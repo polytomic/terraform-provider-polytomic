@@ -14,8 +14,8 @@ SQL Server Connection
 
 ```terraform
 resource "polytomic_sqlserver_connection" "sqlserver" {
-  workspace = polytomic_workspace.acme.id
-  name      = "Acme, Inc"
+  organization = polytomic_organization.acme.id
+  name         = "Acme, Inc"
   configuration = {
     hostname = "sqlserver.azure.example.com"
     username = "polytomic"
@@ -33,7 +33,7 @@ resource "polytomic_sqlserver_connection" "sqlserver" {
 
 - `configuration` (Attributes) (see [below for nested schema](#nestedatt--configuration))
 - `name` (String)
-- `workspace` (String) Workspace ID
+- `organization` (String) Organization ID
 
 ### Read-Only
 

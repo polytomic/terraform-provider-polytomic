@@ -3,7 +3,7 @@
 This repository contains the [Polytomic](https://polytomic.com) Terraform
 provider. This provider may be used to manage on premises deployments.
 
-## Example Workspace configuration with users
+## Example Organization configuration with users
 
 ```terraform
 provider "polytomic" {
@@ -11,14 +11,14 @@ provider "polytomic" {
   deployment_api_key = "secret-key"
 }
 
-resource "polytomic_workspace" "acme" {
+resource "polytomic_organization" "acme" {
   name = "Acme, Inc."
 }
 
 resource "polytomic_user" "acme_admin" {
-  workspace = polytomic_workspace.acme.id
-  email     = "admin@acmeinc.com"
-  role      = "admin"
+  organization = polytomic_organization.acme.id
+  email        = "admin@acmeinc.com"
+  role         = "admin"
 }
 ```
 

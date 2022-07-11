@@ -51,7 +51,7 @@ func (p *provider) Configure(ctx context.Context, req tfsdk.ConfigureProviderReq
 
 func (p *provider) GetResources(ctx context.Context) (map[string]tfsdk.ResourceType, diag.Diagnostics) {
 	return map[string]tfsdk.ResourceType{
-		"polytomic_workspace":            workspaceResourceType{},
+		"polytomic_organization":         organizationResourceType{},
 		"polytomic_user":                 userResourceType{},
 		"polytomic_athena_connection":    athenaConnectionResourceType{},
 		"polytomic_sqlserver_connection": sqlserverConnectionResourceType{},

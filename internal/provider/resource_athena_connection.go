@@ -25,8 +25,8 @@ func (t athenaConnectionResourceType) GetSchema(ctx context.Context) (tfsdk.Sche
 	return tfsdk.Schema{
 		MarkdownDescription: "AWS Athena Connection",
 		Attributes: map[string]tfsdk.Attribute{
-			"workspace": {
-				MarkdownDescription: "Workspace ID",
+			"organization": {
+				MarkdownDescription: "Organization ID",
 				Required:            true,
 				Type:                types.StringType,
 				PlanModifiers: tfsdk.AttributePlanModifiers{
@@ -105,9 +105,9 @@ func (r athenaConnectionResource) Create(ctx context.Context, req tfsdk.CreateRe
 
 	created, err := r.provider.client.Connections().Create(ctx,
 		polytomic.CreateConnectionMutation{
-			Name:        data.Name.Value,
-			Type:        "awsathena",
-			WorkspaceId: data.Workspace.Value,
+			Name:           data.Name.Value,
+			Type:           "awsathena",
+			OrganizationId: data.Organization.Value,
 			Configuration: polytomic.AthenaConfiguration{
 				AccessKeyID:     data.Configuration.Attrs["access_key_id"].(types.String).Value,
 				AccessKeySecret: data.Configuration.Attrs["access_key_secret"].(types.String).Value,
@@ -144,7 +144,7 @@ func (r athenaConnectionResource) Read(ctx context.Context, req tfsdk.ReadResour
 	}
 
 	data.Id = types.String{Value: connection.ID}
-	data.Workspace = types.String{Value: connection.WorkspaceID}
+	data.Organization = types.String{Value: connection.OrganizationId}
 	data.Name = types.String{Value: connection.Name}
 
 	diags = resp.State.Set(ctx, &data)
@@ -164,8 +164,8 @@ func (r athenaConnectionResource) Update(ctx context.Context, req tfsdk.UpdateRe
 	updated, err := r.provider.client.Connections().Update(ctx,
 		uuid.MustParse(data.Id.Value),
 		polytomic.UpdateConnectionMutation{
-			Name:        data.Name.Value,
-			WorkspaceId: data.Workspace.Value,
+			Name:           data.Name.Value,
+			OrganizationId: data.Organization.Value,
 			Configuration: polytomic.AthenaConfiguration{
 				AccessKeyID:     data.Configuration.Attrs["access_key_id"].(types.String).Value,
 				AccessKeySecret: data.Configuration.Attrs["access_key_secret"].(types.String).Value,
@@ -180,7 +180,7 @@ func (r athenaConnectionResource) Update(ctx context.Context, req tfsdk.UpdateRe
 	}
 
 	data.Id = types.String{Value: updated.ID}
-	data.Workspace = types.String{Value: updated.WorkspaceID}
+	data.Organization = types.String{Value: updated.OrganizationId}
 	data.Name = types.String{Value: updated.Name}
 
 	diags = resp.State.Set(ctx, &data)

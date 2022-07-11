@@ -22,11 +22,11 @@ type userResourceType struct{}
 
 func (t userResourceType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: "A User in a Polytomic Workspace",
+		MarkdownDescription: "A User in a Polytomic Organization",
 
 		Attributes: map[string]tfsdk.Attribute{
-			"workspace": {
-				MarkdownDescription: "Workspace ID",
+			"organization": {
+				MarkdownDescription: "Organization ID",
 				Required:            true,
 				Type:                types.StringType,
 				PlanModifiers: tfsdk.AttributePlanModifiers{
@@ -67,10 +67,10 @@ func (t userResourceType) NewResource(ctx context.Context, in tfsdk.Provider) (t
 }
 
 type userResourceData struct {
-	Workspace types.String `tfsdk:"workspace"`
-	Email     types.String `tfsdk:"email"`
-	Role      types.String `tfsdk:"role"`
-	Id        types.String `tfsdk:"id"`
+	Organization types.String `tfsdk:"organization"`
+	Email        types.String `tfsdk:"email"`
+	Role         types.String `tfsdk:"role"`
+	Id           types.String `tfsdk:"id"`
 }
 
 type userResource struct {
@@ -88,7 +88,7 @@ func (r userResource) Create(ctx context.Context, req tfsdk.CreateResourceReques
 	}
 
 	created, err := r.provider.client.Users().Create(ctx,
-		uuid.MustParse(data.Workspace.Value),
+		uuid.MustParse(data.Organization.Value),
 		polytomic.UserMutation{
 			Email: data.Email.Value,
 			Role:  data.Role.Value,
@@ -115,14 +115,14 @@ func (r userResource) Read(ctx context.Context, req tfsdk.ReadResourceRequest, r
 		return
 	}
 
-	user, err := r.provider.client.Users().Get(ctx, uuid.MustParse(data.Workspace.Value), uuid.MustParse(data.Id.Value))
+	user, err := r.provider.client.Users().Get(ctx, uuid.MustParse(data.Organization.Value), uuid.MustParse(data.Id.Value))
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error reading user: %s", err))
 		return
 	}
 
 	data.Id = types.String{Value: user.ID.String()}
-	data.Workspace = types.String{Value: user.WorkspaceId.String()}
+	data.Organization = types.String{Value: user.OrganizationId.String()}
 	data.Email = types.String{Value: user.Email}
 	data.Role = types.String{Value: user.Role}
 
@@ -141,7 +141,7 @@ func (r userResource) Update(ctx context.Context, req tfsdk.UpdateResourceReques
 	}
 
 	user, err := r.provider.client.Users().Update(ctx,
-		uuid.MustParse(data.Workspace.Value),
+		uuid.MustParse(data.Organization.Value),
 		uuid.MustParse(data.Id.Value),
 		polytomic.UserMutation{
 			Email: data.Email.Value,
@@ -154,7 +154,7 @@ func (r userResource) Update(ctx context.Context, req tfsdk.UpdateResourceReques
 	}
 
 	data.Id = types.String{Value: user.ID.String()}
-	data.Workspace = types.String{Value: user.WorkspaceId.String()}
+	data.Organization = types.String{Value: user.OrganizationId.String()}
 	data.Email = types.String{Value: user.Email}
 	data.Role = types.String{Value: user.Role}
 
@@ -172,7 +172,7 @@ func (r userResource) Delete(ctx context.Context, req tfsdk.DeleteResourceReques
 		return
 	}
 
-	err := r.provider.client.Users().Delete(ctx, uuid.MustParse(data.Workspace.Value), uuid.MustParse(data.Id.Value))
+	err := r.provider.client.Users().Delete(ctx, uuid.MustParse(data.Organization.Value), uuid.MustParse(data.Id.Value))
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting user: %s", err))
 		return

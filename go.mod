@@ -8,7 +8,7 @@ require (
 	github.com/hashicorp/terraform-plugin-framework v0.9.0
 	github.com/hashicorp/terraform-plugin-go v0.11.0
 	github.com/hashicorp/terraform-plugin-log v0.4.1
-	github.com/polytomic/polytomic-go v0.0.0-20220710203107-7b72ab0af0af
+	github.com/polytomic/polytomic-go v0.0.0-20220711222819-afbb6110f8a7
 )
 
 require (

@@ -14,8 +14,8 @@ AWS Athena Connection
 
 ```terraform
 resource "polytomic_athena_connection" "acmelake" {
-  workspace = polytomic_workspace.acme.id
-  name      = "Acme, Inc Data"
+  organization = polytomic_organization.acme.id
+  name         = "Acme, Inc Data"
   configuration = {
     access_key_id     = ""
     access_key_secret = ""
@@ -32,7 +32,7 @@ resource "polytomic_athena_connection" "acmelake" {
 
 - `configuration` (Attributes) (see [below for nested schema](#nestedatt--configuration))
 - `name` (String)
-- `workspace` (String) Workspace ID
+- `organization` (String) Organization ID
 
 ### Read-Only
 

@@ -3,7 +3,7 @@
 FEATURES:
 
 * New Resources:
-    - Workspaces
+    - Organizations
     - Users
     - AWS Athena Connections
     - MS SQL Service Connection

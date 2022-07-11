@@ -3,20 +3,20 @@
 page_title: "polytomic_user Resource - terraform-provider-polytomic"
 subcategory: ""
 description: |-
-  A User in a Polytomic Workspace
+  A User in a Polytomic Organization
 ---
 
 # polytomic_user (Resource)
 
-A User in a Polytomic Workspace
+A User in a Polytomic Organization
 
 ## Example Usage
 
 ```terraform
 resource "polytomic_user" "admin" {
-  workspace = polytomic_workspace.acme.id
-  email     = "admin@acmeinc.com"
-  role      = "admin"
+  organization = polytomic_organization.acme.id
+  email        = "admin@acmeinc.com"
+  role         = "admin"
 }
 ```
 
@@ -26,7 +26,7 @@ resource "polytomic_user" "admin" {
 ### Required
 
 - `email` (String) Email address
-- `workspace` (String) Workspace ID
+- `organization` (String) Organization ID
 
 ### Optional
 

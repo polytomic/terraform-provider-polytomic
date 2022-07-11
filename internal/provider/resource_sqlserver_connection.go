@@ -25,8 +25,8 @@ func (t sqlserverConnectionResourceType) GetSchema(ctx context.Context) (tfsdk.S
 	return tfsdk.Schema{
 		MarkdownDescription: "SQL Server Connection",
 		Attributes: map[string]tfsdk.Attribute{
-			"workspace": {
-				MarkdownDescription: "Workspace ID",
+			"organization": {
+				MarkdownDescription: "Organization ID",
 				Required:            true,
 				Type:                types.StringType,
 				PlanModifiers: tfsdk.AttributePlanModifiers{
@@ -106,9 +106,9 @@ func (r sqlserverConnectionResource) Create(ctx context.Context, req tfsdk.Creat
 
 	created, err := r.provider.client.Connections().Create(ctx,
 		polytomic.CreateConnectionMutation{
-			Name:        data.Name.Value,
-			Type:        polytomic.SQLServerConnectionType,
-			WorkspaceId: data.Workspace.Value,
+			Name:           data.Name.Value,
+			Type:           polytomic.SQLServerConnectionType,
+			OrganizationId: data.Organization.Value,
 			Configuration: polytomic.SQLServerConfiguration{
 				Hostname: data.Configuration.Attrs["hostname"].(types.String).Value,
 				Username: data.Configuration.Attrs["username"].(types.String).Value,
@@ -146,7 +146,7 @@ func (r sqlserverConnectionResource) Read(ctx context.Context, req tfsdk.ReadRes
 	}
 
 	data.Id = types.String{Value: connection.ID}
-	data.Workspace = types.String{Value: connection.WorkspaceID}
+	data.Organization = types.String{Value: connection.OrganizationId}
 	data.Name = types.String{Value: connection.Name}
 
 	diags = resp.State.Set(ctx, &data)
@@ -166,8 +166,8 @@ func (r sqlserverConnectionResource) Update(ctx context.Context, req tfsdk.Updat
 	updated, err := r.provider.client.Connections().Update(ctx,
 		uuid.MustParse(data.Id.Value),
 		polytomic.UpdateConnectionMutation{
-			Name:        data.Name.Value,
-			WorkspaceId: data.Workspace.Value,
+			Name:           data.Name.Value,
+			OrganizationId: data.Organization.Value,
 			Configuration: polytomic.SQLServerConfiguration{
 				Hostname: data.Configuration.Attrs["hostname"].(types.String).Value,
 				Username: data.Configuration.Attrs["username"].(types.String).Value,
@@ -183,7 +183,7 @@ func (r sqlserverConnectionResource) Update(ctx context.Context, req tfsdk.Updat
 	}
 
 	data.Id = types.String{Value: updated.ID}
-	data.Workspace = types.String{Value: updated.WorkspaceID}
+	data.Organization = types.String{Value: updated.OrganizationId}
 	data.Name = types.String{Value: updated.Name}
 
 	diags = resp.State.Set(ctx, &data)

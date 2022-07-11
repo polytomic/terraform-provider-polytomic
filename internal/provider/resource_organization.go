@@ -16,19 +16,19 @@ import (
 const clientError = "Client Error"
 
 // Ensure provider defined types fully satisfy framework interfaces
-var _ tfsdk.ResourceType = workspaceResourceType{}
-var _ tfsdk.Resource = workspaceResource{}
-var _ tfsdk.ResourceWithImportState = workspaceResource{}
+var _ tfsdk.ResourceType = organizationResourceType{}
+var _ tfsdk.Resource = organizationResource{}
+var _ tfsdk.ResourceWithImportState = organizationResource{}
 
-type workspaceResourceType struct{}
+type organizationResourceType struct{}
 
-func (t workspaceResourceType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
+func (t organizationResourceType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: "A Polytomic Workspace provides a container for users, connections, and sync definitions.",
+		MarkdownDescription: "A Polytomic Organization provides a container for users, connections, and sync definitions.",
 
 		Attributes: map[string]tfsdk.Attribute{
 			"name": {
-				MarkdownDescription: "Workspace name",
+				MarkdownDescription: "Organization name",
 				Required:            true,
 				Type:                types.StringType,
 			},
@@ -44,7 +44,7 @@ func (t workspaceResourceType) GetSchema(ctx context.Context) (tfsdk.Schema, dia
 			},
 			"id": {
 				Computed:            true,
-				MarkdownDescription: "Workspace identifier",
+				MarkdownDescription: "Organization identifier",
 				PlanModifiers: tfsdk.AttributePlanModifiers{
 					tfsdk.UseStateForUnknown(),
 				},
@@ -54,27 +54,27 @@ func (t workspaceResourceType) GetSchema(ctx context.Context) (tfsdk.Schema, dia
 	}, nil
 }
 
-func (t workspaceResourceType) NewResource(ctx context.Context, in tfsdk.Provider) (tfsdk.Resource, diag.Diagnostics) {
+func (t organizationResourceType) NewResource(ctx context.Context, in tfsdk.Provider) (tfsdk.Resource, diag.Diagnostics) {
 	provider, diags := convertProviderType(in)
 
-	return workspaceResource{
+	return organizationResource{
 		provider: provider,
 	}, diags
 }
 
-type workspaceResourceData struct {
+type organizationResourceData struct {
 	Name      types.String `tfsdk:"name"`
 	Id        types.String `tfsdk:"id"`
 	SSODomain types.String `tfsdk:"sso_domain"`
 	SSOOrgId  types.String `tfsdk:"sso_org_id"`
 }
 
-type workspaceResource struct {
+type organizationResource struct {
 	provider provider
 }
 
-func (r workspaceResource) Create(ctx context.Context, req tfsdk.CreateResourceRequest, resp *tfsdk.CreateResourceResponse) {
-	var data workspaceResourceData
+func (r organizationResource) Create(ctx context.Context, req tfsdk.CreateResourceRequest, resp *tfsdk.CreateResourceResponse) {
+	var data organizationResourceData
 
 	diags := req.Config.Get(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -83,26 +83,26 @@ func (r workspaceResource) Create(ctx context.Context, req tfsdk.CreateResourceR
 		return
 	}
 
-	created, err := r.provider.client.Workspaces().Create(ctx,
-		polytomic.WorkspaceMutation{
+	created, err := r.provider.client.Organizations().Create(ctx,
+		polytomic.OrganizationMutation{
 			Name:      data.Name.Value,
 			SSODomain: data.SSODomain.Value,
 			SSOOrgId:  data.SSOOrgId.Value,
 		},
 	)
 	if err != nil {
-		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating workspace: %s", err))
+		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating organization: %s", err))
 		return
 	}
 	data.Id = types.String{Value: created.ID.String()}
-	tflog.Trace(ctx, "created a workspace")
+	tflog.Trace(ctx, "created a organization")
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r workspaceResource) Read(ctx context.Context, req tfsdk.ReadResourceRequest, resp *tfsdk.ReadResourceResponse) {
-	var data workspaceResourceData
+func (r organizationResource) Read(ctx context.Context, req tfsdk.ReadResourceRequest, resp *tfsdk.ReadResourceResponse) {
+	var data organizationResourceData
 
 	diags := req.State.Get(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -112,24 +112,24 @@ func (r workspaceResource) Read(ctx context.Context, req tfsdk.ReadResourceReque
 	}
 	wsId, err := uuid.Parse(data.Id.Value)
 	if err != nil {
-		resp.Diagnostics.AddError("Value Error", fmt.Sprintf("Invalid workspace ID %s; error when parsing: %s", data.Id.Value, err))
+		resp.Diagnostics.AddError("Value Error", fmt.Sprintf("Invalid organization ID %s; error when parsing: %s", data.Id.Value, err))
 		return
 	}
-	workspace, err := r.provider.client.Workspaces().Get(ctx, wsId)
+	organization, err := r.provider.client.Organizations().Get(ctx, wsId)
 	if err != nil {
-		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error reading workspace: %s", err))
+		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error reading organization: %s", err))
 		return
 	}
 
-	data.Id = types.String{Value: workspace.ID.String()}
-	data.Name = types.String{Value: workspace.Name}
+	data.Id = types.String{Value: organization.ID.String()}
+	data.Name = types.String{Value: organization.Name}
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r workspaceResource) Update(ctx context.Context, req tfsdk.UpdateResourceRequest, resp *tfsdk.UpdateResourceResponse) {
-	var data workspaceResourceData
+func (r organizationResource) Update(ctx context.Context, req tfsdk.UpdateResourceRequest, resp *tfsdk.UpdateResourceResponse) {
+	var data organizationResourceData
 
 	diags := req.Plan.Get(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -139,19 +139,19 @@ func (r workspaceResource) Update(ctx context.Context, req tfsdk.UpdateResourceR
 	}
 	wsId, err := uuid.Parse(data.Id.Value)
 	if err != nil {
-		resp.Diagnostics.AddError("Value Error", fmt.Sprintf("Invalid workspace ID %s; error when parsing: %s", data.Id.Value, err))
+		resp.Diagnostics.AddError("Value Error", fmt.Sprintf("Invalid organization ID %s; error when parsing: %s", data.Id.Value, err))
 		return
 	}
 
-	updated, err := r.provider.client.Workspaces().Update(ctx, wsId,
-		polytomic.WorkspaceMutation{
+	updated, err := r.provider.client.Organizations().Update(ctx, wsId,
+		polytomic.OrganizationMutation{
 			Name:      data.Name.Value,
 			SSODomain: data.SSODomain.Value,
 			SSOOrgId:  data.SSOOrgId.Value,
 		},
 	)
 	if err != nil {
-		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating workspace: %s", err))
+		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating organization: %s", err))
 		return
 	}
 
@@ -160,8 +160,8 @@ func (r workspaceResource) Update(ctx context.Context, req tfsdk.UpdateResourceR
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r workspaceResource) Delete(ctx context.Context, req tfsdk.DeleteResourceRequest, resp *tfsdk.DeleteResourceResponse) {
-	var data workspaceResourceData
+func (r organizationResource) Delete(ctx context.Context, req tfsdk.DeleteResourceRequest, resp *tfsdk.DeleteResourceResponse) {
+	var data organizationResourceData
 
 	diags := req.State.Get(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -171,16 +171,16 @@ func (r workspaceResource) Delete(ctx context.Context, req tfsdk.DeleteResourceR
 	}
 	wsId, err := uuid.Parse(data.Id.Value)
 	if err != nil {
-		resp.Diagnostics.AddError("Value Error", fmt.Sprintf("Invalid workspace ID %s; error when parsing: %s", data.Id.Value, err))
+		resp.Diagnostics.AddError("Value Error", fmt.Sprintf("Invalid organization ID %s; error when parsing: %s", data.Id.Value, err))
 		return
 	}
-	err = r.provider.client.Workspaces().Delete(ctx, wsId)
+	err = r.provider.client.Organizations().Delete(ctx, wsId)
 	if err != nil {
-		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting workspace: %s", err))
+		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting organization: %s", err))
 		return
 	}
 }
 
-func (r workspaceResource) ImportState(ctx context.Context, req tfsdk.ImportResourceStateRequest, resp *tfsdk.ImportResourceStateResponse) {
+func (r organizationResource) ImportState(ctx context.Context, req tfsdk.ImportResourceStateRequest, resp *tfsdk.ImportResourceStateResponse) {
 	tfsdk.ResourceImportStatePassthroughID(ctx, tftypes.NewAttributePath().WithAttributeName("id"), req, resp)
 }
