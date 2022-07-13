@@ -25,13 +25,13 @@ jobs:
         with:
           go-version-file: 'go.mod'
           cache: true
-      # This uses an action (hashicorp/ghaction-import-gpg) that assumes you set your 
+      # This uses an action (hashicorp/ghaction-import-gpg) that assumes you set your
       # private key in the `GPG_PRIVATE_KEY` secret and passphrase in the `PASSPHRASE`
       # secret. If you would rather own your own GPG handling, please fork this action
       # or use an alternative one for key handling.
       - name: Import GPG key
         id: import_gpg
-        uses: ./.github/actions/import-gpg
+        uses: ./.github/actions/import-gpg-key
         env:
           # These secrets will need to be configured for the repository:
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
