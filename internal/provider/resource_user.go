@@ -3,8 +3,10 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/google/uuid"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -38,7 +40,28 @@ func (t userResourceType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Dia
 				Required:            true,
 				Type:                types.StringType,
 				PlanModifiers: tfsdk.AttributePlanModifiers{
-					tfsdk.RequiresReplace(),
+					tfsdk.RequiresReplaceIf(
+						func(ctx context.Context, state, config attr.Value, path *tftypes.AttributePath) (bool, diag.Diagnostics) {
+							tfState, err := state.ToTerraformValue(ctx)
+							if err != nil {
+								return false, nil
+							}
+							tfConfig, err := config.ToTerraformValue(ctx)
+							if err != nil {
+								return false, nil
+							}
+
+							var conf string
+							var stt string
+
+							if tfState.As(&stt) == nil && tfConfig.As(&conf) == nil {
+								return !(strings.ToLower(stt) == strings.ToLower(conf)), nil
+							}
+							return false, nil
+						},
+						"Case-insensitively compares email addresses to determine if replacement is needed.",
+						"Case-insensitively compares email addresses to determine if replacement is needed.",
+					),
 				},
 			},
 			"role": {
@@ -155,8 +178,12 @@ func (r userResource) Update(ctx context.Context, req tfsdk.UpdateResourceReques
 
 	data.Id = types.String{Value: user.ID.String()}
 	data.Organization = types.String{Value: user.OrganizationId.String()}
-	data.Email = types.String{Value: user.Email}
 	data.Role = types.String{Value: user.Role}
+	// Our backend normalizes email addresses to lowercase. As a result we do
+	// not set the email here to prevent Terraform errors about inconsistent
+	// state.
+
+	// data.Email = types.String{Value: user.Email}
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
