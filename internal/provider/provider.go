@@ -46,7 +46,7 @@ func (p *ptProvider) Configure(ctx context.Context, req provider.ConfigureReques
 	}
 
 	// Configuration values are now available.
-	p.client = polytomic.NewClient(data.DeploymentUrl.Value, data.DeploymentKey.Value)
+	p.client = polytomic.NewClient(data.DeploymentUrl.Value, polytomic.DeploymentKey(data.DeploymentKey.Value))
 	p.configured = true
 }
 
