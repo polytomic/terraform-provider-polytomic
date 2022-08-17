@@ -6,18 +6,20 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
+	"github.com/hashicorp/terraform-plugin-framework/provider"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-go/tftypes"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/polytomic/polytomic-go"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
-var _ tfsdk.ResourceType = athenaConnectionResourceType{}
-var _ tfsdk.Resource = athenaConnectionResource{}
+var _ provider.ResourceType = athenaConnectionResourceType{}
+var _ resource.Resource = athenaConnectionResource{}
 
-var _ tfsdk.ResourceWithImportState = athenaConnectionResource{}
+var _ resource.ResourceWithImportState = athenaConnectionResource{}
 
 type athenaConnectionResourceType struct{}
 
@@ -30,7 +32,7 @@ func (t athenaConnectionResourceType) GetSchema(ctx context.Context) (tfsdk.Sche
 				Required:            true,
 				Type:                types.StringType,
 				PlanModifiers: tfsdk.AttributePlanModifiers{
-					tfsdk.RequiresReplace(),
+					resource.RequiresReplace(),
 				},
 			},
 			"name": {
@@ -66,7 +68,7 @@ func (t athenaConnectionResourceType) GetSchema(ctx context.Context) (tfsdk.Sche
 				Computed:            true,
 				MarkdownDescription: "AWS Athena Connection identifier",
 				PlanModifiers: tfsdk.AttributePlanModifiers{
-					tfsdk.UseStateForUnknown(),
+					resource.UseStateForUnknown(),
 				},
 				Type: types.StringType,
 			},
@@ -74,7 +76,7 @@ func (t athenaConnectionResourceType) GetSchema(ctx context.Context) (tfsdk.Sche
 	}, nil
 }
 
-func (t athenaConnectionResourceType) NewResource(ctx context.Context, in tfsdk.Provider) (tfsdk.Resource, diag.Diagnostics) {
+func (t athenaConnectionResourceType) NewResource(ctx context.Context, in provider.Provider) (resource.Resource, diag.Diagnostics) {
 	provider, diags := convertProviderType(in)
 
 	return athenaConnectionResource{
@@ -90,10 +92,10 @@ type athenaConfigurationData struct {
 }
 
 type athenaConnectionResource struct {
-	provider provider
+	provider ptProvider
 }
 
-func (r athenaConnectionResource) Create(ctx context.Context, req tfsdk.CreateResourceRequest, resp *tfsdk.CreateResourceResponse) {
+func (r athenaConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data connectionResourceData
 
 	diags := req.Config.Get(ctx, &data)
@@ -127,7 +129,7 @@ func (r athenaConnectionResource) Create(ctx context.Context, req tfsdk.CreateRe
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r athenaConnectionResource) Read(ctx context.Context, req tfsdk.ReadResourceRequest, resp *tfsdk.ReadResourceResponse) {
+func (r athenaConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data connectionResourceData
 
 	diags := req.State.Get(ctx, &data)
@@ -151,7 +153,7 @@ func (r athenaConnectionResource) Read(ctx context.Context, req tfsdk.ReadResour
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r athenaConnectionResource) Update(ctx context.Context, req tfsdk.UpdateResourceRequest, resp *tfsdk.UpdateResourceResponse) {
+func (r athenaConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var data connectionResourceData
 
 	diags := req.Plan.Get(ctx, &data)
@@ -187,7 +189,7 @@ func (r athenaConnectionResource) Update(ctx context.Context, req tfsdk.UpdateRe
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r athenaConnectionResource) Delete(ctx context.Context, req tfsdk.DeleteResourceRequest, resp *tfsdk.DeleteResourceResponse) {
+func (r athenaConnectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var data connectionResourceData
 
 	diags := req.State.Get(ctx, &data)
@@ -204,6 +206,6 @@ func (r athenaConnectionResource) Delete(ctx context.Context, req tfsdk.DeleteRe
 	}
 }
 
-func (r athenaConnectionResource) ImportState(ctx context.Context, req tfsdk.ImportResourceStateRequest, resp *tfsdk.ImportResourceStateResponse) {
-	tfsdk.ResourceImportStatePassthroughID(ctx, tftypes.NewAttributePath().WithAttributeName("id"), req, resp)
+func (r athenaConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

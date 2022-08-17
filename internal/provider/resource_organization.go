@@ -6,9 +6,11 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
+	"github.com/hashicorp/terraform-plugin-framework/provider"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-go/tftypes"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/polytomic/polytomic-go"
 )
@@ -16,9 +18,9 @@ import (
 const clientError = "Client Error"
 
 // Ensure provider defined types fully satisfy framework interfaces
-var _ tfsdk.ResourceType = organizationResourceType{}
-var _ tfsdk.Resource = organizationResource{}
-var _ tfsdk.ResourceWithImportState = organizationResource{}
+var _ provider.ResourceType = organizationResourceType{}
+var _ resource.Resource = organizationResource{}
+var _ resource.ResourceWithImportState = organizationResource{}
 
 type organizationResourceType struct{}
 
@@ -46,7 +48,7 @@ func (t organizationResourceType) GetSchema(ctx context.Context) (tfsdk.Schema, 
 				Computed:            true,
 				MarkdownDescription: "Organization identifier",
 				PlanModifiers: tfsdk.AttributePlanModifiers{
-					tfsdk.UseStateForUnknown(),
+					resource.UseStateForUnknown(),
 				},
 				Type: types.StringType,
 			},
@@ -54,7 +56,7 @@ func (t organizationResourceType) GetSchema(ctx context.Context) (tfsdk.Schema, 
 	}, nil
 }
 
-func (t organizationResourceType) NewResource(ctx context.Context, in tfsdk.Provider) (tfsdk.Resource, diag.Diagnostics) {
+func (t organizationResourceType) NewResource(ctx context.Context, in provider.Provider) (resource.Resource, diag.Diagnostics) {
 	provider, diags := convertProviderType(in)
 
 	return organizationResource{
@@ -70,10 +72,10 @@ type organizationResourceData struct {
 }
 
 type organizationResource struct {
-	provider provider
+	provider ptProvider
 }
 
-func (r organizationResource) Create(ctx context.Context, req tfsdk.CreateResourceRequest, resp *tfsdk.CreateResourceResponse) {
+func (r organizationResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data organizationResourceData
 
 	diags := req.Config.Get(ctx, &data)
@@ -101,7 +103,7 @@ func (r organizationResource) Create(ctx context.Context, req tfsdk.CreateResour
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r organizationResource) Read(ctx context.Context, req tfsdk.ReadResourceRequest, resp *tfsdk.ReadResourceResponse) {
+func (r organizationResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data organizationResourceData
 
 	diags := req.State.Get(ctx, &data)
@@ -128,7 +130,7 @@ func (r organizationResource) Read(ctx context.Context, req tfsdk.ReadResourceRe
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r organizationResource) Update(ctx context.Context, req tfsdk.UpdateResourceRequest, resp *tfsdk.UpdateResourceResponse) {
+func (r organizationResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var data organizationResourceData
 
 	diags := req.Plan.Get(ctx, &data)
@@ -160,7 +162,7 @@ func (r organizationResource) Update(ctx context.Context, req tfsdk.UpdateResour
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r organizationResource) Delete(ctx context.Context, req tfsdk.DeleteResourceRequest, resp *tfsdk.DeleteResourceResponse) {
+func (r organizationResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var data organizationResourceData
 
 	diags := req.State.Get(ctx, &data)
@@ -181,6 +183,6 @@ func (r organizationResource) Delete(ctx context.Context, req tfsdk.DeleteResour
 	}
 }
 
-func (r organizationResource) ImportState(ctx context.Context, req tfsdk.ImportResourceStateRequest, resp *tfsdk.ImportResourceStateResponse) {
-	tfsdk.ResourceImportStatePassthroughID(ctx, tftypes.NewAttributePath().WithAttributeName("id"), req, resp)
+func (r organizationResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
