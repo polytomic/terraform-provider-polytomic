@@ -6,18 +6,19 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
+	"github.com/hashicorp/terraform-plugin-framework/provider"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-go/tftypes"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/polytomic/polytomic-go"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
-var _ tfsdk.ResourceType = sqlserverConnectionResourceType{}
-var _ tfsdk.Resource = sqlserverConnectionResource{}
-
-var _ tfsdk.ResourceWithImportState = sqlserverConnectionResource{}
+var _ provider.ResourceType = sqlserverConnectionResourceType{}
+var _ resource.Resource = sqlserverConnectionResource{}
+var _ resource.ResourceWithImportState = sqlserverConnectionResource{}
 
 type sqlserverConnectionResourceType struct{}
 
@@ -30,7 +31,7 @@ func (t sqlserverConnectionResourceType) GetSchema(ctx context.Context) (tfsdk.S
 				Required:            true,
 				Type:                types.StringType,
 				PlanModifiers: tfsdk.AttributePlanModifiers{
-					tfsdk.RequiresReplace(),
+					resource.RequiresReplace(),
 				},
 			},
 			"name": {
@@ -67,7 +68,7 @@ func (t sqlserverConnectionResourceType) GetSchema(ctx context.Context) (tfsdk.S
 				Computed:            true,
 				MarkdownDescription: "SQL Server Connection identifier",
 				PlanModifiers: tfsdk.AttributePlanModifiers{
-					tfsdk.UseStateForUnknown(),
+					resource.UseStateForUnknown(),
 				},
 				Type: types.StringType,
 			},
@@ -75,7 +76,7 @@ func (t sqlserverConnectionResourceType) GetSchema(ctx context.Context) (tfsdk.S
 	}, nil
 }
 
-func (t sqlserverConnectionResourceType) NewResource(ctx context.Context, in tfsdk.Provider) (tfsdk.Resource, diag.Diagnostics) {
+func (t sqlserverConnectionResourceType) NewResource(ctx context.Context, in provider.Provider) (resource.Resource, diag.Diagnostics) {
 	provider, diags := convertProviderType(in)
 
 	return sqlserverConnectionResource{
@@ -91,10 +92,10 @@ type sqlserverConfigurationData struct {
 }
 
 type sqlserverConnectionResource struct {
-	provider provider
+	provider ptProvider
 }
 
-func (r sqlserverConnectionResource) Create(ctx context.Context, req tfsdk.CreateResourceRequest, resp *tfsdk.CreateResourceResponse) {
+func (r sqlserverConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data connectionResourceData
 
 	diags := req.Config.Get(ctx, &data)
@@ -129,7 +130,7 @@ func (r sqlserverConnectionResource) Create(ctx context.Context, req tfsdk.Creat
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r sqlserverConnectionResource) Read(ctx context.Context, req tfsdk.ReadResourceRequest, resp *tfsdk.ReadResourceResponse) {
+func (r sqlserverConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data connectionResourceData
 
 	diags := req.State.Get(ctx, &data)
@@ -153,7 +154,7 @@ func (r sqlserverConnectionResource) Read(ctx context.Context, req tfsdk.ReadRes
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r sqlserverConnectionResource) Update(ctx context.Context, req tfsdk.UpdateResourceRequest, resp *tfsdk.UpdateResourceResponse) {
+func (r sqlserverConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var data connectionResourceData
 
 	diags := req.Plan.Get(ctx, &data)
@@ -190,7 +191,7 @@ func (r sqlserverConnectionResource) Update(ctx context.Context, req tfsdk.Updat
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r sqlserverConnectionResource) Delete(ctx context.Context, req tfsdk.DeleteResourceRequest, resp *tfsdk.DeleteResourceResponse) {
+func (r sqlserverConnectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var data connectionResourceData
 
 	diags := req.State.Get(ctx, &data)
@@ -207,6 +208,6 @@ func (r sqlserverConnectionResource) Delete(ctx context.Context, req tfsdk.Delet
 	}
 }
 
-func (r sqlserverConnectionResource) ImportState(ctx context.Context, req tfsdk.ImportResourceStateRequest, resp *tfsdk.ImportResourceStateResponse) {
-	tfsdk.ResourceImportStatePassthroughID(ctx, tftypes.NewAttributePath().WithAttributeName("id"), req, resp)
+func (r sqlserverConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

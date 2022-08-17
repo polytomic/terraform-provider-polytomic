@@ -8,17 +8,19 @@ import (
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
+	"github.com/hashicorp/terraform-plugin-framework/provider"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-go/tftypes"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/polytomic/polytomic-go"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
-var _ tfsdk.ResourceType = userResourceType{}
-var _ tfsdk.Resource = userResource{}
-var _ tfsdk.ResourceWithImportState = userResource{}
+var _ provider.ResourceType = userResourceType{}
+var _ resource.Resource = userResource{}
+var _ resource.ResourceWithImportState = userResource{}
 
 type userResourceType struct{}
 
@@ -32,7 +34,7 @@ func (t userResourceType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Dia
 				Required:            true,
 				Type:                types.StringType,
 				PlanModifiers: tfsdk.AttributePlanModifiers{
-					tfsdk.RequiresReplace(),
+					resource.RequiresReplace(),
 				},
 			},
 			"email": {
@@ -40,8 +42,8 @@ func (t userResourceType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Dia
 				Required:            true,
 				Type:                types.StringType,
 				PlanModifiers: tfsdk.AttributePlanModifiers{
-					tfsdk.RequiresReplaceIf(
-						func(ctx context.Context, state, config attr.Value, path *tftypes.AttributePath) (bool, diag.Diagnostics) {
+					resource.RequiresReplaceIf(
+						func(ctx context.Context, state, config attr.Value, path path.Path) (bool, diag.Diagnostics) {
 							tfState, err := state.ToTerraformValue(ctx)
 							if err != nil {
 								return false, nil
@@ -59,6 +61,7 @@ func (t userResourceType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Dia
 							}
 							return false, nil
 						},
+
 						"Case-insensitively compares email addresses to determine if replacement is needed.",
 						"Case-insensitively compares email addresses to determine if replacement is needed.",
 					),
@@ -73,7 +76,7 @@ func (t userResourceType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Dia
 				Computed:            true,
 				MarkdownDescription: "user identifier",
 				PlanModifiers: tfsdk.AttributePlanModifiers{
-					tfsdk.UseStateForUnknown(),
+					resource.UseStateForUnknown(),
 				},
 				Type: types.StringType,
 			},
@@ -81,7 +84,7 @@ func (t userResourceType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Dia
 	}, nil
 }
 
-func (t userResourceType) NewResource(ctx context.Context, in tfsdk.Provider) (tfsdk.Resource, diag.Diagnostics) {
+func (t userResourceType) NewResource(ctx context.Context, in provider.Provider) (resource.Resource, diag.Diagnostics) {
 	provider, diags := convertProviderType(in)
 
 	return userResource{
@@ -97,10 +100,10 @@ type userResourceData struct {
 }
 
 type userResource struct {
-	provider provider
+	provider ptProvider
 }
 
-func (r userResource) Create(ctx context.Context, req tfsdk.CreateResourceRequest, resp *tfsdk.CreateResourceResponse) {
+func (r userResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data userResourceData
 
 	diags := req.Config.Get(ctx, &data)
@@ -128,7 +131,7 @@ func (r userResource) Create(ctx context.Context, req tfsdk.CreateResourceReques
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r userResource) Read(ctx context.Context, req tfsdk.ReadResourceRequest, resp *tfsdk.ReadResourceResponse) {
+func (r userResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data userResourceData
 
 	diags := req.State.Get(ctx, &data)
@@ -153,7 +156,7 @@ func (r userResource) Read(ctx context.Context, req tfsdk.ReadResourceRequest, r
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r userResource) Update(ctx context.Context, req tfsdk.UpdateResourceRequest, resp *tfsdk.UpdateResourceResponse) {
+func (r userResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var data userResourceData
 
 	diags := req.Plan.Get(ctx, &data)
@@ -189,7 +192,7 @@ func (r userResource) Update(ctx context.Context, req tfsdk.UpdateResourceReques
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r userResource) Delete(ctx context.Context, req tfsdk.DeleteResourceRequest, resp *tfsdk.DeleteResourceResponse) {
+func (r userResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var data userResourceData
 
 	diags := req.State.Get(ctx, &data)
@@ -206,6 +209,6 @@ func (r userResource) Delete(ctx context.Context, req tfsdk.DeleteResourceReques
 	}
 }
 
-func (r userResource) ImportState(ctx context.Context, req tfsdk.ImportResourceStateRequest, resp *tfsdk.ImportResourceStateResponse) {
-	tfsdk.ResourceImportStatePassthroughID(ctx, tftypes.NewAttributePath().WithAttributeName("id"), req, resp)
+func (r userResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
