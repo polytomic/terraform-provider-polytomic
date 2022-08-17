@@ -84,13 +84,6 @@ func (t athenaConnectionResourceType) NewResource(ctx context.Context, in provid
 	}, diags
 }
 
-type athenaConfigurationData struct {
-	AccessKeyId     types.String `tfsdk:"access_key_id"`
-	AccessKeySecret types.String `tfsdk:"access_key_secret"`
-	Region          types.String `tfsdk:"region"`
-	OutputBucket    types.String `tfsdk:"output_bucket"`
-}
-
 type athenaConnectionResource struct {
 	provider ptProvider
 }

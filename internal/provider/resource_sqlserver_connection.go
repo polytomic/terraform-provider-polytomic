@@ -28,7 +28,7 @@ func (t sqlserverConnectionResourceType) GetSchema(ctx context.Context) (tfsdk.S
 		Attributes: map[string]tfsdk.Attribute{
 			"organization": {
 				MarkdownDescription: "Organization ID",
-				Required:            true,
+				Optional:            true,
 				Type:                types.StringType,
 				PlanModifiers: tfsdk.AttributePlanModifiers{
 					resource.RequiresReplace(),
@@ -82,13 +82,6 @@ func (t sqlserverConnectionResourceType) NewResource(ctx context.Context, in pro
 	return sqlserverConnectionResource{
 		provider: provider,
 	}, diags
-}
-
-type sqlserverConfigurationData struct {
-	AccessKeyId     types.String `tfsdk:"access_key_id"`
-	AccessKeySecret types.String `tfsdk:"access_key_secret"`
-	Region          types.String `tfsdk:"region"`
-	OutputBucket    types.String `tfsdk:"output_bucket"`
 }
 
 type sqlserverConnectionResource struct {
