@@ -32,8 +32,9 @@ type ptProvider struct {
 
 // providerData can be used to store data from the Terraform configuration.
 type providerData struct {
-	DeploymentKey types.String `tfsdk:"deployment_api_key"`
 	DeploymentUrl types.String `tfsdk:"deployment_url"`
+	DeploymentKey types.String `tfsdk:"deployment_api_key"`
+	ApiKey        types.String `tfsdk:"api_key"`
 }
 
 func (p *ptProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
@@ -45,8 +46,20 @@ func (p *ptProvider) Configure(ctx context.Context, req provider.ConfigureReques
 		return
 	}
 
-	// Configuration values are now available.
-	p.client = polytomic.NewClient(data.DeploymentUrl.Value, data.DeploymentKey.Value)
+	if (data.ApiKey.Value == "") == (data.DeploymentKey.Value == "") {
+		resp.Diagnostics.AddError(
+			"A single authentication method must be specified.",
+			"Authentication method required; only one of deployment_api_key or api_key may be set.",
+		)
+	}
+	var auth polytomic.Authenticator
+	if data.ApiKey.Value != "" {
+		auth = polytomic.APIKey(data.ApiKey.Value)
+	}
+	if data.DeploymentKey.Value != "" {
+		auth = polytomic.DeploymentKey(data.DeploymentKey.Value)
+	}
+	p.client = polytomic.NewClient(data.DeploymentUrl.Value, auth)
 	p.configured = true
 }
 
@@ -67,12 +80,18 @@ func (p *ptProvider) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnost
 	return tfsdk.Schema{
 		Attributes: map[string]tfsdk.Attribute{
 			"deployment_url": {
-				MarkdownDescription: "Polytomic deployment URL",
+				MarkdownDescription: "Polytomic deployment URL; if omitted, the cloud platform will be used.",
 				Type:                types.StringType,
-				Required:            true,
+				Optional:            true,
 			},
 			"deployment_api_key": {
-				MarkdownDescription: "",
+				MarkdownDescription: "Deployment API key; if specified api_key must be omitted.",
+				Type:                types.StringType,
+				Optional:            true,
+				Sensitive:           true,
+			},
+			"api_key": {
+				MarkdownDescription: "Polytomic API key; if specified deployment_api_key must be omitted.",
 				Type:                types.StringType,
 				Optional:            true,
 				Sensitive:           true,
