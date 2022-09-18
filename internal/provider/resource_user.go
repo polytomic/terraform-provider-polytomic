@@ -27,7 +27,6 @@ type userResourceType struct{}
 func (t userResourceType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
 		MarkdownDescription: "A User in a Polytomic Organization",
-
 		Attributes: map[string]tfsdk.Attribute{
 			"organization": {
 				MarkdownDescription: "Organization ID",
@@ -149,8 +148,13 @@ func (r userResource) Read(ctx context.Context, req resource.ReadRequest, resp *
 
 	data.Id = types.String{Value: user.ID.String()}
 	data.Organization = types.String{Value: user.OrganizationId.String()}
-	data.Email = types.String{Value: user.Email}
 	data.Role = types.String{Value: user.Role}
+
+	// Our backend normalizes email addresses to lowercase. As a result,
+	// we need to do the same here to ensure that the state is consistent
+	if strings.ToLower(data.Email.Value) != strings.ToLower(user.Email) {
+		data.Email = types.String{Value: user.Email}
+	}
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
