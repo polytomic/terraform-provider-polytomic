@@ -3,12 +3,20 @@ package provider
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/polytomic/polytomic-go"
+)
+
+const (
+	//PolytomicDeploymentKey is the environment variable name for the Polytomic API key
+	PolytomicDeploymentKey = "POLYTOMIC_DEPLOYMENT_KEY"
+	//PolytomicDeploymentURL is the environment variable name for the Polytomic deployment URL
+	PolytomicDeploymentURL = "POLYTOMIC_DEPLOYMENT_URL"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -45,8 +53,39 @@ func (p *ptProvider) Configure(ctx context.Context, req provider.ConfigureReques
 		return
 	}
 
+	var deployURL, deployKey string
+
+	// If the deployment URL is not set in the provider configuration, check the environment
+	if data.DeploymentKey.Null {
+		deployKey = os.Getenv(PolytomicDeploymentKey)
+	} else {
+		deployKey = data.DeploymentKey.Value
+	}
+
+	if deployKey == "" {
+		resp.Diagnostics.AddError(
+			"Missing Polytomic Deployment API Key",
+			fmt.Sprintf("Please set the deployment_api_key in the provider configuration or the %s environment variable", PolytomicDeploymentKey),
+		)
+		return
+	}
+
+	// If the deployment URL is not set in the provider configuration, check the environment
+	if data.DeploymentUrl.Null {
+		deployURL = os.Getenv(PolytomicDeploymentURL)
+	} else {
+		deployURL = data.DeploymentUrl.Value
+	}
+
+	if deployURL == "" {
+		resp.Diagnostics.AddError(
+			"Missing Polytomic Deployment URL",
+			fmt.Sprintf("Please set the deployment_url in the provider configuration or the %s environment variable", PolytomicDeploymentURL),
+		)
+		return
+	}
 	// Configuration values are now available.
-	p.client = polytomic.NewClient(data.DeploymentUrl.Value, data.DeploymentKey.Value)
+	p.client = polytomic.NewClient(deployURL, deployKey)
 	p.configured = true
 }
 
@@ -69,7 +108,7 @@ func (p *ptProvider) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnost
 			"deployment_url": {
 				MarkdownDescription: "Polytomic deployment URL",
 				Type:                types.StringType,
-				Required:            true,
+				Optional:            true,
 			},
 			"deployment_api_key": {
 				MarkdownDescription: "",
