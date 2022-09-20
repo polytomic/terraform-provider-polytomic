@@ -1,4 +1,12 @@
-## 0.1.1 (13 July 2022)
+## 0.1.6 (20 Sept 2022)
+
+FIXES
+
+* Corrected additional issues with case-sensitive email comparisons.
+* Resources deleted outside of Terraform caused the provider to fail; they will
+  now be included in the plan for creation.
+
+## 0.1.5 (13 July 2022)
 
 FIXES
 
