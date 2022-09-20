@@ -84,13 +84,6 @@ func (t sqlserverConnectionResourceType) NewResource(ctx context.Context, in pro
 	}, diags
 }
 
-type sqlserverConfigurationData struct {
-	AccessKeyId     types.String `tfsdk:"access_key_id"`
-	AccessKeySecret types.String `tfsdk:"access_key_secret"`
-	Region          types.String `tfsdk:"region"`
-	OutputBucket    types.String `tfsdk:"output_bucket"`
-}
-
 type sqlserverConnectionResource struct {
 	provider ptProvider
 }
@@ -142,6 +135,10 @@ func (r sqlserverConnectionResource) Read(ctx context.Context, req resource.Read
 
 	connection, err := r.provider.client.Connections().Get(ctx, uuid.MustParse(data.Id.Value))
 	if err != nil {
+		if err.Error() == ConnectionNotFoundErr {
+			resp.State.RemoveResource(ctx)
+			return
+		}
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error reading connection: %s", err))
 		return
 	}
