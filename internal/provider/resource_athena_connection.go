@@ -84,13 +84,6 @@ func (t athenaConnectionResourceType) NewResource(ctx context.Context, in provid
 	}, diags
 }
 
-type athenaConfigurationData struct {
-	AccessKeyId     types.String `tfsdk:"access_key_id"`
-	AccessKeySecret types.String `tfsdk:"access_key_secret"`
-	Region          types.String `tfsdk:"region"`
-	OutputBucket    types.String `tfsdk:"output_bucket"`
-}
-
 type athenaConnectionResource struct {
 	provider ptProvider
 }
@@ -141,6 +134,10 @@ func (r athenaConnectionResource) Read(ctx context.Context, req resource.ReadReq
 
 	connection, err := r.provider.client.Connections().Get(ctx, uuid.MustParse(data.Id.Value))
 	if err != nil {
+		if err.Error() == ConnectionNotFoundErr {
+			resp.State.RemoveResource(ctx)
+			return
+		}
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error reading connection: %s", err))
 		return
 	}

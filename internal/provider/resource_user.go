@@ -145,6 +145,10 @@ func (r userResource) Read(ctx context.Context, req resource.ReadRequest, resp *
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error reading user: %s", err))
 		return
 	}
+	if user.ID == uuid.Nil {
+		resp.State.RemoveResource(ctx)
+		return
+	}
 
 	data.Id = types.String{Value: user.ID.String()}
 	data.Organization = types.String{Value: user.OrganizationId.String()}
