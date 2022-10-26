@@ -1,3 +1,9 @@
+## 0.1.7 (26 Oct 2022)
+
+FEATURES
+
+* Added support for S3 Connection resources
+
 ## 0.1.6 (20 Sept 2022)
 
 FIXES
@@ -15,7 +21,7 @@ FIXES
 
 ## 0.1.0 (11 July 2022)
 
-FEATURES:
+FEATURES
 
 * New Resources:
     - Organizations
