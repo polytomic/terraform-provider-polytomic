@@ -90,13 +90,7 @@ func (p *ptProvider) Configure(ctx context.Context, req provider.ConfigureReques
 }
 
 func (p *ptProvider) GetResources(ctx context.Context) (map[string]provider.ResourceType, diag.Diagnostics) {
-	return map[string]provider.ResourceType{
-		"polytomic_organization":         organizationResourceType{},
-		"polytomic_user":                 userResourceType{},
-		"polytomic_athena_connection":    athenaConnectionResourceType{},
-		"polytomic_sqlserver_connection": sqlserverConnectionResourceType{},
-		"polytomic_s3_connection":        s3ConnectionResourceType{},
-	}, nil
+	return resources(), nil
 }
 
 func (p *ptProvider) GetDataSources(ctx context.Context) (map[string]provider.DataSourceType, diag.Diagnostics) {

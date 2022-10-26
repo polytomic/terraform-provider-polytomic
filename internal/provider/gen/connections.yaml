@@ -1,0 +1,73 @@
+connections:
+  - connection: s3
+    type: polytomic.S3ConnectionType
+    config: polytomic.S3Configuration
+    attributes:
+      - name: AccessKeyID
+        type: string
+        required: true
+        sensitive: true
+        example: "EXAMPLEACCESSKEYID"
+      - name: AccessKeySecret
+        type: string
+        required: true
+        sensitive: true
+        example: "EXAMPLEACCESSKEYSECRET"
+      - name: Region
+        type: string
+        required: true
+        example: "us-east-1"
+      - name: Bucket
+        type: string
+        required: true
+        example: "my-bucket"
+  - connection: sqlserver
+    name: SQL Server
+    type: polytomic.SQLServerConnectionType
+    config: polytomic.SQLServerConfiguration
+    attributes:
+      - name: Hostname
+        type: string
+        required: true
+        example: "sqlserver.azure.example.com"
+      - name: Username
+        type: string
+        required: true
+        example: "polytomic"
+      - name: Password
+        type: string
+        required: true
+        sensitive: true
+        example: "secret"
+      - name: Database
+        type: string
+        required: true
+        example: "acme"
+      - name: Port
+        type: int
+        required: true
+        example: 1443
+  - connection: athena
+    name: AWS Athena
+    type: polytomic.AthenaConnectionType
+    config: polytomic.AthenaConfiguration
+    attributes:
+      - name: AccessKeyID
+        type: string
+        required: true
+        sensitive: true
+        example: "EXAMPLEACCESSKEYID"
+      - name: AccessKeySecret
+        type: string
+        required: true
+        sensitive: true
+        example: "EXAMPLEACCESSKEYSECRET"
+      - name: Region
+        type: string
+        required: true
+        example: "us-east-1"
+      - name: OutputBucket
+        type: string
+        required: true
+        description: "S3 bucket for output storage, with optional prefix. Examples: `bucket-name`, `bucket-name/prefix`."
+        example: "athena-output-bucket"

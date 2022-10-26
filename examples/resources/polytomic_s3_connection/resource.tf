@@ -1,11 +1,11 @@
-resource "polytomic_athena_connection" "athena" {
+resource "polytomic_s3_connection" "s3" {
   organization = polytomic_organization.acme.id
   name         = "Acme, Inc"
   configuration = {
     AccessKeyID     = "EXAMPLEACCESSKEYID"
     AccessKeySecret = "EXAMPLEACCESSKEYSECRET"
     Region          = "us-east-1"
-    OutputBucket    = "athena-output-bucket"
+    Bucket          = "my-bucket"
   }
 }
 

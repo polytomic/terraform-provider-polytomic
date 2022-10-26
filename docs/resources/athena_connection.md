@@ -13,14 +13,14 @@ AWS Athena Connection
 ## Example Usage
 
 ```terraform
-resource "polytomic_athena_connection" "acmelake" {
+resource "polytomic_athena_connection" "athena" {
   organization = polytomic_organization.acme.id
-  name         = "Acme, Inc Data"
+  name         = "Acme, Inc"
   configuration = {
-    access_key_id     = ""
-    access_key_secret = ""
-    region            = "us-west-2"
-    output_bucket     = "acme-data-athena-output"
+    AccessKeyID     = "EXAMPLEACCESSKEYID"
+    AccessKeySecret = "EXAMPLEACCESSKEYSECRET"
+    Region          = "us-east-1"
+    OutputBucket    = "athena-output-bucket"
   }
 }
 ```

@@ -17,11 +17,11 @@ resource "polytomic_sqlserver_connection" "sqlserver" {
   organization = polytomic_organization.acme.id
   name         = "Acme, Inc"
   configuration = {
-    hostname = "sqlserver.azure.example.com"
-    username = "polytomic"
-    password = ""
-    database = "acme"
-    port     = 1443
+    Hostname = "sqlserver.azure.example.com"
+    Username = "polytomic"
+    Password = "secret"
+    Database = "acme"
+    Port     = 1443
   }
 }
 ```
@@ -46,7 +46,7 @@ Required:
 
 - `database` (String)
 - `hostname` (String)
-- `password` (String)
+- `password` (String, Sensitive)
 - `port` (Number)
 - `username` (String)
 
