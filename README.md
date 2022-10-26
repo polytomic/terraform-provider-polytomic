@@ -66,3 +66,21 @@ go mod tidy
 ```
 
 Then commit the changes to `go.mod` and `go.sum`.
+
+
+## Releasing
+
+1. Update [CHANGELOG.md](./CHANGELOG.md) with release details and date and commit.
+1. Create an annotated version tag; a version tag consists of the letter `v` followed by `MAJOR.MINOR.PATCH`. For example:
+
+    ```shell
+    git tag -a v0.2.0
+    ```
+
+1. Push the tag to Github.
+
+    ```shell
+    git push origin v0.2.0
+    ```
+
+Github Actions are configured to build release tags and create a new release. Once the release has been created, the Terraform registry will pick it up within a few minutes.
