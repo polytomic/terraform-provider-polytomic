@@ -1,5 +1,5 @@
 POLYTOMIC_DEPLOYMENT_URL ?= app.polytomic-local.com:8443
-POLYTOMIC_DEPLOYMENT_KEY ?= testing
+POLYTOMIC_DEPLOYMENT_KEY ?= secret-key
 
 default: testacc
 
