@@ -85,7 +85,7 @@ func (p *ptProvider) Configure(ctx context.Context, req provider.ConfigureReques
 		return
 	}
 	// Configuration values are now available.
-	p.client = polytomic.NewClient(deployURL, deployKey)
+	p.client = polytomic.NewClient(deployURL, polytomic.DeploymentKey(deployKey))
 	p.configured = true
 }
 
@@ -95,6 +95,7 @@ func (p *ptProvider) GetResources(ctx context.Context) (map[string]provider.Reso
 		"polytomic_user":                 userResourceType{},
 		"polytomic_athena_connection":    athenaConnectionResourceType{},
 		"polytomic_sqlserver_connection": sqlserverConnectionResourceType{},
+		"polytomic_s3_connection":        s3ConnectionResourceType{},
 	}, nil
 }
 
