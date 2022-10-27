@@ -15,11 +15,11 @@ SQL Server Connection
 ```terraform
 resource "polytomic_sqlserver_connection" "sqlserver" {
   organization = polytomic_organization.acme.id
-  name         = "Acme, Inc"
+  name         = "example"
   configuration = {
     hostname = "sqlserver.azure.example.com"
     username = "polytomic"
-    password = ""
+    password = "secret"
     database = "acme"
     port     = 1443
   }
@@ -46,7 +46,7 @@ Required:
 
 - `database` (String)
 - `hostname` (String)
-- `password` (String)
+- `password` (String, Sensitive)
 - `port` (Number)
 - `username` (String)
 

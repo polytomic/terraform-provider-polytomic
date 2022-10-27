@@ -19,15 +19,15 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
-var _ provider.ResourceType = athenaConnectionResourceType{}
-var _ resource.Resource = athenaConnectionResource{}
-var _ resource.ResourceWithImportState = athenaConnectionResource{}
+var _ provider.ResourceType = gcsConnectionResourceType{}
+var _ resource.Resource = gcsConnectionResource{}
+var _ resource.ResourceWithImportState = gcsConnectionResource{}
 
-type athenaConnectionResourceType struct{}
+type gcsConnectionResourceType struct{}
 
-func (t athenaConnectionResourceType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
+func (t gcsConnectionResourceType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: "AWS Athena Connection",
+		MarkdownDescription: "Google Cloud Storage Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"organization": {
 				MarkdownDescription: "Organization ID",
@@ -43,26 +43,20 @@ func (t athenaConnectionResourceType) GetSchema(ctx context.Context) (tfsdk.Sche
 			},
 			"configuration": {
 				Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
-					"access_key_id": {
-						MarkdownDescription: "",
-						Type:                types.StringType,
-						Required:            true,
-						Sensitive:           true,
-					},
-					"access_key_secret": {
-						MarkdownDescription: "",
-						Type:                types.StringType,
-						Required:            true,
-						Sensitive:           true,
-					},
-					"region": {
+					"project_id": {
 						MarkdownDescription: "",
 						Type:                types.StringType,
 						Required:            true,
 						Sensitive:           false,
 					},
-					"output_bucket": {
-						MarkdownDescription: "S3 bucket for output storage, with optional prefix. Examples: `bucket-name`, `bucket-name/prefix`.",
+					"service_account_credentials": {
+						MarkdownDescription: "",
+						Type:                types.StringType,
+						Required:            true,
+						Sensitive:           true,
+					},
+					"bucket": {
+						MarkdownDescription: "",
 						Type:                types.StringType,
 						Required:            true,
 						Sensitive:           false,
@@ -72,7 +66,7 @@ func (t athenaConnectionResourceType) GetSchema(ctx context.Context) (tfsdk.Sche
 			},
 			"id": {
 				Computed:            true,
-				MarkdownDescription: "AWS Athena Connection identifier",
+				MarkdownDescription: "Google Cloud Storage Connection identifier",
 				PlanModifiers: tfsdk.AttributePlanModifiers{
 					resource.UseStateForUnknown(),
 				},
@@ -82,19 +76,19 @@ func (t athenaConnectionResourceType) GetSchema(ctx context.Context) (tfsdk.Sche
 	}, nil
 }
 
-func (t athenaConnectionResourceType) NewResource(ctx context.Context, in provider.Provider) (resource.Resource, diag.Diagnostics) {
+func (t gcsConnectionResourceType) NewResource(ctx context.Context, in provider.Provider) (resource.Resource, diag.Diagnostics) {
 	provider, diags := convertProviderType(in)
 
-	return athenaConnectionResource{
+	return gcsConnectionResource{
 		provider: provider,
 	}, diags
 }
 
-type athenaConnectionResource struct {
+type gcsConnectionResource struct {
 	provider ptProvider
 }
 
-func (r athenaConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r gcsConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data connectionResourceData
 
 	diags := req.Config.Get(ctx, &data)
@@ -107,13 +101,12 @@ func (r athenaConnectionResource) Create(ctx context.Context, req resource.Creat
 	created, err := r.provider.client.Connections().Create(ctx,
 		polytomic.CreateConnectionMutation{
 			Name:           data.Name.Value,
-			Type:           polytomic.AthenaConnectionType,
+			Type:           polytomic.GoogleCloudStorageConnectionType,
 			OrganizationId: data.Organization.Value,
-			Configuration: polytomic.AthenaConfiguration{
-				AccessKeyID:     data.Configuration.Attrs["access_key_id"].(types.String).Value,
-				AccessKeySecret: data.Configuration.Attrs["access_key_secret"].(types.String).Value,
-				Region:          data.Configuration.Attrs["region"].(types.String).Value,
-				OutputBucket:    data.Configuration.Attrs["output_bucket"].(types.String).Value,
+			Configuration: polytomic.GCSConfiguration{
+				ProjectId:                 data.Configuration.Attrs["project_id"].(types.String).Value,
+				ServiceAccountCredentials: data.Configuration.Attrs["service_account_credentials"].(types.String).Value,
+				Bucket:                    data.Configuration.Attrs["bucket"].(types.String).Value,
 			},
 		},
 	)
@@ -122,13 +115,13 @@ func (r athenaConnectionResource) Create(ctx context.Context, req resource.Creat
 		return
 	}
 	data.Id = types.String{Value: created.ID}
-	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "athena", "id": created.ID})
+	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "gcs", "id": created.ID})
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r athenaConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r gcsConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data connectionResourceData
 
 	diags := req.State.Get(ctx, &data)
@@ -156,7 +149,7 @@ func (r athenaConnectionResource) Read(ctx context.Context, req resource.ReadReq
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r athenaConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r gcsConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var data connectionResourceData
 
 	diags := req.Plan.Get(ctx, &data)
@@ -171,11 +164,10 @@ func (r athenaConnectionResource) Update(ctx context.Context, req resource.Updat
 		polytomic.UpdateConnectionMutation{
 			Name:           data.Name.Value,
 			OrganizationId: data.Organization.Value,
-			Configuration: polytomic.AthenaConfiguration{
-				AccessKeyID:     data.Configuration.Attrs["access_key_id"].(types.String).Value,
-				AccessKeySecret: data.Configuration.Attrs["access_key_secret"].(types.String).Value,
-				Region:          data.Configuration.Attrs["region"].(types.String).Value,
-				OutputBucket:    data.Configuration.Attrs["output_bucket"].(types.String).Value,
+			Configuration: polytomic.GCSConfiguration{
+				ProjectId:                 data.Configuration.Attrs["project_id"].(types.String).Value,
+				ServiceAccountCredentials: data.Configuration.Attrs["service_account_credentials"].(types.String).Value,
+				Bucket:                    data.Configuration.Attrs["bucket"].(types.String).Value,
 			},
 		},
 	)
@@ -192,7 +184,7 @@ func (r athenaConnectionResource) Update(ctx context.Context, req resource.Updat
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r athenaConnectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r gcsConnectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var data connectionResourceData
 
 	diags := req.State.Get(ctx, &data)
@@ -209,6 +201,6 @@ func (r athenaConnectionResource) Delete(ctx context.Context, req resource.Delet
 	}
 }
 
-func (r athenaConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r gcsConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

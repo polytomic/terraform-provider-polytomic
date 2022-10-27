@@ -1,0 +1,14 @@
+resource "{{ .Resource }}" "{{ .Name }}" {
+  organization = polytomic_organization.acme.id
+  name         = "example"
+  configuration = {
+   {{- range .Attributes }}
+   {{- if eq .Type "string" }}
+    {{ .AttrName }} = "{{ .Example }}"
+   {{- else }}
+    {{ .AttrName }} = {{ .Example }}
+   {{- end -}}
+    {{ end }}
+  }
+}
+
