@@ -68,12 +68,13 @@ type connection struct {
 }
 
 type attribute struct {
-	Name        string `yaml:"name"`
-	Sensitive   bool   `yaml:"sensitive"`
-	Required    bool   `yaml:"required"`
-	Type        string `yaml:"type"`
-	Description string `yaml:"description"`
-	Example     string `yaml:"example"`
+	Name                string `yaml:"name"`
+	Sensitive           bool   `yaml:"sensitive"`
+	Required            bool   `yaml:"required"`
+	Type                string `yaml:"type"`
+	Description         string `yaml:"description"`
+	Example             string `yaml:"example"`
+	ExampleTypeOverride string `yaml:"example_type_override"`
 
 	TfType   string `yaml:"-"`
 	AttrType string `yaml:"-"`
@@ -148,6 +149,14 @@ func writeConnectionExample(r connection) error {
 		return err
 	}
 	defer f.Close()
+
+	// Overrides types for examples
+	for i, a := range r.Attributes {
+		if a.ExampleTypeOverride != "" {
+			r.Attributes[i].Type = a.ExampleTypeOverride
+		}
+	}
+
 	err = tmpl.Execute(f, struct {
 		Resource   string
 		Name       string

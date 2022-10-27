@@ -15,12 +15,12 @@ AWS Athena Connection
 ```terraform
 resource "polytomic_athena_connection" "athena" {
   organization = polytomic_organization.acme.id
-  name         = "Acme, Inc"
+  name         = "example"
   configuration = {
-    AccessKeyID     = "EXAMPLEACCESSKEYID"
-    AccessKeySecret = "EXAMPLEACCESSKEYSECRET"
-    Region          = "us-east-1"
-    OutputBucket    = "athena-output-bucket"
+    access_key_id     = "EXAMPLEACCESSKEYID"
+    access_key_secret = "EXAMPLEACCESSKEYSECRET"
+    region            = "us-east-1"
+    output_bucket     = "athena-output-bucket"
   }
 }
 ```
