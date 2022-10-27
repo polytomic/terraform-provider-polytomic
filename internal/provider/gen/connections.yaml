@@ -1,4 +1,56 @@
 connections:
+  - connection: bigquery
+    name: Big Query
+    type: polytomic.BigQueryConnectionType
+    config: polytomic.BigQueryConfiguration
+    attributes:
+      - name: ServiceAccountCredentials
+        type: string
+        required: true
+        sensitive: true
+        example: data.account_credentials.json
+        example_type_override: variable
+      - name: Location
+        type: string
+        required: true
+        example: us-central1
+  - connection: gcs
+    name: Google Cloud Storage
+    type: polytomic.GoogleCloudStorageConnectionType
+    config: polytomic.GCSConfiguration
+    attributes:
+      - name: ProjectId
+        type: string
+        required: true
+        example: my-project
+      - name: ServiceAccountCredentials
+        type: string
+        required: true
+        sensitive: true
+        example: data.account_credentials.json
+        example_type_override: variable
+      - name: Bucket
+        type: string
+        required: true
+        example: my-bucket
+  - connection: azureblob
+    name: Azure Blob Storage
+    type: polytomic.AzureBlobConnectionType
+    config: polytomic.AzureBlobConfiguration
+    attributes:
+      - name: AccountName
+        type: string
+        required: true
+        example: my-account
+      - name: AccessKey
+        type: string
+        required: true
+        sensitive: true
+        example: abcdefghijklmnopqrstuvwxyz0123456789==
+      - name: ContainerName
+        type: string
+        required: true
+        example: my-container
   - connection: s3
     type: polytomic.S3ConnectionType
     config: polytomic.S3Configuration
