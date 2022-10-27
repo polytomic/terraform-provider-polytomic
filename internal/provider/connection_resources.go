@@ -7,6 +7,9 @@ import "github.com/hashicorp/terraform-plugin-framework/provider"
 
 var (
 	connection_resources = map[string]provider.ResourceType{
+		"polytomic_bigquery_connection":  bigqueryConnectionResourceType{},
+		"polytomic_gcs_connection":       gcsConnectionResourceType{},
+		"polytomic_azureblob_connection": azureblobConnectionResourceType{},
 		"polytomic_s3_connection":        s3ConnectionResourceType{},
 		"polytomic_sqlserver_connection": sqlserverConnectionResourceType{},
 		"polytomic_athena_connection":    athenaConnectionResourceType{},
