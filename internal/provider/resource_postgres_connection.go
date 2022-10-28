@@ -19,15 +19,15 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
-var _ provider.ResourceType = azureblobConnectionResourceType{}
-var _ resource.Resource = azureblobConnectionResource{}
-var _ resource.ResourceWithImportState = azureblobConnectionResource{}
+var _ provider.ResourceType = postgresConnectionResourceType{}
+var _ resource.Resource = postgresConnectionResource{}
+var _ resource.ResourceWithImportState = postgresConnectionResource{}
 
-type azureblobConnectionResourceType struct{}
+type postgresConnectionResourceType struct{}
 
-func (t azureblobConnectionResourceType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
+func (t postgresConnectionResourceType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: "Azure Blob Storage Connection",
+		MarkdownDescription: "PostgresSQL Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"organization": {
 				MarkdownDescription: "Organization ID",
@@ -43,25 +43,46 @@ func (t azureblobConnectionResourceType) GetSchema(ctx context.Context) (tfsdk.S
 			},
 			"configuration": {
 				Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
-					"account_name": {
+					"hostname": {
 						MarkdownDescription: "",
 						Type:                types.StringType,
 						Required:            true,
 						Optional:            false,
 						Sensitive:           false,
 					},
-					"access_key": {
+					"username": {
+						MarkdownDescription: "",
+						Type:                types.StringType,
+						Required:            true,
+						Optional:            false,
+						Sensitive:           false,
+					},
+					"password": {
 						MarkdownDescription: "",
 						Type:                types.StringType,
 						Required:            true,
 						Optional:            false,
 						Sensitive:           true,
 					},
-					"container_name": {
+					"database": {
 						MarkdownDescription: "",
 						Type:                types.StringType,
 						Required:            true,
 						Optional:            false,
+						Sensitive:           false,
+					},
+					"port": {
+						MarkdownDescription: "",
+						Type:                types.Int64Type,
+						Required:            true,
+						Optional:            false,
+						Sensitive:           false,
+					},
+					"ssl": {
+						MarkdownDescription: "",
+						Type:                types.BoolType,
+						Required:            false,
+						Optional:            true,
 						Sensitive:           false,
 					},
 				}),
@@ -69,7 +90,7 @@ func (t azureblobConnectionResourceType) GetSchema(ctx context.Context) (tfsdk.S
 			},
 			"id": {
 				Computed:            true,
-				MarkdownDescription: "Azure Blob Storage Connection identifier",
+				MarkdownDescription: "PostgresSQL Connection identifier",
 				PlanModifiers: tfsdk.AttributePlanModifiers{
 					resource.UseStateForUnknown(),
 				},
@@ -79,19 +100,19 @@ func (t azureblobConnectionResourceType) GetSchema(ctx context.Context) (tfsdk.S
 	}, nil
 }
 
-func (t azureblobConnectionResourceType) NewResource(ctx context.Context, in provider.Provider) (resource.Resource, diag.Diagnostics) {
+func (t postgresConnectionResourceType) NewResource(ctx context.Context, in provider.Provider) (resource.Resource, diag.Diagnostics) {
 	provider, diags := convertProviderType(in)
 
-	return azureblobConnectionResource{
+	return postgresConnectionResource{
 		provider: provider,
 	}, diags
 }
 
-type azureblobConnectionResource struct {
+type postgresConnectionResource struct {
 	provider ptProvider
 }
 
-func (r azureblobConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r postgresConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data connectionResourceData
 
 	diags := req.Config.Get(ctx, &data)
@@ -104,12 +125,15 @@ func (r azureblobConnectionResource) Create(ctx context.Context, req resource.Cr
 	created, err := r.provider.client.Connections().Create(ctx,
 		polytomic.CreateConnectionMutation{
 			Name:           data.Name.Value,
-			Type:           polytomic.AzureBlobConnectionType,
+			Type:           polytomic.PostgresqlConnectionType,
 			OrganizationId: data.Organization.Value,
-			Configuration: polytomic.AzureBlobConfiguration{
-				AccountName:   data.Configuration.Attrs["account_name"].(types.String).Value,
-				AccessKey:     data.Configuration.Attrs["access_key"].(types.String).Value,
-				ContainerName: data.Configuration.Attrs["container_name"].(types.String).Value,
+			Configuration: polytomic.PostgresqlConfiguration{
+				Hostname: data.Configuration.Attrs["hostname"].(types.String).Value,
+				Username: data.Configuration.Attrs["username"].(types.String).Value,
+				Password: data.Configuration.Attrs["password"].(types.String).Value,
+				Database: data.Configuration.Attrs["database"].(types.String).Value,
+				Port:     int(data.Configuration.Attrs["port"].(types.Int64).Value),
+				SSL:      data.Configuration.Attrs["ssl"].(types.Bool).Value,
 			},
 		},
 	)
@@ -118,13 +142,13 @@ func (r azureblobConnectionResource) Create(ctx context.Context, req resource.Cr
 		return
 	}
 	data.Id = types.String{Value: created.ID}
-	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "azureblob", "id": created.ID})
+	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "postgres", "id": created.ID})
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r azureblobConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r postgresConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data connectionResourceData
 
 	diags := req.State.Get(ctx, &data)
@@ -152,7 +176,7 @@ func (r azureblobConnectionResource) Read(ctx context.Context, req resource.Read
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r azureblobConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r postgresConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var data connectionResourceData
 
 	diags := req.Plan.Get(ctx, &data)
@@ -167,10 +191,13 @@ func (r azureblobConnectionResource) Update(ctx context.Context, req resource.Up
 		polytomic.UpdateConnectionMutation{
 			Name:           data.Name.Value,
 			OrganizationId: data.Organization.Value,
-			Configuration: polytomic.AzureBlobConfiguration{
-				AccountName:   data.Configuration.Attrs["account_name"].(types.String).Value,
-				AccessKey:     data.Configuration.Attrs["access_key"].(types.String).Value,
-				ContainerName: data.Configuration.Attrs["container_name"].(types.String).Value,
+			Configuration: polytomic.PostgresqlConfiguration{
+				Hostname: data.Configuration.Attrs["hostname"].(types.String).Value,
+				Username: data.Configuration.Attrs["username"].(types.String).Value,
+				Password: data.Configuration.Attrs["password"].(types.String).Value,
+				Database: data.Configuration.Attrs["database"].(types.String).Value,
+				Port:     int(data.Configuration.Attrs["port"].(types.Int64).Value),
+				SSL:      data.Configuration.Attrs["ssl"].(types.Bool).Value,
 			},
 		},
 	)
@@ -187,7 +214,7 @@ func (r azureblobConnectionResource) Update(ctx context.Context, req resource.Up
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r azureblobConnectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r postgresConnectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var data connectionResourceData
 
 	diags := req.State.Get(ctx, &data)
@@ -204,6 +231,6 @@ func (r azureblobConnectionResource) Delete(ctx context.Context, req resource.De
 	}
 }
 
-func (r azureblobConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r postgresConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

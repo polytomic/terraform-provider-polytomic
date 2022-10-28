@@ -71,6 +71,7 @@ type attribute struct {
 	Name                string `yaml:"name"`
 	Sensitive           bool   `yaml:"sensitive"`
 	Required            bool   `yaml:"required"`
+	Optional            bool   `yaml:"optional"`
 	Type                string `yaml:"type"`
 	Description         string `yaml:"description"`
 	Example             string `yaml:"example"`

@@ -3,12 +3,14 @@ resource "{{ .Resource }}" "{{ .Name }}" {
   name         = "example"
   configuration = {
    {{- range .Attributes }}
+   {{- if .Example }}
    {{- if eq .Type "string" }}
     {{ .AttrName }} = "{{ .Example }}"
    {{- else }}
     {{ .AttrName }} = {{ .Example }}
    {{- end -}}
     {{ end }}
+    {{- end }}
   }
 }
 
