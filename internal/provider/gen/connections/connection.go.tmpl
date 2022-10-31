@@ -47,6 +47,7 @@ func (t {{ .Connection }}ConnectionResourceType) GetSchema(ctx context.Context) 
 						MarkdownDescription: "{{ .Description }}",
 						Type:      {{ .AttrType }},
 						Required:  {{ .Required }},
+						Optional:  {{ .Optional }},
 						Sensitive: {{ .Sensitive }},
 					},
 					{{ end }}

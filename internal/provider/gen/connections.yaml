@@ -1,4 +1,33 @@
 connections:
+  - connection: postgres
+    name: PostgresSQL
+    type: polytomic.PostgresqlConnectionType
+    config: polytomic.PostgresqlConfiguration
+    attributes:
+      - name: Hostname
+        type: string
+        required: true
+        example: acme.postgres.database.example.com
+      - name: Username
+        type: string
+        required: true
+        example: acme
+      - name: Password
+        type: string
+        required: true
+        sensitive: true
+        example: 1234567890
+      - name: Database
+        type: string
+        required: true
+        example: acme
+      - name: Port
+        type: int
+        required: true
+        example: 5432
+      - name: SSL
+        type: bool
+        optional: true
   - connection: bigquery
     name: Big Query
     type: polytomic.BigQueryConnectionType
