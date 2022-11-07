@@ -13,8 +13,10 @@ import (
 )
 
 const (
-	//PolytomicDeploymentKey is the environment variable name for the Polytomic API key
+	//PolytomicDeploymentKey is the environment variable name for the Polytomic deployment key
 	PolytomicDeploymentKey = "POLYTOMIC_DEPLOYMENT_KEY"
+	//PolytomicAPIKey is the environment variable name for the Polytomic API key
+	PolytomicAPIKey = "POLYTOMIC_API_KEY"
 	//PolytomicDeploymentURL is the environment variable name for the Polytomic deployment URL
 	PolytomicDeploymentURL = "POLYTOMIC_DEPLOYMENT_URL"
 )
@@ -42,6 +44,7 @@ type ptProvider struct {
 type providerData struct {
 	DeploymentKey types.String `tfsdk:"deployment_api_key"`
 	DeploymentUrl types.String `tfsdk:"deployment_url"`
+	APIKey        types.String `tfsdk:"api_key"`
 }
 
 func (p *ptProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
@@ -53,7 +56,7 @@ func (p *ptProvider) Configure(ctx context.Context, req provider.ConfigureReques
 		return
 	}
 
-	var deployURL, deployKey string
+	var deployURL, deployKey, apiKey string
 
 	// If the deployment URL is not set in the provider configuration, check the environment
 	if data.DeploymentKey.Null {
@@ -62,10 +65,16 @@ func (p *ptProvider) Configure(ctx context.Context, req provider.ConfigureReques
 		deployKey = data.DeploymentKey.Value
 	}
 
-	if deployKey == "" {
+	if data.APIKey.Null {
+		apiKey = os.Getenv(PolytomicAPIKey)
+	} else {
+		apiKey = data.APIKey.Value
+	}
+
+	if deployKey == "" && apiKey == "" {
 		resp.Diagnostics.AddError(
-			"Missing Polytomic Deployment API Key",
-			fmt.Sprintf("Please set the deployment_api_key in the provider configuration or the %s environment variable", PolytomicDeploymentKey),
+			"Missing Polytomic Deployment or API Key",
+			fmt.Sprintf(`Please set the "deployment_api_key" or "api_key" in the provider configuration or on of the %s or %s environment variables`, PolytomicDeploymentKey, PolytomicAPIKey),
 		)
 		return
 	}
@@ -80,12 +89,22 @@ func (p *ptProvider) Configure(ctx context.Context, req provider.ConfigureReques
 	if deployURL == "" {
 		resp.Diagnostics.AddError(
 			"Missing Polytomic Deployment URL",
-			fmt.Sprintf("Please set the deployment_url in the provider configuration or the %s environment variable", PolytomicDeploymentURL),
+			fmt.Sprintf(`Please set the "deployment_url" in the provider configuration or the %s environment variable`, PolytomicDeploymentURL),
 		)
 		return
 	}
-	// Configuration values are now available.
-	p.client = polytomic.NewClient(deployURL, polytomic.DeploymentKey(deployKey))
+	// Deployment key is the default and takes precedence
+	if apiKey != "" && deployKey == "" {
+		p.client = polytomic.NewClient(
+			deployURL,
+			polytomic.APIKey(apiKey),
+		)
+	} else {
+		p.client = polytomic.NewClient(
+			deployURL,
+			polytomic.DeploymentKey(deployKey),
+		)
+	}
 	p.configured = true
 }
 
@@ -106,7 +125,13 @@ func (p *ptProvider) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnost
 				Optional:            true,
 			},
 			"deployment_api_key": {
-				MarkdownDescription: "",
+				MarkdownDescription: "Polytomic deployment key",
+				Type:                types.StringType,
+				Optional:            true,
+				Sensitive:           true,
+			},
+			"api_key": {
+				MarkdownDescription: "Polytomic API key",
 				Type:                types.StringType,
 				Optional:            true,
 				Sensitive:           true,

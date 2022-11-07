@@ -24,5 +24,6 @@ provider "polytomic" {
 
 ### Optional
 
-- `deployment_api_key` (String, Sensitive)
+- `api_key` (String, Sensitive) Polytomic API key
+- `deployment_api_key` (String, Sensitive) Polytomic deployment key
 - `deployment_url` (String) Polytomic deployment URL
