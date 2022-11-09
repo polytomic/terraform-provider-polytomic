@@ -74,7 +74,7 @@ func (p *ptProvider) Configure(ctx context.Context, req provider.ConfigureReques
 	if deployKey == "" && apiKey == "" {
 		resp.Diagnostics.AddError(
 			"Missing Polytomic Deployment or API Key",
-			fmt.Sprintf(`Please set the "deployment_api_key" or "api_key" in the provider configuration or on of the %s or %s environment variables`, PolytomicDeploymentKey, PolytomicAPIKey),
+			fmt.Sprintf(`Please set the "deployment_api_key" or "api_key" in the provider configuration or one of the %s or %s environment variables`, PolytomicDeploymentKey, PolytomicAPIKey),
 		)
 		return
 	}
