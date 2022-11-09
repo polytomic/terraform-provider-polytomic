@@ -3,16 +3,16 @@
 
 package provider
 
-import "github.com/hashicorp/terraform-plugin-framework/provider"
+import "github.com/hashicorp/terraform-plugin-framework/resource"
 
 var (
-	connection_resources = map[string]provider.ResourceType{
-		"polytomic_postgres_connection":  postgresConnectionResourceType{},
-		"polytomic_bigquery_connection":  bigqueryConnectionResourceType{},
-		"polytomic_gcs_connection":       gcsConnectionResourceType{},
-		"polytomic_azureblob_connection": azureblobConnectionResourceType{},
-		"polytomic_s3_connection":        s3ConnectionResourceType{},
-		"polytomic_sqlserver_connection": sqlserverConnectionResourceType{},
-		"polytomic_athena_connection":    athenaConnectionResourceType{},
+	connection_resources = []func() resource.Resource{
+		func() resource.Resource { return &postgresConnectionResource{} },
+		func() resource.Resource { return &bigqueryConnectionResource{} },
+		func() resource.Resource { return &gcsConnectionResource{} },
+		func() resource.Resource { return &azureblobConnectionResource{} },
+		func() resource.Resource { return &s3ConnectionResource{} },
+		func() resource.Resource { return &sqlserverConnectionResource{} },
+		func() resource.Resource { return &athenaConnectionResource{} },
 	}
 )

@@ -1,21 +1,18 @@
 package provider
 
-import "github.com/hashicorp/terraform-plugin-framework/provider"
+import (
+	"github.com/hashicorp/terraform-plugin-framework/resource"
+)
 
 var (
-	resourceList = map[string]provider.ResourceType{
-		"polytomic_organization": organizationResourceType{},
-		"polytomic_user":         userResourceType{},
+	resourceList = []func() resource.Resource{
+		func() resource.Resource { return &organizationResource{} },
+		func() resource.Resource { return &userResource{} },
 	}
 )
 
-func resources() map[string]provider.ResourceType {
-	all := map[string]provider.ResourceType{}
-	for k, v := range resourceList {
-		all[k] = v
-	}
-	for k, v := range connection_resources {
-		all[k] = v
-	}
+func resources() []func() resource.Resource {
+	all := append(connection_resources, resourceList...)
+
 	return all
 }

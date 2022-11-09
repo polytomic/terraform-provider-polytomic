@@ -10,7 +10,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
-	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -19,13 +18,10 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
-var _ provider.ResourceType = azureblobConnectionResourceType{}
-var _ resource.Resource = azureblobConnectionResource{}
-var _ resource.ResourceWithImportState = azureblobConnectionResource{}
+var _ resource.Resource = &azureblobConnectionResource{}
+var _ resource.ResourceWithImportState = &azureblobConnectionResource{}
 
-type azureblobConnectionResourceType struct{}
-
-func (t azureblobConnectionResourceType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
+func (t *azureblobConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
 		MarkdownDescription: "Azure Blob Storage Connection",
 		Attributes: map[string]tfsdk.Attribute{
@@ -79,19 +75,15 @@ func (t azureblobConnectionResourceType) GetSchema(ctx context.Context) (tfsdk.S
 	}, nil
 }
 
-func (t azureblobConnectionResourceType) NewResource(ctx context.Context, in provider.Provider) (resource.Resource, diag.Diagnostics) {
-	provider, diags := convertProviderType(in)
-
-	return azureblobConnectionResource{
-		provider: provider,
-	}, diags
+func (r *azureblobConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = "polytomic_azureblob_connection"
 }
 
 type azureblobConnectionResource struct {
-	provider ptProvider
+	client *polytomic.Client
 }
 
-func (r azureblobConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *azureblobConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data connectionResourceData
 
 	diags := req.Config.Get(ctx, &data)
@@ -101,15 +93,15 @@ func (r azureblobConnectionResource) Create(ctx context.Context, req resource.Cr
 		return
 	}
 
-	created, err := r.provider.client.Connections().Create(ctx,
+	created, err := r.client.Connections().Create(ctx,
 		polytomic.CreateConnectionMutation{
-			Name:           data.Name.Value,
+			Name:           data.Name.ValueString(),
 			Type:           polytomic.AzureBlobConnectionType,
-			OrganizationId: data.Organization.Value,
+			OrganizationId: data.Organization.ValueString(),
 			Configuration: polytomic.AzureBlobConfiguration{
-				AccountName:   data.Configuration.Attrs["account_name"].(types.String).Value,
-				AccessKey:     data.Configuration.Attrs["access_key"].(types.String).Value,
-				ContainerName: data.Configuration.Attrs["container_name"].(types.String).Value,
+				AccountName:   data.Configuration.Attributes()["account_name"].(types.String).ValueString(),
+				AccessKey:     data.Configuration.Attributes()["access_key"].(types.String).ValueString(),
+				ContainerName: data.Configuration.Attributes()["container_name"].(types.String).ValueString(),
 			},
 		},
 	)
@@ -117,14 +109,14 @@ func (r azureblobConnectionResource) Create(ctx context.Context, req resource.Cr
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
 		return
 	}
-	data.Id = types.String{Value: created.ID}
+	data.Id = types.StringValue(created.ID)
 	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "azureblob", "id": created.ID})
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r azureblobConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *azureblobConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data connectionResourceData
 
 	diags := req.State.Get(ctx, &data)
@@ -134,7 +126,7 @@ func (r azureblobConnectionResource) Read(ctx context.Context, req resource.Read
 		return
 	}
 
-	connection, err := r.provider.client.Connections().Get(ctx, uuid.MustParse(data.Id.Value))
+	connection, err := r.client.Connections().Get(ctx, uuid.MustParse(data.Id.ValueString()))
 	if err != nil {
 		if err.Error() == ConnectionNotFoundErr {
 			resp.State.RemoveResource(ctx)
@@ -144,15 +136,15 @@ func (r azureblobConnectionResource) Read(ctx context.Context, req resource.Read
 		return
 	}
 
-	data.Id = types.String{Value: connection.ID}
-	data.Organization = types.String{Value: connection.OrganizationId}
-	data.Name = types.String{Value: connection.Name}
+	data.Id = types.StringValue(connection.ID)
+	data.Organization = types.StringValue(connection.OrganizationId)
+	data.Name = types.StringValue(connection.Name)
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r azureblobConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *azureblobConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var data connectionResourceData
 
 	diags := req.Plan.Get(ctx, &data)
@@ -162,15 +154,15 @@ func (r azureblobConnectionResource) Update(ctx context.Context, req resource.Up
 		return
 	}
 
-	updated, err := r.provider.client.Connections().Update(ctx,
-		uuid.MustParse(data.Id.Value),
+	updated, err := r.client.Connections().Update(ctx,
+		uuid.MustParse(data.Id.ValueString()),
 		polytomic.UpdateConnectionMutation{
-			Name:           data.Name.Value,
-			OrganizationId: data.Organization.Value,
+			Name:           data.Name.ValueString(),
+			OrganizationId: data.Organization.ValueString(),
 			Configuration: polytomic.AzureBlobConfiguration{
-				AccountName:   data.Configuration.Attrs["account_name"].(types.String).Value,
-				AccessKey:     data.Configuration.Attrs["access_key"].(types.String).Value,
-				ContainerName: data.Configuration.Attrs["container_name"].(types.String).Value,
+				AccountName:   data.Configuration.Attributes()["account_name"].(types.String).ValueString(),
+				AccessKey:     data.Configuration.Attributes()["access_key"].(types.String).ValueString(),
+				ContainerName: data.Configuration.Attributes()["container_name"].(types.String).ValueString(),
 			},
 		},
 	)
@@ -179,15 +171,15 @@ func (r azureblobConnectionResource) Update(ctx context.Context, req resource.Up
 		return
 	}
 
-	data.Id = types.String{Value: updated.ID}
-	data.Organization = types.String{Value: updated.OrganizationId}
-	data.Name = types.String{Value: updated.Name}
+	data.Id = types.StringValue(updated.ID)
+	data.Organization = types.StringValue(updated.OrganizationId)
+	data.Name = types.StringValue(updated.Name)
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r azureblobConnectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *azureblobConnectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var data connectionResourceData
 
 	diags := req.State.Get(ctx, &data)
@@ -197,13 +189,33 @@ func (r azureblobConnectionResource) Delete(ctx context.Context, req resource.De
 		return
 	}
 
-	err := r.provider.client.Connections().Delete(ctx, uuid.MustParse(data.Id.Value))
+	err := r.client.Connections().Delete(ctx, uuid.MustParse(data.Id.ValueString()))
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting connection: %s", err))
 		return
 	}
 }
 
-func (r azureblobConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *azureblobConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+}
+
+func (r *azureblobConnectionResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+	// Prevent panic if the provider has not been configured.
+	if req.ProviderData == nil {
+		return
+	}
+
+	client, ok := req.ProviderData.(*polytomic.Client)
+
+	if !ok {
+		resp.Diagnostics.AddError(
+			"Unexpected Resource Configure Type",
+			fmt.Sprintf("Expected *polytomic.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+		)
+
+		return
+	}
+
+	r.client = client
 }

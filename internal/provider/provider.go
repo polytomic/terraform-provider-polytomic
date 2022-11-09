@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/polytomic/polytomic-go"
@@ -22,18 +24,14 @@ const (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
-var _ provider.Provider = &ptProvider{}
+var (
+	_ provider.Provider             = &ptProvider{}
+	_ provider.ProviderWithMetadata = &ptProvider{}
+)
 
 // ptProvider satisfies the tfsdk.Provider interface and usually is included
 // with all Resource and DataSource implementations.
 type ptProvider struct {
-	client *polytomic.Client
-
-	// configured is set to true at the end of the Configure method.
-	// This can be used in Resource and DataSource implementations to verify
-	// that the provider was previously configured.
-	configured bool
-
 	// version is set to the provider version on release, "dev" when the
 	// provider is built and ran locally, and "test" when running acceptance
 	// testing.
@@ -41,16 +39,20 @@ type ptProvider struct {
 }
 
 // providerData can be used to store data from the Terraform configuration.
-type providerData struct {
+type ProviderData struct {
 	DeploymentKey types.String `tfsdk:"deployment_api_key"`
 	DeploymentUrl types.String `tfsdk:"deployment_url"`
 	APIKey        types.String `tfsdk:"api_key"`
 }
 
+func (p *ptProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
+	resp.TypeName = "polytomic"
+	resp.Version = p.version
+}
+
 func (p *ptProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
-	var data providerData
-	diags := req.Config.Get(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	var data ProviderData
+	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
 
 	if resp.Diagnostics.HasError() {
 		return
@@ -59,10 +61,10 @@ func (p *ptProvider) Configure(ctx context.Context, req provider.ConfigureReques
 	var deployURL, deployKey, apiKey string
 
 	// If the deployment URL is not set in the provider configuration, check the environment
-	if data.DeploymentKey.Null {
+	if data.DeploymentKey.IsNull() {
 		deployKey = os.Getenv(PolytomicDeploymentKey)
 	} else {
-		deployKey = data.DeploymentKey.Value
+		deployKey = data.DeploymentKey.ValueString()
 	}
 
 	if data.APIKey.Null {
@@ -80,10 +82,10 @@ func (p *ptProvider) Configure(ctx context.Context, req provider.ConfigureReques
 	}
 
 	// If the deployment URL is not set in the provider configuration, check the environment
-	if data.DeploymentUrl.Null {
+	if data.DeploymentUrl.IsNull() {
 		deployURL = os.Getenv(PolytomicDeploymentURL)
 	} else {
-		deployURL = data.DeploymentUrl.Value
+		deployURL = data.DeploymentUrl.ValueString()
 	}
 
 	if deployURL == "" {
@@ -93,27 +95,37 @@ func (p *ptProvider) Configure(ctx context.Context, req provider.ConfigureReques
 		)
 		return
 	}
+	var client *polytomic.Client
 	// Deployment key is the default and takes precedence
 	if apiKey != "" && deployKey == "" {
-		p.client = polytomic.NewClient(
+		client = polytomic.NewClient(
 			deployURL,
 			polytomic.APIKey(apiKey),
 		)
 	} else {
-		p.client = polytomic.NewClient(
+		client = polytomic.NewClient(
 			deployURL,
 			polytomic.DeploymentKey(deployKey),
 		)
 	}
-	p.configured = true
+
+	resp.DataSourceData = client
+	resp.ResourceData = client
+
 }
 
-func (p *ptProvider) GetResources(ctx context.Context) (map[string]provider.ResourceType, diag.Diagnostics) {
-	return resources(), nil
+func (p *ptProvider) Resources(ctx context.Context) []func() resource.Resource {
+	resourceList := []func() resource.Resource{
+		func() resource.Resource { return &organizationResource{} },
+		func() resource.Resource { return &userResource{} },
+	}
+	all := append(connection_resources, resourceList...)
+	return all
+
 }
 
-func (p *ptProvider) GetDataSources(ctx context.Context) (map[string]provider.DataSourceType, diag.Diagnostics) {
-	return map[string]provider.DataSourceType{}, nil
+func (p *ptProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
+	return []func() datasource.DataSource{}
 }
 
 func (p *ptProvider) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
@@ -146,33 +158,4 @@ func New(version string) func() provider.Provider {
 			version: version,
 		}
 	}
-}
-
-// convertProviderType is a helper function for NewResource and NewDataSource
-// implementations to associate the concrete provider type. Alternatively,
-// this helper can be skipped and the provider type can be directly type
-// asserted (e.g. provider: in.(*provider)), however using this can prevent
-// potential panics.
-func convertProviderType(in provider.Provider) (ptProvider, diag.Diagnostics) {
-	var diags diag.Diagnostics
-
-	p, ok := in.(*ptProvider)
-
-	if !ok {
-		diags.AddError(
-			"Unexpected Provider Instance Type",
-			fmt.Sprintf("While creating the data source or resource, an unexpected provider type (%T) was received. This is always a bug in the provider code and should be reported to the provider developers.", p),
-		)
-		return ptProvider{}, diags
-	}
-
-	if p == nil {
-		diags.AddError(
-			"Unexpected Provider Instance Type",
-			"While creating the data source or resource, an unexpected empty provider instance was received. This is always a bug in the provider code and should be reported to the provider developers.",
-		)
-		return ptProvider{}, diags
-	}
-
-	return *p, diags
 }

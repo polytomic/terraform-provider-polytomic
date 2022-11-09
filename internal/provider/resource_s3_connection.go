@@ -10,7 +10,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
-	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -19,13 +18,10 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
-var _ provider.ResourceType = s3ConnectionResourceType{}
-var _ resource.Resource = s3ConnectionResource{}
-var _ resource.ResourceWithImportState = s3ConnectionResource{}
+var _ resource.Resource = &s3ConnectionResource{}
+var _ resource.ResourceWithImportState = &s3ConnectionResource{}
 
-type s3ConnectionResourceType struct{}
-
-func (t s3ConnectionResourceType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
+func (t *s3ConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
 		MarkdownDescription: "S3 Connection",
 		Attributes: map[string]tfsdk.Attribute{
@@ -86,19 +82,15 @@ func (t s3ConnectionResourceType) GetSchema(ctx context.Context) (tfsdk.Schema, 
 	}, nil
 }
 
-func (t s3ConnectionResourceType) NewResource(ctx context.Context, in provider.Provider) (resource.Resource, diag.Diagnostics) {
-	provider, diags := convertProviderType(in)
-
-	return s3ConnectionResource{
-		provider: provider,
-	}, diags
+func (r *s3ConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = "polytomic_s3_connection"
 }
 
 type s3ConnectionResource struct {
-	provider ptProvider
+	client *polytomic.Client
 }
 
-func (r s3ConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *s3ConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data connectionResourceData
 
 	diags := req.Config.Get(ctx, &data)
@@ -108,16 +100,16 @@ func (r s3ConnectionResource) Create(ctx context.Context, req resource.CreateReq
 		return
 	}
 
-	created, err := r.provider.client.Connections().Create(ctx,
+	created, err := r.client.Connections().Create(ctx,
 		polytomic.CreateConnectionMutation{
-			Name:           data.Name.Value,
+			Name:           data.Name.ValueString(),
 			Type:           polytomic.S3ConnectionType,
-			OrganizationId: data.Organization.Value,
+			OrganizationId: data.Organization.ValueString(),
 			Configuration: polytomic.S3Configuration{
-				AccessKeyID:     data.Configuration.Attrs["access_key_id"].(types.String).Value,
-				AccessKeySecret: data.Configuration.Attrs["access_key_secret"].(types.String).Value,
-				Region:          data.Configuration.Attrs["region"].(types.String).Value,
-				Bucket:          data.Configuration.Attrs["bucket"].(types.String).Value,
+				AccessKeyID:     data.Configuration.Attributes()["access_key_id"].(types.String).ValueString(),
+				AccessKeySecret: data.Configuration.Attributes()["access_key_secret"].(types.String).ValueString(),
+				Region:          data.Configuration.Attributes()["region"].(types.String).ValueString(),
+				Bucket:          data.Configuration.Attributes()["bucket"].(types.String).ValueString(),
 			},
 		},
 	)
@@ -125,14 +117,14 @@ func (r s3ConnectionResource) Create(ctx context.Context, req resource.CreateReq
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
 		return
 	}
-	data.Id = types.String{Value: created.ID}
+	data.Id = types.StringValue(created.ID)
 	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "s3", "id": created.ID})
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r s3ConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *s3ConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data connectionResourceData
 
 	diags := req.State.Get(ctx, &data)
@@ -142,7 +134,7 @@ func (r s3ConnectionResource) Read(ctx context.Context, req resource.ReadRequest
 		return
 	}
 
-	connection, err := r.provider.client.Connections().Get(ctx, uuid.MustParse(data.Id.Value))
+	connection, err := r.client.Connections().Get(ctx, uuid.MustParse(data.Id.ValueString()))
 	if err != nil {
 		if err.Error() == ConnectionNotFoundErr {
 			resp.State.RemoveResource(ctx)
@@ -152,15 +144,15 @@ func (r s3ConnectionResource) Read(ctx context.Context, req resource.ReadRequest
 		return
 	}
 
-	data.Id = types.String{Value: connection.ID}
-	data.Organization = types.String{Value: connection.OrganizationId}
-	data.Name = types.String{Value: connection.Name}
+	data.Id = types.StringValue(connection.ID)
+	data.Organization = types.StringValue(connection.OrganizationId)
+	data.Name = types.StringValue(connection.Name)
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r s3ConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *s3ConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var data connectionResourceData
 
 	diags := req.Plan.Get(ctx, &data)
@@ -170,16 +162,16 @@ func (r s3ConnectionResource) Update(ctx context.Context, req resource.UpdateReq
 		return
 	}
 
-	updated, err := r.provider.client.Connections().Update(ctx,
-		uuid.MustParse(data.Id.Value),
+	updated, err := r.client.Connections().Update(ctx,
+		uuid.MustParse(data.Id.ValueString()),
 		polytomic.UpdateConnectionMutation{
-			Name:           data.Name.Value,
-			OrganizationId: data.Organization.Value,
+			Name:           data.Name.ValueString(),
+			OrganizationId: data.Organization.ValueString(),
 			Configuration: polytomic.S3Configuration{
-				AccessKeyID:     data.Configuration.Attrs["access_key_id"].(types.String).Value,
-				AccessKeySecret: data.Configuration.Attrs["access_key_secret"].(types.String).Value,
-				Region:          data.Configuration.Attrs["region"].(types.String).Value,
-				Bucket:          data.Configuration.Attrs["bucket"].(types.String).Value,
+				AccessKeyID:     data.Configuration.Attributes()["access_key_id"].(types.String).ValueString(),
+				AccessKeySecret: data.Configuration.Attributes()["access_key_secret"].(types.String).ValueString(),
+				Region:          data.Configuration.Attributes()["region"].(types.String).ValueString(),
+				Bucket:          data.Configuration.Attributes()["bucket"].(types.String).ValueString(),
 			},
 		},
 	)
@@ -188,15 +180,15 @@ func (r s3ConnectionResource) Update(ctx context.Context, req resource.UpdateReq
 		return
 	}
 
-	data.Id = types.String{Value: updated.ID}
-	data.Organization = types.String{Value: updated.OrganizationId}
-	data.Name = types.String{Value: updated.Name}
+	data.Id = types.StringValue(updated.ID)
+	data.Organization = types.StringValue(updated.OrganizationId)
+	data.Name = types.StringValue(updated.Name)
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r s3ConnectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *s3ConnectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var data connectionResourceData
 
 	diags := req.State.Get(ctx, &data)
@@ -206,13 +198,33 @@ func (r s3ConnectionResource) Delete(ctx context.Context, req resource.DeleteReq
 		return
 	}
 
-	err := r.provider.client.Connections().Delete(ctx, uuid.MustParse(data.Id.Value))
+	err := r.client.Connections().Delete(ctx, uuid.MustParse(data.Id.ValueString()))
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting connection: %s", err))
 		return
 	}
 }
 
-func (r s3ConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *s3ConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+}
+
+func (r *s3ConnectionResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+	// Prevent panic if the provider has not been configured.
+	if req.ProviderData == nil {
+		return
+	}
+
+	client, ok := req.ProviderData.(*polytomic.Client)
+
+	if !ok {
+		resp.Diagnostics.AddError(
+			"Unexpected Resource Configure Type",
+			fmt.Sprintf("Expected *polytomic.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+		)
+
+		return
+	}
+
+	r.client = client
 }

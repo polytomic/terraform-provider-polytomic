@@ -10,7 +10,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
-	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -19,13 +18,10 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
-var _ provider.ResourceType = {{ .Connection }}ConnectionResourceType{}
-var _ resource.Resource = {{ .Connection }}ConnectionResource{}
-var _ resource.ResourceWithImportState = {{ .Connection }}ConnectionResource{}
+var _ resource.Resource = &{{ .Connection }}ConnectionResource{}
+var _ resource.ResourceWithImportState = &{{ .Connection }}ConnectionResource{}
 
-type {{ .Connection }}ConnectionResourceType struct{}
-
-func (t {{ .Connection }}ConnectionResourceType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
+func (t *{{ .Connection }}ConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
 		MarkdownDescription: "{{ .Name }} Connection",
 		Attributes: map[string]tfsdk.Attribute{
@@ -66,19 +62,16 @@ func (t {{ .Connection }}ConnectionResourceType) GetSchema(ctx context.Context) 
 	}, nil
 }
 
-func (t {{ .Connection }}ConnectionResourceType) NewResource(ctx context.Context, in provider.Provider) (resource.Resource, diag.Diagnostics) {
-	provider, diags := convertProviderType(in)
-
-	return {{ .Connection }}ConnectionResource{
-		provider: provider,
-	}, diags
+func (r *{{ .Connection }}ConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = "polytomic_{{ .Connection }}_connection"
 }
+
 
 type {{ .Connection }}ConnectionResource struct {
-	provider ptProvider
+	client  *polytomic.Client
 }
 
-func (r {{ .Connection }}ConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *{{ .Connection }}ConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data connectionResourceData
 
 	diags := req.Config.Get(ctx, &data)
@@ -88,16 +81,17 @@ func (r {{ .Connection }}ConnectionResource) Create(ctx context.Context, req res
 		return
 	}
 
-	created, err := r.provider.client.Connections().Create(ctx,
+	created, err := r.client.Connections().Create(ctx,
 		polytomic.CreateConnectionMutation{
-			Name:           data.Name.Value,
+			Name:           data.Name.ValueString(),
 			Type:           {{ .Type }},
-			OrganizationId: data.Organization.Value,
+			OrganizationId: data.Organization.ValueString(),
 			Configuration: {{ .Config }}{
 				{{ range .Attributes }}{{ .Name }}: 
-				{{ if eq .Type "int" }}int(data.Configuration.Attrs["{{ .AttrName }}"].({{ .TfType }}).Value),
+				{{ if eq .Type "int" }}int(data.Configuration.Attributes()["{{ .AttrName }}"].({{ .TfType }}).ValueInt64()),
+				{{ else if eq .Type "bool" }}data.Configuration.Attributes()["{{ .AttrName }}"].({{ .TfType }}).ValueBool(),
 				{{ else }}
-				data.Configuration.Attrs["{{ .AttrName }}"].({{ .TfType }}).Value,
+				data.Configuration.Attributes()["{{ .AttrName }}"].({{ .TfType }}).ValueString(),
 				{{ end }}
 				{{- end }}
 			},
@@ -107,14 +101,14 @@ func (r {{ .Connection }}ConnectionResource) Create(ctx context.Context, req res
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
 		return
 	}
-	data.Id = types.String{Value: created.ID}
+	data.Id = types.StringValue(created.ID)
 	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "{{ .Connection }}", "id": created.ID})
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r {{ .Connection }}ConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *{{ .Connection }}ConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data connectionResourceData
 
 	diags := req.State.Get(ctx, &data)
@@ -124,7 +118,7 @@ func (r {{ .Connection }}ConnectionResource) Read(ctx context.Context, req resou
 		return
 	}
 
-	connection, err := r.provider.client.Connections().Get(ctx, uuid.MustParse(data.Id.Value))
+	connection, err := r.client.Connections().Get(ctx, uuid.MustParse(data.Id.ValueString()))
 	if err != nil {
 		if err.Error() == ConnectionNotFoundErr {
 			resp.State.RemoveResource(ctx)
@@ -134,15 +128,15 @@ func (r {{ .Connection }}ConnectionResource) Read(ctx context.Context, req resou
 		return
 	}
 
-	data.Id = types.String{Value: connection.ID}
-	data.Organization = types.String{Value: connection.OrganizationId}
-	data.Name = types.String{Value: connection.Name}
+	data.Id = types.StringValue(connection.ID)
+	data.Organization = types.StringValue(connection.OrganizationId)
+	data.Name = types.StringValue(connection.Name)
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r {{ .Connection }}ConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *{{ .Connection }}ConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var data connectionResourceData
 
 	diags := req.Plan.Get(ctx, &data)
@@ -152,16 +146,17 @@ func (r {{ .Connection }}ConnectionResource) Update(ctx context.Context, req res
 		return
 	}
 
-	updated, err := r.provider.client.Connections().Update(ctx,
-		uuid.MustParse(data.Id.Value),
+	updated, err := r.client.Connections().Update(ctx,
+		uuid.MustParse(data.Id.ValueString()),
 		polytomic.UpdateConnectionMutation{
-			Name:           data.Name.Value,
-			OrganizationId: data.Organization.Value,
+			Name:           data.Name.ValueString(),
+			OrganizationId: data.Organization.ValueString(),
 			Configuration: {{ .Config }}{
 				{{ range .Attributes }}{{ .Name }}: 
-				{{ if eq .Type "int" }}int(data.Configuration.Attrs["{{ .AttrName }}"].({{ .TfType }}).Value),
+				{{ if eq .Type "int" }}int(data.Configuration.Attributes()["{{ .AttrName }}"].({{ .TfType }}).ValueInt64()),
+				{{ else if eq .Type "bool" }}data.Configuration.Attributes()["{{ .AttrName }}"].({{ .TfType }}).ValueBool(),
 				{{ else }}
-				data.Configuration.Attrs["{{ .AttrName }}"].({{ .TfType }}).Value,
+				data.Configuration.Attributes()["{{ .AttrName }}"].({{ .TfType }}).ValueString(),
 				{{ end }}
 				{{- end }}
 			},
@@ -172,15 +167,16 @@ func (r {{ .Connection }}ConnectionResource) Update(ctx context.Context, req res
 		return
 	}
 
-	data.Id = types.String{Value: updated.ID}
-	data.Organization = types.String{Value: updated.OrganizationId}
-	data.Name = types.String{Value: updated.Name}
+	data.Id = types.StringValue(updated.ID)
+	data.Organization = types.StringValue(updated.OrganizationId)
+	data.Name = types.StringValue(updated.Name)
+
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r {{ .Connection }}ConnectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *{{ .Connection }}ConnectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var data connectionResourceData
 
 	diags := req.State.Get(ctx, &data)
@@ -190,13 +186,34 @@ func (r {{ .Connection }}ConnectionResource) Delete(ctx context.Context, req res
 		return
 	}
 
-	err := r.provider.client.Connections().Delete(ctx, uuid.MustParse(data.Id.Value))
+	err := r.client.Connections().Delete(ctx, uuid.MustParse(data.Id.ValueString()))
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting connection: %s", err))
 		return
 	}
 }
 
-func (r {{ .Connection }}ConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *{{ .Connection }}ConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+}
+
+
+func (r *{{ .Connection }}ConnectionResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+	// Prevent panic if the provider has not been configured.
+	if req.ProviderData == nil {
+		return
+	}
+
+	client, ok := req.ProviderData.(*polytomic.Client)
+
+	if !ok {
+		resp.Diagnostics.AddError(
+			"Unexpected Resource Configure Type",
+			fmt.Sprintf("Expected *polytomic.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+		)
+
+		return
+	}
+
+	r.client = client
 }

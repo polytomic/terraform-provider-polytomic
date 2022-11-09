@@ -97,7 +97,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	exports := []export{}
+	exports := []string{}
 	for _, r := range data.Connections {
 		for i, a := range r.Attributes {
 			t, ok := typeMap[a.Type]
@@ -119,10 +119,7 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		exports = append(exports, export{
-			Name: terraformResourceName(r.Connection),
-			Type: fmt.Sprintf("%sConnectionResourceType{}", r.Connection),
-		})
+		exports = append(exports, fmt.Sprintf("%sConnectionResource", r.Connection))
 	}
 	err = writeResourceExports(exports)
 	if err != nil {
@@ -201,7 +198,7 @@ func writeConnectionResource(r connection) error {
 	return err
 }
 
-func writeResourceExports(exports []export) error {
+func writeResourceExports(exports []string) error {
 	tmpl, err := template.New("resources.go.tmpl").ParseFiles(exportTemplate)
 	if err != nil {
 		log.Fatal(err)
@@ -210,7 +207,7 @@ func writeResourceExports(exports []export) error {
 	f, err := os.Create(filepath.Join(outputPath, "connection_resources.go"))
 	defer f.Close()
 	err = tmpl.Execute(&buf, struct {
-		Resources []export
+		Resources []string
 	}{
 		Resources: exports,
 	})

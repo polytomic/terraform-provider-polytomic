@@ -10,7 +10,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
-	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -19,13 +18,10 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
-var _ provider.ResourceType = bigqueryConnectionResourceType{}
-var _ resource.Resource = bigqueryConnectionResource{}
-var _ resource.ResourceWithImportState = bigqueryConnectionResource{}
+var _ resource.Resource = &bigqueryConnectionResource{}
+var _ resource.ResourceWithImportState = &bigqueryConnectionResource{}
 
-type bigqueryConnectionResourceType struct{}
-
-func (t bigqueryConnectionResourceType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
+func (t *bigqueryConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
 		MarkdownDescription: "Big Query Connection",
 		Attributes: map[string]tfsdk.Attribute{
@@ -72,19 +68,15 @@ func (t bigqueryConnectionResourceType) GetSchema(ctx context.Context) (tfsdk.Sc
 	}, nil
 }
 
-func (t bigqueryConnectionResourceType) NewResource(ctx context.Context, in provider.Provider) (resource.Resource, diag.Diagnostics) {
-	provider, diags := convertProviderType(in)
-
-	return bigqueryConnectionResource{
-		provider: provider,
-	}, diags
+func (r *bigqueryConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = "polytomic_bigquery_connection"
 }
 
 type bigqueryConnectionResource struct {
-	provider ptProvider
+	client *polytomic.Client
 }
 
-func (r bigqueryConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *bigqueryConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data connectionResourceData
 
 	diags := req.Config.Get(ctx, &data)
@@ -94,14 +86,14 @@ func (r bigqueryConnectionResource) Create(ctx context.Context, req resource.Cre
 		return
 	}
 
-	created, err := r.provider.client.Connections().Create(ctx,
+	created, err := r.client.Connections().Create(ctx,
 		polytomic.CreateConnectionMutation{
-			Name:           data.Name.Value,
+			Name:           data.Name.ValueString(),
 			Type:           polytomic.BigQueryConnectionType,
-			OrganizationId: data.Organization.Value,
+			OrganizationId: data.Organization.ValueString(),
 			Configuration: polytomic.BigQueryConfiguration{
-				ServiceAccountCredentials: data.Configuration.Attrs["service_account_credentials"].(types.String).Value,
-				Location:                  data.Configuration.Attrs["location"].(types.String).Value,
+				ServiceAccountCredentials: data.Configuration.Attributes()["service_account_credentials"].(types.String).ValueString(),
+				Location:                  data.Configuration.Attributes()["location"].(types.String).ValueString(),
 			},
 		},
 	)
@@ -109,14 +101,14 @@ func (r bigqueryConnectionResource) Create(ctx context.Context, req resource.Cre
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
 		return
 	}
-	data.Id = types.String{Value: created.ID}
+	data.Id = types.StringValue(created.ID)
 	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "bigquery", "id": created.ID})
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r bigqueryConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *bigqueryConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data connectionResourceData
 
 	diags := req.State.Get(ctx, &data)
@@ -126,7 +118,7 @@ func (r bigqueryConnectionResource) Read(ctx context.Context, req resource.ReadR
 		return
 	}
 
-	connection, err := r.provider.client.Connections().Get(ctx, uuid.MustParse(data.Id.Value))
+	connection, err := r.client.Connections().Get(ctx, uuid.MustParse(data.Id.ValueString()))
 	if err != nil {
 		if err.Error() == ConnectionNotFoundErr {
 			resp.State.RemoveResource(ctx)
@@ -136,15 +128,15 @@ func (r bigqueryConnectionResource) Read(ctx context.Context, req resource.ReadR
 		return
 	}
 
-	data.Id = types.String{Value: connection.ID}
-	data.Organization = types.String{Value: connection.OrganizationId}
-	data.Name = types.String{Value: connection.Name}
+	data.Id = types.StringValue(connection.ID)
+	data.Organization = types.StringValue(connection.OrganizationId)
+	data.Name = types.StringValue(connection.Name)
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r bigqueryConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *bigqueryConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var data connectionResourceData
 
 	diags := req.Plan.Get(ctx, &data)
@@ -154,14 +146,14 @@ func (r bigqueryConnectionResource) Update(ctx context.Context, req resource.Upd
 		return
 	}
 
-	updated, err := r.provider.client.Connections().Update(ctx,
-		uuid.MustParse(data.Id.Value),
+	updated, err := r.client.Connections().Update(ctx,
+		uuid.MustParse(data.Id.ValueString()),
 		polytomic.UpdateConnectionMutation{
-			Name:           data.Name.Value,
-			OrganizationId: data.Organization.Value,
+			Name:           data.Name.ValueString(),
+			OrganizationId: data.Organization.ValueString(),
 			Configuration: polytomic.BigQueryConfiguration{
-				ServiceAccountCredentials: data.Configuration.Attrs["service_account_credentials"].(types.String).Value,
-				Location:                  data.Configuration.Attrs["location"].(types.String).Value,
+				ServiceAccountCredentials: data.Configuration.Attributes()["service_account_credentials"].(types.String).ValueString(),
+				Location:                  data.Configuration.Attributes()["location"].(types.String).ValueString(),
 			},
 		},
 	)
@@ -170,15 +162,15 @@ func (r bigqueryConnectionResource) Update(ctx context.Context, req resource.Upd
 		return
 	}
 
-	data.Id = types.String{Value: updated.ID}
-	data.Organization = types.String{Value: updated.OrganizationId}
-	data.Name = types.String{Value: updated.Name}
+	data.Id = types.StringValue(updated.ID)
+	data.Organization = types.StringValue(updated.OrganizationId)
+	data.Name = types.StringValue(updated.Name)
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r bigqueryConnectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *bigqueryConnectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var data connectionResourceData
 
 	diags := req.State.Get(ctx, &data)
@@ -188,13 +180,33 @@ func (r bigqueryConnectionResource) Delete(ctx context.Context, req resource.Del
 		return
 	}
 
-	err := r.provider.client.Connections().Delete(ctx, uuid.MustParse(data.Id.Value))
+	err := r.client.Connections().Delete(ctx, uuid.MustParse(data.Id.ValueString()))
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting connection: %s", err))
 		return
 	}
 }
 
-func (r bigqueryConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *bigqueryConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+}
+
+func (r *bigqueryConnectionResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+	// Prevent panic if the provider has not been configured.
+	if req.ProviderData == nil {
+		return
+	}
+
+	client, ok := req.ProviderData.(*polytomic.Client)
+
+	if !ok {
+		resp.Diagnostics.AddError(
+			"Unexpected Resource Configure Type",
+			fmt.Sprintf("Expected *polytomic.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+		)
+
+		return
+	}
+
+	r.client = client
 }
