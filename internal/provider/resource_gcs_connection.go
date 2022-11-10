@@ -10,7 +10,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
-	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -19,13 +18,10 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
-var _ provider.ResourceType = gcsConnectionResourceType{}
-var _ resource.Resource = gcsConnectionResource{}
-var _ resource.ResourceWithImportState = gcsConnectionResource{}
+var _ resource.Resource = &gcsConnectionResource{}
+var _ resource.ResourceWithImportState = &gcsConnectionResource{}
 
-type gcsConnectionResourceType struct{}
-
-func (t gcsConnectionResourceType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
+func (t *gcsConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
 		MarkdownDescription: "Google Cloud Storage Connection",
 		Attributes: map[string]tfsdk.Attribute{
@@ -79,19 +75,15 @@ func (t gcsConnectionResourceType) GetSchema(ctx context.Context) (tfsdk.Schema,
 	}, nil
 }
 
-func (t gcsConnectionResourceType) NewResource(ctx context.Context, in provider.Provider) (resource.Resource, diag.Diagnostics) {
-	provider, diags := convertProviderType(in)
-
-	return gcsConnectionResource{
-		provider: provider,
-	}, diags
+func (r *gcsConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = "polytomic_gcs_connection"
 }
 
 type gcsConnectionResource struct {
-	provider ptProvider
+	client *polytomic.Client
 }
 
-func (r gcsConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *gcsConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data connectionResourceData
 
 	diags := req.Config.Get(ctx, &data)
@@ -101,15 +93,15 @@ func (r gcsConnectionResource) Create(ctx context.Context, req resource.CreateRe
 		return
 	}
 
-	created, err := r.provider.client.Connections().Create(ctx,
+	created, err := r.client.Connections().Create(ctx,
 		polytomic.CreateConnectionMutation{
-			Name:           data.Name.Value,
+			Name:           data.Name.ValueString(),
 			Type:           polytomic.GoogleCloudStorageConnectionType,
-			OrganizationId: data.Organization.Value,
+			OrganizationId: data.Organization.ValueString(),
 			Configuration: polytomic.GCSConfiguration{
-				ProjectId:                 data.Configuration.Attrs["project_id"].(types.String).Value,
-				ServiceAccountCredentials: data.Configuration.Attrs["service_account_credentials"].(types.String).Value,
-				Bucket:                    data.Configuration.Attrs["bucket"].(types.String).Value,
+				ProjectId:                 data.Configuration.Attributes()["project_id"].(types.String).ValueString(),
+				ServiceAccountCredentials: data.Configuration.Attributes()["service_account_credentials"].(types.String).ValueString(),
+				Bucket:                    data.Configuration.Attributes()["bucket"].(types.String).ValueString(),
 			},
 		},
 	)
@@ -117,14 +109,14 @@ func (r gcsConnectionResource) Create(ctx context.Context, req resource.CreateRe
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
 		return
 	}
-	data.Id = types.String{Value: created.ID}
+	data.Id = types.StringValue(created.ID)
 	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "gcs", "id": created.ID})
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r gcsConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *gcsConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data connectionResourceData
 
 	diags := req.State.Get(ctx, &data)
@@ -134,7 +126,7 @@ func (r gcsConnectionResource) Read(ctx context.Context, req resource.ReadReques
 		return
 	}
 
-	connection, err := r.provider.client.Connections().Get(ctx, uuid.MustParse(data.Id.Value))
+	connection, err := r.client.Connections().Get(ctx, uuid.MustParse(data.Id.ValueString()))
 	if err != nil {
 		if err.Error() == ConnectionNotFoundErr {
 			resp.State.RemoveResource(ctx)
@@ -144,15 +136,15 @@ func (r gcsConnectionResource) Read(ctx context.Context, req resource.ReadReques
 		return
 	}
 
-	data.Id = types.String{Value: connection.ID}
-	data.Organization = types.String{Value: connection.OrganizationId}
-	data.Name = types.String{Value: connection.Name}
+	data.Id = types.StringValue(connection.ID)
+	data.Organization = types.StringValue(connection.OrganizationId)
+	data.Name = types.StringValue(connection.Name)
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r gcsConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *gcsConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var data connectionResourceData
 
 	diags := req.Plan.Get(ctx, &data)
@@ -162,15 +154,15 @@ func (r gcsConnectionResource) Update(ctx context.Context, req resource.UpdateRe
 		return
 	}
 
-	updated, err := r.provider.client.Connections().Update(ctx,
-		uuid.MustParse(data.Id.Value),
+	updated, err := r.client.Connections().Update(ctx,
+		uuid.MustParse(data.Id.ValueString()),
 		polytomic.UpdateConnectionMutation{
-			Name:           data.Name.Value,
-			OrganizationId: data.Organization.Value,
+			Name:           data.Name.ValueString(),
+			OrganizationId: data.Organization.ValueString(),
 			Configuration: polytomic.GCSConfiguration{
-				ProjectId:                 data.Configuration.Attrs["project_id"].(types.String).Value,
-				ServiceAccountCredentials: data.Configuration.Attrs["service_account_credentials"].(types.String).Value,
-				Bucket:                    data.Configuration.Attrs["bucket"].(types.String).Value,
+				ProjectId:                 data.Configuration.Attributes()["project_id"].(types.String).ValueString(),
+				ServiceAccountCredentials: data.Configuration.Attributes()["service_account_credentials"].(types.String).ValueString(),
+				Bucket:                    data.Configuration.Attributes()["bucket"].(types.String).ValueString(),
 			},
 		},
 	)
@@ -179,15 +171,15 @@ func (r gcsConnectionResource) Update(ctx context.Context, req resource.UpdateRe
 		return
 	}
 
-	data.Id = types.String{Value: updated.ID}
-	data.Organization = types.String{Value: updated.OrganizationId}
-	data.Name = types.String{Value: updated.Name}
+	data.Id = types.StringValue(updated.ID)
+	data.Organization = types.StringValue(updated.OrganizationId)
+	data.Name = types.StringValue(updated.Name)
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r gcsConnectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *gcsConnectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var data connectionResourceData
 
 	diags := req.State.Get(ctx, &data)
@@ -197,13 +189,33 @@ func (r gcsConnectionResource) Delete(ctx context.Context, req resource.DeleteRe
 		return
 	}
 
-	err := r.provider.client.Connections().Delete(ctx, uuid.MustParse(data.Id.Value))
+	err := r.client.Connections().Delete(ctx, uuid.MustParse(data.Id.ValueString()))
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting connection: %s", err))
 		return
 	}
 }
 
-func (r gcsConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *gcsConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+}
+
+func (r *gcsConnectionResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+	// Prevent panic if the provider has not been configured.
+	if req.ProviderData == nil {
+		return
+	}
+
+	client, ok := req.ProviderData.(*polytomic.Client)
+
+	if !ok {
+		resp.Diagnostics.AddError(
+			"Unexpected Resource Configure Type",
+			fmt.Sprintf("Expected *polytomic.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+		)
+
+		return
+	}
+
+	r.client = client
 }

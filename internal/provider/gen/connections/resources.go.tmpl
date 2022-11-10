@@ -3,12 +3,12 @@
 
 package provider
 
-import "github.com/hashicorp/terraform-plugin-framework/provider"
+import 	"github.com/hashicorp/terraform-plugin-framework/resource"
 
 var (
-	connection_resources = map[string]provider.ResourceType{
-        {{- range .Resources }}
-        "{{ .Name }}": {{ .Type}},
-        {{- end }}
+	connection_resources =  []func() resource.Resource{
+                {{- range .Resources }}
+		func() resource.Resource { return &{{ . }}{} },
+                {{- end }}
 	}
 )

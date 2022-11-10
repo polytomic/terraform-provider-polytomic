@@ -10,7 +10,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
-	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -19,13 +18,10 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
-var _ provider.ResourceType = postgresConnectionResourceType{}
-var _ resource.Resource = postgresConnectionResource{}
-var _ resource.ResourceWithImportState = postgresConnectionResource{}
+var _ resource.Resource = &postgresConnectionResource{}
+var _ resource.ResourceWithImportState = &postgresConnectionResource{}
 
-type postgresConnectionResourceType struct{}
-
-func (t postgresConnectionResourceType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
+func (t *postgresConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
 		MarkdownDescription: "PostgresSQL Connection",
 		Attributes: map[string]tfsdk.Attribute{
@@ -100,19 +96,15 @@ func (t postgresConnectionResourceType) GetSchema(ctx context.Context) (tfsdk.Sc
 	}, nil
 }
 
-func (t postgresConnectionResourceType) NewResource(ctx context.Context, in provider.Provider) (resource.Resource, diag.Diagnostics) {
-	provider, diags := convertProviderType(in)
-
-	return postgresConnectionResource{
-		provider: provider,
-	}, diags
+func (r *postgresConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = "polytomic_postgres_connection"
 }
 
 type postgresConnectionResource struct {
-	provider ptProvider
+	client *polytomic.Client
 }
 
-func (r postgresConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *postgresConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data connectionResourceData
 
 	diags := req.Config.Get(ctx, &data)
@@ -122,18 +114,18 @@ func (r postgresConnectionResource) Create(ctx context.Context, req resource.Cre
 		return
 	}
 
-	created, err := r.provider.client.Connections().Create(ctx,
+	created, err := r.client.Connections().Create(ctx,
 		polytomic.CreateConnectionMutation{
-			Name:           data.Name.Value,
+			Name:           data.Name.ValueString(),
 			Type:           polytomic.PostgresqlConnectionType,
-			OrganizationId: data.Organization.Value,
+			OrganizationId: data.Organization.ValueString(),
 			Configuration: polytomic.PostgresqlConfiguration{
-				Hostname: data.Configuration.Attrs["hostname"].(types.String).Value,
-				Username: data.Configuration.Attrs["username"].(types.String).Value,
-				Password: data.Configuration.Attrs["password"].(types.String).Value,
-				Database: data.Configuration.Attrs["database"].(types.String).Value,
-				Port:     int(data.Configuration.Attrs["port"].(types.Int64).Value),
-				SSL:      data.Configuration.Attrs["ssl"].(types.Bool).Value,
+				Hostname: data.Configuration.Attributes()["hostname"].(types.String).ValueString(),
+				Username: data.Configuration.Attributes()["username"].(types.String).ValueString(),
+				Password: data.Configuration.Attributes()["password"].(types.String).ValueString(),
+				Database: data.Configuration.Attributes()["database"].(types.String).ValueString(),
+				Port:     int(data.Configuration.Attributes()["port"].(types.Int64).ValueInt64()),
+				SSL:      data.Configuration.Attributes()["ssl"].(types.Bool).ValueBool(),
 			},
 		},
 	)
@@ -141,14 +133,14 @@ func (r postgresConnectionResource) Create(ctx context.Context, req resource.Cre
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
 		return
 	}
-	data.Id = types.String{Value: created.ID}
+	data.Id = types.StringValue(created.ID)
 	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "postgres", "id": created.ID})
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r postgresConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *postgresConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data connectionResourceData
 
 	diags := req.State.Get(ctx, &data)
@@ -158,7 +150,7 @@ func (r postgresConnectionResource) Read(ctx context.Context, req resource.ReadR
 		return
 	}
 
-	connection, err := r.provider.client.Connections().Get(ctx, uuid.MustParse(data.Id.Value))
+	connection, err := r.client.Connections().Get(ctx, uuid.MustParse(data.Id.ValueString()))
 	if err != nil {
 		if err.Error() == ConnectionNotFoundErr {
 			resp.State.RemoveResource(ctx)
@@ -168,15 +160,15 @@ func (r postgresConnectionResource) Read(ctx context.Context, req resource.ReadR
 		return
 	}
 
-	data.Id = types.String{Value: connection.ID}
-	data.Organization = types.String{Value: connection.OrganizationId}
-	data.Name = types.String{Value: connection.Name}
+	data.Id = types.StringValue(connection.ID)
+	data.Organization = types.StringValue(connection.OrganizationId)
+	data.Name = types.StringValue(connection.Name)
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r postgresConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *postgresConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var data connectionResourceData
 
 	diags := req.Plan.Get(ctx, &data)
@@ -186,18 +178,18 @@ func (r postgresConnectionResource) Update(ctx context.Context, req resource.Upd
 		return
 	}
 
-	updated, err := r.provider.client.Connections().Update(ctx,
-		uuid.MustParse(data.Id.Value),
+	updated, err := r.client.Connections().Update(ctx,
+		uuid.MustParse(data.Id.ValueString()),
 		polytomic.UpdateConnectionMutation{
-			Name:           data.Name.Value,
-			OrganizationId: data.Organization.Value,
+			Name:           data.Name.ValueString(),
+			OrganizationId: data.Organization.ValueString(),
 			Configuration: polytomic.PostgresqlConfiguration{
-				Hostname: data.Configuration.Attrs["hostname"].(types.String).Value,
-				Username: data.Configuration.Attrs["username"].(types.String).Value,
-				Password: data.Configuration.Attrs["password"].(types.String).Value,
-				Database: data.Configuration.Attrs["database"].(types.String).Value,
-				Port:     int(data.Configuration.Attrs["port"].(types.Int64).Value),
-				SSL:      data.Configuration.Attrs["ssl"].(types.Bool).Value,
+				Hostname: data.Configuration.Attributes()["hostname"].(types.String).ValueString(),
+				Username: data.Configuration.Attributes()["username"].(types.String).ValueString(),
+				Password: data.Configuration.Attributes()["password"].(types.String).ValueString(),
+				Database: data.Configuration.Attributes()["database"].(types.String).ValueString(),
+				Port:     int(data.Configuration.Attributes()["port"].(types.Int64).ValueInt64()),
+				SSL:      data.Configuration.Attributes()["ssl"].(types.Bool).ValueBool(),
 			},
 		},
 	)
@@ -206,15 +198,15 @@ func (r postgresConnectionResource) Update(ctx context.Context, req resource.Upd
 		return
 	}
 
-	data.Id = types.String{Value: updated.ID}
-	data.Organization = types.String{Value: updated.OrganizationId}
-	data.Name = types.String{Value: updated.Name}
+	data.Id = types.StringValue(updated.ID)
+	data.Organization = types.StringValue(updated.OrganizationId)
+	data.Name = types.StringValue(updated.Name)
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r postgresConnectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *postgresConnectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var data connectionResourceData
 
 	diags := req.State.Get(ctx, &data)
@@ -224,13 +216,33 @@ func (r postgresConnectionResource) Delete(ctx context.Context, req resource.Del
 		return
 	}
 
-	err := r.provider.client.Connections().Delete(ctx, uuid.MustParse(data.Id.Value))
+	err := r.client.Connections().Delete(ctx, uuid.MustParse(data.Id.ValueString()))
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting connection: %s", err))
 		return
 	}
 }
 
-func (r postgresConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *postgresConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+}
+
+func (r *postgresConnectionResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+	// Prevent panic if the provider has not been configured.
+	if req.ProviderData == nil {
+		return
+	}
+
+	client, ok := req.ProviderData.(*polytomic.Client)
+
+	if !ok {
+		resp.Diagnostics.AddError(
+			"Unexpected Resource Configure Type",
+			fmt.Sprintf("Expected *polytomic.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+		)
+
+		return
+	}
+
+	r.client = client
 }

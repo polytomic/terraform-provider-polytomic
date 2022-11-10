@@ -7,7 +7,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
-	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -18,13 +17,10 @@ import (
 const clientError = "Client Error"
 
 // Ensure provider defined types fully satisfy framework interfaces
-var _ provider.ResourceType = organizationResourceType{}
-var _ resource.Resource = organizationResource{}
-var _ resource.ResourceWithImportState = organizationResource{}
+var _ resource.Resource = &organizationResource{}
+var _ resource.ResourceWithImportState = &organizationResource{}
 
-type organizationResourceType struct{}
-
-func (t organizationResourceType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
+func (r *organizationResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
 		MarkdownDescription: "A Polytomic Organization provides a container for users, connections, and sync definitions.",
 
@@ -55,13 +51,28 @@ func (t organizationResourceType) GetSchema(ctx context.Context) (tfsdk.Schema, 
 		},
 	}, nil
 }
+func (r *organizationResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+	// Prevent panic if the provider has not been configured.
+	if req.ProviderData == nil {
+		return
+	}
 
-func (t organizationResourceType) NewResource(ctx context.Context, in provider.Provider) (resource.Resource, diag.Diagnostics) {
-	provider, diags := convertProviderType(in)
+	client, ok := req.ProviderData.(*polytomic.Client)
 
-	return organizationResource{
-		provider: provider,
-	}, diags
+	if !ok {
+		resp.Diagnostics.AddError(
+			"Unexpected Resource Configure Type",
+			fmt.Sprintf("Expected *polytomic.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+		)
+
+		return
+	}
+
+	r.client = client
+}
+
+func (r *organizationResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = "polytomic_organization"
 }
 
 type organizationResourceData struct {
@@ -72,10 +83,10 @@ type organizationResourceData struct {
 }
 
 type organizationResource struct {
-	provider ptProvider
+	client *polytomic.Client
 }
 
-func (r organizationResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *organizationResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data organizationResourceData
 
 	diags := req.Config.Get(ctx, &data)
@@ -85,25 +96,28 @@ func (r organizationResource) Create(ctx context.Context, req resource.CreateReq
 		return
 	}
 
-	created, err := r.provider.client.Organizations().Create(ctx,
+	created, err := r.client.Organizations().Create(ctx,
 		polytomic.OrganizationMutation{
-			Name:      data.Name.Value,
-			SSODomain: data.SSODomain.Value,
-			SSOOrgId:  data.SSOOrgId.Value,
+			Name:      data.Name.ValueString(),
+			SSODomain: data.SSODomain.ValueString(),
+			SSOOrgId:  data.SSOOrgId.ValueString(),
 		},
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating organization: %s", err))
 		return
 	}
-	data.Id = types.String{Value: created.ID.String()}
+	data.Id = types.StringValue(created.ID.String())
 	tflog.Trace(ctx, "created a organization")
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 }
 
-func (r organizationResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *organizationResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data organizationResourceData
 
 	diags := req.State.Get(ctx, &data)
@@ -112,25 +126,25 @@ func (r organizationResource) Read(ctx context.Context, req resource.ReadRequest
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	wsId, err := uuid.Parse(data.Id.Value)
+	wsId, err := uuid.Parse(data.Id.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("Value Error", fmt.Sprintf("Invalid organization ID %s; error when parsing: %s", data.Id.Value, err))
+		resp.Diagnostics.AddError("Value Error", fmt.Sprintf("Invalid organization ID %s; error when parsing: %s", data.Id.ValueString(), err))
 		return
 	}
-	organization, err := r.provider.client.Organizations().Get(ctx, wsId)
+	organization, err := r.client.Organizations().Get(ctx, wsId)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error reading organization: %s", err))
 		return
 	}
 
-	data.Id = types.String{Value: organization.ID.String()}
-	data.Name = types.String{Value: organization.Name}
+	data.Id = types.StringValue(organization.ID.String())
+	data.Name = types.StringValue(organization.Name)
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r organizationResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *organizationResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var data organizationResourceData
 
 	diags := req.Plan.Get(ctx, &data)
@@ -139,17 +153,17 @@ func (r organizationResource) Update(ctx context.Context, req resource.UpdateReq
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	wsId, err := uuid.Parse(data.Id.Value)
+	wsId, err := uuid.Parse(data.Id.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("Value Error", fmt.Sprintf("Invalid organization ID %s; error when parsing: %s", data.Id.Value, err))
+		resp.Diagnostics.AddError("Value Error", fmt.Sprintf("Invalid organization ID %s; error when parsing: %s", data.Id.ValueString(), err))
 		return
 	}
 
-	updated, err := r.provider.client.Organizations().Update(ctx, wsId,
+	updated, err := r.client.Organizations().Update(ctx, wsId,
 		polytomic.OrganizationMutation{
-			Name:      data.Name.Value,
-			SSODomain: data.SSODomain.Value,
-			SSOOrgId:  data.SSOOrgId.Value,
+			Name:      data.Name.ValueString(),
+			SSODomain: data.SSODomain.ValueString(),
+			SSOOrgId:  data.SSOOrgId.ValueString(),
 		},
 	)
 	if err != nil {
@@ -157,12 +171,12 @@ func (r organizationResource) Update(ctx context.Context, req resource.UpdateReq
 		return
 	}
 
-	data.Name = types.String{Value: updated.Name}
+	data.Name = types.StringValue(updated.Name)
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r organizationResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *organizationResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var data organizationResourceData
 
 	diags := req.State.Get(ctx, &data)
@@ -171,18 +185,18 @@ func (r organizationResource) Delete(ctx context.Context, req resource.DeleteReq
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	wsId, err := uuid.Parse(data.Id.Value)
+	wsId, err := uuid.Parse(data.Id.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("Value Error", fmt.Sprintf("Invalid organization ID %s; error when parsing: %s", data.Id.Value, err))
+		resp.Diagnostics.AddError("Value Error", fmt.Sprintf("Invalid organization ID %s; error when parsing: %s", data.Id.ValueString(), err))
 		return
 	}
-	err = r.provider.client.Organizations().Delete(ctx, wsId)
+	err = r.client.Organizations().Delete(ctx, wsId)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting organization: %s", err))
 		return
 	}
 }
 
-func (r organizationResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *organizationResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

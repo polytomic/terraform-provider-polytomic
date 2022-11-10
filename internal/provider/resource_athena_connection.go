@@ -10,7 +10,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
-	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -19,13 +18,10 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
-var _ provider.ResourceType = athenaConnectionResourceType{}
-var _ resource.Resource = athenaConnectionResource{}
-var _ resource.ResourceWithImportState = athenaConnectionResource{}
+var _ resource.Resource = &athenaConnectionResource{}
+var _ resource.ResourceWithImportState = &athenaConnectionResource{}
 
-type athenaConnectionResourceType struct{}
-
-func (t athenaConnectionResourceType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
+func (t *athenaConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
 		MarkdownDescription: "AWS Athena Connection",
 		Attributes: map[string]tfsdk.Attribute{
@@ -86,19 +82,15 @@ func (t athenaConnectionResourceType) GetSchema(ctx context.Context) (tfsdk.Sche
 	}, nil
 }
 
-func (t athenaConnectionResourceType) NewResource(ctx context.Context, in provider.Provider) (resource.Resource, diag.Diagnostics) {
-	provider, diags := convertProviderType(in)
-
-	return athenaConnectionResource{
-		provider: provider,
-	}, diags
+func (r *athenaConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = "polytomic_athena_connection"
 }
 
 type athenaConnectionResource struct {
-	provider ptProvider
+	client *polytomic.Client
 }
 
-func (r athenaConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *athenaConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data connectionResourceData
 
 	diags := req.Config.Get(ctx, &data)
@@ -108,16 +100,16 @@ func (r athenaConnectionResource) Create(ctx context.Context, req resource.Creat
 		return
 	}
 
-	created, err := r.provider.client.Connections().Create(ctx,
+	created, err := r.client.Connections().Create(ctx,
 		polytomic.CreateConnectionMutation{
-			Name:           data.Name.Value,
+			Name:           data.Name.ValueString(),
 			Type:           polytomic.AthenaConnectionType,
-			OrganizationId: data.Organization.Value,
+			OrganizationId: data.Organization.ValueString(),
 			Configuration: polytomic.AthenaConfiguration{
-				AccessKeyID:     data.Configuration.Attrs["access_key_id"].(types.String).Value,
-				AccessKeySecret: data.Configuration.Attrs["access_key_secret"].(types.String).Value,
-				Region:          data.Configuration.Attrs["region"].(types.String).Value,
-				OutputBucket:    data.Configuration.Attrs["output_bucket"].(types.String).Value,
+				AccessKeyID:     data.Configuration.Attributes()["access_key_id"].(types.String).ValueString(),
+				AccessKeySecret: data.Configuration.Attributes()["access_key_secret"].(types.String).ValueString(),
+				Region:          data.Configuration.Attributes()["region"].(types.String).ValueString(),
+				OutputBucket:    data.Configuration.Attributes()["output_bucket"].(types.String).ValueString(),
 			},
 		},
 	)
@@ -125,14 +117,14 @@ func (r athenaConnectionResource) Create(ctx context.Context, req resource.Creat
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
 		return
 	}
-	data.Id = types.String{Value: created.ID}
+	data.Id = types.StringValue(created.ID)
 	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "athena", "id": created.ID})
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r athenaConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *athenaConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data connectionResourceData
 
 	diags := req.State.Get(ctx, &data)
@@ -142,7 +134,7 @@ func (r athenaConnectionResource) Read(ctx context.Context, req resource.ReadReq
 		return
 	}
 
-	connection, err := r.provider.client.Connections().Get(ctx, uuid.MustParse(data.Id.Value))
+	connection, err := r.client.Connections().Get(ctx, uuid.MustParse(data.Id.ValueString()))
 	if err != nil {
 		if err.Error() == ConnectionNotFoundErr {
 			resp.State.RemoveResource(ctx)
@@ -152,15 +144,15 @@ func (r athenaConnectionResource) Read(ctx context.Context, req resource.ReadReq
 		return
 	}
 
-	data.Id = types.String{Value: connection.ID}
-	data.Organization = types.String{Value: connection.OrganizationId}
-	data.Name = types.String{Value: connection.Name}
+	data.Id = types.StringValue(connection.ID)
+	data.Organization = types.StringValue(connection.OrganizationId)
+	data.Name = types.StringValue(connection.Name)
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r athenaConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *athenaConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var data connectionResourceData
 
 	diags := req.Plan.Get(ctx, &data)
@@ -170,16 +162,16 @@ func (r athenaConnectionResource) Update(ctx context.Context, req resource.Updat
 		return
 	}
 
-	updated, err := r.provider.client.Connections().Update(ctx,
-		uuid.MustParse(data.Id.Value),
+	updated, err := r.client.Connections().Update(ctx,
+		uuid.MustParse(data.Id.ValueString()),
 		polytomic.UpdateConnectionMutation{
-			Name:           data.Name.Value,
-			OrganizationId: data.Organization.Value,
+			Name:           data.Name.ValueString(),
+			OrganizationId: data.Organization.ValueString(),
 			Configuration: polytomic.AthenaConfiguration{
-				AccessKeyID:     data.Configuration.Attrs["access_key_id"].(types.String).Value,
-				AccessKeySecret: data.Configuration.Attrs["access_key_secret"].(types.String).Value,
-				Region:          data.Configuration.Attrs["region"].(types.String).Value,
-				OutputBucket:    data.Configuration.Attrs["output_bucket"].(types.String).Value,
+				AccessKeyID:     data.Configuration.Attributes()["access_key_id"].(types.String).ValueString(),
+				AccessKeySecret: data.Configuration.Attributes()["access_key_secret"].(types.String).ValueString(),
+				Region:          data.Configuration.Attributes()["region"].(types.String).ValueString(),
+				OutputBucket:    data.Configuration.Attributes()["output_bucket"].(types.String).ValueString(),
 			},
 		},
 	)
@@ -188,15 +180,15 @@ func (r athenaConnectionResource) Update(ctx context.Context, req resource.Updat
 		return
 	}
 
-	data.Id = types.String{Value: updated.ID}
-	data.Organization = types.String{Value: updated.OrganizationId}
-	data.Name = types.String{Value: updated.Name}
+	data.Id = types.StringValue(updated.ID)
+	data.Organization = types.StringValue(updated.OrganizationId)
+	data.Name = types.StringValue(updated.Name)
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r athenaConnectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *athenaConnectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var data connectionResourceData
 
 	diags := req.State.Get(ctx, &data)
@@ -206,13 +198,33 @@ func (r athenaConnectionResource) Delete(ctx context.Context, req resource.Delet
 		return
 	}
 
-	err := r.provider.client.Connections().Delete(ctx, uuid.MustParse(data.Id.Value))
+	err := r.client.Connections().Delete(ctx, uuid.MustParse(data.Id.ValueString()))
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting connection: %s", err))
 		return
 	}
 }
 
-func (r athenaConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *athenaConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+}
+
+func (r *athenaConnectionResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+	// Prevent panic if the provider has not been configured.
+	if req.ProviderData == nil {
+		return
+	}
+
+	client, ok := req.ProviderData.(*polytomic.Client)
+
+	if !ok {
+		resp.Diagnostics.AddError(
+			"Unexpected Resource Configure Type",
+			fmt.Sprintf("Expected *polytomic.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+		)
+
+		return
+	}
+
+	r.client = client
 }
