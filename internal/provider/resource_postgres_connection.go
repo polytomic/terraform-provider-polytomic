@@ -97,7 +97,7 @@ func (t *postgresConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schem
 }
 
 func (r *postgresConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = "polytomic_postgres_connection"
+	resp.TypeName = req.ProviderTypeName + "_postgres_connection"
 }
 
 type postgresConnectionResource struct {
@@ -105,7 +105,7 @@ type postgresConnectionResource struct {
 }
 
 func (r *postgresConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data connectionResourceData
+	var data connectionData
 
 	diags := req.Config.Get(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -141,7 +141,7 @@ func (r *postgresConnectionResource) Create(ctx context.Context, req resource.Cr
 }
 
 func (r *postgresConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var data connectionResourceData
+	var data connectionData
 
 	diags := req.State.Get(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -169,7 +169,7 @@ func (r *postgresConnectionResource) Read(ctx context.Context, req resource.Read
 }
 
 func (r *postgresConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data connectionResourceData
+	var data connectionData
 
 	diags := req.Plan.Get(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -207,7 +207,7 @@ func (r *postgresConnectionResource) Update(ctx context.Context, req resource.Up
 }
 
 func (r *postgresConnectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data connectionResourceData
+	var data connectionData
 
 	diags := req.State.Get(ctx, &data)
 	resp.Diagnostics.Append(diags...)

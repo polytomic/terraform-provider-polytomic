@@ -76,7 +76,7 @@ func (t *gcsConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, di
 }
 
 func (r *gcsConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = "polytomic_gcs_connection"
+	resp.TypeName = req.ProviderTypeName + "_gcs_connection"
 }
 
 type gcsConnectionResource struct {
@@ -84,7 +84,7 @@ type gcsConnectionResource struct {
 }
 
 func (r *gcsConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data connectionResourceData
+	var data connectionData
 
 	diags := req.Config.Get(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -117,7 +117,7 @@ func (r *gcsConnectionResource) Create(ctx context.Context, req resource.CreateR
 }
 
 func (r *gcsConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var data connectionResourceData
+	var data connectionData
 
 	diags := req.State.Get(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -145,7 +145,7 @@ func (r *gcsConnectionResource) Read(ctx context.Context, req resource.ReadReque
 }
 
 func (r *gcsConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data connectionResourceData
+	var data connectionData
 
 	diags := req.Plan.Get(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -180,7 +180,7 @@ func (r *gcsConnectionResource) Update(ctx context.Context, req resource.UpdateR
 }
 
 func (r *gcsConnectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data connectionResourceData
+	var data connectionData
 
 	diags := req.State.Get(ctx, &data)
 	resp.Diagnostics.Append(diags...)

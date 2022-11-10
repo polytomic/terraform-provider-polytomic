@@ -83,7 +83,7 @@ func (t *athenaConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema,
 }
 
 func (r *athenaConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = "polytomic_athena_connection"
+	resp.TypeName = req.ProviderTypeName + "_athena_connection"
 }
 
 type athenaConnectionResource struct {
@@ -91,7 +91,7 @@ type athenaConnectionResource struct {
 }
 
 func (r *athenaConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data connectionResourceData
+	var data connectionData
 
 	diags := req.Config.Get(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -125,7 +125,7 @@ func (r *athenaConnectionResource) Create(ctx context.Context, req resource.Crea
 }
 
 func (r *athenaConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var data connectionResourceData
+	var data connectionData
 
 	diags := req.State.Get(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -153,7 +153,7 @@ func (r *athenaConnectionResource) Read(ctx context.Context, req resource.ReadRe
 }
 
 func (r *athenaConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data connectionResourceData
+	var data connectionData
 
 	diags := req.Plan.Get(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -189,7 +189,7 @@ func (r *athenaConnectionResource) Update(ctx context.Context, req resource.Upda
 }
 
 func (r *athenaConnectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data connectionResourceData
+	var data connectionData
 
 	diags := req.State.Get(ctx, &data)
 	resp.Diagnostics.Append(diags...)
