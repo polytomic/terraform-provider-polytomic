@@ -68,6 +68,7 @@ func (t *s3ConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, dia
 						Sensitive:           false,
 					},
 				}),
+
 				Required: true,
 			},
 			"id": {

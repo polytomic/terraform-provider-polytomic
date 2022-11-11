@@ -18,12 +18,12 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
-var _ resource.Resource = &gcsConnectionResource{}
-var _ resource.ResourceWithImportState = &gcsConnectionResource{}
+var _ resource.Resource = &snowflakeConnectionResource{}
+var _ resource.ResourceWithImportState = &snowflakeConnectionResource{}
 
-func (t *gcsConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
+func (t *snowflakeConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: "Google Cloud Storage Connection",
+		MarkdownDescription: "Snowflake Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"organization": {
 				MarkdownDescription: "Organization ID",
@@ -39,25 +39,46 @@ func (t *gcsConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, di
 			},
 			"configuration": {
 				Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
-					"project_id": {
+					"account": {
 						MarkdownDescription: "",
 						Type:                types.StringType,
 						Required:            true,
 						Optional:            false,
 						Sensitive:           false,
 					},
-					"service_account_credentials": {
+					"username": {
+						MarkdownDescription: "",
+						Type:                types.StringType,
+						Required:            true,
+						Optional:            false,
+						Sensitive:           false,
+					},
+					"password": {
 						MarkdownDescription: "",
 						Type:                types.StringType,
 						Required:            true,
 						Optional:            false,
 						Sensitive:           true,
 					},
-					"bucket": {
+					"database": {
 						MarkdownDescription: "",
 						Type:                types.StringType,
 						Required:            true,
 						Optional:            false,
+						Sensitive:           false,
+					},
+					"warehouse": {
+						MarkdownDescription: "",
+						Type:                types.StringType,
+						Required:            true,
+						Optional:            false,
+						Sensitive:           false,
+					},
+					"additional_params": {
+						MarkdownDescription: "",
+						Type:                types.StringType,
+						Required:            false,
+						Optional:            true,
 						Sensitive:           false,
 					},
 				}),
@@ -66,7 +87,7 @@ func (t *gcsConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, di
 			},
 			"id": {
 				Computed:            true,
-				MarkdownDescription: "Google Cloud Storage Connection identifier",
+				MarkdownDescription: "Snowflake Connection identifier",
 				PlanModifiers: tfsdk.AttributePlanModifiers{
 					resource.UseStateForUnknown(),
 				},
@@ -76,15 +97,15 @@ func (t *gcsConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, di
 	}, nil
 }
 
-func (r *gcsConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_gcs_connection"
+func (r *snowflakeConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_snowflake_connection"
 }
 
-type gcsConnectionResource struct {
+type snowflakeConnectionResource struct {
 	client *polytomic.Client
 }
 
-func (r *gcsConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *snowflakeConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data connectionData
 
 	diags := req.Config.Get(ctx, &data)
@@ -97,12 +118,15 @@ func (r *gcsConnectionResource) Create(ctx context.Context, req resource.CreateR
 	created, err := r.client.Connections().Create(ctx,
 		polytomic.CreateConnectionMutation{
 			Name:           data.Name.ValueString(),
-			Type:           polytomic.GoogleCloudStorageConnectionType,
+			Type:           polytomic.SnowflakeConnectionType,
 			OrganizationId: data.Organization.ValueString(),
-			Configuration: polytomic.GCSConfiguration{
-				ProjectId:                 data.Configuration.Attributes()["project_id"].(types.String).ValueString(),
-				ServiceAccountCredentials: data.Configuration.Attributes()["service_account_credentials"].(types.String).ValueString(),
-				Bucket:                    data.Configuration.Attributes()["bucket"].(types.String).ValueString(),
+			Configuration: polytomic.SnowflakeConfiguration{
+				Account:          data.Configuration.Attributes()["account"].(types.String).ValueString(),
+				Username:         data.Configuration.Attributes()["username"].(types.String).ValueString(),
+				Password:         data.Configuration.Attributes()["password"].(types.String).ValueString(),
+				Database:         data.Configuration.Attributes()["database"].(types.String).ValueString(),
+				Warehouse:        data.Configuration.Attributes()["warehouse"].(types.String).ValueString(),
+				AdditionalParams: data.Configuration.Attributes()["additional_params"].(types.String).ValueString(),
 			},
 		},
 	)
@@ -111,13 +135,13 @@ func (r *gcsConnectionResource) Create(ctx context.Context, req resource.CreateR
 		return
 	}
 	data.Id = types.StringValue(created.ID)
-	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "gcs", "id": created.ID})
+	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "snowflake", "id": created.ID})
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r *gcsConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *snowflakeConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data connectionData
 
 	diags := req.State.Get(ctx, &data)
@@ -145,7 +169,7 @@ func (r *gcsConnectionResource) Read(ctx context.Context, req resource.ReadReque
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r *gcsConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *snowflakeConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var data connectionData
 
 	diags := req.Plan.Get(ctx, &data)
@@ -160,10 +184,13 @@ func (r *gcsConnectionResource) Update(ctx context.Context, req resource.UpdateR
 		polytomic.UpdateConnectionMutation{
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueString(),
-			Configuration: polytomic.GCSConfiguration{
-				ProjectId:                 data.Configuration.Attributes()["project_id"].(types.String).ValueString(),
-				ServiceAccountCredentials: data.Configuration.Attributes()["service_account_credentials"].(types.String).ValueString(),
-				Bucket:                    data.Configuration.Attributes()["bucket"].(types.String).ValueString(),
+			Configuration: polytomic.SnowflakeConfiguration{
+				Account:          data.Configuration.Attributes()["account"].(types.String).ValueString(),
+				Username:         data.Configuration.Attributes()["username"].(types.String).ValueString(),
+				Password:         data.Configuration.Attributes()["password"].(types.String).ValueString(),
+				Database:         data.Configuration.Attributes()["database"].(types.String).ValueString(),
+				Warehouse:        data.Configuration.Attributes()["warehouse"].(types.String).ValueString(),
+				AdditionalParams: data.Configuration.Attributes()["additional_params"].(types.String).ValueString(),
 			},
 		},
 	)
@@ -180,7 +207,7 @@ func (r *gcsConnectionResource) Update(ctx context.Context, req resource.UpdateR
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r *gcsConnectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *snowflakeConnectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var data connectionData
 
 	diags := req.State.Get(ctx, &data)
@@ -197,11 +224,11 @@ func (r *gcsConnectionResource) Delete(ctx context.Context, req resource.DeleteR
 	}
 }
 
-func (r *gcsConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *snowflakeConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
 
-func (r *gcsConnectionResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *snowflakeConnectionResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return

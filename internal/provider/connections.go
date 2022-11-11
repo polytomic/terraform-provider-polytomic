@@ -17,6 +17,7 @@ var (
 		func() resource.Resource { return &s3ConnectionResource{} },
 		func() resource.Resource { return &sqlserverConnectionResource{} },
 		func() resource.Resource { return &athenaConnectionResource{} },
+		func() resource.Resource { return &snowflakeConnectionResource{} },
 	}
 
 	connection_datasources = []func() datasource.DataSource{
@@ -27,5 +28,10 @@ var (
 		func() datasource.DataSource { return &s3ConnectionDataSource{} },
 		func() datasource.DataSource { return &sqlserverConnectionDataSource{} },
 		func() datasource.DataSource { return &athenaConnectionDataSource{} },
+		func() datasource.DataSource { return &salesforceConnectionDataSource{} },
+		func() datasource.DataSource { return &hubspotConnectionDataSource{} },
+		func() datasource.DataSource { return &googleadsConnectionDataSource{} },
+		func() datasource.DataSource { return &gsheetsConnectionDataSource{} },
+		func() datasource.DataSource { return &snowflakeConnectionDataSource{} },
 	}
 )

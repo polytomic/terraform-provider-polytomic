@@ -52,6 +52,17 @@ Required:
 
 Optional:
 
+- `ca_cert` (String)
+- `change_detection` (Boolean)
+- `client_certificate` (String)
+- `client_certs` (Boolean)
+- `client_key` (String, Sensitive)
+- `private_key` (String, Sensitive)
+- `publication` (String)
+- `ssh` (Boolean)
+- `ssh_host` (String)
+- `ssh_port` (Number)
+- `ssh_user` (String)
 - `ssl` (Boolean)
 
 

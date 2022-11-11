@@ -68,6 +68,7 @@ func (t *athenaConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema,
 						Sensitive:           false,
 					},
 				}),
+
 				Required: true,
 			},
 			"id": {

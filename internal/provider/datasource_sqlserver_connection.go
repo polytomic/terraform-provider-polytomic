@@ -128,7 +128,6 @@ func (d *sqlserverConnectionDataSource) Read(ctx context.Context, req datasource
 	data.Id = types.StringValue(connection.ID)
 	data.Name = types.StringValue(connection.Name)
 	data.Organization = types.StringValue(connection.OrganizationId)
-
 	var conf polytomic.SQLServerConfiguration
 	err = mapstructure.Decode(connection.Configuration, &conf)
 	if err != nil {
