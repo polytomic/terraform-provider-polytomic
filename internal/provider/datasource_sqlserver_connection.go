@@ -33,7 +33,6 @@ func (d *sqlserverConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Sc
 	return tfsdk.Schema{
 		// This description is used by the documentation generator and the language server.
 		MarkdownDescription: "SQL Server Connection",
-
 		Attributes: map[string]tfsdk.Attribute{
 			"name": {
 				MarkdownDescription: "",
@@ -65,13 +64,6 @@ func (d *sqlserverConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Sc
 						Required:            true,
 						Optional:            false,
 						Sensitive:           false,
-					},
-					"password": {
-						MarkdownDescription: "",
-						Type:                types.StringType,
-						Required:            true,
-						Optional:            false,
-						Sensitive:           true,
 					},
 					"database": {
 						MarkdownDescription: "",
@@ -148,23 +140,15 @@ func (d *sqlserverConnectionDataSource) Read(ctx context.Context, req datasource
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttrTypes,
 		map[string]attr.Value{
-
 			"hostname": types.StringValue(
 				conf.Hostname,
 			),
-
 			"username": types.StringValue(
 				conf.Username,
 			),
-
-			"password": types.StringValue(
-				conf.Password,
-			),
-
 			"database": types.StringValue(
 				conf.Database,
 			),
-
 			"port": types.Int64Value(
 				int64(conf.Port),
 			),

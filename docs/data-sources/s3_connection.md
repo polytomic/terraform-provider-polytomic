@@ -40,8 +40,6 @@ data "polytomic_s3_connection" "s3" {
 
 Required:
 
-- `access_key_id` (String, Sensitive)
-- `access_key_secret` (String, Sensitive)
 - `bucket` (String)
 - `region` (String)
 

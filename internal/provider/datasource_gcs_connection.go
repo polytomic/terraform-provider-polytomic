@@ -33,7 +33,6 @@ func (d *gcsConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, 
 	return tfsdk.Schema{
 		// This description is used by the documentation generator and the language server.
 		MarkdownDescription: "Google Cloud Storage Connection",
-
 		Attributes: map[string]tfsdk.Attribute{
 			"name": {
 				MarkdownDescription: "",
@@ -58,13 +57,6 @@ func (d *gcsConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, 
 						Required:            true,
 						Optional:            false,
 						Sensitive:           false,
-					},
-					"service_account_credentials": {
-						MarkdownDescription: "",
-						Type:                types.StringType,
-						Required:            true,
-						Optional:            false,
-						Sensitive:           true,
 					},
 					"bucket": {
 						MarkdownDescription: "",
@@ -134,15 +126,9 @@ func (d *gcsConnectionDataSource) Read(ctx context.Context, req datasource.ReadR
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttrTypes,
 		map[string]attr.Value{
-
 			"project_id": types.StringValue(
 				conf.ProjectId,
 			),
-
-			"service_account_credentials": types.StringValue(
-				conf.ServiceAccountCredentials,
-			),
-
 			"bucket": types.StringValue(
 				conf.Bucket,
 			),

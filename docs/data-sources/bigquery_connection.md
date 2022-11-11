@@ -41,6 +41,5 @@ data "polytomic_bigquery_connection" "bigquery" {
 Required:
 
 - `location` (String)
-- `service_account_credentials` (String, Sensitive)
 
 

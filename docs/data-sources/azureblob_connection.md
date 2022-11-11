@@ -40,7 +40,6 @@ data "polytomic_azureblob_connection" "azureblob" {
 
 Required:
 
-- `access_key` (String, Sensitive)
 - `account_name` (String)
 - `container_name` (String)
 

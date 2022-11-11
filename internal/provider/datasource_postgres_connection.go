@@ -33,7 +33,6 @@ func (d *postgresConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Sch
 	return tfsdk.Schema{
 		// This description is used by the documentation generator and the language server.
 		MarkdownDescription: "PostgresSQL Connection",
-
 		Attributes: map[string]tfsdk.Attribute{
 			"name": {
 				MarkdownDescription: "",
@@ -65,13 +64,6 @@ func (d *postgresConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Sch
 						Required:            true,
 						Optional:            false,
 						Sensitive:           false,
-					},
-					"password": {
-						MarkdownDescription: "",
-						Type:                types.StringType,
-						Required:            true,
-						Optional:            false,
-						Sensitive:           true,
 					},
 					"database": {
 						MarkdownDescription: "",
@@ -155,27 +147,18 @@ func (d *postgresConnectionDataSource) Read(ctx context.Context, req datasource.
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttrTypes,
 		map[string]attr.Value{
-
 			"hostname": types.StringValue(
 				conf.Hostname,
 			),
-
 			"username": types.StringValue(
 				conf.Username,
 			),
-
-			"password": types.StringValue(
-				conf.Password,
-			),
-
 			"database": types.StringValue(
 				conf.Database,
 			),
-
 			"port": types.Int64Value(
 				int64(conf.Port),
 			),
-
 			"ssl": types.BoolValue(
 				conf.SSL,
 			),

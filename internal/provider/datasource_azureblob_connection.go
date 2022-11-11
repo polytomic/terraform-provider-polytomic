@@ -33,7 +33,6 @@ func (d *azureblobConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Sc
 	return tfsdk.Schema{
 		// This description is used by the documentation generator and the language server.
 		MarkdownDescription: "Azure Blob Storage Connection",
-
 		Attributes: map[string]tfsdk.Attribute{
 			"name": {
 				MarkdownDescription: "",
@@ -58,13 +57,6 @@ func (d *azureblobConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Sc
 						Required:            true,
 						Optional:            false,
 						Sensitive:           false,
-					},
-					"access_key": {
-						MarkdownDescription: "",
-						Type:                types.StringType,
-						Required:            true,
-						Optional:            false,
-						Sensitive:           true,
 					},
 					"container_name": {
 						MarkdownDescription: "",
@@ -134,15 +126,9 @@ func (d *azureblobConnectionDataSource) Read(ctx context.Context, req datasource
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttrTypes,
 		map[string]attr.Value{
-
 			"account_name": types.StringValue(
 				conf.AccountName,
 			),
-
-			"access_key": types.StringValue(
-				conf.AccessKey,
-			),
-
 			"container_name": types.StringValue(
 				conf.ContainerName,
 			),

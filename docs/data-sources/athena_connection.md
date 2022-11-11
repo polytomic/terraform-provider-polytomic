@@ -40,8 +40,6 @@ data "polytomic_athena_connection" "athena" {
 
 Required:
 
-- `access_key_id` (String, Sensitive)
-- `access_key_secret` (String, Sensitive)
 - `output_bucket` (String) S3 bucket for output storage, with optional prefix. Examples: `bucket-name`, `bucket-name/prefix`.
 - `region` (String)
 

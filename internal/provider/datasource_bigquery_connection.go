@@ -33,7 +33,6 @@ func (d *bigqueryConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Sch
 	return tfsdk.Schema{
 		// This description is used by the documentation generator and the language server.
 		MarkdownDescription: "Big Query Connection",
-
 		Attributes: map[string]tfsdk.Attribute{
 			"name": {
 				MarkdownDescription: "",
@@ -52,13 +51,6 @@ func (d *bigqueryConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Sch
 			},
 			"configuration": {
 				Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
-					"service_account_credentials": {
-						MarkdownDescription: "",
-						Type:                types.StringType,
-						Required:            true,
-						Optional:            false,
-						Sensitive:           true,
-					},
 					"location": {
 						MarkdownDescription: "",
 						Type:                types.StringType,
@@ -127,11 +119,6 @@ func (d *bigqueryConnectionDataSource) Read(ctx context.Context, req datasource.
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttrTypes,
 		map[string]attr.Value{
-
-			"service_account_credentials": types.StringValue(
-				conf.ServiceAccountCredentials,
-			),
-
 			"location": types.StringValue(
 				conf.Location,
 			),

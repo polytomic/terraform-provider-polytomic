@@ -33,7 +33,6 @@ func (d *s3ConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, d
 	return tfsdk.Schema{
 		// This description is used by the documentation generator and the language server.
 		MarkdownDescription: "S3 Connection",
-
 		Attributes: map[string]tfsdk.Attribute{
 			"name": {
 				MarkdownDescription: "",
@@ -52,20 +51,6 @@ func (d *s3ConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, d
 			},
 			"configuration": {
 				Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
-					"access_key_id": {
-						MarkdownDescription: "",
-						Type:                types.StringType,
-						Required:            true,
-						Optional:            false,
-						Sensitive:           true,
-					},
-					"access_key_secret": {
-						MarkdownDescription: "",
-						Type:                types.StringType,
-						Required:            true,
-						Optional:            false,
-						Sensitive:           true,
-					},
 					"region": {
 						MarkdownDescription: "",
 						Type:                types.StringType,
@@ -141,19 +126,9 @@ func (d *s3ConnectionDataSource) Read(ctx context.Context, req datasource.ReadRe
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttrTypes,
 		map[string]attr.Value{
-
-			"access_key_id": types.StringValue(
-				conf.AccessKeyID,
-			),
-
-			"access_key_secret": types.StringValue(
-				conf.AccessKeySecret,
-			),
-
 			"region": types.StringValue(
 				conf.Region,
 			),
-
 			"bucket": types.StringValue(
 				conf.Bucket,
 			),

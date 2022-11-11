@@ -33,7 +33,6 @@ func (d *athenaConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schem
 	return tfsdk.Schema{
 		// This description is used by the documentation generator and the language server.
 		MarkdownDescription: "AWS Athena Connection",
-
 		Attributes: map[string]tfsdk.Attribute{
 			"name": {
 				MarkdownDescription: "",
@@ -52,20 +51,6 @@ func (d *athenaConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schem
 			},
 			"configuration": {
 				Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
-					"access_key_id": {
-						MarkdownDescription: "",
-						Type:                types.StringType,
-						Required:            true,
-						Optional:            false,
-						Sensitive:           true,
-					},
-					"access_key_secret": {
-						MarkdownDescription: "",
-						Type:                types.StringType,
-						Required:            true,
-						Optional:            false,
-						Sensitive:           true,
-					},
 					"region": {
 						MarkdownDescription: "",
 						Type:                types.StringType,
@@ -141,19 +126,9 @@ func (d *athenaConnectionDataSource) Read(ctx context.Context, req datasource.Re
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttrTypes,
 		map[string]attr.Value{
-
-			"access_key_id": types.StringValue(
-				conf.AccessKeyID,
-			),
-
-			"access_key_secret": types.StringValue(
-				conf.AccessKeySecret,
-			),
-
 			"region": types.StringValue(
 				conf.Region,
 			),
-
 			"output_bucket": types.StringValue(
 				conf.OutputBucket,
 			),

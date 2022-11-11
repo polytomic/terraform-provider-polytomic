@@ -42,6 +42,5 @@ Required:
 
 - `bucket` (String)
 - `project_id` (String)
-- `service_account_credentials` (String, Sensitive)
 
 

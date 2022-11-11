@@ -35,7 +35,6 @@ func (d *{{ .Connection }}ConnectionDataSource) GetSchema(ctx context.Context) (
 	return tfsdk.Schema{
 		// This description is used by the documentation generator and the language server.
 		MarkdownDescription: "{{ .Name }} Connection",
-
 		Attributes: map[string]tfsdk.Attribute{
 			"name": {
 				MarkdownDescription: "",
@@ -54,14 +53,17 @@ func (d *{{ .Connection }}ConnectionDataSource) GetSchema(ctx context.Context) (
 			},
 			"configuration": {
 				Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
-					{{ range .Attributes }}"{{ .AttrName }}": {
+					{{- range .Attributes }}
+					{{- if not .Sensitive }}
+					"{{ .AttrName }}": {
 						MarkdownDescription: "{{ .Description }}",
 						Type:      {{ .AttrType }},
 						Required:  {{ .Required }},
 						Optional:  {{ .Optional }},
 						Sensitive: {{ .Sensitive }},
 					},
-					{{ end }}
+					{{- end }}
+					{{- end }}
 				}),
 				Optional: true,
 			},
@@ -123,21 +125,23 @@ func (d *{{ .Connection }}ConnectionDataSource) Read(ctx context.Context, req da
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttrTypes,
 		map[string]attr.Value{
-			{{ range .Attributes }} 
-			{{ if eq .Type "int" }}
+			{{- range .Attributes }} 
+			{{- if not .Sensitive }}
+			{{- if eq .Type "int" }}
 			"{{ .AttrName }}": types.Int64Value(
 				int64(conf.{{ .Name }}),
 			),
-			{{ else if eq .Type "bool" }}
+			{{- else if eq .Type "bool" }}
 			"{{ .AttrName }}": types.BoolValue(
 				conf.{{ .Name }},
 			),
-			{{ else }}
+			{{- else }}
 			"{{ .AttrName }}": types.StringValue(
 				conf.{{ .Name }},
 			),
-			{{ end }}
-			{{ end }}
+			{{- end }}
+			{{- end }}
+			{{- end }}
 		},
 	)
 
