@@ -76,7 +76,7 @@ func (t *azureblobConnectionResource) GetSchema(ctx context.Context) (tfsdk.Sche
 }
 
 func (r *azureblobConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = "polytomic_azureblob_connection"
+	resp.TypeName = req.ProviderTypeName + "_azureblob_connection"
 }
 
 type azureblobConnectionResource struct {
@@ -84,7 +84,7 @@ type azureblobConnectionResource struct {
 }
 
 func (r *azureblobConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data connectionResourceData
+	var data connectionData
 
 	diags := req.Config.Get(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -117,7 +117,7 @@ func (r *azureblobConnectionResource) Create(ctx context.Context, req resource.C
 }
 
 func (r *azureblobConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var data connectionResourceData
+	var data connectionData
 
 	diags := req.State.Get(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -145,7 +145,7 @@ func (r *azureblobConnectionResource) Read(ctx context.Context, req resource.Rea
 }
 
 func (r *azureblobConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data connectionResourceData
+	var data connectionData
 
 	diags := req.Plan.Get(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -180,7 +180,7 @@ func (r *azureblobConnectionResource) Update(ctx context.Context, req resource.U
 }
 
 func (r *azureblobConnectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data connectionResourceData
+	var data connectionData
 
 	diags := req.State.Get(ctx, &data)
 	resp.Diagnostics.Append(diags...)

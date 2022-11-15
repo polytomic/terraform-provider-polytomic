@@ -69,7 +69,7 @@ func (t *bigqueryConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schem
 }
 
 func (r *bigqueryConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = "polytomic_bigquery_connection"
+	resp.TypeName = req.ProviderTypeName + "_bigquery_connection"
 }
 
 type bigqueryConnectionResource struct {
@@ -77,7 +77,7 @@ type bigqueryConnectionResource struct {
 }
 
 func (r *bigqueryConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data connectionResourceData
+	var data connectionData
 
 	diags := req.Config.Get(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -109,7 +109,7 @@ func (r *bigqueryConnectionResource) Create(ctx context.Context, req resource.Cr
 }
 
 func (r *bigqueryConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var data connectionResourceData
+	var data connectionData
 
 	diags := req.State.Get(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -137,7 +137,7 @@ func (r *bigqueryConnectionResource) Read(ctx context.Context, req resource.Read
 }
 
 func (r *bigqueryConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data connectionResourceData
+	var data connectionData
 
 	diags := req.Plan.Get(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -171,7 +171,7 @@ func (r *bigqueryConnectionResource) Update(ctx context.Context, req resource.Up
 }
 
 func (r *bigqueryConnectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data connectionResourceData
+	var data connectionData
 
 	diags := req.State.Get(ctx, &data)
 	resp.Diagnostics.Append(diags...)

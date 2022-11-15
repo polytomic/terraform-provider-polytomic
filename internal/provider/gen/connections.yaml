@@ -3,6 +3,8 @@ connections:
     name: PostgresSQL
     type: polytomic.PostgresqlConnectionType
     config: polytomic.PostgresqlConfiguration
+    resource: true
+    datasource: true
     attributes:
       - name: Hostname
         type: string
@@ -32,6 +34,8 @@ connections:
     name: Big Query
     type: polytomic.BigQueryConnectionType
     config: polytomic.BigQueryConfiguration
+    resource: true
+    datasource: true
     attributes:
       - name: ServiceAccountCredentials
         type: string
@@ -47,6 +51,8 @@ connections:
     name: Google Cloud Storage
     type: polytomic.GoogleCloudStorageConnectionType
     config: polytomic.GCSConfiguration
+    resource: true
+    datasource: true
     attributes:
       - name: ProjectId
         type: string
@@ -66,6 +72,8 @@ connections:
     name: Azure Blob Storage
     type: polytomic.AzureBlobConnectionType
     config: polytomic.AzureBlobConfiguration
+    resource: true
+    datasource: true
     attributes:
       - name: AccountName
         type: string
@@ -83,6 +91,8 @@ connections:
   - connection: s3
     type: polytomic.S3ConnectionType
     config: polytomic.S3Configuration
+    resource: true
+    datasource: true
     attributes:
       - name: AccessKeyID
         type: string
@@ -106,6 +116,8 @@ connections:
     name: SQL Server
     type: polytomic.SQLServerConnectionType
     config: polytomic.SQLServerConfiguration
+    resource: true
+    datasource: true
     attributes:
       - name: Hostname
         type: string
@@ -132,6 +144,8 @@ connections:
     name: AWS Athena
     type: polytomic.AthenaConnectionType
     config: polytomic.AthenaConfiguration
+    resource: true
+    datasource: true
     attributes:
       - name: AccessKeyID
         type: string

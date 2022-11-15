@@ -63,7 +63,7 @@ func (t *{{ .Connection }}ConnectionResource) GetSchema(ctx context.Context) (tf
 }
 
 func (r *{{ .Connection }}ConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = "polytomic_{{ .Connection }}_connection"
+	resp.TypeName = req.ProviderTypeName + "_{{ .Connection }}_connection"
 }
 
 
@@ -72,7 +72,7 @@ type {{ .Connection }}ConnectionResource struct {
 }
 
 func (r *{{ .Connection }}ConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data connectionResourceData
+	var data connectionData
 
 	diags := req.Config.Get(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -109,7 +109,7 @@ func (r *{{ .Connection }}ConnectionResource) Create(ctx context.Context, req re
 }
 
 func (r *{{ .Connection }}ConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var data connectionResourceData
+	var data connectionData
 
 	diags := req.State.Get(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -137,7 +137,7 @@ func (r *{{ .Connection }}ConnectionResource) Read(ctx context.Context, req reso
 }
 
 func (r *{{ .Connection }}ConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data connectionResourceData
+	var data connectionData
 
 	diags := req.Plan.Get(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -177,7 +177,7 @@ func (r *{{ .Connection }}ConnectionResource) Update(ctx context.Context, req re
 }
 
 func (r *{{ .Connection }}ConnectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data connectionResourceData
+	var data connectionData
 
 	diags := req.State.Get(ctx, &data)
 	resp.Diagnostics.Append(diags...)

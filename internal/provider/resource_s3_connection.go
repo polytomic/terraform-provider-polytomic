@@ -83,7 +83,7 @@ func (t *s3ConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, dia
 }
 
 func (r *s3ConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = "polytomic_s3_connection"
+	resp.TypeName = req.ProviderTypeName + "_s3_connection"
 }
 
 type s3ConnectionResource struct {
@@ -91,7 +91,7 @@ type s3ConnectionResource struct {
 }
 
 func (r *s3ConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data connectionResourceData
+	var data connectionData
 
 	diags := req.Config.Get(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -125,7 +125,7 @@ func (r *s3ConnectionResource) Create(ctx context.Context, req resource.CreateRe
 }
 
 func (r *s3ConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var data connectionResourceData
+	var data connectionData
 
 	diags := req.State.Get(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -153,7 +153,7 @@ func (r *s3ConnectionResource) Read(ctx context.Context, req resource.ReadReques
 }
 
 func (r *s3ConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data connectionResourceData
+	var data connectionData
 
 	diags := req.Plan.Get(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -189,7 +189,7 @@ func (r *s3ConnectionResource) Update(ctx context.Context, req resource.UpdateRe
 }
 
 func (r *s3ConnectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data connectionResourceData
+	var data connectionData
 
 	diags := req.State.Get(ctx, &data)
 	resp.Diagnostics.Append(diags...)
