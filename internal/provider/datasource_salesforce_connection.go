@@ -18,21 +18,21 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
-var _ datasource.DataSource = &postgresConnectionDataSource{}
+var _ datasource.DataSource = &salesforceConnectionDataSource{}
 
 // ExampleDataSource defines the data source implementation.
-type postgresConnectionDataSource struct {
+type salesforceConnectionDataSource struct {
 	client *polytomic.Client
 }
 
-func (d *postgresConnectionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_postgres_connection"
+func (d *salesforceConnectionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_salesforce_connection"
 }
 
-func (d *postgresConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
+func (d *salesforceConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "PostgresSQL Connection",
+		MarkdownDescription: "Salesforce Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"name": {
 				MarkdownDescription: "",
@@ -51,98 +51,28 @@ func (d *postgresConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Sch
 			},
 			"configuration": {
 				Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
-					"hostname": {
-						MarkdownDescription: "",
-						Type:                types.StringType,
-						Required:            true,
-						Optional:            false,
-						Sensitive:           false,
-					},
 					"username": {
 						MarkdownDescription: "",
 						Type:                types.StringType,
-						Required:            true,
-						Optional:            false,
-						Sensitive:           false,
-					},
-					"database": {
-						MarkdownDescription: "",
-						Type:                types.StringType,
-						Required:            true,
-						Optional:            false,
-						Sensitive:           false,
-					},
-					"port": {
-						MarkdownDescription: "",
-						Type:                types.Int64Type,
-						Required:            true,
-						Optional:            false,
-						Sensitive:           false,
-					},
-					"ssl": {
-						MarkdownDescription: "",
-						Type:                types.BoolType,
 						Required:            false,
 						Optional:            true,
 						Sensitive:           false,
 					},
-					"client_certs": {
-						MarkdownDescription: "",
-						Type:                types.BoolType,
-						Required:            false,
-						Optional:            true,
-						Sensitive:           false,
-					},
-					"client_certificate": {
+					"domain": {
 						MarkdownDescription: "",
 						Type:                types.StringType,
 						Required:            false,
 						Optional:            true,
 						Sensitive:           false,
 					},
-					"ca_cert": {
+					"instance_url": {
 						MarkdownDescription: "",
 						Type:                types.StringType,
 						Required:            false,
 						Optional:            true,
 						Sensitive:           false,
 					},
-					"change_detection": {
-						MarkdownDescription: "",
-						Type:                types.BoolType,
-						Required:            false,
-						Optional:            true,
-						Sensitive:           false,
-					},
-					"publication": {
-						MarkdownDescription: "",
-						Type:                types.StringType,
-						Required:            false,
-						Optional:            true,
-						Sensitive:           false,
-					},
-					"ssh": {
-						MarkdownDescription: "",
-						Type:                types.BoolType,
-						Required:            false,
-						Optional:            true,
-						Sensitive:           false,
-					},
-					"ssh_user": {
-						MarkdownDescription: "",
-						Type:                types.StringType,
-						Required:            false,
-						Optional:            true,
-						Sensitive:           false,
-					},
-					"ssh_host": {
-						MarkdownDescription: "",
-						Type:                types.StringType,
-						Required:            false,
-						Optional:            true,
-						Sensitive:           false,
-					},
-					"ssh_port": {
+					"api_version": {
 						MarkdownDescription: "",
 						Type:                types.Int64Type,
 						Required:            false,
@@ -156,7 +86,7 @@ func (d *postgresConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Sch
 	}, nil
 }
 
-func (d *postgresConnectionDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *salesforceConnectionDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -176,7 +106,7 @@ func (d *postgresConnectionDataSource) Configure(ctx context.Context, req dataso
 	d.client = client
 }
 
-func (d *postgresConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+func (d *salesforceConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionData
 
 	// Read Terraform configuration data into the model
@@ -198,7 +128,7 @@ func (d *postgresConnectionDataSource) Read(ctx context.Context, req datasource.
 	data.Id = types.StringValue(connection.ID)
 	data.Name = types.StringValue(connection.Name)
 	data.Organization = types.StringValue(connection.OrganizationId)
-	var conf polytomic.PostgresqlConfiguration
+	var conf polytomic.SalesforceConfiguration
 	err = mapstructure.Decode(connection.Configuration, &conf)
 	if err != nil {
 		resp.Diagnostics.AddError("Error decoding connection", err.Error())
@@ -209,47 +139,17 @@ func (d *postgresConnectionDataSource) Read(ctx context.Context, req datasource.
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttrTypes,
 		map[string]attr.Value{
-			"hostname": types.StringValue(
-				conf.Hostname,
-			),
 			"username": types.StringValue(
 				conf.Username,
 			),
-			"database": types.StringValue(
-				conf.Database,
+			"domain": types.StringValue(
+				conf.Domain,
 			),
-			"port": types.Int64Value(
-				int64(conf.Port),
+			"instance_url": types.StringValue(
+				conf.InstanceURL,
 			),
-			"ssl": types.BoolValue(
-				conf.SSL,
-			),
-			"client_certs": types.BoolValue(
-				conf.ClientCerts,
-			),
-			"client_certificate": types.StringValue(
-				conf.ClientCertificate,
-			),
-			"ca_cert": types.StringValue(
-				conf.CACert,
-			),
-			"change_detection": types.BoolValue(
-				conf.ChangeDetection,
-			),
-			"publication": types.StringValue(
-				conf.Publication,
-			),
-			"ssh": types.BoolValue(
-				conf.SSH,
-			),
-			"ssh_user": types.StringValue(
-				conf.SSHUser,
-			),
-			"ssh_host": types.StringValue(
-				conf.SSHHost,
-			),
-			"ssh_port": types.Int64Value(
-				int64(conf.SSHPort),
+			"api_version": types.Int64Value(
+				int64(conf.APIVersion),
 			),
 		},
 	)

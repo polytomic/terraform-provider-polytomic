@@ -20,6 +20,9 @@ echo ".terraformrc config written"
 echo "Creating local provider directory ${LOCAL_PROVIDER_PATH} ... "
 mkdir -p $LOCAL_PROVIDER_PATH
 
+echo "Clear out any existing local provider binaries... "
+rm -f $LOCAL_PROVIDER_PATH/*
+
 cat <<EOF
 
 Ensure the following block is set in your terraform configuration:

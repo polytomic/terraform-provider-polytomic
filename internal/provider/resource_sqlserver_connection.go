@@ -75,6 +75,7 @@ func (t *sqlserverConnectionResource) GetSchema(ctx context.Context) (tfsdk.Sche
 						Sensitive:           false,
 					},
 				}),
+
 				Required: true,
 			},
 			"id": {

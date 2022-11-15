@@ -66,6 +66,9 @@ func (d *{{ .Connection }}ConnectionDataSource) GetSchema(ctx context.Context) (
 					{{- end }}
 				}),
 				Optional: true,
+				{{ if not .Attributes}}
+				Type: types.ObjectType{},
+				{{ end }}
 			},
 		},
 	}, nil
@@ -114,6 +117,7 @@ func (d *{{ .Connection }}ConnectionDataSource) Read(ctx context.Context, req da
 	data.Name = types.StringValue(connection.Name)
 	data.Organization = types.StringValue(connection.OrganizationId)
 
+    {{- if .Attributes }}
 	var conf {{ .Config }}
 	err = mapstructure.Decode(connection.Configuration, &conf)
 	if err != nil {
@@ -149,6 +153,7 @@ func (d *{{ .Connection }}ConnectionDataSource) Read(ctx context.Context, req da
 		resp.Diagnostics.Append(diags...)
 		return
 	}
+	{{- end }}
 
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)

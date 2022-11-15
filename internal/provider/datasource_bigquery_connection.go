@@ -107,7 +107,6 @@ func (d *bigqueryConnectionDataSource) Read(ctx context.Context, req datasource.
 	data.Id = types.StringValue(connection.ID)
 	data.Name = types.StringValue(connection.Name)
 	data.Organization = types.StringValue(connection.OrganizationId)
-
 	var conf polytomic.BigQueryConfiguration
 	err = mapstructure.Decode(connection.Configuration, &conf)
 	if err != nil {

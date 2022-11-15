@@ -61,6 +61,7 @@ func (t *azureblobConnectionResource) GetSchema(ctx context.Context) (tfsdk.Sche
 						Sensitive:           false,
 					},
 				}),
+
 				Required: true,
 			},
 			"id": {

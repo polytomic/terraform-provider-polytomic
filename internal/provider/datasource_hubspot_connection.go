@@ -18,21 +18,21 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
-var _ datasource.DataSource = &azureblobConnectionDataSource{}
+var _ datasource.DataSource = &hubspotConnectionDataSource{}
 
 // ExampleDataSource defines the data source implementation.
-type azureblobConnectionDataSource struct {
+type hubspotConnectionDataSource struct {
 	client *polytomic.Client
 }
 
-func (d *azureblobConnectionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_azureblob_connection"
+func (d *hubspotConnectionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_hubspot_connection"
 }
 
-func (d *azureblobConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
+func (d *hubspotConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Azure Blob Storage Connection",
+		MarkdownDescription: "Hubspot Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"name": {
 				MarkdownDescription: "",
@@ -51,18 +51,18 @@ func (d *azureblobConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Sc
 			},
 			"configuration": {
 				Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
-					"account_name": {
+					"hub_domain": {
 						MarkdownDescription: "",
 						Type:                types.StringType,
-						Required:            true,
-						Optional:            false,
+						Required:            false,
+						Optional:            true,
 						Sensitive:           false,
 					},
-					"container_name": {
+					"hub_id": {
 						MarkdownDescription: "",
-						Type:                types.StringType,
-						Required:            true,
-						Optional:            false,
+						Type:                types.Int64Type,
+						Required:            false,
+						Optional:            true,
 						Sensitive:           false,
 					},
 				}),
@@ -72,7 +72,7 @@ func (d *azureblobConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Sc
 	}, nil
 }
 
-func (d *azureblobConnectionDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *hubspotConnectionDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -92,7 +92,7 @@ func (d *azureblobConnectionDataSource) Configure(ctx context.Context, req datas
 	d.client = client
 }
 
-func (d *azureblobConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+func (d *hubspotConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionData
 
 	// Read Terraform configuration data into the model
@@ -114,7 +114,7 @@ func (d *azureblobConnectionDataSource) Read(ctx context.Context, req datasource
 	data.Id = types.StringValue(connection.ID)
 	data.Name = types.StringValue(connection.Name)
 	data.Organization = types.StringValue(connection.OrganizationId)
-	var conf polytomic.AzureBlobConfiguration
+	var conf polytomic.HubspotConfiguration
 	err = mapstructure.Decode(connection.Configuration, &conf)
 	if err != nil {
 		resp.Diagnostics.AddError("Error decoding connection", err.Error())
@@ -125,11 +125,11 @@ func (d *azureblobConnectionDataSource) Read(ctx context.Context, req datasource
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttrTypes,
 		map[string]attr.Value{
-			"account_name": types.StringValue(
-				conf.AccountName,
+			"hub_domain": types.StringValue(
+				conf.HubDomain,
 			),
-			"container_name": types.StringValue(
-				conf.ContainerName,
+			"hub_id": types.Int64Value(
+				int64(conf.HubId),
 			),
 		},
 	)

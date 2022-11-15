@@ -114,7 +114,6 @@ func (d *athenaConnectionDataSource) Read(ctx context.Context, req datasource.Re
 	data.Id = types.StringValue(connection.ID)
 	data.Name = types.StringValue(connection.Name)
 	data.Organization = types.StringValue(connection.OrganizationId)
-
 	var conf polytomic.AthenaConfiguration
 	err = mapstructure.Decode(connection.Configuration, &conf)
 	if err != nil {

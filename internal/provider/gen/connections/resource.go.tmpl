@@ -48,7 +48,12 @@ func (t *{{ .Connection }}ConnectionResource) GetSchema(ctx context.Context) (tf
 					},
 					{{ end }}
 				}),
+				{{ if  .Attributes}}
 				Required: true,
+				{{ else }}
+				Optional: true,
+				Type: types.ObjectType{},
+				{{ end }}
 			},
 			"id": {
 				Computed:            true,
@@ -86,6 +91,7 @@ func (r *{{ .Connection }}ConnectionResource) Create(ctx context.Context, req re
 			Name:           data.Name.ValueString(),
 			Type:           {{ .Type }},
 			OrganizationId: data.Organization.ValueString(),
+			{{- if .Attributes }}
 			Configuration: {{ .Config }}{
 				{{ range .Attributes }}{{ .Name }}: 
 				{{ if eq .Type "int" }}int(data.Configuration.Attributes()["{{ .AttrName }}"].({{ .TfType }}).ValueInt64()),
@@ -95,6 +101,7 @@ func (r *{{ .Connection }}ConnectionResource) Create(ctx context.Context, req re
 				{{ end }}
 				{{- end }}
 			},
+			{{- end }}
 		},
 	)
 	if err != nil {
@@ -151,6 +158,7 @@ func (r *{{ .Connection }}ConnectionResource) Update(ctx context.Context, req re
 		polytomic.UpdateConnectionMutation{
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueString(),
+			{{- if .Attributes }}
 			Configuration: {{ .Config }}{
 				{{ range .Attributes }}{{ .Name }}: 
 				{{ if eq .Type "int" }}int(data.Configuration.Attributes()["{{ .AttrName }}"].({{ .TfType }}).ValueInt64()),
@@ -160,6 +168,7 @@ func (r *{{ .Connection }}ConnectionResource) Update(ctx context.Context, req re
 				{{ end }}
 				{{- end }}
 			},
+			{{- end }}
 		},
 	)
 	if err != nil {

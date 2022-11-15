@@ -114,7 +114,6 @@ func (d *gcsConnectionDataSource) Read(ctx context.Context, req datasource.ReadR
 	data.Id = types.StringValue(connection.ID)
 	data.Name = types.StringValue(connection.Name)
 	data.Organization = types.StringValue(connection.OrganizationId)
-
 	var conf polytomic.GCSConfiguration
 	err = mapstructure.Decode(connection.Configuration, &conf)
 	if err != nil {

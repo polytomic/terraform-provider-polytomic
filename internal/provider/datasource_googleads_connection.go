@@ -8,31 +8,29 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/polytomic-go"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
-var _ datasource.DataSource = &azureblobConnectionDataSource{}
+var _ datasource.DataSource = &googleadsConnectionDataSource{}
 
 // ExampleDataSource defines the data source implementation.
-type azureblobConnectionDataSource struct {
+type googleadsConnectionDataSource struct {
 	client *polytomic.Client
 }
 
-func (d *azureblobConnectionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_azureblob_connection"
+func (d *googleadsConnectionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_googleads_connection"
 }
 
-func (d *azureblobConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
+func (d *googleadsConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Azure Blob Storage Connection",
+		MarkdownDescription: "Google Ads Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"name": {
 				MarkdownDescription: "",
@@ -50,29 +48,16 @@ func (d *azureblobConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Sc
 				Required:            true,
 			},
 			"configuration": {
-				Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
-					"account_name": {
-						MarkdownDescription: "",
-						Type:                types.StringType,
-						Required:            true,
-						Optional:            false,
-						Sensitive:           false,
-					},
-					"container_name": {
-						MarkdownDescription: "",
-						Type:                types.StringType,
-						Required:            true,
-						Optional:            false,
-						Sensitive:           false,
-					},
-				}),
-				Optional: true,
+				Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{}),
+				Optional:   true,
+
+				Type: types.ObjectType{},
 			},
 		},
 	}, nil
 }
 
-func (d *azureblobConnectionDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *googleadsConnectionDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -92,7 +77,7 @@ func (d *azureblobConnectionDataSource) Configure(ctx context.Context, req datas
 	d.client = client
 }
 
-func (d *azureblobConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+func (d *googleadsConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionData
 
 	// Read Terraform configuration data into the model
@@ -114,30 +99,6 @@ func (d *azureblobConnectionDataSource) Read(ctx context.Context, req datasource
 	data.Id = types.StringValue(connection.ID)
 	data.Name = types.StringValue(connection.Name)
 	data.Organization = types.StringValue(connection.OrganizationId)
-	var conf polytomic.AzureBlobConfiguration
-	err = mapstructure.Decode(connection.Configuration, &conf)
-	if err != nil {
-		resp.Diagnostics.AddError("Error decoding connection", err.Error())
-		return
-	}
-
-	var diags diag.Diagnostics
-	data.Configuration, diags = types.ObjectValue(
-		data.Configuration.AttrTypes,
-		map[string]attr.Value{
-			"account_name": types.StringValue(
-				conf.AccountName,
-			),
-			"container_name": types.StringValue(
-				conf.ContainerName,
-			),
-		},
-	)
-
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
 
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)

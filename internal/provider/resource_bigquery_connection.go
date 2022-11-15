@@ -54,6 +54,7 @@ func (t *bigqueryConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schem
 						Sensitive:           false,
 					},
 				}),
+
 				Required: true,
 			},
 			"id": {

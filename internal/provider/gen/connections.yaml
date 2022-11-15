@@ -30,6 +30,41 @@ connections:
       - name: SSL
         type: bool
         optional: true
+      - name: ClientCerts
+        type: bool
+        optional: true
+      - name: ClientCertificate
+        type: string
+        optional: true
+      - name: ClientKey
+        type: string
+        optional: true
+        sensitive: true
+      - name: CACert
+        type: string
+        optional: true
+      - name: ChangeDetection
+        type: bool
+        optional: true
+      - name: Publication
+        type: string
+        optional: true
+      - name: SSH
+        type: bool
+        optional: true
+      - name: SSHUser
+        type: string
+        optional: true
+      - name: SSHHost
+        type: string
+        optional: true
+      - name: SSHPort
+        type: int
+        optional: true
+      - name: PrivateKey
+        type: string
+        optional: true
+        sensitive: true
   - connection: bigquery
     name: Big Query
     type: polytomic.BigQueryConnectionType
@@ -166,3 +201,71 @@ connections:
         required: true
         description: "S3 bucket for output storage, with optional prefix. Examples: `bucket-name`, `bucket-name/prefix`."
         example: "athena-output-bucket"
+  - connection: salesforce
+    name: Salesforce
+    type: polytomic.SalesforceConnectionType
+    config: polytomic.SalesforceConfiguration
+    datasource: true
+    attributes:
+      - name: Username
+        type: string
+        optional: true
+      - name: Domain
+        type: string
+        optional: true
+      - name: InstanceURL
+        type: string
+        optional: true
+      - name: APIVersion
+        type: int
+        optional: true
+  - connection: hubspot
+    name: Hubspot
+    type: polytomic.HubspotConnectionType
+    config: polytomic.HubspotConfiguration
+    datasource: true
+    attributes:
+      - name: HubDomain
+        type: string
+        optional: true
+      - name: HubId
+        type: int
+        optional: true
+  - connection: googleads
+    name: Google Ads
+    type: polytomic.GoogleAdsConnectionType
+    config: polytomic.GoogleAdsConfiguration
+    datasource: true
+    attributes: []
+  - connection: gsheets
+    name: Google Sheets
+    type: polytomic.GoogleSheetsConnectionType
+    config: polytomic.GoogleSheetsConfiguration
+    datasource: true
+    attributes: []
+  - connection: snowflake
+    name: Snowflake
+    type: polytomic.SnowflakeConnectionType
+    config: polytomic.SnowflakeConfiguration
+    datasource: true
+    resource: true
+    attributes:
+      - name: Account
+        type: string
+        required: true
+      - name: Username
+        type: string
+        required: true
+      - name: Password
+        type: string
+        required: true
+        sensitive: true
+      - name: Database
+        type: string
+        required: true
+      - name: Warehouse
+        type: string
+        required: true
+      - name: AdditionalParams
+        type: string
+        optional: true
