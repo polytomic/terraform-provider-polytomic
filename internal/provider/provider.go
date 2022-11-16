@@ -23,6 +23,8 @@ const (
 	PolytomicDeploymentURL = "POLYTOMIC_DEPLOYMENT_URL"
 )
 
+const clientError = "Client Error"
+
 // Ensure provider defined types fully satisfy framework interfaces
 var (
 	_ provider.Provider             = &ptProvider{}
@@ -118,6 +120,7 @@ func (p *ptProvider) Resources(ctx context.Context) []func() resource.Resource {
 	resourceList := []func() resource.Resource{
 		func() resource.Resource { return &organizationResource{} },
 		func() resource.Resource { return &userResource{} },
+		func() resource.Resource { return &bulkSyncResource{} },
 	}
 	all := append(connection_resources, resourceList...)
 	return all
@@ -125,7 +128,12 @@ func (p *ptProvider) Resources(ctx context.Context) []func() resource.Resource {
 }
 
 func (p *ptProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
-	return connection_datasources
+	datasources := []func() datasource.DataSource{
+		func() datasource.DataSource { return &bulkSourceDatasource{} },
+		func() datasource.DataSource { return &bulkDestinationDatasource{} },
+	}
+	all := append(connection_datasources, datasources...)
+	return all
 }
 
 func (p *ptProvider) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
