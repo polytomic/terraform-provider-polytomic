@@ -209,6 +209,8 @@ github.com/polytomic/polytomic-go v0.0.0-20221111150150-3de4251ff854 h1:g9umMr5d
 github.com/polytomic/polytomic-go v0.0.0-20221111150150-3de4251ff854/go.mod h1:OYSOoZCtLFAW6hCf5YGWGXuoX6RgYAd49QEV7v7QLvo=
 github.com/polytomic/polytomic-go v0.0.0-20221111150939-92ec570f710b h1:KbjoYr8LeV4D2LnzigP36UkZlx2GKezMtZ+lJ0AH+Jk=
 github.com/polytomic/polytomic-go v0.0.0-20221111150939-92ec570f710b/go.mod h1:OYSOoZCtLFAW6hCf5YGWGXuoX6RgYAd49QEV7v7QLvo=
+github.com/polytomic/polytomic-go v0.0.0-20221117190638-4693db5a36e1 h1:koeWvwqaJiCaJw8FXj/tEPQ/Ey7/ilJ6Q2w4L7Xygi8=
+github.com/polytomic/polytomic-go v0.0.0-20221117190638-4693db5a36e1/go.mod h1:OYSOoZCtLFAW6hCf5YGWGXuoX6RgYAd49QEV7v7QLvo=
 github.com/posener/complete v1.1.1/go.mod h1:em0nMJCgc9GFtwrmVmEMR/ZL6WyhyjMBndrE9hABlRI=
 github.com/posener/complete v1.2.3 h1:NP0eAhjcjImqslEwo/1hq7gpajME0fTLTezBKDqfXqo=
 github.com/posener/complete v1.2.3/go.mod h1:WZIdtGGp+qx0sLrYKtIRAruyNpv6hFCicSgv7Sy7s/s=
