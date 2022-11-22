@@ -123,7 +123,7 @@ func (d *hubspotConnectionDataSource) Read(ctx context.Context, req datasource.R
 
 	var diags diag.Diagnostics
 	data.Configuration, diags = types.ObjectValue(
-		data.Configuration.AttrTypes,
+		data.Configuration.AttributeTypes(ctx),
 		map[string]attr.Value{
 			"hub_domain": types.StringValue(
 				conf.HubDomain,

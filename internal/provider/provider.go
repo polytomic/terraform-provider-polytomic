@@ -69,10 +69,10 @@ func (p *ptProvider) Configure(ctx context.Context, req provider.ConfigureReques
 		deployKey = data.DeploymentKey.ValueString()
 	}
 
-	if data.APIKey.Null {
+	if data.APIKey.IsNull() {
 		apiKey = os.Getenv(PolytomicAPIKey)
 	} else {
-		apiKey = data.APIKey.Value
+		apiKey = data.APIKey.ValueString()
 	}
 
 	if deployKey == "" && apiKey == "" {
@@ -120,6 +120,7 @@ func (p *ptProvider) Resources(ctx context.Context) []func() resource.Resource {
 	resourceList := []func() resource.Resource{
 		func() resource.Resource { return &organizationResource{} },
 		func() resource.Resource { return &userResource{} },
+		func() resource.Resource { return &modelResource{} },
 		func() resource.Resource { return &bulkSyncResource{} },
 		func() resource.Resource { return &bulkSyncSchemaResource{} },
 	}

@@ -137,7 +137,7 @@ func (d *sqlserverConnectionDataSource) Read(ctx context.Context, req datasource
 
 	var diags diag.Diagnostics
 	data.Configuration, diags = types.ObjectValue(
-		data.Configuration.AttrTypes,
+		data.Configuration.AttributeTypes(ctx),
 		map[string]attr.Value{
 			"hostname": types.StringValue(
 				conf.Hostname,

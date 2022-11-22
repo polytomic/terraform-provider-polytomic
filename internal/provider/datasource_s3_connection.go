@@ -123,7 +123,7 @@ func (d *s3ConnectionDataSource) Read(ctx context.Context, req datasource.ReadRe
 
 	var diags diag.Diagnostics
 	data.Configuration, diags = types.ObjectValue(
-		data.Configuration.AttrTypes,
+		data.Configuration.AttributeTypes(ctx),
 		map[string]attr.Value{
 			"region": types.StringValue(
 				conf.Region,
