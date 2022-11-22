@@ -121,6 +121,7 @@ func (p *ptProvider) Resources(ctx context.Context) []func() resource.Resource {
 		func() resource.Resource { return &organizationResource{} },
 		func() resource.Resource { return &userResource{} },
 		func() resource.Resource { return &bulkSyncResource{} },
+		func() resource.Resource { return &bulkSyncSchemaResource{} },
 	}
 	all := append(connection_resources, resourceList...)
 	return all

@@ -79,26 +79,31 @@ func (r *bulkSyncResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Di
 						MarkdownDescription: "",
 						Type:                types.StringType,
 						Optional:            true,
+						Computed:            true,
 					},
 					"hour": {
 						MarkdownDescription: "",
 						Type:                types.StringType,
 						Optional:            true,
+						Computed:            true,
 					},
 					"minute": {
 						MarkdownDescription: "",
 						Type:                types.StringType,
 						Optional:            true,
+						Computed:            true,
 					},
 					"month": {
 						MarkdownDescription: "",
 						Type:                types.StringType,
 						Optional:            true,
+						Computed:            true,
 					},
 					"day_of_month": {
 						MarkdownDescription: "",
 						Type:                types.StringType,
 						Optional:            true,
+						Computed:            true,
 					},
 				}),
 				Required: true,
@@ -123,6 +128,32 @@ func (r *bulkSyncResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Di
 		},
 	}, nil
 }
+
+func (r *bulkSyncResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+	if req.State.Raw.IsNull() || !req.State.Raw.IsKnown() {
+		return
+	}
+
+	config := &bulkSyncResourceData{}
+	resp.Diagnostics.Append(req.Config.Get(ctx, config)...)
+
+	plan := &bulkSyncResourceData{}
+	resp.Diagnostics.Append(req.Plan.Get(ctx, plan)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	keys := []string{"day_of_week", "hour", "minute", "month", "day_of_month"}
+	for _, key := range keys {
+		if config.Schedule.Attrs[key].IsNull() {
+			plan.Schedule.Attrs[key] = types.StringValue("")
+		}
+	}
+
+	resp.Diagnostics.Append(resp.Plan.Set(ctx, plan)...)
+
+}
+
 func (r *bulkSyncResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
