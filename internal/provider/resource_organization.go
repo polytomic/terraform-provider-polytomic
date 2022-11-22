@@ -14,8 +14,6 @@ import (
 	"github.com/polytomic/polytomic-go"
 )
 
-const clientError = "Client Error"
-
 // Ensure provider defined types fully satisfy framework interfaces
 var _ resource.Resource = &organizationResource{}
 var _ resource.ResourceWithImportState = &organizationResource{}
