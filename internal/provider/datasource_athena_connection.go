@@ -123,7 +123,7 @@ func (d *athenaConnectionDataSource) Read(ctx context.Context, req datasource.Re
 
 	var diags diag.Diagnostics
 	data.Configuration, diags = types.ObjectValue(
-		data.Configuration.AttrTypes,
+		data.Configuration.AttributeTypes(ctx),
 		map[string]attr.Value{
 			"region": types.StringValue(
 				conf.Region,

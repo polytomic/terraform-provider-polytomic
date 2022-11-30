@@ -145,8 +145,8 @@ func (r *bulkSyncResource) ModifyPlan(ctx context.Context, req resource.ModifyPl
 
 	keys := []string{"day_of_week", "hour", "minute", "month", "day_of_month"}
 	for _, key := range keys {
-		if config.Schedule.Attrs[key].IsNull() {
-			plan.Schedule.Attrs[key] = types.StringValue("")
+		if config.Schedule.Attributes()[key].IsNull() {
+			plan.Schedule.Attributes()[key] = types.StringValue("")
 		}
 	}
 

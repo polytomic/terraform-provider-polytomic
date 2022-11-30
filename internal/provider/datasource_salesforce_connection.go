@@ -137,7 +137,7 @@ func (d *salesforceConnectionDataSource) Read(ctx context.Context, req datasourc
 
 	var diags diag.Diagnostics
 	data.Configuration, diags = types.ObjectValue(
-		data.Configuration.AttrTypes,
+		data.Configuration.AttributeTypes(ctx),
 		map[string]attr.Value{
 			"username": types.StringValue(
 				conf.Username,
