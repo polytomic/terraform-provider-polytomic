@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	ModelNotFoundErr = "model not found (404)"
+	ModelNotFoundErr = "not found: model not found (404)"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -448,11 +448,6 @@ func (r *modelResource) Read(ctx context.Context, req resource.ReadRequest, resp
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-	diags = resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
 
 }
 
@@ -611,10 +606,6 @@ func (r *modelResource) Update(ctx context.Context, req resource.UpdateRequest, 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
 	return
 }
 
@@ -631,7 +622,6 @@ func (r *modelResource) Delete(ctx context.Context, req resource.DeleteRequest, 
 	err := r.client.Models().Delete(ctx, data.ID.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Error deleting model", err.Error())
-		return
 	}
 
 }

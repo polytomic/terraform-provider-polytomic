@@ -10,7 +10,7 @@ require (
 	github.com/hashicorp/terraform-plugin-log v0.7.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.24.0
 	github.com/mitchellh/mapstructure v1.5.0
-	github.com/polytomic/polytomic-go v0.0.0-20221128194012-ebadebc93c53
+	github.com/polytomic/polytomic-go v0.0.0-20221212155257-741086f11283
 	gopkg.in/yaml.v2 v2.3.0
 )
 
