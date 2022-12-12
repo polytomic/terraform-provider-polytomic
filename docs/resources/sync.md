@@ -136,14 +136,23 @@ Required:
 
 Required:
 
-- `function` (String)
-- `source` (String)
+- `source` (Attributes) (see [below for nested schema](#nestedatt--identity--source))
 - `target` (String)
 
 Optional:
 
+- `function` (String)
 - `new_field` (Boolean)
 - `remote_field_type_id` (String)
+
+<a id="nestedatt--identity--source"></a>
+### Nested Schema for `identity.source`
+
+Required:
+
+- `field` (String)
+- `model_id` (String)
+
 
 
 <a id="nestedatt--override_fields"></a>

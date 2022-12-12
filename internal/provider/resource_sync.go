@@ -50,6 +50,7 @@ func (r *syncResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagno
 						MarkdownDescription: "",
 						Type:                types.StringType,
 						Optional:            true,
+						Computed:            true,
 					},
 					"search_values": {
 						MarkdownDescription: "",
@@ -65,6 +66,7 @@ func (r *syncResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagno
 						MarkdownDescription: "",
 						Type:                types.StringType,
 						Optional:            true,
+						Computed:            true,
 					},
 					"filter_logic": {
 						MarkdownDescription: "",
@@ -251,8 +253,19 @@ func (r *syncResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagno
 				Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
 					"source": {
 						MarkdownDescription: "",
-						Type:                types.StringType,
-						Required:            true,
+						Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
+							"model_id": {
+								MarkdownDescription: "",
+								Type:                types.StringType,
+								Required:            true,
+							},
+							"field": {
+								MarkdownDescription: "",
+								Type:                types.StringType,
+								Required:            true,
+							},
+						}),
+						Required: true,
 					},
 					"target": {
 						MarkdownDescription: "",
@@ -262,17 +275,20 @@ func (r *syncResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagno
 					"function": {
 						MarkdownDescription: "",
 						Type:                types.StringType,
-						Required:            true,
+						Optional:            true,
+						Computed:            true,
 					},
 					"remote_field_type_id": {
 						MarkdownDescription: "",
 						Type:                types.StringType,
 						Optional:            true,
+						Computed:            true,
 					},
 					"new_field": {
 						MarkdownDescription: "",
 						Type:                types.BoolType,
 						Optional:            true,
+						Computed:            true,
 					},
 				}),
 				Optional: true,
@@ -419,6 +435,15 @@ func (r *syncResource) Create(ctx context.Context, req resource.CreateRequest, r
 
 	data.ID = types.StringValue(sync.ID)
 	data.Name = types.StringValue(sync.Name)
+
+	// Override the target object for reasons...
+	// It's possible the target is a new target in which case
+	// the "new" placeholder will be changed to the actual target ID
+	// in the return. This causes terraform barf with
+	// `Provider produced inconsistent result after apply`
+	// For now, we'll just override the target object state with the
+	// sent object
+	sync.Target = target
 	data.Target, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"connection_id": types.StringType,
 		"object":        types.StringType,
@@ -501,7 +526,12 @@ func (r *syncResource) Create(ctx context.Context, req resource.CreateRequest, r
 		return
 	}
 	data.Identity, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"source":               types.StringType,
+		"source": types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				"model_id": types.StringType,
+				"field":    types.StringType,
+			},
+		},
 		"target":               types.StringType,
 		"function":             types.StringType,
 		"remote_field_type_id": types.StringType,
@@ -709,7 +739,12 @@ func (r *syncResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		return
 	}
 	data.Identity, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"source":               types.StringType,
+		"source": types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				"model_id": types.StringType,
+				"field":    types.StringType,
+			},
+		},
 		"target":               types.StringType,
 		"function":             types.StringType,
 		"remote_field_type_id": types.StringType,
