@@ -80,7 +80,7 @@ connections:
         example_type_override: variable
       - name: Location
         type: string
-        required: true
+        optional: true
         example: us-central1
   - connection: gcs
     name: Google Cloud Storage
