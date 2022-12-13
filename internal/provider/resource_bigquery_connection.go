@@ -49,8 +49,8 @@ func (t *bigqueryConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schem
 					"location": {
 						MarkdownDescription: "",
 						Type:                types.StringType,
-						Required:            true,
-						Optional:            false,
+						Required:            false,
+						Optional:            true,
 						Sensitive:           false,
 					},
 				}),
