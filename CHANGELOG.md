@@ -1,3 +1,12 @@
+## 0.2.0 (14 Dec 2022)
+
+FEATURES
+
+* Added support for Connection data sources
+* Added support for Bulk Sync resources
+* Added support for Model resources
+* Added support for Model Sync resources
+
 ## 0.1.7 (26 Oct 2022)
 
 FEATURES
