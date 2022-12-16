@@ -45,7 +45,7 @@ func (d *gsheetsConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Sche
 			"organization": {
 				MarkdownDescription: "",
 				Type:                types.StringType,
-				Required:            true,
+				Optional:            true,
 			},
 			"configuration": {
 				Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{}),

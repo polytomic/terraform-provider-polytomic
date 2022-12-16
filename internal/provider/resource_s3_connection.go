@@ -27,11 +27,9 @@ func (t *s3ConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, dia
 		Attributes: map[string]tfsdk.Attribute{
 			"organization": {
 				MarkdownDescription: "Organization ID",
-				Required:            true,
+				Optional:            true,
+				Computed:            true,
 				Type:                types.StringType,
-				PlanModifiers: tfsdk.AttributePlanModifiers{
-					resource.RequiresReplace(),
-				},
 			},
 			"name": {
 				Type:     types.StringType,
@@ -119,6 +117,8 @@ func (r *s3ConnectionResource) Create(ctx context.Context, req resource.CreateRe
 		return
 	}
 	data.Id = types.StringValue(created.ID)
+	data.Name = types.StringValue(created.Name)
+
 	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "s3", "id": created.ID})
 
 	diags = resp.State.Set(ctx, &data)
@@ -146,7 +146,6 @@ func (r *s3ConnectionResource) Read(ctx context.Context, req resource.ReadReques
 	}
 
 	data.Id = types.StringValue(connection.ID)
-	data.Organization = types.StringValue(connection.OrganizationId)
 	data.Name = types.StringValue(connection.Name)
 
 	diags = resp.State.Set(ctx, &data)
@@ -182,7 +181,6 @@ func (r *s3ConnectionResource) Update(ctx context.Context, req resource.UpdateRe
 	}
 
 	data.Id = types.StringValue(updated.ID)
-	data.Organization = types.StringValue(updated.OrganizationId)
 	data.Name = types.StringValue(updated.Name)
 
 	diags = resp.State.Set(ctx, &data)

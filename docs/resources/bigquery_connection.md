@@ -14,8 +14,7 @@ Big Query Connection
 
 ```terraform
 resource "polytomic_bigquery_connection" "bigquery" {
-  organization = polytomic_organization.acme.id
-  name         = "example"
+  name = "example"
   configuration = {
     service_account_credentials = data.account_credentials.json
     location                    = "us-central1"
@@ -30,6 +29,9 @@ resource "polytomic_bigquery_connection" "bigquery" {
 
 - `configuration` (Attributes) (see [below for nested schema](#nestedatt--configuration))
 - `name` (String)
+
+### Optional
+
 - `organization` (String) Organization ID
 
 ### Read-Only

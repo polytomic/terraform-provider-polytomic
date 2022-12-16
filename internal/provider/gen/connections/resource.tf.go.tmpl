@@ -1,5 +1,4 @@
 resource "{{ .Resource }}" "{{ .Name }}" {
-  organization = polytomic_organization.acme.id
   name         = "example"
   configuration = {
    {{- range .Attributes }}

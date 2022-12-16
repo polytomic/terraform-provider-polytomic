@@ -14,8 +14,7 @@ Azure Blob Storage Connection
 
 ```terraform
 resource "polytomic_azureblob_connection" "azureblob" {
-  organization = polytomic_organization.acme.id
-  name         = "example"
+  name = "example"
   configuration = {
     account_name   = "my-account"
     access_key     = "abcdefghijklmnopqrstuvwxyz0123456789=="
@@ -31,6 +30,9 @@ resource "polytomic_azureblob_connection" "azureblob" {
 
 - `configuration` (Attributes) (see [below for nested schema](#nestedatt--configuration))
 - `name` (String)
+
+### Optional
+
 - `organization` (String) Organization ID
 
 ### Read-Only

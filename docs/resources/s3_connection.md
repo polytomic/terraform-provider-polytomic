@@ -14,8 +14,7 @@ S3 Connection
 
 ```terraform
 resource "polytomic_s3_connection" "s3" {
-  organization = polytomic_organization.acme.id
-  name         = "example"
+  name = "example"
   configuration = {
     access_key_id     = "EXAMPLEACCESSKEYID"
     access_key_secret = "EXAMPLEACCESSKEYSECRET"
@@ -32,6 +31,9 @@ resource "polytomic_s3_connection" "s3" {
 
 - `configuration` (Attributes) (see [below for nested schema](#nestedatt--configuration))
 - `name` (String)
+
+### Optional
+
 - `organization` (String) Organization ID
 
 ### Read-Only

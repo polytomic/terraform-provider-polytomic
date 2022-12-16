@@ -47,7 +47,7 @@ func (d *bigqueryConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Sch
 			"organization": {
 				MarkdownDescription: "",
 				Type:                types.StringType,
-				Required:            true,
+				Optional:            true,
 			},
 			"configuration": {
 				Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{

@@ -47,7 +47,7 @@ func (d *snowflakeConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Sc
 			"organization": {
 				MarkdownDescription: "",
 				Type:                types.StringType,
-				Required:            true,
+				Optional:            true,
 			},
 			"configuration": {
 				Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{

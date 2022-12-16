@@ -1,6 +1,5 @@
 resource "polytomic_sqlserver_connection" "sqlserver" {
-  organization = polytomic_organization.acme.id
-  name         = "example"
+  name = "example"
   configuration = {
     hostname = "sqlserver.azure.example.com"
     username = "polytomic"

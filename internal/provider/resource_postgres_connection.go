@@ -27,11 +27,9 @@ func (t *postgresConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schem
 		Attributes: map[string]tfsdk.Attribute{
 			"organization": {
 				MarkdownDescription: "Organization ID",
-				Required:            true,
+				Optional:            true,
+				Computed:            true,
 				Type:                types.StringType,
-				PlanModifiers: tfsdk.AttributePlanModifiers{
-					resource.RequiresReplace(),
-				},
 			},
 			"name": {
 				Type:     types.StringType,
@@ -223,6 +221,8 @@ func (r *postgresConnectionResource) Create(ctx context.Context, req resource.Cr
 		return
 	}
 	data.Id = types.StringValue(created.ID)
+	data.Name = types.StringValue(created.Name)
+
 	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "postgres", "id": created.ID})
 
 	diags = resp.State.Set(ctx, &data)
@@ -250,7 +250,6 @@ func (r *postgresConnectionResource) Read(ctx context.Context, req resource.Read
 	}
 
 	data.Id = types.StringValue(connection.ID)
-	data.Organization = types.StringValue(connection.OrganizationId)
 	data.Name = types.StringValue(connection.Name)
 
 	diags = resp.State.Set(ctx, &data)
@@ -299,7 +298,6 @@ func (r *postgresConnectionResource) Update(ctx context.Context, req resource.Up
 	}
 
 	data.Id = types.StringValue(updated.ID)
-	data.Organization = types.StringValue(updated.OrganizationId)
 	data.Name = types.StringValue(updated.Name)
 
 	diags = resp.State.Set(ctx, &data)

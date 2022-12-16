@@ -47,7 +47,7 @@ func (d *s3ConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, d
 			"organization": {
 				MarkdownDescription: "",
 				Type:                types.StringType,
-				Required:            true,
+				Optional:            true,
 			},
 			"configuration": {
 				Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
