@@ -21,6 +21,8 @@ const (
 	PolytomicAPIKey = "POLYTOMIC_API_KEY"
 	//PolytomicDeploymentURL is the environment variable name for the Polytomic deployment URL
 	PolytomicDeploymentURL = "POLYTOMIC_DEPLOYMENT_URL"
+
+	PolytomicDefaultURL = "app.polytomic.com"
 )
 
 const clientError = "Client Error"
@@ -91,11 +93,7 @@ func (p *ptProvider) Configure(ctx context.Context, req provider.ConfigureReques
 	}
 
 	if deployURL == "" {
-		resp.Diagnostics.AddError(
-			"Missing Polytomic Deployment URL",
-			fmt.Sprintf(`Please set the "deployment_url" in the provider configuration or the %s environment variable`, PolytomicDeploymentURL),
-		)
-		return
+		deployURL = PolytomicDefaultURL
 	}
 	var client *polytomic.Client
 	// Deployment key is the default and takes precedence
