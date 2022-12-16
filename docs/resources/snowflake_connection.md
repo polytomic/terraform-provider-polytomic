@@ -14,8 +14,7 @@ Snowflake Connection
 
 ```terraform
 resource "polytomic_snowflake_connection" "snowflake" {
-  organization = polytomic_organization.acme.id
-  name         = "example"
+  name = "example"
   configuration = {
   }
 }
@@ -28,6 +27,9 @@ resource "polytomic_snowflake_connection" "snowflake" {
 
 - `configuration` (Attributes) (see [below for nested schema](#nestedatt--configuration))
 - `name` (String)
+
+### Optional
+
 - `organization` (String) Organization ID
 
 ### Read-Only

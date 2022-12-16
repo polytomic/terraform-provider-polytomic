@@ -47,7 +47,7 @@ func (d *gcsConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, 
 			"organization": {
 				MarkdownDescription: "",
 				Type:                types.StringType,
-				Required:            true,
+				Optional:            true,
 			},
 			"configuration": {
 				Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{

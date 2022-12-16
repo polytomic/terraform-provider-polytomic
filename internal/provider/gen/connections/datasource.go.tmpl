@@ -49,7 +49,7 @@ func (d *{{ .Connection }}ConnectionDataSource) GetSchema(ctx context.Context) (
 			"organization": {
 				MarkdownDescription: "",
 				Type:                types.StringType,
-				Required:            true,
+				Optional:            true,
 			},
 			"configuration": {
 				Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{

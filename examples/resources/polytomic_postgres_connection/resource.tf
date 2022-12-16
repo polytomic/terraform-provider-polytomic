@@ -1,6 +1,5 @@
 resource "polytomic_postgres_connection" "postgres" {
-  organization = polytomic_organization.acme.id
-  name         = "example"
+  name = "example"
   configuration = {
     hostname = "acme.postgres.database.example.com"
     username = "acme"

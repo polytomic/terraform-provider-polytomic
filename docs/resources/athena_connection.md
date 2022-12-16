@@ -14,8 +14,7 @@ AWS Athena Connection
 
 ```terraform
 resource "polytomic_athena_connection" "athena" {
-  organization = polytomic_organization.acme.id
-  name         = "example"
+  name = "example"
   configuration = {
     access_key_id     = "EXAMPLEACCESSKEYID"
     access_key_secret = "EXAMPLEACCESSKEYSECRET"
@@ -32,6 +31,9 @@ resource "polytomic_athena_connection" "athena" {
 
 - `configuration` (Attributes) (see [below for nested schema](#nestedatt--configuration))
 - `name` (String)
+
+### Optional
+
 - `organization` (String) Organization ID
 
 ### Read-Only

@@ -14,8 +14,7 @@ PostgresSQL Connection
 
 ```terraform
 resource "polytomic_postgres_connection" "postgres" {
-  organization = polytomic_organization.acme.id
-  name         = "example"
+  name = "example"
   configuration = {
     hostname = "acme.postgres.database.example.com"
     username = "acme"
@@ -33,6 +32,9 @@ resource "polytomic_postgres_connection" "postgres" {
 
 - `configuration` (Attributes) (see [below for nested schema](#nestedatt--configuration))
 - `name` (String)
+
+### Optional
+
 - `organization` (String) Organization ID
 
 ### Read-Only
