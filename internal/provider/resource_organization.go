@@ -175,24 +175,12 @@ func (r *organizationResource) Update(ctx context.Context, req resource.UpdateRe
 }
 
 func (r *organizationResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data organizationResourceData
+	// TODO: Implement maybe?
 
-	diags := req.State.Get(ctx, &data)
-	resp.Diagnostics.Append(diags...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
-	wsId, err := uuid.Parse(data.Id.ValueString())
-	if err != nil {
-		resp.Diagnostics.AddError("Value Error", fmt.Sprintf("Invalid organization ID %s; error when parsing: %s", data.Id.ValueString(), err))
-		return
-	}
-	err = r.client.Organizations().Delete(ctx, wsId)
-	if err != nil {
-		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting organization: %s", err))
-		return
-	}
+	// We don't currently support deleting organizations via the API
+	// since it's a destructive operation. We may want to support this
+	// in the future, but for now we'll just log a warning.
+	resp.Diagnostics.AddWarning("Deleting organizations is not currently supported by the API", "Please delete the organization manually.")
 }
 
 func (r *organizationResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
