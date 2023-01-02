@@ -9,22 +9,24 @@ import (
 )
 
 func init() {
-
-	var apiKey string
+	// Root flags
+	var apiKey, url string
 	rootCmd.PersistentFlags().StringVar(&apiKey, "api-key", "", "Polytomic API key")
 	viper.BindPFlag("api-key", rootCmd.PersistentFlags().Lookup("api-key"))
-	var url string
 	rootCmd.PersistentFlags().StringVar(&url, "url", "https://api.polytomic.com", "Polytomic API URL")
 	viper.BindPFlag("url", rootCmd.PersistentFlags().Lookup("url"))
 
-	// Persistent flags
+	// Run flags
 	var output string
 	runCmd.PersistentFlags().StringVar(&output, "output", ".", "Output directory for generated files (defaults to current directory)")
 	runCmd.PersistentFlags().Bool("replace", false, "Replace existing files")
 	viper.BindPFlag("output", runCmd.PersistentFlags().Lookup("output"))
 	viper.BindPFlag("replace", runCmd.PersistentFlags().Lookup("replace"))
 
+	// Register commands
 	rootCmd.AddCommand(runCmd)
+
+	// Hide completions
 	rootCmd.CompletionOptions.HiddenDefaultCmd = true
 }
 

@@ -29,7 +29,7 @@ See [Polytomic Importer](./importer/README.md)
 
 If you wish to work on the provider, you'll first need [Go](http://www.golang.org) installed on your machine (see [Requirements](#requirements) above).
 
-Connections can be added by editing `provider/gen/connections.yaml` and running `go generate`
+Connections can be added by editing `provider/gen/connections/connections.yaml` and running `go generate`
 
 To compile the provider, run `go install`. This will build the provider and put the provider binary in the `$GOPATH/bin` directory.
 
