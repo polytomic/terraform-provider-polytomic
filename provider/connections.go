@@ -10,7 +10,7 @@ import (
 
 var (
 	connection_resources = []func() resource.Resource{
-		func() resource.Resource { return &postgresConnectionResource{} },
+		func() resource.Resource { return &postgresqlConnectionResource{} },
 		func() resource.Resource { return &bigqueryConnectionResource{} },
 		func() resource.Resource { return &gcsConnectionResource{} },
 		func() resource.Resource { return &azureblobConnectionResource{} },
@@ -21,7 +21,7 @@ var (
 	}
 
 	connection_datasources = []func() datasource.DataSource{
-		func() datasource.DataSource { return &postgresConnectionDataSource{} },
+		func() datasource.DataSource { return &postgresqlConnectionDataSource{} },
 		func() datasource.DataSource { return &bigqueryConnectionDataSource{} },
 		func() datasource.DataSource { return &gcsConnectionDataSource{} },
 		func() datasource.DataSource { return &azureblobConnectionDataSource{} },

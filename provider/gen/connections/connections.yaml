@@ -1,5 +1,5 @@
 connections:
-  - connection: postgres
+  - connection: postgresql
     name: PostgresSQL
     type: polytomic.PostgresqlConnectionType
     config: polytomic.PostgresqlConfiguration
@@ -66,7 +66,7 @@ connections:
         optional: true
         sensitive: true
   - connection: bigquery
-    name: Big Query
+    name: BigQuery
     type: polytomic.BigQueryConnectionType
     config: polytomic.BigQueryConfiguration
     resource: true
@@ -78,6 +78,7 @@ connections:
         sensitive: true
         example: data.account_credentials.json
         example_type_override: variable
+        alias: service_account
       - name: Location
         type: string
         optional: true
@@ -263,6 +264,7 @@ connections:
       - name: Database
         type: string
         required: true
+        alias: dbname
       - name: Warehouse
         type: string
         required: true

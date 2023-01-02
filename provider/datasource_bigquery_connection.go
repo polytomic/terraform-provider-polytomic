@@ -32,7 +32,7 @@ func (d *bigqueryConnectionDataSource) Metadata(ctx context.Context, req datasou
 func (d *bigqueryConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Big Query Connection",
+		MarkdownDescription: "BigQuery Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"name": {
 				MarkdownDescription: "",

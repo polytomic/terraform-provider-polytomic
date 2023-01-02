@@ -6,11 +6,11 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
-	"github.com/polytomic/terraform-provider-polytomic/internal/provider"
+	"github.com/polytomic/terraform-provider-polytomic/provider"
 )
 
-//go:generate go run internal/provider/gen/gen.go
-//go:generate goimports -w ./internal/provider/..
+//go:generate go run provider/gen/gen.go
+//go:generate goimports -w ./provider/..
 //go:generate terraform fmt -recursive ./examples/
 //go:generate go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs
 
@@ -25,7 +25,6 @@ var (
 
 func main() {
 	var debug bool
-
 	flag.BoolVar(&debug, "debug", false, "set to true to run the provider with support for debuggers like delve")
 	flag.Parse()
 

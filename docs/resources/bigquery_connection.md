@@ -3,12 +3,12 @@
 page_title: "polytomic_bigquery_connection Resource - terraform-provider-polytomic"
 subcategory: ""
 description: |-
-  Big Query Connection
+  BigQuery Connection
 ---
 
 # polytomic_bigquery_connection (Resource)
 
-Big Query Connection
+BigQuery Connection
 
 ## Example Usage
 
@@ -36,7 +36,7 @@ resource "polytomic_bigquery_connection" "bigquery" {
 
 ### Read-Only
 
-- `id` (String) Big Query Connection identifier
+- `id` (String) BigQuery Connection identifier
 
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
