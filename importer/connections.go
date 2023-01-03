@@ -4,11 +4,8 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"html/template"
 	"io/ioutil"
-	"os"
-	"path/filepath"
-	"syscall"
+	"text/template"
 
 	"github.com/rs/zerolog/log"
 
@@ -19,11 +16,13 @@ import (
 )
 
 const (
-	ImportFileName   = "import_connections.sh"
-	ResourceFileName = "connections.tf"
+	ConnectionsResourceFileName = "connections.tf"
 )
 
-var connTemplate = `
+var (
+	_ Importable = &Connections{}
+
+	connTemplate = `
 resource "{{ .Resource }}" "{{ .ResourceName }}" {
 	  name = "{{ .Name }}"
 	  organization = "{{ .Organization }}"
@@ -37,12 +36,7 @@ resource "{{ .Resource }}" "{{ .ResourceName }}" {
 		{{- end }}
 	  }
 }`
-
-type Config struct {
-	Name  string
-	Type  string
-	Value interface{}
-}
+)
 
 type Connections struct {
 	c *polytomic.Client
@@ -59,6 +53,12 @@ type Connection struct {
 	Schema       connections.Connection
 	SourceData   polytomic.Connection
 	Config       []Config
+}
+
+type Config struct {
+	Name  string
+	Type  string
+	Value interface{}
 }
 
 func NewConnections(c *polytomic.Client) *Connections {
@@ -148,29 +148,17 @@ func (c *Connections) Init(ctx context.Context) error {
 }
 
 func (c *Connections) GenerateTerraformFiles(ctx context.Context, path string, recreate bool) error {
-	if recreate {
-		err := os.Remove(filepath.Join(path, ResourceFileName))
-		if err != nil {
-			e, ok := err.(*os.PathError)
-			if ok && e.Err == syscall.ENOENT {
-				// File doesn't exist, ignore
-			} else {
-				return err
-			}
-		}
+	f, err := createFile(recreate, 0644, path, ConnectionsResourceFileName)
+	if err != nil {
+		return err
 	}
+	defer f.Close()
 	for _, conn := range c.Resources {
 		tmpl, err := template.New("template").Parse(connTemplate)
 		if err != nil {
 			return err
 		}
 		var buf bytes.Buffer
-		f, err := os.OpenFile(
-			filepath.Join(path, ResourceFileName), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-		if err != nil {
-			return err
-		}
-		defer f.Close()
 		err = tmpl.Execute(&buf, Connection{
 			Resource:     connections.TerraformResourceName(conn.Schema.Connection),
 			ResourceName: provider.ToSnakeCase(conn.Name),
@@ -189,34 +177,14 @@ func (c *Connections) GenerateTerraformFiles(ctx context.Context, path string, r
 	return nil
 }
 
-func (c *Connections) Imports(ctx context.Context, path string, recreate bool) error {
-	if recreate {
-		err := os.Remove(filepath.Join(path, ImportFileName))
-		if err != nil {
-			e, ok := err.(*os.PathError)
-			if ok && e.Err == syscall.ENOENT {
-				// File doesn't exist, ignore
-			} else {
-				return err
-			}
-		}
-	}
-	f, err := os.OpenFile(
-		filepath.Join(path, ImportFileName), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
+func (c *Connections) GenerateImports(ctx context.Context, path string, recreate bool) (bytes.Buffer, error) {
+	var buf bytes.Buffer
 	for _, conn := range c.Resources {
-		_, err = f.Write([]byte(fmt.Sprintf("terraform import %s.%s %s", connections.TerraformResourceName(conn.Schema.Connection), conn.ResourceName, conn.ID)))
-		if err != nil {
-			return err
-		}
-		_, err = f.Write([]byte(" # " + conn.Name + "\n"))
-		if err != nil {
-			return err
-		}
+		buf.Write([]byte(fmt.Sprintf("terraform import %s.%s %s",
+			connections.TerraformResourceName(conn.Schema.Connection),
+			conn.ResourceName,
+			conn.ID)))
+		buf.Write([]byte(fmt.Sprintf(" # %s\n", conn.Name)))
 	}
-	return nil
-
+	return buf, nil
 }
