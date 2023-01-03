@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"text/template"
 
@@ -147,12 +148,7 @@ func (c *Connections) Init(ctx context.Context) error {
 	return nil
 }
 
-func (c *Connections) GenerateTerraformFiles(ctx context.Context, path string, recreate bool) error {
-	f, err := createFile(recreate, 0644, path, ConnectionsResourceFileName)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
+func (c *Connections) GenerateTerraformFiles(ctx context.Context, w io.Writer) error {
 	for _, conn := range c.Resources {
 		tmpl, err := template.New("template").Parse(connTemplate)
 		if err != nil {
@@ -169,7 +165,7 @@ func (c *Connections) GenerateTerraformFiles(ctx context.Context, path string, r
 		if err != nil {
 			return err
 		}
-		_, err = f.Write(buf.Bytes())
+		_, err = w.Write(buf.Bytes())
 		if err != nil {
 			return err
 		}
@@ -177,14 +173,17 @@ func (c *Connections) GenerateTerraformFiles(ctx context.Context, path string, r
 	return nil
 }
 
-func (c *Connections) GenerateImports(ctx context.Context, path string, recreate bool) (bytes.Buffer, error) {
-	var buf bytes.Buffer
+func (c *Connections) GenerateImports(ctx context.Context, w io.Writer) error {
 	for _, conn := range c.Resources {
-		buf.Write([]byte(fmt.Sprintf("terraform import %s.%s %s",
+		w.Write([]byte(fmt.Sprintf("terraform import %s.%s %s",
 			connections.TerraformResourceName(conn.Schema.Connection),
 			conn.ResourceName,
 			conn.ID)))
-		buf.Write([]byte(fmt.Sprintf(" # %s\n", conn.Name)))
+		w.Write([]byte(fmt.Sprintf(" # %s\n", conn.Name)))
 	}
-	return buf, nil
+	return nil
+}
+
+func (c *Connections) Filename() string {
+	return ConnectionsResourceFileName
 }
