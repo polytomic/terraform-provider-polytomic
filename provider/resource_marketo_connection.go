@@ -72,7 +72,7 @@ func (t *MarketoConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema
 						Optional:            true,
 						Sensitive:           false,
 					},
-					"concurrent_import_jobs": {
+					"concurrent_imports": {
 						MarkdownDescription: "",
 						Type:                types.Int64Type,
 						Required:            false,
@@ -119,12 +119,12 @@ func (r *MarketoConnectionResource) Create(ctx context.Context, req resource.Cre
 			Type:           polytomic.MarketoConnectionType,
 			OrganizationId: data.Organization.ValueString(),
 			Configuration: polytomic.MarketoConfiguration{
-				ClientID:             data.Configuration.Attributes()["client_id"].(types.String).ValueString(),
-				ClientSecret:         data.Configuration.Attributes()["client_secret"].(types.String).ValueString(),
-				RESTEndpoint:         data.Configuration.Attributes()["rest_endpoint"].(types.String).ValueString(),
-				EnforceAPILimits:     data.Configuration.Attributes()["enforce_api_limits"].(types.Bool).ValueBool(),
-				DailyAPICalls:        int(data.Configuration.Attributes()["daily_api_calls"].(types.Int64).ValueInt64()),
-				ConcurrentImportJobs: int(data.Configuration.Attributes()["concurrent_import_jobs"].(types.Int64).ValueInt64()),
+				ClientID:          data.Configuration.Attributes()["client_id"].(types.String).ValueString(),
+				ClientSecret:      data.Configuration.Attributes()["client_secret"].(types.String).ValueString(),
+				RESTEndpoint:      data.Configuration.Attributes()["rest_endpoint"].(types.String).ValueString(),
+				EnforceAPILimits:  data.Configuration.Attributes()["enforce_api_limits"].(types.Bool).ValueBool(),
+				DailyAPICalls:     int(data.Configuration.Attributes()["daily_api_calls"].(types.Int64).ValueInt64()),
+				ConcurrentImports: int(data.Configuration.Attributes()["concurrent_imports"].(types.Int64).ValueInt64()),
 			},
 		},
 	)
@@ -184,12 +184,12 @@ func (r *MarketoConnectionResource) Update(ctx context.Context, req resource.Upd
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueString(),
 			Configuration: polytomic.MarketoConfiguration{
-				ClientID:             data.Configuration.Attributes()["client_id"].(types.String).ValueString(),
-				ClientSecret:         data.Configuration.Attributes()["client_secret"].(types.String).ValueString(),
-				RESTEndpoint:         data.Configuration.Attributes()["rest_endpoint"].(types.String).ValueString(),
-				EnforceAPILimits:     data.Configuration.Attributes()["enforce_api_limits"].(types.Bool).ValueBool(),
-				DailyAPICalls:        int(data.Configuration.Attributes()["daily_api_calls"].(types.Int64).ValueInt64()),
-				ConcurrentImportJobs: int(data.Configuration.Attributes()["concurrent_import_jobs"].(types.Int64).ValueInt64()),
+				ClientID:          data.Configuration.Attributes()["client_id"].(types.String).ValueString(),
+				ClientSecret:      data.Configuration.Attributes()["client_secret"].(types.String).ValueString(),
+				RESTEndpoint:      data.Configuration.Attributes()["rest_endpoint"].(types.String).ValueString(),
+				EnforceAPILimits:  data.Configuration.Attributes()["enforce_api_limits"].(types.Bool).ValueBool(),
+				DailyAPICalls:     int(data.Configuration.Attributes()["daily_api_calls"].(types.Int64).ValueInt64()),
+				ConcurrentImports: int(data.Configuration.Attributes()["concurrent_imports"].(types.Int64).ValueInt64()),
 			},
 		},
 	)

@@ -338,7 +338,7 @@ connections:
       - name: DailyAPICalls
         type: int
         optional: true
-      - name: ConcurrentImportJobs
+      - name: ConcurrentImports
         type: int
         optional: true
   - connection: mongodb

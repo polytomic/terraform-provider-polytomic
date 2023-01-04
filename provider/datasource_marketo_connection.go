@@ -79,7 +79,7 @@ func (d *MarketoConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Sche
 						Optional:            true,
 						Sensitive:           false,
 					},
-					"concurrent_import_jobs": {
+					"concurrent_imports": {
 						MarkdownDescription: "",
 						Type:                types.Int64Type,
 						Required:            false,
@@ -158,8 +158,8 @@ func (d *MarketoConnectionDataSource) Read(ctx context.Context, req datasource.R
 			"daily_api_calls": types.Int64Value(
 				int64(conf.DailyAPICalls),
 			),
-			"concurrent_import_jobs": types.Int64Value(
-				int64(conf.ConcurrentImportJobs),
+			"concurrent_imports": types.Int64Value(
+				int64(conf.ConcurrentImports),
 			),
 		},
 	)

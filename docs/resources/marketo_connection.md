@@ -47,7 +47,7 @@ Required:
 
 Optional:
 
-- `concurrent_import_jobs` (Number)
+- `concurrent_imports` (Number)
 - `daily_api_calls` (Number)
 - `enforce_api_limits` (Boolean)
 
