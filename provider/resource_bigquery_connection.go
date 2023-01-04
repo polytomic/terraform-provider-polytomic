@@ -18,10 +18,10 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
-var _ resource.Resource = &bigqueryConnectionResource{}
-var _ resource.ResourceWithImportState = &bigqueryConnectionResource{}
+var _ resource.Resource = &BigqueryConnectionResource{}
+var _ resource.ResourceWithImportState = &BigqueryConnectionResource{}
 
-func (t *bigqueryConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
+func (t *BigqueryConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
 		MarkdownDescription: "BigQuery Connection",
 		Attributes: map[string]tfsdk.Attribute{
@@ -37,7 +37,14 @@ func (t *bigqueryConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schem
 			},
 			"configuration": {
 				Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
-					"service_account_credentials": {
+					"project_id": {
+						MarkdownDescription: "",
+						Type:                types.StringType,
+						Required:            true,
+						Optional:            false,
+						Sensitive:           false,
+					},
+					"service_account": {
 						MarkdownDescription: "",
 						Type:                types.StringType,
 						Required:            true,
@@ -67,15 +74,15 @@ func (t *bigqueryConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schem
 	}, nil
 }
 
-func (r *bigqueryConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *BigqueryConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_bigquery_connection"
 }
 
-type bigqueryConnectionResource struct {
+type BigqueryConnectionResource struct {
 	client *polytomic.Client
 }
 
-func (r *bigqueryConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *BigqueryConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data connectionData
 
 	diags := req.Config.Get(ctx, &data)
@@ -91,8 +98,9 @@ func (r *bigqueryConnectionResource) Create(ctx context.Context, req resource.Cr
 			Type:           polytomic.BigQueryConnectionType,
 			OrganizationId: data.Organization.ValueString(),
 			Configuration: polytomic.BigQueryConfiguration{
-				ServiceAccountCredentials: data.Configuration.Attributes()["service_account_credentials"].(types.String).ValueString(),
-				Location:                  data.Configuration.Attributes()["location"].(types.String).ValueString(),
+				ProjectID:      data.Configuration.Attributes()["project_id"].(types.String).ValueString(),
+				ServiceAccount: data.Configuration.Attributes()["service_account"].(types.String).ValueString(),
+				Location:       data.Configuration.Attributes()["location"].(types.String).ValueString(),
 			},
 		},
 	)
@@ -103,13 +111,13 @@ func (r *bigqueryConnectionResource) Create(ctx context.Context, req resource.Cr
 	data.Id = types.StringValue(created.ID)
 	data.Name = types.StringValue(created.Name)
 
-	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "bigquery", "id": created.ID})
+	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Bigquery", "id": created.ID})
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r *bigqueryConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *BigqueryConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data connectionData
 
 	diags := req.State.Get(ctx, &data)
@@ -136,7 +144,7 @@ func (r *bigqueryConnectionResource) Read(ctx context.Context, req resource.Read
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r *bigqueryConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *BigqueryConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var data connectionData
 
 	diags := req.Plan.Get(ctx, &data)
@@ -152,8 +160,9 @@ func (r *bigqueryConnectionResource) Update(ctx context.Context, req resource.Up
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueString(),
 			Configuration: polytomic.BigQueryConfiguration{
-				ServiceAccountCredentials: data.Configuration.Attributes()["service_account_credentials"].(types.String).ValueString(),
-				Location:                  data.Configuration.Attributes()["location"].(types.String).ValueString(),
+				ProjectID:      data.Configuration.Attributes()["project_id"].(types.String).ValueString(),
+				ServiceAccount: data.Configuration.Attributes()["service_account"].(types.String).ValueString(),
+				Location:       data.Configuration.Attributes()["location"].(types.String).ValueString(),
 			},
 		},
 	)
@@ -169,7 +178,7 @@ func (r *bigqueryConnectionResource) Update(ctx context.Context, req resource.Up
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r *bigqueryConnectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *BigqueryConnectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var data connectionData
 
 	diags := req.State.Get(ctx, &data)
@@ -186,11 +195,11 @@ func (r *bigqueryConnectionResource) Delete(ctx context.Context, req resource.De
 	}
 }
 
-func (r *bigqueryConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *BigqueryConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
 
-func (r *bigqueryConnectionResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *BigqueryConnectionResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return

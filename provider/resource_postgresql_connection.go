@@ -18,10 +18,10 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
-var _ resource.Resource = &postgresqlConnectionResource{}
-var _ resource.ResourceWithImportState = &postgresqlConnectionResource{}
+var _ resource.Resource = &PostgresqlConnectionResource{}
+var _ resource.ResourceWithImportState = &PostgresqlConnectionResource{}
 
-func (t *postgresqlConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
+func (t *PostgresqlConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
 		MarkdownDescription: "PostgresSQL Connection",
 		Attributes: map[string]tfsdk.Attribute{
@@ -172,15 +172,15 @@ func (t *postgresqlConnectionResource) GetSchema(ctx context.Context) (tfsdk.Sch
 	}, nil
 }
 
-func (r *postgresqlConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *PostgresqlConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_postgresql_connection"
 }
 
-type postgresqlConnectionResource struct {
+type PostgresqlConnectionResource struct {
 	client *polytomic.Client
 }
 
-func (r *postgresqlConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *PostgresqlConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data connectionData
 
 	diags := req.Config.Get(ctx, &data)
@@ -223,13 +223,13 @@ func (r *postgresqlConnectionResource) Create(ctx context.Context, req resource.
 	data.Id = types.StringValue(created.ID)
 	data.Name = types.StringValue(created.Name)
 
-	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "postgresql", "id": created.ID})
+	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Postgresql", "id": created.ID})
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r *postgresqlConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *PostgresqlConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data connectionData
 
 	diags := req.State.Get(ctx, &data)
@@ -256,7 +256,7 @@ func (r *postgresqlConnectionResource) Read(ctx context.Context, req resource.Re
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r *postgresqlConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *PostgresqlConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var data connectionData
 
 	diags := req.Plan.Get(ctx, &data)
@@ -304,7 +304,7 @@ func (r *postgresqlConnectionResource) Update(ctx context.Context, req resource.
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r *postgresqlConnectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *PostgresqlConnectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var data connectionData
 
 	diags := req.State.Get(ctx, &data)
@@ -321,11 +321,11 @@ func (r *postgresqlConnectionResource) Delete(ctx context.Context, req resource.
 	}
 }
 
-func (r *postgresqlConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *PostgresqlConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
 
-func (r *postgresqlConnectionResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *PostgresqlConnectionResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return

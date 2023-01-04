@@ -18,10 +18,10 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
-var _ resource.Resource = &snowflakeConnectionResource{}
-var _ resource.ResourceWithImportState = &snowflakeConnectionResource{}
+var _ resource.Resource = &SnowflakeConnectionResource{}
+var _ resource.ResourceWithImportState = &SnowflakeConnectionResource{}
 
-func (t *snowflakeConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
+func (t *SnowflakeConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
 		MarkdownDescription: "Snowflake Connection",
 		Attributes: map[string]tfsdk.Attribute{
@@ -58,7 +58,7 @@ func (t *snowflakeConnectionResource) GetSchema(ctx context.Context) (tfsdk.Sche
 						Optional:            false,
 						Sensitive:           true,
 					},
-					"database": {
+					"dbname": {
 						MarkdownDescription: "",
 						Type:                types.StringType,
 						Required:            true,
@@ -95,15 +95,15 @@ func (t *snowflakeConnectionResource) GetSchema(ctx context.Context) (tfsdk.Sche
 	}, nil
 }
 
-func (r *snowflakeConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *SnowflakeConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_snowflake_connection"
 }
 
-type snowflakeConnectionResource struct {
+type SnowflakeConnectionResource struct {
 	client *polytomic.Client
 }
 
-func (r *snowflakeConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *SnowflakeConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data connectionData
 
 	diags := req.Config.Get(ctx, &data)
@@ -122,7 +122,7 @@ func (r *snowflakeConnectionResource) Create(ctx context.Context, req resource.C
 				Account:          data.Configuration.Attributes()["account"].(types.String).ValueString(),
 				Username:         data.Configuration.Attributes()["username"].(types.String).ValueString(),
 				Password:         data.Configuration.Attributes()["password"].(types.String).ValueString(),
-				Database:         data.Configuration.Attributes()["database"].(types.String).ValueString(),
+				Dbname:           data.Configuration.Attributes()["dbname"].(types.String).ValueString(),
 				Warehouse:        data.Configuration.Attributes()["warehouse"].(types.String).ValueString(),
 				AdditionalParams: data.Configuration.Attributes()["additional_params"].(types.String).ValueString(),
 			},
@@ -135,13 +135,13 @@ func (r *snowflakeConnectionResource) Create(ctx context.Context, req resource.C
 	data.Id = types.StringValue(created.ID)
 	data.Name = types.StringValue(created.Name)
 
-	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "snowflake", "id": created.ID})
+	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Snowflake", "id": created.ID})
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r *snowflakeConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *SnowflakeConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data connectionData
 
 	diags := req.State.Get(ctx, &data)
@@ -168,7 +168,7 @@ func (r *snowflakeConnectionResource) Read(ctx context.Context, req resource.Rea
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r *snowflakeConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *SnowflakeConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var data connectionData
 
 	diags := req.Plan.Get(ctx, &data)
@@ -187,7 +187,7 @@ func (r *snowflakeConnectionResource) Update(ctx context.Context, req resource.U
 				Account:          data.Configuration.Attributes()["account"].(types.String).ValueString(),
 				Username:         data.Configuration.Attributes()["username"].(types.String).ValueString(),
 				Password:         data.Configuration.Attributes()["password"].(types.String).ValueString(),
-				Database:         data.Configuration.Attributes()["database"].(types.String).ValueString(),
+				Dbname:           data.Configuration.Attributes()["dbname"].(types.String).ValueString(),
 				Warehouse:        data.Configuration.Attributes()["warehouse"].(types.String).ValueString(),
 				AdditionalParams: data.Configuration.Attributes()["additional_params"].(types.String).ValueString(),
 			},
@@ -205,7 +205,7 @@ func (r *snowflakeConnectionResource) Update(ctx context.Context, req resource.U
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r *snowflakeConnectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *SnowflakeConnectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var data connectionData
 
 	diags := req.State.Get(ctx, &data)
@@ -222,11 +222,11 @@ func (r *snowflakeConnectionResource) Delete(ctx context.Context, req resource.D
 	}
 }
 
-func (r *snowflakeConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *SnowflakeConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
 
-func (r *snowflakeConnectionResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *SnowflakeConnectionResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return

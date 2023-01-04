@@ -18,10 +18,10 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
-var _ resource.Resource = &sqlserverConnectionResource{}
-var _ resource.ResourceWithImportState = &sqlserverConnectionResource{}
+var _ resource.Resource = &SqlserverConnectionResource{}
+var _ resource.ResourceWithImportState = &SqlserverConnectionResource{}
 
-func (t *sqlserverConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
+func (t *SqlserverConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
 		MarkdownDescription: "SQL Server Connection",
 		Attributes: map[string]tfsdk.Attribute{
@@ -88,15 +88,15 @@ func (t *sqlserverConnectionResource) GetSchema(ctx context.Context) (tfsdk.Sche
 	}, nil
 }
 
-func (r *sqlserverConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *SqlserverConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_sqlserver_connection"
 }
 
-type sqlserverConnectionResource struct {
+type SqlserverConnectionResource struct {
 	client *polytomic.Client
 }
 
-func (r *sqlserverConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *SqlserverConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data connectionData
 
 	diags := req.Config.Get(ctx, &data)
@@ -127,13 +127,13 @@ func (r *sqlserverConnectionResource) Create(ctx context.Context, req resource.C
 	data.Id = types.StringValue(created.ID)
 	data.Name = types.StringValue(created.Name)
 
-	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "sqlserver", "id": created.ID})
+	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Sqlserver", "id": created.ID})
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r *sqlserverConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *SqlserverConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data connectionData
 
 	diags := req.State.Get(ctx, &data)
@@ -160,7 +160,7 @@ func (r *sqlserverConnectionResource) Read(ctx context.Context, req resource.Rea
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r *sqlserverConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *SqlserverConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var data connectionData
 
 	diags := req.Plan.Get(ctx, &data)
@@ -196,7 +196,7 @@ func (r *sqlserverConnectionResource) Update(ctx context.Context, req resource.U
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r *sqlserverConnectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *SqlserverConnectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var data connectionData
 
 	diags := req.State.Get(ctx, &data)
@@ -213,11 +213,11 @@ func (r *sqlserverConnectionResource) Delete(ctx context.Context, req resource.D
 	}
 }
 
-func (r *sqlserverConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *SqlserverConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
 
-func (r *sqlserverConnectionResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *SqlserverConnectionResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return

@@ -37,7 +37,7 @@ data "polytomic_snowflake_connection" "snowflake" {
 Required:
 
 - `account` (String)
-- `database` (String)
+- `dbname` (String)
 - `username` (String)
 - `warehouse` (String)
 

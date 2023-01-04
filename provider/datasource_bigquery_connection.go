@@ -18,18 +18,18 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
-var _ datasource.DataSource = &bigqueryConnectionDataSource{}
+var _ datasource.DataSource = &BigqueryConnectionDataSource{}
 
 // ExampleDataSource defines the data source implementation.
-type bigqueryConnectionDataSource struct {
+type BigqueryConnectionDataSource struct {
 	client *polytomic.Client
 }
 
-func (d *bigqueryConnectionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+func (d *BigqueryConnectionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_bigquery_connection"
 }
 
-func (d *bigqueryConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
+func (d *BigqueryConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
 		// This description is used by the documentation generator and the language server.
 		MarkdownDescription: "BigQuery Connection",
@@ -51,6 +51,13 @@ func (d *bigqueryConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Sch
 			},
 			"configuration": {
 				Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
+					"project_id": {
+						MarkdownDescription: "",
+						Type:                types.StringType,
+						Required:            true,
+						Optional:            false,
+						Sensitive:           false,
+					},
 					"location": {
 						MarkdownDescription: "",
 						Type:                types.StringType,
@@ -65,7 +72,7 @@ func (d *bigqueryConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Sch
 	}, nil
 }
 
-func (d *bigqueryConnectionDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *BigqueryConnectionDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -85,7 +92,7 @@ func (d *bigqueryConnectionDataSource) Configure(ctx context.Context, req dataso
 	d.client = client
 }
 
-func (d *bigqueryConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+func (d *BigqueryConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionData
 
 	// Read Terraform configuration data into the model
@@ -118,6 +125,9 @@ func (d *bigqueryConnectionDataSource) Read(ctx context.Context, req datasource.
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttributeTypes(ctx),
 		map[string]attr.Value{
+			"project_id": types.StringValue(
+				conf.ProjectID,
+			),
 			"location": types.StringValue(
 				conf.Location,
 			),

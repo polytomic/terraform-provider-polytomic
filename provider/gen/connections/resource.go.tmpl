@@ -46,7 +46,7 @@ func (t *{{ .Connection }}ConnectionResource) GetSchema(ctx context.Context) (tf
 					},
 					{{ end }}
 				}),
-				{{ if  .Attributes}}
+				{{ if .Attributes}}
 				Required: true,
 				{{ else }}
 				Optional: true,
@@ -66,7 +66,7 @@ func (t *{{ .Connection }}ConnectionResource) GetSchema(ctx context.Context) (tf
 }
 
 func (r *{{ .Connection }}ConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_{{ .Connection }}_connection"
+	resp.TypeName = req.ProviderTypeName + "_{{ .ResourceName }}_connection"
 }
 
 

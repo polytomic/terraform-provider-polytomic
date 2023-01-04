@@ -18,18 +18,18 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
-var _ datasource.DataSource = &gcsConnectionDataSource{}
+var _ datasource.DataSource = &GcsConnectionDataSource{}
 
 // ExampleDataSource defines the data source implementation.
-type gcsConnectionDataSource struct {
+type GcsConnectionDataSource struct {
 	client *polytomic.Client
 }
 
-func (d *gcsConnectionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+func (d *GcsConnectionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_gcs_connection"
 }
 
-func (d *gcsConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
+func (d *GcsConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
 		// This description is used by the documentation generator and the language server.
 		MarkdownDescription: "Google Cloud Storage Connection",
@@ -72,7 +72,7 @@ func (d *gcsConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, 
 	}, nil
 }
 
-func (d *gcsConnectionDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *GcsConnectionDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -92,7 +92,7 @@ func (d *gcsConnectionDataSource) Configure(ctx context.Context, req datasource.
 	d.client = client
 }
 
-func (d *gcsConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+func (d *GcsConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionData
 
 	// Read Terraform configuration data into the model

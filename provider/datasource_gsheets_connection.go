@@ -16,18 +16,18 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
-var _ datasource.DataSource = &gsheetsConnectionDataSource{}
+var _ datasource.DataSource = &GsheetsConnectionDataSource{}
 
 // ExampleDataSource defines the data source implementation.
-type gsheetsConnectionDataSource struct {
+type GsheetsConnectionDataSource struct {
 	client *polytomic.Client
 }
 
-func (d *gsheetsConnectionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+func (d *GsheetsConnectionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_gsheets_connection"
 }
 
-func (d *gsheetsConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
+func (d *GsheetsConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
 		// This description is used by the documentation generator and the language server.
 		MarkdownDescription: "Google Sheets Connection",
@@ -57,7 +57,7 @@ func (d *gsheetsConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Sche
 	}, nil
 }
 
-func (d *gsheetsConnectionDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *GsheetsConnectionDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -77,7 +77,7 @@ func (d *gsheetsConnectionDataSource) Configure(ctx context.Context, req datasou
 	d.client = client
 }
 
-func (d *gsheetsConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+func (d *GsheetsConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionData
 
 	// Read Terraform configuration data into the model

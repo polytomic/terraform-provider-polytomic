@@ -9,13 +9,13 @@ import 	(
 )
 
 var (
-	connection_resources =  []func() resource.Resource{
+	connectionResources =  []func() resource.Resource{
                 {{- range .Resources }}
 		func() resource.Resource { return &{{ . }}{} },
                 {{- end }}
 	}
 
-	connection_datasources =  []func() datasource.DataSource{
+	connectionDatasources =  []func() datasource.DataSource{
                 {{- range .Datasources }}
 		func() datasource.DataSource { return &{{ . }}{} },
                 {{- end }}

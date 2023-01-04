@@ -18,18 +18,18 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
-var _ datasource.DataSource = &athenaConnectionDataSource{}
+var _ datasource.DataSource = &AthenaConnectionDataSource{}
 
 // ExampleDataSource defines the data source implementation.
-type athenaConnectionDataSource struct {
+type AthenaConnectionDataSource struct {
 	client *polytomic.Client
 }
 
-func (d *athenaConnectionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+func (d *AthenaConnectionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_athena_connection"
 }
 
-func (d *athenaConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
+func (d *AthenaConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
 		// This description is used by the documentation generator and the language server.
 		MarkdownDescription: "AWS Athena Connection",
@@ -72,7 +72,7 @@ func (d *athenaConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schem
 	}, nil
 }
 
-func (d *athenaConnectionDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *AthenaConnectionDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -92,7 +92,7 @@ func (d *athenaConnectionDataSource) Configure(ctx context.Context, req datasour
 	d.client = client
 }
 
-func (d *athenaConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+func (d *AthenaConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionData
 
 	// Read Terraform configuration data into the model

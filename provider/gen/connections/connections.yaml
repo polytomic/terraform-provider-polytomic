@@ -72,13 +72,16 @@ connections:
     resource: true
     datasource: true
     attributes:
-      - name: ServiceAccountCredentials
+      - name: ProjectID
+        type: string
+        required: true
+        example: my-project
+      - name: ServiceAccount
         type: string
         required: true
         sensitive: true
         example: data.account_credentials.json
         example_type_override: variable
-        alias: service_account
       - name: Location
         type: string
         optional: true
@@ -94,7 +97,7 @@ connections:
         type: string
         required: true
         example: my-project
-      - name: ServiceAccountCredentials
+      - name: ServiceAccount
         type: string
         required: true
         sensitive: true
@@ -261,13 +264,106 @@ connections:
         type: string
         required: true
         sensitive: true
-      - name: Database
+      - name: Dbname
         type: string
         required: true
-        alias: dbname
       - name: Warehouse
         type: string
         required: true
+      - name: AdditionalParams
+        type: string
+        optional: true
+  - connection: affinity
+    name: Affinity
+    type: polytomic.AffinityConnectionType
+    config: polytomic.AffinityConfiguration
+    datasource: true
+    resource: true
+    attributes:
+      - name: APIKey
+        type: string
+        required: true
+        sensitive: true
+  - connection: airtable
+    name: Airtable
+    type: polytomic.AirtableConnectionType
+    config: polytomic.AirtableConfiguration
+    datasource: true
+    resource: true
+    attributes:
+      - name: APIKey
+        type: string
+        required: true
+        sensitive: true
+  - connection: amplitude
+    name: Amplitude
+    type: polytomic.AmplitudeConnectionType
+    config: polytomic.AmplitudeConfiguration
+    datasource: true
+    resource: true
+    attributes:
+      - name: APIKey
+        type: string
+        required: true
+      - name: SecretKey
+        type: string
+        required: true
+        sensitive: true
+  # - connection: csv
+  #   name: CSV
+  #   type: polytomic.CSVConnectionType
+  #   config: polytomic.CSVConfiguration
+  #   datasource: true
+  #   resource: true
+  - connection: marketo
+    name: Marketo
+    type: polytomic.MarketoConnectionType
+    config: polytomic.MarketoConfiguration
+    datasource: true
+    resource: true
+    attributes:
+      - name: ClientID
+        type: string
+        required: true
+      - name: ClientSecret
+        type: string
+        required: true
+        sensitive: true
+      - name: RESTEndpoint
+        type: string
+        required: true
+      - name: EnforceAPILimits
+        type: bool
+        optional: true
+      - name: DailyAPICalls
+        type: int
+        optional: true
+      - name: ConcurrentImportJobs
+        type: int
+        optional: true
+  - connection: mongodb
+    name: MongoDB
+    type: polytomic.MongoDBConnectionType
+    config: polytomic.MongoDBConfiguration
+    datasource: true
+    resource: true
+    attributes:
+      - name: Hosts
+        type: string
+        required: true
+      - name: Username
+        type: string
+        required: true
+      - name: Password
+        type: string
+        required: true
+        sensitive: true
+      - name: Database
+        type: string
+        optional: true
+      - name: SRV
+        type: bool
+        optional: true
       - name: AdditionalParams
         type: string
         optional: true

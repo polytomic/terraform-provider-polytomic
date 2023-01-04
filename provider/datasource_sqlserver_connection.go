@@ -18,18 +18,18 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
-var _ datasource.DataSource = &sqlserverConnectionDataSource{}
+var _ datasource.DataSource = &SqlserverConnectionDataSource{}
 
 // ExampleDataSource defines the data source implementation.
-type sqlserverConnectionDataSource struct {
+type SqlserverConnectionDataSource struct {
 	client *polytomic.Client
 }
 
-func (d *sqlserverConnectionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+func (d *SqlserverConnectionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_sqlserver_connection"
 }
 
-func (d *sqlserverConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
+func (d *SqlserverConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
 		// This description is used by the documentation generator and the language server.
 		MarkdownDescription: "SQL Server Connection",
@@ -86,7 +86,7 @@ func (d *sqlserverConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Sc
 	}, nil
 }
 
-func (d *sqlserverConnectionDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *SqlserverConnectionDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -106,7 +106,7 @@ func (d *sqlserverConnectionDataSource) Configure(ctx context.Context, req datas
 	d.client = client
 }
 
-func (d *sqlserverConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+func (d *SqlserverConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionData
 
 	// Read Terraform configuration data into the model

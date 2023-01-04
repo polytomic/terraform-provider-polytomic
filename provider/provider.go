@@ -15,6 +15,9 @@ import (
 )
 
 const (
+	// Name is the name of the provider.
+	Name = "polytomic"
+
 	//PolytomicDeploymentKey is the environment variable name for the Polytomic deployment key
 	PolytomicDeploymentKey = "POLYTOMIC_DEPLOYMENT_KEY"
 	//PolytomicAPIKey is the environment variable name for the Polytomic API key
@@ -50,7 +53,7 @@ type ProviderData struct {
 }
 
 func (p *ptProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
-	resp.TypeName = "polytomic"
+	resp.TypeName = Name
 	resp.Version = p.version
 }
 
@@ -122,8 +125,9 @@ func (p *ptProvider) Resources(ctx context.Context) []func() resource.Resource {
 		func() resource.Resource { return &bulkSyncResource{} },
 		func() resource.Resource { return &bulkSyncSchemaResource{} },
 		func() resource.Resource { return &syncResource{} },
+		func() resource.Resource { return &APIConnectionResource{} },
 	}
-	all := append(connection_resources, resourceList...)
+	all := append(connectionResources, resourceList...)
 	return all
 
 }
@@ -133,7 +137,7 @@ func (p *ptProvider) DataSources(ctx context.Context) []func() datasource.DataSo
 		func() datasource.DataSource { return &bulkSourceDatasource{} },
 		func() datasource.DataSource { return &bulkDestinationDatasource{} },
 	}
-	all := append(connection_datasources, datasources...)
+	all := append(connectionDatasources, datasources...)
 	return all
 }
 

@@ -18,18 +18,18 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
-var _ datasource.DataSource = &salesforceConnectionDataSource{}
+var _ datasource.DataSource = &SalesforceConnectionDataSource{}
 
 // ExampleDataSource defines the data source implementation.
-type salesforceConnectionDataSource struct {
+type SalesforceConnectionDataSource struct {
 	client *polytomic.Client
 }
 
-func (d *salesforceConnectionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+func (d *SalesforceConnectionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_salesforce_connection"
 }
 
-func (d *salesforceConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
+func (d *SalesforceConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
 		// This description is used by the documentation generator and the language server.
 		MarkdownDescription: "Salesforce Connection",
@@ -86,7 +86,7 @@ func (d *salesforceConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.S
 	}, nil
 }
 
-func (d *salesforceConnectionDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *SalesforceConnectionDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -106,7 +106,7 @@ func (d *salesforceConnectionDataSource) Configure(ctx context.Context, req data
 	d.client = client
 }
 
-func (d *salesforceConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+func (d *SalesforceConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionData
 
 	// Read Terraform configuration data into the model

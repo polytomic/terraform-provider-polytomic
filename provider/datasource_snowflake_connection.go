@@ -18,18 +18,18 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
-var _ datasource.DataSource = &snowflakeConnectionDataSource{}
+var _ datasource.DataSource = &SnowflakeConnectionDataSource{}
 
 // ExampleDataSource defines the data source implementation.
-type snowflakeConnectionDataSource struct {
+type SnowflakeConnectionDataSource struct {
 	client *polytomic.Client
 }
 
-func (d *snowflakeConnectionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+func (d *SnowflakeConnectionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_snowflake_connection"
 }
 
-func (d *snowflakeConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
+func (d *SnowflakeConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
 		// This description is used by the documentation generator and the language server.
 		MarkdownDescription: "Snowflake Connection",
@@ -65,7 +65,7 @@ func (d *snowflakeConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Sc
 						Optional:            false,
 						Sensitive:           false,
 					},
-					"database": {
+					"dbname": {
 						MarkdownDescription: "",
 						Type:                types.StringType,
 						Required:            true,
@@ -93,7 +93,7 @@ func (d *snowflakeConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Sc
 	}, nil
 }
 
-func (d *snowflakeConnectionDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *SnowflakeConnectionDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -113,7 +113,7 @@ func (d *snowflakeConnectionDataSource) Configure(ctx context.Context, req datas
 	d.client = client
 }
 
-func (d *snowflakeConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+func (d *SnowflakeConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionData
 
 	// Read Terraform configuration data into the model
@@ -152,8 +152,8 @@ func (d *snowflakeConnectionDataSource) Read(ctx context.Context, req datasource
 			"username": types.StringValue(
 				conf.Username,
 			),
-			"database": types.StringValue(
-				conf.Database,
+			"dbname": types.StringValue(
+				conf.Dbname,
 			),
 			"warehouse": types.StringValue(
 				conf.Warehouse,

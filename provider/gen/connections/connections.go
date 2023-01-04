@@ -68,13 +68,14 @@ type Connections struct {
 }
 
 type Connection struct {
-	Name       string      `yaml:"name"`
-	Connection string      `yaml:"connection"`
-	Type       string      `yaml:"type"`
-	Attributes []Attribute `yaml:"attributes"`
-	Config     string      `yaml:"config"`
-	Datasource bool        `yaml:"datasource"`
-	Resource   bool        `yaml:"resource"`
+	Name         string `yaml:"name"`
+	Connection   string `yaml:"connection"`
+	ResourceName string
+	Type         string      `yaml:"type"`
+	Attributes   []Attribute `yaml:"attributes"`
+	Config       string      `yaml:"config"`
+	Datasource   bool        `yaml:"datasource"`
+	Resource     bool        `yaml:"resource"`
 }
 
 type Attribute struct {
@@ -123,14 +124,14 @@ func GenerateConnections() error {
 			if err != nil {
 				return err
 			}
-			resources = append(resources, fmt.Sprintf("%sConnectionResource", r.Connection))
+			resources = append(resources, fmt.Sprintf("%sConnectionResource", strings.Title(r.Connection)))
 		}
 		if r.Datasource {
 			err := writeConnectionDataSource(r)
 			if err != nil {
 				return err
 			}
-			datasources = append(datasources, fmt.Sprintf("%sConnectionDataSource", r.Connection))
+			datasources = append(datasources, fmt.Sprintf("%sConnectionDataSource", strings.Title(r.Connection)))
 		}
 
 		err = writeConnectionExamples(r)
@@ -149,6 +150,15 @@ func GenerateConnections() error {
 }
 
 func writeConnectionExamples(r Connection) error {
+	var attributes []Attribute
+	for i, a := range r.Attributes {
+		if a.ExampleTypeOverride != "" {
+			r.Attributes[i].Type = a.ExampleTypeOverride
+		}
+		if !a.Sensitive {
+			attributes = append(attributes, a)
+		}
+	}
 
 	if r.Resource {
 		tmpl, err := template.New("resource.tf.go.tmpl").ParseFiles(exampleResourceTemplate)
@@ -171,13 +181,6 @@ func writeConnectionExamples(r Connection) error {
 		}
 		defer f.Close()
 
-		// Overrides types for examples
-		for i, a := range r.Attributes {
-			if a.ExampleTypeOverride != "" {
-				r.Attributes[i].Type = a.ExampleTypeOverride
-			}
-		}
-
 		err = tmpl.Execute(f, struct {
 			Resource   string
 			Name       string
@@ -185,7 +188,7 @@ func writeConnectionExamples(r Connection) error {
 		}{
 			Resource:   TerraformResourceName(r.Connection),
 			Name:       r.Connection,
-			Attributes: r.Attributes,
+			Attributes: attributes,
 		})
 		if err != nil {
 			log.Fatal(err)
@@ -213,13 +216,6 @@ func writeConnectionExamples(r Connection) error {
 		}
 		defer f.Close()
 
-		// Overrides types for examples
-		for i, a := range r.Attributes {
-			if a.ExampleTypeOverride != "" {
-				r.Attributes[i].Type = a.ExampleTypeOverride
-			}
-		}
-
 		err = tmpl.Execute(f, struct {
 			Resource   string
 			Name       string
@@ -227,7 +223,7 @@ func writeConnectionExamples(r Connection) error {
 		}{
 			Resource:   TerraformResourceName(r.Connection),
 			Name:       r.Connection,
-			Attributes: r.Attributes,
+			Attributes: attributes,
 		})
 		if err != nil {
 			log.Fatal(err)
@@ -247,11 +243,12 @@ func writeConnectionResource(r Connection) error {
 		filepath.Join(outputPath, fmt.Sprintf("resource_%s_connection.go", r.Connection)))
 	defer f.Close()
 	err = tmpl.Execute(&buf, Connection{
-		Name:       r.Name,
-		Connection: r.Connection,
-		Attributes: r.Attributes,
-		Type:       r.Type,
-		Config:     r.Config,
+		Name:         r.Name,
+		Connection:   strings.Title(r.Connection),
+		ResourceName: r.Connection,
+		Attributes:   r.Attributes,
+		Type:         r.Type,
+		Config:       r.Config,
 	})
 	if err != nil {
 		log.Fatal(err)
@@ -273,12 +270,21 @@ func writeConnectionDataSource(r Connection) error {
 	f, err := os.Create(
 		filepath.Join(outputPath, fmt.Sprintf("datasource_%s_connection.go", r.Connection)))
 	defer f.Close()
+
+	var attributes []Attribute
+	for _, a := range r.Attributes {
+		if !a.Sensitive {
+			attributes = append(attributes, a)
+		}
+	}
+
 	err = tmpl.Execute(&buf, Connection{
-		Name:       r.Name,
-		Connection: r.Connection,
-		Attributes: r.Attributes,
-		Type:       r.Type,
-		Config:     r.Config,
+		Name:         r.Name,
+		Connection:   strings.Title(r.Connection),
+		ResourceName: r.Connection,
+		Attributes:   attributes,
+		Type:         r.Type,
+		Config:       r.Config,
 	})
 	if err != nil {
 		log.Fatal(err)
