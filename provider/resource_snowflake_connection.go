@@ -23,7 +23,7 @@ var _ resource.ResourceWithImportState = &SnowflakeConnectionResource{}
 
 func (t *SnowflakeConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: "Snowflake Connection",
+		MarkdownDescription: ":meta:subcategory:Connection: Snowflake Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"organization": {
 				MarkdownDescription: "Organization ID",

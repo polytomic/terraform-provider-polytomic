@@ -23,7 +23,7 @@ var _ resource.ResourceWithImportState = &AirtableConnectionResource{}
 
 func (t *AirtableConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: "Airtable Connection",
+		MarkdownDescription: ":meta:subcategory:Connection: Airtable Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"organization": {
 				MarkdownDescription: "Organization ID",

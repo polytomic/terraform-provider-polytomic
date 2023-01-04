@@ -23,7 +23,7 @@ var _ resource.ResourceWithImportState = &AthenaConnectionResource{}
 
 func (t *AthenaConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: "AWS Athena Connection",
+		MarkdownDescription: ":meta:subcategory:Connection: AWS Athena Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"organization": {
 				MarkdownDescription: "Organization ID",

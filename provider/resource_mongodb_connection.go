@@ -23,7 +23,7 @@ var _ resource.ResourceWithImportState = &MongodbConnectionResource{}
 
 func (t *MongodbConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: "MongoDB Connection",
+		MarkdownDescription: ":meta:subcategory:Connection: MongoDB Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"organization": {
 				MarkdownDescription: "Organization ID",

@@ -23,7 +23,7 @@ var _ resource.ResourceWithImportState = &PostgresqlConnectionResource{}
 
 func (t *PostgresqlConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: "PostgresSQL Connection",
+		MarkdownDescription: ":meta:subcategory:Connection: PostgresSQL Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"organization": {
 				MarkdownDescription: "Organization ID",

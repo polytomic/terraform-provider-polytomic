@@ -31,8 +31,7 @@ func (d *AzureblobConnectionDataSource) Metadata(ctx context.Context, req dataso
 
 func (d *AzureblobConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Azure Blob Storage Connection",
+		MarkdownDescription: ":meta:subcategory:Connection: Azure Blob Storage Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"name": {
 				MarkdownDescription: "",

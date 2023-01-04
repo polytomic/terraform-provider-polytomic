@@ -31,8 +31,7 @@ func (d *MarketoConnectionDataSource) Metadata(ctx context.Context, req datasour
 
 func (d *MarketoConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Marketo Connection",
+		MarkdownDescription: ":meta:subcategory:Connection: Marketo Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"name": {
 				MarkdownDescription: "",

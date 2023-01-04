@@ -23,7 +23,7 @@ var _ resource.ResourceWithImportState = &MarketoConnectionResource{}
 
 func (t *MarketoConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: "Marketo Connection",
+		MarkdownDescription: ":meta:subcategory:Connection: Marketo Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"organization": {
 				MarkdownDescription: "Organization ID",

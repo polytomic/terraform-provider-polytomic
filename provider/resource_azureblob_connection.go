@@ -23,7 +23,7 @@ var _ resource.ResourceWithImportState = &AzureblobConnectionResource{}
 
 func (t *AzureblobConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: "Azure Blob Storage Connection",
+		MarkdownDescription: ":meta:subcategory:Connection: Azure Blob Storage Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"organization": {
 				MarkdownDescription: "Organization ID",

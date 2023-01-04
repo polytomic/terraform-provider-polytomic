@@ -31,8 +31,7 @@ func (d *AthenaConnectionDataSource) Metadata(ctx context.Context, req datasourc
 
 func (d *AthenaConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "AWS Athena Connection",
+		MarkdownDescription: ":meta:subcategory:Connection: AWS Athena Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"name": {
 				MarkdownDescription: "",

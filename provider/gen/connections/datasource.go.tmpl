@@ -33,8 +33,7 @@ func (d *{{ .Connection }}ConnectionDataSource) Metadata(ctx context.Context, re
 
 func (d *{{ .Connection }}ConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "{{ .Name }} Connection",
+		MarkdownDescription: ":meta:subcategory:Connection: {{ .Name }} Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"name": {
 				MarkdownDescription: "",

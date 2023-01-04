@@ -23,7 +23,7 @@ var _ resource.ResourceWithImportState = &SqlserverConnectionResource{}
 
 func (t *SqlserverConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: "SQL Server Connection",
+		MarkdownDescription: ":meta:subcategory:Connection: SQL Server Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"organization": {
 				MarkdownDescription: "Organization ID",
