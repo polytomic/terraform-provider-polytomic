@@ -3,12 +3,12 @@
 page_title: "polytomic_bigquery_connection Data Source - terraform-provider-polytomic"
 subcategory: ""
 description: |-
-  Big Query Connection
+  BigQuery Connection
 ---
 
 # polytomic_bigquery_connection (Data Source)
 
-Big Query Connection
+BigQuery Connection
 
 ## Example Usage
 

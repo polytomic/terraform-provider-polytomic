@@ -1,4 +1,4 @@
-resource "polytomic_postgres_connection" "postgres" {
+resource "polytomic_postgresql_connection" "postgresql" {
   name = "example"
   configuration = {
     hostname = "acme.postgres.database.example.com"

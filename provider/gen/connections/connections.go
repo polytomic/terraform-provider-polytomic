@@ -1,4 +1,4 @@
-package main
+package connections
 
 import (
 	"bytes"
@@ -12,29 +12,29 @@ import (
 	"text/template"
 
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/polytomic/terraform-provider-polytomic/internal/provider"
+	"github.com/polytomic/terraform-provider-polytomic/provider"
 	"gopkg.in/yaml.v2"
 )
 
 const (
 	// General
-	connectionsFile = "./internal/provider/gen/connections.yaml"
-	outputPath      = "./internal/provider"
-	exportTemplate  = "./internal/provider/gen/connections/connections.go.tmpl"
+	ConnectionsFile = "./provider/gen/connections/connections.yaml"
+	outputPath      = "./provider"
+	exportTemplate  = "./provider/gen/connections/connections.go.tmpl"
 
 	// Resources
-	connectionResourceTemplate = "./internal/provider/gen/connections/resource.go.tmpl"
-	exampleResourceTemplate    = "./internal/provider/gen/connections/resource.tf.go.tmpl"
+	connectionResourceTemplate = "./provider/gen/connections/resource.go.tmpl"
+	exampleResourceTemplate    = "./provider/gen/connections/resource.tf.go.tmpl"
 	exampleResourceOutputPath  = "./examples/resources"
 
 	// Datasources
-	connectionDataSourceTemplate = "./internal/provider/gen/connections/datasource.go.tmpl"
-	exampleDatasourceTemplate    = "./internal/provider/gen/connections/datasource.tf.go.tmpl"
+	connectionDataSourceTemplate = "./provider/gen/connections/datasource.go.tmpl"
+	exampleDatasourceTemplate    = "./provider/gen/connections/datasource.tf.go.tmpl"
 	exampleDatasourceOutputPath  = "./examples/data-sources"
 )
 
 var (
-	typeMap = map[string]typer{
+	TypeMap = map[string]Typer{
 		"string": {
 			AttrType: types.StringType.String(),
 			TfType:   "types.String",
@@ -58,27 +58,28 @@ var (
 	}
 )
 
-type typer struct {
+type Typer struct {
 	AttrType string
 	TfType   string
 }
 
-type connections struct {
-	Connections []connection `yaml:"connections"`
+type Connections struct {
+	Connections []Connection `yaml:"connections"`
 }
 
-type connection struct {
+type Connection struct {
 	Name       string      `yaml:"name"`
 	Connection string      `yaml:"connection"`
 	Type       string      `yaml:"type"`
-	Attributes []attribute `yaml:"attributes"`
+	Attributes []Attribute `yaml:"attributes"`
 	Config     string      `yaml:"config"`
 	Datasource bool        `yaml:"datasource"`
 	Resource   bool        `yaml:"resource"`
 }
 
-type attribute struct {
+type Attribute struct {
 	Name                string `yaml:"name"`
+	Alias               string `yaml:"alias"`
 	Sensitive           bool   `yaml:"sensitive"`
 	Required            bool   `yaml:"required"`
 	Optional            bool   `yaml:"optional"`
@@ -92,23 +93,23 @@ type attribute struct {
 	AttrName string `yaml:"-"`
 }
 
-func main() {
-	config, err := ioutil.ReadFile(connectionsFile)
+func GenerateConnections() error {
+	config, err := ioutil.ReadFile(ConnectionsFile)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
-	data := connections{}
+	data := Connections{}
 	err = yaml.Unmarshal(config, &data)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	resources := []string{}
 	datasources := []string{}
 	for _, r := range data.Connections {
 		for i, a := range r.Attributes {
-			t, ok := typeMap[a.Type]
+			t, ok := TypeMap[a.Type]
 			if !ok {
-				log.Fatalf("unknown type %s", a.Type)
+				return err
 			}
 			r.Attributes[i].TfType = t.TfType
 			r.Attributes[i].AttrType = t.AttrType
@@ -120,33 +121,34 @@ func main() {
 		if r.Resource {
 			err := writeConnectionResource(r)
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 			resources = append(resources, fmt.Sprintf("%sConnectionResource", r.Connection))
 		}
 		if r.Datasource {
 			err := writeConnectionDataSource(r)
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 			datasources = append(datasources, fmt.Sprintf("%sConnectionDataSource", r.Connection))
 		}
 
 		err = writeConnectionExamples(r)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 	}
 
 	err = writeExports(datasources, resources)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
+	return nil
 }
 
-func writeConnectionExamples(r connection) error {
+func writeConnectionExamples(r Connection) error {
 
 	if r.Resource {
 		tmpl, err := template.New("resource.tf.go.tmpl").ParseFiles(exampleResourceTemplate)
@@ -179,9 +181,9 @@ func writeConnectionExamples(r connection) error {
 		err = tmpl.Execute(f, struct {
 			Resource   string
 			Name       string
-			Attributes []attribute
+			Attributes []Attribute
 		}{
-			Resource:   terraformResourceName(r.Connection),
+			Resource:   TerraformResourceName(r.Connection),
 			Name:       r.Connection,
 			Attributes: r.Attributes,
 		})
@@ -221,9 +223,9 @@ func writeConnectionExamples(r connection) error {
 		err = tmpl.Execute(f, struct {
 			Resource   string
 			Name       string
-			Attributes []attribute
+			Attributes []Attribute
 		}{
-			Resource:   terraformResourceName(r.Connection),
+			Resource:   TerraformResourceName(r.Connection),
 			Name:       r.Connection,
 			Attributes: r.Attributes,
 		})
@@ -235,7 +237,7 @@ func writeConnectionExamples(r connection) error {
 	return nil
 }
 
-func writeConnectionResource(r connection) error {
+func writeConnectionResource(r Connection) error {
 	tmpl, err := template.New("resource.go.tmpl").ParseFiles(connectionResourceTemplate)
 	if err != nil {
 		log.Fatal(err)
@@ -244,7 +246,7 @@ func writeConnectionResource(r connection) error {
 	f, err := os.Create(
 		filepath.Join(outputPath, fmt.Sprintf("resource_%s_connection.go", r.Connection)))
 	defer f.Close()
-	err = tmpl.Execute(&buf, connection{
+	err = tmpl.Execute(&buf, Connection{
 		Name:       r.Name,
 		Connection: r.Connection,
 		Attributes: r.Attributes,
@@ -262,7 +264,7 @@ func writeConnectionResource(r connection) error {
 	return err
 }
 
-func writeConnectionDataSource(r connection) error {
+func writeConnectionDataSource(r Connection) error {
 	tmpl, err := template.New("datasource.go.tmpl").ParseFiles(connectionDataSourceTemplate)
 	if err != nil {
 		log.Fatal(err)
@@ -271,7 +273,7 @@ func writeConnectionDataSource(r connection) error {
 	f, err := os.Create(
 		filepath.Join(outputPath, fmt.Sprintf("datasource_%s_connection.go", r.Connection)))
 	defer f.Close()
-	err = tmpl.Execute(&buf, connection{
+	err = tmpl.Execute(&buf, Connection{
 		Name:       r.Name,
 		Connection: r.Connection,
 		Attributes: r.Attributes,
@@ -316,6 +318,6 @@ func writeExports(datasources, resources []string) error {
 	return err
 }
 
-func terraformResourceName(connection string) string {
+func TerraformResourceName(connection string) string {
 	return fmt.Sprintf("polytomic_%s_connection", connection)
 }

@@ -23,7 +23,7 @@ var _ resource.ResourceWithImportState = &bigqueryConnectionResource{}
 
 func (t *bigqueryConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: "Big Query Connection",
+		MarkdownDescription: "BigQuery Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"organization": {
 				MarkdownDescription: "Organization ID",
@@ -57,7 +57,7 @@ func (t *bigqueryConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schem
 			},
 			"id": {
 				Computed:            true,
-				MarkdownDescription: "Big Query Connection identifier",
+				MarkdownDescription: "BigQuery Connection identifier",
 				PlanModifiers: tfsdk.AttributePlanModifiers{
 					resource.UseStateForUnknown(),
 				},
