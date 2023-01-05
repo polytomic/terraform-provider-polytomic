@@ -6,7 +6,7 @@ require (
 	github.com/fbreckle/terraform-plugin-docs v0.0.0-20220812121758-a828466500d3
 	github.com/google/uuid v1.3.0
 	github.com/hashicorp/hcl/v2 v2.14.1
-	github.com/hashicorp/terraform-plugin-framework v0.16.0
+	github.com/hashicorp/terraform-plugin-framework v1.0.1
 	github.com/hashicorp/terraform-plugin-go v0.14.2
 	github.com/hashicorp/terraform-plugin-log v0.7.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.24.0
