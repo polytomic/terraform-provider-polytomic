@@ -198,6 +198,7 @@ func (r *RedshiftConnectionResource) Create(ctx context.Context, req resource.Cr
 	}
 	data.Id = types.StringValue(created.ID)
 	data.Name = types.StringValue(created.Name)
+	data.Organization = types.StringValue(created.OrganizationId)
 
 	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Redshift", "id": created.ID})
 
@@ -227,6 +228,7 @@ func (r *RedshiftConnectionResource) Read(ctx context.Context, req resource.Read
 
 	data.Id = types.StringValue(connection.ID)
 	data.Name = types.StringValue(connection.Name)
+	data.Organization = types.StringValue(connection.OrganizationId)
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -272,6 +274,7 @@ func (r *RedshiftConnectionResource) Update(ctx context.Context, req resource.Up
 
 	data.Id = types.StringValue(updated.ID)
 	data.Name = types.StringValue(updated.Name)
+	data.Organization = types.StringValue(updated.OrganizationId)
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)

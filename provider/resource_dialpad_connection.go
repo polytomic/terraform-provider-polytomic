@@ -94,6 +94,7 @@ func (r *DialpadConnectionResource) Create(ctx context.Context, req resource.Cre
 	}
 	data.Id = types.StringValue(created.ID)
 	data.Name = types.StringValue(created.Name)
+	data.Organization = types.StringValue(created.OrganizationId)
 
 	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Dialpad", "id": created.ID})
 
@@ -123,6 +124,7 @@ func (r *DialpadConnectionResource) Read(ctx context.Context, req resource.ReadR
 
 	data.Id = types.StringValue(connection.ID)
 	data.Name = types.StringValue(connection.Name)
+	data.Organization = types.StringValue(connection.OrganizationId)
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -155,6 +157,7 @@ func (r *DialpadConnectionResource) Update(ctx context.Context, req resource.Upd
 
 	data.Id = types.StringValue(updated.ID)
 	data.Name = types.StringValue(updated.Name)
+	data.Organization = types.StringValue(updated.OrganizationId)
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)

@@ -126,6 +126,7 @@ func (r *SqlserverConnectionResource) Create(ctx context.Context, req resource.C
 	}
 	data.Id = types.StringValue(created.ID)
 	data.Name = types.StringValue(created.Name)
+	data.Organization = types.StringValue(created.OrganizationId)
 
 	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Sqlserver", "id": created.ID})
 
@@ -155,6 +156,7 @@ func (r *SqlserverConnectionResource) Read(ctx context.Context, req resource.Rea
 
 	data.Id = types.StringValue(connection.ID)
 	data.Name = types.StringValue(connection.Name)
+	data.Organization = types.StringValue(connection.OrganizationId)
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -191,6 +193,7 @@ func (r *SqlserverConnectionResource) Update(ctx context.Context, req resource.U
 
 	data.Id = types.StringValue(updated.ID)
 	data.Name = types.StringValue(updated.Name)
+	data.Organization = types.StringValue(updated.OrganizationId)
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)

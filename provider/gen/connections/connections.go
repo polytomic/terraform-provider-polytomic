@@ -110,7 +110,7 @@ func GenerateConnections() error {
 		for i, a := range r.Attributes {
 			t, ok := TypeMap[a.Type]
 			if !ok {
-				return err
+				return fmt.Errorf("type %s not found for %s", a.Type, r.Name)
 			}
 			r.Attributes[i].TfType = t.TfType
 			r.Attributes[i].AttrType = t.AttrType

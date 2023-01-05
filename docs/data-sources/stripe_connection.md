@@ -23,7 +23,7 @@ data "polytomic_stripe_connection" "stripe" {
 
 ### Optional
 
-- `configuration` (Attributes) (see [below for nested schema](#nestedatt--configuration))
+- `configuration` (Object) (see [below for nested schema](#nestedatt--configuration))
 - `name` (String)
 - `organization` (String)
 
@@ -34,8 +34,6 @@ data "polytomic_stripe_connection" "stripe" {
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
-Required:
-
-- `version` (String)
+Optional:
 
 

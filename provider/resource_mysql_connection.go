@@ -166,6 +166,7 @@ func (r *MysqlConnectionResource) Create(ctx context.Context, req resource.Creat
 	}
 	data.Id = types.StringValue(created.ID)
 	data.Name = types.StringValue(created.Name)
+	data.Organization = types.StringValue(created.OrganizationId)
 
 	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Mysql", "id": created.ID})
 
@@ -195,6 +196,7 @@ func (r *MysqlConnectionResource) Read(ctx context.Context, req resource.ReadReq
 
 	data.Id = types.StringValue(connection.ID)
 	data.Name = types.StringValue(connection.Name)
+	data.Organization = types.StringValue(connection.OrganizationId)
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -236,6 +238,7 @@ func (r *MysqlConnectionResource) Update(ctx context.Context, req resource.Updat
 
 	data.Id = types.StringValue(updated.ID)
 	data.Name = types.StringValue(updated.Name)
+	data.Organization = types.StringValue(updated.OrganizationId)
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)

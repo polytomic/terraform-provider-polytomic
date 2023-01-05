@@ -8,12 +8,10 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/polytomic-go"
 )
 
@@ -49,16 +47,10 @@ func (d *StripeConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schem
 				Optional:            true,
 			},
 			"configuration": {
-				Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
-					"version": {
-						MarkdownDescription: "",
-						Type:                types.StringType,
-						Required:            true,
-						Optional:            false,
-						Sensitive:           false,
-					},
-				}),
-				Optional: true,
+				Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{}),
+				Optional:   true,
+
+				Type: types.ObjectType{},
 			},
 		},
 	}, nil
@@ -106,27 +98,6 @@ func (d *StripeConnectionDataSource) Read(ctx context.Context, req datasource.Re
 	data.Id = types.StringValue(connection.ID)
 	data.Name = types.StringValue(connection.Name)
 	data.Organization = types.StringValue(connection.OrganizationId)
-	var conf polytomic.StripeConnectionConfiguration
-	err = mapstructure.Decode(connection.Configuration, &conf)
-	if err != nil {
-		resp.Diagnostics.AddError("Error decoding connection", err.Error())
-		return
-	}
-
-	var diags diag.Diagnostics
-	data.Configuration, diags = types.ObjectValue(
-		data.Configuration.AttributeTypes(ctx),
-		map[string]attr.Value{
-			"version": types.StringValue(
-				conf.Version,
-			),
-		},
-	)
-
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
 
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)

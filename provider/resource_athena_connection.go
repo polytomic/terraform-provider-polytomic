@@ -118,6 +118,7 @@ func (r *AthenaConnectionResource) Create(ctx context.Context, req resource.Crea
 	}
 	data.Id = types.StringValue(created.ID)
 	data.Name = types.StringValue(created.Name)
+	data.Organization = types.StringValue(created.OrganizationId)
 
 	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Athena", "id": created.ID})
 
@@ -147,6 +148,7 @@ func (r *AthenaConnectionResource) Read(ctx context.Context, req resource.ReadRe
 
 	data.Id = types.StringValue(connection.ID)
 	data.Name = types.StringValue(connection.Name)
+	data.Organization = types.StringValue(connection.OrganizationId)
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -182,6 +184,7 @@ func (r *AthenaConnectionResource) Update(ctx context.Context, req resource.Upda
 
 	data.Id = types.StringValue(updated.ID)
 	data.Name = types.StringValue(updated.Name)
+	data.Organization = types.StringValue(updated.OrganizationId)
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
