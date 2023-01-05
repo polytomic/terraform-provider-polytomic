@@ -2,6 +2,7 @@ package importer
 
 import (
 	"context"
+	"fmt"
 	"io"
 
 	"github.com/hashicorp/hcl/v2/hclwrite"
@@ -44,7 +45,6 @@ func (b *BulkSyncs) Init(ctx context.Context) error {
 
 func (b *BulkSyncs) GenerateTerraformFiles(ctx context.Context, writer io.Writer) error {
 	for _, bulkSync := range b.Resources {
-
 		bulkSchemas, err := b.c.Bulk().GetBulkSyncSchemas(ctx, bulkSync.ID)
 		if err != nil {
 			return err
@@ -55,10 +55,12 @@ func (b *BulkSyncs) GenerateTerraformFiles(ctx context.Context, writer io.Writer
 				schemas = append(schemas, schema.ID)
 			}
 		}
-
 		hclFile := hclwrite.NewEmptyFile()
 		body := hclFile.Body()
-		resourceBlock := body.AppendNewBlock("resource", []string{BulkSyncResource, provider.ToSnakeCase(bulkSync.Name)})
+		// Bulk sync names are not unique, so we need to a slug to the name
+		// to make it unique.
+		name := provider.ToSnakeCase(bulkSync.Name) + "_" + bulkSync.ID[:8]
+		resourceBlock := body.AppendNewBlock("resource", []string{BulkSyncResource, name})
 		resourceBlock.Body().SetAttributeValue("name", cty.StringVal(bulkSync.Name))
 		resourceBlock.Body().SetAttributeValue("source_connection_id", cty.StringVal(bulkSync.SourceConnectionID))
 		resourceBlock.Body().SetAttributeValue("dest_connection_id", cty.StringVal(bulkSync.DestConnectionID))
@@ -83,6 +85,16 @@ func (b *BulkSyncs) GenerateTerraformFiles(ctx context.Context, writer io.Writer
 }
 
 func (b *BulkSyncs) GenerateImports(ctx context.Context, writer io.Writer) error {
+	for _, bulkSync := range b.Resources {
+		// Bulk sync names are not unique, so we need to a slug to the name
+		// to make it unique.
+		name := provider.ToSnakeCase(bulkSync.Name) + "_" + bulkSync.ID[:8]
+		writer.Write([]byte(fmt.Sprintf("terraform import %s.%s %s",
+			BulkSyncResource,
+			name,
+			bulkSync.ID)))
+		writer.Write([]byte(fmt.Sprintf(" # %s\n", bulkSync.Name)))
+	}
 	return nil
 }
 
