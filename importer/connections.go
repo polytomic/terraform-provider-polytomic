@@ -68,7 +68,7 @@ func (c *Connections) Init(ctx context.Context) error {
 	return nil
 }
 
-func (c *Connections) GenerateTerraformFiles(ctx context.Context, w io.Writer) error {
+func (c *Connections) GenerateTerraformFiles(ctx context.Context, writer io.Writer) error {
 	for _, conn := range c.Resources {
 		config := typeConverter(conn.Configuration)
 		hclFile := hclwrite.NewEmptyFile()
@@ -77,19 +77,19 @@ func (c *Connections) GenerateTerraformFiles(ctx context.Context, w io.Writer) e
 		resourceBlock.Body().SetAttributeValue("name", cty.StringVal(conn.Name))
 		resourceBlock.Body().SetAttributeValue("organization", cty.StringVal(conn.Organization))
 		resourceBlock.Body().SetAttributeValue("configuration", config)
-		w.Write(hclFile.Bytes())
+		writer.Write(hclFile.Bytes())
 	}
 	return nil
 
 }
 
-func (c *Connections) GenerateImports(ctx context.Context, w io.Writer) error {
+func (c *Connections) GenerateImports(ctx context.Context, writer io.Writer) error {
 	for _, conn := range c.Resources {
-		w.Write([]byte(fmt.Sprintf("terraform import %s.%s %s",
+		writer.Write([]byte(fmt.Sprintf("terraform import %s.%s %s",
 			conn.Resource,
 			provider.ToSnakeCase(conn.Name),
 			conn.ID)))
-		w.Write([]byte(fmt.Sprintf(" # %s\n", conn.Name)))
+		writer.Write([]byte(fmt.Sprintf(" # %s\n", conn.Name)))
 	}
 	return nil
 }
