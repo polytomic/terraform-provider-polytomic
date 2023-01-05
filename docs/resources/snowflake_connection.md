@@ -42,7 +42,7 @@ resource "polytomic_snowflake_connection" "snowflake" {
 Required:
 
 - `account` (String)
-- `database` (String)
+- `dbname` (String)
 - `password` (String, Sensitive)
 - `username` (String)
 - `warehouse` (String)

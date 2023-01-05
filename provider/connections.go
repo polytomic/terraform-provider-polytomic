@@ -9,29 +9,39 @@ import (
 )
 
 var (
-	connection_resources = []func() resource.Resource{
-		func() resource.Resource { return &postgresqlConnectionResource{} },
-		func() resource.Resource { return &bigqueryConnectionResource{} },
-		func() resource.Resource { return &gcsConnectionResource{} },
-		func() resource.Resource { return &azureblobConnectionResource{} },
-		func() resource.Resource { return &s3ConnectionResource{} },
-		func() resource.Resource { return &sqlserverConnectionResource{} },
-		func() resource.Resource { return &athenaConnectionResource{} },
-		func() resource.Resource { return &snowflakeConnectionResource{} },
+	connectionResources = []func() resource.Resource{
+		func() resource.Resource { return &PostgresqlConnectionResource{} },
+		func() resource.Resource { return &BigqueryConnectionResource{} },
+		func() resource.Resource { return &GcsConnectionResource{} },
+		func() resource.Resource { return &AzureblobConnectionResource{} },
+		func() resource.Resource { return &S3ConnectionResource{} },
+		func() resource.Resource { return &SqlserverConnectionResource{} },
+		func() resource.Resource { return &AthenaConnectionResource{} },
+		func() resource.Resource { return &SnowflakeConnectionResource{} },
+		func() resource.Resource { return &AffinityConnectionResource{} },
+		func() resource.Resource { return &AirtableConnectionResource{} },
+		func() resource.Resource { return &AmplitudeConnectionResource{} },
+		func() resource.Resource { return &MarketoConnectionResource{} },
+		func() resource.Resource { return &MongodbConnectionResource{} },
 	}
 
-	connection_datasources = []func() datasource.DataSource{
-		func() datasource.DataSource { return &postgresqlConnectionDataSource{} },
-		func() datasource.DataSource { return &bigqueryConnectionDataSource{} },
-		func() datasource.DataSource { return &gcsConnectionDataSource{} },
-		func() datasource.DataSource { return &azureblobConnectionDataSource{} },
-		func() datasource.DataSource { return &s3ConnectionDataSource{} },
-		func() datasource.DataSource { return &sqlserverConnectionDataSource{} },
-		func() datasource.DataSource { return &athenaConnectionDataSource{} },
-		func() datasource.DataSource { return &salesforceConnectionDataSource{} },
-		func() datasource.DataSource { return &hubspotConnectionDataSource{} },
-		func() datasource.DataSource { return &googleadsConnectionDataSource{} },
-		func() datasource.DataSource { return &gsheetsConnectionDataSource{} },
-		func() datasource.DataSource { return &snowflakeConnectionDataSource{} },
+	connectionDatasources = []func() datasource.DataSource{
+		func() datasource.DataSource { return &PostgresqlConnectionDataSource{} },
+		func() datasource.DataSource { return &BigqueryConnectionDataSource{} },
+		func() datasource.DataSource { return &GcsConnectionDataSource{} },
+		func() datasource.DataSource { return &AzureblobConnectionDataSource{} },
+		func() datasource.DataSource { return &S3ConnectionDataSource{} },
+		func() datasource.DataSource { return &SqlserverConnectionDataSource{} },
+		func() datasource.DataSource { return &AthenaConnectionDataSource{} },
+		func() datasource.DataSource { return &SalesforceConnectionDataSource{} },
+		func() datasource.DataSource { return &HubspotConnectionDataSource{} },
+		func() datasource.DataSource { return &GoogleadsConnectionDataSource{} },
+		func() datasource.DataSource { return &GsheetsConnectionDataSource{} },
+		func() datasource.DataSource { return &SnowflakeConnectionDataSource{} },
+		func() datasource.DataSource { return &AffinityConnectionDataSource{} },
+		func() datasource.DataSource { return &AirtableConnectionDataSource{} },
+		func() datasource.DataSource { return &AmplitudeConnectionDataSource{} },
+		func() datasource.DataSource { return &MarketoConnectionDataSource{} },
+		func() datasource.DataSource { return &MongodbConnectionDataSource{} },
 	}
 )

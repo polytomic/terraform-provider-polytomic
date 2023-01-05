@@ -18,10 +18,10 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
-var _ resource.Resource = &gcsConnectionResource{}
-var _ resource.ResourceWithImportState = &gcsConnectionResource{}
+var _ resource.Resource = &GcsConnectionResource{}
+var _ resource.ResourceWithImportState = &GcsConnectionResource{}
 
-func (t *gcsConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
+func (t *GcsConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
 		MarkdownDescription: "Google Cloud Storage Connection",
 		Attributes: map[string]tfsdk.Attribute{
@@ -44,7 +44,7 @@ func (t *gcsConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, di
 						Optional:            false,
 						Sensitive:           false,
 					},
-					"service_account_credentials": {
+					"service_account": {
 						MarkdownDescription: "",
 						Type:                types.StringType,
 						Required:            true,
@@ -74,15 +74,15 @@ func (t *gcsConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, di
 	}, nil
 }
 
-func (r *gcsConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *GcsConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_gcs_connection"
 }
 
-type gcsConnectionResource struct {
+type GcsConnectionResource struct {
 	client *polytomic.Client
 }
 
-func (r *gcsConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *GcsConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data connectionData
 
 	diags := req.Config.Get(ctx, &data)
@@ -98,9 +98,9 @@ func (r *gcsConnectionResource) Create(ctx context.Context, req resource.CreateR
 			Type:           polytomic.GoogleCloudStorageConnectionType,
 			OrganizationId: data.Organization.ValueString(),
 			Configuration: polytomic.GCSConfiguration{
-				ProjectId:                 data.Configuration.Attributes()["project_id"].(types.String).ValueString(),
-				ServiceAccountCredentials: data.Configuration.Attributes()["service_account_credentials"].(types.String).ValueString(),
-				Bucket:                    data.Configuration.Attributes()["bucket"].(types.String).ValueString(),
+				ProjectId:      data.Configuration.Attributes()["project_id"].(types.String).ValueString(),
+				ServiceAccount: data.Configuration.Attributes()["service_account"].(types.String).ValueString(),
+				Bucket:         data.Configuration.Attributes()["bucket"].(types.String).ValueString(),
 			},
 		},
 	)
@@ -111,13 +111,13 @@ func (r *gcsConnectionResource) Create(ctx context.Context, req resource.CreateR
 	data.Id = types.StringValue(created.ID)
 	data.Name = types.StringValue(created.Name)
 
-	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "gcs", "id": created.ID})
+	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Gcs", "id": created.ID})
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r *gcsConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *GcsConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data connectionData
 
 	diags := req.State.Get(ctx, &data)
@@ -144,7 +144,7 @@ func (r *gcsConnectionResource) Read(ctx context.Context, req resource.ReadReque
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r *gcsConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *GcsConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var data connectionData
 
 	diags := req.Plan.Get(ctx, &data)
@@ -160,9 +160,9 @@ func (r *gcsConnectionResource) Update(ctx context.Context, req resource.UpdateR
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueString(),
 			Configuration: polytomic.GCSConfiguration{
-				ProjectId:                 data.Configuration.Attributes()["project_id"].(types.String).ValueString(),
-				ServiceAccountCredentials: data.Configuration.Attributes()["service_account_credentials"].(types.String).ValueString(),
-				Bucket:                    data.Configuration.Attributes()["bucket"].(types.String).ValueString(),
+				ProjectId:      data.Configuration.Attributes()["project_id"].(types.String).ValueString(),
+				ServiceAccount: data.Configuration.Attributes()["service_account"].(types.String).ValueString(),
+				Bucket:         data.Configuration.Attributes()["bucket"].(types.String).ValueString(),
 			},
 		},
 	)
@@ -178,7 +178,7 @@ func (r *gcsConnectionResource) Update(ctx context.Context, req resource.UpdateR
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r *gcsConnectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *GcsConnectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var data connectionData
 
 	diags := req.State.Get(ctx, &data)
@@ -195,11 +195,11 @@ func (r *gcsConnectionResource) Delete(ctx context.Context, req resource.DeleteR
 	}
 }
 
-func (r *gcsConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *GcsConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
 
-func (r *gcsConnectionResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *GcsConnectionResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return

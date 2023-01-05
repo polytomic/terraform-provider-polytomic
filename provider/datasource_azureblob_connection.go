@@ -18,18 +18,18 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
-var _ datasource.DataSource = &azureblobConnectionDataSource{}
+var _ datasource.DataSource = &AzureblobConnectionDataSource{}
 
 // ExampleDataSource defines the data source implementation.
-type azureblobConnectionDataSource struct {
+type AzureblobConnectionDataSource struct {
 	client *polytomic.Client
 }
 
-func (d *azureblobConnectionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+func (d *AzureblobConnectionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_azureblob_connection"
 }
 
-func (d *azureblobConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
+func (d *AzureblobConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
 		// This description is used by the documentation generator and the language server.
 		MarkdownDescription: "Azure Blob Storage Connection",
@@ -72,7 +72,7 @@ func (d *azureblobConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Sc
 	}, nil
 }
 
-func (d *azureblobConnectionDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *AzureblobConnectionDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -92,7 +92,7 @@ func (d *azureblobConnectionDataSource) Configure(ctx context.Context, req datas
 	d.client = client
 }
 
-func (d *azureblobConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+func (d *AzureblobConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionData
 
 	// Read Terraform configuration data into the model

@@ -34,6 +34,10 @@ data "polytomic_bigquery_connection" "bigquery" {
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
+Required:
+
+- `project_id` (String)
+
 Optional:
 
 - `location` (String)

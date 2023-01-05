@@ -16,18 +16,18 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
-var _ datasource.DataSource = &googleadsConnectionDataSource{}
+var _ datasource.DataSource = &GoogleadsConnectionDataSource{}
 
 // ExampleDataSource defines the data source implementation.
-type googleadsConnectionDataSource struct {
+type GoogleadsConnectionDataSource struct {
 	client *polytomic.Client
 }
 
-func (d *googleadsConnectionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+func (d *GoogleadsConnectionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_googleads_connection"
 }
 
-func (d *googleadsConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
+func (d *GoogleadsConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
 		// This description is used by the documentation generator and the language server.
 		MarkdownDescription: "Google Ads Connection",
@@ -57,7 +57,7 @@ func (d *googleadsConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Sc
 	}, nil
 }
 
-func (d *googleadsConnectionDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *GoogleadsConnectionDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -77,7 +77,7 @@ func (d *googleadsConnectionDataSource) Configure(ctx context.Context, req datas
 	d.client = client
 }
 
-func (d *googleadsConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+func (d *GoogleadsConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionData
 
 	// Read Terraform configuration data into the model

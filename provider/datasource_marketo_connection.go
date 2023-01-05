@@ -18,21 +18,21 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
-var _ datasource.DataSource = &postgresConnectionDataSource{}
+var _ datasource.DataSource = &MarketoConnectionDataSource{}
 
 // ExampleDataSource defines the data source implementation.
-type postgresConnectionDataSource struct {
+type MarketoConnectionDataSource struct {
 	client *polytomic.Client
 }
 
-func (d *postgresConnectionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_postgres_connection"
+func (d *MarketoConnectionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_marketo_connection"
 }
 
-func (d *postgresConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
+func (d *MarketoConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "PostgresSQL Connection",
+		MarkdownDescription: "Marketo Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"name": {
 				MarkdownDescription: "",
@@ -51,98 +51,35 @@ func (d *postgresConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Sch
 			},
 			"configuration": {
 				Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
-					"hostname": {
+					"client_id": {
 						MarkdownDescription: "",
 						Type:                types.StringType,
 						Required:            true,
 						Optional:            false,
 						Sensitive:           false,
 					},
-					"username": {
+					"rest_endpoint": {
 						MarkdownDescription: "",
 						Type:                types.StringType,
 						Required:            true,
 						Optional:            false,
 						Sensitive:           false,
 					},
-					"database": {
+					"enforce_api_limits": {
 						MarkdownDescription: "",
-						Type:                types.StringType,
-						Required:            true,
-						Optional:            false,
+						Type:                types.BoolType,
+						Required:            false,
+						Optional:            true,
 						Sensitive:           false,
 					},
-					"port": {
+					"daily_api_calls": {
 						MarkdownDescription: "",
 						Type:                types.Int64Type,
-						Required:            true,
-						Optional:            false,
-						Sensitive:           false,
-					},
-					"ssl": {
-						MarkdownDescription: "",
-						Type:                types.BoolType,
 						Required:            false,
 						Optional:            true,
 						Sensitive:           false,
 					},
-					"client_certs": {
-						MarkdownDescription: "",
-						Type:                types.BoolType,
-						Required:            false,
-						Optional:            true,
-						Sensitive:           false,
-					},
-					"client_certificate": {
-						MarkdownDescription: "",
-						Type:                types.StringType,
-						Required:            false,
-						Optional:            true,
-						Sensitive:           false,
-					},
-					"ca_cert": {
-						MarkdownDescription: "",
-						Type:                types.StringType,
-						Required:            false,
-						Optional:            true,
-						Sensitive:           false,
-					},
-					"change_detection": {
-						MarkdownDescription: "",
-						Type:                types.BoolType,
-						Required:            false,
-						Optional:            true,
-						Sensitive:           false,
-					},
-					"publication": {
-						MarkdownDescription: "",
-						Type:                types.StringType,
-						Required:            false,
-						Optional:            true,
-						Sensitive:           false,
-					},
-					"ssh": {
-						MarkdownDescription: "",
-						Type:                types.BoolType,
-						Required:            false,
-						Optional:            true,
-						Sensitive:           false,
-					},
-					"ssh_user": {
-						MarkdownDescription: "",
-						Type:                types.StringType,
-						Required:            false,
-						Optional:            true,
-						Sensitive:           false,
-					},
-					"ssh_host": {
-						MarkdownDescription: "",
-						Type:                types.StringType,
-						Required:            false,
-						Optional:            true,
-						Sensitive:           false,
-					},
-					"ssh_port": {
+					"concurrent_imports": {
 						MarkdownDescription: "",
 						Type:                types.Int64Type,
 						Required:            false,
@@ -156,7 +93,7 @@ func (d *postgresConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Sch
 	}, nil
 }
 
-func (d *postgresConnectionDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *MarketoConnectionDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -176,7 +113,7 @@ func (d *postgresConnectionDataSource) Configure(ctx context.Context, req dataso
 	d.client = client
 }
 
-func (d *postgresConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+func (d *MarketoConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionData
 
 	// Read Terraform configuration data into the model
@@ -198,7 +135,7 @@ func (d *postgresConnectionDataSource) Read(ctx context.Context, req datasource.
 	data.Id = types.StringValue(connection.ID)
 	data.Name = types.StringValue(connection.Name)
 	data.Organization = types.StringValue(connection.OrganizationId)
-	var conf polytomic.PostgresqlConfiguration
+	var conf polytomic.MarketoConfiguration
 	err = mapstructure.Decode(connection.Configuration, &conf)
 	if err != nil {
 		resp.Diagnostics.AddError("Error decoding connection", err.Error())
@@ -209,47 +146,20 @@ func (d *postgresConnectionDataSource) Read(ctx context.Context, req datasource.
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttributeTypes(ctx),
 		map[string]attr.Value{
-			"hostname": types.StringValue(
-				conf.Hostname,
+			"client_id": types.StringValue(
+				conf.ClientID,
 			),
-			"username": types.StringValue(
-				conf.Username,
+			"rest_endpoint": types.StringValue(
+				conf.RESTEndpoint,
 			),
-			"database": types.StringValue(
-				conf.Database,
+			"enforce_api_limits": types.BoolValue(
+				conf.EnforceAPILimits,
 			),
-			"port": types.Int64Value(
-				int64(conf.Port),
+			"daily_api_calls": types.Int64Value(
+				int64(conf.DailyAPICalls),
 			),
-			"ssl": types.BoolValue(
-				conf.SSL,
-			),
-			"client_certs": types.BoolValue(
-				conf.ClientCerts,
-			),
-			"client_certificate": types.StringValue(
-				conf.ClientCertificate,
-			),
-			"ca_cert": types.StringValue(
-				conf.CACert,
-			),
-			"change_detection": types.BoolValue(
-				conf.ChangeDetection,
-			),
-			"publication": types.StringValue(
-				conf.Publication,
-			),
-			"ssh": types.BoolValue(
-				conf.SSH,
-			),
-			"ssh_user": types.StringValue(
-				conf.SSHUser,
-			),
-			"ssh_host": types.StringValue(
-				conf.SSHHost,
-			),
-			"ssh_port": types.Int64Value(
-				int64(conf.SSHPort),
+			"concurrent_imports": types.Int64Value(
+				int64(conf.ConcurrentImports),
 			),
 		},
 	)

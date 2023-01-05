@@ -18,10 +18,10 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
-var _ resource.Resource = &azureblobConnectionResource{}
-var _ resource.ResourceWithImportState = &azureblobConnectionResource{}
+var _ resource.Resource = &AzureblobConnectionResource{}
+var _ resource.ResourceWithImportState = &AzureblobConnectionResource{}
 
-func (t *azureblobConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
+func (t *AzureblobConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
 		MarkdownDescription: "Azure Blob Storage Connection",
 		Attributes: map[string]tfsdk.Attribute{
@@ -74,15 +74,15 @@ func (t *azureblobConnectionResource) GetSchema(ctx context.Context) (tfsdk.Sche
 	}, nil
 }
 
-func (r *azureblobConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *AzureblobConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_azureblob_connection"
 }
 
-type azureblobConnectionResource struct {
+type AzureblobConnectionResource struct {
 	client *polytomic.Client
 }
 
-func (r *azureblobConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *AzureblobConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data connectionData
 
 	diags := req.Config.Get(ctx, &data)
@@ -111,13 +111,13 @@ func (r *azureblobConnectionResource) Create(ctx context.Context, req resource.C
 	data.Id = types.StringValue(created.ID)
 	data.Name = types.StringValue(created.Name)
 
-	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "azureblob", "id": created.ID})
+	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Azureblob", "id": created.ID})
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r *azureblobConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *AzureblobConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data connectionData
 
 	diags := req.State.Get(ctx, &data)
@@ -144,7 +144,7 @@ func (r *azureblobConnectionResource) Read(ctx context.Context, req resource.Rea
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r *azureblobConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *AzureblobConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var data connectionData
 
 	diags := req.Plan.Get(ctx, &data)
@@ -178,7 +178,7 @@ func (r *azureblobConnectionResource) Update(ctx context.Context, req resource.U
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r *azureblobConnectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *AzureblobConnectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var data connectionData
 
 	diags := req.State.Get(ctx, &data)
@@ -195,11 +195,11 @@ func (r *azureblobConnectionResource) Delete(ctx context.Context, req resource.D
 	}
 }
 
-func (r *azureblobConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *AzureblobConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
 
-func (r *azureblobConnectionResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *AzureblobConnectionResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return

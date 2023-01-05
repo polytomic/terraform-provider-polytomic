@@ -18,18 +18,18 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
-var _ datasource.DataSource = &s3ConnectionDataSource{}
+var _ datasource.DataSource = &S3ConnectionDataSource{}
 
 // ExampleDataSource defines the data source implementation.
-type s3ConnectionDataSource struct {
+type S3ConnectionDataSource struct {
 	client *polytomic.Client
 }
 
-func (d *s3ConnectionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+func (d *S3ConnectionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_s3_connection"
 }
 
-func (d *s3ConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
+func (d *S3ConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
 		// This description is used by the documentation generator and the language server.
 		MarkdownDescription: "S3 Connection",
@@ -72,7 +72,7 @@ func (d *s3ConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, d
 	}, nil
 }
 
-func (d *s3ConnectionDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *S3ConnectionDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -92,7 +92,7 @@ func (d *s3ConnectionDataSource) Configure(ctx context.Context, req datasource.C
 	d.client = client
 }
 
-func (d *s3ConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+func (d *S3ConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionData
 
 	// Read Terraform configuration data into the model

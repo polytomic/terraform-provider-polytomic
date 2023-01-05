@@ -18,18 +18,18 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
-var _ datasource.DataSource = &hubspotConnectionDataSource{}
+var _ datasource.DataSource = &HubspotConnectionDataSource{}
 
 // ExampleDataSource defines the data source implementation.
-type hubspotConnectionDataSource struct {
+type HubspotConnectionDataSource struct {
 	client *polytomic.Client
 }
 
-func (d *hubspotConnectionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+func (d *HubspotConnectionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_hubspot_connection"
 }
 
-func (d *hubspotConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
+func (d *HubspotConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
 		// This description is used by the documentation generator and the language server.
 		MarkdownDescription: "Hubspot Connection",
@@ -72,7 +72,7 @@ func (d *hubspotConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Sche
 	}, nil
 }
 
-func (d *hubspotConnectionDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *HubspotConnectionDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -92,7 +92,7 @@ func (d *hubspotConnectionDataSource) Configure(ctx context.Context, req datasou
 	d.client = client
 }
 
-func (d *hubspotConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+func (d *HubspotConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionData
 
 	// Read Terraform configuration data into the model

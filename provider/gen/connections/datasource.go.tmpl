@@ -28,7 +28,7 @@ type {{ .Connection }}ConnectionDataSource struct {
 
 
 func (d *{{ .Connection }}ConnectionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_{{ .Connection }}_connection"
+	resp.TypeName = req.ProviderTypeName + "_{{ .ResourceName }}_connection"
 }
 
 func (d *{{ .Connection }}ConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
