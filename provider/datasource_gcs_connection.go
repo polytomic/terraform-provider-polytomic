@@ -31,8 +31,7 @@ func (d *GcsConnectionDataSource) Metadata(ctx context.Context, req datasource.M
 
 func (d *GcsConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Google Cloud Storage Connection",
+		MarkdownDescription: ":meta:subcategory:Connection: Google Cloud Storage Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"name": {
 				MarkdownDescription: "",

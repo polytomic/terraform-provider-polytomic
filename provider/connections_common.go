@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	ConnectionNotFoundErr = "no connection found (404)"
+	ConnectionNotFoundErr = "not found: no connection found (404)"
 )
 
 var (

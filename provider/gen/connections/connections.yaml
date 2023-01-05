@@ -367,3 +367,321 @@ connections:
       - name: AdditionalParams
         type: string
         optional: true
+  - connection: chargebee
+    name: Chargebee
+    type: polytomic.ChargebeeConnectionType
+    config: polytomic.ChargeBeeConnectionConfiguration
+    datasource: true
+    resource: true
+    attributes:
+      - name: Site
+        type: string
+        required: true
+      - name: APIKey
+        type: string
+        required: true
+        sensitive: true
+      - name: RatelimitRPM
+        type: int
+        optional: true
+  - connection: cloudsql
+    name: Cloud SQL
+    type: polytomic.CloudSQLConnectionType
+    config: polytomic.CloudSQLConnectionConfiguration
+    datasource: true
+    resource: true
+    attributes:
+      - name: ConnectionName
+        type: string
+        required: true
+      - name: Database
+        type: string
+        required: true
+      - name: Username
+        type: string
+        optional: true
+      - name: Password
+        type: string
+        optional: true
+        sensitive: true
+      - name: Credentials
+        type: string
+        optional: true
+        sensitive: true
+  - connection: cosmosdb
+    name: Cosmos DB
+    type: polytomic.CosmosDBConnectionType
+    config: polytomic.CosmosDBConnectionConfiguration
+    datasource: true
+    resource: true
+    attributes:
+      - name: URI
+        type: string
+        required: true
+      - name: Key
+        type: string
+        required: true
+        sensitive: true
+  - connection: customerio
+    name: Customer.io
+    type: polytomic.CustomerIOConnectionType
+    config: polytomic.CustomerIOConnectionConfiguration
+    datasource: true
+    resource: true
+    attributes:
+      - name: SiteID
+        type: string
+        required: true
+      - name: TrackingAPIKey
+        type: string
+        required: true
+        sensitive: true
+      - name: AppAPIKey
+        type: string
+        required: true
+        sensitive: true
+  - connection: dialpad
+    name: Dialpad
+    type: polytomic.DialpadConnectionType
+    config: polytomic.DialpadConnectionConfiguration
+    datasource: true
+    resource: true
+    attributes:
+      - name: APIKey
+        type: string
+        required: true
+        sensitive: true
+  - connection: freshdesk
+    name: Freshdesk
+    type: polytomic.FreshdeskConnectionType
+    config: polytomic.FreshdeskConnectionConfiguration
+    datasource: true
+    resource: true
+    attributes:
+      - name: Apikey
+        type: string
+        required: true
+        sensitive: true
+      - name: Subdomain
+        type: string
+        required: true
+  - connection: fullstory
+    name: FullStory
+    type: polytomic.FullstoryConnectionType
+    config: polytomic.FullstoryConnectionConfiguration
+    datasource: true
+    resource: true
+    attributes:
+      - name: APIKey
+        type: string
+        required: true
+        sensitive: true
+  - connection: harmonic
+    name: Harmonic
+    type: polytomic.HarmonicConnectionType
+    config: polytomic.HarmonicConnectionConfiguration
+    datasource: true
+    resource: true
+    attributes:
+      - name: APIKey
+        type: string
+        required: true
+        sensitive: true
+  - connection: intercom
+    name: Intercom
+    type: polytomic.IntercomConnectionType
+    config: polytomic.IntercomConnectionConfiguration
+    datasource: true
+    resource: true
+    attributes:
+      - name: APIKey
+        type: string
+        required: true
+        sensitive: true
+  - connection: klaviyo
+    name: Klaviyo
+    type: polytomic.KlaviyoConnectionType
+    config: polytomic.KlaviyoConnectionConfiguration
+    datasource: true
+    resource: true
+    attributes:
+      - name: APIKey
+        type: string
+        required: true
+        sensitive: true
+  - connection: kustomer
+    name: Kustomer
+    type: polytomic.KustomerConnectionType
+    config: polytomic.KustomerConnectionConfiguration
+    datasource: true
+    resource: true
+    attributes:
+      - name: Apikey
+        type: string
+        required: true
+        sensitive: true
+      - name: Domain
+        type: string
+        required: true
+  - connection: lob
+    name: Lob
+    type: polytomic.LobConnectionType
+    config: polytomic.LobConnectionConfiguration
+    datasource: true
+    resource: true
+    attributes:
+      - name: Apikey
+        type: string
+        required: true
+        sensitive: true
+  - connection: mysql
+    name: MySQL
+    type: polytomic.MysqlConnectionType
+    config: polytomic.MysqlConnectionConfiguration
+    datasource: true
+    resource: true
+    attributes:
+      - name: Hostname
+        type: string
+        required: true
+      - name: Account
+        type: string
+        required: true
+      - name: Passwd
+        type: string
+        required: true
+        sensitive: true
+      - name: Dbname
+        type: string
+        required: true
+      - name: Port
+        type: int
+        optional: true
+      - name: SSH
+        type: bool
+        optional: true
+      - name: SSHUser
+        type: string
+        optional: true
+      - name: SSHHost
+        type: string
+        optional: true
+      - name: SSHPort
+        type: int
+        optional: true
+      - name: PrivateKey
+        type: string
+        optional: true
+        sensitive: true
+  - connection: netsuite
+    name: NetSuite
+    type: polytomic.NetsuiteConnectionType
+    config: polytomic.NetsuiteConnectionConfiguration
+    datasource: true
+    resource: true
+    attributes:
+      - name: AccountID
+        type: string
+        required: true
+      - name: ConsumerKey
+        type: string
+        required: true
+      - name: ConsumerSecret
+        type: string
+        required: true
+        sensitive: true
+      - name: Token
+        type: string
+        required: true
+      - name: TokenSecret
+        type: string
+        required: true
+        sensitive: true
+  - connection: pipedrive
+    name: Pipedrive
+    type: polytomic.PipedriveConnectionType
+    config: polytomic.PipedriveConnectionConfiguration
+    datasource: true
+    resource: true
+    attributes:
+      - name: APIKey
+        type: string
+        required: true
+        sensitive: true
+      - name: Domain
+        type: string
+        required: true
+  - connection: redshift
+    name: Redshift
+    type: polytomic.RedshiftConnectionType
+    config: polytomic.RedshiftConnectionConfiguration
+    datasource: true
+    resource: true
+    attributes:
+      - name: Hostname
+        type: string
+        required: true
+      - name: Username
+        type: string
+        required: true
+      - name: Password
+        type: string
+        required: true
+        sensitive: true
+      - name: Database
+        type: string
+        required: true
+      - name: Port
+        type: int
+        optional: true
+      - name: SSH
+        type: bool
+        optional: true
+      - name: SSHUser
+        type: string
+        optional: true
+      - name: SSHHost
+        type: string
+        optional: true
+      - name: SSHPort
+        type: int
+        optional: true
+      - name: PrivateKey
+        type: string
+        optional: true
+        sensitive: true
+      - name: AwsAccessKeyID
+        type: string
+        optional: true
+      - name: AwsSecretAccessKey
+        type: string
+        optional: true
+        sensitive: true
+      - name: S3BucketName
+        type: string
+        optional: true
+      - name: S3BucketRegion
+        type: string
+        optional: true
+  - connection: segment
+    name: Segment
+    type: polytomic.SegmentConnectionType
+    config: polytomic.SegmentConnectionConfiguration
+    datasource: true
+    resource: true
+    attributes:
+      - name: WriteKey
+        type: string
+        required: true
+        sensitive: true
+  - connection: stripe
+    name: Stripe
+    type: polytomic.StripeConnectionType
+    config: polytomic.StripeConnectionConfiguration
+    datasource: true
+    resource: true
+    attributes:
+      - name: APIKey
+        type: string
+        required: true
+        sensitive: true

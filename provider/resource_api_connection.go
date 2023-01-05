@@ -21,7 +21,7 @@ var _ resource.ResourceWithImportState = &APIConnectionResource{}
 
 func (t *APIConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: "API Connection",
+		MarkdownDescription: ":meta:subcategory:Connection: API Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"organization": {
 				MarkdownDescription: "Organization ID",
@@ -43,25 +43,21 @@ func (t *APIConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, di
 					},
 					"headers": {
 						MarkdownDescription: "",
-						Attributes: tfsdk.SetNestedAttributes(map[string]tfsdk.Attribute{
-							"": {
-								Type: types.ObjectType{
-									AttrTypes: map[string]attr.Type{
-										"name":  types.StringType,
-										"value": types.StringType,
-									},
-								},
-								Optional: true,
+						Type: types.SetType{ElemType: types.ObjectType{
+							AttrTypes: map[string]attr.Type{
+								"name":  types.StringType,
+								"value": types.StringType,
 							},
-						}),
+						}},
 						Optional: true,
 					},
+
 					"body": {
 						MarkdownDescription: "",
 						Type:                types.StringType,
 						Required:            true,
 					},
-					"query_parameters": {
+					"parameters": {
 						MarkdownDescription: "",
 						Type: types.SetType{
 							ElemType: types.ObjectType{
@@ -164,17 +160,21 @@ func (r *APIConnectionResource) Create(ctx context.Context, req resource.CreateR
 	}
 
 	var headers []polytomic.RequestParameter
-	diags = data.Configuration.Attributes()["headers"].(types.Set).ElementsAs(ctx, &headers, true)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
+	if data.Configuration.Attributes()["headers"] != nil {
+		diags = data.Configuration.Attributes()["headers"].(types.Set).ElementsAs(ctx, &headers, true)
+		if diags.HasError() {
+			resp.Diagnostics.Append(diags...)
+			return
+		}
 	}
 
 	var params []polytomic.RequestParameter
-	diags = data.Configuration.Attributes()["query_string_parameters"].(types.Set).ElementsAs(ctx, &params, true)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
+	if data.Configuration.Attributes()["parameters"] != nil {
+		diags = data.Configuration.Attributes()["parameters"].(types.Set).ElementsAs(ctx, &params, true)
+		if diags.HasError() {
+			resp.Diagnostics.Append(diags...)
+			return
+		}
 	}
 
 	var auth polytomic.Auth
@@ -190,12 +190,12 @@ func (r *APIConnectionResource) Create(ctx context.Context, req resource.CreateR
 			Type:           polytomic.APIConnectionType,
 			OrganizationId: data.Organization.ValueString(),
 			Configuration: polytomic.APIConnectionConfiguration{
-				URL:                   data.Configuration.Attributes()["url"].(types.String).ValueString(),
-				Headers:               headers,
-				Body:                  data.Configuration.Attributes()["body"].(types.String).ValueString(),
-				QueryStringParameters: params,
-				Healthcheck:           data.Configuration.Attributes()["healthcheck"].(types.String).ValueString(),
-				Auth:                  auth,
+				URL:         data.Configuration.Attributes()["url"].(types.String).ValueString(),
+				Headers:     headers,
+				Body:        data.Configuration.Attributes()["body"].(types.String).ValueString(),
+				Parameters:  params,
+				Healthcheck: data.Configuration.Attributes()["healthcheck"].(types.String).ValueString(),
+				Auth:        auth,
 			},
 		},
 	)
@@ -205,6 +205,7 @@ func (r *APIConnectionResource) Create(ctx context.Context, req resource.CreateR
 	}
 	data.Id = types.StringValue(created.ID)
 	data.Name = types.StringValue(created.Name)
+	data.Organization = types.StringValue(created.OrganizationId)
 
 	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "API", "id": created.ID})
 
@@ -234,6 +235,7 @@ func (r *APIConnectionResource) Read(ctx context.Context, req resource.ReadReque
 
 	data.Id = types.StringValue(connection.ID)
 	data.Name = types.StringValue(connection.Name)
+	data.Organization = types.StringValue(connection.OrganizationId)
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -264,6 +266,7 @@ func (r *APIConnectionResource) Update(ctx context.Context, req resource.UpdateR
 
 	data.Id = types.StringValue(updated.ID)
 	data.Name = types.StringValue(updated.Name)
+	data.Organization = types.StringValue(updated.OrganizationId)
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)

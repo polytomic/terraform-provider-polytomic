@@ -23,7 +23,7 @@ var _ resource.ResourceWithImportState = &PostgresqlConnectionResource{}
 
 func (t *PostgresqlConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: "PostgresSQL Connection",
+		MarkdownDescription: ":meta:subcategory:Connection: PostgresSQL Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"organization": {
 				MarkdownDescription: "Organization ID",
@@ -222,6 +222,7 @@ func (r *PostgresqlConnectionResource) Create(ctx context.Context, req resource.
 	}
 	data.Id = types.StringValue(created.ID)
 	data.Name = types.StringValue(created.Name)
+	data.Organization = types.StringValue(created.OrganizationId)
 
 	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Postgresql", "id": created.ID})
 
@@ -251,6 +252,7 @@ func (r *PostgresqlConnectionResource) Read(ctx context.Context, req resource.Re
 
 	data.Id = types.StringValue(connection.ID)
 	data.Name = types.StringValue(connection.Name)
+	data.Organization = types.StringValue(connection.OrganizationId)
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -299,6 +301,7 @@ func (r *PostgresqlConnectionResource) Update(ctx context.Context, req resource.
 
 	data.Id = types.StringValue(updated.ID)
 	data.Name = types.StringValue(updated.Name)
+	data.Organization = types.StringValue(updated.OrganizationId)
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)

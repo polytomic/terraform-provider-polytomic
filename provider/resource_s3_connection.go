@@ -23,7 +23,7 @@ var _ resource.ResourceWithImportState = &S3ConnectionResource{}
 
 func (t *S3ConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: "S3 Connection",
+		MarkdownDescription: ":meta:subcategory:Connection: S3 Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"organization": {
 				MarkdownDescription: "Organization ID",
@@ -118,6 +118,7 @@ func (r *S3ConnectionResource) Create(ctx context.Context, req resource.CreateRe
 	}
 	data.Id = types.StringValue(created.ID)
 	data.Name = types.StringValue(created.Name)
+	data.Organization = types.StringValue(created.OrganizationId)
 
 	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "S3", "id": created.ID})
 
@@ -147,6 +148,7 @@ func (r *S3ConnectionResource) Read(ctx context.Context, req resource.ReadReques
 
 	data.Id = types.StringValue(connection.ID)
 	data.Name = types.StringValue(connection.Name)
+	data.Organization = types.StringValue(connection.OrganizationId)
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -182,6 +184,7 @@ func (r *S3ConnectionResource) Update(ctx context.Context, req resource.UpdateRe
 
 	data.Id = types.StringValue(updated.ID)
 	data.Name = types.StringValue(updated.Name)
+	data.Organization = types.StringValue(updated.OrganizationId)
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
