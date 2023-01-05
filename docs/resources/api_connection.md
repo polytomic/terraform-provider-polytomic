@@ -39,9 +39,9 @@ Required:
 Optional:
 
 - `auth` (Attributes) (see [below for nested schema](#nestedatt--configuration--auth))
-- `headers` (Attributes Set) (see [below for nested schema](#nestedatt--configuration--headers))
+- `headers` (Set of Object) (see [below for nested schema](#nestedatt--configuration--headers))
 - `healthcheck` (String)
-- `query_parameters` (Set of Object) (see [below for nested schema](#nestedatt--configuration--query_parameters))
+- `parameters` (Set of Object) (see [below for nested schema](#nestedatt--configuration--parameters))
 
 <a id="nestedatt--configuration--auth"></a>
 ### Nested Schema for `configuration.auth`
@@ -94,22 +94,14 @@ Required:
 <a id="nestedatt--configuration--headers"></a>
 ### Nested Schema for `configuration.headers`
 
-Optional:
-
-- `` (Object) (see [below for nested schema](#nestedatt--configuration--headers--))
-
-<a id="nestedatt--configuration--headers--"></a>
-### Nested Schema for `configuration.headers.`
-
 Required:
 
 - `name` (String)
 - `value` (String)
 
 
-
-<a id="nestedatt--configuration--query_parameters"></a>
-### Nested Schema for `configuration.query_parameters`
+<a id="nestedatt--configuration--parameters"></a>
+### Nested Schema for `configuration.parameters`
 
 Required:
 
