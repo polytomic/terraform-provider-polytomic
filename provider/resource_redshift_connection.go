@@ -121,14 +121,14 @@ func (t *RedshiftConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schem
 						Optional:            true,
 						Sensitive:           true,
 					},
-					"s_3_bucket_name": {
+					"s3_bucket_name": {
 						MarkdownDescription: "",
 						Type:                types.StringType,
 						Required:            false,
 						Optional:            true,
 						Sensitive:           false,
 					},
-					"s_3_bucket_region": {
+					"s3_bucket_region": {
 						MarkdownDescription: "",
 						Type:                types.StringType,
 						Required:            false,
@@ -187,8 +187,8 @@ func (r *RedshiftConnectionResource) Create(ctx context.Context, req resource.Cr
 				PrivateKey:         data.Configuration.Attributes()["private_key"].(types.String).ValueString(),
 				AwsAccessKeyID:     data.Configuration.Attributes()["aws_access_key_id"].(types.String).ValueString(),
 				AwsSecretAccessKey: data.Configuration.Attributes()["aws_secret_access_key"].(types.String).ValueString(),
-				S3BucketName:       data.Configuration.Attributes()["s_3_bucket_name"].(types.String).ValueString(),
-				S3BucketRegion:     data.Configuration.Attributes()["s_3_bucket_region"].(types.String).ValueString(),
+				S3BucketName:       data.Configuration.Attributes()["s3_bucket_name"].(types.String).ValueString(),
+				S3BucketRegion:     data.Configuration.Attributes()["s3_bucket_region"].(types.String).ValueString(),
 			},
 		},
 	)
@@ -262,8 +262,8 @@ func (r *RedshiftConnectionResource) Update(ctx context.Context, req resource.Up
 				PrivateKey:         data.Configuration.Attributes()["private_key"].(types.String).ValueString(),
 				AwsAccessKeyID:     data.Configuration.Attributes()["aws_access_key_id"].(types.String).ValueString(),
 				AwsSecretAccessKey: data.Configuration.Attributes()["aws_secret_access_key"].(types.String).ValueString(),
-				S3BucketName:       data.Configuration.Attributes()["s_3_bucket_name"].(types.String).ValueString(),
-				S3BucketRegion:     data.Configuration.Attributes()["s_3_bucket_region"].(types.String).ValueString(),
+				S3BucketName:       data.Configuration.Attributes()["s3_bucket_name"].(types.String).ValueString(),
+				S3BucketRegion:     data.Configuration.Attributes()["s3_bucket_region"].(types.String).ValueString(),
 			},
 		},
 	)

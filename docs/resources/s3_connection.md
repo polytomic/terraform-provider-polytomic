@@ -16,8 +16,8 @@ S3 Connection
 resource "polytomic_s3_connection" "s3" {
   name = "example"
   configuration = {
-    region = "us-east-1"
-    bucket = "my-bucket"
+    s3_bucket_region = "us-east-1"
+    s3_bucket_name   = "my-bucket"
   }
 }
 ```
@@ -43,9 +43,9 @@ resource "polytomic_s3_connection" "s3" {
 
 Required:
 
-- `access_key_id` (String, Sensitive)
-- `access_key_secret` (String, Sensitive)
-- `bucket` (String)
-- `region` (String)
+- `aws_access_key_id` (String, Sensitive)
+- `aws_secret_access_key` (String, Sensitive)
+- `s3_bucket_name` (String)
+- `s3_bucket_region` (String)
 
 

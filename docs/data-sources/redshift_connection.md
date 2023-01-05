@@ -44,8 +44,8 @@ Optional:
 
 - `aws_access_key_id` (String)
 - `port` (Number)
-- `s_3_bucket_name` (String)
-- `s_3_bucket_region` (String)
+- `s3_bucket_name` (String)
+- `s3_bucket_region` (String)
 - `ssh` (Boolean)
 - `ssh_host` (String)
 - `ssh_port` (Number)

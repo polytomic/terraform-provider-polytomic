@@ -32,6 +32,7 @@ func Init(url, key, path string, recreate bool) {
 		"main":        NewMain(),
 		"connections": NewConnections(c),
 		"models":      NewModels(c),
+		"bulk_syncs":  NewBulkSyncs(c),
 	}
 
 	// Create import.sh
