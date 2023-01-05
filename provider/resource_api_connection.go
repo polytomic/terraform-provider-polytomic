@@ -43,19 +43,15 @@ func (t *APIConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, di
 					},
 					"headers": {
 						MarkdownDescription: "",
-						Attributes: tfsdk.SetNestedAttributes(map[string]tfsdk.Attribute{
-							"": {
-								Type: types.ObjectType{
-									AttrTypes: map[string]attr.Type{
-										"name":  types.StringType,
-										"value": types.StringType,
-									},
-								},
-								Optional: true,
+						Type: types.SetType{ElemType: types.ObjectType{
+							AttrTypes: map[string]attr.Type{
+								"name":  types.StringType,
+								"value": types.StringType,
 							},
-						}),
+						}},
 						Optional: true,
 					},
+
 					"body": {
 						MarkdownDescription: "",
 						Type:                types.StringType,
