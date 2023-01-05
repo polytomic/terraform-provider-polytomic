@@ -31,6 +31,7 @@ func Init(url, key, path string, recreate bool) {
 	importables := map[string]Importable{
 		"main":        NewMain(),
 		"connections": NewConnections(c),
+		"models":      NewModels(c),
 	}
 
 	// Create import.sh
