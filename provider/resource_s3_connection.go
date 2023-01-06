@@ -37,28 +37,28 @@ func (t *S3ConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, dia
 			},
 			"configuration": {
 				Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
-					"access_key_id": {
+					"aws_access_key_id": {
 						MarkdownDescription: "",
 						Type:                types.StringType,
 						Required:            true,
 						Optional:            false,
 						Sensitive:           true,
 					},
-					"access_key_secret": {
+					"aws_secret_access_key": {
 						MarkdownDescription: "",
 						Type:                types.StringType,
 						Required:            true,
 						Optional:            false,
 						Sensitive:           true,
 					},
-					"region": {
+					"s3_bucket_region": {
 						MarkdownDescription: "",
 						Type:                types.StringType,
 						Required:            true,
 						Optional:            false,
 						Sensitive:           false,
 					},
-					"bucket": {
+					"s3_bucket_name": {
 						MarkdownDescription: "",
 						Type:                types.StringType,
 						Required:            true,
@@ -105,10 +105,10 @@ func (r *S3ConnectionResource) Create(ctx context.Context, req resource.CreateRe
 			Type:           polytomic.S3ConnectionType,
 			OrganizationId: data.Organization.ValueString(),
 			Configuration: polytomic.S3Configuration{
-				AccessKeyID:     data.Configuration.Attributes()["access_key_id"].(types.String).ValueString(),
-				AccessKeySecret: data.Configuration.Attributes()["access_key_secret"].(types.String).ValueString(),
-				Region:          data.Configuration.Attributes()["region"].(types.String).ValueString(),
-				Bucket:          data.Configuration.Attributes()["bucket"].(types.String).ValueString(),
+				AwsAccessKeyID:     data.Configuration.Attributes()["aws_access_key_id"].(types.String).ValueString(),
+				AwsSecretAccessKey: data.Configuration.Attributes()["aws_secret_access_key"].(types.String).ValueString(),
+				S3BucketRegion:     data.Configuration.Attributes()["s3_bucket_region"].(types.String).ValueString(),
+				S3BucketName:       data.Configuration.Attributes()["s3_bucket_name"].(types.String).ValueString(),
 			},
 		},
 	)
@@ -170,10 +170,10 @@ func (r *S3ConnectionResource) Update(ctx context.Context, req resource.UpdateRe
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueString(),
 			Configuration: polytomic.S3Configuration{
-				AccessKeyID:     data.Configuration.Attributes()["access_key_id"].(types.String).ValueString(),
-				AccessKeySecret: data.Configuration.Attributes()["access_key_secret"].(types.String).ValueString(),
-				Region:          data.Configuration.Attributes()["region"].(types.String).ValueString(),
-				Bucket:          data.Configuration.Attributes()["bucket"].(types.String).ValueString(),
+				AwsAccessKeyID:     data.Configuration.Attributes()["aws_access_key_id"].(types.String).ValueString(),
+				AwsSecretAccessKey: data.Configuration.Attributes()["aws_secret_access_key"].(types.String).ValueString(),
+				S3BucketRegion:     data.Configuration.Attributes()["s3_bucket_region"].(types.String).ValueString(),
+				S3BucketName:       data.Configuration.Attributes()["s3_bucket_name"].(types.String).ValueString(),
 			},
 		},
 	)

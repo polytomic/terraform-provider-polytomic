@@ -133,21 +133,21 @@ connections:
     resource: true
     datasource: true
     attributes:
-      - name: AccessKeyID
+      - name: AwsAccessKeyID
         type: string
         required: true
         sensitive: true
         example: "EXAMPLEACCESSKEYID"
-      - name: AccessKeySecret
+      - name: AwsSecretAccessKey
         type: string
         required: true
         sensitive: true
         example: "EXAMPLEACCESSKEYSECRET"
-      - name: Region
+      - name: S3BucketRegion
         type: string
         required: true
         example: "us-east-1"
-      - name: Bucket
+      - name: S3BucketName
         type: string
         required: true
         example: "my-bucket"

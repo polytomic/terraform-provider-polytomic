@@ -36,7 +36,7 @@ data "polytomic_s3_connection" "s3" {
 
 Required:
 
-- `bucket` (String)
-- `region` (String)
+- `s3_bucket_name` (String)
+- `s3_bucket_region` (String)
 
 

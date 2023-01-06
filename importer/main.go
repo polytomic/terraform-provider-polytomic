@@ -23,7 +23,7 @@ terraform {
 
 	  provider "polytomic" {
 		deployment_url = "{{ .URL }}"
-		deployment_api_key = "{{ .APIKey }}"
+		api_key = "{{ .APIKey }}"
 	  }
 `
 )

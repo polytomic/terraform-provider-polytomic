@@ -64,9 +64,6 @@ func (r *bulkSyncResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Di
 				MarkdownDescription: "",
 				Type:                types.ListType{ElemType: types.StringType},
 				Optional:            true,
-				PlanModifiers: tfsdk.AttributePlanModifiers{
-					resource.RequiresReplace(),
-				},
 			},
 			"schedule": {
 				Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{

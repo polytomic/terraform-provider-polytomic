@@ -113,14 +113,14 @@ func (d *RedshiftConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Sch
 						Optional:            true,
 						Sensitive:           false,
 					},
-					"s_3_bucket_name": {
+					"s3_bucket_name": {
 						MarkdownDescription: "",
 						Type:                types.StringType,
 						Required:            false,
 						Optional:            true,
 						Sensitive:           false,
 					},
-					"s_3_bucket_region": {
+					"s3_bucket_region": {
 						MarkdownDescription: "",
 						Type:                types.StringType,
 						Required:            false,
@@ -214,10 +214,10 @@ func (d *RedshiftConnectionDataSource) Read(ctx context.Context, req datasource.
 			"aws_access_key_id": types.StringValue(
 				conf.AwsAccessKeyID,
 			),
-			"s_3_bucket_name": types.StringValue(
+			"s3_bucket_name": types.StringValue(
 				conf.S3BucketName,
 			),
-			"s_3_bucket_region": types.StringValue(
+			"s3_bucket_region": types.StringValue(
 				conf.S3BucketRegion,
 			),
 		},

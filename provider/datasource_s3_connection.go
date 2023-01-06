@@ -50,14 +50,14 @@ func (d *S3ConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, d
 			},
 			"configuration": {
 				Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
-					"region": {
+					"s3_bucket_region": {
 						MarkdownDescription: "",
 						Type:                types.StringType,
 						Required:            true,
 						Optional:            false,
 						Sensitive:           false,
 					},
-					"bucket": {
+					"s3_bucket_name": {
 						MarkdownDescription: "",
 						Type:                types.StringType,
 						Required:            true,
@@ -124,11 +124,11 @@ func (d *S3ConnectionDataSource) Read(ctx context.Context, req datasource.ReadRe
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttributeTypes(ctx),
 		map[string]attr.Value{
-			"region": types.StringValue(
-				conf.Region,
+			"s3_bucket_region": types.StringValue(
+				conf.S3BucketRegion,
 			),
-			"bucket": types.StringValue(
-				conf.Bucket,
+			"s3_bucket_name": types.StringValue(
+				conf.S3BucketName,
 			),
 		},
 	)

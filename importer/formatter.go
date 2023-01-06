@@ -70,6 +70,14 @@ func typeConverter(value any) cty.Value {
 			vals = append(vals, cty.StringVal(v))
 		}
 		return cty.ListVal(vals)
+	case map[string]*string:
+		config := make(map[string]cty.Value)
+		for k, v := range value.(map[string]*string) {
+			if *v != "" {
+				config[k] = cty.StringVal(*v)
+			}
+		}
+		return cty.ObjectVal(config)
 	default:
 		fmt.Printf("Unknown type: %T\n", value)
 		return cty.NilVal
