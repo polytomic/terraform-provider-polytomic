@@ -61,7 +61,7 @@ connections:
       - name: SSHPort
         type: int
         optional: true
-      - name: PrivateKey
+      - name: SSHPrivateKey
         type: string
         optional: true
         sensitive: true
@@ -270,7 +270,7 @@ connections:
       - name: Warehouse
         type: string
         required: true
-      - name: AdditionalParams
+      - name: Params
         type: string
         optional: true
   - connection: affinity
@@ -364,7 +364,7 @@ connections:
       - name: SRV
         type: bool
         optional: true
-      - name: AdditionalParams
+      - name: Params
         type: string
         optional: true
   - connection: chargebee
@@ -569,7 +569,7 @@ connections:
       - name: SSHPort
         type: int
         optional: true
-      - name: PrivateKey
+      - name: SSHPrivateKey
         type: string
         optional: true
         sensitive: true
@@ -646,7 +646,7 @@ connections:
       - name: SSHPort
         type: int
         optional: true
-      - name: PrivateKey
+      - name: SSHPrivateKey
         type: string
         optional: true
         sensitive: true

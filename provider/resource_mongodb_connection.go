@@ -72,7 +72,7 @@ func (t *MongodbConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema
 						Optional:            true,
 						Sensitive:           false,
 					},
-					"additional_params": {
+					"params": {
 						MarkdownDescription: "",
 						Type:                types.StringType,
 						Required:            false,
@@ -119,12 +119,12 @@ func (r *MongodbConnectionResource) Create(ctx context.Context, req resource.Cre
 			Type:           polytomic.MongoDBConnectionType,
 			OrganizationId: data.Organization.ValueString(),
 			Configuration: polytomic.MongoDBConfiguration{
-				Hosts:            data.Configuration.Attributes()["hosts"].(types.String).ValueString(),
-				Username:         data.Configuration.Attributes()["username"].(types.String).ValueString(),
-				Password:         data.Configuration.Attributes()["password"].(types.String).ValueString(),
-				Database:         data.Configuration.Attributes()["database"].(types.String).ValueString(),
-				SRV:              data.Configuration.Attributes()["srv"].(types.Bool).ValueBool(),
-				AdditionalParams: data.Configuration.Attributes()["additional_params"].(types.String).ValueString(),
+				Hosts:    data.Configuration.Attributes()["hosts"].(types.String).ValueString(),
+				Username: data.Configuration.Attributes()["username"].(types.String).ValueString(),
+				Password: data.Configuration.Attributes()["password"].(types.String).ValueString(),
+				Database: data.Configuration.Attributes()["database"].(types.String).ValueString(),
+				SRV:      data.Configuration.Attributes()["srv"].(types.Bool).ValueBool(),
+				Params:   data.Configuration.Attributes()["params"].(types.String).ValueString(),
 			},
 		},
 	)
@@ -135,6 +135,32 @@ func (r *MongodbConnectionResource) Create(ctx context.Context, req resource.Cre
 	data.Id = types.StringValue(created.ID)
 	data.Name = types.StringValue(created.Name)
 	data.Organization = types.StringValue(created.OrganizationId)
+
+	//var output polytomic.MongoDBConfiguration
+	//cfg := &mapstructure.DecoderConfig{
+	//    Result:   &output,
+	//}
+	//decoder, _ := mapstructure.NewDecoder(cfg)
+	//decoder.Decode(created.Configuration)
+	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+	//
+	//	"hosts": types.StringType,
+	//
+	//	"username": types.StringType,
+	//
+	//	"password": types.StringType,
+	//
+	//	"database": types.StringType,
+	//
+	//	"srv": types.BoolType,
+	//
+	//	"params": types.StringType,
+	//
+	//}, output)
+	//if diags.HasError() {
+	//	resp.Diagnostics.Append(diags...)
+	//	return
+	//}
 
 	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Mongodb", "id": created.ID})
 
@@ -166,6 +192,32 @@ func (r *MongodbConnectionResource) Read(ctx context.Context, req resource.ReadR
 	data.Name = types.StringValue(connection.Name)
 	data.Organization = types.StringValue(connection.OrganizationId)
 
+	//var output polytomic.MongoDBConfiguration
+	//cfg := &mapstructure.DecoderConfig{
+	//    Result:   &output,
+	//}
+	//decoder, _ := mapstructure.NewDecoder(cfg)
+	//decoder.Decode(connection.Configuration)
+	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+	//
+	//	"hosts": types.StringType,
+	//
+	//	"username": types.StringType,
+	//
+	//	"password": types.StringType,
+	//
+	//	"database": types.StringType,
+	//
+	//	"srv": types.BoolType,
+	//
+	//	"params": types.StringType,
+	//
+	//}, output)
+	//if diags.HasError() {
+	//	resp.Diagnostics.Append(diags...)
+	//	return
+	//}
+
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
@@ -186,12 +238,12 @@ func (r *MongodbConnectionResource) Update(ctx context.Context, req resource.Upd
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueString(),
 			Configuration: polytomic.MongoDBConfiguration{
-				Hosts:            data.Configuration.Attributes()["hosts"].(types.String).ValueString(),
-				Username:         data.Configuration.Attributes()["username"].(types.String).ValueString(),
-				Password:         data.Configuration.Attributes()["password"].(types.String).ValueString(),
-				Database:         data.Configuration.Attributes()["database"].(types.String).ValueString(),
-				SRV:              data.Configuration.Attributes()["srv"].(types.Bool).ValueBool(),
-				AdditionalParams: data.Configuration.Attributes()["additional_params"].(types.String).ValueString(),
+				Hosts:    data.Configuration.Attributes()["hosts"].(types.String).ValueString(),
+				Username: data.Configuration.Attributes()["username"].(types.String).ValueString(),
+				Password: data.Configuration.Attributes()["password"].(types.String).ValueString(),
+				Database: data.Configuration.Attributes()["database"].(types.String).ValueString(),
+				SRV:      data.Configuration.Attributes()["srv"].(types.Bool).ValueBool(),
+				Params:   data.Configuration.Attributes()["params"].(types.String).ValueString(),
 			},
 		},
 	)
@@ -203,6 +255,32 @@ func (r *MongodbConnectionResource) Update(ctx context.Context, req resource.Upd
 	data.Id = types.StringValue(updated.ID)
 	data.Name = types.StringValue(updated.Name)
 	data.Organization = types.StringValue(updated.OrganizationId)
+
+	//var output polytomic.MongoDBConfiguration
+	//cfg := &mapstructure.DecoderConfig{
+	//    Result:   &output,
+	//}
+	//decoder, _ := mapstructure.NewDecoder(cfg)
+	//decoder.Decode(updated.Configuration)
+	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+	//
+	//	"hosts": types.StringType,
+	//
+	//	"username": types.StringType,
+	//
+	//	"password": types.StringType,
+	//
+	//	"database": types.StringType,
+	//
+	//	"srv": types.BoolType,
+	//
+	//	"params": types.StringType,
+	//
+	//}, output)
+	//if diags.HasError() {
+	//	resp.Diagnostics.Append(diags...)
+	//	return
+	//}
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)

@@ -112,6 +112,26 @@ func (r *BigqueryConnectionResource) Create(ctx context.Context, req resource.Cr
 	data.Name = types.StringValue(created.Name)
 	data.Organization = types.StringValue(created.OrganizationId)
 
+	//var output polytomic.BigQueryConfiguration
+	//cfg := &mapstructure.DecoderConfig{
+	//    Result:   &output,
+	//}
+	//decoder, _ := mapstructure.NewDecoder(cfg)
+	//decoder.Decode(created.Configuration)
+	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+	//
+	//	"project_id": types.StringType,
+	//
+	//	"service_account": types.StringType,
+	//
+	//	"location": types.StringType,
+	//
+	//}, output)
+	//if diags.HasError() {
+	//	resp.Diagnostics.Append(diags...)
+	//	return
+	//}
+
 	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Bigquery", "id": created.ID})
 
 	diags = resp.State.Set(ctx, &data)
@@ -141,6 +161,26 @@ func (r *BigqueryConnectionResource) Read(ctx context.Context, req resource.Read
 	data.Id = types.StringValue(connection.ID)
 	data.Name = types.StringValue(connection.Name)
 	data.Organization = types.StringValue(connection.OrganizationId)
+
+	//var output polytomic.BigQueryConfiguration
+	//cfg := &mapstructure.DecoderConfig{
+	//    Result:   &output,
+	//}
+	//decoder, _ := mapstructure.NewDecoder(cfg)
+	//decoder.Decode(connection.Configuration)
+	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+	//
+	//	"project_id": types.StringType,
+	//
+	//	"service_account": types.StringType,
+	//
+	//	"location": types.StringType,
+	//
+	//}, output)
+	//if diags.HasError() {
+	//	resp.Diagnostics.Append(diags...)
+	//	return
+	//}
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -176,6 +216,26 @@ func (r *BigqueryConnectionResource) Update(ctx context.Context, req resource.Up
 	data.Id = types.StringValue(updated.ID)
 	data.Name = types.StringValue(updated.Name)
 	data.Organization = types.StringValue(updated.OrganizationId)
+
+	//var output polytomic.BigQueryConfiguration
+	//cfg := &mapstructure.DecoderConfig{
+	//    Result:   &output,
+	//}
+	//decoder, _ := mapstructure.NewDecoder(cfg)
+	//decoder.Decode(updated.Configuration)
+	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+	//
+	//	"project_id": types.StringType,
+	//
+	//	"service_account": types.StringType,
+	//
+	//	"location": types.StringType,
+	//
+	//}, output)
+	//if diags.HasError() {
+	//	resp.Diagnostics.Append(diags...)
+	//	return
+	//}
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)

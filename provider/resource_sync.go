@@ -66,7 +66,6 @@ func (r *syncResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagno
 						MarkdownDescription: "",
 						Type:                types.StringType,
 						Optional:            true,
-						Computed:            true,
 					},
 					"filter_logic": {
 						MarkdownDescription: "",
@@ -200,7 +199,6 @@ func (r *syncResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagno
 				MarkdownDescription: "",
 				Type:                types.StringType,
 				Optional:            true,
-				Computed:            true,
 			},
 			"overrides": {
 				MarkdownDescription: "",
@@ -436,14 +434,6 @@ func (r *syncResource) Create(ctx context.Context, req resource.CreateRequest, r
 	data.ID = types.StringValue(sync.ID)
 	data.Name = types.StringValue(sync.Name)
 
-	// Override the target object for reasons...
-	// It's possible the target is a new target in which case
-	// the "new" placeholder will be changed to the actual target ID
-	// in the return. This causes terraform barf with
-	// `Provider produced inconsistent result after apply`
-	// For now, we'll just override the target object state with the
-	// sent object
-	sync.Target = target
 	data.Target, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"connection_id": types.StringType,
 		"object":        types.StringType,
@@ -456,6 +446,7 @@ func (r *syncResource) Create(ctx context.Context, req resource.CreateRequest, r
 		resp.Diagnostics.Append(diags...)
 		return
 	}
+
 	data.Mode = types.StringValue(sync.Mode)
 	data.Fields, diags = types.SetValueFrom(ctx, types.ObjectType{
 		AttrTypes: map[string]attr.Type{
@@ -553,7 +544,6 @@ func (r *syncResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 
 	diags := req.State.Get(ctx, &data)
 	resp.Diagnostics.Append(diags...)
-
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -571,93 +561,6 @@ func (r *syncResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 	data.ID = types.StringValue(sync.ID)
 	data.Name = types.StringValue(sync.Name)
 
-	diags = resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
-
-}
-
-func (r *syncResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data syncResourceResourceData
-
-	diags := req.Config.Get(ctx, &data)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	var target polytomic.Target
-	diags = data.Target.As(ctx, &target, types.ObjectAsOptions{})
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
-
-	var fields []polytomic.SyncField
-	diags = data.Fields.ElementsAs(ctx, &fields, true)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
-
-	var overrideFields []polytomic.SyncField
-	diags = data.OverrideFields.ElementsAs(ctx, &overrideFields, true)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
-
-	var filters []polytomic.Filter
-	diags = data.Filters.ElementsAs(ctx, &filters, true)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
-
-	var overrides []polytomic.Override
-	diags = data.Overrides.ElementsAs(ctx, &overrides, true)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
-
-	var schedule polytomic.Schedule
-	diags = data.Schedule.As(ctx, &schedule, types.ObjectAsOptions{})
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
-
-	var identity polytomic.Identity
-	diags = data.Identity.As(ctx, &identity, types.ObjectAsOptions{
-		UnhandledNullAsEmpty: true,
-	})
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
-
-	request := polytomic.SyncRequest{
-		Name:           data.Name.ValueString(),
-		Target:         target,
-		Mode:           data.Mode.ValueString(),
-		Fields:         fields,
-		OverrideFields: overrideFields,
-		Filters:        filters,
-		FilterLogic:    data.FilterLogic.ValueString(),
-		Overrides:      overrides,
-		Schedule:       schedule,
-		Identity:       &identity,
-		SyncAllRecords: data.SyncAllRecords.ValueBool(),
-	}
-
-	sync, err := r.client.Syncs().Create(ctx, request)
-	if err != nil {
-		resp.Diagnostics.AddError("Error creating sync", err.Error())
-		return
-	}
-
-	data.ID = types.StringValue(sync.ID)
-	data.Name = types.StringValue(sync.Name)
 	data.Target, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"connection_id": types.StringType,
 		"object":        types.StringType,
@@ -715,7 +618,227 @@ func (r *syncResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		resp.Diagnostics.Append(diags...)
 		return
 	}
-	data.FilterLogic = types.StringValue(sync.FilterLogic)
+
+	if sync.FilterLogic != "" {
+		data.FilterLogic = types.StringValue(sync.FilterLogic)
+	} else {
+		data.FilterLogic = types.StringNull()
+	}
+
+	data.Overrides, diags = types.SetValueFrom(ctx, types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"field_id": types.StringType,
+			"function": types.StringType,
+			"value":    types.StringType,
+		}}, sync.Overrides)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+	data.Schedule, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"frequency":    types.StringType,
+		"day_of_week":  types.StringType,
+		"hour":         types.StringType,
+		"minute":       types.StringType,
+		"month":        types.StringType,
+		"day_of_month": types.StringType,
+	}, sync.Schedule)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+	data.Identity, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"source": types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				"model_id": types.StringType,
+				"field":    types.StringType,
+			},
+		},
+		"target":               types.StringType,
+		"function":             types.StringType,
+		"remote_field_type_id": types.StringType,
+		"new_field":            types.BoolType,
+	}, sync.Identity)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+	data.SyncAllRecords = types.BoolValue(sync.SyncAllRecords)
+
+	diags = resp.State.Set(ctx, &data)
+	resp.Diagnostics.Append(diags...)
+
+	diags = resp.State.Set(ctx, &data)
+	resp.Diagnostics.Append(diags...)
+
+}
+
+func (r *syncResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var data syncResourceResourceData
+	diags := req.Plan.Get(ctx, &data)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var configuration syncResourceResourceData
+	diags = req.Config.Get(ctx, &configuration)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var target polytomic.Target
+	diags = data.Target.As(ctx, &target, types.ObjectAsOptions{
+		UnhandledNullAsEmpty: true,
+	})
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
+	var fields []polytomic.SyncField
+	diags = data.Fields.ElementsAs(ctx, &fields, true)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
+	var overrideFields []polytomic.SyncField
+	diags = data.OverrideFields.ElementsAs(ctx, &overrideFields, true)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
+	var filters []polytomic.Filter
+	diags = data.Filters.ElementsAs(ctx, &filters, true)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
+	var overrides []polytomic.Override
+	diags = data.Overrides.ElementsAs(ctx, &overrides, true)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
+	var schedule polytomic.Schedule
+	diags = data.Schedule.As(ctx, &schedule, types.ObjectAsOptions{})
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
+	var identity *polytomic.Identity
+	diags = data.Identity.As(ctx, &identity, types.ObjectAsOptions{
+		UnhandledNullAsEmpty: false,
+	})
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
+	request := polytomic.SyncRequest{
+		Name:           data.Name.ValueString(),
+		Target:         target,
+		Mode:           data.Mode.ValueString(),
+		Fields:         fields,
+		OverrideFields: overrideFields,
+		Filters:        filters,
+		FilterLogic:    data.FilterLogic.ValueString(),
+		Overrides:      overrides,
+		Schedule:       schedule,
+		Identity:       identity,
+		SyncAllRecords: data.SyncAllRecords.ValueBool(),
+	}
+	sync, err := r.client.Syncs().Update(ctx, data.ID.ValueString(), request)
+	if err != nil {
+		resp.Diagnostics.AddError("Error creating sync", err.Error())
+		return
+	}
+
+	data.ID = types.StringValue(sync.ID)
+	data.Name = types.StringValue(sync.Name)
+
+	var plannedTarget polytomic.Target
+	diags = configuration.Target.As(ctx, &plannedTarget, types.ObjectAsOptions{})
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
+	if plannedTarget.Configuration != nil &&
+		sync.Target.Configuration == nil {
+		sync.Target.Configuration = plannedTarget.Configuration
+	}
+
+	data.Target, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"connection_id": types.StringType,
+		"object":        types.StringType,
+		"search_values": types.MapType{ElemType: types.StringType},
+		"configuration": types.MapType{ElemType: types.StringType},
+		"new_name":      types.StringType,
+		"filter_logic":  types.StringType,
+	}, sync.Target)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+	data.Mode = types.StringValue(sync.Mode)
+	data.Fields, diags = types.SetValueFrom(ctx, types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"source": types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"model_id": types.StringType,
+					"field":    types.StringType,
+				}},
+			"target":         types.StringType,
+			"new":            types.BoolType,
+			"override_value": types.StringType,
+			"sync_mode":      types.StringType,
+		}}, sync.Fields)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+	data.OverrideFields, diags = types.SetValueFrom(ctx, types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"source": types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"model_id": types.StringType,
+					"field":    types.StringType,
+				}},
+			"target":         types.StringType,
+			"new":            types.BoolType,
+			"override_value": types.StringType,
+			"sync_mode":      types.StringType,
+		}}, sync.OverrideFields)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+	data.Filters, diags = types.SetValueFrom(ctx, types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"field_id":   types.StringType,
+			"field_type": types.StringType,
+			"function":   types.StringType,
+			"value":      types.StringType,
+			"label":      types.StringType,
+		}}, sync.Filters)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
+	if configuration.FilterLogic.IsNull() {
+		data.FilterLogic = configuration.FilterLogic
+	} else {
+		data.FilterLogic = types.StringValue(sync.FilterLogic)
+	}
+
 	data.Overrides, diags = types.SetValueFrom(ctx, types.ObjectType{
 		AttrTypes: map[string]attr.Type{
 			"field_id": types.StringType,

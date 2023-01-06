@@ -100,7 +100,7 @@ func (t *RedshiftConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schem
 						Optional:            true,
 						Sensitive:           false,
 					},
-					"private_key": {
+					"ssh_private_key": {
 						MarkdownDescription: "",
 						Type:                types.StringType,
 						Required:            false,
@@ -184,7 +184,7 @@ func (r *RedshiftConnectionResource) Create(ctx context.Context, req resource.Cr
 				SSHUser:            data.Configuration.Attributes()["ssh_user"].(types.String).ValueString(),
 				SSHHost:            data.Configuration.Attributes()["ssh_host"].(types.String).ValueString(),
 				SSHPort:            int(data.Configuration.Attributes()["ssh_port"].(types.Int64).ValueInt64()),
-				PrivateKey:         data.Configuration.Attributes()["private_key"].(types.String).ValueString(),
+				SSHPrivateKey:      data.Configuration.Attributes()["ssh_private_key"].(types.String).ValueString(),
 				AwsAccessKeyID:     data.Configuration.Attributes()["aws_access_key_id"].(types.String).ValueString(),
 				AwsSecretAccessKey: data.Configuration.Attributes()["aws_secret_access_key"].(types.String).ValueString(),
 				S3BucketName:       data.Configuration.Attributes()["s3_bucket_name"].(types.String).ValueString(),
@@ -199,6 +199,48 @@ func (r *RedshiftConnectionResource) Create(ctx context.Context, req resource.Cr
 	data.Id = types.StringValue(created.ID)
 	data.Name = types.StringValue(created.Name)
 	data.Organization = types.StringValue(created.OrganizationId)
+
+	//var output polytomic.RedshiftConnectionConfiguration
+	//cfg := &mapstructure.DecoderConfig{
+	//    Result:   &output,
+	//}
+	//decoder, _ := mapstructure.NewDecoder(cfg)
+	//decoder.Decode(created.Configuration)
+	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+	//
+	//	"hostname": types.StringType,
+	//
+	//	"username": types.StringType,
+	//
+	//	"password": types.StringType,
+	//
+	//	"database": types.StringType,
+	//
+	//	"port": types.Int64Type,
+	//
+	//	"ssh": types.BoolType,
+	//
+	//	"ssh_user": types.StringType,
+	//
+	//	"ssh_host": types.StringType,
+	//
+	//	"ssh_port": types.Int64Type,
+	//
+	//	"ssh_private_key": types.StringType,
+	//
+	//	"aws_access_key_id": types.StringType,
+	//
+	//	"aws_secret_access_key": types.StringType,
+	//
+	//	"s3_bucket_name": types.StringType,
+	//
+	//	"s3_bucket_region": types.StringType,
+	//
+	//}, output)
+	//if diags.HasError() {
+	//	resp.Diagnostics.Append(diags...)
+	//	return
+	//}
 
 	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Redshift", "id": created.ID})
 
@@ -230,6 +272,48 @@ func (r *RedshiftConnectionResource) Read(ctx context.Context, req resource.Read
 	data.Name = types.StringValue(connection.Name)
 	data.Organization = types.StringValue(connection.OrganizationId)
 
+	//var output polytomic.RedshiftConnectionConfiguration
+	//cfg := &mapstructure.DecoderConfig{
+	//    Result:   &output,
+	//}
+	//decoder, _ := mapstructure.NewDecoder(cfg)
+	//decoder.Decode(connection.Configuration)
+	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+	//
+	//	"hostname": types.StringType,
+	//
+	//	"username": types.StringType,
+	//
+	//	"password": types.StringType,
+	//
+	//	"database": types.StringType,
+	//
+	//	"port": types.Int64Type,
+	//
+	//	"ssh": types.BoolType,
+	//
+	//	"ssh_user": types.StringType,
+	//
+	//	"ssh_host": types.StringType,
+	//
+	//	"ssh_port": types.Int64Type,
+	//
+	//	"ssh_private_key": types.StringType,
+	//
+	//	"aws_access_key_id": types.StringType,
+	//
+	//	"aws_secret_access_key": types.StringType,
+	//
+	//	"s3_bucket_name": types.StringType,
+	//
+	//	"s3_bucket_region": types.StringType,
+	//
+	//}, output)
+	//if diags.HasError() {
+	//	resp.Diagnostics.Append(diags...)
+	//	return
+	//}
+
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
@@ -259,7 +343,7 @@ func (r *RedshiftConnectionResource) Update(ctx context.Context, req resource.Up
 				SSHUser:            data.Configuration.Attributes()["ssh_user"].(types.String).ValueString(),
 				SSHHost:            data.Configuration.Attributes()["ssh_host"].(types.String).ValueString(),
 				SSHPort:            int(data.Configuration.Attributes()["ssh_port"].(types.Int64).ValueInt64()),
-				PrivateKey:         data.Configuration.Attributes()["private_key"].(types.String).ValueString(),
+				SSHPrivateKey:      data.Configuration.Attributes()["ssh_private_key"].(types.String).ValueString(),
 				AwsAccessKeyID:     data.Configuration.Attributes()["aws_access_key_id"].(types.String).ValueString(),
 				AwsSecretAccessKey: data.Configuration.Attributes()["aws_secret_access_key"].(types.String).ValueString(),
 				S3BucketName:       data.Configuration.Attributes()["s3_bucket_name"].(types.String).ValueString(),
@@ -275,6 +359,48 @@ func (r *RedshiftConnectionResource) Update(ctx context.Context, req resource.Up
 	data.Id = types.StringValue(updated.ID)
 	data.Name = types.StringValue(updated.Name)
 	data.Organization = types.StringValue(updated.OrganizationId)
+
+	//var output polytomic.RedshiftConnectionConfiguration
+	//cfg := &mapstructure.DecoderConfig{
+	//    Result:   &output,
+	//}
+	//decoder, _ := mapstructure.NewDecoder(cfg)
+	//decoder.Decode(updated.Configuration)
+	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+	//
+	//	"hostname": types.StringType,
+	//
+	//	"username": types.StringType,
+	//
+	//	"password": types.StringType,
+	//
+	//	"database": types.StringType,
+	//
+	//	"port": types.Int64Type,
+	//
+	//	"ssh": types.BoolType,
+	//
+	//	"ssh_user": types.StringType,
+	//
+	//	"ssh_host": types.StringType,
+	//
+	//	"ssh_port": types.Int64Type,
+	//
+	//	"ssh_private_key": types.StringType,
+	//
+	//	"aws_access_key_id": types.StringType,
+	//
+	//	"aws_secret_access_key": types.StringType,
+	//
+	//	"s3_bucket_name": types.StringType,
+	//
+	//	"s3_bucket_region": types.StringType,
+	//
+	//}, output)
+	//if diags.HasError() {
+	//	resp.Diagnostics.Append(diags...)
+	//	return
+	//}
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)

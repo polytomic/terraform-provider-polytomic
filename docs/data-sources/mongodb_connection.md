@@ -41,8 +41,8 @@ Required:
 
 Optional:
 
-- `additional_params` (String)
 - `database` (String)
+- `params` (String)
 - `srv` (Boolean)
 
 

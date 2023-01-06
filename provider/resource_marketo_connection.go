@@ -136,6 +136,32 @@ func (r *MarketoConnectionResource) Create(ctx context.Context, req resource.Cre
 	data.Name = types.StringValue(created.Name)
 	data.Organization = types.StringValue(created.OrganizationId)
 
+	//var output polytomic.MarketoConfiguration
+	//cfg := &mapstructure.DecoderConfig{
+	//    Result:   &output,
+	//}
+	//decoder, _ := mapstructure.NewDecoder(cfg)
+	//decoder.Decode(created.Configuration)
+	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+	//
+	//	"client_id": types.StringType,
+	//
+	//	"client_secret": types.StringType,
+	//
+	//	"rest_endpoint": types.StringType,
+	//
+	//	"enforce_api_limits": types.BoolType,
+	//
+	//	"daily_api_calls": types.Int64Type,
+	//
+	//	"concurrent_imports": types.Int64Type,
+	//
+	//}, output)
+	//if diags.HasError() {
+	//	resp.Diagnostics.Append(diags...)
+	//	return
+	//}
+
 	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Marketo", "id": created.ID})
 
 	diags = resp.State.Set(ctx, &data)
@@ -165,6 +191,32 @@ func (r *MarketoConnectionResource) Read(ctx context.Context, req resource.ReadR
 	data.Id = types.StringValue(connection.ID)
 	data.Name = types.StringValue(connection.Name)
 	data.Organization = types.StringValue(connection.OrganizationId)
+
+	//var output polytomic.MarketoConfiguration
+	//cfg := &mapstructure.DecoderConfig{
+	//    Result:   &output,
+	//}
+	//decoder, _ := mapstructure.NewDecoder(cfg)
+	//decoder.Decode(connection.Configuration)
+	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+	//
+	//	"client_id": types.StringType,
+	//
+	//	"client_secret": types.StringType,
+	//
+	//	"rest_endpoint": types.StringType,
+	//
+	//	"enforce_api_limits": types.BoolType,
+	//
+	//	"daily_api_calls": types.Int64Type,
+	//
+	//	"concurrent_imports": types.Int64Type,
+	//
+	//}, output)
+	//if diags.HasError() {
+	//	resp.Diagnostics.Append(diags...)
+	//	return
+	//}
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -203,6 +255,32 @@ func (r *MarketoConnectionResource) Update(ctx context.Context, req resource.Upd
 	data.Id = types.StringValue(updated.ID)
 	data.Name = types.StringValue(updated.Name)
 	data.Organization = types.StringValue(updated.OrganizationId)
+
+	//var output polytomic.MarketoConfiguration
+	//cfg := &mapstructure.DecoderConfig{
+	//    Result:   &output,
+	//}
+	//decoder, _ := mapstructure.NewDecoder(cfg)
+	//decoder.Decode(updated.Configuration)
+	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+	//
+	//	"client_id": types.StringType,
+	//
+	//	"client_secret": types.StringType,
+	//
+	//	"rest_endpoint": types.StringType,
+	//
+	//	"enforce_api_limits": types.BoolType,
+	//
+	//	"daily_api_calls": types.Int64Type,
+	//
+	//	"concurrent_imports": types.Int64Type,
+	//
+	//}, output)
+	//if diags.HasError() {
+	//	resp.Diagnostics.Append(diags...)
+	//	return
+	//}
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)

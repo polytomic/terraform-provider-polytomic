@@ -43,6 +43,6 @@ Required:
 
 Optional:
 
-- `additional_params` (String)
+- `params` (String)
 
 

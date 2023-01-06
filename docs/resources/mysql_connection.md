@@ -49,10 +49,10 @@ Required:
 Optional:
 
 - `port` (Number)
-- `private_key` (String, Sensitive)
 - `ssh` (Boolean)
 - `ssh_host` (String)
 - `ssh_port` (Number)
+- `ssh_private_key` (String, Sensitive)
 - `ssh_user` (String)
 
 

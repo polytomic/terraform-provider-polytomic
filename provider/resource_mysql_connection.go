@@ -100,7 +100,7 @@ func (t *MysqlConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, 
 						Optional:            true,
 						Sensitive:           false,
 					},
-					"private_key": {
+					"ssh_private_key": {
 						MarkdownDescription: "",
 						Type:                types.StringType,
 						Required:            false,
@@ -147,16 +147,16 @@ func (r *MysqlConnectionResource) Create(ctx context.Context, req resource.Creat
 			Type:           polytomic.MysqlConnectionType,
 			OrganizationId: data.Organization.ValueString(),
 			Configuration: polytomic.MysqlConnectionConfiguration{
-				Hostname:   data.Configuration.Attributes()["hostname"].(types.String).ValueString(),
-				Account:    data.Configuration.Attributes()["account"].(types.String).ValueString(),
-				Passwd:     data.Configuration.Attributes()["passwd"].(types.String).ValueString(),
-				Dbname:     data.Configuration.Attributes()["dbname"].(types.String).ValueString(),
-				Port:       int(data.Configuration.Attributes()["port"].(types.Int64).ValueInt64()),
-				SSH:        data.Configuration.Attributes()["ssh"].(types.Bool).ValueBool(),
-				SSHUser:    data.Configuration.Attributes()["ssh_user"].(types.String).ValueString(),
-				SSHHost:    data.Configuration.Attributes()["ssh_host"].(types.String).ValueString(),
-				SSHPort:    int(data.Configuration.Attributes()["ssh_port"].(types.Int64).ValueInt64()),
-				PrivateKey: data.Configuration.Attributes()["private_key"].(types.String).ValueString(),
+				Hostname:      data.Configuration.Attributes()["hostname"].(types.String).ValueString(),
+				Account:       data.Configuration.Attributes()["account"].(types.String).ValueString(),
+				Passwd:        data.Configuration.Attributes()["passwd"].(types.String).ValueString(),
+				Dbname:        data.Configuration.Attributes()["dbname"].(types.String).ValueString(),
+				Port:          int(data.Configuration.Attributes()["port"].(types.Int64).ValueInt64()),
+				SSH:           data.Configuration.Attributes()["ssh"].(types.Bool).ValueBool(),
+				SSHUser:       data.Configuration.Attributes()["ssh_user"].(types.String).ValueString(),
+				SSHHost:       data.Configuration.Attributes()["ssh_host"].(types.String).ValueString(),
+				SSHPort:       int(data.Configuration.Attributes()["ssh_port"].(types.Int64).ValueInt64()),
+				SSHPrivateKey: data.Configuration.Attributes()["ssh_private_key"].(types.String).ValueString(),
 			},
 		},
 	)
@@ -167,6 +167,40 @@ func (r *MysqlConnectionResource) Create(ctx context.Context, req resource.Creat
 	data.Id = types.StringValue(created.ID)
 	data.Name = types.StringValue(created.Name)
 	data.Organization = types.StringValue(created.OrganizationId)
+
+	//var output polytomic.MysqlConnectionConfiguration
+	//cfg := &mapstructure.DecoderConfig{
+	//    Result:   &output,
+	//}
+	//decoder, _ := mapstructure.NewDecoder(cfg)
+	//decoder.Decode(created.Configuration)
+	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+	//
+	//	"hostname": types.StringType,
+	//
+	//	"account": types.StringType,
+	//
+	//	"passwd": types.StringType,
+	//
+	//	"dbname": types.StringType,
+	//
+	//	"port": types.Int64Type,
+	//
+	//	"ssh": types.BoolType,
+	//
+	//	"ssh_user": types.StringType,
+	//
+	//	"ssh_host": types.StringType,
+	//
+	//	"ssh_port": types.Int64Type,
+	//
+	//	"ssh_private_key": types.StringType,
+	//
+	//}, output)
+	//if diags.HasError() {
+	//	resp.Diagnostics.Append(diags...)
+	//	return
+	//}
 
 	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Mysql", "id": created.ID})
 
@@ -198,6 +232,40 @@ func (r *MysqlConnectionResource) Read(ctx context.Context, req resource.ReadReq
 	data.Name = types.StringValue(connection.Name)
 	data.Organization = types.StringValue(connection.OrganizationId)
 
+	//var output polytomic.MysqlConnectionConfiguration
+	//cfg := &mapstructure.DecoderConfig{
+	//    Result:   &output,
+	//}
+	//decoder, _ := mapstructure.NewDecoder(cfg)
+	//decoder.Decode(connection.Configuration)
+	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+	//
+	//	"hostname": types.StringType,
+	//
+	//	"account": types.StringType,
+	//
+	//	"passwd": types.StringType,
+	//
+	//	"dbname": types.StringType,
+	//
+	//	"port": types.Int64Type,
+	//
+	//	"ssh": types.BoolType,
+	//
+	//	"ssh_user": types.StringType,
+	//
+	//	"ssh_host": types.StringType,
+	//
+	//	"ssh_port": types.Int64Type,
+	//
+	//	"ssh_private_key": types.StringType,
+	//
+	//}, output)
+	//if diags.HasError() {
+	//	resp.Diagnostics.Append(diags...)
+	//	return
+	//}
+
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
@@ -218,16 +286,16 @@ func (r *MysqlConnectionResource) Update(ctx context.Context, req resource.Updat
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueString(),
 			Configuration: polytomic.MysqlConnectionConfiguration{
-				Hostname:   data.Configuration.Attributes()["hostname"].(types.String).ValueString(),
-				Account:    data.Configuration.Attributes()["account"].(types.String).ValueString(),
-				Passwd:     data.Configuration.Attributes()["passwd"].(types.String).ValueString(),
-				Dbname:     data.Configuration.Attributes()["dbname"].(types.String).ValueString(),
-				Port:       int(data.Configuration.Attributes()["port"].(types.Int64).ValueInt64()),
-				SSH:        data.Configuration.Attributes()["ssh"].(types.Bool).ValueBool(),
-				SSHUser:    data.Configuration.Attributes()["ssh_user"].(types.String).ValueString(),
-				SSHHost:    data.Configuration.Attributes()["ssh_host"].(types.String).ValueString(),
-				SSHPort:    int(data.Configuration.Attributes()["ssh_port"].(types.Int64).ValueInt64()),
-				PrivateKey: data.Configuration.Attributes()["private_key"].(types.String).ValueString(),
+				Hostname:      data.Configuration.Attributes()["hostname"].(types.String).ValueString(),
+				Account:       data.Configuration.Attributes()["account"].(types.String).ValueString(),
+				Passwd:        data.Configuration.Attributes()["passwd"].(types.String).ValueString(),
+				Dbname:        data.Configuration.Attributes()["dbname"].(types.String).ValueString(),
+				Port:          int(data.Configuration.Attributes()["port"].(types.Int64).ValueInt64()),
+				SSH:           data.Configuration.Attributes()["ssh"].(types.Bool).ValueBool(),
+				SSHUser:       data.Configuration.Attributes()["ssh_user"].(types.String).ValueString(),
+				SSHHost:       data.Configuration.Attributes()["ssh_host"].(types.String).ValueString(),
+				SSHPort:       int(data.Configuration.Attributes()["ssh_port"].(types.Int64).ValueInt64()),
+				SSHPrivateKey: data.Configuration.Attributes()["ssh_private_key"].(types.String).ValueString(),
 			},
 		},
 	)
@@ -239,6 +307,40 @@ func (r *MysqlConnectionResource) Update(ctx context.Context, req resource.Updat
 	data.Id = types.StringValue(updated.ID)
 	data.Name = types.StringValue(updated.Name)
 	data.Organization = types.StringValue(updated.OrganizationId)
+
+	//var output polytomic.MysqlConnectionConfiguration
+	//cfg := &mapstructure.DecoderConfig{
+	//    Result:   &output,
+	//}
+	//decoder, _ := mapstructure.NewDecoder(cfg)
+	//decoder.Decode(updated.Configuration)
+	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+	//
+	//	"hostname": types.StringType,
+	//
+	//	"account": types.StringType,
+	//
+	//	"passwd": types.StringType,
+	//
+	//	"dbname": types.StringType,
+	//
+	//	"port": types.Int64Type,
+	//
+	//	"ssh": types.BoolType,
+	//
+	//	"ssh_user": types.StringType,
+	//
+	//	"ssh_host": types.StringType,
+	//
+	//	"ssh_port": types.Int64Type,
+	//
+	//	"ssh_private_key": types.StringType,
+	//
+	//}, output)
+	//if diags.HasError() {
+	//	resp.Diagnostics.Append(diags...)
+	//	return
+	//}
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)

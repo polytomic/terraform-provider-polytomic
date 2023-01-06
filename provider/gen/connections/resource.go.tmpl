@@ -111,6 +111,22 @@ func (r *{{ .Connection }}ConnectionResource) Create(ctx context.Context, req re
 	data.Organization = types.StringValue(created.OrganizationId)
 
 
+	//var output {{ .Config }}
+    //cfg := &mapstructure.DecoderConfig{
+    //    Result:   &output,
+    //}
+    //decoder, _ := mapstructure.NewDecoder(cfg)
+    //decoder.Decode(created.Configuration)	
+	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+	//	{{- range .Attributes }}
+	//	"{{ .AttrName }}": {{ .AttrType }},
+	//	{{- end }}
+	//}, output)
+	//if diags.HasError() {
+	//	resp.Diagnostics.Append(diags...)
+	//	return
+	//}
+
 	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "{{ .Connection }}", "id": created.ID})
 
 	diags = resp.State.Set(ctx, &data)
@@ -140,6 +156,22 @@ func (r *{{ .Connection }}ConnectionResource) Read(ctx context.Context, req reso
 	data.Id = types.StringValue(connection.ID)
 	data.Name = types.StringValue(connection.Name)
 	data.Organization = types.StringValue(connection.OrganizationId)
+
+	//var output {{ .Config }}
+    //cfg := &mapstructure.DecoderConfig{
+    //    Result:   &output,
+    //}
+    //decoder, _ := mapstructure.NewDecoder(cfg)
+    //decoder.Decode(connection.Configuration)	
+	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+	//	{{- range .Attributes }}
+	//	"{{ .AttrName }}": {{ .AttrType }},
+	//	{{- end }}
+	//}, output)
+	//if diags.HasError() {
+	//	resp.Diagnostics.Append(diags...)
+	//	return
+	//}
 
 
 	diags = resp.State.Set(ctx, &data)
@@ -182,6 +214,22 @@ func (r *{{ .Connection }}ConnectionResource) Update(ctx context.Context, req re
 	data.Id = types.StringValue(updated.ID)
 	data.Name = types.StringValue(updated.Name)
 	data.Organization = types.StringValue(updated.OrganizationId)
+
+	//var output {{ .Config }}
+    //cfg := &mapstructure.DecoderConfig{
+    //    Result:   &output,
+    //}
+    //decoder, _ := mapstructure.NewDecoder(cfg)
+    //decoder.Decode(updated.Configuration)	
+	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+	//	{{- range .Attributes }}
+	//	"{{ .AttrName }}": {{ .AttrType }},
+	//	{{- end }}
+	//}, output)
+	//if diags.HasError() {
+	//	resp.Diagnostics.Append(diags...)
+	//	return
+	//}
 
 
 	diags = resp.State.Set(ctx, &data)
