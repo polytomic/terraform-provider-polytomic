@@ -112,6 +112,26 @@ func (r *ChargebeeConnectionResource) Create(ctx context.Context, req resource.C
 	data.Name = types.StringValue(created.Name)
 	data.Organization = types.StringValue(created.OrganizationId)
 
+	//var output polytomic.ChargeBeeConnectionConfiguration
+	//cfg := &mapstructure.DecoderConfig{
+	//    Result:   &output,
+	//}
+	//decoder, _ := mapstructure.NewDecoder(cfg)
+	//decoder.Decode(created.Configuration)
+	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+	//
+	//	"site": types.StringType,
+	//
+	//	"api_key": types.StringType,
+	//
+	//	"ratelimit_rpm": types.Int64Type,
+	//
+	//}, output)
+	//if diags.HasError() {
+	//	resp.Diagnostics.Append(diags...)
+	//	return
+	//}
+
 	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Chargebee", "id": created.ID})
 
 	diags = resp.State.Set(ctx, &data)
@@ -141,6 +161,26 @@ func (r *ChargebeeConnectionResource) Read(ctx context.Context, req resource.Rea
 	data.Id = types.StringValue(connection.ID)
 	data.Name = types.StringValue(connection.Name)
 	data.Organization = types.StringValue(connection.OrganizationId)
+
+	//var output polytomic.ChargeBeeConnectionConfiguration
+	//cfg := &mapstructure.DecoderConfig{
+	//    Result:   &output,
+	//}
+	//decoder, _ := mapstructure.NewDecoder(cfg)
+	//decoder.Decode(connection.Configuration)
+	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+	//
+	//	"site": types.StringType,
+	//
+	//	"api_key": types.StringType,
+	//
+	//	"ratelimit_rpm": types.Int64Type,
+	//
+	//}, output)
+	//if diags.HasError() {
+	//	resp.Diagnostics.Append(diags...)
+	//	return
+	//}
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -176,6 +216,26 @@ func (r *ChargebeeConnectionResource) Update(ctx context.Context, req resource.U
 	data.Id = types.StringValue(updated.ID)
 	data.Name = types.StringValue(updated.Name)
 	data.Organization = types.StringValue(updated.OrganizationId)
+
+	//var output polytomic.ChargeBeeConnectionConfiguration
+	//cfg := &mapstructure.DecoderConfig{
+	//    Result:   &output,
+	//}
+	//decoder, _ := mapstructure.NewDecoder(cfg)
+	//decoder.Decode(updated.Configuration)
+	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+	//
+	//	"site": types.StringType,
+	//
+	//	"api_key": types.StringType,
+	//
+	//	"ratelimit_rpm": types.Int64Type,
+	//
+	//}, output)
+	//if diags.HasError() {
+	//	resp.Diagnostics.Append(diags...)
+	//	return
+	//}
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)

@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	err := connections.GenerateConnections() // Generate connections
+	err := connections.GenerateConnections()
 	if err != nil {
 		log.Fatal(err.Error())
 	}

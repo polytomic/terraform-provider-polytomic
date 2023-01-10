@@ -78,7 +78,7 @@ func (d *SnowflakeConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Sc
 						Optional:            false,
 						Sensitive:           false,
 					},
-					"additional_params": {
+					"params": {
 						MarkdownDescription: "",
 						Type:                types.StringType,
 						Required:            false,
@@ -157,8 +157,8 @@ func (d *SnowflakeConnectionDataSource) Read(ctx context.Context, req datasource
 			"warehouse": types.StringValue(
 				conf.Warehouse,
 			),
-			"additional_params": types.StringValue(
-				conf.AdditionalParams,
+			"params": types.StringValue(
+				conf.Params,
 			),
 		},
 	)

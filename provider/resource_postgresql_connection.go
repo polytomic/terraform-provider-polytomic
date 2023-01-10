@@ -149,7 +149,7 @@ func (t *PostgresqlConnectionResource) GetSchema(ctx context.Context) (tfsdk.Sch
 						Optional:            true,
 						Sensitive:           false,
 					},
-					"private_key": {
+					"ssh_private_key": {
 						MarkdownDescription: "",
 						Type:                types.StringType,
 						Required:            false,
@@ -212,7 +212,7 @@ func (r *PostgresqlConnectionResource) Create(ctx context.Context, req resource.
 				SSHUser:           data.Configuration.Attributes()["ssh_user"].(types.String).ValueString(),
 				SSHHost:           data.Configuration.Attributes()["ssh_host"].(types.String).ValueString(),
 				SSHPort:           int(data.Configuration.Attributes()["ssh_port"].(types.Int64).ValueInt64()),
-				PrivateKey:        data.Configuration.Attributes()["private_key"].(types.String).ValueString(),
+				SSHPrivateKey:     data.Configuration.Attributes()["ssh_private_key"].(types.String).ValueString(),
 			},
 		},
 	)
@@ -223,6 +223,54 @@ func (r *PostgresqlConnectionResource) Create(ctx context.Context, req resource.
 	data.Id = types.StringValue(created.ID)
 	data.Name = types.StringValue(created.Name)
 	data.Organization = types.StringValue(created.OrganizationId)
+
+	//var output polytomic.PostgresqlConfiguration
+	//cfg := &mapstructure.DecoderConfig{
+	//    Result:   &output,
+	//}
+	//decoder, _ := mapstructure.NewDecoder(cfg)
+	//decoder.Decode(created.Configuration)
+	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+	//
+	//	"hostname": types.StringType,
+	//
+	//	"username": types.StringType,
+	//
+	//	"password": types.StringType,
+	//
+	//	"database": types.StringType,
+	//
+	//	"port": types.Int64Type,
+	//
+	//	"ssl": types.BoolType,
+	//
+	//	"client_certs": types.BoolType,
+	//
+	//	"client_certificate": types.StringType,
+	//
+	//	"client_key": types.StringType,
+	//
+	//	"ca_cert": types.StringType,
+	//
+	//	"change_detection": types.BoolType,
+	//
+	//	"publication": types.StringType,
+	//
+	//	"ssh": types.BoolType,
+	//
+	//	"ssh_user": types.StringType,
+	//
+	//	"ssh_host": types.StringType,
+	//
+	//	"ssh_port": types.Int64Type,
+	//
+	//	"ssh_private_key": types.StringType,
+	//
+	//}, output)
+	//if diags.HasError() {
+	//	resp.Diagnostics.Append(diags...)
+	//	return
+	//}
 
 	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Postgresql", "id": created.ID})
 
@@ -253,6 +301,54 @@ func (r *PostgresqlConnectionResource) Read(ctx context.Context, req resource.Re
 	data.Id = types.StringValue(connection.ID)
 	data.Name = types.StringValue(connection.Name)
 	data.Organization = types.StringValue(connection.OrganizationId)
+
+	//var output polytomic.PostgresqlConfiguration
+	//cfg := &mapstructure.DecoderConfig{
+	//    Result:   &output,
+	//}
+	//decoder, _ := mapstructure.NewDecoder(cfg)
+	//decoder.Decode(connection.Configuration)
+	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+	//
+	//	"hostname": types.StringType,
+	//
+	//	"username": types.StringType,
+	//
+	//	"password": types.StringType,
+	//
+	//	"database": types.StringType,
+	//
+	//	"port": types.Int64Type,
+	//
+	//	"ssl": types.BoolType,
+	//
+	//	"client_certs": types.BoolType,
+	//
+	//	"client_certificate": types.StringType,
+	//
+	//	"client_key": types.StringType,
+	//
+	//	"ca_cert": types.StringType,
+	//
+	//	"change_detection": types.BoolType,
+	//
+	//	"publication": types.StringType,
+	//
+	//	"ssh": types.BoolType,
+	//
+	//	"ssh_user": types.StringType,
+	//
+	//	"ssh_host": types.StringType,
+	//
+	//	"ssh_port": types.Int64Type,
+	//
+	//	"ssh_private_key": types.StringType,
+	//
+	//}, output)
+	//if diags.HasError() {
+	//	resp.Diagnostics.Append(diags...)
+	//	return
+	//}
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -290,7 +386,7 @@ func (r *PostgresqlConnectionResource) Update(ctx context.Context, req resource.
 				SSHUser:           data.Configuration.Attributes()["ssh_user"].(types.String).ValueString(),
 				SSHHost:           data.Configuration.Attributes()["ssh_host"].(types.String).ValueString(),
 				SSHPort:           int(data.Configuration.Attributes()["ssh_port"].(types.Int64).ValueInt64()),
-				PrivateKey:        data.Configuration.Attributes()["private_key"].(types.String).ValueString(),
+				SSHPrivateKey:     data.Configuration.Attributes()["ssh_private_key"].(types.String).ValueString(),
 			},
 		},
 	)
@@ -302,6 +398,54 @@ func (r *PostgresqlConnectionResource) Update(ctx context.Context, req resource.
 	data.Id = types.StringValue(updated.ID)
 	data.Name = types.StringValue(updated.Name)
 	data.Organization = types.StringValue(updated.OrganizationId)
+
+	//var output polytomic.PostgresqlConfiguration
+	//cfg := &mapstructure.DecoderConfig{
+	//    Result:   &output,
+	//}
+	//decoder, _ := mapstructure.NewDecoder(cfg)
+	//decoder.Decode(updated.Configuration)
+	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+	//
+	//	"hostname": types.StringType,
+	//
+	//	"username": types.StringType,
+	//
+	//	"password": types.StringType,
+	//
+	//	"database": types.StringType,
+	//
+	//	"port": types.Int64Type,
+	//
+	//	"ssl": types.BoolType,
+	//
+	//	"client_certs": types.BoolType,
+	//
+	//	"client_certificate": types.StringType,
+	//
+	//	"client_key": types.StringType,
+	//
+	//	"ca_cert": types.StringType,
+	//
+	//	"change_detection": types.BoolType,
+	//
+	//	"publication": types.StringType,
+	//
+	//	"ssh": types.BoolType,
+	//
+	//	"ssh_user": types.StringType,
+	//
+	//	"ssh_host": types.StringType,
+	//
+	//	"ssh_port": types.Int64Type,
+	//
+	//	"ssh_private_key": types.StringType,
+	//
+	//}, output)
+	//if diags.HasError() {
+	//	resp.Diagnostics.Append(diags...)
+	//	return
+	//}
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)

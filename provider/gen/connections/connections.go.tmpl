@@ -20,4 +20,10 @@ var (
 		func() datasource.DataSource { return &{{ . }}{} },
                 {{- end }}
 	}
+
+	connectionImportables = map[string]resource.Resource {
+			{{- range .Importables }}
+		"{{ .Name }}": &{{ .ResourceName }}{},
+				{{- end }}		
+	}
 )

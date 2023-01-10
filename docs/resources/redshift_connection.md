@@ -51,12 +51,12 @@ Optional:
 - `aws_access_key_id` (String)
 - `aws_secret_access_key` (String, Sensitive)
 - `port` (Number)
-- `private_key` (String, Sensitive)
 - `s3_bucket_name` (String)
 - `s3_bucket_region` (String)
 - `ssh` (Boolean)
 - `ssh_host` (String)
 - `ssh_port` (Number)
+- `ssh_private_key` (String, Sensitive)
 - `ssh_user` (String)
 
 

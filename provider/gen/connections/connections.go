@@ -94,6 +94,11 @@ type Attribute struct {
 	AttrName string `yaml:"-"`
 }
 
+type Importable struct {
+	Name         string
+	ResourceName string
+}
+
 func GenerateConnections() error {
 	config, err := ioutil.ReadFile(ConnectionsFile)
 	if err != nil {
@@ -104,7 +109,9 @@ func GenerateConnections() error {
 	if err != nil {
 		return err
 	}
+
 	resources := []string{}
+	importables := []Importable{}
 	datasources := []string{}
 	for _, r := range data.Connections {
 		for i, a := range r.Attributes {
@@ -124,7 +131,12 @@ func GenerateConnections() error {
 			if err != nil {
 				return err
 			}
-			resources = append(resources, fmt.Sprintf("%sConnectionResource", strings.Title(r.Connection)))
+			resourceName := fmt.Sprintf("%sConnectionResource", strings.Title(r.Connection))
+			importables = append(importables, Importable{
+				Name:         r.Connection,
+				ResourceName: resourceName,
+			})
+			resources = append(resources, resourceName)
 		}
 		if r.Datasource {
 			err := writeConnectionDataSource(r)
@@ -141,7 +153,7 @@ func GenerateConnections() error {
 
 	}
 
-	err = writeExports(datasources, resources)
+	err = writeExports(datasources, resources, importables)
 	if err != nil {
 		return err
 	}
@@ -297,7 +309,7 @@ func writeConnectionDataSource(r Connection) error {
 	return err
 }
 
-func writeExports(datasources, resources []string) error {
+func writeExports(datasources, resources []string, importables []Importable) error {
 	tmpl, err := template.New("connections.go.tmpl").ParseFiles(exportTemplate)
 	if err != nil {
 		log.Fatal(err)
@@ -309,9 +321,11 @@ func writeExports(datasources, resources []string) error {
 	err = tmpl.Execute(&buf, struct {
 		Datasources []string
 		Resources   []string
+		Importables []Importable
 	}{
 		Datasources: datasources,
 		Resources:   resources,
+		Importables: importables,
 	})
 	if err != nil {
 		log.Fatal(err)

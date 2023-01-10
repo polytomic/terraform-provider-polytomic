@@ -120,6 +120,28 @@ func (r *S3ConnectionResource) Create(ctx context.Context, req resource.CreateRe
 	data.Name = types.StringValue(created.Name)
 	data.Organization = types.StringValue(created.OrganizationId)
 
+	//var output polytomic.S3Configuration
+	//cfg := &mapstructure.DecoderConfig{
+	//    Result:   &output,
+	//}
+	//decoder, _ := mapstructure.NewDecoder(cfg)
+	//decoder.Decode(created.Configuration)
+	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+	//
+	//	"aws_access_key_id": types.StringType,
+	//
+	//	"aws_secret_access_key": types.StringType,
+	//
+	//	"s3_bucket_region": types.StringType,
+	//
+	//	"s3_bucket_name": types.StringType,
+	//
+	//}, output)
+	//if diags.HasError() {
+	//	resp.Diagnostics.Append(diags...)
+	//	return
+	//}
+
 	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "S3", "id": created.ID})
 
 	diags = resp.State.Set(ctx, &data)
@@ -149,6 +171,28 @@ func (r *S3ConnectionResource) Read(ctx context.Context, req resource.ReadReques
 	data.Id = types.StringValue(connection.ID)
 	data.Name = types.StringValue(connection.Name)
 	data.Organization = types.StringValue(connection.OrganizationId)
+
+	//var output polytomic.S3Configuration
+	//cfg := &mapstructure.DecoderConfig{
+	//    Result:   &output,
+	//}
+	//decoder, _ := mapstructure.NewDecoder(cfg)
+	//decoder.Decode(connection.Configuration)
+	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+	//
+	//	"aws_access_key_id": types.StringType,
+	//
+	//	"aws_secret_access_key": types.StringType,
+	//
+	//	"s3_bucket_region": types.StringType,
+	//
+	//	"s3_bucket_name": types.StringType,
+	//
+	//}, output)
+	//if diags.HasError() {
+	//	resp.Diagnostics.Append(diags...)
+	//	return
+	//}
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -185,6 +229,28 @@ func (r *S3ConnectionResource) Update(ctx context.Context, req resource.UpdateRe
 	data.Id = types.StringValue(updated.ID)
 	data.Name = types.StringValue(updated.Name)
 	data.Organization = types.StringValue(updated.OrganizationId)
+
+	//var output polytomic.S3Configuration
+	//cfg := &mapstructure.DecoderConfig{
+	//    Result:   &output,
+	//}
+	//decoder, _ := mapstructure.NewDecoder(cfg)
+	//decoder.Decode(updated.Configuration)
+	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+	//
+	//	"aws_access_key_id": types.StringType,
+	//
+	//	"aws_secret_access_key": types.StringType,
+	//
+	//	"s3_bucket_region": types.StringType,
+	//
+	//	"s3_bucket_name": types.StringType,
+	//
+	//}, output)
+	//if diags.HasError() {
+	//	resp.Diagnostics.Append(diags...)
+	//	return
+	//}
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)

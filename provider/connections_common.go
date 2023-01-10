@@ -10,22 +10,8 @@ const (
 )
 
 var (
-	ConnectionsMap = map[string]resource.Resource{
-		"affinity":   &AffinityConnectionResource{},
-		"airtable":   &AirtableConnectionResource{},
-		"api":        &APIConnectionResource{},
-		"amplitude":  &AmplitudeConnectionResource{},
-		"athena":     &AthenaConnectionResource{},
-		"azureblob":  &AzureblobConnectionResource{},
-		"bigquery":   &BigqueryConnectionResource{},
-		"gcs":        &GcsConnectionResource{},
-		"marketo":    &MarketoConnectionResource{},
-		"mongodb":    &MongodbConnectionResource{},
-		"postgresql": &PostgresqlConnectionResource{},
-		"s3":         &S3ConnectionResource{},
-		"snowflake":  &SnowflakeConnectionResource{},
-		"sqlserver":  &SqlserverConnectionResource{},
-	}
+	// ConnectionsMap is a map of all the connections that can be imported
+	ConnectionsMap = connectionsMap()
 )
 
 type connectionData struct {
@@ -33,4 +19,16 @@ type connectionData struct {
 	Name          types.String `tfsdk:"name"`
 	Id            types.String `tfsdk:"id"`
 	Configuration types.Object `tfsdk:"configuration"`
+}
+
+// connectionsMap combines the generated importable connections
+// with any additional connections that are not generated.
+func connectionsMap() map[string]resource.Resource {
+	conns := make(map[string]resource.Resource)
+	for k, v := range connectionImportables {
+		conns[k] = v
+	}
+	conns["api"] = &APIConnectionResource{}
+
+	return conns
 }

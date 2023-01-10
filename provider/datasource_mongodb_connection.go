@@ -78,7 +78,7 @@ func (d *MongodbConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Sche
 						Optional:            true,
 						Sensitive:           false,
 					},
-					"additional_params": {
+					"params": {
 						MarkdownDescription: "",
 						Type:                types.StringType,
 						Required:            false,
@@ -157,8 +157,8 @@ func (d *MongodbConnectionDataSource) Read(ctx context.Context, req datasource.R
 			"srv": types.BoolValue(
 				conf.SRV,
 			),
-			"additional_params": types.StringValue(
-				conf.AdditionalParams,
+			"params": types.StringValue(
+				conf.Params,
 			),
 		},
 	)

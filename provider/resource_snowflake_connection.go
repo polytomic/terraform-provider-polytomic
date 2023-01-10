@@ -72,7 +72,7 @@ func (t *SnowflakeConnectionResource) GetSchema(ctx context.Context) (tfsdk.Sche
 						Optional:            false,
 						Sensitive:           false,
 					},
-					"additional_params": {
+					"params": {
 						MarkdownDescription: "",
 						Type:                types.StringType,
 						Required:            false,
@@ -119,12 +119,12 @@ func (r *SnowflakeConnectionResource) Create(ctx context.Context, req resource.C
 			Type:           polytomic.SnowflakeConnectionType,
 			OrganizationId: data.Organization.ValueString(),
 			Configuration: polytomic.SnowflakeConfiguration{
-				Account:          data.Configuration.Attributes()["account"].(types.String).ValueString(),
-				Username:         data.Configuration.Attributes()["username"].(types.String).ValueString(),
-				Password:         data.Configuration.Attributes()["password"].(types.String).ValueString(),
-				Dbname:           data.Configuration.Attributes()["dbname"].(types.String).ValueString(),
-				Warehouse:        data.Configuration.Attributes()["warehouse"].(types.String).ValueString(),
-				AdditionalParams: data.Configuration.Attributes()["additional_params"].(types.String).ValueString(),
+				Account:   data.Configuration.Attributes()["account"].(types.String).ValueString(),
+				Username:  data.Configuration.Attributes()["username"].(types.String).ValueString(),
+				Password:  data.Configuration.Attributes()["password"].(types.String).ValueString(),
+				Dbname:    data.Configuration.Attributes()["dbname"].(types.String).ValueString(),
+				Warehouse: data.Configuration.Attributes()["warehouse"].(types.String).ValueString(),
+				Params:    data.Configuration.Attributes()["params"].(types.String).ValueString(),
 			},
 		},
 	)
@@ -135,6 +135,32 @@ func (r *SnowflakeConnectionResource) Create(ctx context.Context, req resource.C
 	data.Id = types.StringValue(created.ID)
 	data.Name = types.StringValue(created.Name)
 	data.Organization = types.StringValue(created.OrganizationId)
+
+	//var output polytomic.SnowflakeConfiguration
+	//cfg := &mapstructure.DecoderConfig{
+	//    Result:   &output,
+	//}
+	//decoder, _ := mapstructure.NewDecoder(cfg)
+	//decoder.Decode(created.Configuration)
+	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+	//
+	//	"account": types.StringType,
+	//
+	//	"username": types.StringType,
+	//
+	//	"password": types.StringType,
+	//
+	//	"dbname": types.StringType,
+	//
+	//	"warehouse": types.StringType,
+	//
+	//	"params": types.StringType,
+	//
+	//}, output)
+	//if diags.HasError() {
+	//	resp.Diagnostics.Append(diags...)
+	//	return
+	//}
 
 	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Snowflake", "id": created.ID})
 
@@ -166,6 +192,32 @@ func (r *SnowflakeConnectionResource) Read(ctx context.Context, req resource.Rea
 	data.Name = types.StringValue(connection.Name)
 	data.Organization = types.StringValue(connection.OrganizationId)
 
+	//var output polytomic.SnowflakeConfiguration
+	//cfg := &mapstructure.DecoderConfig{
+	//    Result:   &output,
+	//}
+	//decoder, _ := mapstructure.NewDecoder(cfg)
+	//decoder.Decode(connection.Configuration)
+	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+	//
+	//	"account": types.StringType,
+	//
+	//	"username": types.StringType,
+	//
+	//	"password": types.StringType,
+	//
+	//	"dbname": types.StringType,
+	//
+	//	"warehouse": types.StringType,
+	//
+	//	"params": types.StringType,
+	//
+	//}, output)
+	//if diags.HasError() {
+	//	resp.Diagnostics.Append(diags...)
+	//	return
+	//}
+
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
@@ -186,12 +238,12 @@ func (r *SnowflakeConnectionResource) Update(ctx context.Context, req resource.U
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueString(),
 			Configuration: polytomic.SnowflakeConfiguration{
-				Account:          data.Configuration.Attributes()["account"].(types.String).ValueString(),
-				Username:         data.Configuration.Attributes()["username"].(types.String).ValueString(),
-				Password:         data.Configuration.Attributes()["password"].(types.String).ValueString(),
-				Dbname:           data.Configuration.Attributes()["dbname"].(types.String).ValueString(),
-				Warehouse:        data.Configuration.Attributes()["warehouse"].(types.String).ValueString(),
-				AdditionalParams: data.Configuration.Attributes()["additional_params"].(types.String).ValueString(),
+				Account:   data.Configuration.Attributes()["account"].(types.String).ValueString(),
+				Username:  data.Configuration.Attributes()["username"].(types.String).ValueString(),
+				Password:  data.Configuration.Attributes()["password"].(types.String).ValueString(),
+				Dbname:    data.Configuration.Attributes()["dbname"].(types.String).ValueString(),
+				Warehouse: data.Configuration.Attributes()["warehouse"].(types.String).ValueString(),
+				Params:    data.Configuration.Attributes()["params"].(types.String).ValueString(),
 			},
 		},
 	)
@@ -203,6 +255,32 @@ func (r *SnowflakeConnectionResource) Update(ctx context.Context, req resource.U
 	data.Id = types.StringValue(updated.ID)
 	data.Name = types.StringValue(updated.Name)
 	data.Organization = types.StringValue(updated.OrganizationId)
+
+	//var output polytomic.SnowflakeConfiguration
+	//cfg := &mapstructure.DecoderConfig{
+	//    Result:   &output,
+	//}
+	//decoder, _ := mapstructure.NewDecoder(cfg)
+	//decoder.Decode(updated.Configuration)
+	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+	//
+	//	"account": types.StringType,
+	//
+	//	"username": types.StringType,
+	//
+	//	"password": types.StringType,
+	//
+	//	"dbname": types.StringType,
+	//
+	//	"warehouse": types.StringType,
+	//
+	//	"params": types.StringType,
+	//
+	//}, output)
+	//if diags.HasError() {
+	//	resp.Diagnostics.Append(diags...)
+	//	return
+	//}
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
