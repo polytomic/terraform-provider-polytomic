@@ -65,6 +65,8 @@ archives:
       - "polytomic_importer"
     name_template: "polytomic_importer_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
 checksum:
+  ids:
+    - "{{ .ProjectName }}_v{{ .Version }}"
   extra_files:
     - glob: "terraform-registry-manifest.json"
       name_template: "{{ .ProjectName }}_{{ .Version }}_manifest.json"
