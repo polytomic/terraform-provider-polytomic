@@ -1,3 +1,9 @@
+## 0.3.0 (16 Jan 2023)
+* Added support for importing resources
+* Updated to use new wrapped responses from API
+* Added additional connection resources
+* Restructured docs
+
 ## 0.2.0 (14 Dec 2022)
 
 FEATURES
