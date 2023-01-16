@@ -60,9 +60,9 @@ archives:
       - "{{ .ProjectName }}_v{{ .Version }}"
     name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
   - format: zip
-    id: "polytomic_importer"
+    id: polytomic_importer
     builds:
-      - "polytomic_importer"
+      - polytomic_importer
     name_template: "polytomic_importer_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
 checksum:
   ids:
@@ -87,9 +87,6 @@ signs:
       - "--detach-sign"
       - "${artifact}"
 release:
-  ids:
-    - "{{ .ProjectName }}_v{{ .Version }}"
-    - "polytomic_importer"
   extra_files:
     - glob: "terraform-registry-manifest.json"
       name_template: "{{ .ProjectName }}_{{ .Version }}_manifest.json"
