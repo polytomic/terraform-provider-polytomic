@@ -11,6 +11,7 @@ builds:
       # they are unable to install libraries.
       - CGO_ENABLED=0
     mod_timestamp: "{{ .CommitTimestamp }}"
+    id: "{{ .ProjectName }}_v{{ .Version }}"
     flags:
       - -trimpath
     ldflags:
@@ -54,6 +55,7 @@ builds:
     binary: "polytomic_importer_v{{ .Version }}"
 archives:
   - format: zip
+    id: "{{ .ProjectName }}_v{{ .Version }}"
     builds:
       - "{{ .ProjectName }}_v{{ .Version }}"
     name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
@@ -81,6 +83,9 @@ signs:
       - "--detach-sign"
       - "${artifact}"
 release:
+  ids:
+    - "{{ .ProjectName }}_v{{ .Version }}"
+    - "polytomic_importer"
   extra_files:
     - glob: "terraform-registry-manifest.json"
       name_template: "{{ .ProjectName }}_{{ .Version }}_manifest.json"
