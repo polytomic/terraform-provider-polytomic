@@ -1,3 +1,17 @@
+## 0.3.6 (17 Jan 2023)
+* Add additional example values to documentation
+## 0.3.5 (16 Jan 2023)
+* Re-org documentation
+## 0.3.4 (16 Jan 2023)
+* N/A
+## 0.3.3 (16 Jan 2023)
+* N/A
+## 0.3.2 (16 Jan 2023)
+* N/A
+
+## 0.3.1 (16 Jan 2023)
+* N/A
+
 ## 0.3.0 (16 Jan 2023)
 * Added support for importing resources
 * Updated to use new wrapped responses from API
