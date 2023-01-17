@@ -29,7 +29,7 @@ func (d *AffinityConnectionDataSource) Metadata(ctx context.Context, req datasou
 
 func (d *AffinityConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: ":meta:subcategory:Connection: Affinity Connection",
+		MarkdownDescription: ":meta:subcategory:Connections: Affinity Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"name": {
 				MarkdownDescription: "",

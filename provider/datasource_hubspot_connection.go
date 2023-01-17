@@ -31,7 +31,7 @@ func (d *HubspotConnectionDataSource) Metadata(ctx context.Context, req datasour
 
 func (d *HubspotConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: ":meta:subcategory:Connection: Hubspot Connection",
+		MarkdownDescription: ":meta:subcategory:Connections: Hubspot Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"name": {
 				MarkdownDescription: "",

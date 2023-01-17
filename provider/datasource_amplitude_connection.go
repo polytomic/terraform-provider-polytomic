@@ -31,7 +31,7 @@ func (d *AmplitudeConnectionDataSource) Metadata(ctx context.Context, req dataso
 
 func (d *AmplitudeConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: ":meta:subcategory:Connection: Amplitude Connection",
+		MarkdownDescription: ":meta:subcategory:Connections: Amplitude Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"name": {
 				MarkdownDescription: "",

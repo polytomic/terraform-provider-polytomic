@@ -29,7 +29,7 @@ func (d *SegmentConnectionDataSource) Metadata(ctx context.Context, req datasour
 
 func (d *SegmentConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: ":meta:subcategory:Connection: Segment Connection",
+		MarkdownDescription: ":meta:subcategory:Connections: Segment Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"name": {
 				MarkdownDescription: "",

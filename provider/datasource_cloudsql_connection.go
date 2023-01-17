@@ -31,7 +31,7 @@ func (d *CloudsqlConnectionDataSource) Metadata(ctx context.Context, req datasou
 
 func (d *CloudsqlConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: ":meta:subcategory:Connection: Cloud SQL Connection",
+		MarkdownDescription: ":meta:subcategory:Connections: Cloud SQL Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"name": {
 				MarkdownDescription: "",

@@ -26,7 +26,7 @@ func (d *bulkSourceDatasource) Metadata(ctx context.Context, req datasource.Meta
 
 func (d *bulkSourceDatasource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: "Bulk Source",
+		MarkdownDescription: ":meta:subcategory:Bulk Syncs: Bulk Source",
 		Attributes: map[string]tfsdk.Attribute{
 			"connection_id": {
 				MarkdownDescription: "",

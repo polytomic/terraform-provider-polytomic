@@ -23,7 +23,7 @@ var _ resource.ResourceWithImportState = &CosmosdbConnectionResource{}
 
 func (t *CosmosdbConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: ":meta:subcategory:Connection: Cosmos DB Connection",
+		MarkdownDescription: ":meta:subcategory:Connections: Cosmos DB Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"organization": {
 				MarkdownDescription: "Organization ID",

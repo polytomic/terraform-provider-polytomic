@@ -23,7 +23,7 @@ var _ resource.ResourceWithImportState = &KustomerConnectionResource{}
 
 func (t *KustomerConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: ":meta:subcategory:Connection: Kustomer Connection",
+		MarkdownDescription: ":meta:subcategory:Connections: Kustomer Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"organization": {
 				MarkdownDescription: "Organization ID",

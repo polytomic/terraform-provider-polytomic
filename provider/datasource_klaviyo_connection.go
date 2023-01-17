@@ -29,7 +29,7 @@ func (d *KlaviyoConnectionDataSource) Metadata(ctx context.Context, req datasour
 
 func (d *KlaviyoConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: ":meta:subcategory:Connection: Klaviyo Connection",
+		MarkdownDescription: ":meta:subcategory:Connections: Klaviyo Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"name": {
 				MarkdownDescription: "",

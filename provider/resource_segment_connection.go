@@ -23,7 +23,7 @@ var _ resource.ResourceWithImportState = &SegmentConnectionResource{}
 
 func (t *SegmentConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: ":meta:subcategory:Connection: Segment Connection",
+		MarkdownDescription: ":meta:subcategory:Connections: Segment Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"organization": {
 				MarkdownDescription: "Organization ID",

@@ -29,7 +29,7 @@ func (d *LobConnectionDataSource) Metadata(ctx context.Context, req datasource.M
 
 func (d *LobConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: ":meta:subcategory:Connection: Lob Connection",
+		MarkdownDescription: ":meta:subcategory:Connections: Lob Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"name": {
 				MarkdownDescription: "",

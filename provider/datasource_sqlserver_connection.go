@@ -31,7 +31,7 @@ func (d *SqlserverConnectionDataSource) Metadata(ctx context.Context, req dataso
 
 func (d *SqlserverConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: ":meta:subcategory:Connection: SQL Server Connection",
+		MarkdownDescription: ":meta:subcategory:Connections: SQL Server Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"name": {
 				MarkdownDescription: "",

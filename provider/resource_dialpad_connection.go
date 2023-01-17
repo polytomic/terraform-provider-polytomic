@@ -23,7 +23,7 @@ var _ resource.ResourceWithImportState = &DialpadConnectionResource{}
 
 func (t *DialpadConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: ":meta:subcategory:Connection: Dialpad Connection",
+		MarkdownDescription: ":meta:subcategory:Connections: Dialpad Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"organization": {
 				MarkdownDescription: "Organization ID",

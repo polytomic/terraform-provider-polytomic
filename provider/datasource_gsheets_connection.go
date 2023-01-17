@@ -29,7 +29,7 @@ func (d *GsheetsConnectionDataSource) Metadata(ctx context.Context, req datasour
 
 func (d *GsheetsConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: ":meta:subcategory:Connection: Google Sheets Connection",
+		MarkdownDescription: ":meta:subcategory:Connections: Google Sheets Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"name": {
 				MarkdownDescription: "",

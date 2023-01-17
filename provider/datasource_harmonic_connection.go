@@ -29,7 +29,7 @@ func (d *HarmonicConnectionDataSource) Metadata(ctx context.Context, req datasou
 
 func (d *HarmonicConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: ":meta:subcategory:Connection: Harmonic Connection",
+		MarkdownDescription: ":meta:subcategory:Connections: Harmonic Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"name": {
 				MarkdownDescription: "",

@@ -31,7 +31,7 @@ func (d *FreshdeskConnectionDataSource) Metadata(ctx context.Context, req dataso
 
 func (d *FreshdeskConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: ":meta:subcategory:Connection: Freshdesk Connection",
+		MarkdownDescription: ":meta:subcategory:Connections: Freshdesk Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"name": {
 				MarkdownDescription: "",

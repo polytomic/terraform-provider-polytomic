@@ -31,7 +31,7 @@ func (d *MarketoConnectionDataSource) Metadata(ctx context.Context, req datasour
 
 func (d *MarketoConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: ":meta:subcategory:Connection: Marketo Connection",
+		MarkdownDescription: ":meta:subcategory:Connections: Marketo Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"name": {
 				MarkdownDescription: "",

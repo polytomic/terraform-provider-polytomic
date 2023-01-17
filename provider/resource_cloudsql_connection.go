@@ -23,7 +23,7 @@ var _ resource.ResourceWithImportState = &CloudsqlConnectionResource{}
 
 func (t *CloudsqlConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: ":meta:subcategory:Connection: Cloud SQL Connection",
+		MarkdownDescription: ":meta:subcategory:Connections: Cloud SQL Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"organization": {
 				MarkdownDescription: "Organization ID",

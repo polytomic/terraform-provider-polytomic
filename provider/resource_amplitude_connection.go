@@ -23,7 +23,7 @@ var _ resource.ResourceWithImportState = &AmplitudeConnectionResource{}
 
 func (t *AmplitudeConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: ":meta:subcategory:Connection: Amplitude Connection",
+		MarkdownDescription: ":meta:subcategory:Connections: Amplitude Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"organization": {
 				MarkdownDescription: "Organization ID",

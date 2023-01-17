@@ -23,7 +23,7 @@ var _ resource.ResourceWithImportState = &LobConnectionResource{}
 
 func (t *LobConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: ":meta:subcategory:Connection: Lob Connection",
+		MarkdownDescription: ":meta:subcategory:Connections: Lob Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"organization": {
 				MarkdownDescription: "Organization ID",

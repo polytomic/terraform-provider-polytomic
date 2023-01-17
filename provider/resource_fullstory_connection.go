@@ -23,7 +23,7 @@ var _ resource.ResourceWithImportState = &FullstoryConnectionResource{}
 
 func (t *FullstoryConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: ":meta:subcategory:Connection: FullStory Connection",
+		MarkdownDescription: ":meta:subcategory:Connections: FullStory Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"organization": {
 				MarkdownDescription: "Organization ID",

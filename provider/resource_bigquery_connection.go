@@ -23,7 +23,7 @@ var _ resource.ResourceWithImportState = &BigqueryConnectionResource{}
 
 func (t *BigqueryConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: ":meta:subcategory:Connection: BigQuery Connection",
+		MarkdownDescription: ":meta:subcategory:Connections: BigQuery Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"organization": {
 				MarkdownDescription: "Organization ID",

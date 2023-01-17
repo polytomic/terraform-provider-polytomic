@@ -20,8 +20,7 @@ var _ resource.ResourceWithImportState = &organizationResource{}
 
 func (r *organizationResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: "A Polytomic Organization provides a container for users, connections, and sync definitions.",
-
+		MarkdownDescription: ":meta:subcategory:Organizations: A Polytomic Organization provides a container for users, connections, and sync definitions.",
 		Attributes: map[string]tfsdk.Attribute{
 			"name": {
 				MarkdownDescription: "Organization name",

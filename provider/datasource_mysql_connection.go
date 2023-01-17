@@ -31,7 +31,7 @@ func (d *MysqlConnectionDataSource) Metadata(ctx context.Context, req datasource
 
 func (d *MysqlConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: ":meta:subcategory:Connection: MySQL Connection",
+		MarkdownDescription: ":meta:subcategory:Connections: MySQL Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"name": {
 				MarkdownDescription: "",

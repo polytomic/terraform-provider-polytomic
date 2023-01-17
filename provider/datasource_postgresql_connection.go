@@ -31,7 +31,7 @@ func (d *PostgresqlConnectionDataSource) Metadata(ctx context.Context, req datas
 
 func (d *PostgresqlConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: ":meta:subcategory:Connection: PostgresSQL Connection",
+		MarkdownDescription: ":meta:subcategory:Connections: PostgresSQL Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"name": {
 				MarkdownDescription: "",

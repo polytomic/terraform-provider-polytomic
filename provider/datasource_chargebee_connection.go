@@ -31,7 +31,7 @@ func (d *ChargebeeConnectionDataSource) Metadata(ctx context.Context, req dataso
 
 func (d *ChargebeeConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: ":meta:subcategory:Connection: Chargebee Connection",
+		MarkdownDescription: ":meta:subcategory:Connections: Chargebee Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"name": {
 				MarkdownDescription: "",

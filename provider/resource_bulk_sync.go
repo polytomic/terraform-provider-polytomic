@@ -20,7 +20,7 @@ var _ resource.ResourceWithImportState = &bulkSyncResource{}
 
 func (r *bulkSyncResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: "",
+		MarkdownDescription: ":meta:subcategory:Bulk Syncs: Bulk Sync",
 		Attributes: map[string]tfsdk.Attribute{
 			"id": {
 				MarkdownDescription: "",

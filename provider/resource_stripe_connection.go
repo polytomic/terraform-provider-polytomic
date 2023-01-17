@@ -23,7 +23,7 @@ var _ resource.ResourceWithImportState = &StripeConnectionResource{}
 
 func (t *StripeConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: ":meta:subcategory:Connection: Stripe Connection",
+		MarkdownDescription: ":meta:subcategory:Connections: Stripe Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"organization": {
 				MarkdownDescription: "Organization ID",

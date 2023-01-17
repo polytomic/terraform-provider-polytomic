@@ -23,7 +23,7 @@ var _ resource.ResourceWithImportState = &PipedriveConnectionResource{}
 
 func (t *PipedriveConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: ":meta:subcategory:Connection: Pipedrive Connection",
+		MarkdownDescription: ":meta:subcategory:Connections: Pipedrive Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"organization": {
 				MarkdownDescription: "Organization ID",

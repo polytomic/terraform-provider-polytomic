@@ -23,7 +23,7 @@ var _ resource.ResourceWithImportState = &FreshdeskConnectionResource{}
 
 func (t *FreshdeskConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: ":meta:subcategory:Connection: Freshdesk Connection",
+		MarkdownDescription: ":meta:subcategory:Connections: Freshdesk Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"organization": {
 				MarkdownDescription: "Organization ID",

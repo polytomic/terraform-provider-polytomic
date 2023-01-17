@@ -31,7 +31,7 @@ func (d *BigqueryConnectionDataSource) Metadata(ctx context.Context, req datasou
 
 func (d *BigqueryConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: ":meta:subcategory:Connection: BigQuery Connection",
+		MarkdownDescription: ":meta:subcategory:Connections: BigQuery Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"name": {
 				MarkdownDescription: "",
