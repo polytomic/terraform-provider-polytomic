@@ -23,7 +23,7 @@ var _ resource.ResourceWithImportState = &S3ConnectionResource{}
 
 func (t *S3ConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: ":meta:subcategory:Connection: S3 Connection",
+		MarkdownDescription: ":meta:subcategory:Connections: S3 Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"organization": {
 				MarkdownDescription: "Organization ID",

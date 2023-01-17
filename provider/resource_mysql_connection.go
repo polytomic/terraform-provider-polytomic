@@ -23,7 +23,7 @@ var _ resource.ResourceWithImportState = &MysqlConnectionResource{}
 
 func (t *MysqlConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: ":meta:subcategory:Connection: MySQL Connection",
+		MarkdownDescription: ":meta:subcategory:Connections: MySQL Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"organization": {
 				MarkdownDescription: "Organization ID",

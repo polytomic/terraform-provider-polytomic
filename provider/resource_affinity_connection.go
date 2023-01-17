@@ -23,7 +23,7 @@ var _ resource.ResourceWithImportState = &AffinityConnectionResource{}
 
 func (t *AffinityConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: ":meta:subcategory:Connection: Affinity Connection",
+		MarkdownDescription: ":meta:subcategory:Connections: Affinity Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"organization": {
 				MarkdownDescription: "Organization ID",

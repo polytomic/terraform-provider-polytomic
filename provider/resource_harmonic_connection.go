@@ -23,7 +23,7 @@ var _ resource.ResourceWithImportState = &HarmonicConnectionResource{}
 
 func (t *HarmonicConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: ":meta:subcategory:Connection: Harmonic Connection",
+		MarkdownDescription: ":meta:subcategory:Connections: Harmonic Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"organization": {
 				MarkdownDescription: "Organization ID",

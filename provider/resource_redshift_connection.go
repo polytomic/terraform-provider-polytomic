@@ -23,7 +23,7 @@ var _ resource.ResourceWithImportState = &RedshiftConnectionResource{}
 
 func (t *RedshiftConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: ":meta:subcategory:Connection: Redshift Connection",
+		MarkdownDescription: ":meta:subcategory:Connections: Redshift Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"organization": {
 				MarkdownDescription: "Organization ID",

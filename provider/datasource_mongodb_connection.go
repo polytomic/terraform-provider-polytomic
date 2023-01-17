@@ -31,7 +31,7 @@ func (d *MongodbConnectionDataSource) Metadata(ctx context.Context, req datasour
 
 func (d *MongodbConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: ":meta:subcategory:Connection: MongoDB Connection",
+		MarkdownDescription: ":meta:subcategory:Connections: MongoDB Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"name": {
 				MarkdownDescription: "",

@@ -22,7 +22,7 @@ var _ resource.ResourceWithImportState = &userResource{}
 
 func (r *userResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: "A User in a Polytomic Organization",
+		MarkdownDescription: ":meta:subcategory:Organizations: A user in a Polytomic organization",
 		Attributes: map[string]tfsdk.Attribute{
 			"organization": {
 				MarkdownDescription: "Organization ID",

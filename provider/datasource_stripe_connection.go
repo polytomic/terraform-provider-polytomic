@@ -29,7 +29,7 @@ func (d *StripeConnectionDataSource) Metadata(ctx context.Context, req datasourc
 
 func (d *StripeConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: ":meta:subcategory:Connection: Stripe Connection",
+		MarkdownDescription: ":meta:subcategory:Connections: Stripe Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"name": {
 				MarkdownDescription: "",

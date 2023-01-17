@@ -23,7 +23,7 @@ var _ resource.ResourceWithImportState = &NetsuiteConnectionResource{}
 
 func (t *NetsuiteConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: ":meta:subcategory:Connection: NetSuite Connection",
+		MarkdownDescription: ":meta:subcategory:Connections: NetSuite Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"organization": {
 				MarkdownDescription: "Organization ID",

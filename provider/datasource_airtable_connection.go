@@ -29,7 +29,7 @@ func (d *AirtableConnectionDataSource) Metadata(ctx context.Context, req datasou
 
 func (d *AirtableConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: ":meta:subcategory:Connection: Airtable Connection",
+		MarkdownDescription: ":meta:subcategory:Connections: Airtable Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"name": {
 				MarkdownDescription: "",

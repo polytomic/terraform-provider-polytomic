@@ -31,7 +31,7 @@ func (d *CosmosdbConnectionDataSource) Metadata(ctx context.Context, req datasou
 
 func (d *CosmosdbConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: ":meta:subcategory:Connection: Cosmos DB Connection",
+		MarkdownDescription: ":meta:subcategory:Connections: Cosmos DB Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"name": {
 				MarkdownDescription: "",

@@ -29,7 +29,7 @@ func (d *FullstoryConnectionDataSource) Metadata(ctx context.Context, req dataso
 
 func (d *FullstoryConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: ":meta:subcategory:Connection: FullStory Connection",
+		MarkdownDescription: ":meta:subcategory:Connections: FullStory Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"name": {
 				MarkdownDescription: "",

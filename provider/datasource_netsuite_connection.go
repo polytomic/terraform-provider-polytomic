@@ -31,7 +31,7 @@ func (d *NetsuiteConnectionDataSource) Metadata(ctx context.Context, req datasou
 
 func (d *NetsuiteConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: ":meta:subcategory:Connection: NetSuite Connection",
+		MarkdownDescription: ":meta:subcategory:Connections: NetSuite Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"name": {
 				MarkdownDescription: "",

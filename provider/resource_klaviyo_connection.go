@@ -23,7 +23,7 @@ var _ resource.ResourceWithImportState = &KlaviyoConnectionResource{}
 
 func (t *KlaviyoConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: ":meta:subcategory:Connection: Klaviyo Connection",
+		MarkdownDescription: ":meta:subcategory:Connections: Klaviyo Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"organization": {
 				MarkdownDescription: "Organization ID",

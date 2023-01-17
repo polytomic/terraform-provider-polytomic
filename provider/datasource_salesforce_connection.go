@@ -31,7 +31,7 @@ func (d *SalesforceConnectionDataSource) Metadata(ctx context.Context, req datas
 
 func (d *SalesforceConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: ":meta:subcategory:Connection: Salesforce Connection",
+		MarkdownDescription: ":meta:subcategory:Connections: Salesforce Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"name": {
 				MarkdownDescription: "",

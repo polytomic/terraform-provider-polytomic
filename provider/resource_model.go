@@ -23,7 +23,7 @@ var _ resource.ResourceWithImportState = &modelResource{}
 
 func (r *modelResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: "",
+		MarkdownDescription: ":meta:subcategory:Models: Model",
 		Attributes: map[string]tfsdk.Attribute{
 			"id": {
 				MarkdownDescription: "",

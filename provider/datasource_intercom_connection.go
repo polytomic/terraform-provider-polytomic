@@ -29,7 +29,7 @@ func (d *IntercomConnectionDataSource) Metadata(ctx context.Context, req datasou
 
 func (d *IntercomConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: ":meta:subcategory:Connection: Intercom Connection",
+		MarkdownDescription: ":meta:subcategory:Connections: Intercom Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"name": {
 				MarkdownDescription: "",

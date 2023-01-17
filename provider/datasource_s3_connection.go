@@ -31,7 +31,7 @@ func (d *S3ConnectionDataSource) Metadata(ctx context.Context, req datasource.Me
 
 func (d *S3ConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: ":meta:subcategory:Connection: S3 Connection",
+		MarkdownDescription: ":meta:subcategory:Connections: S3 Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"name": {
 				MarkdownDescription: "",

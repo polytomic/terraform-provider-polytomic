@@ -31,7 +31,7 @@ func (d *SnowflakeConnectionDataSource) Metadata(ctx context.Context, req dataso
 
 func (d *SnowflakeConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: ":meta:subcategory:Connection: Snowflake Connection",
+		MarkdownDescription: ":meta:subcategory:Connections: Snowflake Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"name": {
 				MarkdownDescription: "",

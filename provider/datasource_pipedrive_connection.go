@@ -31,7 +31,7 @@ func (d *PipedriveConnectionDataSource) Metadata(ctx context.Context, req dataso
 
 func (d *PipedriveConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: ":meta:subcategory:Connection: Pipedrive Connection",
+		MarkdownDescription: ":meta:subcategory:Connections: Pipedrive Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"name": {
 				MarkdownDescription: "",

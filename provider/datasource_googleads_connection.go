@@ -29,7 +29,7 @@ func (d *GoogleadsConnectionDataSource) Metadata(ctx context.Context, req dataso
 
 func (d *GoogleadsConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: ":meta:subcategory:Connection: Google Ads Connection",
+		MarkdownDescription: ":meta:subcategory:Connections: Google Ads Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"name": {
 				MarkdownDescription: "",

@@ -23,7 +23,7 @@ var _ resource.ResourceWithImportState = &GcsConnectionResource{}
 
 func (t *GcsConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: ":meta:subcategory:Connection: Google Cloud Storage Connection",
+		MarkdownDescription: ":meta:subcategory:Connections: Google Cloud Storage Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"organization": {
 				MarkdownDescription: "Organization ID",

@@ -23,7 +23,7 @@ var _ resource.ResourceWithImportState = &syncResource{}
 
 func (r *syncResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: "",
+		MarkdownDescription: ":meta:subcategory:Syncs: Sync",
 		Attributes: map[string]tfsdk.Attribute{
 			"id": {
 				MarkdownDescription: "",

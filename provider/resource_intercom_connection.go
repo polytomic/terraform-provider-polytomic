@@ -23,7 +23,7 @@ var _ resource.ResourceWithImportState = &IntercomConnectionResource{}
 
 func (t *IntercomConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: ":meta:subcategory:Connection: Intercom Connection",
+		MarkdownDescription: ":meta:subcategory:Connections: Intercom Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"organization": {
 				MarkdownDescription: "Organization ID",

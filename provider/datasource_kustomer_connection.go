@@ -31,7 +31,7 @@ func (d *KustomerConnectionDataSource) Metadata(ctx context.Context, req datasou
 
 func (d *KustomerConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: ":meta:subcategory:Connection: Kustomer Connection",
+		MarkdownDescription: ":meta:subcategory:Connections: Kustomer Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"name": {
 				MarkdownDescription: "",

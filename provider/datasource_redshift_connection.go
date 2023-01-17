@@ -31,7 +31,7 @@ func (d *RedshiftConnectionDataSource) Metadata(ctx context.Context, req datasou
 
 func (d *RedshiftConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: ":meta:subcategory:Connection: Redshift Connection",
+		MarkdownDescription: ":meta:subcategory:Connections: Redshift Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"name": {
 				MarkdownDescription: "",
