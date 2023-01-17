@@ -19,6 +19,7 @@ resource "polytomic_cloudsql_connection" "cloudsql" {
     connection_name = "my-project:us-central1:my-instance"
     database        = "my-db"
     username        = "cloudsql"
+    credentials     = "data.account_credentials.json"
   }
 }
 ```

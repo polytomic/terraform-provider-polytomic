@@ -3,6 +3,7 @@ resource "polytomic_snowflake_connection" "snowflake" {
   configuration = {
     account   = "acme"
     username  = "user"
+    password  = "secret"
     dbname    = "db"
     warehouse = "warehouse"
   }

@@ -167,9 +167,7 @@ func writeConnectionExamples(r Connection) error {
 		if a.ExampleTypeOverride != "" {
 			r.Attributes[i].Type = a.ExampleTypeOverride
 		}
-		if !a.Sensitive {
-			attributes = append(attributes, a)
-		}
+		attributes = append(attributes, a)
 	}
 
 	if r.Resource {

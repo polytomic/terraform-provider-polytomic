@@ -3,6 +3,7 @@ resource "polytomic_mysql_connection" "mysql" {
   configuration = {
     hostname = "mysql.example.com"
     account  = "acme"
+    passwd   = "super-secret-password"
     dbname   = "db"
     port     = 3306
   }

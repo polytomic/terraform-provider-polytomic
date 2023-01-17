@@ -18,6 +18,7 @@ resource "polytomic_mongodb_connection" "mongodb" {
   configuration = {
     hosts    = "mongodb.example.com"
     username = "user"
+    password = "secret"
     database = "db"
   }
 }
