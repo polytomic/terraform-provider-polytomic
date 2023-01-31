@@ -6,6 +6,7 @@ import (
 	"io"
 
 	"github.com/hashicorp/hcl/v2/hclwrite"
+	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/polytomic/polytomic-go"
 	"github.com/polytomic/terraform-provider-polytomic/provider"
@@ -24,7 +25,8 @@ var (
 type Connections struct {
 	c *polytomic.Client
 
-	Resources []Connection
+	Resources   []Connection
+	Datasources []Connection
 }
 
 type Connection struct {
@@ -48,27 +50,50 @@ func (c *Connections) Init(ctx context.Context) error {
 		return err
 	}
 	for _, conn := range conns {
-		r, ok := provider.ConnectionsMap[conn.Type.ID]
-		if !ok {
+		if r, ok := provider.ConnectionsMap[conn.Type.ID]; ok {
+			resp := &resource.MetadataResponse{}
+			r.Metadata(ctx, resource.MetadataRequest{
+				ProviderTypeName: provider.Name,
+			}, resp)
+			c.Resources = append(c.Resources, Connection{
+				ID:            conn.ID,
+				Resource:      resp.TypeName,
+				Name:          conn.Name,
+				Organization:  conn.OrganizationId,
+				Configuration: conn.Configuration,
+			})
+
+		} else if d, ok := provider.ConnectionDatasourcesMap[conn.Type.ID]; ok {
+			resp := &datasource.MetadataResponse{}
+			d.Metadata(ctx, datasource.MetadataRequest{
+				ProviderTypeName: provider.Name,
+			}, resp)
+			c.Datasources = append(c.Datasources, Connection{
+				ID:           conn.ID,
+				Resource:     resp.TypeName,
+				Name:         conn.Name,
+				Organization: conn.OrganizationId,
+			})
+		} else {
 			log.Warn().Msgf("connection type %s not supported", conn.Type.ID)
-			continue
 		}
-		resp := &resource.MetadataResponse{}
-		r.Metadata(ctx, resource.MetadataRequest{
-			ProviderTypeName: provider.Name,
-		}, resp)
-		c.Resources = append(c.Resources, Connection{
-			ID:            conn.ID,
-			Resource:      resp.TypeName,
-			Name:          conn.Name,
-			Organization:  conn.OrganizationId,
-			Configuration: conn.Configuration,
-		})
 	}
 	return nil
 }
 
 func (c *Connections) GenerateTerraformFiles(ctx context.Context, writer io.Writer) error {
+	for _, conn := range c.Datasources {
+		hclFile := hclwrite.NewEmptyFile()
+		body := hclFile.Body()
+		resourceBlock := body.AppendNewBlock("datasource", []string{conn.Resource, provider.ToSnakeCase(conn.Name)})
+		resourceBlock.Body().SetAttributeValue("id", cty.StringVal(conn.ID))
+		resourceBlock.Body().SetAttributeValue("name", cty.StringVal(conn.Name))
+		resourceBlock.Body().SetAttributeValue("organization", cty.StringVal(conn.Organization))
+		body.AppendNewline()
+
+		writer.Write(hclFile.Bytes())
+	}
+
 	for _, conn := range c.Resources {
 		config := typeConverter(conn.Configuration)
 		hclFile := hclwrite.NewEmptyFile()

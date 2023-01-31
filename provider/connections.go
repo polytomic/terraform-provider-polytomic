@@ -81,7 +81,7 @@ var (
 		func() datasource.DataSource { return &StripeConnectionDataSource{} },
 	}
 
-	connectionImportables = map[string]resource.Resource{
+	connectionImportableResourcess = map[string]resource.Resource{
 		"postgresql": &PostgresqlConnectionResource{},
 		"bigquery":   &BigqueryConnectionResource{},
 		"gcs":        &GcsConnectionResource{},
@@ -113,5 +113,11 @@ var (
 		"redshift":   &RedshiftConnectionResource{},
 		"segment":    &SegmentConnectionResource{},
 		"stripe":     &StripeConnectionResource{},
+	}
+
+	connectionImportableDatasources = map[string]datasource.DataSource{
+		"gsheets":    &GsheetsConnectionDataSource{},
+		"hubspot":	&HubspotConnectionDataSource{},
+		"salesforce": &SalesforceConnectionDataSource{},
 	}
 )
