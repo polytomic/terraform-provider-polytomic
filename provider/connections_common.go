@@ -31,7 +31,7 @@ type connectionData struct {
 // with any additional connections that are not generated.
 func connectionsMap() map[string]resource.Resource {
 	conns := make(map[string]resource.Resource)
-	for k, v := range connectionImportableResourcess {
+	for k, v := range connectionImportableResources {
 		conns[k] = v
 	}
 	conns["api"] = &APIConnectionResource{}

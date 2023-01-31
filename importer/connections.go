@@ -85,7 +85,7 @@ func (c *Connections) GenerateTerraformFiles(ctx context.Context, writer io.Writ
 	for _, conn := range c.Datasources {
 		hclFile := hclwrite.NewEmptyFile()
 		body := hclFile.Body()
-		resourceBlock := body.AppendNewBlock("datasource", []string{conn.Resource, provider.ToSnakeCase(conn.Name)})
+		resourceBlock := body.AppendNewBlock("data", []string{conn.Resource, provider.ToSnakeCase(conn.Name)})
 		resourceBlock.Body().SetAttributeValue("id", cty.StringVal(conn.ID))
 		resourceBlock.Body().SetAttributeValue("name", cty.StringVal(conn.Name))
 		resourceBlock.Body().SetAttributeValue("organization", cty.StringVal(conn.Organization))
