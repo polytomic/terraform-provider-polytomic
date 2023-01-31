@@ -81,7 +81,7 @@ var (
 		func() datasource.DataSource { return &StripeConnectionDataSource{} },
 	}
 
-	connectionImportables = map[string]resource.Resource{
+	connectionImportableResources = map[string]resource.Resource{
 		"postgresql": &PostgresqlConnectionResource{},
 		"bigquery":   &BigqueryConnectionResource{},
 		"gcs":        &GcsConnectionResource{},
@@ -113,5 +113,43 @@ var (
 		"redshift":   &RedshiftConnectionResource{},
 		"segment":    &SegmentConnectionResource{},
 		"stripe":     &StripeConnectionResource{},
+	}
+
+	connectionImportableDatasources = map[string]datasource.DataSource{
+		"postgresql": &PostgresqlConnectionDataSource{},
+		"bigquery":   &BigqueryConnectionDataSource{},
+		"gcs":        &GcsConnectionDataSource{},
+		"azureblob":  &AzureblobConnectionDataSource{},
+		"s3":         &S3ConnectionDataSource{},
+		"sqlserver":  &SqlserverConnectionDataSource{},
+		"athena":     &AthenaConnectionDataSource{},
+		"salesforce": &SalesforceConnectionDataSource{},
+		"hubspot":    &HubspotConnectionDataSource{},
+		"googleads":  &GoogleadsConnectionDataSource{},
+		"gsheets":    &GsheetsConnectionDataSource{},
+		"snowflake":  &SnowflakeConnectionDataSource{},
+		"affinity":   &AffinityConnectionDataSource{},
+		"airtable":   &AirtableConnectionDataSource{},
+		"amplitude":  &AmplitudeConnectionDataSource{},
+		"marketo":    &MarketoConnectionDataSource{},
+		"mongodb":    &MongodbConnectionDataSource{},
+		"chargebee":  &ChargebeeConnectionDataSource{},
+		"cloudsql":   &CloudsqlConnectionDataSource{},
+		"cosmosdb":   &CosmosdbConnectionDataSource{},
+		"customerio": &CustomerioConnectionDataSource{},
+		"dialpad":    &DialpadConnectionDataSource{},
+		"freshdesk":  &FreshdeskConnectionDataSource{},
+		"fullstory":  &FullstoryConnectionDataSource{},
+		"harmonic":   &HarmonicConnectionDataSource{},
+		"intercom":   &IntercomConnectionDataSource{},
+		"klaviyo":    &KlaviyoConnectionDataSource{},
+		"kustomer":   &KustomerConnectionDataSource{},
+		"lob":        &LobConnectionDataSource{},
+		"mysql":      &MysqlConnectionDataSource{},
+		"netsuite":   &NetsuiteConnectionDataSource{},
+		"pipedrive":  &PipedriveConnectionDataSource{},
+		"redshift":   &RedshiftConnectionDataSource{},
+		"segment":    &SegmentConnectionDataSource{},
+		"stripe":     &StripeConnectionDataSource{},
 	}
 )

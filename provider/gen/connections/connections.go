@@ -110,9 +110,9 @@ func GenerateConnections() error {
 		return err
 	}
 
-	resources := []string{}
-	importables := []Importable{}
-	datasources := []string{}
+	resources := []Importable{}
+	datasources := []Importable{}
+
 	for _, r := range data.Connections {
 		for i, a := range r.Attributes {
 			t, ok := TypeMap[a.Type]
@@ -131,19 +131,20 @@ func GenerateConnections() error {
 			if err != nil {
 				return err
 			}
-			resourceName := fmt.Sprintf("%sConnectionResource", strings.Title(r.Connection))
-			importables = append(importables, Importable{
+			resources = append(resources, Importable{
 				Name:         r.Connection,
-				ResourceName: resourceName,
+				ResourceName: fmt.Sprintf("%sConnectionResource", strings.Title(r.Connection)),
 			})
-			resources = append(resources, resourceName)
 		}
 		if r.Datasource {
 			err := writeConnectionDataSource(r)
 			if err != nil {
 				return err
 			}
-			datasources = append(datasources, fmt.Sprintf("%sConnectionDataSource", strings.Title(r.Connection)))
+			datasources = append(datasources, Importable{
+				Name:         r.Connection,
+				ResourceName: fmt.Sprintf("%sConnectionDataSource", strings.Title(r.Connection)),
+			})
 		}
 
 		err = writeConnectionExamples(r)
@@ -153,7 +154,7 @@ func GenerateConnections() error {
 
 	}
 
-	err = writeExports(datasources, resources, importables)
+	err = writeExports(datasources, resources)
 	if err != nil {
 		return err
 	}
@@ -307,7 +308,7 @@ func writeConnectionDataSource(r Connection) error {
 	return err
 }
 
-func writeExports(datasources, resources []string, importables []Importable) error {
+func writeExports(datasources, resources []Importable) error {
 	tmpl, err := template.New("connections.go.tmpl").ParseFiles(exportTemplate)
 	if err != nil {
 		log.Fatal(err)
@@ -315,15 +316,16 @@ func writeExports(datasources, resources []string, importables []Importable) err
 	var buf bytes.Buffer
 	f, err := os.Create(
 		filepath.Join(outputPath, "connections.go"))
+	if err != nil {
+		return err
+	}
 	defer f.Close()
 	err = tmpl.Execute(&buf, struct {
-		Datasources []string
-		Resources   []string
-		Importables []Importable
+		Datasources []Importable
+		Resources   []Importable
 	}{
 		Datasources: datasources,
 		Resources:   resources,
-		Importables: importables,
 	})
 	if err != nil {
 		log.Fatal(err)
