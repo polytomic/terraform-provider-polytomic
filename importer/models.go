@@ -22,13 +22,18 @@ var (
 
 type Models struct {
 	c *polytomic.Client
+	// modelNames is a map of model id's to their disambiguated names
+	modelNames  map[string]string
+	uniqueNames map[string]bool
 
 	Resources []*polytomic.Model
 }
 
 func NewModels(c *polytomic.Client) *Models {
 	return &Models{
-		c: c,
+		c:           c,
+		modelNames:  map[string]string{},
+		uniqueNames: map[string]bool{},
 	}
 }
 
@@ -55,7 +60,14 @@ func (m *Models) GenerateTerraformFiles(ctx context.Context, writer io.Writer) e
 	for _, model := range m.Resources {
 		hclFile := hclwrite.NewEmptyFile()
 		body := hclFile.Body()
-		resourceBlock := body.AppendNewBlock("resource", []string{ModelResource, provider.ToSnakeCase(model.Name)})
+		name := provider.ToSnakeCase(model.Name)
+		if _, exists := m.uniqueNames[name]; exists {
+			name = fmt.Sprintf("%s_%s", name, model.Type)
+		}
+		m.uniqueNames[name] = true
+		m.modelNames[model.ID] = name
+
+		resourceBlock := body.AppendNewBlock("resource", []string{ModelResource, name})
 		resourceBlock.Body().SetAttributeValue("connection_id", cty.StringVal(model.ConnectionID))
 		resourceBlock.Body().SetAttributeValue("name", cty.StringVal(model.Name))
 
@@ -109,7 +121,7 @@ func (m *Models) GenerateImports(ctx context.Context, writer io.Writer) error {
 	for _, model := range m.Resources {
 		writer.Write([]byte(fmt.Sprintf("terraform import %s.%s %s",
 			ModelResource,
-			provider.ToSnakeCase(model.Name),
+			m.modelNames[model.ID],
 			model.ID)))
 		writer.Write([]byte(fmt.Sprintf(" # %s\n", model.Name)))
 	}
