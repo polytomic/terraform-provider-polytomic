@@ -77,13 +77,16 @@ func typeConverter(value any) cty.Value {
 			vals = append(vals, typeConverter(v))
 		}
 		if len(vals) == 0 {
-			return cty.NilVal
+			return cty.EmptyTupleVal
 		}
-		return cty.ListVal(vals)
+		return cty.TupleVal(vals)
 	case []string:
 		vals := make([]cty.Value, 0)
 		for _, v := range value.([]string) {
 			vals = append(vals, cty.StringVal(v))
+		}
+		if len(vals) == 0 {
+			return cty.ListValEmpty(cty.String)
 		}
 		return cty.ListVal(vals)
 	case map[string]*string:
@@ -109,6 +112,4 @@ func typeConverter(value any) cty.Value {
 		fmt.Printf("Unknown type: %T\n", value)
 		return cty.NilVal
 	}
-
-	return cty.NilVal
 }
