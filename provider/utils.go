@@ -1,6 +1,9 @@
 package provider
 
-import "strings"
+import (
+	"strings"
+	"unicode"
+)
 
 func ToSnakeCase(s string) string {
 	s = strings.TrimSpace(s)
@@ -36,11 +39,10 @@ func ToSnakeCase(s string) string {
 			}
 		}
 
-		if v == ' ' || v == '_' || v == '-' || v == '.' {
-			// replace space/underscore/hyphen/dot with delimiter
-			n.WriteByte('_')
-		} else {
+		if unicode.IsNumber(rune(v)) || unicode.IsLetter(rune(v)) {
 			n.WriteByte(v)
+		} else if n.Len() > 0 {
+			n.WriteByte('_')
 		}
 	}
 
