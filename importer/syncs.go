@@ -39,9 +39,7 @@ func (s *Syncs) Init(ctx context.Context) error {
 		return err
 	}
 
-	for _, sync := range syncs {
-		s.Resources = append(s.Resources, sync)
-	}
+	s.Resources = append(s.Resources, syncs...)
 
 	return nil
 }
@@ -107,6 +105,7 @@ func (s *Syncs) GenerateTerraformFiles(ctx context.Context, writer io.Writer) er
 			resourceBlock.Body().SetAttributeValue("overrides", typeConverter(overrides))
 		}
 		resourceBlock.Body().SetAttributeValue("sync_all_records", cty.BoolVal(sync.SyncAllRecords))
+		body.AppendNewline()
 
 		writer.Write(hclFile.Bytes())
 

@@ -77,6 +77,7 @@ func (b *BulkSyncs) GenerateTerraformFiles(ctx context.Context, writer io.Writer
 			return err
 		}
 		resourceBlock.Body().SetAttributeValue("schedule", typeConverter(schedule))
+		body.AppendNewline()
 
 		writer.Write(hclFile.Bytes())
 	}

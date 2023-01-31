@@ -77,6 +77,8 @@ func (c *Connections) GenerateTerraformFiles(ctx context.Context, writer io.Writ
 		resourceBlock.Body().SetAttributeValue("name", cty.StringVal(conn.Name))
 		resourceBlock.Body().SetAttributeValue("organization", cty.StringVal(conn.Organization))
 		resourceBlock.Body().SetAttributeValue("configuration", config)
+		body.AppendNewline()
+
 		writer.Write(hclFile.Bytes())
 	}
 	return nil
