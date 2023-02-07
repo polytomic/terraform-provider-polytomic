@@ -2,7 +2,10 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"net/http"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -225,12 +228,23 @@ func (r *APIConnectionResource) Read(ctx context.Context, req resource.ReadReque
 
 	connection, err := r.client.Connections().Get(ctx, uuid.MustParse(data.Id.ValueString()))
 	if err != nil {
-		if err.Error() == ConnectionNotFoundErr {
-			resp.State.RemoveResource(ctx)
-			return
+		pErr := polytomic.ApiError{}
+		if errors.As(err, &pErr) {
+			if pErr.StatusCode == http.StatusNotFound {
+				resp.State.RemoveResource(ctx)
+				return
+			}
+			if strings.Contains(pErr.Message, "connection in use") {
+				for _, meta := range pErr.Metadata {
+					info := meta.(map[string]interface{})
+					resp.Diagnostics.AddError("Connection in use",
+						fmt.Sprintf("Connection is used by %s \"%s\" (%s). Please remove before deleting this connection.",
+							info["type"], info["name"], info["id"]),
+					)
+				}
+				return
+			}
 		}
-		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error reading connection: %s", err))
-		return
 	}
 
 	data.Id = types.StringValue(connection.ID)

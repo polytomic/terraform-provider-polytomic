@@ -5,7 +5,10 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"net/http"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -150,9 +153,12 @@ func (r *GcsConnectionResource) Read(ctx context.Context, req resource.ReadReque
 
 	connection, err := r.client.Connections().Get(ctx, uuid.MustParse(data.Id.ValueString()))
 	if err != nil {
-		if err.Error() == ConnectionNotFoundErr {
-			resp.State.RemoveResource(ctx)
-			return
+		pErr := polytomic.ApiError{}
+		if errors.As(err, &pErr) {
+			if pErr.StatusCode == http.StatusNotFound {
+				resp.State.RemoveResource(ctx)
+				return
+			}
 		}
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error reading connection: %s", err))
 		return
@@ -253,9 +259,28 @@ func (r *GcsConnectionResource) Delete(ctx context.Context, req resource.DeleteR
 
 	err := r.client.Connections().Delete(ctx, uuid.MustParse(data.Id.ValueString()))
 	if err != nil {
+		pErr := polytomic.ApiError{}
+		if errors.As(err, &pErr) {
+			if pErr.StatusCode == http.StatusNotFound {
+				resp.State.RemoveResource(ctx)
+				return
+			}
+			if strings.Contains(pErr.Message, "connection in use") {
+				for _, meta := range pErr.Metadata {
+					info := meta.(map[string]interface{})
+					resp.Diagnostics.AddError("Connection in use",
+						fmt.Sprintf("Connection is used by %s \"%s\" (%s). Please remove before deleting this connection.",
+							info["type"], info["name"], info["id"]),
+					)
+				}
+				return
+			}
+		}
+
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting connection: %s", err))
 		return
 	}
+
 }
 
 func (r *GcsConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
