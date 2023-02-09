@@ -6,10 +6,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-const (
-	ConnectionNotFoundErr = "not found: no connection found (404)"
-)
-
 var (
 	// ConnectionsMap is a map of all the connections that can be imported as
 	// resources.

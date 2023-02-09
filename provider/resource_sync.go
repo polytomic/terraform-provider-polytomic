@@ -2,7 +2,9 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"net/http"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -11,10 +13,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/polytomic/polytomic-go"
-)
-
-const (
-	SyncNotFoundErr = "not found: no sync found (404)"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -550,9 +548,12 @@ func (r *syncResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 
 	sync, err := r.client.Syncs().Get(ctx, data.ID.ValueString())
 	if err != nil {
-		if err.Error() == SyncNotFoundErr {
-			resp.State.RemoveResource(ctx)
-			return
+		pErr := polytomic.ApiError{}
+		if errors.As(err, &pErr) {
+			if pErr.StatusCode == http.StatusNotFound {
+				resp.State.RemoveResource(ctx)
+				return
+			}
 		}
 		resp.Diagnostics.AddError("Error reading sync", err.Error())
 		return
