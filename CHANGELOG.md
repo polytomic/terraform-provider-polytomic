@@ -1,9 +1,15 @@
+## 0.3.7 (9 Feb 2023)
+* Add support for organization-level syncs, bulk syncs, and models
+* Disallow deleting connections with dependent resources
+* Enhanced error handling
+* Add support for importing connections as data sources
+
 ## 0.3.6 (17 Jan 2023)
 * Add additional example values to documentation
 ## 0.3.5 (16 Jan 2023)
 * Re-org documentation
 ## 0.3.4 (16 Jan 2023)
-* N/A
+* N/Aw
 ## 0.3.3 (16 Jan 2023)
 * N/A
 ## 0.3.2 (16 Jan 2023)
