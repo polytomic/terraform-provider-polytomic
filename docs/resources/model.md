@@ -39,6 +39,7 @@ resource "polytomic_model" "model" {
 - `additional_fields` (Set of Object) (see [below for nested schema](#nestedatt--additional_fields))
 - `fields` (Set of String)
 - `identifier` (String)
+- `organization` (String)
 - `relations` (Set of Object) (see [below for nested schema](#nestedatt--relations))
 - `tracking_columns` (Set of String)
 

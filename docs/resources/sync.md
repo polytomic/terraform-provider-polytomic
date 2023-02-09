@@ -55,6 +55,7 @@ resource "polytomic_sync" "sync" {
 - `filter_logic` (String)
 - `filters` (Attributes Set) (see [below for nested schema](#nestedatt--filters))
 - `identity` (Attributes) (see [below for nested schema](#nestedatt--identity))
+- `organization` (String)
 - `override_fields` (Attributes Set) (see [below for nested schema](#nestedatt--override_fields))
 - `overrides` (Set of Object) (see [below for nested schema](#nestedatt--overrides))
 - `sync_all_records` (Boolean)

@@ -31,6 +31,11 @@ func (r *syncResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagno
 					resource.UseStateForUnknown(),
 				},
 			},
+			"organization": {
+				MarkdownDescription: "",
+				Type:                types.StringType,
+				Optional:            true,
+			},
 			"name": {
 				MarkdownDescription: "",
 				Type:                types.StringType,
@@ -325,6 +330,7 @@ func (r *syncResource) Metadata(ctx context.Context, req resource.MetadataReques
 
 type syncResourceResourceData struct {
 	ID             types.String `tfsdk:"id"`
+	Organization   types.String `tfsdk:"organization"`
 	Name           types.String `tfsdk:"name"`
 	Target         types.Object `tfsdk:"target"`
 	Mode           types.String `tfsdk:"mode"`
@@ -408,6 +414,7 @@ func (r *syncResource) Create(ctx context.Context, req resource.CreateRequest, r
 
 	request := polytomic.SyncRequest{
 		Name:           data.Name.ValueString(),
+		OrganizationID: data.Organization.ValueString(),
 		Target:         target,
 		Mode:           data.Mode.ValueString(),
 		Fields:         fields,
@@ -430,6 +437,7 @@ func (r *syncResource) Create(ctx context.Context, req resource.CreateRequest, r
 	}
 
 	data.ID = types.StringValue(sync.ID)
+	data.Organization = types.StringValue(sync.OrganizationID)
 	data.Name = types.StringValue(sync.Name)
 
 	data.Target, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
@@ -491,7 +499,9 @@ func (r *syncResource) Create(ctx context.Context, req resource.CreateRequest, r
 		resp.Diagnostics.Append(diags...)
 		return
 	}
-	data.FilterLogic = types.StringValue(sync.FilterLogic)
+	if sync.FilterLogic != "" {
+		data.FilterLogic = types.StringValue(sync.FilterLogic)
+	}
 	data.Overrides, diags = types.SetValueFrom(ctx, types.ObjectType{
 		AttrTypes: map[string]attr.Type{
 			"field_id": types.StringType,
@@ -560,6 +570,7 @@ func (r *syncResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 	}
 
 	data.ID = types.StringValue(sync.ID)
+	data.Organization = types.StringValue(sync.OrganizationID)
 	data.Name = types.StringValue(sync.Name)
 
 	data.Target, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
@@ -744,6 +755,7 @@ func (r *syncResource) Update(ctx context.Context, req resource.UpdateRequest, r
 
 	request := polytomic.SyncRequest{
 		Name:           data.Name.ValueString(),
+		OrganizationID: data.Organization.ValueString(),
 		Target:         target,
 		Mode:           data.Mode.ValueString(),
 		Fields:         fields,
@@ -762,6 +774,7 @@ func (r *syncResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	}
 
 	data.ID = types.StringValue(sync.ID)
+	data.Organization = types.StringValue(sync.OrganizationID)
 	data.Name = types.StringValue(sync.Name)
 
 	var plannedTarget polytomic.Target

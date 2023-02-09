@@ -30,6 +30,11 @@ func (r *bulkSyncResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Di
 					resource.UseStateForUnknown(),
 				},
 			},
+			"organization": {
+				MarkdownDescription: "",
+				Type:                types.StringType,
+				Optional:            true,
+			},
 			"name": {
 				MarkdownDescription: "",
 				Type:                types.StringType,
@@ -177,6 +182,7 @@ func (r *bulkSyncResource) Metadata(ctx context.Context, req resource.MetadataRe
 
 type bulkSyncResourceData struct {
 	Name                     types.String `tfsdk:"name"`
+	Organization             types.String `tfsdk:"organization"`
 	Id                       types.String `tfsdk:"id"`
 	DestConnectionID         types.String `tfsdk:"dest_connection_id"`
 	SourceConnectionID       types.String `tfsdk:"source_connection_id"`
@@ -242,6 +248,7 @@ func (r *bulkSyncResource) Create(ctx context.Context, req resource.CreateReques
 
 	created, err := r.client.Bulk().CreateBulkSync(ctx,
 		polytomic.BulkSyncRequest{
+			OrganizationID:           data.Organization.ValueString(),
 			Name:                     data.Name.ValueString(),
 			DestConnectionID:         data.DestConnectionID.ValueString(),
 			SourceConnectionID:       data.SourceConnectionID.ValueString(),
@@ -259,6 +266,7 @@ func (r *bulkSyncResource) Create(ctx context.Context, req resource.CreateReques
 		return
 	}
 	data.Id = types.StringValue(created.ID)
+	data.Organization = types.StringValue(created.OrganizationID)
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -294,7 +302,13 @@ func (r *bulkSyncResource) Read(ctx context.Context, req resource.ReadRequest, r
 		},
 		bulkSync.Schedule)
 
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
 	data.Id = types.StringValue(bulkSync.ID)
+	data.Organization = types.StringValue(bulkSync.OrganizationID)
 	data.Name = types.StringValue(bulkSync.Name)
 	data.DestConnectionID = types.StringValue(bulkSync.DestConnectionID)
 	data.SourceConnectionID = types.StringValue(bulkSync.SourceConnectionID)
@@ -328,6 +342,7 @@ func (r *bulkSyncResource) Update(ctx context.Context, req resource.UpdateReques
 	updated, err := r.client.Bulk().UpdateBulkSync(ctx,
 		data.Id.ValueString(),
 		polytomic.BulkSyncRequest{
+			OrganizationID:     data.Organization.ValueString(),
 			Name:               data.Name.ValueString(),
 			Active:             data.Active.ValueBool(),
 			Discover:           data.Discover.ValueBool(),
@@ -343,10 +358,10 @@ func (r *bulkSyncResource) Update(ctx context.Context, req resource.UpdateReques
 	}
 
 	data.Name = types.StringValue(updated.Name)
+	data.Organization = types.StringValue(updated.OrganizationID)
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 
-	return
 }
 
 func (r *bulkSyncResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
