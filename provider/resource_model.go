@@ -31,6 +31,11 @@ func (r *modelResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagn
 					resource.UseStateForUnknown(),
 				},
 			},
+			"organization": {
+				MarkdownDescription: "",
+				Type:                types.StringType,
+				Optional:            true,
+			},
 			"connection_id": {
 				MarkdownDescription: "",
 				Type:                types.StringType,
@@ -167,6 +172,7 @@ func (r *modelResource) Metadata(ctx context.Context, req resource.MetadataReque
 
 type modelResourceResourceData struct {
 	ID               types.String `tfsdk:"id"`
+	Organization     types.String `tfsdk:"organization"`
 	Name             types.String `tfsdk:"name"`
 	Type             types.String `tfsdk:"type"`
 	Version          types.Int64  `tfsdk:"version"`
@@ -234,6 +240,7 @@ func (r *modelResource) Create(ctx context.Context, req resource.CreateRequest, 
 
 	request := polytomic.ModelRequest{
 		Name:             data.Name.ValueString(),
+		OrganizationID:   data.Organization.ValueString(),
 		ConnectionID:     data.ConnectionID.ValueString(),
 		Configuration:    confRequestTyped,
 		Fields:           requestFields,
@@ -297,6 +304,11 @@ func (r *modelResource) Create(ctx context.Context, req resource.CreateRequest, 
 		},
 	}, modelAdditionalFields)
 
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
 	relations, diags := types.SetValueFrom(ctx, types.ObjectType{
 		AttrTypes: map[string]attr.Type{
 			"to": types.ObjectType{
@@ -320,6 +332,7 @@ func (r *modelResource) Create(ctx context.Context, req resource.CreateRequest, 
 	}
 
 	data.ID = types.StringValue(model.ID)
+	data.Organization = types.StringValue(model.OrganizationID)
 	data.Name = types.StringValue(model.Name)
 	data.Type = types.StringValue(model.Type)
 	data.Version = types.Int64Value(int64(model.Version))
@@ -436,6 +449,7 @@ func (r *modelResource) Read(ctx context.Context, req resource.ReadRequest, resp
 	}
 
 	data.ID = types.StringValue(model.ID)
+	data.Organization = types.StringValue(model.OrganizationID)
 	data.Name = types.StringValue(model.Name)
 	data.Type = types.StringValue(model.Type)
 	data.Version = types.Int64Value(int64(model.Version))
@@ -508,6 +522,7 @@ func (r *modelResource) Update(ctx context.Context, req resource.UpdateRequest, 
 	model, err := r.client.Models().Update(ctx, data.ID.ValueString(),
 		polytomic.ModelRequest{
 			Name:             data.Name.ValueString(),
+			OrganizationID:   data.Organization.ValueString(),
 			ConnectionID:     data.ConnectionID.ValueString(),
 			Configuration:    confRequestTyped,
 			Fields:           requestFields,
@@ -570,6 +585,11 @@ func (r *modelResource) Update(ctx context.Context, req resource.UpdateRequest, 
 		},
 	}, modelAdditionalFields)
 
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
 	relations, diags := types.SetValueFrom(ctx, types.ObjectType{
 		AttrTypes: map[string]attr.Type{
 			"to": types.ObjectType{
@@ -593,6 +613,7 @@ func (r *modelResource) Update(ctx context.Context, req resource.UpdateRequest, 
 	}
 
 	data.ID = types.StringValue(model.ID)
+	data.Organization = types.StringValue(model.OrganizationID)
 	data.Name = types.StringValue(model.Name)
 	data.Type = types.StringValue(model.Type)
 	data.Version = types.Int64Value(int64(model.Version))
@@ -607,7 +628,6 @@ func (r *modelResource) Update(ctx context.Context, req resource.UpdateRequest, 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 
-	return
 }
 
 func (r *modelResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
