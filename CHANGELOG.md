@@ -1,4 +1,4 @@
-## 0.3.7 (10 Feb 2023)
+## 0.3.8 (10 Feb 2023)
 * Fix default value for polytomic url in importer
 
 ## 0.3.7 (9 Feb 2023)
