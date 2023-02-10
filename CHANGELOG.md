@@ -1,3 +1,6 @@
+## 0.3.7 (10 Feb 2023)
+* Fix default value for polytomic url in importer
+
 ## 0.3.7 (9 Feb 2023)
 * Add support for organization-level syncs, bulk syncs, and models
 * Disallow deleting connections with dependent resources
