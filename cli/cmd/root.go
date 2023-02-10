@@ -13,7 +13,7 @@ func init() {
 	var apiKey, url string
 	rootCmd.PersistentFlags().StringVar(&apiKey, "api-key", "", "Polytomic API key")
 	viper.BindPFlag("api-key", rootCmd.PersistentFlags().Lookup("api-key"))
-	rootCmd.PersistentFlags().StringVar(&url, "url", "https://api.polytomic.com", "Polytomic API URL")
+	rootCmd.PersistentFlags().StringVar(&url, "url", "app.polytomic.com", "Polytomic API URL")
 	viper.BindPFlag("url", rootCmd.PersistentFlags().Lookup("url"))
 
 	// Run flags
