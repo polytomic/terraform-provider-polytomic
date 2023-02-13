@@ -35,6 +35,7 @@ func (r *syncResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagno
 				MarkdownDescription: "",
 				Type:                types.StringType,
 				Optional:            true,
+				Computed:            true,
 			},
 			"name": {
 				MarkdownDescription: "",

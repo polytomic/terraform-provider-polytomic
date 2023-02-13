@@ -35,6 +35,7 @@ func (r *modelResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagn
 				MarkdownDescription: "",
 				Type:                types.StringType,
 				Optional:            true,
+				Computed:            true,
 			},
 			"connection_id": {
 				MarkdownDescription: "",
