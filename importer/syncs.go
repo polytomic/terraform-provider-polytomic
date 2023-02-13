@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"strings"
 
 	"github.com/hashicorp/hcl/v2/hclwrite"
 	"github.com/mitchellh/mapstructure"
@@ -73,12 +74,44 @@ func (s *Syncs) GenerateTerraformFiles(ctx context.Context, writer io.Writer) er
 			resourceBlock.Body().SetAttributeValue("filter_logic", cty.StringVal(sync.FilterLogic))
 		}
 		if len(sync.Filters) > 0 {
-			var filters []map[string]interface{}
-			err = mapstructure.Decode(sync.Filters, &filters)
-			if err != nil {
-				return err
+			var res string
+			res += "["
+			for _, filter := range sync.Filters {
+				if filter.Value != nil {
+					tmpl := `{
+					field_id = "%s"
+					field_type = "%s"
+					function = "%s"
+					value = jsonencode(%s)
+				},`
+
+					var v string
+					switch filter.Value.(type) {
+					case []interface{}:
+						var val []string
+						for _, v := range filter.Value.([]interface{}) {
+							val = append(val, v.(string))
+						}
+						v = fmt.Sprintf(`["%s"]`, strings.Join(val, `","`))
+					default:
+						v = fmt.Sprintf(`"%s"`, filter.Value.(string))
+					}
+					res += fmt.Sprintf(tmpl, filter.FieldID, filter.FieldType, filter.Function, v)
+
+				} else {
+					tmpl := `{
+					field_id = "%s"
+					field_type = "%s"
+					function = "%s"
+				},`
+					res += fmt.Sprintf(tmpl, filter.FieldID, filter.FieldType, filter.Function)
+				}
 			}
-			resourceBlock.Body().SetAttributeValue("filters", typeConverter(filters))
+			res += "]"
+
+			resourceBlock.Body().SetAttributeRaw("filters", hclwrite.Tokens{{
+				Bytes: []byte(res),
+			}})
 		}
 		if sync.Identity != nil {
 			var identity map[string]interface{}
