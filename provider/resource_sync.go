@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -35,6 +36,7 @@ func (r *syncResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagno
 				MarkdownDescription: "",
 				Type:                types.StringType,
 				Optional:            true,
+				Computed:            true,
 			},
 			"name": {
 				MarkdownDescription: "",
@@ -64,6 +66,7 @@ func (r *syncResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagno
 						MarkdownDescription: "",
 						Type:                types.MapType{ElemType: types.StringType},
 						Optional:            true,
+						Computed:            true,
 					},
 					"new_name": {
 						MarkdownDescription: "",
@@ -188,12 +191,12 @@ func (r *syncResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagno
 					"value": {
 						MarkdownDescription: "",
 						Type:                types.StringType,
-						Required:            true,
+						Optional:            true,
 					},
 					"label": {
 						MarkdownDescription: "",
 						Type:                types.StringType,
-						Required:            true,
+						Optional:            true,
 					},
 				}),
 				Optional: true,
@@ -344,6 +347,14 @@ type syncResourceResourceData struct {
 	SyncAllRecords types.Bool   `tfsdk:"sync_all_records"`
 }
 
+type Filter struct {
+	FieldID   string `json:"field_id" tfsdk:"field_id" mapstructure:"field_id"`
+	FieldType string `json:"field_type" tfsdk:"field_type" mapstructure:"field_type"`
+	Function  string `json:"function" tfsdk:"function" mapstructure:"function"`
+	Value     string `json:"value" tfsdk:"value" mapstructure:"value"`
+	Label     string `json:"label" tfsdk:"label" mapstructure:"label"`
+}
+
 type syncResource struct {
 	client *polytomic.Client
 }
@@ -380,11 +391,33 @@ func (r *syncResource) Create(ctx context.Context, req resource.CreateRequest, r
 		return
 	}
 
-	var filters []polytomic.Filter
+	var filters []Filter
 	diags = data.Filters.ElementsAs(ctx, &filters, true)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
+	}
+
+	var pfilters []polytomic.Filter
+	for _, filter := range filters {
+		f := polytomic.Filter{
+			FieldID:   filter.FieldID,
+			FieldType: filter.FieldType,
+			Function:  filter.Function,
+			Label:     filter.Label,
+		}
+
+		var val interface{}
+		if filter.Value != "" {
+			err := json.Unmarshal([]byte(filter.Value), &val)
+			if err != nil {
+				resp.Diagnostics.AddError("Failed to unmarshal filter value", err.Error())
+				return
+			}
+			f.Value = val
+		}
+		pfilters = append(pfilters, f)
+
 	}
 
 	var overrides []polytomic.Override
@@ -419,7 +452,7 @@ func (r *syncResource) Create(ctx context.Context, req resource.CreateRequest, r
 		Mode:           data.Mode.ValueString(),
 		Fields:         fields,
 		OverrideFields: overrideFields,
-		Filters:        filters,
+		Filters:        pfilters,
 		FilterLogic:    data.FilterLogic.ValueString(),
 		Overrides:      overrides,
 		Schedule:       schedule,
@@ -487,18 +520,7 @@ func (r *syncResource) Create(ctx context.Context, req resource.CreateRequest, r
 		resp.Diagnostics.Append(diags...)
 		return
 	}
-	data.Filters, diags = types.SetValueFrom(ctx, types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"field_id":   types.StringType,
-			"field_type": types.StringType,
-			"function":   types.StringType,
-			"value":      types.StringType,
-			"label":      types.StringType,
-		}}, sync.Filters)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
+
 	if sync.FilterLogic != "" {
 		data.FilterLogic = types.StringValue(sync.FilterLogic)
 	}
@@ -581,10 +603,12 @@ func (r *syncResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 		"new_name":      types.StringType,
 		"filter_logic":  types.StringType,
 	}, sync.Target)
+
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
+
 	data.Mode = types.StringValue(sync.Mode)
 	data.Fields, diags = types.SetValueFrom(ctx, types.ObjectType{
 		AttrTypes: map[string]attr.Type{
@@ -614,18 +638,6 @@ func (r *syncResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 			"override_value": types.StringType,
 			"sync_mode":      types.StringType,
 		}}, sync.OverrideFields)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
-	data.Filters, diags = types.SetValueFrom(ctx, types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"field_id":   types.StringType,
-			"field_type": types.StringType,
-			"function":   types.StringType,
-			"value":      types.StringType,
-			"label":      types.StringType,
-		}}, sync.Filters)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -723,11 +735,33 @@ func (r *syncResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		return
 	}
 
-	var filters []polytomic.Filter
+	var filters []Filter
 	diags = data.Filters.ElementsAs(ctx, &filters, true)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
+	}
+
+	var pfilters []polytomic.Filter
+	for _, filter := range filters {
+		f := polytomic.Filter{
+			FieldID:   filter.FieldID,
+			FieldType: filter.FieldType,
+			Function:  filter.Function,
+			Label:     filter.Label,
+		}
+
+		var val interface{}
+		if filter.Value != "" {
+			err := json.Unmarshal([]byte(filter.Value), &val)
+			if err != nil {
+				resp.Diagnostics.AddError("Failed to unmarshal filter value", err.Error())
+				return
+			}
+			f.Value = val
+		}
+		pfilters = append(pfilters, f)
+
 	}
 
 	var overrides []polytomic.Override
@@ -760,7 +794,7 @@ func (r *syncResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		Mode:           data.Mode.ValueString(),
 		Fields:         fields,
 		OverrideFields: overrideFields,
-		Filters:        filters,
+		Filters:        pfilters,
 		FilterLogic:    data.FilterLogic.ValueString(),
 		Overrides:      overrides,
 		Schedule:       schedule,
@@ -830,18 +864,6 @@ func (r *syncResource) Update(ctx context.Context, req resource.UpdateRequest, r
 			"override_value": types.StringType,
 			"sync_mode":      types.StringType,
 		}}, sync.OverrideFields)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
-	data.Filters, diags = types.SetValueFrom(ctx, types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"field_id":   types.StringType,
-			"field_type": types.StringType,
-			"function":   types.StringType,
-			"value":      types.StringType,
-			"label":      types.StringType,
-		}}, sync.Filters)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return

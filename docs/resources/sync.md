@@ -128,6 +128,9 @@ Required:
 - `field_id` (String)
 - `field_type` (String)
 - `function` (String)
+
+Optional:
+
 - `label` (String)
 - `value` (String)
 
