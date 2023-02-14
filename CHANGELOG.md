@@ -1,3 +1,8 @@
+## 0.3.9 (14 Feb 2023)
+* Fix handling of optional organization ids
+* Handle sync filters
+
+
 ## 0.3.8 (10 Feb 2023)
 * Fix default value for polytomic url in importer
 
