@@ -34,6 +34,7 @@ func (r *bulkSyncResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Di
 				MarkdownDescription: "",
 				Type:                types.StringType,
 				Optional:            true,
+				Computed:            true,
 			},
 			"name": {
 				MarkdownDescription: "",
