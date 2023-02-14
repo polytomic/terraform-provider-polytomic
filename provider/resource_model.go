@@ -86,6 +86,7 @@ func (r *modelResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagn
 					},
 				}},
 				Optional: true,
+				Computed: true,
 			},
 			"relations": {
 				MarkdownDescription: "",
@@ -309,6 +310,20 @@ func (r *modelResource) Create(ctx context.Context, req resource.CreateRequest, 
 		return
 	}
 
+	if additionalFields.IsNull() {
+		additionalFields, diags = types.SetValue(types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				"name":  types.StringType,
+				"type":  types.StringType,
+				"label": types.StringType,
+			},
+		}, nil)
+		if diags.HasError() {
+			resp.Diagnostics.Append(diags...)
+			return
+		}
+	}
+
 	relations, diags := types.SetValueFrom(ctx, types.ObjectType{
 		AttrTypes: map[string]attr.Type{
 			"to": types.ObjectType{
@@ -450,6 +465,20 @@ func (r *modelResource) Read(ctx context.Context, req resource.ReadRequest, resp
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
+	}
+
+	if additionalFields.IsNull() {
+		additionalFields, diags = types.SetValue(types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				"name":  types.StringType,
+				"type":  types.StringType,
+				"label": types.StringType,
+			},
+		}, nil)
+		if diags.HasError() {
+			resp.Diagnostics.Append(diags...)
+			return
+		}
 	}
 
 	relations, diags := types.SetValueFrom(ctx, types.ObjectType{
@@ -640,6 +669,20 @@ func (r *modelResource) Update(ctx context.Context, req resource.UpdateRequest, 
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
+	}
+
+	if additionalFields.IsNull() {
+		additionalFields, diags = types.SetValue(types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				"name":  types.StringType,
+				"type":  types.StringType,
+				"label": types.StringType,
+			},
+		}, nil)
+		if diags.HasError() {
+			resp.Diagnostics.Append(diags...)
+			return
+		}
 	}
 
 	relations, diags := types.SetValueFrom(ctx, types.ObjectType{
