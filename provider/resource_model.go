@@ -101,9 +101,7 @@ func (r *modelResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagn
 					},
 				}},
 				Optional: true,
-				PlanModifiers: []tfsdk.AttributePlanModifier{
-					resource.UseStateForUnknown(),
-				},
+				Computed: true,
 			},
 			"identifier": {
 				MarkdownDescription: "",
@@ -118,6 +116,7 @@ func (r *modelResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagn
 				MarkdownDescription: "",
 				Type:                types.SetType{ElemType: types.StringType},
 				Optional:            true,
+				Computed:            true,
 				PlanModifiers: []tfsdk.AttributePlanModifier{
 					resource.UseStateForUnknown(),
 				},
@@ -326,10 +325,36 @@ func (r *modelResource) Create(ctx context.Context, req resource.CreateRequest, 
 		return
 	}
 
+	if relations.IsNull() {
+		relations, diags = types.SetValue(types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				"to": types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						"model_id": types.StringType,
+						"field":    types.StringType,
+					},
+				},
+				"from": types.StringType,
+			}}, nil)
+
+		if diags.HasError() {
+			resp.Diagnostics.Append(diags...)
+			return
+		}
+	}
+
 	trackingColumns, diags := types.SetValueFrom(ctx, types.StringType, model.TrackingColumns)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
+	}
+
+	if trackingColumns.IsNull() {
+		trackingColumns, diags = types.SetValue(types.StringType, nil)
+		if diags.HasError() {
+			resp.Diagnostics.Append(diags...)
+			return
+		}
 	}
 
 	data.ID = types.StringValue(model.ID)
@@ -443,10 +468,36 @@ func (r *modelResource) Read(ctx context.Context, req resource.ReadRequest, resp
 		return
 	}
 
+	if relations.IsNull() {
+		relations, diags = types.SetValue(types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				"to": types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						"model_id": types.StringType,
+						"field":    types.StringType,
+					},
+				},
+				"from": types.StringType,
+			}}, nil)
+
+		if diags.HasError() {
+			resp.Diagnostics.Append(diags...)
+			return
+		}
+	}
+
 	trackingColumns, diags := types.SetValueFrom(ctx, types.StringType, model.TrackingColumns)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
+	}
+
+	if trackingColumns.IsNull() {
+		trackingColumns, diags = types.SetValue(types.StringType, nil)
+		if diags.HasError() {
+			resp.Diagnostics.Append(diags...)
+			return
+		}
 	}
 
 	data.ID = types.StringValue(model.ID)
@@ -607,10 +658,36 @@ func (r *modelResource) Update(ctx context.Context, req resource.UpdateRequest, 
 		return
 	}
 
+	if relations.IsNull() {
+		relations, diags = types.SetValue(types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				"to": types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						"model_id": types.StringType,
+						"field":    types.StringType,
+					},
+				},
+				"from": types.StringType,
+			}}, nil)
+
+		if diags.HasError() {
+			resp.Diagnostics.Append(diags...)
+			return
+		}
+	}
+
 	trackingColumns, diags := types.SetValueFrom(ctx, types.StringType, model.TrackingColumns)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
+	}
+
+	if trackingColumns.IsNull() {
+		trackingColumns, diags = types.SetValue(types.StringType, nil)
+		if diags.HasError() {
+			resp.Diagnostics.Append(diags...)
+			return
+		}
 	}
 
 	data.ID = types.StringValue(model.ID)
