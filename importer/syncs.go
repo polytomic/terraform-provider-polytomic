@@ -69,7 +69,6 @@ func (s *Syncs) GenerateTerraformFiles(ctx context.Context, writer io.Writer) er
 		if err != nil {
 			return err
 		}
-		// resourceBlock.Body().SetAttributeValue("target", typeConverter(target))
 
 		var res string
 		res += "{\n"
