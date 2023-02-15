@@ -69,7 +69,50 @@ func (s *Syncs) GenerateTerraformFiles(ctx context.Context, writer io.Writer) er
 		if err != nil {
 			return err
 		}
-		resourceBlock.Body().SetAttributeValue("target", typeConverter(target))
+		// resourceBlock.Body().SetAttributeValue("target", typeConverter(target))
+
+		var res string
+		res += "{\n"
+		res += fmt.Sprintf("connection_id = \"%s\"\n", target["connection_id"])
+		if target["object"].(*string) != nil {
+			res += fmt.Sprintf("object = \"%s\"\n", *target["object"].(*string))
+		}
+		if target["new_name"].(*string) != nil {
+			res += fmt.Sprintf("new_name = \"%s\"\n", *target["new_name"].(*string))
+		}
+		if target["filter_logic"].(*string) != nil {
+			res += fmt.Sprintf("filter_logic = \"%s\"\n", *target["filter_logic"].(*string))
+		}
+		if target["search_values"] != nil {
+			var sv string
+			sv += "jsonencode({\n"
+			for k, v := range target["search_values"].(map[string]interface{}) {
+				if v == nil {
+					continue
+				}
+				sv += fmt.Sprintf("\"%s\" = %q\n", k, v)
+			}
+			sv += "})"
+			res += fmt.Sprintf("search_values = %s \n", sv)
+		}
+
+		if target["configuration"] != nil {
+			var conf string
+			conf += "jsonencode({\n"
+			for k, v := range target["configuration"].(map[string]interface{}) {
+				if v == nil {
+					continue
+				}
+				conf += fmt.Sprintf("\"%s\" = %q\n", k, v)
+			}
+			conf += "})"
+			res += fmt.Sprintf("configuration = %s \n", conf)
+		}
+
+		res += "}"
+
+		resourceBlock.Body().SetAttributeRaw("target", hclwrite.Tokens{{Bytes: []byte(res)}})
+
 		if sync.FilterLogic != "" {
 			resourceBlock.Body().SetAttributeValue("filter_logic", cty.StringVal(sync.FilterLogic))
 		}
