@@ -89,7 +89,12 @@ func (s *Syncs) GenerateTerraformFiles(ctx context.Context, writer io.Writer) er
 				if v == nil {
 					continue
 				}
-				sv += fmt.Sprintf("\"%s\" = %q\n", k, v)
+				switch v.(type) {
+				case bool:
+					sv += fmt.Sprintf("\"%s\" = %t\n", k, v)
+				default:
+					sv += fmt.Sprintf("\"%s\" = %q\n", k, v)
+				}
 			}
 			sv += "})"
 			res += fmt.Sprintf("search_values = %s \n", sv)
@@ -102,7 +107,12 @@ func (s *Syncs) GenerateTerraformFiles(ctx context.Context, writer io.Writer) er
 				if v == nil {
 					continue
 				}
-				conf += fmt.Sprintf("\"%s\" = %q\n", k, v)
+				switch v.(type) {
+				case bool:
+					conf += fmt.Sprintf("\"%s\" = %t\n", k, v)
+				default:
+					conf += fmt.Sprintf("\"%s\" = %q\n", k, v)
+				}
 			}
 			conf += "})"
 			res += fmt.Sprintf("configuration = %s \n", conf)
