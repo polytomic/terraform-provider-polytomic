@@ -1,3 +1,6 @@
+## 0.3.10 (15 Feb 2023)
+* Encode sync target configuration as JSON
+
 ## 0.3.9 (14 Feb 2023)
 * Fix handling of optional organization ids
 * Handle sync filters
