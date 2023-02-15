@@ -113,11 +113,11 @@ Required:
 
 Optional:
 
-- `configuration` (Map of String)
+- `configuration` (String)
 - `filter_logic` (String)
 - `new_name` (String)
 - `object` (String)
-- `search_values` (Map of String)
+- `search_values` (String)
 
 
 <a id="nestedatt--filters"></a>
