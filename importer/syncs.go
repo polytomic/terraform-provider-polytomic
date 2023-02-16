@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"strings"
 
 	"github.com/hashicorp/hcl/v2/hclwrite"
 	"github.com/mitchellh/mapstructure"
@@ -69,110 +68,23 @@ func (s *Syncs) GenerateTerraformFiles(ctx context.Context, writer io.Writer) er
 		if err != nil {
 			return err
 		}
-
-		var res string
-		res += "{\n"
-		res += fmt.Sprintf("connection_id = \"%s\"\n", target["connection_id"])
-		if target["object"].(*string) != nil {
-			res += fmt.Sprintf("object = \"%s\"\n", *target["object"].(*string))
-		}
-		if target["new_name"].(*string) != nil {
-			res += fmt.Sprintf("new_name = \"%s\"\n", *target["new_name"].(*string))
-		}
-		if target["filter_logic"].(*string) != nil {
-			res += fmt.Sprintf("filter_logic = \"%s\"\n", *target["filter_logic"].(*string))
-		}
-		if target["search_values"] != nil {
-			var sv string
-			sv += "jsonencode({\n"
-			for k, v := range target["search_values"].(map[string]interface{}) {
-				if v == nil {
-					continue
-				}
-				switch v.(type) {
-				case int:
-					sv += fmt.Sprintf("\"%s\" = %d\n", k, v)
-				case bool:
-					sv += fmt.Sprintf("\"%s\" = %t\n", k, v)
-				case float64, float32:
-					sv += fmt.Sprintf("\"%s\" = %f\n", k, v)
-				default:
-					sv += fmt.Sprintf("\"%s\" = %q\n", k, v)
-				}
-			}
-			sv += "})"
-			res += fmt.Sprintf("search_values = %s \n", sv)
-		}
-
-		if target["configuration"] != nil {
-			var conf string
-			conf += "jsonencode({\n"
-			for k, v := range target["configuration"].(map[string]interface{}) {
-				if v == nil {
-					continue
-				}
-				switch v.(type) {
-				case int:
-					conf += fmt.Sprintf("\"%s\" = %d\n", k, v)
-				case bool:
-					conf += fmt.Sprintf("\"%s\" = %t\n", k, v)
-				case float64, float32:
-					conf += fmt.Sprintf("\"%s\" = %f\n", k, v)
-				default:
-					conf += fmt.Sprintf("\"%s\" = %q\n", k, v)
-				}
-			}
-			conf += "})"
-			res += fmt.Sprintf("configuration = %s \n", conf)
-		}
-
-		res += "}"
-
-		resourceBlock.Body().SetAttributeRaw("target", hclwrite.Tokens{{Bytes: []byte(res)}})
+		tokens := wrapJSONEncode(target, "search_values", "configuration")
+		resourceBlock.Body().SetAttributeRaw("target", tokens)
 
 		if sync.FilterLogic != "" {
 			resourceBlock.Body().SetAttributeValue("filter_logic", cty.StringVal(sync.FilterLogic))
 		}
+
 		if len(sync.Filters) > 0 {
-			var res string
-			res += "["
-			for _, filter := range sync.Filters {
-				if filter.Value != nil {
-					tmpl := `{
-					field_id = "%s"
-					field_type = "%s"
-					function = "%s"
-					value = jsonencode(%s)
-				},`
-
-					var v string
-					switch filter.Value.(type) {
-					case []interface{}:
-						var val []string
-						for _, v := range filter.Value.([]interface{}) {
-							val = append(val, v.(string))
-						}
-						v = fmt.Sprintf(`["%s"]`, strings.Join(val, `","`))
-					default:
-						v = fmt.Sprintf(`"%s"`, filter.Value.(string))
-					}
-					res += fmt.Sprintf(tmpl, filter.FieldID, filter.FieldType, filter.Function, v)
-
-				} else {
-					tmpl := `{
-					field_id = "%s"
-					field_type = "%s"
-					function = "%s"
-				},`
-					res += fmt.Sprintf(tmpl, filter.FieldID, filter.FieldType, filter.Function)
-				}
+			var filters []map[string]interface{}
+			err = mapstructure.Decode(sync.Filters, &filters)
+			if err != nil {
+				return err
 			}
-			res += "]"
-
-			resourceBlock.Body().SetAttributeRaw("filters", hclwrite.Tokens{{
-				Bytes: []byte(res),
-			}})
+			filterTokens := wrapJSONEncode(filters, "value")
+			resourceBlock.Body().SetAttributeRaw("filters", filterTokens)
 		}
+
 		if sync.Identity != nil {
 			var identity map[string]interface{}
 			err = mapstructure.Decode(sync.Identity, &identity)
