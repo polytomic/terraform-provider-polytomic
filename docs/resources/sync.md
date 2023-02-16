@@ -57,7 +57,7 @@ resource "polytomic_sync" "sync" {
 - `identity` (Attributes) (see [below for nested schema](#nestedatt--identity))
 - `organization` (String)
 - `override_fields` (Attributes Set) (see [below for nested schema](#nestedatt--override_fields))
-- `overrides` (Set of Object) (see [below for nested schema](#nestedatt--overrides))
+- `overrides` (Attributes Set) (see [below for nested schema](#nestedatt--overrides))
 - `sync_all_records` (Boolean)
 
 ### Read-Only
@@ -186,10 +186,14 @@ Required:
 <a id="nestedatt--overrides"></a>
 ### Nested Schema for `overrides`
 
-Optional:
+Required:
 
 - `field_id` (String)
 - `function` (String)
+- `override` (String)
+
+Optional:
+
 - `value` (String)
 
 
