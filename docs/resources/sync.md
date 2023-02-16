@@ -31,9 +31,9 @@ resource "polytomic_sync" "sync" {
   target = {
     connection_id = "bbd321bb-abc1-27f3-1111-abcde123a1bb"
     object        = "test"
-    configuration = {
+    configuration = jsonencode({
       "format" = "csv"
-    }
+    })
   }
 
 }
