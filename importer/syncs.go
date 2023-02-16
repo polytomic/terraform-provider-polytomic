@@ -90,8 +90,12 @@ func (s *Syncs) GenerateTerraformFiles(ctx context.Context, writer io.Writer) er
 					continue
 				}
 				switch v.(type) {
+				case int:
+					sv += fmt.Sprintf("\"%s\" = %d\n", k, v)
 				case bool:
 					sv += fmt.Sprintf("\"%s\" = %t\n", k, v)
+				case float64, float32:
+					sv += fmt.Sprintf("\"%s\" = %f\n", k, v)
 				default:
 					sv += fmt.Sprintf("\"%s\" = %q\n", k, v)
 				}
@@ -108,8 +112,12 @@ func (s *Syncs) GenerateTerraformFiles(ctx context.Context, writer io.Writer) er
 					continue
 				}
 				switch v.(type) {
+				case int:
+					conf += fmt.Sprintf("\"%s\" = %d\n", k, v)
 				case bool:
 					conf += fmt.Sprintf("\"%s\" = %t\n", k, v)
+				case float64, float32:
+					conf += fmt.Sprintf("\"%s\" = %f\n", k, v)
 				default:
 					conf += fmt.Sprintf("\"%s\" = %q\n", k, v)
 				}
