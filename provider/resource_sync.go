@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/AlekSi/pointer"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -198,6 +199,7 @@ func (r *syncResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagno
 						MarkdownDescription: "",
 						Type:                types.StringType,
 						Optional:            true,
+						Computed:            true,
 					},
 				}),
 				Optional: true,
@@ -209,13 +211,28 @@ func (r *syncResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagno
 			},
 			"overrides": {
 				MarkdownDescription: "",
-				Type: types.SetType{ElemType: types.ObjectType{
-					AttrTypes: map[string]attr.Type{
-						"field_id": types.StringType,
-						"function": types.StringType,
-						"value":    types.StringType,
-					}},
-				},
+				Attributes: tfsdk.SetNestedAttributes(map[string]tfsdk.Attribute{
+					"field_id": {
+						MarkdownDescription: "",
+						Type:                types.StringType,
+						Required:            true,
+					},
+					"function": {
+						MarkdownDescription: "",
+						Type:                types.StringType,
+						Required:            true,
+					},
+					"value": {
+						MarkdownDescription: "",
+						Type:                types.StringType,
+						Optional:            true,
+					},
+					"override": {
+						MarkdownDescription: "",
+						Type:                types.StringType,
+						Required:            true,
+					},
+				}),
 				Optional: true,
 			},
 			"schedule": {
@@ -349,11 +366,11 @@ type syncResourceResourceData struct {
 }
 
 type Filter struct {
-	FieldID   string `json:"field_id" tfsdk:"field_id" mapstructure:"field_id"`
-	FieldType string `json:"field_type" tfsdk:"field_type" mapstructure:"field_type"`
-	Function  string `json:"function" tfsdk:"function" mapstructure:"function"`
-	Value     string `json:"value" tfsdk:"value" mapstructure:"value"`
-	Label     string `json:"label" tfsdk:"label" mapstructure:"label"`
+	FieldID   string  `json:"field_id" tfsdk:"field_id" mapstructure:"field_id"`
+	FieldType string  `json:"field_type" tfsdk:"field_type" mapstructure:"field_type"`
+	Function  string  `json:"function" tfsdk:"function" mapstructure:"function"`
+	Value     *string `json:"value" tfsdk:"value" mapstructure:"value"`
+	Label     string  `json:"label" tfsdk:"label" mapstructure:"label"`
 }
 
 type Target struct {
@@ -363,6 +380,13 @@ type Target struct {
 	Configuration string  `json:"configuration,omitempty" tfsdk:"configuration" mapstructure:"configuration,omitempty"`
 	NewName       *string `json:"new_name,omitempty" tfsdk:"new_name" mapstructure:"new_name"`
 	FilterLogic   *string `json:"filter_logic,omitempty" tfsdk:"filter_logic" mapstructure:"filter_logic"`
+}
+
+type Override struct {
+	FieldID  string  `json:"field_id" tfsdk:"field_id" mapstructure:"field_id"`
+	Function string  `json:"function" tfsdk:"function" mapstructure:"function"`
+	Value    *string `json:"value" tfsdk:"value" mapstructure:"value"`
+	Override *string `json:"override" tfsdk:"override" mapstructure:"override"`
 }
 
 type syncResource struct {
@@ -449,8 +473,8 @@ func (r *syncResource) Create(ctx context.Context, req resource.CreateRequest, r
 		}
 
 		var val interface{}
-		if filter.Value != "" {
-			err := json.Unmarshal([]byte(filter.Value), &val)
+		if filter.Value != nil {
+			err := json.Unmarshal([]byte(*filter.Value), &val)
 			if err != nil {
 				resp.Diagnostics.AddError("Failed to unmarshal filter value", err.Error())
 				return
@@ -461,11 +485,42 @@ func (r *syncResource) Create(ctx context.Context, req resource.CreateRequest, r
 
 	}
 
-	var overrides []polytomic.Override
+	var overrides []Override
 	diags = data.Overrides.ElementsAs(ctx, &overrides, true)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
+	}
+
+	var poverrides []polytomic.Override
+	for _, override := range overrides {
+		o := polytomic.Override{
+			FieldID:  override.FieldID,
+			Function: override.Function,
+		}
+
+		var val interface{}
+		if override.Value != nil {
+			err := json.Unmarshal([]byte(*override.Value), &val)
+			if err != nil {
+				resp.Diagnostics.AddError("Failed to unmarshal override value", err.Error())
+				return
+			}
+			o.Value = val
+		}
+
+		var ov interface{}
+		if override.Override != nil {
+			err := json.Unmarshal([]byte(*override.Override), &ov)
+			if err != nil {
+				resp.Diagnostics.AddError("Failed to unmarshal override override", err.Error())
+				return
+			}
+			o.Override = ov
+		}
+
+		poverrides = append(poverrides, o)
+
 	}
 
 	var schedule polytomic.Schedule
@@ -495,7 +550,7 @@ func (r *syncResource) Create(ctx context.Context, req resource.CreateRequest, r
 		OverrideFields: overrideFields,
 		Filters:        pfilters,
 		FilterLogic:    data.FilterLogic.ValueString(),
-		Overrides:      overrides,
+		Overrides:      poverrides,
 		Schedule:       schedule,
 		SyncAllRecords: data.SyncAllRecords.ValueBool(),
 	}
@@ -594,16 +649,85 @@ func (r *syncResource) Create(ctx context.Context, req resource.CreateRequest, r
 	if sync.FilterLogic != "" {
 		data.FilterLogic = types.StringValue(sync.FilterLogic)
 	}
+
+	var resFilters []Filter
+	for _, f := range sync.Filters {
+		res := Filter{
+			FieldID:   f.FieldID,
+			Function:  f.Function,
+			FieldType: f.FieldType,
+			Label:     f.Label,
+		}
+		val, err := json.Marshal(f.Value)
+		if err != nil {
+			resp.Diagnostics.AddError("Error marshaling filter value", err.Error())
+			return
+		}
+
+		if string(val) == "null" {
+			res.Value = nil
+		} else {
+			res.Value = pointer.ToString(string(val))
+		}
+		resFilters = append(resFilters, res)
+	}
+
+	data.Filters, diags = types.SetValueFrom(ctx, types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"field_id":   types.StringType,
+			"function":   types.StringType,
+			"field_type": types.StringType,
+			"label":      types.StringType,
+			"value":      types.StringType,
+		}}, resFilters)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
+	var resOverrides []Override
+	for _, o := range sync.Overrides {
+		res := Override{
+			FieldID:  o.FieldID,
+			Function: o.Function,
+		}
+		val, err := json.Marshal(o.Value)
+		if err != nil {
+			resp.Diagnostics.AddError("Error marshaling override value", err.Error())
+			return
+		}
+
+		if string(val) == "null" {
+			res.Value = nil
+		} else {
+			res.Value = pointer.ToString(string(val))
+		}
+		oval, err := json.Marshal(o.Override)
+		if err != nil {
+			resp.Diagnostics.AddError("Error marshaling override override", err.Error())
+			return
+		}
+
+		if string(oval) == "null" {
+			res.Override = nil
+		} else {
+			res.Override = pointer.ToString(string(oval))
+		}
+		resOverrides = append(resOverrides, res)
+	}
+
 	data.Overrides, diags = types.SetValueFrom(ctx, types.ObjectType{
 		AttrTypes: map[string]attr.Type{
 			"field_id": types.StringType,
 			"function": types.StringType,
 			"value":    types.StringType,
-		}}, sync.Overrides)
+			"override": types.StringType,
+		}}, resOverrides)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
+
 	data.Schedule, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"frequency":    types.StringType,
 		"day_of_week":  types.StringType,
@@ -748,16 +872,82 @@ func (r *syncResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 		data.FilterLogic = types.StringNull()
 	}
 
+	var resFilters []Filter
+	for _, f := range sync.Filters {
+		res := Filter{
+			FieldID:   f.FieldID,
+			Function:  f.Function,
+			FieldType: f.FieldType,
+			Label:     f.Label,
+		}
+		val, err := json.Marshal(f.Value)
+		if err != nil {
+			resp.Diagnostics.AddError("Error marshaling filter value", err.Error())
+			return
+		}
+
+		if string(val) == "null" {
+			res.Value = nil
+		} else {
+			res.Value = pointer.ToString(string(val))
+		}
+		resFilters = append(resFilters, res)
+	}
+
+	data.Filters, diags = types.SetValueFrom(ctx, types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"field_id":   types.StringType,
+			"function":   types.StringType,
+			"field_type": types.StringType,
+			"label":      types.StringType,
+			"value":      types.StringType,
+		}}, resFilters)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
+	var resOverrides []Override
+	for _, o := range sync.Overrides {
+		res := Override{
+			FieldID:  o.FieldID,
+			Function: o.Function,
+		}
+		val, err := json.Marshal(o.Value)
+		if err != nil {
+			resp.Diagnostics.AddError("Error marshaling override value", err.Error())
+			return
+		}
+		if string(val) == "null" {
+			res.Value = nil
+		} else {
+			res.Value = pointer.ToString(string(val))
+		}
+		oval, err := json.Marshal(o.Override)
+		if err != nil {
+			resp.Diagnostics.AddError("Error marshaling override override", err.Error())
+			return
+		}
+		if string(oval) == "null" {
+			res.Override = nil
+		} else {
+			res.Override = pointer.ToString(string(oval))
+		}
+		resOverrides = append(resOverrides, res)
+	}
+
 	data.Overrides, diags = types.SetValueFrom(ctx, types.ObjectType{
 		AttrTypes: map[string]attr.Type{
 			"field_id": types.StringType,
 			"function": types.StringType,
 			"value":    types.StringType,
-		}}, sync.Overrides)
+			"override": types.StringType,
+		}}, resOverrides)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
+
 	data.Schedule, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"frequency":    types.StringType,
 		"day_of_week":  types.StringType,
@@ -880,8 +1070,8 @@ func (r *syncResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		}
 
 		var val interface{}
-		if filter.Value != "" {
-			err := json.Unmarshal([]byte(filter.Value), &val)
+		if filter.Value != nil {
+			err := json.Unmarshal([]byte(*filter.Value), &val)
 			if err != nil {
 				resp.Diagnostics.AddError("Failed to unmarshal filter value", err.Error())
 				return
@@ -892,11 +1082,42 @@ func (r *syncResource) Update(ctx context.Context, req resource.UpdateRequest, r
 
 	}
 
-	var overrides []polytomic.Override
+	var overrides []Override
 	diags = data.Overrides.ElementsAs(ctx, &overrides, true)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
+	}
+
+	var poverrides []polytomic.Override
+	for _, override := range overrides {
+		o := polytomic.Override{
+			FieldID:  override.FieldID,
+			Function: override.Function,
+		}
+
+		var val interface{}
+		if override.Value != nil {
+			err := json.Unmarshal([]byte(*override.Value), &val)
+			if err != nil {
+				resp.Diagnostics.AddError("Failed to unmarshal override value", err.Error())
+				return
+			}
+			o.Value = val
+		}
+
+		var ov interface{}
+		if override.Override != nil {
+			err := json.Unmarshal([]byte(*override.Override), &ov)
+			if err != nil {
+				resp.Diagnostics.AddError("Failed to unmarshal override override", err.Error())
+				return
+			}
+			o.Override = ov
+		}
+
+		poverrides = append(poverrides, o)
+
 	}
 
 	var schedule polytomic.Schedule
@@ -924,7 +1145,7 @@ func (r *syncResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		OverrideFields: overrideFields,
 		Filters:        pfilters,
 		FilterLogic:    data.FilterLogic.ValueString(),
-		Overrides:      overrides,
+		Overrides:      poverrides,
 		Schedule:       schedule,
 		Identity:       identity,
 		SyncAllRecords: data.SyncAllRecords.ValueBool(),
@@ -1022,16 +1243,83 @@ func (r *syncResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		data.FilterLogic = types.StringValue(sync.FilterLogic)
 	}
 
+	var resFilters []Filter
+	for _, f := range sync.Filters {
+		res := Filter{
+			FieldID:   f.FieldID,
+			Function:  f.Function,
+			FieldType: f.FieldType,
+			Label:     f.Label,
+		}
+		val, err := json.Marshal(f.Value)
+		if err != nil {
+			resp.Diagnostics.AddError("Error marshaling filter value", err.Error())
+			return
+		}
+
+		if string(val) == "null" {
+			res.Value = nil
+		} else {
+			res.Value = pointer.ToString(string(val))
+		}
+		resFilters = append(resFilters, res)
+	}
+
+	data.Filters, diags = types.SetValueFrom(ctx, types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"field_id":   types.StringType,
+			"function":   types.StringType,
+			"field_type": types.StringType,
+			"label":      types.StringType,
+			"value":      types.StringType,
+		}}, resFilters)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
+	var resOverrides []Override
+	for _, o := range sync.Overrides {
+		res := Override{
+			FieldID:  o.FieldID,
+			Function: o.Function,
+		}
+		val, err := json.Marshal(o.Value)
+		if err != nil {
+			resp.Diagnostics.AddError("Error marshaling override value", err.Error())
+			return
+		}
+
+		if string(val) == "null" {
+			res.Value = nil
+		} else {
+			res.Value = pointer.ToString(string(val))
+		}
+		oval, err := json.Marshal(o.Override)
+		if err != nil {
+			resp.Diagnostics.AddError("Error marshaling override override", err.Error())
+			return
+		}
+
+		if string(oval) == "null" {
+			res.Override = nil
+		} else {
+			res.Override = pointer.ToString(string(oval))
+		}
+		resOverrides = append(resOverrides, res)
+	}
 	data.Overrides, diags = types.SetValueFrom(ctx, types.ObjectType{
 		AttrTypes: map[string]attr.Type{
 			"field_id": types.StringType,
 			"function": types.StringType,
 			"value":    types.StringType,
-		}}, sync.Overrides)
+			"override": types.StringType,
+		}}, resOverrides)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
+
 	data.Schedule, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"frequency":    types.StringType,
 		"day_of_week":  types.StringType,

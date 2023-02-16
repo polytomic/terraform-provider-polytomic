@@ -31,9 +31,9 @@ resource "polytomic_sync" "sync" {
   target = {
     connection_id = "bbd321bb-abc1-27f3-1111-abcde123a1bb"
     object        = "test"
-    configuration = {
+    configuration = jsonencode({
       "format" = "csv"
-    }
+    })
   }
 
 }
@@ -57,7 +57,7 @@ resource "polytomic_sync" "sync" {
 - `identity` (Attributes) (see [below for nested schema](#nestedatt--identity))
 - `organization` (String)
 - `override_fields` (Attributes Set) (see [below for nested schema](#nestedatt--override_fields))
-- `overrides` (Set of Object) (see [below for nested schema](#nestedatt--overrides))
+- `overrides` (Attributes Set) (see [below for nested schema](#nestedatt--overrides))
 - `sync_all_records` (Boolean)
 
 ### Read-Only
@@ -186,10 +186,14 @@ Required:
 <a id="nestedatt--overrides"></a>
 ### Nested Schema for `overrides`
 
-Optional:
+Required:
 
 - `field_id` (String)
 - `function` (String)
+- `override` (String)
+
+Optional:
+
 - `value` (String)
 
 

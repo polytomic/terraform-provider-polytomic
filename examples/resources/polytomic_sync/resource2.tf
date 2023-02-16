@@ -18,10 +18,10 @@ resource "polytomic_sync" "sync2" {
   target = {
     connection_id = "19962644-780b-11ed-aeca-ea7534cffcab"
     object        = "__pt_new_target"
-    search_values = {
+    search_values = jsonencode({
       "dataset" = "awesome"
       "table"   = "new_table"
-    }
+    })
     new_name = "awesome.table"
   }
   identity = {

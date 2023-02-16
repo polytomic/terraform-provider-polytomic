@@ -3,6 +3,7 @@ module github.com/polytomic/terraform-provider-polytomic
 go 1.18
 
 require (
+	github.com/AlekSi/pointer v1.2.0
 	github.com/fbreckle/terraform-plugin-docs v0.0.0-20220812121758-a828466500d3
 	github.com/google/uuid v1.3.0
 	github.com/hashicorp/hcl/v2 v2.16.1
@@ -11,7 +12,7 @@ require (
 	github.com/hashicorp/terraform-plugin-log v0.8.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.25.0
 	github.com/mitchellh/mapstructure v1.5.0
-	github.com/polytomic/polytomic-go v0.0.0-20230215205934-748d77025103
+	github.com/polytomic/polytomic-go v0.0.0-20230216150925-64dd1b654b5c
 	github.com/rs/zerolog v1.29.0
 	github.com/spf13/cobra v1.6.1
 	github.com/spf13/viper v1.15.0
