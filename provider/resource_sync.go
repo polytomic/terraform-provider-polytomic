@@ -199,6 +199,7 @@ func (r *syncResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagno
 						MarkdownDescription: "",
 						Type:                types.StringType,
 						Optional:            true,
+						Computed:            true,
 					},
 				}),
 				Optional: true,
@@ -365,11 +366,11 @@ type syncResourceResourceData struct {
 }
 
 type Filter struct {
-	FieldID   string `json:"field_id" tfsdk:"field_id" mapstructure:"field_id"`
-	FieldType string `json:"field_type" tfsdk:"field_type" mapstructure:"field_type"`
-	Function  string `json:"function" tfsdk:"function" mapstructure:"function"`
-	Value     string `json:"value" tfsdk:"value" mapstructure:"value"`
-	Label     string `json:"label" tfsdk:"label" mapstructure:"label"`
+	FieldID   string  `json:"field_id" tfsdk:"field_id" mapstructure:"field_id"`
+	FieldType string  `json:"field_type" tfsdk:"field_type" mapstructure:"field_type"`
+	Function  string  `json:"function" tfsdk:"function" mapstructure:"function"`
+	Value     *string `json:"value" tfsdk:"value" mapstructure:"value"`
+	Label     string  `json:"label" tfsdk:"label" mapstructure:"label"`
 }
 
 type Target struct {
@@ -472,8 +473,8 @@ func (r *syncResource) Create(ctx context.Context, req resource.CreateRequest, r
 		}
 
 		var val interface{}
-		if filter.Value != "" {
-			err := json.Unmarshal([]byte(filter.Value), &val)
+		if filter.Value != nil {
+			err := json.Unmarshal([]byte(*filter.Value), &val)
 			if err != nil {
 				resp.Diagnostics.AddError("Failed to unmarshal filter value", err.Error())
 				return
@@ -647,6 +648,41 @@ func (r *syncResource) Create(ctx context.Context, req resource.CreateRequest, r
 
 	if sync.FilterLogic != "" {
 		data.FilterLogic = types.StringValue(sync.FilterLogic)
+	}
+
+	var resFilters []Filter
+	for _, f := range sync.Filters {
+		res := Filter{
+			FieldID:   f.FieldID,
+			Function:  f.Function,
+			FieldType: f.FieldType,
+			Label:     f.Label,
+		}
+		val, err := json.Marshal(f.Value)
+		if err != nil {
+			resp.Diagnostics.AddError("Error marshaling filter value", err.Error())
+			return
+		}
+
+		if string(val) == "null" {
+			res.Value = nil
+		} else {
+			res.Value = pointer.ToString(string(val))
+		}
+		resFilters = append(resFilters, res)
+	}
+
+	data.Filters, diags = types.SetValueFrom(ctx, types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"field_id":   types.StringType,
+			"function":   types.StringType,
+			"field_type": types.StringType,
+			"label":      types.StringType,
+			"value":      types.StringType,
+		}}, resFilters)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
 	}
 
 	var resOverrides []Override
@@ -836,6 +872,41 @@ func (r *syncResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 		data.FilterLogic = types.StringNull()
 	}
 
+	var resFilters []Filter
+	for _, f := range sync.Filters {
+		res := Filter{
+			FieldID:   f.FieldID,
+			Function:  f.Function,
+			FieldType: f.FieldType,
+			Label:     f.Label,
+		}
+		val, err := json.Marshal(f.Value)
+		if err != nil {
+			resp.Diagnostics.AddError("Error marshaling filter value", err.Error())
+			return
+		}
+
+		if string(val) == "null" {
+			res.Value = nil
+		} else {
+			res.Value = pointer.ToString(string(val))
+		}
+		resFilters = append(resFilters, res)
+	}
+
+	data.Filters, diags = types.SetValueFrom(ctx, types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"field_id":   types.StringType,
+			"function":   types.StringType,
+			"field_type": types.StringType,
+			"label":      types.StringType,
+			"value":      types.StringType,
+		}}, resFilters)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
 	var resOverrides []Override
 	for _, o := range sync.Overrides {
 		res := Override{
@@ -999,8 +1070,8 @@ func (r *syncResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		}
 
 		var val interface{}
-		if filter.Value != "" {
-			err := json.Unmarshal([]byte(filter.Value), &val)
+		if filter.Value != nil {
+			err := json.Unmarshal([]byte(*filter.Value), &val)
 			if err != nil {
 				resp.Diagnostics.AddError("Failed to unmarshal filter value", err.Error())
 				return
@@ -1170,6 +1241,41 @@ func (r *syncResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		data.FilterLogic = configuration.FilterLogic
 	} else {
 		data.FilterLogic = types.StringValue(sync.FilterLogic)
+	}
+
+	var resFilters []Filter
+	for _, f := range sync.Filters {
+		res := Filter{
+			FieldID:   f.FieldID,
+			Function:  f.Function,
+			FieldType: f.FieldType,
+			Label:     f.Label,
+		}
+		val, err := json.Marshal(f.Value)
+		if err != nil {
+			resp.Diagnostics.AddError("Error marshaling filter value", err.Error())
+			return
+		}
+
+		if string(val) == "null" {
+			res.Value = nil
+		} else {
+			res.Value = pointer.ToString(string(val))
+		}
+		resFilters = append(resFilters, res)
+	}
+
+	data.Filters, diags = types.SetValueFrom(ctx, types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"field_id":   types.StringType,
+			"function":   types.StringType,
+			"field_type": types.StringType,
+			"label":      types.StringType,
+			"value":      types.StringType,
+		}}, resFilters)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
 	}
 
 	var resOverrides []Override
