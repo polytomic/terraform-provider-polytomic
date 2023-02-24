@@ -745,3 +745,128 @@ connections:
         required: true
         sensitive: true
         example: my-api-key
+  - connection: bingads
+    name: Bing Ads
+    type: polytomic.BingAdsConnectionType
+    config: polytomic.BingAdsConnectionConfiguration
+    datasource: true
+    attributes: []
+  - connection: iterable
+    name: Iterable
+    type: polytomic.IterableConnectionType
+    config: polytomic.IterableConnectionConfiguration
+    datasource: true
+    attributes:
+      - name: APIKey
+        type: string
+        required: true
+        sensitive: true
+        example: my-api-key
+  - connection: shipbob
+    name: ShipBob
+    type: polytomic.ShipBobConnectionType
+    config: polytomic.ShipBobConnectionConfiguration
+    datasource: true
+    attributes: []
+  - connection: shopify
+    name: Shopify
+    type: polytomic.ShopifyConnectionType
+    config: polytomic.ShopifyConnectionConfiguration
+    datasource: true
+    attributes:
+      - name: Store
+        type: string
+        required: true
+        example: my-store
+  - connection: smartsheet
+    name: Smartsheet
+    type: polytomic.SmartSheetConnectionType
+    config: polytomic.SmartSheetConnectionConfiguration
+    datasource: true
+    attributes: []
+  - connection: survicate
+    name: Survicate
+    type: polytomic.SurvicateConnectionType
+    config: polytomic.SurvicateConnectionConfiguration
+    datasource: true
+    resource: true
+    attributes:
+      - name: APIKey
+        type: string
+        required: true
+        sensitive: true
+        example: my-api-key
+  - connection: synapse
+    name: Synapse
+    type: polytomic.SynapseConnectionType
+    config: polytomic.SynapseConnectionConfiguration
+    resource: true
+    datasource: true
+    attributes:
+      - name: Hostname
+        type: string
+        required: true
+        sensitive: false
+        example: host.example.com
+      - name: Username
+        type: string
+        required: true
+        sensitive: false
+        example: user
+      - name: Password
+        type: string
+        required: true
+        sensitive: true
+        example: password
+      - name: Database
+        type: string
+        required: true
+        sensitive: false
+        example: database
+      - name: Port
+        type: int
+        required: true
+        sensitive: false
+        example: 5439
+  - connection: uservoice
+    name: UserVoice
+    type: polytomic.UserVoiceConnectionType
+    config: polytomic.UserVoiceConnectionConfiguration
+    resource: true
+    datasource: true
+    attributes:
+      - name: APIKey
+        type: string
+        required: true
+        sensitive: true
+        example: my-api-key
+      - name: Domain
+        type: string
+        required: true
+        example: example.com
+  - connection: vanilla
+    name: Vanilla Forums
+    type: polytomic.VanillaConnectionType
+    config: polytomic.VanillaConnectionConfiguration
+    datasource: true
+    resource: true
+    attributes:
+      - name: APIKey
+        type: string
+        required: true
+        sensitive: true
+        example: my-api-key
+      - name: Domain
+        type: string
+        required: true
+        example: example.com
+  - connection: zendesk
+    name: Zendesk
+    type: polytomic.ZendeskConnectionType
+    config: polytomic.ZendeskConnectionConfiguration
+    datasource: true
+    attributes:
+      - name: Domain
+        type: string
+        required: true
+        example: example.zendesk.com

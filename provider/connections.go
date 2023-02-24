@@ -41,6 +41,10 @@ var (
 		func() resource.Resource { return &RedshiftConnectionResource{} },
 		func() resource.Resource { return &SegmentConnectionResource{} },
 		func() resource.Resource { return &StripeConnectionResource{} },
+		func() resource.Resource { return &SurvicateConnectionResource{} },
+		func() resource.Resource { return &SynapseConnectionResource{} },
+		func() resource.Resource { return &UservoiceConnectionResource{} },
+		func() resource.Resource { return &VanillaConnectionResource{} },
 	}
 
 	connectionDatasources = []func() datasource.DataSource{
@@ -79,6 +83,16 @@ var (
 		func() datasource.DataSource { return &RedshiftConnectionDataSource{} },
 		func() datasource.DataSource { return &SegmentConnectionDataSource{} },
 		func() datasource.DataSource { return &StripeConnectionDataSource{} },
+		func() datasource.DataSource { return &BingadsConnectionDataSource{} },
+		func() datasource.DataSource { return &IterableConnectionDataSource{} },
+		func() datasource.DataSource { return &ShipbobConnectionDataSource{} },
+		func() datasource.DataSource { return &ShopifyConnectionDataSource{} },
+		func() datasource.DataSource { return &SmartsheetConnectionDataSource{} },
+		func() datasource.DataSource { return &SurvicateConnectionDataSource{} },
+		func() datasource.DataSource { return &SynapseConnectionDataSource{} },
+		func() datasource.DataSource { return &UservoiceConnectionDataSource{} },
+		func() datasource.DataSource { return &VanillaConnectionDataSource{} },
+		func() datasource.DataSource { return &ZendeskConnectionDataSource{} },
 	}
 
 	connectionImportableResources = map[string]resource.Resource{
@@ -113,6 +127,10 @@ var (
 		"redshift":   &RedshiftConnectionResource{},
 		"segment":    &SegmentConnectionResource{},
 		"stripe":     &StripeConnectionResource{},
+		"survicate":  &SurvicateConnectionResource{},
+		"synapse":    &SynapseConnectionResource{},
+		"uservoice":  &UservoiceConnectionResource{},
+		"vanilla":    &VanillaConnectionResource{},
 	}
 
 	connectionImportableDatasources = map[string]datasource.DataSource{
@@ -151,5 +169,15 @@ var (
 		"redshift":   &RedshiftConnectionDataSource{},
 		"segment":    &SegmentConnectionDataSource{},
 		"stripe":     &StripeConnectionDataSource{},
+		"bingads":    &BingadsConnectionDataSource{},
+		"iterable":   &IterableConnectionDataSource{},
+		"shipbob":    &ShipbobConnectionDataSource{},
+		"shopify":    &ShopifyConnectionDataSource{},
+		"smartsheet": &SmartsheetConnectionDataSource{},
+		"survicate":  &SurvicateConnectionDataSource{},
+		"synapse":    &SynapseConnectionDataSource{},
+		"uservoice":  &UservoiceConnectionDataSource{},
+		"vanilla":    &VanillaConnectionDataSource{},
+		"zendesk":    &ZendeskConnectionDataSource{},
 	}
 )
