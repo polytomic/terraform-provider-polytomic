@@ -319,12 +319,6 @@ connections:
         required: true
         sensitive: true
         example: my-secret-key
-  # - connection: csv
-  #   name: CSV
-  #   type: polytomic.CSVConnectionType
-  #   config: polytomic.CSVConfiguration
-  #   datasource: true
-  #   resource: true
   - connection: marketo
     name: Marketo
     type: polytomic.MarketoConnectionType

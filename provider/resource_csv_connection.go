@@ -19,12 +19,12 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
-var _ resource.Resource = &APIConnectionResource{}
-var _ resource.ResourceWithImportState = &APIConnectionResource{}
+var _ resource.Resource = &CSVConnectionResource{}
+var _ resource.ResourceWithImportState = &CSVConnectionResource{}
 
-func (t *APIConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
+func (t *CSVConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: ":meta:subcategory:Connections: API Connection",
+		MarkdownDescription: ":meta:subcategory:Connections: CSV Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"organization": {
 				MarkdownDescription: "Organization ID",
@@ -37,12 +37,13 @@ func (t *APIConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, di
 				Required: true,
 			},
 			"configuration": {
-				Required: true,
 				Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
 					"url": {
 						MarkdownDescription: "",
 						Type:                types.StringType,
 						Required:            true,
+						Optional:            false,
+						Sensitive:           false,
 					},
 					"headers": {
 						MarkdownDescription: "",
@@ -64,11 +65,6 @@ func (t *APIConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, di
 								}},
 						},
 						Optional: true,
-					},
-					"healthcheck": {
-						MarkdownDescription: "",
-						Type:                types.StringType,
-						Optional:            true,
 					},
 					"auth": {
 						Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
@@ -124,11 +120,12 @@ func (t *APIConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, di
 							}}),
 						Optional: true,
 					},
-				},
-				)},
+				}),
+				Required: true,
+			},
 			"id": {
 				Computed:            true,
-				MarkdownDescription: "API Connection identifier",
+				MarkdownDescription: "Google Cloud Storage Connection identifier",
 				PlanModifiers: tfsdk.AttributePlanModifiers{
 					resource.UseStateForUnknown(),
 				},
@@ -138,15 +135,15 @@ func (t *APIConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, di
 	}, nil
 }
 
-func (r *APIConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_api_connection"
+func (r *CSVConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_csv_connection"
 }
 
-type APIConnectionResource struct {
+type CSVConnectionResource struct {
 	client *polytomic.Client
 }
 
-func (r *APIConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *CSVConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data connectionData
 
 	diags := req.Config.Get(ctx, &data)
@@ -184,14 +181,13 @@ func (r *APIConnectionResource) Create(ctx context.Context, req resource.CreateR
 	created, err := r.client.Connections().Create(ctx,
 		polytomic.CreateConnectionMutation{
 			Name:           data.Name.ValueString(),
-			Type:           polytomic.APIConnectionType,
+			Type:           polytomic.CsvConnectionType,
 			OrganizationId: data.Organization.ValueString(),
-			Configuration: polytomic.APIConnectionConfiguration{
-				URL:         data.Configuration.Attributes()["url"].(types.String).ValueString(),
-				Headers:     headers,
-				Parameters:  params,
-				Healthcheck: data.Configuration.Attributes()["healthcheck"].(types.String).ValueString(),
-				Auth:        auth,
+			Configuration: polytomic.CSVConnectionConfiguration{
+				URL:                   data.Configuration.Attributes()["url"].(types.String).ValueString(),
+				Headers:               headers,
+				QueryStringParameters: params,
+				Auth:                  auth,
 			},
 		},
 	)
@@ -203,13 +199,13 @@ func (r *APIConnectionResource) Create(ctx context.Context, req resource.CreateR
 	data.Name = types.StringValue(created.Name)
 	data.Organization = types.StringValue(created.OrganizationId)
 
-	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "API", "id": created.ID})
+	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "CSV", "id": created.ID})
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r *APIConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *CSVConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data connectionData
 
 	diags := req.State.Get(ctx, &data)
@@ -248,7 +244,7 @@ func (r *APIConnectionResource) Read(ctx context.Context, req resource.ReadReque
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r *APIConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *CSVConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var data connectionData
 
 	diags := req.Plan.Get(ctx, &data)
@@ -288,12 +284,11 @@ func (r *APIConnectionResource) Update(ctx context.Context, req resource.UpdateR
 		polytomic.UpdateConnectionMutation{
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueString(),
-			Configuration: polytomic.APIConnectionConfiguration{
-				URL:         data.Configuration.Attributes()["url"].(types.String).ValueString(),
-				Headers:     headers,
-				Parameters:  params,
-				Healthcheck: data.Configuration.Attributes()["healthcheck"].(types.String).ValueString(),
-				Auth:        auth,
+			Configuration: polytomic.CSVConnectionConfiguration{
+				URL:                   data.Configuration.Attributes()["url"].(types.String).ValueString(),
+				Headers:               headers,
+				QueryStringParameters: params,
+				Auth:                  auth,
 			},
 		},
 	)
@@ -310,7 +305,7 @@ func (r *APIConnectionResource) Update(ctx context.Context, req resource.UpdateR
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r *APIConnectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *CSVConnectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var data connectionData
 
 	diags := req.State.Get(ctx, &data)
@@ -327,11 +322,11 @@ func (r *APIConnectionResource) Delete(ctx context.Context, req resource.DeleteR
 	}
 }
 
-func (r *APIConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *CSVConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
 
-func (r *APIConnectionResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *CSVConnectionResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return

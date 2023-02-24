@@ -126,6 +126,8 @@ func (p *ptProvider) Resources(ctx context.Context) []func() resource.Resource {
 		func() resource.Resource { return &bulkSyncSchemaResource{} },
 		func() resource.Resource { return &syncResource{} },
 		func() resource.Resource { return &APIConnectionResource{} },
+		func() resource.Resource { return &CSVConnectionResource{} },
+		func() resource.Resource { return &WebhookConnectionResource{} },
 	}
 	all := append(connectionResources, resourceList...)
 	return all

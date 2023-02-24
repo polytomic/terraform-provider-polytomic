@@ -19,12 +19,12 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
-var _ resource.Resource = &APIConnectionResource{}
-var _ resource.ResourceWithImportState = &APIConnectionResource{}
+var _ resource.Resource = &WebhookConnectionResource{}
+var _ resource.ResourceWithImportState = &WebhookConnectionResource{}
 
-func (t *APIConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
+func (t *WebhookConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: ":meta:subcategory:Connections: API Connection",
+		MarkdownDescription: ":meta:subcategory:Connections: Webhook Connection",
 		Attributes: map[string]tfsdk.Attribute{
 			"organization": {
 				MarkdownDescription: "Organization ID",
@@ -37,12 +37,13 @@ func (t *APIConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, di
 				Required: true,
 			},
 			"configuration": {
-				Required: true,
 				Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
 					"url": {
 						MarkdownDescription: "",
 						Type:                types.StringType,
 						Required:            true,
+						Optional:            false,
+						Sensitive:           false,
 					},
 					"headers": {
 						MarkdownDescription: "",
@@ -54,81 +55,18 @@ func (t *APIConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, di
 						}},
 						Optional: true,
 					},
-					"parameters": {
-						MarkdownDescription: "",
-						Type: types.SetType{
-							ElemType: types.ObjectType{
-								AttrTypes: map[string]attr.Type{
-									"name":  types.StringType,
-									"value": types.StringType,
-								}},
-						},
-						Optional: true,
-					},
-					"healthcheck": {
+					"secret": {
 						MarkdownDescription: "",
 						Type:                types.StringType,
-						Optional:            true,
+						Sensitive:           true,
+						Computed:            true,
 					},
-					"auth": {
-						Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
-							"basic": {
-								Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
-									"username": {
-										Type:     types.StringType,
-										Optional: true,
-									},
-									"password": {
-										Type:      types.StringType,
-										Optional:  true,
-										Sensitive: true,
-									},
-								}),
-								Optional: true,
-							},
-							"header": {
-								Type: types.ObjectType{
-									AttrTypes: map[string]attr.Type{
-										"name":  types.StringType,
-										"value": types.StringType,
-									}},
-								Optional: true,
-							},
-							"oauth": {
-								Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
-									"client_id": {
-										Type:     types.StringType,
-										Optional: true,
-									},
-									"client_secret": {
-										Type:      types.StringType,
-										Optional:  true,
-										Sensitive: true,
-									},
-									"token_endpoint": {
-										Type:     types.StringType,
-										Optional: true,
-									},
-									"extra_form_data": {
-										Type: types.SetType{
-											ElemType: types.ObjectType{
-												AttrTypes: map[string]attr.Type{
-													"name":  types.StringType,
-													"value": types.StringType,
-												}},
-										},
-										Optional: true,
-									},
-								}),
-								Optional: true,
-							}}),
-						Optional: true,
-					},
-				},
-				)},
+				}),
+				Required: true,
+			},
 			"id": {
 				Computed:            true,
-				MarkdownDescription: "API Connection identifier",
+				MarkdownDescription: "Google Cloud Storage Connection identifier",
 				PlanModifiers: tfsdk.AttributePlanModifiers{
 					resource.UseStateForUnknown(),
 				},
@@ -138,15 +76,15 @@ func (t *APIConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, di
 	}, nil
 }
 
-func (r *APIConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_api_connection"
+func (r *WebhookConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_webhook_connection"
 }
 
-type APIConnectionResource struct {
+type WebhookConnectionResource struct {
 	client *polytomic.Client
 }
 
-func (r *APIConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *WebhookConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data connectionData
 
 	diags := req.Config.Get(ctx, &data)
@@ -165,33 +103,14 @@ func (r *APIConnectionResource) Create(ctx context.Context, req resource.CreateR
 		}
 	}
 
-	var params []polytomic.RequestParameter
-	if data.Configuration.Attributes()["parameters"] != nil {
-		diags = data.Configuration.Attributes()["parameters"].(types.Set).ElementsAs(ctx, &params, true)
-		if diags.HasError() {
-			resp.Diagnostics.Append(diags...)
-			return
-		}
-	}
-
-	var auth polytomic.Auth
-	diags = data.Configuration.Attributes()["auth"].(types.Object).As(ctx, &auth, types.ObjectAsOptions{UnhandledNullAsEmpty: true})
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
-
 	created, err := r.client.Connections().Create(ctx,
 		polytomic.CreateConnectionMutation{
 			Name:           data.Name.ValueString(),
-			Type:           polytomic.APIConnectionType,
+			Type:           polytomic.WebhookConnectionType,
 			OrganizationId: data.Organization.ValueString(),
-			Configuration: polytomic.APIConnectionConfiguration{
-				URL:         data.Configuration.Attributes()["url"].(types.String).ValueString(),
-				Headers:     headers,
-				Parameters:  params,
-				Healthcheck: data.Configuration.Attributes()["healthcheck"].(types.String).ValueString(),
-				Auth:        auth,
+			Configuration: polytomic.WebhookConnectionConfiguration{
+				URL:     data.Configuration.Attributes()["url"].(types.String).ValueString(),
+				Headers: headers,
 			},
 		},
 	)
@@ -203,13 +122,13 @@ func (r *APIConnectionResource) Create(ctx context.Context, req resource.CreateR
 	data.Name = types.StringValue(created.Name)
 	data.Organization = types.StringValue(created.OrganizationId)
 
-	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "API", "id": created.ID})
+	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Webhook", "id": created.ID})
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r *APIConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *WebhookConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data connectionData
 
 	diags := req.State.Get(ctx, &data)
@@ -248,7 +167,7 @@ func (r *APIConnectionResource) Read(ctx context.Context, req resource.ReadReque
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r *APIConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *WebhookConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var data connectionData
 
 	diags := req.Plan.Get(ctx, &data)
@@ -267,33 +186,14 @@ func (r *APIConnectionResource) Update(ctx context.Context, req resource.UpdateR
 		}
 	}
 
-	var params []polytomic.RequestParameter
-	if data.Configuration.Attributes()["parameters"] != nil {
-		diags = data.Configuration.Attributes()["parameters"].(types.Set).ElementsAs(ctx, &params, true)
-		if diags.HasError() {
-			resp.Diagnostics.Append(diags...)
-			return
-		}
-	}
-
-	var auth polytomic.Auth
-	diags = data.Configuration.Attributes()["auth"].(types.Object).As(ctx, &auth, types.ObjectAsOptions{UnhandledNullAsEmpty: true})
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
-
 	updated, err := r.client.Connections().Update(ctx,
 		uuid.MustParse(data.Id.ValueString()),
 		polytomic.UpdateConnectionMutation{
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueString(),
-			Configuration: polytomic.APIConnectionConfiguration{
-				URL:         data.Configuration.Attributes()["url"].(types.String).ValueString(),
-				Headers:     headers,
-				Parameters:  params,
-				Healthcheck: data.Configuration.Attributes()["healthcheck"].(types.String).ValueString(),
-				Auth:        auth,
+			Configuration: polytomic.WebhookConnectionConfiguration{
+				URL:     data.Configuration.Attributes()["url"].(types.String).ValueString(),
+				Headers: headers,
 			},
 		},
 	)
@@ -310,7 +210,7 @@ func (r *APIConnectionResource) Update(ctx context.Context, req resource.UpdateR
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r *APIConnectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *WebhookConnectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var data connectionData
 
 	diags := req.State.Get(ctx, &data)
@@ -327,11 +227,11 @@ func (r *APIConnectionResource) Delete(ctx context.Context, req resource.DeleteR
 	}
 }
 
-func (r *APIConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *WebhookConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
 
-func (r *APIConnectionResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *WebhookConnectionResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
