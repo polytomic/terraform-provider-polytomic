@@ -1,3 +1,9 @@
+
+## 0.3.11 (24 Feb 2023)
+ * Add bingads, csv, iterable, shipbob, shopify, smartsheet, survicate, synapse, uservoice, vanilla, webhook, and zendesk connections
+ * Fix error updating api connections
+ * Ensure importer import.sh ordering is deterministic
+
 ## 0.3.10 (15 Feb 2023)
 * Encode sync target configuration as JSON
 
