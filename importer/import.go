@@ -28,12 +28,12 @@ func Init(url, key, path string, recreate bool) {
 	ctx := context.Background()
 	c := polytomic.NewClient(url, polytomic.APIKey(key))
 
-	importables := map[string]Importable{
-		"main":        NewMain(),
-		"connections": NewConnections(c),
-		"models":      NewModels(c),
-		"bulk_syncs":  NewBulkSyncs(c),
-		"syncs":       NewSyncs(c),
+	importables := []Importable{
+		NewMain(),
+		NewConnections(c),
+		NewModels(c),
+		NewBulkSyncs(c),
+		NewSyncs(c),
 	}
 
 	// Create import.sh
