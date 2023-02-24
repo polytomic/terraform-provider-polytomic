@@ -31,6 +31,8 @@ func connectionsMap() map[string]resource.Resource {
 		conns[k] = v
 	}
 	conns["api"] = &APIConnectionResource{}
+	conns["csv"] = &CSVConnectionResource{}
+	conns["webhook"] = &WebhookConnectionResource{}
 
 	return conns
 }
