@@ -1,3 +1,5 @@
+## 0.3.12 (26 Feb 2023)
+* Added Ascend and Statsig connection type
 
 ## 0.3.11 (24 Feb 2023)
  * Add bingads, csv, iterable, shipbob, shopify, smartsheet, survicate, synapse, uservoice, vanilla, webhook, and zendesk connections
