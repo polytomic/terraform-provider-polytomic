@@ -301,6 +301,8 @@ github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZb
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/polytomic/polytomic-go v0.0.0-20230224155308-57b74fec593c h1:P45Bid4SP+UuilDHVOUSPreboMLDQq82wGTTRIK7aV4=
 github.com/polytomic/polytomic-go v0.0.0-20230224155308-57b74fec593c/go.mod h1:OYSOoZCtLFAW6hCf5YGWGXuoX6RgYAd49QEV7v7QLvo=
+github.com/polytomic/polytomic-go v0.0.0-20230224215215-d1563076f476 h1:11enc89C8zq4mYoeDxUxoVY1jrhGcIrvbFYQhiUAwy0=
+github.com/polytomic/polytomic-go v0.0.0-20230224215215-d1563076f476/go.mod h1:OYSOoZCtLFAW6hCf5YGWGXuoX6RgYAd49QEV7v7QLvo=
 github.com/posener/complete v1.1.1/go.mod h1:em0nMJCgc9GFtwrmVmEMR/ZL6WyhyjMBndrE9hABlRI=
 github.com/posener/complete v1.2.3 h1:NP0eAhjcjImqslEwo/1hq7gpajME0fTLTezBKDqfXqo=
 github.com/posener/complete v1.2.3/go.mod h1:WZIdtGGp+qx0sLrYKtIRAruyNpv6hFCicSgv7Sy7s/s=

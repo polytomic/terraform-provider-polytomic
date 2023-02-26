@@ -12,6 +12,7 @@ var (
 	connectionResources = []func() resource.Resource{
 		func() resource.Resource { return &PostgresqlConnectionResource{} },
 		func() resource.Resource { return &BigqueryConnectionResource{} },
+		func() resource.Resource { return &AscendConnectionResource{} },
 		func() resource.Resource { return &GcsConnectionResource{} },
 		func() resource.Resource { return &AzureblobConnectionResource{} },
 		func() resource.Resource { return &S3ConnectionResource{} },
@@ -41,6 +42,7 @@ var (
 		func() resource.Resource { return &RedshiftConnectionResource{} },
 		func() resource.Resource { return &SegmentConnectionResource{} },
 		func() resource.Resource { return &StripeConnectionResource{} },
+		func() resource.Resource { return &StatsigConnectionResource{} },
 		func() resource.Resource { return &SurvicateConnectionResource{} },
 		func() resource.Resource { return &SynapseConnectionResource{} },
 		func() resource.Resource { return &UservoiceConnectionResource{} },
@@ -50,6 +52,7 @@ var (
 	connectionDatasources = []func() datasource.DataSource{
 		func() datasource.DataSource { return &PostgresqlConnectionDataSource{} },
 		func() datasource.DataSource { return &BigqueryConnectionDataSource{} },
+		func() datasource.DataSource { return &AscendConnectionDataSource{} },
 		func() datasource.DataSource { return &GcsConnectionDataSource{} },
 		func() datasource.DataSource { return &AzureblobConnectionDataSource{} },
 		func() datasource.DataSource { return &S3ConnectionDataSource{} },
@@ -87,6 +90,7 @@ var (
 		func() datasource.DataSource { return &IterableConnectionDataSource{} },
 		func() datasource.DataSource { return &ShipbobConnectionDataSource{} },
 		func() datasource.DataSource { return &ShopifyConnectionDataSource{} },
+		func() datasource.DataSource { return &StatsigConnectionDataSource{} },
 		func() datasource.DataSource { return &SmartsheetConnectionDataSource{} },
 		func() datasource.DataSource { return &SurvicateConnectionDataSource{} },
 		func() datasource.DataSource { return &SynapseConnectionDataSource{} },
@@ -98,6 +102,7 @@ var (
 	connectionImportableResources = map[string]resource.Resource{
 		"postgresql": &PostgresqlConnectionResource{},
 		"bigquery":   &BigqueryConnectionResource{},
+		"ascend":     &AscendConnectionResource{},
 		"gcs":        &GcsConnectionResource{},
 		"azureblob":  &AzureblobConnectionResource{},
 		"s3":         &S3ConnectionResource{},
@@ -127,6 +132,7 @@ var (
 		"redshift":   &RedshiftConnectionResource{},
 		"segment":    &SegmentConnectionResource{},
 		"stripe":     &StripeConnectionResource{},
+		"statsig":    &StatsigConnectionResource{},
 		"survicate":  &SurvicateConnectionResource{},
 		"synapse":    &SynapseConnectionResource{},
 		"uservoice":  &UservoiceConnectionResource{},
@@ -136,6 +142,7 @@ var (
 	connectionImportableDatasources = map[string]datasource.DataSource{
 		"postgresql": &PostgresqlConnectionDataSource{},
 		"bigquery":   &BigqueryConnectionDataSource{},
+		"ascend":     &AscendConnectionDataSource{},
 		"gcs":        &GcsConnectionDataSource{},
 		"azureblob":  &AzureblobConnectionDataSource{},
 		"s3":         &S3ConnectionDataSource{},
@@ -173,6 +180,7 @@ var (
 		"iterable":   &IterableConnectionDataSource{},
 		"shipbob":    &ShipbobConnectionDataSource{},
 		"shopify":    &ShopifyConnectionDataSource{},
+		"statsig":    &StatsigConnectionDataSource{},
 		"smartsheet": &SmartsheetConnectionDataSource{},
 		"survicate":  &SurvicateConnectionDataSource{},
 		"synapse":    &SynapseConnectionDataSource{},
