@@ -15,7 +15,8 @@ var runCmd = &cobra.Command{
 		apiKey := viper.GetString("api-key")
 		path := viper.GetString("output")
 		replace := viper.GetBool("replace")
+		includePermissions := viper.GetBool("include-permissions")
 
-		importer.Init(url, apiKey, path, replace)
+		importer.Init(url, apiKey, path, replace, includePermissions)
 	},
 }
