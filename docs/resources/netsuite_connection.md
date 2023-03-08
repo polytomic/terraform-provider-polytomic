@@ -19,6 +19,8 @@ resource "polytomic_netsuite_connection" "netsuite" {
     account_id      = "my-account-id"
     consumer_key    = "my-consumer-key"
     consumer_secret = "my-consumer-secret"
+    token           = "token"
+    token_secret    = "token-secret"
   }
 }
 ```
