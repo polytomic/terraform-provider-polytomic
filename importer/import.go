@@ -19,7 +19,7 @@ type Importable interface {
 	Filename() string
 }
 
-func Init(url, key, path string, recreate bool) {
+func Init(url, key, path string, recreate bool, includePermissions bool) {
 	err := createDirectory(path)
 	if err != nil {
 		log.Fatal().AnErr("error", err).Msg("failed to create directory")
@@ -34,6 +34,11 @@ func Init(url, key, path string, recreate bool) {
 		NewModels(c),
 		NewBulkSyncs(c),
 		NewSyncs(c),
+	}
+
+	if includePermissions {
+		importables = append(importables, NewPolicies(c))
+		importables = append(importables, NewRoles(c))
 	}
 
 	// Create import.sh

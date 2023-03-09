@@ -121,6 +121,8 @@ func (p *ptProvider) Resources(ctx context.Context) []func() resource.Resource {
 	resourceList := []func() resource.Resource{
 		func() resource.Resource { return &organizationResource{} },
 		func() resource.Resource { return &userResource{} },
+		func() resource.Resource { return &roleResource{} },
+		func() resource.Resource { return &policyResource{} },
 		func() resource.Resource { return &modelResource{} },
 		func() resource.Resource { return &bulkSyncResource{} },
 		func() resource.Resource { return &bulkSyncSchemaResource{} },

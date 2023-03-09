@@ -40,6 +40,18 @@ func typeConverter(value any) cty.Value {
 				config[k] = typeConverter(v)
 			case map[string]string:
 				config[k] = typeConverter(v)
+			case []string:
+				if len(v) == 0 {
+					continue
+				}
+				vals := make([]cty.Value, 0)
+				for _, v := range v {
+					vals = append(vals, cty.StringVal(v))
+				}
+				if len(vals) == 0 {
+					continue
+				}
+				config[k] = cty.ListVal(vals)
 			case []any:
 				if len(v) == 0 {
 					continue
@@ -49,7 +61,6 @@ func typeConverter(value any) cty.Value {
 					switch v := v.(type) {
 					case map[string]any:
 						vals = append(vals, typeConverter(v))
-
 					case string:
 						vals = append(vals, cty.StringVal(v))
 					case int:
@@ -100,7 +111,6 @@ func typeConverter(value any) cty.Value {
 			switch v := v.(type) {
 			case map[string]any:
 				vals = append(vals, typeConverter(v))
-
 			case string:
 				vals = append(vals, cty.StringVal(v))
 			case int:
