@@ -6,6 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
+	"github.com/polytomic/polytomic-go"
 )
 
 // testAccProtoV6ProviderFactories are used to instantiate a provider during
@@ -21,11 +22,32 @@ func testAccPreCheck(t *testing.T) {
 	// about the appropriate environment variables being set are common to see in a pre-check
 	// function.
 
-	if os.Getenv(PolytomicDeploymentKey) == "" {
-		t.Fatalf("%s must be set for acceptance testing", PolytomicDeploymentKey)
+	if os.Getenv(PolytomicAPIKey) == "" && os.Getenv(PolytomicDeploymentKey) == "" {
+		t.Fatalf("%s or %s must be set for acceptance testing", PolytomicAPIKey, PolytomicDeploymentKey)
 	}
 
 	if os.Getenv(PolytomicDeploymentURL) == "" {
 		t.Fatalf("%s must be set for acceptance testing", PolytomicDeploymentURL)
 	}
+}
+
+func sweeperClient() *polytomic.Client {
+	deployURL := os.Getenv(PolytomicDeploymentURL)
+	deployKey := os.Getenv(PolytomicDeploymentKey)
+	apiKey := os.Getenv(PolytomicAPIKey)
+
+	var client *polytomic.Client
+	if deployKey != "" {
+		client = polytomic.NewClient(
+			deployURL,
+			polytomic.DeploymentKey(apiKey),
+		)
+	} else {
+		client = polytomic.NewClient(
+			deployURL,
+			polytomic.APIKey(deployKey),
+		)
+	}
+
+	return client
 }

@@ -2,6 +2,7 @@ package provider
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -9,6 +10,10 @@ import (
 )
 
 func TestAccUser_basic(t *testing.T) {
+	if os.Getenv("TEST_ORG_RESOURCES") != "true" {
+		t.Skip("Skipping test that creates resources in the Terraform test organization. To run, set TEST_ORG_RESOURCES=true")
+	}
+
 	email := "test@example.com"
 	email2 := "mIxEdCase@example.com"
 
