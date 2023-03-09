@@ -31,7 +31,7 @@ func testAccPreCheck(t *testing.T) {
 	}
 }
 
-func sweeperClient() *polytomic.Client {
+func testClient() *polytomic.Client {
 	deployURL := os.Getenv(PolytomicDeploymentURL)
 	deployKey := os.Getenv(PolytomicDeploymentKey)
 	apiKey := os.Getenv(PolytomicAPIKey)
@@ -40,12 +40,12 @@ func sweeperClient() *polytomic.Client {
 	if deployKey != "" {
 		client = polytomic.NewClient(
 			deployURL,
-			polytomic.DeploymentKey(apiKey),
+			polytomic.DeploymentKey(deployKey),
 		)
 	} else {
 		client = polytomic.NewClient(
 			deployURL,
-			polytomic.APIKey(deployKey),
+			polytomic.APIKey(apiKey),
 		)
 	}
 

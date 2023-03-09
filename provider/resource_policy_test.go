@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -17,8 +18,15 @@ func TestAccPolicy(t *testing.T) {
 			{
 				Config: testAccPolicyResource(name),
 				Check: resource.ComposeTestCheckFunc(
+					// Check if the resource exists
 					testAccPolicyExists(name),
-				),
+					// Check the name
+					resource.TestCheckResourceAttr("polytomic_policy.test", "name", name),
+					// Number of policy actions
+					resource.TestCheckResourceAttr("polytomic_policy.test", "policy_actions.#", "2"),
+					// Check the first policy action
+					resource.TestCheckResourceAttr("polytomic_policy.test", "policy_actions.0.action", "apply_policy"),
+					resource.TestCheckResourceAttr("polytomic_policy.test", "policy_actions.0.role_ids.#", "1")),
 			},
 		},
 	})
@@ -26,13 +34,28 @@ func TestAccPolicy(t *testing.T) {
 
 func testAccPolicyExists(name string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		rs, ok := s.RootModule().Resources["polytomic_policy.test"]
+		_, ok := s.RootModule().Resources["polytomic_policy.test"]
 		if !ok {
 			return fmt.Errorf("not found: %s", "polytomic_policy.test")
 		}
-		if rs.Primary.Attributes["name"] != name {
-			return fmt.Errorf("name is %s; want %s", rs.Primary.Attributes["name"], name)
+
+		client := testClient()
+		policies, err := client.Permissions().ListPolicies(context.TODO())
+		if err != nil {
+			return err
 		}
+		var found bool
+		for _, policy := range policies {
+			if policy.Name == name {
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			return fmt.Errorf("policy %s not found", name)
+		}
+
 		return nil
 
 	}
@@ -45,6 +68,12 @@ resource "polytomic_policy" "test" {
 	policy_actions = [
 		{
 			action = "apply_policy"
+			role_ids = [
+				polytomic_role.test.id
+			]
+		},
+		{
+			action = "delete"
 			role_ids = [
 				polytomic_role.test.id
 			]
