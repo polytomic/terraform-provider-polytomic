@@ -1,3 +1,7 @@
+## 0.3.13 (09 Mar 2023)
+* Add permission resources (roles and policies)
+* Add version information to importer at build time
+
 ## 0.3.12 (26 Feb 2023)
 * Added Ascend and Statsig connection type
 
