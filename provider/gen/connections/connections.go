@@ -23,9 +23,10 @@ const (
 	exportTemplate  = "./provider/gen/connections/connections.go.tmpl"
 
 	// Resources
-	connectionResourceTemplate = "./provider/gen/connections/resource.go.tmpl"
-	exampleResourceTemplate    = "./provider/gen/connections/resource.tf.go.tmpl"
-	exampleResourceOutputPath  = "./examples/resources"
+	connectionResourceTemplate     = "./provider/gen/connections/resource.go.tmpl"
+	connectionResourceTestTemplate = "./provider/gen/connections/resource_test.go.tmpl"
+	exampleResourceTemplate        = "./provider/gen/connections/resource.tf.go.tmpl"
+	exampleResourceOutputPath      = "./examples/resources"
 
 	// Datasources
 	connectionDataSourceTemplate = "./provider/gen/connections/datasource.go.tmpl"
@@ -76,6 +77,7 @@ type Connection struct {
 	Config       string      `yaml:"config"`
 	Datasource   bool        `yaml:"datasource"`
 	Resource     bool        `yaml:"resource"`
+	SkipTest     bool        `yaml:"skip_test"`
 }
 
 type Attribute struct {
@@ -145,6 +147,13 @@ func GenerateConnections() error {
 				Name:         r.Connection,
 				ResourceName: fmt.Sprintf("%sConnectionDataSource", strings.Title(r.Connection)),
 			})
+		}
+
+		if !r.SkipTest && r.Resource {
+			err := writeConnectionTest(r)
+			if err != nil {
+				return err
+			}
 		}
 
 		err = writeConnectionExamples(r)
@@ -306,6 +315,38 @@ func writeConnectionDataSource(r Connection) error {
 	}
 	_, err = f.Write(p)
 	return err
+}
+
+func writeConnectionTest(r Connection) error {
+	tmpl, err := template.New("resource_test.go.tmpl").ParseFiles(connectionResourceTestTemplate)
+	if err != nil {
+		return err
+	}
+	var buf bytes.Buffer
+	f, err := os.Create(
+		filepath.Join(outputPath, fmt.Sprintf("resource_%s_connection_test.go", r.Connection)))
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	err = tmpl.Execute(&buf, Connection{
+		Name:         r.Name,
+		Connection:   strings.Title(r.Connection),
+		ResourceName: r.Connection,
+		Attributes:   r.Attributes,
+	})
+	if err != nil {
+		return err
+	}
+	p, err := format.Source(buf.Bytes())
+	if err != nil {
+		return err
+	}
+
+	_, err = f.Write(p)
+	return err
+
 }
 
 func writeExports(datasources, resources []Importable) error {
