@@ -140,6 +140,8 @@ func (p *ptProvider) DataSources(ctx context.Context) []func() datasource.DataSo
 	datasources := []func() datasource.DataSource{
 		func() datasource.DataSource { return &bulkSourceDatasource{} },
 		func() datasource.DataSource { return &bulkDestinationDatasource{} },
+		func() datasource.DataSource { return &GithubConnectionDataSource{} },
+		func() datasource.DataSource { return &LinkedinAdConnectionDataSource{} },
 	}
 	all := append(connectionDatasources, datasources...)
 	return all
