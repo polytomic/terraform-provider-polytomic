@@ -42,6 +42,7 @@ Required:
 
 Optional:
 
+- `change_detection` (Boolean)
 - `port` (Number)
 - `ssh` (Boolean)
 - `ssh_host` (String)

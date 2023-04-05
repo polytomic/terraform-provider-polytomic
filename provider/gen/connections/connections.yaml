@@ -623,6 +623,10 @@ connections:
         type: string
         optional: true
         sensitive: true
+      - name: ChangeDetection
+        type: bool
+        optional: true
+        example: false
   - connection: netsuite
     name: NetSuite
     type: polytomic.NetsuiteConnectionType
@@ -962,3 +966,27 @@ connections:
   #     - name: Accounts
   #       type: object
   #       required: true
+  - connection: delighted
+    name: Delighted
+    type: polytomic.DelightedConnectionType
+    config: polytomic.DelightedConnectionConfiguration
+    datasource: true
+    resource: true
+    attributes:
+      - name: APIKey
+        type: string
+        required: true
+        sensitive: true
+        example: my-api-key
+  - connection: linear
+    name: Linear
+    type: polytomic.LinearConnectionType
+    config: polytomic.LinearConnectionConfiguration
+    datasource: true
+    resource: true
+    attributes:
+      - name: APIKey
+        type: string
+        required: true
+        sensitive: true
+        example: my-api-key

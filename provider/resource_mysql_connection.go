@@ -110,6 +110,13 @@ func (t *MysqlConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, 
 						Optional:            true,
 						Sensitive:           true,
 					},
+					"change_detection": {
+						MarkdownDescription: "",
+						Type:                types.BoolType,
+						Required:            false,
+						Optional:            true,
+						Sensitive:           false,
+					},
 				}),
 
 				Required: true,
@@ -150,16 +157,17 @@ func (r *MysqlConnectionResource) Create(ctx context.Context, req resource.Creat
 			Type:           polytomic.MysqlConnectionType,
 			OrganizationId: data.Organization.ValueString(),
 			Configuration: polytomic.MysqlConnectionConfiguration{
-				Hostname:      data.Configuration.Attributes()["hostname"].(types.String).ValueString(),
-				Account:       data.Configuration.Attributes()["account"].(types.String).ValueString(),
-				Passwd:        data.Configuration.Attributes()["passwd"].(types.String).ValueString(),
-				Dbname:        data.Configuration.Attributes()["dbname"].(types.String).ValueString(),
-				Port:          int(data.Configuration.Attributes()["port"].(types.Int64).ValueInt64()),
-				SSH:           data.Configuration.Attributes()["ssh"].(types.Bool).ValueBool(),
-				SSHUser:       data.Configuration.Attributes()["ssh_user"].(types.String).ValueString(),
-				SSHHost:       data.Configuration.Attributes()["ssh_host"].(types.String).ValueString(),
-				SSHPort:       int(data.Configuration.Attributes()["ssh_port"].(types.Int64).ValueInt64()),
-				SSHPrivateKey: data.Configuration.Attributes()["ssh_private_key"].(types.String).ValueString(),
+				Hostname:        data.Configuration.Attributes()["hostname"].(types.String).ValueString(),
+				Account:         data.Configuration.Attributes()["account"].(types.String).ValueString(),
+				Passwd:          data.Configuration.Attributes()["passwd"].(types.String).ValueString(),
+				Dbname:          data.Configuration.Attributes()["dbname"].(types.String).ValueString(),
+				Port:            int(data.Configuration.Attributes()["port"].(types.Int64).ValueInt64()),
+				SSH:             data.Configuration.Attributes()["ssh"].(types.Bool).ValueBool(),
+				SSHUser:         data.Configuration.Attributes()["ssh_user"].(types.String).ValueString(),
+				SSHHost:         data.Configuration.Attributes()["ssh_host"].(types.String).ValueString(),
+				SSHPort:         int(data.Configuration.Attributes()["ssh_port"].(types.Int64).ValueInt64()),
+				SSHPrivateKey:   data.Configuration.Attributes()["ssh_private_key"].(types.String).ValueString(),
+				ChangeDetection: data.Configuration.Attributes()["change_detection"].(types.Bool).ValueBool(),
 			},
 		},
 	)
@@ -198,6 +206,8 @@ func (r *MysqlConnectionResource) Create(ctx context.Context, req resource.Creat
 	//	"ssh_port": types.Int64Type,
 	//
 	//	"ssh_private_key": types.StringType,
+	//
+	//	"change_detection": types.BoolType,
 	//
 	//}, output)
 	//if diags.HasError() {
@@ -266,6 +276,8 @@ func (r *MysqlConnectionResource) Read(ctx context.Context, req resource.ReadReq
 	//
 	//	"ssh_private_key": types.StringType,
 	//
+	//	"change_detection": types.BoolType,
+	//
 	//}, output)
 	//if diags.HasError() {
 	//	resp.Diagnostics.Append(diags...)
@@ -292,16 +304,17 @@ func (r *MysqlConnectionResource) Update(ctx context.Context, req resource.Updat
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueString(),
 			Configuration: polytomic.MysqlConnectionConfiguration{
-				Hostname:      data.Configuration.Attributes()["hostname"].(types.String).ValueString(),
-				Account:       data.Configuration.Attributes()["account"].(types.String).ValueString(),
-				Passwd:        data.Configuration.Attributes()["passwd"].(types.String).ValueString(),
-				Dbname:        data.Configuration.Attributes()["dbname"].(types.String).ValueString(),
-				Port:          int(data.Configuration.Attributes()["port"].(types.Int64).ValueInt64()),
-				SSH:           data.Configuration.Attributes()["ssh"].(types.Bool).ValueBool(),
-				SSHUser:       data.Configuration.Attributes()["ssh_user"].(types.String).ValueString(),
-				SSHHost:       data.Configuration.Attributes()["ssh_host"].(types.String).ValueString(),
-				SSHPort:       int(data.Configuration.Attributes()["ssh_port"].(types.Int64).ValueInt64()),
-				SSHPrivateKey: data.Configuration.Attributes()["ssh_private_key"].(types.String).ValueString(),
+				Hostname:        data.Configuration.Attributes()["hostname"].(types.String).ValueString(),
+				Account:         data.Configuration.Attributes()["account"].(types.String).ValueString(),
+				Passwd:          data.Configuration.Attributes()["passwd"].(types.String).ValueString(),
+				Dbname:          data.Configuration.Attributes()["dbname"].(types.String).ValueString(),
+				Port:            int(data.Configuration.Attributes()["port"].(types.Int64).ValueInt64()),
+				SSH:             data.Configuration.Attributes()["ssh"].(types.Bool).ValueBool(),
+				SSHUser:         data.Configuration.Attributes()["ssh_user"].(types.String).ValueString(),
+				SSHHost:         data.Configuration.Attributes()["ssh_host"].(types.String).ValueString(),
+				SSHPort:         int(data.Configuration.Attributes()["ssh_port"].(types.Int64).ValueInt64()),
+				SSHPrivateKey:   data.Configuration.Attributes()["ssh_private_key"].(types.String).ValueString(),
+				ChangeDetection: data.Configuration.Attributes()["change_detection"].(types.Bool).ValueBool(),
 			},
 		},
 	)
@@ -341,6 +354,8 @@ func (r *MysqlConnectionResource) Update(ctx context.Context, req resource.Updat
 	//	"ssh_port": types.Int64Type,
 	//
 	//	"ssh_private_key": types.StringType,
+	//
+	//	"change_detection": types.BoolType,
 	//
 	//}, output)
 	//if diags.HasError() {
