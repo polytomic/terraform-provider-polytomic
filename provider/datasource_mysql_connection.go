@@ -106,6 +106,13 @@ func (d *MysqlConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema
 						Optional:            true,
 						Sensitive:           false,
 					},
+					"change_detection": {
+						MarkdownDescription: "",
+						Type:                types.BoolType,
+						Required:            false,
+						Optional:            true,
+						Sensitive:           false,
+					},
 				}),
 				Optional: true,
 			},
@@ -189,6 +196,9 @@ func (d *MysqlConnectionDataSource) Read(ctx context.Context, req datasource.Rea
 			),
 			"ssh_port": types.Int64Value(
 				int64(conf.SSHPort),
+			),
+			"change_detection": types.BoolValue(
+				conf.ChangeDetection,
 			),
 		},
 	)

@@ -49,6 +49,8 @@ var (
 		func() resource.Resource { return &VanillaConnectionResource{} },
 		func() resource.Resource { return &DatabricksConnectionResource{} },
 		func() resource.Resource { return &AsanaConnectionResource{} },
+		func() resource.Resource { return &DelightedConnectionResource{} },
+		func() resource.Resource { return &LinearConnectionResource{} },
 	}
 
 	connectionDatasources = []func() datasource.DataSource{
@@ -101,6 +103,8 @@ var (
 		func() datasource.DataSource { return &ZendeskConnectionDataSource{} },
 		func() datasource.DataSource { return &DatabricksConnectionDataSource{} },
 		func() datasource.DataSource { return &AsanaConnectionDataSource{} },
+		func() datasource.DataSource { return &DelightedConnectionDataSource{} },
+		func() datasource.DataSource { return &LinearConnectionDataSource{} },
 	}
 
 	connectionImportableResources = map[string]resource.Resource{
@@ -143,6 +147,8 @@ var (
 		"vanilla":    &VanillaConnectionResource{},
 		"databricks": &DatabricksConnectionResource{},
 		"asana":      &AsanaConnectionResource{},
+		"delighted":  &DelightedConnectionResource{},
+		"linear":     &LinearConnectionResource{},
 	}
 
 	connectionImportableDatasources = map[string]datasource.DataSource{
@@ -195,5 +201,7 @@ var (
 		"zendesk":    &ZendeskConnectionDataSource{},
 		"databricks": &DatabricksConnectionDataSource{},
 		"asana":      &AsanaConnectionDataSource{},
+		"delighted":  &DelightedConnectionDataSource{},
+		"linear":     &LinearConnectionDataSource{},
 	}
 )
