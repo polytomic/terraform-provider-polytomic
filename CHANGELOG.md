@@ -1,3 +1,8 @@
+## 0.3.14 (05 Apr 2023)
+* Add Asana, Databricks, Delighted, Github, Linear and LinkedIn Ads connections
+* Update MySQL configuration to support change detection
+
+
 ## 0.3.13 (09 Mar 2023)
 * Add permission resources (roles and policies)
 * Add version information to importer at build time
