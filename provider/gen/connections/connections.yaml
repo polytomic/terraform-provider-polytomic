@@ -888,3 +888,77 @@ connections:
         type: string
         required: true
         example: example.zendesk.com
+  - connection: databricks
+    name: Databricks
+    type: polytomic.DatabricksConnectionType
+    config: polytomic.DatabricksConnectionConfiguration
+    datasource: true
+    resource: true
+    attributes:
+      - name: ServerHostname
+        type: string
+        required: true
+        example: https://my.databricks.com
+      - name: Port
+        type: int
+        required: true
+        example: 443
+      - name: AccessToken
+        type: string
+        required: true
+        sensitive: true
+        example: my-access-token
+      - name: HTTPPath
+        type: string
+        required: true
+        example: /sql
+      - name: AwsAccessKeyID
+        type: string
+        optional: true
+        example: EXAMPLEKEY
+      - name: AwsSecretAccessKey
+        type: string
+        optional: true
+        sensitive: true
+        example: EXAMPLESECRET
+      - name: S3BucketName
+        type: string
+        optional: true
+        example: my-bucket
+      - name: S3BucketRegion
+        type: string
+        optional: true
+        example: us-east-1
+  - connection: asana
+    name: Asana
+    type: polytomic.AsanaConnectionType
+    config: polytomic.AsanaConnectionConfiguration
+    datasource: true
+    resource: true
+    attributes:
+      - name: PAT
+        type: string
+        required: true
+        sensitive: true
+        example: my-personal-access-token
+  # Maybe one day we can support nested struct attributes
+  #
+  # - connection: github
+  #   name: GitHub
+  #   type: polytomic.GitHubConnectionType
+  #   config: polytomic.GitHubConnectionConfiguration
+  #   datasource: true
+  #   resource: true
+  #   attributes:
+  #     - name: Repositories
+  #       type: object
+  #       required: true
+  # - connection: linkedinads
+  #   name: LinkedIn Ads
+  #   type: polytomic.LinkedInAdsConnectionType
+  #   config: polytomic.LinkedInAdsConnectionConfiguration
+  #   datasource: true
+  #   attributes:
+  #     - name: Accounts
+  #       type: object
+  #       required: true
