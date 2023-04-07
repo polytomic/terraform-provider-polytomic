@@ -26,6 +26,8 @@ const (
 	PolytomicDeploymentURL = "POLYTOMIC_DEPLOYMENT_URL"
 
 	PolytomicDefaultURL = "app.polytomic.com"
+
+	UserAgent = "polytomic-terraform-provider"
 )
 
 const clientError = "Client Error"
@@ -104,11 +106,13 @@ func (p *ptProvider) Configure(ctx context.Context, req provider.ConfigureReques
 		client = polytomic.NewClient(
 			deployURL,
 			polytomic.APIKey(apiKey),
+			polytomic.WithUserAgent(UserAgent),
 		)
 	} else {
 		client = polytomic.NewClient(
 			deployURL,
 			polytomic.DeploymentKey(deployKey),
+			polytomic.WithUserAgent(UserAgent),
 		)
 	}
 
