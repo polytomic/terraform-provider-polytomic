@@ -35,12 +35,12 @@ func (d *bulkDestinationDatasource) GetSchema(ctx context.Context) (tfsdk.Schema
 			},
 			"required_configuration": {
 				MarkdownDescription: "",
-				Type:                types.ListType{ElemType: types.StringType},
+				Type:                types.SetType{ElemType: types.StringType},
 				Computed:            true,
 			},
 			"modes": {
 				MarkdownDescription: "",
-				Type: types.ListType{ElemType: types.ObjectType{
+				Type: types.SetType{ElemType: types.ObjectType{
 					AttrTypes: map[string]attr.Type{
 						"id":          types.StringType,
 						"label":       types.StringType,
@@ -89,22 +89,27 @@ func (d *bulkDestinationDatasource) Read(ctx context.Context, req datasource.Rea
 		return
 	}
 	var diags diag.Diagnostics
-	data.Modes, diags = types.ListValueFrom(ctx, types.ObjectType{
+	data.Modes, diags = types.SetValueFrom(ctx, types.ObjectType{
 		AttrTypes: map[string]attr.Type{
 			"id":          types.StringType,
 			"label":       types.StringType,
 			"description": types.StringType,
 		},
 	}, dest.Modes)
-
-	raw := dest.Configuration.(map[string]interface{})["definitions"].(map[string]interface{})["BulkDestinationConfiguration"].(map[string]interface{})["required"].([]interface{})
-	required := make([]string, len(raw))
-	for i, v := range raw {
-		fmt.Print(v.(string))
-		required[i] = v.(string)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
 	}
 
-	data.RequiredConfiguration, diags = types.ListValueFrom(ctx, types.StringType, required)
+	raw := dest.Configuration.(map[string]interface{})
+	required := make([]string, len(raw))
+	i := 0
+	for k := range raw {
+		required[i] = k
+		i++
+	}
+
+	data.RequiredConfiguration, diags = types.SetValueFrom(ctx, types.StringType, required)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return

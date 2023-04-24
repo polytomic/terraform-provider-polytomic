@@ -27,6 +27,14 @@ data "polytomic_bulk_source" "source" {
 
 ### Read-Only
 
-- `schemas` (List of String)
+- `schemas` (Set of Object) (see [below for nested schema](#nestedatt--schemas))
+
+<a id="nestedatt--schemas"></a>
+### Nested Schema for `schemas`
+
+Read-Only:
+
+- `id` (String)
+- `name` (String)
 
 
