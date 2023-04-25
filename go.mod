@@ -12,7 +12,7 @@ require (
 	github.com/hashicorp/terraform-plugin-log v0.8.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.26.1
 	github.com/mitchellh/mapstructure v1.5.0
-	github.com/polytomic/polytomic-go v0.0.0-20230425130107-6037d7343fce
+	github.com/polytomic/polytomic-go v0.0.0-20230425174357-2473b234a883
 	github.com/rs/zerolog v1.29.1
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/viper v1.15.0
