@@ -58,7 +58,7 @@ resource "polytomic_bulk_sync" "sync" {
 ### Optional
 
 - `organization` (String)
-- `schemas` (List of String)
+- `schemas` (Set of String)
 - `source_configuration` (Map of String)
 
 ### Read-Only

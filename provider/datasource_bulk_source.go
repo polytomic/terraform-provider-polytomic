@@ -3,8 +3,8 @@ package provider
 import (
 	"context"
 	"fmt"
-	"sort"
 
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
@@ -35,8 +35,15 @@ func (d *bulkSourceDatasource) GetSchema(ctx context.Context) (tfsdk.Schema, dia
 			},
 			"schemas": {
 				MarkdownDescription: "",
-				Type:                types.ListType{ElemType: types.StringType},
-				Computed:            true,
+				Type: types.SetType{
+					ElemType: types.ObjectType{
+						AttrTypes: map[string]attr.Type{
+							"id":   types.StringType,
+							"name": types.StringType,
+						},
+					},
+				},
+				Computed: true,
 			},
 		},
 	}, nil
@@ -78,9 +85,13 @@ func (d *bulkSourceDatasource) Read(ctx context.Context, req datasource.ReadRequ
 		resp.Diagnostics.AddError("Error getting connection", err.Error())
 		return
 	}
-	sort.Strings(source.Schemas)
+
 	var diags diag.Diagnostics
-	data.Schemas, diags = types.ListValueFrom(ctx, types.StringType, source.Schemas)
+	data.Schemas, diags = types.SetValueFrom(ctx, types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"id":   types.StringType,
+			"name": types.StringType,
+		}}, source.Schemas)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
