@@ -40,6 +40,15 @@ func (d *bulkSourceDatasource) GetSchema(ctx context.Context) (tfsdk.Schema, dia
 						AttrTypes: map[string]attr.Type{
 							"id":   types.StringType,
 							"name": types.StringType,
+							"fields": types.SetType{
+								ElemType: types.ObjectType{
+									AttrTypes: map[string]attr.Type{
+										"id":   types.StringType,
+										"name": types.StringType,
+										"type": types.StringType,
+									},
+								},
+							},
 						},
 					},
 				},
@@ -91,6 +100,15 @@ func (d *bulkSourceDatasource) Read(ctx context.Context, req datasource.ReadRequ
 		AttrTypes: map[string]attr.Type{
 			"id":   types.StringType,
 			"name": types.StringType,
+			"fields": types.SetType{
+				ElemType: types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						"id":   types.StringType,
+						"name": types.StringType,
+						"type": types.StringType,
+					},
+				},
+			},
 		}}, source.Schemas)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

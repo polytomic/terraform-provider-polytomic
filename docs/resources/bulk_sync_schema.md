@@ -28,10 +28,20 @@ resource "polytomic_bulk_sync_schema" "schema" {
 
 ### Optional
 
+- `fields` (Set of Object) (see [below for nested schema](#nestedatt--fields))
 - `partition_key` (String)
 
 ### Read-Only
 
 - `id` (String) The ID of this resource.
+
+<a id="nestedatt--fields"></a>
+### Nested Schema for `fields`
+
+Optional:
+
+- `enabled` (Boolean)
+- `id` (String)
+- `obfuscated` (Boolean)
 
 
