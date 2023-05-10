@@ -2,7 +2,9 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"net/http"
 
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -130,6 +132,13 @@ func (r *organizationResource) Read(ctx context.Context, req resource.ReadReques
 	}
 	organization, err := r.client.Organizations().Get(ctx, wsId)
 	if err != nil {
+		pErr := polytomic.ApiError{}
+		if errors.As(err, &pErr) {
+			if pErr.StatusCode == http.StatusNotFound {
+				resp.State.RemoveResource(ctx)
+				return
+			}
+		}
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error reading organization: %s", err))
 		return
 	}
