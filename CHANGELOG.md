@@ -1,3 +1,7 @@
+## 0.3.15 (10 May 2023)
+* Update bulk sync schema handling
+* Fix handling of missing organizations
+
 ## 0.3.14 (05 Apr 2023)
 * Add Asana, Databricks, Delighted, Github, Linear and LinkedIn Ads connections
 * Update MySQL configuration to support change detection
