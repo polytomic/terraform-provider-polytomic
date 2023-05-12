@@ -59,7 +59,7 @@ func (b *BulkSyncs) GenerateTerraformFiles(ctx context.Context, writer io.Writer
 		body := hclFile.Body()
 		// Bulk sync names are not unique, so we need to a slug to the name
 		// to make it unique.
-		name := provider.ToSnakeCase(bulkSync.Name) + "_" + bulkSync.ID[:8]
+		name := provider.ValidNamer(provider.ToSnakeCase(bulkSync.Name) + "_" + bulkSync.ID[:8])
 		resourceBlock := body.AppendNewBlock("resource", []string{BulkSyncResource, name})
 		resourceBlock.Body().SetAttributeValue("name", cty.StringVal(bulkSync.Name))
 		resourceBlock.Body().SetAttributeValue("source_connection_id", cty.StringVal(bulkSync.SourceConnectionID))
@@ -89,7 +89,7 @@ func (b *BulkSyncs) GenerateImports(ctx context.Context, writer io.Writer) error
 	for _, bulkSync := range b.Resources {
 		// Bulk sync names are not unique, so we need to a slug to the name
 		// to make it unique.
-		name := provider.ToSnakeCase(bulkSync.Name) + "_" + bulkSync.ID[:8]
+		name := provider.ValidNamer(provider.ToSnakeCase(bulkSync.Name) + "_" + bulkSync.ID[:8])
 		writer.Write([]byte(fmt.Sprintf("terraform import %s.%s %s",
 			BulkSyncResource,
 			name,

@@ -60,7 +60,9 @@ func (m *Models) GenerateTerraformFiles(ctx context.Context, writer io.Writer) e
 	for _, model := range m.Resources {
 		hclFile := hclwrite.NewEmptyFile()
 		body := hclFile.Body()
-		name := provider.ToSnakeCase(model.Name)
+		name := provider.ValidNamer(
+			provider.ToSnakeCase(model.Name),
+		)
 		if _, exists := m.uniqueNames[name]; exists {
 			name = fmt.Sprintf("%s_%s", name, model.Type)
 		}
