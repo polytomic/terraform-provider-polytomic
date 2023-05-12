@@ -191,6 +191,10 @@ connections:
         type: int
         required: true
         example: 1443
+      - name: SSL
+        type: bool
+        optional: true
+        example: true
   - connection: athena
     name: AWS Athena
     type: polytomic.AthenaConnectionType

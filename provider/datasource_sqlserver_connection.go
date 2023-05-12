@@ -78,6 +78,13 @@ func (d *SqlserverConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Sc
 						Optional:            false,
 						Sensitive:           false,
 					},
+					"ssl": {
+						MarkdownDescription: "",
+						Type:                types.BoolType,
+						Required:            false,
+						Optional:            true,
+						Sensitive:           false,
+					},
 				}),
 				Optional: true,
 			},
@@ -149,6 +156,9 @@ func (d *SqlserverConnectionDataSource) Read(ctx context.Context, req datasource
 			),
 			"port": types.Int64Value(
 				int64(conf.Port),
+			),
+			"ssl": types.BoolValue(
+				conf.SSL,
 			),
 		},
 	)
