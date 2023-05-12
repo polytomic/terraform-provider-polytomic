@@ -21,6 +21,7 @@ resource "polytomic_sqlserver_connection" "sqlserver" {
     password = "secret"
     database = "acme"
     port     = 1443
+    ssl      = true
   }
 }
 ```
@@ -51,5 +52,9 @@ Required:
 - `password` (String, Sensitive)
 - `port` (Number)
 - `username` (String)
+
+Optional:
+
+- `ssl` (Boolean)
 
 

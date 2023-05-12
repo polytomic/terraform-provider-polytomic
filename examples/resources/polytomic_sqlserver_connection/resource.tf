@@ -6,6 +6,7 @@ resource "polytomic_sqlserver_connection" "sqlserver" {
     password = "secret"
     database = "acme"
     port     = 1443
+    ssl      = true
   }
 }
 

@@ -41,4 +41,8 @@ Required:
 - `port` (Number)
 - `username` (String)
 
+Optional:
+
+- `ssl` (Boolean)
+
 

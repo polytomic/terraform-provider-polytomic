@@ -75,6 +75,13 @@ func (t *SqlserverConnectionResource) GetSchema(ctx context.Context) (tfsdk.Sche
 						Optional:            false,
 						Sensitive:           false,
 					},
+					"ssl": {
+						MarkdownDescription: "",
+						Type:                types.BoolType,
+						Required:            false,
+						Optional:            true,
+						Sensitive:           false,
+					},
 				}),
 
 				Required: true,
@@ -120,6 +127,7 @@ func (r *SqlserverConnectionResource) Create(ctx context.Context, req resource.C
 				Password: data.Configuration.Attributes()["password"].(types.String).ValueString(),
 				Database: data.Configuration.Attributes()["database"].(types.String).ValueString(),
 				Port:     int(data.Configuration.Attributes()["port"].(types.Int64).ValueInt64()),
+				SSL:      data.Configuration.Attributes()["ssl"].(types.Bool).ValueBool(),
 			},
 		},
 	)
@@ -148,6 +156,8 @@ func (r *SqlserverConnectionResource) Create(ctx context.Context, req resource.C
 	//	"database": types.StringType,
 	//
 	//	"port": types.Int64Type,
+	//
+	//	"ssl": types.BoolType,
 	//
 	//}, output)
 	//if diags.HasError() {
@@ -206,6 +216,8 @@ func (r *SqlserverConnectionResource) Read(ctx context.Context, req resource.Rea
 	//
 	//	"port": types.Int64Type,
 	//
+	//	"ssl": types.BoolType,
+	//
 	//}, output)
 	//if diags.HasError() {
 	//	resp.Diagnostics.Append(diags...)
@@ -237,6 +249,7 @@ func (r *SqlserverConnectionResource) Update(ctx context.Context, req resource.U
 				Password: data.Configuration.Attributes()["password"].(types.String).ValueString(),
 				Database: data.Configuration.Attributes()["database"].(types.String).ValueString(),
 				Port:     int(data.Configuration.Attributes()["port"].(types.Int64).ValueInt64()),
+				SSL:      data.Configuration.Attributes()["ssl"].(types.Bool).ValueBool(),
 			},
 		},
 	)
@@ -266,6 +279,8 @@ func (r *SqlserverConnectionResource) Update(ctx context.Context, req resource.U
 	//	"database": types.StringType,
 	//
 	//	"port": types.Int64Type,
+	//
+	//	"ssl": types.BoolType,
 	//
 	//}, output)
 	//if diags.HasError() {
