@@ -1,3 +1,8 @@
+## 0.3.16 (15 May 2023)
+* Ensure resource names from importer are valid
+* Add SSL parameter to SQL Server connection
+
+
 ## 0.3.15 (10 May 2023)
 * Update bulk sync schema handling
 * Fix handling of missing organizations
