@@ -5,6 +5,33 @@ import (
 	"unicode"
 )
 
+const (
+	legalCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_"
+)
+
+// A name must start with a letter or underscore and
+// may contain only letters, digits, underscores, and dashes.
+// e.g 100_users -> _100_users
+func ValidName(s string) string {
+	if len(s) == 0 {
+		return "_"
+	}
+
+	// if string is not a letter or underscore, prepend underscore
+	if !unicode.IsLetter(rune(s[0])) && s[0] != '_' {
+		s = "_" + s
+	}
+
+	// replace illegal characters with underscore
+	for i, v := range []byte(s) {
+		if !strings.Contains(legalCharacters, string(v)) {
+			s = s[:i] + "_" + s[i+1:]
+		}
+	}
+
+	return s
+}
+
 func ToSnakeCase(s string) string {
 	s = strings.TrimSpace(s)
 	n := strings.Builder{}

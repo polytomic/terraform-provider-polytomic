@@ -48,7 +48,7 @@ func (s *Syncs) GenerateTerraformFiles(ctx context.Context, writer io.Writer) er
 	for _, sync := range s.Resources {
 		hclFile := hclwrite.NewEmptyFile()
 		body := hclFile.Body()
-		resourceBlock := body.AppendNewBlock("resource", []string{SyncResource, provider.ToSnakeCase(sync.Name)})
+		resourceBlock := body.AppendNewBlock("resource", []string{SyncResource, provider.ValidName(provider.ToSnakeCase(sync.Name))})
 		resourceBlock.Body().SetAttributeValue("name", cty.StringVal(sync.Name))
 		resourceBlock.Body().SetAttributeValue("mode", cty.StringVal(sync.Mode))
 		var schedule map[string]*string
@@ -122,7 +122,7 @@ func (s *Syncs) GenerateImports(ctx context.Context, writer io.Writer) error {
 	for _, sync := range s.Resources {
 		writer.Write([]byte(fmt.Sprintf("terraform import %s.%s %s",
 			SyncResource,
-			provider.ToSnakeCase(sync.Name),
+			provider.ValidName(provider.ToSnakeCase(sync.Name)),
 			sync.ID)))
 		writer.Write([]byte(fmt.Sprintf(" # %s\n", sync.Name)))
 	}

@@ -55,7 +55,7 @@ func (p *Roles) GenerateTerraformFiles(ctx context.Context, writer io.Writer) er
 	for _, role := range p.Resources {
 		hclFile := hclwrite.NewEmptyFile()
 		body := hclFile.Body()
-		name := provider.ToSnakeCase(role.Name)
+		name := provider.ValidName(provider.ToSnakeCase(role.Name))
 
 		resourceBlock := body.AppendNewBlock("resource", []string{RoleResource, name})
 
@@ -73,7 +73,7 @@ func (p *Roles) GenerateImports(ctx context.Context, writer io.Writer) error {
 	for _, role := range p.Resources {
 		writer.Write([]byte(fmt.Sprintf("terraform import %s.%s %s",
 			RoleResource,
-			provider.ToSnakeCase(role.Name),
+			provider.ValidName(provider.ToSnakeCase(role.Name)),
 			role.ID)))
 		writer.Write([]byte(fmt.Sprintf(" # %s\n", role.Name)))
 	}

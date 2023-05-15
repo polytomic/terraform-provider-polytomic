@@ -60,7 +60,7 @@ func (p *Policies) GenerateTerraformFiles(ctx context.Context, writer io.Writer)
 	for _, policy := range p.Resources {
 		hclFile := hclwrite.NewEmptyFile()
 		body := hclFile.Body()
-		name := provider.ToSnakeCase(policy.Name)
+		name := provider.ValidName(provider.ToSnakeCase(policy.Name))
 
 		resourceBlock := body.AppendNewBlock("resource", []string{PolicyResource, name})
 
@@ -87,7 +87,7 @@ func (p *Policies) GenerateImports(ctx context.Context, writer io.Writer) error 
 	for _, policy := range p.Resources {
 		writer.Write([]byte(fmt.Sprintf("terraform import %s.%s %s",
 			PolicyResource,
-			provider.ToSnakeCase(policy.Name),
+			provider.ValidName(provider.ToSnakeCase(policy.Name)),
 			policy.ID)))
 		writer.Write([]byte(fmt.Sprintf(" # %s\n", policy.Name)))
 	}
