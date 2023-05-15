@@ -85,7 +85,7 @@ func (c *Connections) GenerateTerraformFiles(ctx context.Context, writer io.Writ
 	for _, conn := range c.Datasources {
 		hclFile := hclwrite.NewEmptyFile()
 		body := hclFile.Body()
-		resourceBlock := body.AppendNewBlock("data", []string{conn.Resource, provider.ValidNamer(provider.ToSnakeCase(conn.Name))})
+		resourceBlock := body.AppendNewBlock("data", []string{conn.Resource, provider.ValidName(provider.ToSnakeCase(conn.Name))})
 		resourceBlock.Body().SetAttributeValue("id", cty.StringVal(conn.ID))
 		resourceBlock.Body().SetAttributeValue("name", cty.StringVal(conn.Name))
 		resourceBlock.Body().SetAttributeValue("organization", cty.StringVal(conn.Organization))
@@ -114,7 +114,7 @@ func (c *Connections) GenerateImports(ctx context.Context, writer io.Writer) err
 	for _, conn := range c.Resources {
 		writer.Write([]byte(fmt.Sprintf("terraform import %s.%s %s",
 			conn.Resource,
-			provider.ValidNamer(provider.ToSnakeCase(conn.Name)),
+			provider.ValidName(provider.ToSnakeCase(conn.Name)),
 			conn.ID)))
 		writer.Write([]byte(fmt.Sprintf(" # %s\n", conn.Name)))
 	}

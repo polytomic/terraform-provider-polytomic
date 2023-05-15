@@ -47,7 +47,7 @@ func TestValidNamer(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			actual := ValidNamer(tc.input)
+			actual := ValidName(tc.input)
 			if actual != tc.expected {
 				t.Errorf("expected %s, got %s", tc.expected, actual)
 			}
