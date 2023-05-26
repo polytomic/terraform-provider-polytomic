@@ -16,7 +16,7 @@ resource "polytomic_bulk_sync" "sync" {
   schedule = {
     frequency = "manual"
   }
-  schemas = data.polytomic_bulk_source.source.schemas
+  schemas = data.polytomic_bulk_source.source.schemas.*.id
   dest_configuration = {
     "dataset" = "terraform"
   }

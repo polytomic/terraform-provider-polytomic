@@ -35,7 +35,7 @@ resource "polytomic_webhook_connection" "example" {
 
 ### Read-Only
 
-- `id` (String) Google Cloud Storage Connection identifier
+- `id` (String) Webhook Connection identifier
 
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`

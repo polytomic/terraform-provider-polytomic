@@ -31,7 +31,7 @@ resource "polytomic_bulk_sync" "sync" {
   schedule = {
     frequency = "manual"
   }
-  schemas = data.polytomic_bulk_source.source.schemas
+  schemas = data.polytomic_bulk_source.source.schemas.*.id
   dest_configuration = {
     "dataset" = "terraform"
   }
@@ -44,10 +44,7 @@ resource "polytomic_bulk_sync" "sync" {
 ### Required
 
 - `active` (Boolean)
-- `dest_configuration` (Map of String) \
-				- Snowflake: schema = "" \
-				- BigQuery: dataset = "" \
-				- S3: format = "csv/json"
+- `dest_configuration` (Map of String)
 - `dest_connection_id` (String)
 - `discover` (Boolean)
 - `mode` (String)
@@ -58,6 +55,7 @@ resource "polytomic_bulk_sync" "sync" {
 ### Optional
 
 - `organization` (String)
+- `policies` (Set of String)
 - `schemas` (Set of String)
 - `source_configuration` (Map of String)
 

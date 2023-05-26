@@ -9,11 +9,13 @@ import (
 
 	"github.com/AlekSi/pointer"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/polytomic/polytomic-go"
 )
 
@@ -21,308 +23,268 @@ import (
 var _ resource.Resource = &syncResource{}
 var _ resource.ResourceWithImportState = &syncResource{}
 
-func (r *syncResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
-	return tfsdk.Schema{
+func (r *syncResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = schema.Schema{
 		MarkdownDescription: ":meta:subcategory:Syncs: Sync",
-		Attributes: map[string]tfsdk.Attribute{
-			"id": {
+		Attributes: map[string]schema.Attribute{
+			"id": schema.StringAttribute{
 				MarkdownDescription: "",
-				Type:                types.StringType,
 				Computed:            true,
-				PlanModifiers: []tfsdk.AttributePlanModifier{
-					resource.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
-			"organization": {
+			"organization": schema.StringAttribute{
 				MarkdownDescription: "",
-				Type:                types.StringType,
 				Optional:            true,
 				Computed:            true,
 			},
-			"name": {
+			"name": schema.StringAttribute{
 				MarkdownDescription: "",
-				Type:                types.StringType,
 				Required:            true,
 			},
-			"target": {
+			"target": schema.SingleNestedAttribute{
 				MarkdownDescription: "",
-				Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
-					"connection_id": {
+				Attributes: map[string]schema.Attribute{
+					"connection_id": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            true,
 					},
-					"object": {
+					"object": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Optional:            true,
 						Computed:            true,
 					},
-					"search_values": {
+					"search_values": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Optional:            true,
 						Computed:            true,
 					},
-					"configuration": {
+					"configuration": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Optional:            true,
 						Computed:            true,
 					},
-					"new_name": {
+					"new_name": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Optional:            true,
 					},
-					"filter_logic": {
+					"filter_logic": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Optional:            true,
 					},
-				}),
+				},
 				Required: true,
 			},
-			"mode": {
+			"mode": schema.StringAttribute{
 				MarkdownDescription: "",
-				Type:                types.StringType,
 				Required:            true,
 			},
-			"fields": {
+			"fields": schema.SetNestedAttribute{
 				MarkdownDescription: "",
-				Attributes: tfsdk.SetNestedAttributes(map[string]tfsdk.Attribute{
-					"source": {
-						MarkdownDescription: "",
-						Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
-							"model_id": {
-								MarkdownDescription: "",
-								Type:                types.StringType,
-								Required:            true,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"source": schema.SingleNestedAttribute{
+							MarkdownDescription: "",
+							Attributes: map[string]schema.Attribute{
+								"model_id": schema.StringAttribute{
+									MarkdownDescription: "",
+									Required:            true,
+								},
+								"field": schema.StringAttribute{
+									MarkdownDescription: "",
+									Required:            true,
+								},
 							},
-							"field": {
-								MarkdownDescription: "",
-								Type:                types.StringType,
-								Required:            true,
-							},
-						}),
-						Required: true,
+							Required: true,
+						},
+						"target": schema.StringAttribute{
+							MarkdownDescription: "",
+							Required:            true,
+						},
+						"new": schema.BoolAttribute{
+							MarkdownDescription: "",
+							Optional:            true,
+						},
+						"override_value": schema.StringAttribute{
+							MarkdownDescription: "",
+							Optional:            true,
+						},
+						"sync_mode": schema.StringAttribute{
+							MarkdownDescription: "",
+							Optional:            true,
+						},
 					},
-					"target": {
-						MarkdownDescription: "",
-						Type:                types.StringType,
-						Required:            true,
-					},
-					"new": {
-						MarkdownDescription: "",
-						Type:                types.BoolType,
-						Optional:            true,
-					},
-					"override_value": {
-						MarkdownDescription: "",
-						Type:                types.StringType,
-						Optional:            true,
-					},
-					"sync_mode": {
-						MarkdownDescription: "",
-						Type:                types.StringType,
-						Optional:            true,
-					},
-				}),
+				},
 				Required: true,
 			},
-			"override_fields": {
+			"override_fields": schema.SetNestedAttribute{
 				MarkdownDescription: "",
-				Attributes: tfsdk.SetNestedAttributes(map[string]tfsdk.Attribute{
-					"source": {
-						MarkdownDescription: "",
-						Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
-							"model_id": {
-								MarkdownDescription: "",
-								Type:                types.StringType,
-								Required:            true,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"source": schema.SingleNestedAttribute{
+							MarkdownDescription: "",
+							Attributes: map[string]schema.Attribute{
+								"model_id": schema.StringAttribute{
+									MarkdownDescription: "",
+									Required:            true,
+								},
+								"field": schema.StringAttribute{
+									MarkdownDescription: "",
+									Required:            true,
+								},
 							},
-							"field": {
-								MarkdownDescription: "",
-								Type:                types.StringType,
-								Required:            true,
-							},
-						}),
-						Required: true,
-					},
-					"target": {
-						MarkdownDescription: "",
-						Type:                types.StringType,
-						Required:            true,
-					},
-					"new": {
-						MarkdownDescription: "",
-						Type:                types.BoolType,
-						Optional:            true,
-					},
-					"override_value": {
-						MarkdownDescription: "",
-						Type:                types.StringType,
-						Optional:            true,
-					},
-					"sync_mode": {
-						MarkdownDescription: "",
-						Type:                types.StringType,
-						Optional:            true,
-					},
-				}),
+							Required: true,
+						},
+						"target": schema.StringAttribute{
+							MarkdownDescription: "",
+							Required:            true,
+						},
+						"new": schema.BoolAttribute{
+							MarkdownDescription: "",
+							Optional:            true,
+						},
+						"override_value": schema.StringAttribute{
+							MarkdownDescription: "",
+							Optional:            true,
+						},
+						"sync_mode": schema.StringAttribute{
+							MarkdownDescription: "",
+							Optional:            true,
+						},
+					}},
 				Optional: true,
 			},
-			"filters": {
+			"filters": schema.SetNestedAttribute{
 				MarkdownDescription: "",
-				Attributes: tfsdk.SetNestedAttributes(map[string]tfsdk.Attribute{
-					"field_id": {
-						MarkdownDescription: "",
-						Type:                types.StringType,
-						Required:            true,
-					},
-					"field_type": {
-						MarkdownDescription: "",
-						Type:                types.StringType,
-						Required:            true,
-					},
-					"function": {
-						MarkdownDescription: "",
-						Type:                types.StringType,
-						Required:            true,
-					},
-					"value": {
-						MarkdownDescription: "",
-						Type:                types.StringType,
-						Optional:            true,
-					},
-					"label": {
-						MarkdownDescription: "",
-						Type:                types.StringType,
-						Optional:            true,
-						Computed:            true,
-					},
-				}),
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"field_id": schema.StringAttribute{
+							MarkdownDescription: "",
+							Required:            true,
+						},
+						"field_type": schema.StringAttribute{
+							MarkdownDescription: "",
+							Required:            true,
+						},
+						"function": schema.StringAttribute{
+							MarkdownDescription: "",
+							Required:            true,
+						},
+						"value": schema.StringAttribute{
+							MarkdownDescription: "",
+							Optional:            true,
+						},
+						"label": schema.StringAttribute{
+							MarkdownDescription: "",
+							Optional:            true,
+							Computed:            true,
+						},
+					}},
 				Optional: true,
 			},
-			"filter_logic": {
+			"filter_logic": schema.StringAttribute{
 				MarkdownDescription: "",
-				Type:                types.StringType,
 				Optional:            true,
 			},
-			"overrides": {
+			"overrides": schema.SetNestedAttribute{
 				MarkdownDescription: "",
-				Attributes: tfsdk.SetNestedAttributes(map[string]tfsdk.Attribute{
-					"field_id": {
-						MarkdownDescription: "",
-						Type:                types.StringType,
-						Required:            true,
-					},
-					"function": {
-						MarkdownDescription: "",
-						Type:                types.StringType,
-						Required:            true,
-					},
-					"value": {
-						MarkdownDescription: "",
-						Type:                types.StringType,
-						Optional:            true,
-					},
-					"override": {
-						MarkdownDescription: "",
-						Type:                types.StringType,
-						Required:            true,
-					},
-				}),
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"field_id": schema.StringAttribute{
+							MarkdownDescription: "",
+							Required:            true,
+						},
+						"function": schema.StringAttribute{
+							MarkdownDescription: "",
+							Required:            true,
+						},
+						"value": schema.StringAttribute{
+							MarkdownDescription: "",
+							Optional:            true,
+						},
+						"override": schema.StringAttribute{
+							MarkdownDescription: "",
+							Required:            true,
+						}},
+				},
 				Optional: true,
 			},
-			"schedule": {
-				Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
-					"frequency": {
+			"schedule": schema.SingleNestedAttribute{
+				Attributes: map[string]schema.Attribute{
+					"frequency": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            true,
 					},
-					"day_of_week": {
+					"day_of_week": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Optional:            true,
 					},
-					"hour": {
+					"hour": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Optional:            true,
 					},
-					"minute": {
+					"minute": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Optional:            true,
 					},
-					"month": {
+					"month": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Optional:            true,
 					},
-					"day_of_month": {
+					"day_of_month": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Optional:            true,
 					},
-				}),
+				},
 				Required: true,
 			},
-			"identity": {
+			"identity": schema.SingleNestedAttribute{
 				MarkdownDescription: "",
-				Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
-					"source": {
+				Attributes: map[string]schema.Attribute{
+					"source": schema.SingleNestedAttribute{
 						MarkdownDescription: "",
-						Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
-							"model_id": {
+						Attributes: map[string]schema.Attribute{
+							"model_id": schema.StringAttribute{
 								MarkdownDescription: "",
-								Type:                types.StringType,
 								Required:            true,
 							},
-							"field": {
+							"field": schema.StringAttribute{
 								MarkdownDescription: "",
-								Type:                types.StringType,
 								Required:            true,
 							},
-						}),
+						},
 						Required: true,
 					},
-					"target": {
+					"target": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            true,
 					},
-					"function": {
+					"function": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Optional:            true,
 						Computed:            true,
 					},
-					"remote_field_type_id": {
+					"remote_field_type_id": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Optional:            true,
 						Computed:            true,
 					},
-					"new_field": {
+					"new_field": schema.BoolAttribute{
 						MarkdownDescription: "",
-						Type:                types.BoolType,
 						Optional:            true,
 						Computed:            true,
 					},
-				}),
+				},
 				Optional: true,
 			},
-			"sync_all_records": {
+			"sync_all_records": schema.BoolAttribute{
 				MarkdownDescription: "",
-				Type:                types.BoolType,
 				Optional:            true,
 				Computed:            true,
 			},
 		},
-	}, nil
+	}
 }
 
 func (r *syncResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
@@ -403,7 +365,7 @@ func (r *syncResource) Create(ctx context.Context, req resource.CreateRequest, r
 	}
 
 	var target Target
-	diags = data.Target.As(ctx, &target, types.ObjectAsOptions{
+	diags = data.Target.As(ctx, &target, basetypes.ObjectAsOptions{
 		UnhandledNullAsEmpty: true,
 	})
 	if diags.HasError() {
@@ -524,7 +486,7 @@ func (r *syncResource) Create(ctx context.Context, req resource.CreateRequest, r
 	}
 
 	var schedule polytomic.Schedule
-	diags = data.Schedule.As(ctx, &schedule, types.ObjectAsOptions{
+	diags = data.Schedule.As(ctx, &schedule, basetypes.ObjectAsOptions{
 		UnhandledNullAsEmpty: true,
 	})
 	if diags.HasError() {
@@ -533,7 +495,7 @@ func (r *syncResource) Create(ctx context.Context, req resource.CreateRequest, r
 	}
 
 	var identity polytomic.Identity
-	diags = data.Identity.As(ctx, &identity, types.ObjectAsOptions{
+	diags = data.Identity.As(ctx, &identity, basetypes.ObjectAsOptions{
 		UnhandledNullAsEmpty: true,
 	})
 	if diags.HasError() {
@@ -999,7 +961,7 @@ func (r *syncResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	}
 
 	var target Target
-	diags = data.Target.As(ctx, &target, types.ObjectAsOptions{
+	diags = data.Target.As(ctx, &target, basetypes.ObjectAsOptions{
 		UnhandledNullAsEmpty:    true,
 		UnhandledUnknownAsEmpty: true,
 	})
@@ -1121,14 +1083,14 @@ func (r *syncResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	}
 
 	var schedule polytomic.Schedule
-	diags = data.Schedule.As(ctx, &schedule, types.ObjectAsOptions{})
+	diags = data.Schedule.As(ctx, &schedule, basetypes.ObjectAsOptions{})
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
 
 	var identity *polytomic.Identity
-	diags = data.Identity.As(ctx, &identity, types.ObjectAsOptions{
+	diags = data.Identity.As(ctx, &identity, basetypes.ObjectAsOptions{
 		UnhandledNullAsEmpty: false,
 	})
 	if diags.HasError() {

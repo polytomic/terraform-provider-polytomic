@@ -7,10 +7,13 @@ import (
 	"net/http"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/polytomic/polytomic-go"
 )
@@ -19,78 +22,70 @@ import (
 var _ resource.Resource = &modelResource{}
 var _ resource.ResourceWithImportState = &modelResource{}
 
-func (r *modelResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
-	return tfsdk.Schema{
+func (r *modelResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = schema.Schema{
 		MarkdownDescription: ":meta:subcategory:Models: Model",
-		Attributes: map[string]tfsdk.Attribute{
-			"id": {
+		Attributes: map[string]schema.Attribute{
+			"id": schema.StringAttribute{
 				MarkdownDescription: "",
-				Type:                types.StringType,
 				Computed:            true,
-				PlanModifiers: []tfsdk.AttributePlanModifier{
-					resource.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
-			"organization": {
+			"organization": schema.StringAttribute{
 				MarkdownDescription: "",
-				Type:                types.StringType,
 				Optional:            true,
 				Computed:            true,
 			},
-			"connection_id": {
+			"connection_id": schema.StringAttribute{
 				MarkdownDescription: "",
-				Type:                types.StringType,
 				Required:            true,
 			},
-			"name": {
+			"name": schema.StringAttribute{
 				MarkdownDescription: "",
-				Type:                types.StringType,
 				Required:            true,
 			},
-			"type": {
+			"type": schema.StringAttribute{
 				MarkdownDescription: "",
-				Type:                types.StringType,
 				Computed:            true,
-				PlanModifiers: []tfsdk.AttributePlanModifier{
-					resource.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
-			"version": {
+			"version": schema.Int64Attribute{
 				MarkdownDescription: "",
-				Type:                types.Int64Type,
 				Computed:            true,
-				PlanModifiers: []tfsdk.AttributePlanModifier{
-					resource.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.Int64{
+					int64planmodifier.UseStateForUnknown(),
 				},
 			},
-			"configuration": {
+			"configuration": schema.MapAttribute{
 				MarkdownDescription: "",
-				Type: types.MapType{
-					ElemType: types.StringType,
-				},
-				Required: true,
+				ElementType:         types.StringType,
+				Required:            true,
 			},
-			"fields": {
+			"fields": schema.SetAttribute{
 				MarkdownDescription: "",
-				Type:                types.SetType{ElemType: types.StringType},
+				ElementType:         types.StringType,
 				Optional:            true,
 				Computed:            true,
 			},
-			"additional_fields": {
+			"additional_fields": schema.SetAttribute{
 				MarkdownDescription: "",
-				Type: types.SetType{ElemType: types.ObjectType{
+				ElementType: types.ObjectType{
 					AttrTypes: map[string]attr.Type{
 						"name":  types.StringType,
 						"type":  types.StringType,
 						"label": types.StringType,
 					},
-				}},
+				},
 				Optional: true,
 				Computed: true,
 			},
-			"relations": {
+			"relations": schema.SetAttribute{
 				MarkdownDescription: "",
-				Type: types.SetType{ElemType: types.ObjectType{
+				ElementType: types.ObjectType{
 					AttrTypes: map[string]attr.Type{
 						"to": types.ObjectType{
 							AttrTypes: map[string]attr.Type{
@@ -100,30 +95,29 @@ func (r *modelResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagn
 						},
 						"from": types.StringType,
 					},
-				}},
+				},
 				Optional: true,
 				Computed: true,
 			},
-			"identifier": {
+			"identifier": schema.StringAttribute{
 				MarkdownDescription: "",
-				Type:                types.StringType,
 				Optional:            true,
 				Computed:            true,
-				PlanModifiers: []tfsdk.AttributePlanModifier{
-					resource.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
-			"tracking_columns": {
+			"tracking_columns": schema.SetAttribute{
 				MarkdownDescription: "",
-				Type:                types.SetType{ElemType: types.StringType},
+				ElementType:         types.StringType,
 				Optional:            true,
 				Computed:            true,
-				PlanModifiers: []tfsdk.AttributePlanModifier{
-					resource.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.Set{
+					setplanmodifier.UseStateForUnknown(),
 				},
 			},
 		},
-	}, nil
+	}
 }
 
 func (r *modelResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {

@@ -11,10 +11,11 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/polytomic/polytomic-go"
@@ -24,71 +25,63 @@ import (
 var _ resource.Resource = &CloudsqlConnectionResource{}
 var _ resource.ResourceWithImportState = &CloudsqlConnectionResource{}
 
-func (t *CloudsqlConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
-	return tfsdk.Schema{
+func (t *CloudsqlConnectionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = schema.Schema{
 		MarkdownDescription: ":meta:subcategory:Connections: Cloud SQL Connection",
-		Attributes: map[string]tfsdk.Attribute{
-			"organization": {
+		Attributes: map[string]schema.Attribute{
+			"organization": schema.StringAttribute{
 				MarkdownDescription: "Organization ID",
 				Optional:            true,
 				Computed:            true,
-				Type:                types.StringType,
 			},
-			"name": {
-				Type:     types.StringType,
+			"name": schema.StringAttribute{
 				Required: true,
 			},
-			"configuration": {
-				Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
-					"connection_name": {
+			"configuration": schema.SingleNestedAttribute{
+				Attributes: map[string]schema.Attribute{
+					"connection_name": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            true,
 						Optional:            false,
 						Sensitive:           false,
 					},
-					"database": {
+					"database": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            true,
 						Optional:            false,
 						Sensitive:           false,
 					},
-					"username": {
+					"username": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            false,
 						Optional:            true,
 						Sensitive:           false,
 					},
-					"password": {
+					"password": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            false,
 						Optional:            true,
 						Sensitive:           true,
 					},
-					"credentials": {
+					"credentials": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            false,
 						Optional:            true,
 						Sensitive:           true,
 					},
-				}),
+				},
 
 				Required: true,
 			},
-			"id": {
+			"id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Cloud SQL Connection identifier",
-				PlanModifiers: tfsdk.AttributePlanModifiers{
-					resource.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
 				},
-				Type: types.StringType,
 			},
 		},
-	}, nil
+	}
 }
 
 func (r *CloudsqlConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -139,15 +132,15 @@ func (r *CloudsqlConnectionResource) Create(ctx context.Context, req resource.Cr
 	//decoder.Decode(created.Configuration)
 	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 	//
-	//	"connection_name": types.StringType,
+	//	"connection_name": schema.StringAttribute,
 	//
-	//	"database": types.StringType,
+	//	"database": schema.StringAttribute,
 	//
-	//	"username": types.StringType,
+	//	"username": schema.StringAttribute,
 	//
-	//	"password": types.StringType,
+	//	"password": schema.StringAttribute,
 	//
-	//	"credentials": types.StringType,
+	//	"credentials": schema.StringAttribute,
 	//
 	//}, output)
 	//if diags.HasError() {
@@ -196,15 +189,15 @@ func (r *CloudsqlConnectionResource) Read(ctx context.Context, req resource.Read
 	//decoder.Decode(connection.Configuration)
 	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 	//
-	//	"connection_name": types.StringType,
+	//	"connection_name": schema.StringAttribute,
 	//
-	//	"database": types.StringType,
+	//	"database": schema.StringAttribute,
 	//
-	//	"username": types.StringType,
+	//	"username": schema.StringAttribute,
 	//
-	//	"password": types.StringType,
+	//	"password": schema.StringAttribute,
 	//
-	//	"credentials": types.StringType,
+	//	"credentials": schema.StringAttribute,
 	//
 	//}, output)
 	//if diags.HasError() {
@@ -257,15 +250,15 @@ func (r *CloudsqlConnectionResource) Update(ctx context.Context, req resource.Up
 	//decoder.Decode(updated.Configuration)
 	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 	//
-	//	"connection_name": types.StringType,
+	//	"connection_name": schema.StringAttribute,
 	//
-	//	"database": types.StringType,
+	//	"database": schema.StringAttribute,
 	//
-	//	"username": types.StringType,
+	//	"username": schema.StringAttribute,
 	//
-	//	"password": types.StringType,
+	//	"password": schema.StringAttribute,
 	//
-	//	"credentials": types.StringType,
+	//	"credentials": schema.StringAttribute,
 	//
 	//}, output)
 	//if diags.HasError() {

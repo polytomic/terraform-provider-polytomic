@@ -6,11 +6,11 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
-	"github.com/hashicorp/terraform-plugin-framework/attr"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/polytomic/polytomic-go"
@@ -20,63 +20,44 @@ import (
 var _ resource.Resource = &userResource{}
 var _ resource.ResourceWithImportState = &userResource{}
 
-func (r *userResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
-	return tfsdk.Schema{
+func (r *userResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = schema.Schema{
 		MarkdownDescription: ":meta:subcategory:Organizations: A user in a Polytomic organization",
-		Attributes: map[string]tfsdk.Attribute{
-			"organization": {
+		Attributes: map[string]schema.Attribute{
+			"organization": schema.StringAttribute{
 				MarkdownDescription: "Organization ID",
 				Required:            true,
-				Type:                types.StringType,
-				PlanModifiers: tfsdk.AttributePlanModifiers{
-					resource.RequiresReplace(),
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
-			"email": {
+			"email": schema.StringAttribute{
 				MarkdownDescription: "Email address",
 				Required:            true,
-				Type:                types.StringType,
-				PlanModifiers: tfsdk.AttributePlanModifiers{
-					resource.RequiresReplaceIf(
-						func(ctx context.Context, state, config attr.Value, path path.Path) (bool, diag.Diagnostics) {
-							tfState, err := state.ToTerraformValue(ctx)
-							if err != nil {
-								return false, nil
-							}
-							tfConfig, err := config.ToTerraformValue(ctx)
-							if err != nil {
-								return false, nil
-							}
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplaceIf(
+						func(ctx context.Context, req planmodifier.StringRequest, resp *stringplanmodifier.RequiresReplaceIfFuncResponse) {
+							resp.RequiresReplace = !(strings.ToLower(req.StateValue.ValueString()) == strings.ToLower(req.ConfigValue.ValueString()))
 
-							var conf string
-							var stt string
-
-							if tfState.As(&stt) == nil && tfConfig.As(&conf) == nil {
-								return !(strings.ToLower(stt) == strings.ToLower(conf)), nil
-							}
-							return false, nil
 						},
-
 						"Case-insensitively compares email addresses to determine if replacement is needed.",
 						"Case-insensitively compares email addresses to determine if replacement is needed.",
 					),
 				},
 			},
-			"role": {
+			"role": schema.StringAttribute{
 				MarkdownDescription: "Role; one of `user` or `admin`.",
 				Optional:            true,
-				Type:                types.StringType,
 			},
-			"id": {
+			"id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "user identifier",
-				PlanModifiers: tfsdk.AttributePlanModifiers{
-					resource.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
 				},
-				Type: types.StringType,
 			},
 		},
-	}, nil
+	}
 }
 
 func (r userResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {

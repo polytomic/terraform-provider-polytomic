@@ -11,10 +11,11 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/polytomic/polytomic-go"
@@ -24,57 +25,51 @@ import (
 var _ resource.Resource = &ChargebeeConnectionResource{}
 var _ resource.ResourceWithImportState = &ChargebeeConnectionResource{}
 
-func (t *ChargebeeConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
-	return tfsdk.Schema{
+func (t *ChargebeeConnectionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = schema.Schema{
 		MarkdownDescription: ":meta:subcategory:Connections: Chargebee Connection",
-		Attributes: map[string]tfsdk.Attribute{
-			"organization": {
+		Attributes: map[string]schema.Attribute{
+			"organization": schema.StringAttribute{
 				MarkdownDescription: "Organization ID",
 				Optional:            true,
 				Computed:            true,
-				Type:                types.StringType,
 			},
-			"name": {
-				Type:     types.StringType,
+			"name": schema.StringAttribute{
 				Required: true,
 			},
-			"configuration": {
-				Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
-					"site": {
+			"configuration": schema.SingleNestedAttribute{
+				Attributes: map[string]schema.Attribute{
+					"site": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            true,
 						Optional:            false,
 						Sensitive:           false,
 					},
-					"api_key": {
+					"api_key": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            true,
 						Optional:            false,
 						Sensitive:           true,
 					},
-					"ratelimit_rpm": {
+					"ratelimit_rpm": schema.Int64Attribute{
 						MarkdownDescription: "",
-						Type:                types.Int64Type,
 						Required:            false,
 						Optional:            true,
 						Sensitive:           false,
 					},
-				}),
+				},
 
 				Required: true,
 			},
-			"id": {
+			"id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Chargebee Connection identifier",
-				PlanModifiers: tfsdk.AttributePlanModifiers{
-					resource.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
 				},
-				Type: types.StringType,
 			},
 		},
-	}, nil
+	}
 }
 
 func (r *ChargebeeConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -123,11 +118,11 @@ func (r *ChargebeeConnectionResource) Create(ctx context.Context, req resource.C
 	//decoder.Decode(created.Configuration)
 	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 	//
-	//	"site": types.StringType,
+	//	"site": schema.StringAttribute,
 	//
-	//	"api_key": types.StringType,
+	//	"api_key": schema.StringAttribute,
 	//
-	//	"ratelimit_rpm": types.Int64Type,
+	//	"ratelimit_rpm": schema.Int64Attribute,
 	//
 	//}, output)
 	//if diags.HasError() {
@@ -176,11 +171,11 @@ func (r *ChargebeeConnectionResource) Read(ctx context.Context, req resource.Rea
 	//decoder.Decode(connection.Configuration)
 	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 	//
-	//	"site": types.StringType,
+	//	"site": schema.StringAttribute,
 	//
-	//	"api_key": types.StringType,
+	//	"api_key": schema.StringAttribute,
 	//
-	//	"ratelimit_rpm": types.Int64Type,
+	//	"ratelimit_rpm": schema.Int64Attribute,
 	//
 	//}, output)
 	//if diags.HasError() {
@@ -231,11 +226,11 @@ func (r *ChargebeeConnectionResource) Update(ctx context.Context, req resource.U
 	//decoder.Decode(updated.Configuration)
 	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 	//
-	//	"site": types.StringType,
+	//	"site": schema.StringAttribute,
 	//
-	//	"api_key": types.StringType,
+	//	"api_key": schema.StringAttribute,
 	//
-	//	"ratelimit_rpm": types.Int64Type,
+	//	"ratelimit_rpm": schema.Int64Attribute,
 	//
 	//}, output)
 	//if diags.HasError() {

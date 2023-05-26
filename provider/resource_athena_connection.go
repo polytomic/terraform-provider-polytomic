@@ -11,10 +11,11 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/polytomic/polytomic-go"
@@ -24,64 +25,57 @@ import (
 var _ resource.Resource = &AthenaConnectionResource{}
 var _ resource.ResourceWithImportState = &AthenaConnectionResource{}
 
-func (t *AthenaConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
-	return tfsdk.Schema{
+func (t *AthenaConnectionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = schema.Schema{
 		MarkdownDescription: ":meta:subcategory:Connections: AWS Athena Connection",
-		Attributes: map[string]tfsdk.Attribute{
-			"organization": {
+		Attributes: map[string]schema.Attribute{
+			"organization": schema.StringAttribute{
 				MarkdownDescription: "Organization ID",
 				Optional:            true,
 				Computed:            true,
-				Type:                types.StringType,
 			},
-			"name": {
-				Type:     types.StringType,
+			"name": schema.StringAttribute{
 				Required: true,
 			},
-			"configuration": {
-				Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
-					"access_key_id": {
+			"configuration": schema.SingleNestedAttribute{
+				Attributes: map[string]schema.Attribute{
+					"access_key_id": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            true,
 						Optional:            false,
 						Sensitive:           true,
 					},
-					"access_key_secret": {
+					"access_key_secret": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            true,
 						Optional:            false,
 						Sensitive:           true,
 					},
-					"region": {
+					"region": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            true,
 						Optional:            false,
 						Sensitive:           false,
 					},
-					"output_bucket": {
+					"output_bucket": schema.StringAttribute{
 						MarkdownDescription: "S3 bucket for output storage, with optional prefix. Examples: `bucket-name`, `bucket-name/prefix`.",
-						Type:                types.StringType,
 						Required:            true,
 						Optional:            false,
 						Sensitive:           false,
 					},
-				}),
+				},
 
 				Required: true,
 			},
-			"id": {
+			"id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "AWS Athena Connection identifier",
-				PlanModifiers: tfsdk.AttributePlanModifiers{
-					resource.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
 				},
-				Type: types.StringType,
 			},
 		},
-	}, nil
+	}
 }
 
 func (r *AthenaConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -131,13 +125,13 @@ func (r *AthenaConnectionResource) Create(ctx context.Context, req resource.Crea
 	//decoder.Decode(created.Configuration)
 	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 	//
-	//	"access_key_id": types.StringType,
+	//	"access_key_id": schema.StringAttribute,
 	//
-	//	"access_key_secret": types.StringType,
+	//	"access_key_secret": schema.StringAttribute,
 	//
-	//	"region": types.StringType,
+	//	"region": schema.StringAttribute,
 	//
-	//	"output_bucket": types.StringType,
+	//	"output_bucket": schema.StringAttribute,
 	//
 	//}, output)
 	//if diags.HasError() {
@@ -186,13 +180,13 @@ func (r *AthenaConnectionResource) Read(ctx context.Context, req resource.ReadRe
 	//decoder.Decode(connection.Configuration)
 	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 	//
-	//	"access_key_id": types.StringType,
+	//	"access_key_id": schema.StringAttribute,
 	//
-	//	"access_key_secret": types.StringType,
+	//	"access_key_secret": schema.StringAttribute,
 	//
-	//	"region": types.StringType,
+	//	"region": schema.StringAttribute,
 	//
-	//	"output_bucket": types.StringType,
+	//	"output_bucket": schema.StringAttribute,
 	//
 	//}, output)
 	//if diags.HasError() {
@@ -244,13 +238,13 @@ func (r *AthenaConnectionResource) Update(ctx context.Context, req resource.Upda
 	//decoder.Decode(updated.Configuration)
 	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 	//
-	//	"access_key_id": types.StringType,
+	//	"access_key_id": schema.StringAttribute,
 	//
-	//	"access_key_secret": types.StringType,
+	//	"access_key_secret": schema.StringAttribute,
 	//
-	//	"region": types.StringType,
+	//	"region": schema.StringAttribute,
 	//
-	//	"output_bucket": types.StringType,
+	//	"output_bucket": schema.StringAttribute,
 	//
 	//}, output)
 	//if diags.HasError() {

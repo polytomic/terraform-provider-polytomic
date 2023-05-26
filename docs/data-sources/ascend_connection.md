@@ -23,7 +23,7 @@ data "polytomic_ascend_connection" "ascend" {
 
 ### Optional
 
-- `configuration` (Object) (see [below for nested schema](#nestedatt--configuration))
+- `configuration` (Attributes) (see [below for nested schema](#nestedatt--configuration))
 - `name` (String)
 - `organization` (String)
 
@@ -33,7 +33,5 @@ data "polytomic_ascend_connection" "ascend" {
 
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
-
-Optional:
 
 

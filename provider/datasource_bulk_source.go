@@ -6,8 +6,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/polytomic/polytomic-go"
 )
@@ -24,29 +24,26 @@ func (d *bulkSourceDatasource) Metadata(ctx context.Context, req datasource.Meta
 	resp.TypeName = req.ProviderTypeName + "_bulk_source"
 }
 
-func (d *bulkSourceDatasource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
-	return tfsdk.Schema{
+func (d *bulkSourceDatasource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+	resp.Schema = schema.Schema{
 		MarkdownDescription: ":meta:subcategory:Bulk Syncs: Bulk Source",
-		Attributes: map[string]tfsdk.Attribute{
-			"connection_id": {
+		Attributes: map[string]schema.Attribute{
+			"connection_id": schema.StringAttribute{
 				MarkdownDescription: "",
-				Type:                types.StringType,
 				Required:            true,
 			},
-			"schemas": {
+			"schemas": schema.SetAttribute{
 				MarkdownDescription: "",
-				Type: types.SetType{
-					ElemType: types.ObjectType{
-						AttrTypes: map[string]attr.Type{
-							"id":   types.StringType,
-							"name": types.StringType,
-							"fields": types.SetType{
-								ElemType: types.ObjectType{
-									AttrTypes: map[string]attr.Type{
-										"id":   types.StringType,
-										"name": types.StringType,
-										"type": types.StringType,
-									},
+				ElementType: types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						"id":   types.StringType,
+						"name": types.StringType,
+						"fields": types.SetType{
+							ElemType: types.ObjectType{
+								AttrTypes: map[string]attr.Type{
+									"id":   types.StringType,
+									"name": types.StringType,
+									"type": types.StringType,
 								},
 							},
 						},
@@ -55,7 +52,7 @@ func (d *bulkSourceDatasource) GetSchema(ctx context.Context) (tfsdk.Schema, dia
 				Computed: true,
 			},
 		},
-	}, nil
+	}
 }
 
 func (d *bulkSourceDatasource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {

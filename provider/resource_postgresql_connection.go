@@ -11,10 +11,11 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/polytomic/polytomic-go"
@@ -24,155 +25,135 @@ import (
 var _ resource.Resource = &PostgresqlConnectionResource{}
 var _ resource.ResourceWithImportState = &PostgresqlConnectionResource{}
 
-func (t *PostgresqlConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
-	return tfsdk.Schema{
+func (t *PostgresqlConnectionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = schema.Schema{
 		MarkdownDescription: ":meta:subcategory:Connections: PostgresSQL Connection",
-		Attributes: map[string]tfsdk.Attribute{
-			"organization": {
+		Attributes: map[string]schema.Attribute{
+			"organization": schema.StringAttribute{
 				MarkdownDescription: "Organization ID",
 				Optional:            true,
 				Computed:            true,
-				Type:                types.StringType,
 			},
-			"name": {
-				Type:     types.StringType,
+			"name": schema.StringAttribute{
 				Required: true,
 			},
-			"configuration": {
-				Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
-					"hostname": {
+			"configuration": schema.SingleNestedAttribute{
+				Attributes: map[string]schema.Attribute{
+					"hostname": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            true,
 						Optional:            false,
 						Sensitive:           false,
 					},
-					"username": {
+					"username": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            true,
 						Optional:            false,
 						Sensitive:           false,
 					},
-					"password": {
+					"password": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            true,
 						Optional:            false,
 						Sensitive:           true,
 					},
-					"database": {
+					"database": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            true,
 						Optional:            false,
 						Sensitive:           false,
 					},
-					"port": {
+					"port": schema.Int64Attribute{
 						MarkdownDescription: "",
-						Type:                types.Int64Type,
 						Required:            true,
 						Optional:            false,
 						Sensitive:           false,
 					},
-					"ssl": {
+					"ssl": schema.BoolAttribute{
 						MarkdownDescription: "",
-						Type:                types.BoolType,
 						Required:            false,
 						Optional:            true,
 						Sensitive:           false,
 					},
-					"client_certs": {
+					"client_certs": schema.BoolAttribute{
 						MarkdownDescription: "",
-						Type:                types.BoolType,
 						Required:            false,
 						Optional:            true,
 						Sensitive:           false,
 					},
-					"client_certificate": {
+					"client_certificate": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            false,
 						Optional:            true,
 						Sensitive:           false,
 					},
-					"client_key": {
+					"client_key": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            false,
 						Optional:            true,
 						Sensitive:           true,
 					},
-					"ca_cert": {
+					"ca_cert": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            false,
 						Optional:            true,
 						Sensitive:           false,
 					},
-					"change_detection": {
+					"change_detection": schema.BoolAttribute{
 						MarkdownDescription: "",
-						Type:                types.BoolType,
 						Required:            false,
 						Optional:            true,
 						Sensitive:           false,
 					},
-					"publication": {
+					"publication": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            false,
 						Optional:            true,
 						Sensitive:           false,
 					},
-					"ssh": {
+					"ssh": schema.BoolAttribute{
 						MarkdownDescription: "",
-						Type:                types.BoolType,
 						Required:            false,
 						Optional:            true,
 						Sensitive:           false,
 					},
-					"ssh_user": {
+					"ssh_user": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            false,
 						Optional:            true,
 						Sensitive:           false,
 					},
-					"ssh_host": {
+					"ssh_host": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            false,
 						Optional:            true,
 						Sensitive:           false,
 					},
-					"ssh_port": {
+					"ssh_port": schema.Int64Attribute{
 						MarkdownDescription: "",
-						Type:                types.Int64Type,
 						Required:            false,
 						Optional:            true,
 						Sensitive:           false,
 					},
-					"ssh_private_key": {
+					"ssh_private_key": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            false,
 						Optional:            true,
 						Sensitive:           true,
 					},
-				}),
+				},
 
 				Required: true,
 			},
-			"id": {
+			"id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "PostgresSQL Connection identifier",
-				PlanModifiers: tfsdk.AttributePlanModifiers{
-					resource.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
 				},
-				Type: types.StringType,
 			},
 		},
-	}, nil
+	}
 }
 
 func (r *PostgresqlConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -235,39 +216,39 @@ func (r *PostgresqlConnectionResource) Create(ctx context.Context, req resource.
 	//decoder.Decode(created.Configuration)
 	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 	//
-	//	"hostname": types.StringType,
+	//	"hostname": schema.StringAttribute,
 	//
-	//	"username": types.StringType,
+	//	"username": schema.StringAttribute,
 	//
-	//	"password": types.StringType,
+	//	"password": schema.StringAttribute,
 	//
-	//	"database": types.StringType,
+	//	"database": schema.StringAttribute,
 	//
-	//	"port": types.Int64Type,
+	//	"port": schema.Int64Attribute,
 	//
-	//	"ssl": types.BoolType,
+	//	"ssl": schema.BoolAttribute,
 	//
-	//	"client_certs": types.BoolType,
+	//	"client_certs": schema.BoolAttribute,
 	//
-	//	"client_certificate": types.StringType,
+	//	"client_certificate": schema.StringAttribute,
 	//
-	//	"client_key": types.StringType,
+	//	"client_key": schema.StringAttribute,
 	//
-	//	"ca_cert": types.StringType,
+	//	"ca_cert": schema.StringAttribute,
 	//
-	//	"change_detection": types.BoolType,
+	//	"change_detection": schema.BoolAttribute,
 	//
-	//	"publication": types.StringType,
+	//	"publication": schema.StringAttribute,
 	//
-	//	"ssh": types.BoolType,
+	//	"ssh": schema.BoolAttribute,
 	//
-	//	"ssh_user": types.StringType,
+	//	"ssh_user": schema.StringAttribute,
 	//
-	//	"ssh_host": types.StringType,
+	//	"ssh_host": schema.StringAttribute,
 	//
-	//	"ssh_port": types.Int64Type,
+	//	"ssh_port": schema.Int64Attribute,
 	//
-	//	"ssh_private_key": types.StringType,
+	//	"ssh_private_key": schema.StringAttribute,
 	//
 	//}, output)
 	//if diags.HasError() {
@@ -316,39 +297,39 @@ func (r *PostgresqlConnectionResource) Read(ctx context.Context, req resource.Re
 	//decoder.Decode(connection.Configuration)
 	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 	//
-	//	"hostname": types.StringType,
+	//	"hostname": schema.StringAttribute,
 	//
-	//	"username": types.StringType,
+	//	"username": schema.StringAttribute,
 	//
-	//	"password": types.StringType,
+	//	"password": schema.StringAttribute,
 	//
-	//	"database": types.StringType,
+	//	"database": schema.StringAttribute,
 	//
-	//	"port": types.Int64Type,
+	//	"port": schema.Int64Attribute,
 	//
-	//	"ssl": types.BoolType,
+	//	"ssl": schema.BoolAttribute,
 	//
-	//	"client_certs": types.BoolType,
+	//	"client_certs": schema.BoolAttribute,
 	//
-	//	"client_certificate": types.StringType,
+	//	"client_certificate": schema.StringAttribute,
 	//
-	//	"client_key": types.StringType,
+	//	"client_key": schema.StringAttribute,
 	//
-	//	"ca_cert": types.StringType,
+	//	"ca_cert": schema.StringAttribute,
 	//
-	//	"change_detection": types.BoolType,
+	//	"change_detection": schema.BoolAttribute,
 	//
-	//	"publication": types.StringType,
+	//	"publication": schema.StringAttribute,
 	//
-	//	"ssh": types.BoolType,
+	//	"ssh": schema.BoolAttribute,
 	//
-	//	"ssh_user": types.StringType,
+	//	"ssh_user": schema.StringAttribute,
 	//
-	//	"ssh_host": types.StringType,
+	//	"ssh_host": schema.StringAttribute,
 	//
-	//	"ssh_port": types.Int64Type,
+	//	"ssh_port": schema.Int64Attribute,
 	//
-	//	"ssh_private_key": types.StringType,
+	//	"ssh_private_key": schema.StringAttribute,
 	//
 	//}, output)
 	//if diags.HasError() {
@@ -413,39 +394,39 @@ func (r *PostgresqlConnectionResource) Update(ctx context.Context, req resource.
 	//decoder.Decode(updated.Configuration)
 	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 	//
-	//	"hostname": types.StringType,
+	//	"hostname": schema.StringAttribute,
 	//
-	//	"username": types.StringType,
+	//	"username": schema.StringAttribute,
 	//
-	//	"password": types.StringType,
+	//	"password": schema.StringAttribute,
 	//
-	//	"database": types.StringType,
+	//	"database": schema.StringAttribute,
 	//
-	//	"port": types.Int64Type,
+	//	"port": schema.Int64Attribute,
 	//
-	//	"ssl": types.BoolType,
+	//	"ssl": schema.BoolAttribute,
 	//
-	//	"client_certs": types.BoolType,
+	//	"client_certs": schema.BoolAttribute,
 	//
-	//	"client_certificate": types.StringType,
+	//	"client_certificate": schema.StringAttribute,
 	//
-	//	"client_key": types.StringType,
+	//	"client_key": schema.StringAttribute,
 	//
-	//	"ca_cert": types.StringType,
+	//	"ca_cert": schema.StringAttribute,
 	//
-	//	"change_detection": types.BoolType,
+	//	"change_detection": schema.BoolAttribute,
 	//
-	//	"publication": types.StringType,
+	//	"publication": schema.StringAttribute,
 	//
-	//	"ssh": types.BoolType,
+	//	"ssh": schema.BoolAttribute,
 	//
-	//	"ssh_user": types.StringType,
+	//	"ssh_user": schema.StringAttribute,
 	//
-	//	"ssh_host": types.StringType,
+	//	"ssh_host": schema.StringAttribute,
 	//
-	//	"ssh_port": types.Int64Type,
+	//	"ssh_port": schema.Int64Attribute,
 	//
-	//	"ssh_private_key": types.StringType,
+	//	"ssh_private_key": schema.StringAttribute,
 	//
 	//}, output)
 	//if diags.HasError() {
