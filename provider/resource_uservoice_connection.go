@@ -11,10 +11,11 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/polytomic/polytomic-go"
@@ -24,50 +25,45 @@ import (
 var _ resource.Resource = &UservoiceConnectionResource{}
 var _ resource.ResourceWithImportState = &UservoiceConnectionResource{}
 
-func (t *UservoiceConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
-	return tfsdk.Schema{
+func (t *UservoiceConnectionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = schema.Schema{
 		MarkdownDescription: ":meta:subcategory:Connections: UserVoice Connection",
-		Attributes: map[string]tfsdk.Attribute{
-			"organization": {
+		Attributes: map[string]schema.Attribute{
+			"organization": schema.StringAttribute{
 				MarkdownDescription: "Organization ID",
 				Optional:            true,
 				Computed:            true,
-				Type:                types.StringType,
 			},
-			"name": {
-				Type:     types.StringType,
+			"name": schema.StringAttribute{
 				Required: true,
 			},
-			"configuration": {
-				Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
-					"api_key": {
+			"configuration": schema.SingleNestedAttribute{
+				Attributes: map[string]schema.Attribute{
+					"api_key": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            true,
 						Optional:            false,
 						Sensitive:           true,
 					},
-					"domain": {
+					"domain": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            true,
 						Optional:            false,
 						Sensitive:           false,
 					},
-				}),
+				},
 
 				Required: true,
 			},
-			"id": {
+			"id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "UserVoice Connection identifier",
-				PlanModifiers: tfsdk.AttributePlanModifiers{
-					resource.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
 				},
-				Type: types.StringType,
 			},
 		},
-	}, nil
+	}
 }
 
 func (r *UservoiceConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -115,9 +111,9 @@ func (r *UservoiceConnectionResource) Create(ctx context.Context, req resource.C
 	//decoder.Decode(created.Configuration)
 	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 	//
-	//	"api_key": types.StringType,
+	//	"api_key": schema.StringAttribute,
 	//
-	//	"domain": types.StringType,
+	//	"domain": schema.StringAttribute,
 	//
 	//}, output)
 	//if diags.HasError() {
@@ -166,9 +162,9 @@ func (r *UservoiceConnectionResource) Read(ctx context.Context, req resource.Rea
 	//decoder.Decode(connection.Configuration)
 	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 	//
-	//	"api_key": types.StringType,
+	//	"api_key": schema.StringAttribute,
 	//
-	//	"domain": types.StringType,
+	//	"domain": schema.StringAttribute,
 	//
 	//}, output)
 	//if diags.HasError() {
@@ -218,9 +214,9 @@ func (r *UservoiceConnectionResource) Update(ctx context.Context, req resource.U
 	//decoder.Decode(updated.Configuration)
 	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 	//
-	//	"api_key": types.StringType,
+	//	"api_key": schema.StringAttribute,
 	//
-	//	"domain": types.StringType,
+	//	"domain": schema.StringAttribute,
 	//
 	//}, output)
 	//if diags.HasError() {

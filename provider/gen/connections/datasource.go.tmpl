@@ -9,8 +9,8 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/polytomic/polytomic-go"
 	{{- if .Attributes }}
@@ -33,46 +33,39 @@ func (d *{{ .Connection }}ConnectionDataSource) Metadata(ctx context.Context, re
 	resp.TypeName = req.ProviderTypeName + "_{{ .ResourceName }}_connection"
 }
 
-func (d *{{ .Connection }}ConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
-	return tfsdk.Schema{
+func (d *{{ .Connection }}ConnectionDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+	resp.Schema = schema.Schema{
 		MarkdownDescription: ":meta:subcategory:Connections: {{ .Name }} Connection",
-		Attributes: map[string]tfsdk.Attribute{
-			"name": {
+		Attributes: map[string]schema.Attribute{
+			"name": schema.StringAttribute{
 				MarkdownDescription: "",
-				Type:                types.StringType,
 				Optional:            true,
 			},
-			"id": {
+			"id": schema.StringAttribute{
 				MarkdownDescription: "",
-				Type:                types.StringType,
 				Required:            true,
 			},
-			"organization": {
+			"organization": schema.StringAttribute{
 				MarkdownDescription: "",
-				Type:                types.StringType,
 				Optional:            true,
 			},
-			"configuration": {
-				Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
+			"configuration": schema.SingleNestedAttribute{
+				Attributes: map[string]schema.Attribute{
 					{{- range .Attributes }}
 					{{- if not .Sensitive }}
-					"{{ .AttrName }}": {
+					"{{ .AttrName }}": {{ .AttrType }}{
 						MarkdownDescription: "{{ .Description }}",
-						Type:      {{ .AttrType }},
 						Required:  {{ .Required }},
 						Optional:  {{ .Optional }},
 						Sensitive: {{ .Sensitive }},
 					},
 					{{- end }}
 					{{- end }}
-				}),
+				},
 				Optional: true,
-				{{ if not .Attributes}}
-				Type: types.ObjectType{},
-				{{ end }}
 			},
 		},
-	}, nil
+	}
 }
 
 func (d *{{ .Connection }}ConnectionDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {

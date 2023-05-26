@@ -10,8 +10,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/polytomic-go"
@@ -29,74 +29,65 @@ func (d *DatabricksConnectionDataSource) Metadata(ctx context.Context, req datas
 	resp.TypeName = req.ProviderTypeName + "_databricks_connection"
 }
 
-func (d *DatabricksConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
-	return tfsdk.Schema{
+func (d *DatabricksConnectionDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+	resp.Schema = schema.Schema{
 		MarkdownDescription: ":meta:subcategory:Connections: Databricks Connection",
-		Attributes: map[string]tfsdk.Attribute{
-			"name": {
+		Attributes: map[string]schema.Attribute{
+			"name": schema.StringAttribute{
 				MarkdownDescription: "",
-				Type:                types.StringType,
 				Optional:            true,
 			},
-			"id": {
+			"id": schema.StringAttribute{
 				MarkdownDescription: "",
-				Type:                types.StringType,
 				Required:            true,
 			},
-			"organization": {
+			"organization": schema.StringAttribute{
 				MarkdownDescription: "",
-				Type:                types.StringType,
 				Optional:            true,
 			},
-			"configuration": {
-				Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
-					"server_hostname": {
+			"configuration": schema.SingleNestedAttribute{
+				Attributes: map[string]schema.Attribute{
+					"server_hostname": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            true,
 						Optional:            false,
 						Sensitive:           false,
 					},
-					"port": {
+					"port": schema.Int64Attribute{
 						MarkdownDescription: "",
-						Type:                types.Int64Type,
 						Required:            true,
 						Optional:            false,
 						Sensitive:           false,
 					},
-					"http_path": {
+					"http_path": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            true,
 						Optional:            false,
 						Sensitive:           false,
 					},
-					"aws_access_key_id": {
+					"aws_access_key_id": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            false,
 						Optional:            true,
 						Sensitive:           false,
 					},
-					"s3_bucket_name": {
+					"s3_bucket_name": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            false,
 						Optional:            true,
 						Sensitive:           false,
 					},
-					"s3_bucket_region": {
+					"s3_bucket_region": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            false,
 						Optional:            true,
 						Sensitive:           false,
 					},
-				}),
+				},
 				Optional: true,
 			},
 		},
-	}, nil
+	}
 }
 
 func (d *DatabricksConnectionDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {

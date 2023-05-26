@@ -23,7 +23,7 @@ data "polytomic_shipbob_connection" "shipbob" {
 
 ### Optional
 
-- `configuration` (Object) (see [below for nested schema](#nestedatt--configuration))
+- `configuration` (Attributes) (see [below for nested schema](#nestedatt--configuration))
 - `name` (String)
 - `organization` (String)
 
@@ -33,7 +33,5 @@ data "polytomic_shipbob_connection" "shipbob" {
 
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
-
-Optional:
 
 

@@ -11,10 +11,11 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/polytomic/polytomic-go"
@@ -24,78 +25,69 @@ import (
 var _ resource.Resource = &MarketoConnectionResource{}
 var _ resource.ResourceWithImportState = &MarketoConnectionResource{}
 
-func (t *MarketoConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
-	return tfsdk.Schema{
+func (t *MarketoConnectionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = schema.Schema{
 		MarkdownDescription: ":meta:subcategory:Connections: Marketo Connection",
-		Attributes: map[string]tfsdk.Attribute{
-			"organization": {
+		Attributes: map[string]schema.Attribute{
+			"organization": schema.StringAttribute{
 				MarkdownDescription: "Organization ID",
 				Optional:            true,
 				Computed:            true,
-				Type:                types.StringType,
 			},
-			"name": {
-				Type:     types.StringType,
+			"name": schema.StringAttribute{
 				Required: true,
 			},
-			"configuration": {
-				Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
-					"client_id": {
+			"configuration": schema.SingleNestedAttribute{
+				Attributes: map[string]schema.Attribute{
+					"client_id": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            true,
 						Optional:            false,
 						Sensitive:           false,
 					},
-					"client_secret": {
+					"client_secret": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            true,
 						Optional:            false,
 						Sensitive:           true,
 					},
-					"rest_endpoint": {
+					"rest_endpoint": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            true,
 						Optional:            false,
 						Sensitive:           false,
 					},
-					"enforce_api_limits": {
+					"enforce_api_limits": schema.BoolAttribute{
 						MarkdownDescription: "",
-						Type:                types.BoolType,
 						Required:            false,
 						Optional:            true,
 						Sensitive:           false,
 					},
-					"daily_api_calls": {
+					"daily_api_calls": schema.Int64Attribute{
 						MarkdownDescription: "",
-						Type:                types.Int64Type,
 						Required:            false,
 						Optional:            true,
 						Sensitive:           false,
 					},
-					"concurrent_imports": {
+					"concurrent_imports": schema.Int64Attribute{
 						MarkdownDescription: "",
-						Type:                types.Int64Type,
 						Required:            false,
 						Optional:            true,
 						Sensitive:           false,
 					},
-				}),
+				},
 
 				Required: true,
 			},
-			"id": {
+			"id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Marketo Connection identifier",
-				PlanModifiers: tfsdk.AttributePlanModifiers{
-					resource.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
 				},
-				Type: types.StringType,
 			},
 		},
-	}, nil
+	}
 }
 
 func (r *MarketoConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -147,17 +139,17 @@ func (r *MarketoConnectionResource) Create(ctx context.Context, req resource.Cre
 	//decoder.Decode(created.Configuration)
 	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 	//
-	//	"client_id": types.StringType,
+	//	"client_id": schema.StringAttribute,
 	//
-	//	"client_secret": types.StringType,
+	//	"client_secret": schema.StringAttribute,
 	//
-	//	"rest_endpoint": types.StringType,
+	//	"rest_endpoint": schema.StringAttribute,
 	//
-	//	"enforce_api_limits": types.BoolType,
+	//	"enforce_api_limits": schema.BoolAttribute,
 	//
-	//	"daily_api_calls": types.Int64Type,
+	//	"daily_api_calls": schema.Int64Attribute,
 	//
-	//	"concurrent_imports": types.Int64Type,
+	//	"concurrent_imports": schema.Int64Attribute,
 	//
 	//}, output)
 	//if diags.HasError() {
@@ -206,17 +198,17 @@ func (r *MarketoConnectionResource) Read(ctx context.Context, req resource.ReadR
 	//decoder.Decode(connection.Configuration)
 	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 	//
-	//	"client_id": types.StringType,
+	//	"client_id": schema.StringAttribute,
 	//
-	//	"client_secret": types.StringType,
+	//	"client_secret": schema.StringAttribute,
 	//
-	//	"rest_endpoint": types.StringType,
+	//	"rest_endpoint": schema.StringAttribute,
 	//
-	//	"enforce_api_limits": types.BoolType,
+	//	"enforce_api_limits": schema.BoolAttribute,
 	//
-	//	"daily_api_calls": types.Int64Type,
+	//	"daily_api_calls": schema.Int64Attribute,
 	//
-	//	"concurrent_imports": types.Int64Type,
+	//	"concurrent_imports": schema.Int64Attribute,
 	//
 	//}, output)
 	//if diags.HasError() {
@@ -270,17 +262,17 @@ func (r *MarketoConnectionResource) Update(ctx context.Context, req resource.Upd
 	//decoder.Decode(updated.Configuration)
 	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 	//
-	//	"client_id": types.StringType,
+	//	"client_id": schema.StringAttribute,
 	//
-	//	"client_secret": types.StringType,
+	//	"client_secret": schema.StringAttribute,
 	//
-	//	"rest_endpoint": types.StringType,
+	//	"rest_endpoint": schema.StringAttribute,
 	//
-	//	"enforce_api_limits": types.BoolType,
+	//	"enforce_api_limits": schema.BoolAttribute,
 	//
-	//	"daily_api_calls": types.Int64Type,
+	//	"daily_api_calls": schema.Int64Attribute,
 	//
-	//	"concurrent_imports": types.Int64Type,
+	//	"concurrent_imports": schema.Int64Attribute,
 	//
 	//}, output)
 	//if diags.HasError() {

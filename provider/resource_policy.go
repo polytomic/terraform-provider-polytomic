@@ -8,10 +8,11 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/polytomic/polytomic-go"
 )
@@ -19,47 +20,44 @@ import (
 var _ resource.Resource = &policyResource{}
 var _ resource.ResourceWithImportState = &policyResource{}
 
-func (r *policyResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
-	return tfsdk.Schema{
+func (r *policyResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = schema.Schema{
 		MarkdownDescription: ":meta:subcategory:Organizations: A policy in a Polytomic organization",
-		Attributes: map[string]tfsdk.Attribute{
-			"organization": {
+		Attributes: map[string]schema.Attribute{
+			"organization": schema.StringAttribute{
 				MarkdownDescription: "Organization ID",
 				Optional:            true,
 				Computed:            true,
-				Type:                types.StringType,
 			},
-			"name": {
-				Type:     types.StringType,
+			"name": schema.StringAttribute{
 				Required: true,
 			},
-			"policy_actions": {
+			"policy_actions": schema.SetNestedAttribute{
 				MarkdownDescription: "Policy actions",
 				Optional:            true,
 				Computed:            true,
-				Attributes: tfsdk.SetNestedAttributes(map[string]tfsdk.Attribute{
-					"action": {
-						MarkdownDescription: "Action",
-						Required:            true,
-						Type:                types.StringType,
-					},
-					"role_ids": {
-						MarkdownDescription: "Role IDs",
-						Optional:            true,
-						Computed:            true,
-						Type:                types.SetType{ElemType: types.StringType},
-					}}),
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"action": schema.StringAttribute{
+							MarkdownDescription: "Action",
+							Required:            true,
+						},
+						"role_ids": schema.SetAttribute{
+							MarkdownDescription: "Role IDs",
+							Optional:            true,
+							Computed:            true,
+							ElementType:         types.StringType,
+						}}},
 			},
-			"id": {
+			"id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "",
-				PlanModifiers: tfsdk.AttributePlanModifiers{
-					resource.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
 				},
-				Type: types.StringType,
 			},
 		},
-	}, nil
+	}
 }
 
 func (r policyResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {

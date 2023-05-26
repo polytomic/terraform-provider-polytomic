@@ -10,8 +10,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/polytomic-go"
@@ -29,130 +29,113 @@ func (d *PostgresqlConnectionDataSource) Metadata(ctx context.Context, req datas
 	resp.TypeName = req.ProviderTypeName + "_postgresql_connection"
 }
 
-func (d *PostgresqlConnectionDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
-	return tfsdk.Schema{
+func (d *PostgresqlConnectionDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+	resp.Schema = schema.Schema{
 		MarkdownDescription: ":meta:subcategory:Connections: PostgresSQL Connection",
-		Attributes: map[string]tfsdk.Attribute{
-			"name": {
+		Attributes: map[string]schema.Attribute{
+			"name": schema.StringAttribute{
 				MarkdownDescription: "",
-				Type:                types.StringType,
 				Optional:            true,
 			},
-			"id": {
+			"id": schema.StringAttribute{
 				MarkdownDescription: "",
-				Type:                types.StringType,
 				Required:            true,
 			},
-			"organization": {
+			"organization": schema.StringAttribute{
 				MarkdownDescription: "",
-				Type:                types.StringType,
 				Optional:            true,
 			},
-			"configuration": {
-				Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
-					"hostname": {
+			"configuration": schema.SingleNestedAttribute{
+				Attributes: map[string]schema.Attribute{
+					"hostname": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            true,
 						Optional:            false,
 						Sensitive:           false,
 					},
-					"username": {
+					"username": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            true,
 						Optional:            false,
 						Sensitive:           false,
 					},
-					"database": {
+					"database": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            true,
 						Optional:            false,
 						Sensitive:           false,
 					},
-					"port": {
+					"port": schema.Int64Attribute{
 						MarkdownDescription: "",
-						Type:                types.Int64Type,
 						Required:            true,
 						Optional:            false,
 						Sensitive:           false,
 					},
-					"ssl": {
+					"ssl": schema.BoolAttribute{
 						MarkdownDescription: "",
-						Type:                types.BoolType,
 						Required:            false,
 						Optional:            true,
 						Sensitive:           false,
 					},
-					"client_certs": {
+					"client_certs": schema.BoolAttribute{
 						MarkdownDescription: "",
-						Type:                types.BoolType,
 						Required:            false,
 						Optional:            true,
 						Sensitive:           false,
 					},
-					"client_certificate": {
+					"client_certificate": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            false,
 						Optional:            true,
 						Sensitive:           false,
 					},
-					"ca_cert": {
+					"ca_cert": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            false,
 						Optional:            true,
 						Sensitive:           false,
 					},
-					"change_detection": {
+					"change_detection": schema.BoolAttribute{
 						MarkdownDescription: "",
-						Type:                types.BoolType,
 						Required:            false,
 						Optional:            true,
 						Sensitive:           false,
 					},
-					"publication": {
+					"publication": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            false,
 						Optional:            true,
 						Sensitive:           false,
 					},
-					"ssh": {
+					"ssh": schema.BoolAttribute{
 						MarkdownDescription: "",
-						Type:                types.BoolType,
 						Required:            false,
 						Optional:            true,
 						Sensitive:           false,
 					},
-					"ssh_user": {
+					"ssh_user": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            false,
 						Optional:            true,
 						Sensitive:           false,
 					},
-					"ssh_host": {
+					"ssh_host": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            false,
 						Optional:            true,
 						Sensitive:           false,
 					},
-					"ssh_port": {
+					"ssh_port": schema.Int64Attribute{
 						MarkdownDescription: "",
-						Type:                types.Int64Type,
 						Required:            false,
 						Optional:            true,
 						Sensitive:           false,
 					},
-				}),
+				},
 				Optional: true,
 			},
 		},
-	}, nil
+	}
 }
 
 func (d *PostgresqlConnectionDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {

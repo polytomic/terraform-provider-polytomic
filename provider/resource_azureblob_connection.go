@@ -11,10 +11,11 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/polytomic/polytomic-go"
@@ -24,57 +25,51 @@ import (
 var _ resource.Resource = &AzureblobConnectionResource{}
 var _ resource.ResourceWithImportState = &AzureblobConnectionResource{}
 
-func (t *AzureblobConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
-	return tfsdk.Schema{
+func (t *AzureblobConnectionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = schema.Schema{
 		MarkdownDescription: ":meta:subcategory:Connections: Azure Blob Storage Connection",
-		Attributes: map[string]tfsdk.Attribute{
-			"organization": {
+		Attributes: map[string]schema.Attribute{
+			"organization": schema.StringAttribute{
 				MarkdownDescription: "Organization ID",
 				Optional:            true,
 				Computed:            true,
-				Type:                types.StringType,
 			},
-			"name": {
-				Type:     types.StringType,
+			"name": schema.StringAttribute{
 				Required: true,
 			},
-			"configuration": {
-				Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
-					"account_name": {
+			"configuration": schema.SingleNestedAttribute{
+				Attributes: map[string]schema.Attribute{
+					"account_name": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            true,
 						Optional:            false,
 						Sensitive:           false,
 					},
-					"access_key": {
+					"access_key": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            true,
 						Optional:            false,
 						Sensitive:           true,
 					},
-					"container_name": {
+					"container_name": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            true,
 						Optional:            false,
 						Sensitive:           false,
 					},
-				}),
+				},
 
 				Required: true,
 			},
-			"id": {
+			"id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Azure Blob Storage Connection identifier",
-				PlanModifiers: tfsdk.AttributePlanModifiers{
-					resource.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
 				},
-				Type: types.StringType,
 			},
 		},
-	}, nil
+	}
 }
 
 func (r *AzureblobConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -123,11 +118,11 @@ func (r *AzureblobConnectionResource) Create(ctx context.Context, req resource.C
 	//decoder.Decode(created.Configuration)
 	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 	//
-	//	"account_name": types.StringType,
+	//	"account_name": schema.StringAttribute,
 	//
-	//	"access_key": types.StringType,
+	//	"access_key": schema.StringAttribute,
 	//
-	//	"container_name": types.StringType,
+	//	"container_name": schema.StringAttribute,
 	//
 	//}, output)
 	//if diags.HasError() {
@@ -176,11 +171,11 @@ func (r *AzureblobConnectionResource) Read(ctx context.Context, req resource.Rea
 	//decoder.Decode(connection.Configuration)
 	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 	//
-	//	"account_name": types.StringType,
+	//	"account_name": schema.StringAttribute,
 	//
-	//	"access_key": types.StringType,
+	//	"access_key": schema.StringAttribute,
 	//
-	//	"container_name": types.StringType,
+	//	"container_name": schema.StringAttribute,
 	//
 	//}, output)
 	//if diags.HasError() {
@@ -231,11 +226,11 @@ func (r *AzureblobConnectionResource) Update(ctx context.Context, req resource.U
 	//decoder.Decode(updated.Configuration)
 	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 	//
-	//	"account_name": types.StringType,
+	//	"account_name": schema.StringAttribute,
 	//
-	//	"access_key": types.StringType,
+	//	"access_key": schema.StringAttribute,
 	//
-	//	"container_name": types.StringType,
+	//	"container_name": schema.StringAttribute,
 	//
 	//}, output)
 	//if diags.HasError() {

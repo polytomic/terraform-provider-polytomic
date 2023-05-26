@@ -6,10 +6,9 @@ import (
 	"os"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
+	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/polytomic/polytomic-go"
 )
@@ -34,8 +33,7 @@ const clientError = "Client Error"
 
 // Ensure provider defined types fully satisfy framework interfaces
 var (
-	_ provider.Provider             = &ptProvider{}
-	_ provider.ProviderWithMetadata = &ptProvider{}
+	_ provider.Provider = &ptProvider{}
 )
 
 // ptProvider satisfies the tfsdk.Provider interface and usually is included
@@ -151,28 +149,25 @@ func (p *ptProvider) DataSources(ctx context.Context) []func() datasource.DataSo
 	return all
 }
 
-func (p *ptProvider) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
-	return tfsdk.Schema{
-		Attributes: map[string]tfsdk.Attribute{
-			"deployment_url": {
+func (p *ptProvider) Schema(ctx context.Context, req provider.SchemaRequest, resp *provider.SchemaResponse) {
+	resp.Schema = schema.Schema{
+		Attributes: map[string]schema.Attribute{
+			"deployment_url": schema.StringAttribute{
 				MarkdownDescription: "Polytomic deployment URL",
-				Type:                types.StringType,
 				Optional:            true,
 			},
-			"deployment_api_key": {
+			"deployment_api_key": schema.StringAttribute{
 				MarkdownDescription: "Polytomic deployment key",
-				Type:                types.StringType,
 				Optional:            true,
 				Sensitive:           true,
 			},
-			"api_key": {
+			"api_key": schema.StringAttribute{
 				MarkdownDescription: "Polytomic API key",
-				Type:                types.StringType,
 				Optional:            true,
 				Sensitive:           true,
 			},
 		},
-	}, nil
+	}
 }
 
 func New(version string) func() provider.Provider {

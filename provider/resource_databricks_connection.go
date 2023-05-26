@@ -11,10 +11,11 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/polytomic/polytomic-go"
@@ -24,92 +25,81 @@ import (
 var _ resource.Resource = &DatabricksConnectionResource{}
 var _ resource.ResourceWithImportState = &DatabricksConnectionResource{}
 
-func (t *DatabricksConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
-	return tfsdk.Schema{
+func (t *DatabricksConnectionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = schema.Schema{
 		MarkdownDescription: ":meta:subcategory:Connections: Databricks Connection",
-		Attributes: map[string]tfsdk.Attribute{
-			"organization": {
+		Attributes: map[string]schema.Attribute{
+			"organization": schema.StringAttribute{
 				MarkdownDescription: "Organization ID",
 				Optional:            true,
 				Computed:            true,
-				Type:                types.StringType,
 			},
-			"name": {
-				Type:     types.StringType,
+			"name": schema.StringAttribute{
 				Required: true,
 			},
-			"configuration": {
-				Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
-					"server_hostname": {
+			"configuration": schema.SingleNestedAttribute{
+				Attributes: map[string]schema.Attribute{
+					"server_hostname": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            true,
 						Optional:            false,
 						Sensitive:           false,
 					},
-					"port": {
+					"port": schema.Int64Attribute{
 						MarkdownDescription: "",
-						Type:                types.Int64Type,
 						Required:            true,
 						Optional:            false,
 						Sensitive:           false,
 					},
-					"access_token": {
+					"access_token": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            true,
 						Optional:            false,
 						Sensitive:           true,
 					},
-					"http_path": {
+					"http_path": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            true,
 						Optional:            false,
 						Sensitive:           false,
 					},
-					"aws_access_key_id": {
+					"aws_access_key_id": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            false,
 						Optional:            true,
 						Sensitive:           false,
 					},
-					"aws_secret_access_key": {
+					"aws_secret_access_key": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            false,
 						Optional:            true,
 						Sensitive:           true,
 					},
-					"s3_bucket_name": {
+					"s3_bucket_name": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            false,
 						Optional:            true,
 						Sensitive:           false,
 					},
-					"s3_bucket_region": {
+					"s3_bucket_region": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            false,
 						Optional:            true,
 						Sensitive:           false,
 					},
-				}),
+				},
 
 				Required: true,
 			},
-			"id": {
+			"id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Databricks Connection identifier",
-				PlanModifiers: tfsdk.AttributePlanModifiers{
-					resource.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
 				},
-				Type: types.StringType,
 			},
 		},
-	}, nil
+	}
 }
 
 func (r *DatabricksConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -163,21 +153,21 @@ func (r *DatabricksConnectionResource) Create(ctx context.Context, req resource.
 	//decoder.Decode(created.Configuration)
 	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 	//
-	//	"server_hostname": types.StringType,
+	//	"server_hostname": schema.StringAttribute,
 	//
-	//	"port": types.Int64Type,
+	//	"port": schema.Int64Attribute,
 	//
-	//	"access_token": types.StringType,
+	//	"access_token": schema.StringAttribute,
 	//
-	//	"http_path": types.StringType,
+	//	"http_path": schema.StringAttribute,
 	//
-	//	"aws_access_key_id": types.StringType,
+	//	"aws_access_key_id": schema.StringAttribute,
 	//
-	//	"aws_secret_access_key": types.StringType,
+	//	"aws_secret_access_key": schema.StringAttribute,
 	//
-	//	"s3_bucket_name": types.StringType,
+	//	"s3_bucket_name": schema.StringAttribute,
 	//
-	//	"s3_bucket_region": types.StringType,
+	//	"s3_bucket_region": schema.StringAttribute,
 	//
 	//}, output)
 	//if diags.HasError() {
@@ -226,21 +216,21 @@ func (r *DatabricksConnectionResource) Read(ctx context.Context, req resource.Re
 	//decoder.Decode(connection.Configuration)
 	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 	//
-	//	"server_hostname": types.StringType,
+	//	"server_hostname": schema.StringAttribute,
 	//
-	//	"port": types.Int64Type,
+	//	"port": schema.Int64Attribute,
 	//
-	//	"access_token": types.StringType,
+	//	"access_token": schema.StringAttribute,
 	//
-	//	"http_path": types.StringType,
+	//	"http_path": schema.StringAttribute,
 	//
-	//	"aws_access_key_id": types.StringType,
+	//	"aws_access_key_id": schema.StringAttribute,
 	//
-	//	"aws_secret_access_key": types.StringType,
+	//	"aws_secret_access_key": schema.StringAttribute,
 	//
-	//	"s3_bucket_name": types.StringType,
+	//	"s3_bucket_name": schema.StringAttribute,
 	//
-	//	"s3_bucket_region": types.StringType,
+	//	"s3_bucket_region": schema.StringAttribute,
 	//
 	//}, output)
 	//if diags.HasError() {
@@ -296,21 +286,21 @@ func (r *DatabricksConnectionResource) Update(ctx context.Context, req resource.
 	//decoder.Decode(updated.Configuration)
 	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 	//
-	//	"server_hostname": types.StringType,
+	//	"server_hostname": schema.StringAttribute,
 	//
-	//	"port": types.Int64Type,
+	//	"port": schema.Int64Attribute,
 	//
-	//	"access_token": types.StringType,
+	//	"access_token": schema.StringAttribute,
 	//
-	//	"http_path": types.StringType,
+	//	"http_path": schema.StringAttribute,
 	//
-	//	"aws_access_key_id": types.StringType,
+	//	"aws_access_key_id": schema.StringAttribute,
 	//
-	//	"aws_secret_access_key": types.StringType,
+	//	"aws_secret_access_key": schema.StringAttribute,
 	//
-	//	"s3_bucket_name": types.StringType,
+	//	"s3_bucket_name": schema.StringAttribute,
 	//
-	//	"s3_bucket_region": types.StringType,
+	//	"s3_bucket_region": schema.StringAttribute,
 	//
 	//}, output)
 	//if diags.HasError() {

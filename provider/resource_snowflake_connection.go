@@ -11,10 +11,11 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/polytomic/polytomic-go"
@@ -24,78 +25,69 @@ import (
 var _ resource.Resource = &SnowflakeConnectionResource{}
 var _ resource.ResourceWithImportState = &SnowflakeConnectionResource{}
 
-func (t *SnowflakeConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
-	return tfsdk.Schema{
+func (t *SnowflakeConnectionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = schema.Schema{
 		MarkdownDescription: ":meta:subcategory:Connections: Snowflake Connection",
-		Attributes: map[string]tfsdk.Attribute{
-			"organization": {
+		Attributes: map[string]schema.Attribute{
+			"organization": schema.StringAttribute{
 				MarkdownDescription: "Organization ID",
 				Optional:            true,
 				Computed:            true,
-				Type:                types.StringType,
 			},
-			"name": {
-				Type:     types.StringType,
+			"name": schema.StringAttribute{
 				Required: true,
 			},
-			"configuration": {
-				Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
-					"account": {
+			"configuration": schema.SingleNestedAttribute{
+				Attributes: map[string]schema.Attribute{
+					"account": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            true,
 						Optional:            false,
 						Sensitive:           false,
 					},
-					"username": {
+					"username": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            true,
 						Optional:            false,
 						Sensitive:           false,
 					},
-					"password": {
+					"password": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            true,
 						Optional:            false,
 						Sensitive:           true,
 					},
-					"dbname": {
+					"dbname": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            true,
 						Optional:            false,
 						Sensitive:           false,
 					},
-					"warehouse": {
+					"warehouse": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            true,
 						Optional:            false,
 						Sensitive:           false,
 					},
-					"params": {
+					"params": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            false,
 						Optional:            true,
 						Sensitive:           false,
 					},
-				}),
+				},
 
 				Required: true,
 			},
-			"id": {
+			"id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Snowflake Connection identifier",
-				PlanModifiers: tfsdk.AttributePlanModifiers{
-					resource.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
 				},
-				Type: types.StringType,
 			},
 		},
-	}, nil
+	}
 }
 
 func (r *SnowflakeConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -147,17 +139,17 @@ func (r *SnowflakeConnectionResource) Create(ctx context.Context, req resource.C
 	//decoder.Decode(created.Configuration)
 	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 	//
-	//	"account": types.StringType,
+	//	"account": schema.StringAttribute,
 	//
-	//	"username": types.StringType,
+	//	"username": schema.StringAttribute,
 	//
-	//	"password": types.StringType,
+	//	"password": schema.StringAttribute,
 	//
-	//	"dbname": types.StringType,
+	//	"dbname": schema.StringAttribute,
 	//
-	//	"warehouse": types.StringType,
+	//	"warehouse": schema.StringAttribute,
 	//
-	//	"params": types.StringType,
+	//	"params": schema.StringAttribute,
 	//
 	//}, output)
 	//if diags.HasError() {
@@ -206,17 +198,17 @@ func (r *SnowflakeConnectionResource) Read(ctx context.Context, req resource.Rea
 	//decoder.Decode(connection.Configuration)
 	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 	//
-	//	"account": types.StringType,
+	//	"account": schema.StringAttribute,
 	//
-	//	"username": types.StringType,
+	//	"username": schema.StringAttribute,
 	//
-	//	"password": types.StringType,
+	//	"password": schema.StringAttribute,
 	//
-	//	"dbname": types.StringType,
+	//	"dbname": schema.StringAttribute,
 	//
-	//	"warehouse": types.StringType,
+	//	"warehouse": schema.StringAttribute,
 	//
-	//	"params": types.StringType,
+	//	"params": schema.StringAttribute,
 	//
 	//}, output)
 	//if diags.HasError() {
@@ -270,17 +262,17 @@ func (r *SnowflakeConnectionResource) Update(ctx context.Context, req resource.U
 	//decoder.Decode(updated.Configuration)
 	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 	//
-	//	"account": types.StringType,
+	//	"account": schema.StringAttribute,
 	//
-	//	"username": types.StringType,
+	//	"username": schema.StringAttribute,
 	//
-	//	"password": types.StringType,
+	//	"password": schema.StringAttribute,
 	//
-	//	"dbname": types.StringType,
+	//	"dbname": schema.StringAttribute,
 	//
-	//	"warehouse": types.StringType,
+	//	"warehouse": schema.StringAttribute,
 	//
-	//	"params": types.StringType,
+	//	"params": schema.StringAttribute,
 	//
 	//}, output)
 	//if diags.HasError() {

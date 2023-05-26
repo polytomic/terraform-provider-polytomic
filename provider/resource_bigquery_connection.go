@@ -11,10 +11,11 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/polytomic/polytomic-go"
@@ -24,57 +25,51 @@ import (
 var _ resource.Resource = &BigqueryConnectionResource{}
 var _ resource.ResourceWithImportState = &BigqueryConnectionResource{}
 
-func (t *BigqueryConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
-	return tfsdk.Schema{
+func (t *BigqueryConnectionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = schema.Schema{
 		MarkdownDescription: ":meta:subcategory:Connections: BigQuery Connection",
-		Attributes: map[string]tfsdk.Attribute{
-			"organization": {
+		Attributes: map[string]schema.Attribute{
+			"organization": schema.StringAttribute{
 				MarkdownDescription: "Organization ID",
 				Optional:            true,
 				Computed:            true,
-				Type:                types.StringType,
 			},
-			"name": {
-				Type:     types.StringType,
+			"name": schema.StringAttribute{
 				Required: true,
 			},
-			"configuration": {
-				Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
-					"project_id": {
+			"configuration": schema.SingleNestedAttribute{
+				Attributes: map[string]schema.Attribute{
+					"project_id": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            true,
 						Optional:            false,
 						Sensitive:           false,
 					},
-					"service_account": {
+					"service_account": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            true,
 						Optional:            false,
 						Sensitive:           true,
 					},
-					"location": {
+					"location": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            false,
 						Optional:            true,
 						Sensitive:           false,
 					},
-				}),
+				},
 
 				Required: true,
 			},
-			"id": {
+			"id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "BigQuery Connection identifier",
-				PlanModifiers: tfsdk.AttributePlanModifiers{
-					resource.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
 				},
-				Type: types.StringType,
 			},
 		},
-	}, nil
+	}
 }
 
 func (r *BigqueryConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -123,11 +118,11 @@ func (r *BigqueryConnectionResource) Create(ctx context.Context, req resource.Cr
 	//decoder.Decode(created.Configuration)
 	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 	//
-	//	"project_id": types.StringType,
+	//	"project_id": schema.StringAttribute,
 	//
-	//	"service_account": types.StringType,
+	//	"service_account": schema.StringAttribute,
 	//
-	//	"location": types.StringType,
+	//	"location": schema.StringAttribute,
 	//
 	//}, output)
 	//if diags.HasError() {
@@ -176,11 +171,11 @@ func (r *BigqueryConnectionResource) Read(ctx context.Context, req resource.Read
 	//decoder.Decode(connection.Configuration)
 	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 	//
-	//	"project_id": types.StringType,
+	//	"project_id": schema.StringAttribute,
 	//
-	//	"service_account": types.StringType,
+	//	"service_account": schema.StringAttribute,
 	//
-	//	"location": types.StringType,
+	//	"location": schema.StringAttribute,
 	//
 	//}, output)
 	//if diags.HasError() {
@@ -231,11 +226,11 @@ func (r *BigqueryConnectionResource) Update(ctx context.Context, req resource.Up
 	//decoder.Decode(updated.Configuration)
 	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 	//
-	//	"project_id": types.StringType,
+	//	"project_id": schema.StringAttribute,
 	//
-	//	"service_account": types.StringType,
+	//	"service_account": schema.StringAttribute,
 	//
-	//	"location": types.StringType,
+	//	"location": schema.StringAttribute,
 	//
 	//}, output)
 	//if diags.HasError() {

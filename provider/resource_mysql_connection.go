@@ -11,10 +11,11 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/polytomic/polytomic-go"
@@ -24,113 +25,99 @@ import (
 var _ resource.Resource = &MysqlConnectionResource{}
 var _ resource.ResourceWithImportState = &MysqlConnectionResource{}
 
-func (t *MysqlConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
-	return tfsdk.Schema{
+func (t *MysqlConnectionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = schema.Schema{
 		MarkdownDescription: ":meta:subcategory:Connections: MySQL Connection",
-		Attributes: map[string]tfsdk.Attribute{
-			"organization": {
+		Attributes: map[string]schema.Attribute{
+			"organization": schema.StringAttribute{
 				MarkdownDescription: "Organization ID",
 				Optional:            true,
 				Computed:            true,
-				Type:                types.StringType,
 			},
-			"name": {
-				Type:     types.StringType,
+			"name": schema.StringAttribute{
 				Required: true,
 			},
-			"configuration": {
-				Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
-					"hostname": {
+			"configuration": schema.SingleNestedAttribute{
+				Attributes: map[string]schema.Attribute{
+					"hostname": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            true,
 						Optional:            false,
 						Sensitive:           false,
 					},
-					"account": {
+					"account": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            true,
 						Optional:            false,
 						Sensitive:           false,
 					},
-					"passwd": {
+					"passwd": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            true,
 						Optional:            false,
 						Sensitive:           true,
 					},
-					"dbname": {
+					"dbname": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            true,
 						Optional:            false,
 						Sensitive:           false,
 					},
-					"port": {
+					"port": schema.Int64Attribute{
 						MarkdownDescription: "",
-						Type:                types.Int64Type,
 						Required:            false,
 						Optional:            true,
 						Sensitive:           false,
 					},
-					"ssh": {
+					"ssh": schema.BoolAttribute{
 						MarkdownDescription: "",
-						Type:                types.BoolType,
 						Required:            false,
 						Optional:            true,
 						Sensitive:           false,
 					},
-					"ssh_user": {
+					"ssh_user": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            false,
 						Optional:            true,
 						Sensitive:           false,
 					},
-					"ssh_host": {
+					"ssh_host": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            false,
 						Optional:            true,
 						Sensitive:           false,
 					},
-					"ssh_port": {
+					"ssh_port": schema.Int64Attribute{
 						MarkdownDescription: "",
-						Type:                types.Int64Type,
 						Required:            false,
 						Optional:            true,
 						Sensitive:           false,
 					},
-					"ssh_private_key": {
+					"ssh_private_key": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            false,
 						Optional:            true,
 						Sensitive:           true,
 					},
-					"change_detection": {
+					"change_detection": schema.BoolAttribute{
 						MarkdownDescription: "",
-						Type:                types.BoolType,
 						Required:            false,
 						Optional:            true,
 						Sensitive:           false,
 					},
-				}),
+				},
 
 				Required: true,
 			},
-			"id": {
+			"id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "MySQL Connection identifier",
-				PlanModifiers: tfsdk.AttributePlanModifiers{
-					resource.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
 				},
-				Type: types.StringType,
 			},
 		},
-	}, nil
+	}
 }
 
 func (r *MysqlConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -187,27 +174,27 @@ func (r *MysqlConnectionResource) Create(ctx context.Context, req resource.Creat
 	//decoder.Decode(created.Configuration)
 	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 	//
-	//	"hostname": types.StringType,
+	//	"hostname": schema.StringAttribute,
 	//
-	//	"account": types.StringType,
+	//	"account": schema.StringAttribute,
 	//
-	//	"passwd": types.StringType,
+	//	"passwd": schema.StringAttribute,
 	//
-	//	"dbname": types.StringType,
+	//	"dbname": schema.StringAttribute,
 	//
-	//	"port": types.Int64Type,
+	//	"port": schema.Int64Attribute,
 	//
-	//	"ssh": types.BoolType,
+	//	"ssh": schema.BoolAttribute,
 	//
-	//	"ssh_user": types.StringType,
+	//	"ssh_user": schema.StringAttribute,
 	//
-	//	"ssh_host": types.StringType,
+	//	"ssh_host": schema.StringAttribute,
 	//
-	//	"ssh_port": types.Int64Type,
+	//	"ssh_port": schema.Int64Attribute,
 	//
-	//	"ssh_private_key": types.StringType,
+	//	"ssh_private_key": schema.StringAttribute,
 	//
-	//	"change_detection": types.BoolType,
+	//	"change_detection": schema.BoolAttribute,
 	//
 	//}, output)
 	//if diags.HasError() {
@@ -256,27 +243,27 @@ func (r *MysqlConnectionResource) Read(ctx context.Context, req resource.ReadReq
 	//decoder.Decode(connection.Configuration)
 	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 	//
-	//	"hostname": types.StringType,
+	//	"hostname": schema.StringAttribute,
 	//
-	//	"account": types.StringType,
+	//	"account": schema.StringAttribute,
 	//
-	//	"passwd": types.StringType,
+	//	"passwd": schema.StringAttribute,
 	//
-	//	"dbname": types.StringType,
+	//	"dbname": schema.StringAttribute,
 	//
-	//	"port": types.Int64Type,
+	//	"port": schema.Int64Attribute,
 	//
-	//	"ssh": types.BoolType,
+	//	"ssh": schema.BoolAttribute,
 	//
-	//	"ssh_user": types.StringType,
+	//	"ssh_user": schema.StringAttribute,
 	//
-	//	"ssh_host": types.StringType,
+	//	"ssh_host": schema.StringAttribute,
 	//
-	//	"ssh_port": types.Int64Type,
+	//	"ssh_port": schema.Int64Attribute,
 	//
-	//	"ssh_private_key": types.StringType,
+	//	"ssh_private_key": schema.StringAttribute,
 	//
-	//	"change_detection": types.BoolType,
+	//	"change_detection": schema.BoolAttribute,
 	//
 	//}, output)
 	//if diags.HasError() {
@@ -335,27 +322,27 @@ func (r *MysqlConnectionResource) Update(ctx context.Context, req resource.Updat
 	//decoder.Decode(updated.Configuration)
 	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 	//
-	//	"hostname": types.StringType,
+	//	"hostname": schema.StringAttribute,
 	//
-	//	"account": types.StringType,
+	//	"account": schema.StringAttribute,
 	//
-	//	"passwd": types.StringType,
+	//	"passwd": schema.StringAttribute,
 	//
-	//	"dbname": types.StringType,
+	//	"dbname": schema.StringAttribute,
 	//
-	//	"port": types.Int64Type,
+	//	"port": schema.Int64Attribute,
 	//
-	//	"ssh": types.BoolType,
+	//	"ssh": schema.BoolAttribute,
 	//
-	//	"ssh_user": types.StringType,
+	//	"ssh_user": schema.StringAttribute,
 	//
-	//	"ssh_host": types.StringType,
+	//	"ssh_host": schema.StringAttribute,
 	//
-	//	"ssh_port": types.Int64Type,
+	//	"ssh_port": schema.Int64Attribute,
 	//
-	//	"ssh_private_key": types.StringType,
+	//	"ssh_private_key": schema.StringAttribute,
 	//
-	//	"change_detection": types.BoolType,
+	//	"change_detection": schema.BoolAttribute,
 	//
 	//}, output)
 	//if diags.HasError() {

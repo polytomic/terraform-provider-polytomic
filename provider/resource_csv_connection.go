@@ -9,11 +9,13 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/polytomic/polytomic-go"
 )
@@ -22,117 +24,104 @@ import (
 var _ resource.Resource = &CSVConnectionResource{}
 var _ resource.ResourceWithImportState = &CSVConnectionResource{}
 
-func (t *CSVConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
-	return tfsdk.Schema{
+func (t *CSVConnectionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = schema.Schema{
 		MarkdownDescription: ":meta:subcategory:Connections: CSV Connection",
-		Attributes: map[string]tfsdk.Attribute{
-			"organization": {
+		Attributes: map[string]schema.Attribute{
+			"organization": schema.StringAttribute{
 				MarkdownDescription: "Organization ID",
 				Optional:            true,
 				Computed:            true,
-				Type:                types.StringType,
 			},
-			"name": {
-				Type:     types.StringType,
+			"name": schema.StringAttribute{
 				Required: true,
 			},
-			"configuration": {
-				Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
-					"url": {
+			"configuration": schema.SingleNestedAttribute{
+				Attributes: map[string]schema.Attribute{
+					"url": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            true,
 						Optional:            false,
 						Sensitive:           false,
 					},
-					"headers": {
+					"headers": schema.SetAttribute{
 						MarkdownDescription: "",
-						Type: types.SetType{ElemType: types.ObjectType{
+						ElementType: types.ObjectType{
 							AttrTypes: map[string]attr.Type{
 								"name":  types.StringType,
 								"value": types.StringType,
 							},
-						}},
-						Optional: true,
-					},
-					"parameters": {
-						MarkdownDescription: "",
-						Type: types.SetType{
-							ElemType: types.ObjectType{
-								AttrTypes: map[string]attr.Type{
-									"name":  types.StringType,
-									"value": types.StringType,
-								}},
 						},
 						Optional: true,
 					},
-					"auth": {
-						Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
-							"basic": {
-								Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
-									"username": {
-										Type:     types.StringType,
-										Optional: true,
-									},
-									"password": {
-										Type:      types.StringType,
-										Optional:  true,
-										Sensitive: true,
-									},
-								}),
-								Optional: true,
+					"parameters": schema.SetAttribute{
+						MarkdownDescription: "",
+						ElementType: types.ObjectType{
+							AttrTypes: map[string]attr.Type{
+								"name":  types.StringType,
+								"value": types.StringType,
 							},
-							"header": {
-								Type: types.ObjectType{
-									AttrTypes: map[string]attr.Type{
-										"name":  types.StringType,
-										"value": types.StringType,
-									}},
-								Optional: true,
-							},
-							"oauth": {
-								Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
-									"client_id": {
-										Type:     types.StringType,
-										Optional: true,
-									},
-									"client_secret": {
-										Type:      types.StringType,
-										Optional:  true,
-										Sensitive: true,
-									},
-									"token_endpoint": {
-										Type:     types.StringType,
-										Optional: true,
-									},
-									"extra_form_data": {
-										Type: types.SetType{
-											ElemType: types.ObjectType{
-												AttrTypes: map[string]attr.Type{
-													"name":  types.StringType,
-													"value": types.StringType,
-												}},
-										},
-										Optional: true,
-									},
-								}),
-								Optional: true,
-							}}),
+						},
 						Optional: true,
 					},
-				}),
+					"auth": schema.SingleNestedAttribute{
+						Attributes: map[string]schema.Attribute{
+							"basic": schema.SingleNestedAttribute{
+								Attributes: map[string]schema.Attribute{
+									"username": schema.StringAttribute{
+										Optional: true,
+									},
+									"password": schema.StringAttribute{
+										Optional:  true,
+										Sensitive: true,
+									},
+								},
+								Optional: true,
+							},
+							"header": schema.ObjectAttribute{
+								AttributeTypes: map[string]attr.Type{
+									"name":  types.StringType,
+									"value": types.StringType,
+								},
+								Optional: true,
+							},
+							"oauth": schema.SingleNestedAttribute{
+								Attributes: map[string]schema.Attribute{
+									"client_id": schema.StringAttribute{
+										Optional: true,
+									},
+									"client_secret": schema.StringAttribute{
+										Optional:  true,
+										Sensitive: true,
+									},
+									"token_endpoint": schema.StringAttribute{
+										Optional: true,
+									},
+									"extra_form_data": schema.SetAttribute{
+										ElementType: types.ObjectType{
+											AttrTypes: map[string]attr.Type{
+												"name":  types.StringType,
+												"value": types.StringType,
+											}},
+										Optional: true,
+									},
+								},
+								Optional: true,
+							}},
+						Optional: true,
+					},
+				},
 				Required: true,
 			},
-			"id": {
+			"id": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "Google Cloud Storage Connection identifier",
-				PlanModifiers: tfsdk.AttributePlanModifiers{
-					resource.UseStateForUnknown(),
+				MarkdownDescription: "CSV Connection identifier",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
 				},
-				Type: types.StringType,
 			},
 		},
-	}, nil
+	}
 }
 
 func (r *CSVConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -172,7 +161,7 @@ func (r *CSVConnectionResource) Create(ctx context.Context, req resource.CreateR
 	}
 
 	var auth polytomic.Auth
-	diags = data.Configuration.Attributes()["auth"].(types.Object).As(ctx, &auth, types.ObjectAsOptions{UnhandledNullAsEmpty: true})
+	diags = data.Configuration.Attributes()["auth"].(types.Object).As(ctx, &auth, basetypes.ObjectAsOptions{UnhandledNullAsEmpty: true})
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -273,7 +262,7 @@ func (r *CSVConnectionResource) Update(ctx context.Context, req resource.UpdateR
 	}
 
 	var auth polytomic.Auth
-	diags = data.Configuration.Attributes()["auth"].(types.Object).As(ctx, &auth, types.ObjectAsOptions{UnhandledNullAsEmpty: true})
+	diags = data.Configuration.Attributes()["auth"].(types.Object).As(ctx, &auth, basetypes.ObjectAsOptions{UnhandledNullAsEmpty: true})
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return

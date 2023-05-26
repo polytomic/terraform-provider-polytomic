@@ -11,7 +11,6 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/polytomic/terraform-provider-polytomic/provider"
 	"gopkg.in/yaml.v2"
 )
@@ -36,23 +35,23 @@ const (
 var (
 	TypeMap = map[string]Typer{
 		"string": {
-			AttrType: types.StringType.String(),
+			AttrType: "schema.StringAttribute",
 			TfType:   "types.String",
 		},
 		"number": {
-			AttrType: types.NumberType.String(),
+			AttrType: "schema.NumberAttribute",
 			TfType:   "types.Number",
 		},
 		"bool": {
-			AttrType: types.BoolType.String(),
+			AttrType: "schema.BoolAttribute",
 			TfType:   "types.Bool",
 		},
 		"int": {
-			AttrType: types.Int64Type.String(),
+			AttrType: "schema.Int64Attribute",
 			TfType:   "types.Int64",
 		},
 		"int64": {
-			AttrType: types.Int64Type.String(),
+			AttrType: "schema.Int64Attribute",
 			TfType:   "types.Int64",
 		},
 	}

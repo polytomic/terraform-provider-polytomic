@@ -6,11 +6,13 @@ import (
 	"sort"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/polytomic/polytomic-go"
 )
 
@@ -18,118 +20,101 @@ import (
 var _ resource.Resource = &bulkSyncResource{}
 var _ resource.ResourceWithImportState = &bulkSyncResource{}
 
-func (r *bulkSyncResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
-	return tfsdk.Schema{
+func (r *bulkSyncResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = schema.Schema{
 		MarkdownDescription: ":meta:subcategory:Bulk Syncs: Bulk Sync",
-		Attributes: map[string]tfsdk.Attribute{
-			"id": {
+		Attributes: map[string]schema.Attribute{
+			"id": schema.StringAttribute{
 				MarkdownDescription: "",
-				Type:                types.StringType,
 				Computed:            true,
-				PlanModifiers: tfsdk.AttributePlanModifiers{
-					resource.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
-			"organization": {
+			"organization": schema.StringAttribute{
 				MarkdownDescription: "",
-				Type:                types.StringType,
 				Optional:            true,
 				Computed:            true,
 			},
-			"name": {
+			"name": schema.StringAttribute{
 				MarkdownDescription: "",
-				Type:                types.StringType,
 				Required:            true,
 			},
-			"dest_connection_id": {
+			"dest_connection_id": schema.StringAttribute{
 				MarkdownDescription: "",
-				Type:                types.StringType,
 				Required:            true,
 			},
-			"source_connection_id": {
+			"source_connection_id": schema.StringAttribute{
 				MarkdownDescription: "",
-				Type:                types.StringType,
 				Required:            true,
 			},
-			"mode": {
+			"mode": schema.StringAttribute{
 				MarkdownDescription: "",
-				Type:                types.StringType,
 				Required:            true,
 			},
-			"discover": {
+			"discover": schema.BoolAttribute{
 				MarkdownDescription: "",
-				Type:                types.BoolType,
 				Required:            true,
 			},
-			"active": {
+			"active": schema.BoolAttribute{
 				MarkdownDescription: "",
-				Type:                types.BoolType,
 				Required:            true,
 			},
-			"schemas": {
+			"schemas": schema.SetAttribute{
 				MarkdownDescription: "",
-				Type:                types.SetType{ElemType: types.StringType},
+				ElementType:         types.StringType,
 				Optional:            true,
 			},
-			"schedule": {
-				Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
-					"frequency": {
+			"policies": schema.SetAttribute{
+				MarkdownDescription: "",
+				ElementType:         types.StringType,
+				Optional:            true,
+			},
+			"schedule": schema.SingleNestedAttribute{
+				Attributes: map[string]schema.Attribute{
+					"frequency": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            true,
 					},
-					"day_of_week": {
+					"day_of_week": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Optional:            true,
 						Computed:            true,
 					},
-					"hour": {
+					"hour": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Optional:            true,
 						Computed:            true,
 					},
-					"minute": {
+					"minute": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Optional:            true,
 						Computed:            true,
 					},
-					"month": {
+					"month": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Optional:            true,
 						Computed:            true,
 					},
-					"day_of_month": {
+					"day_of_month": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Optional:            true,
 						Computed:            true,
 					},
-				}),
-				Required: true,
-			},
-			"dest_configuration": {
-				MarkdownDescription: `\
-				- Snowflake: schema = "" \
-				- BigQuery: dataset = "" \
-				- S3: format = "csv/json"`,
-				Type: types.MapType{
-					ElemType: types.StringType,
 				},
 				Required: true,
 			},
-			"source_configuration": {
+			"dest_configuration": schema.MapAttribute{
+				ElementType: types.StringType,
+				Required:    true,
+			},
+			"source_configuration": schema.MapAttribute{
 				MarkdownDescription: "",
-				Type: types.MapType{
-					ElemType: types.StringType,
-				},
-				Optional: true,
+				ElementType:         types.StringType,
+				Optional:            true,
 			},
 		},
-	}, nil
+	}
 }
 
 func (r *bulkSyncResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
@@ -190,7 +175,8 @@ type bulkSyncResourceData struct {
 	Mode                     types.String `tfsdk:"mode"`
 	Discover                 types.Bool   `tfsdk:"discover"`
 	Active                   types.Bool   `tfsdk:"active"`
-	Schemas                  types.List   `tfsdk:"schemas"`
+	Schemas                  types.Set    `tfsdk:"schemas"`
+	Policies                 types.Set    `tfsdk:"policies"`
 	Schedule                 types.Object `tfsdk:"schedule"`
 	DestinationConfiguration types.Map    `tfsdk:"dest_configuration"`
 	SourceConfiguration      types.Map    `tfsdk:"source_configuration"`
@@ -218,8 +204,15 @@ func (r *bulkSyncResource) Create(ctx context.Context, req resource.CreateReques
 	}
 	sort.Strings(schemas)
 
+	var policies []string
+	diags = data.Policies.ElementsAs(ctx, &policies, false)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
 	var schedule polytomic.Schedule
-	diags = data.Schedule.As(ctx, &schedule, types.ObjectAsOptions{})
+	diags = data.Schedule.As(ctx, &schedule, basetypes.ObjectAsOptions{})
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -257,6 +250,7 @@ func (r *bulkSyncResource) Create(ctx context.Context, req resource.CreateReques
 			Discover:                 data.Discover.ValueBool(),
 			Active:                   data.Active.ValueBool(),
 			Schemas:                  schemas,
+			Policies:                 policies,
 			Schedule:                 schedule,
 			DestinationConfiguration: destConfig,
 			SourceConfiguration:      sourceConfig,
@@ -267,7 +261,6 @@ func (r *bulkSyncResource) Create(ctx context.Context, req resource.CreateReques
 		return
 	}
 	data.Id = types.StringValue(created.ID)
-	data.Organization = types.StringValue(created.OrganizationID)
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -309,7 +302,6 @@ func (r *bulkSyncResource) Read(ctx context.Context, req resource.ReadRequest, r
 	}
 
 	data.Id = types.StringValue(bulkSync.ID)
-	data.Organization = types.StringValue(bulkSync.OrganizationID)
 	data.Name = types.StringValue(bulkSync.Name)
 	data.DestConnectionID = types.StringValue(bulkSync.DestConnectionID)
 	data.SourceConnectionID = types.StringValue(bulkSync.SourceConnectionID)
@@ -334,7 +326,7 @@ func (r *bulkSyncResource) Update(ctx context.Context, req resource.UpdateReques
 	}
 
 	var schedule polytomic.Schedule
-	diags = data.Schedule.As(ctx, &schedule, types.ObjectAsOptions{})
+	diags = data.Schedule.As(ctx, &schedule, basetypes.ObjectAsOptions{})
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return

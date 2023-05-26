@@ -8,10 +8,9 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/polytomic/polytomic-go"
 )
@@ -20,41 +19,36 @@ import (
 var _ resource.Resource = &bulkSyncSchemaResource{}
 var _ resource.ResourceWithImportState = &bulkSyncSchemaResource{}
 
-func (r *bulkSyncSchemaResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
-	return tfsdk.Schema{
+func (r *bulkSyncSchemaResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = schema.Schema{
 		MarkdownDescription: ":meta:subcategory:Bulk Syncs: Schema",
-		Attributes: map[string]tfsdk.Attribute{
-			"id": {
+		Attributes: map[string]schema.Attribute{
+			"id": schema.StringAttribute{
 				MarkdownDescription: "",
-				Type:                types.StringType,
 				Required:            true,
 			},
-			"sync_id": {
+			"sync_id": schema.StringAttribute{
 				MarkdownDescription: "",
-				Type:                types.StringType,
 				Required:            true,
 			},
-			"partition_key": {
+			"partition_key": schema.StringAttribute{
 				MarkdownDescription: "",
-				Type:                types.StringType,
 				Optional:            true,
 				Computed:            true,
 			},
-			"fields": {
+			"fields": schema.SetAttribute{
 				MarkdownDescription: "",
 				Optional:            true,
-				Type: types.SetType{
-					ElemType: types.ObjectType{
-						AttrTypes: map[string]attr.Type{
-							"id":         types.StringType,
-							"enabled":    types.BoolType,
-							"obfuscated": types.BoolType,
-						},
+				ElementType: types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						"id":         types.StringType,
+						"enabled":    types.BoolType,
+						"obfuscated": types.BoolType,
 					},
 				},
 			},
 		},
-	}, nil
+	}
 }
 
 func (r *bulkSyncSchemaResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {

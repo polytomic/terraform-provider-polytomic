@@ -55,7 +55,7 @@ resource "polytomic_csv_connection" "example" {
 
 ### Read-Only
 
-- `id` (String) Google Cloud Storage Connection identifier
+- `id` (String) CSV Connection identifier
 
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`

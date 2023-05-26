@@ -11,10 +11,11 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/polytomic/polytomic-go"
@@ -24,78 +25,69 @@ import (
 var _ resource.Resource = &MongodbConnectionResource{}
 var _ resource.ResourceWithImportState = &MongodbConnectionResource{}
 
-func (t *MongodbConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
-	return tfsdk.Schema{
+func (t *MongodbConnectionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = schema.Schema{
 		MarkdownDescription: ":meta:subcategory:Connections: MongoDB Connection",
-		Attributes: map[string]tfsdk.Attribute{
-			"organization": {
+		Attributes: map[string]schema.Attribute{
+			"organization": schema.StringAttribute{
 				MarkdownDescription: "Organization ID",
 				Optional:            true,
 				Computed:            true,
-				Type:                types.StringType,
 			},
-			"name": {
-				Type:     types.StringType,
+			"name": schema.StringAttribute{
 				Required: true,
 			},
-			"configuration": {
-				Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
-					"hosts": {
+			"configuration": schema.SingleNestedAttribute{
+				Attributes: map[string]schema.Attribute{
+					"hosts": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            true,
 						Optional:            false,
 						Sensitive:           false,
 					},
-					"username": {
+					"username": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            true,
 						Optional:            false,
 						Sensitive:           false,
 					},
-					"password": {
+					"password": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            true,
 						Optional:            false,
 						Sensitive:           true,
 					},
-					"database": {
+					"database": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            false,
 						Optional:            true,
 						Sensitive:           false,
 					},
-					"srv": {
+					"srv": schema.BoolAttribute{
 						MarkdownDescription: "",
-						Type:                types.BoolType,
 						Required:            false,
 						Optional:            true,
 						Sensitive:           false,
 					},
-					"params": {
+					"params": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            false,
 						Optional:            true,
 						Sensitive:           false,
 					},
-				}),
+				},
 
 				Required: true,
 			},
-			"id": {
+			"id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "MongoDB Connection identifier",
-				PlanModifiers: tfsdk.AttributePlanModifiers{
-					resource.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
 				},
-				Type: types.StringType,
 			},
 		},
-	}, nil
+	}
 }
 
 func (r *MongodbConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -147,17 +139,17 @@ func (r *MongodbConnectionResource) Create(ctx context.Context, req resource.Cre
 	//decoder.Decode(created.Configuration)
 	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 	//
-	//	"hosts": types.StringType,
+	//	"hosts": schema.StringAttribute,
 	//
-	//	"username": types.StringType,
+	//	"username": schema.StringAttribute,
 	//
-	//	"password": types.StringType,
+	//	"password": schema.StringAttribute,
 	//
-	//	"database": types.StringType,
+	//	"database": schema.StringAttribute,
 	//
-	//	"srv": types.BoolType,
+	//	"srv": schema.BoolAttribute,
 	//
-	//	"params": types.StringType,
+	//	"params": schema.StringAttribute,
 	//
 	//}, output)
 	//if diags.HasError() {
@@ -206,17 +198,17 @@ func (r *MongodbConnectionResource) Read(ctx context.Context, req resource.ReadR
 	//decoder.Decode(connection.Configuration)
 	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 	//
-	//	"hosts": types.StringType,
+	//	"hosts": schema.StringAttribute,
 	//
-	//	"username": types.StringType,
+	//	"username": schema.StringAttribute,
 	//
-	//	"password": types.StringType,
+	//	"password": schema.StringAttribute,
 	//
-	//	"database": types.StringType,
+	//	"database": schema.StringAttribute,
 	//
-	//	"srv": types.BoolType,
+	//	"srv": schema.BoolAttribute,
 	//
-	//	"params": types.StringType,
+	//	"params": schema.StringAttribute,
 	//
 	//}, output)
 	//if diags.HasError() {
@@ -270,17 +262,17 @@ func (r *MongodbConnectionResource) Update(ctx context.Context, req resource.Upd
 	//decoder.Decode(updated.Configuration)
 	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 	//
-	//	"hosts": types.StringType,
+	//	"hosts": schema.StringAttribute,
 	//
-	//	"username": types.StringType,
+	//	"username": schema.StringAttribute,
 	//
-	//	"password": types.StringType,
+	//	"password": schema.StringAttribute,
 	//
-	//	"database": types.StringType,
+	//	"database": schema.StringAttribute,
 	//
-	//	"srv": types.BoolType,
+	//	"srv": schema.BoolAttribute,
 	//
-	//	"params": types.StringType,
+	//	"params": schema.StringAttribute,
 	//
 	//}, output)
 	//if diags.HasError() {

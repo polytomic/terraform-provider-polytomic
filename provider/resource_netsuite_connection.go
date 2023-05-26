@@ -11,10 +11,11 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/polytomic/polytomic-go"
@@ -24,71 +25,63 @@ import (
 var _ resource.Resource = &NetsuiteConnectionResource{}
 var _ resource.ResourceWithImportState = &NetsuiteConnectionResource{}
 
-func (t *NetsuiteConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
-	return tfsdk.Schema{
+func (t *NetsuiteConnectionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = schema.Schema{
 		MarkdownDescription: ":meta:subcategory:Connections: NetSuite Connection",
-		Attributes: map[string]tfsdk.Attribute{
-			"organization": {
+		Attributes: map[string]schema.Attribute{
+			"organization": schema.StringAttribute{
 				MarkdownDescription: "Organization ID",
 				Optional:            true,
 				Computed:            true,
-				Type:                types.StringType,
 			},
-			"name": {
-				Type:     types.StringType,
+			"name": schema.StringAttribute{
 				Required: true,
 			},
-			"configuration": {
-				Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
-					"account_id": {
+			"configuration": schema.SingleNestedAttribute{
+				Attributes: map[string]schema.Attribute{
+					"account_id": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            true,
 						Optional:            false,
 						Sensitive:           false,
 					},
-					"consumer_key": {
+					"consumer_key": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            true,
 						Optional:            false,
 						Sensitive:           false,
 					},
-					"consumer_secret": {
+					"consumer_secret": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            true,
 						Optional:            false,
 						Sensitive:           true,
 					},
-					"token": {
+					"token": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            true,
 						Optional:            false,
 						Sensitive:           false,
 					},
-					"token_secret": {
+					"token_secret": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            true,
 						Optional:            false,
 						Sensitive:           true,
 					},
-				}),
+				},
 
 				Required: true,
 			},
-			"id": {
+			"id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "NetSuite Connection identifier",
-				PlanModifiers: tfsdk.AttributePlanModifiers{
-					resource.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
 				},
-				Type: types.StringType,
 			},
 		},
-	}, nil
+	}
 }
 
 func (r *NetsuiteConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -139,15 +132,15 @@ func (r *NetsuiteConnectionResource) Create(ctx context.Context, req resource.Cr
 	//decoder.Decode(created.Configuration)
 	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 	//
-	//	"account_id": types.StringType,
+	//	"account_id": schema.StringAttribute,
 	//
-	//	"consumer_key": types.StringType,
+	//	"consumer_key": schema.StringAttribute,
 	//
-	//	"consumer_secret": types.StringType,
+	//	"consumer_secret": schema.StringAttribute,
 	//
-	//	"token": types.StringType,
+	//	"token": schema.StringAttribute,
 	//
-	//	"token_secret": types.StringType,
+	//	"token_secret": schema.StringAttribute,
 	//
 	//}, output)
 	//if diags.HasError() {
@@ -196,15 +189,15 @@ func (r *NetsuiteConnectionResource) Read(ctx context.Context, req resource.Read
 	//decoder.Decode(connection.Configuration)
 	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 	//
-	//	"account_id": types.StringType,
+	//	"account_id": schema.StringAttribute,
 	//
-	//	"consumer_key": types.StringType,
+	//	"consumer_key": schema.StringAttribute,
 	//
-	//	"consumer_secret": types.StringType,
+	//	"consumer_secret": schema.StringAttribute,
 	//
-	//	"token": types.StringType,
+	//	"token": schema.StringAttribute,
 	//
-	//	"token_secret": types.StringType,
+	//	"token_secret": schema.StringAttribute,
 	//
 	//}, output)
 	//if diags.HasError() {
@@ -257,15 +250,15 @@ func (r *NetsuiteConnectionResource) Update(ctx context.Context, req resource.Up
 	//decoder.Decode(updated.Configuration)
 	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 	//
-	//	"account_id": types.StringType,
+	//	"account_id": schema.StringAttribute,
 	//
-	//	"consumer_key": types.StringType,
+	//	"consumer_key": schema.StringAttribute,
 	//
-	//	"consumer_secret": types.StringType,
+	//	"consumer_secret": schema.StringAttribute,
 	//
-	//	"token": types.StringType,
+	//	"token": schema.StringAttribute,
 	//
-	//	"token_secret": types.StringType,
+	//	"token_secret": schema.StringAttribute,
 	//
 	//}, output)
 	//if diags.HasError() {

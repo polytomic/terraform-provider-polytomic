@@ -9,11 +9,13 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/polytomic/polytomic-go"
 )
@@ -22,120 +24,107 @@ import (
 var _ resource.Resource = &APIConnectionResource{}
 var _ resource.ResourceWithImportState = &APIConnectionResource{}
 
-func (t *APIConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
-	return tfsdk.Schema{
+func (t *APIConnectionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = schema.Schema{
 		MarkdownDescription: ":meta:subcategory:Connections: API Connection",
-		Attributes: map[string]tfsdk.Attribute{
-			"organization": {
+		Attributes: map[string]schema.Attribute{
+			"organization": schema.StringAttribute{
 				MarkdownDescription: "Organization ID",
 				Optional:            true,
 				Computed:            true,
-				Type:                types.StringType,
 			},
-			"name": {
-				Type:     types.StringType,
+			"name": schema.StringAttribute{
 				Required: true,
 			},
-			"configuration": {
+			"configuration": schema.SingleNestedAttribute{
 				Required: true,
-				Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
-					"url": {
+				Attributes: map[string]schema.Attribute{
+					"url": schema.StringAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
 						Required:            true,
 					},
-					"headers": {
+					"headers": schema.SetAttribute{
 						MarkdownDescription: "",
-						Type: types.SetType{ElemType: types.ObjectType{
+						ElementType: types.ObjectType{
 							AttrTypes: map[string]attr.Type{
 								"name":  types.StringType,
 								"value": types.StringType,
 							},
-						}},
-						Optional: true,
-					},
-					"parameters": {
-						MarkdownDescription: "",
-						Type: types.SetType{
-							ElemType: types.ObjectType{
-								AttrTypes: map[string]attr.Type{
-									"name":  types.StringType,
-									"value": types.StringType,
-								}},
 						},
 						Optional: true,
 					},
-					"healthcheck": {
+					"parameters": schema.SetAttribute{
 						MarkdownDescription: "",
-						Type:                types.StringType,
+						ElementType: types.ObjectType{
+							AttrTypes: map[string]attr.Type{
+								"name":  types.StringType,
+								"value": types.StringType,
+							},
+						},
+						Optional: true,
+					},
+					"healthcheck": schema.StringAttribute{
+						MarkdownDescription: "",
 						Optional:            true,
 					},
-					"auth": {
-						Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
-							"basic": {
-								Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
-									"username": {
-										Type:     types.StringType,
+					"auth": schema.SingleNestedAttribute{
+						Attributes: map[string]schema.Attribute{
+							"basic": schema.SingleNestedAttribute{
+								Attributes: map[string]schema.Attribute{
+									"username": schema.StringAttribute{
 										Optional: true,
 									},
-									"password": {
-										Type:      types.StringType,
+									"password": schema.StringAttribute{
 										Optional:  true,
 										Sensitive: true,
 									},
-								}),
+								},
 								Optional: true,
 							},
-							"header": {
-								Type: types.ObjectType{
-									AttrTypes: map[string]attr.Type{
-										"name":  types.StringType,
-										"value": types.StringType,
-									}},
+							"header": schema.ObjectAttribute{
+								AttributeTypes: map[string]attr.Type{
+									"name":  types.StringType,
+									"value": types.StringType,
+								},
 								Optional: true,
 							},
-							"oauth": {
-								Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
-									"client_id": {
-										Type:     types.StringType,
+							"oauth": schema.SingleNestedAttribute{
+								Attributes: map[string]schema.Attribute{
+									"client_id": schema.StringAttribute{
 										Optional: true,
 									},
-									"client_secret": {
-										Type:      types.StringType,
+									"client_secret": schema.StringAttribute{
 										Optional:  true,
 										Sensitive: true,
 									},
-									"token_endpoint": {
-										Type:     types.StringType,
+									"token_endpoint": schema.StringAttribute{
 										Optional: true,
 									},
-									"extra_form_data": {
-										Type: types.SetType{
-											ElemType: types.ObjectType{
-												AttrTypes: map[string]attr.Type{
-													"name":  types.StringType,
-													"value": types.StringType,
-												}},
+									"extra_form_data": schema.SetAttribute{
+										ElementType: types.ObjectType{
+											AttrTypes: map[string]attr.Type{
+												"name":  types.StringType,
+												"value": types.StringType,
+											},
 										},
 										Optional: true,
 									},
-								}),
+								},
 								Optional: true,
-							}}),
+							}},
 						Optional: true,
 					},
 				},
-				)},
-			"id": {
+			},
+			"id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "API Connection identifier",
-				PlanModifiers: tfsdk.AttributePlanModifiers{
-					resource.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
 				},
-				Type: types.StringType,
 			},
 		},
-	}, nil
+	}
 }
 
 func (r *APIConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -175,7 +164,7 @@ func (r *APIConnectionResource) Create(ctx context.Context, req resource.CreateR
 	}
 
 	var auth polytomic.Auth
-	diags = data.Configuration.Attributes()["auth"].(types.Object).As(ctx, &auth, types.ObjectAsOptions{UnhandledNullAsEmpty: true})
+	diags = data.Configuration.Attributes()["auth"].(types.Object).As(ctx, &auth, basetypes.ObjectAsOptions{UnhandledNullAsEmpty: true})
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -277,7 +266,7 @@ func (r *APIConnectionResource) Update(ctx context.Context, req resource.UpdateR
 	}
 
 	var auth polytomic.Auth
-	diags = data.Configuration.Attributes()["auth"].(types.Object).As(ctx, &auth, types.ObjectAsOptions{UnhandledNullAsEmpty: true})
+	diags = data.Configuration.Attributes()["auth"].(types.Object).As(ctx, &auth, basetypes.ObjectAsOptions{UnhandledNullAsEmpty: true})
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return

@@ -5,13 +5,17 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"net/http"
+	"strings"
 
 	"github.com/google/uuid"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/polytomic/polytomic-go"
@@ -21,31 +25,28 @@ import (
 var _ resource.Resource = &{{ .Connection }}ConnectionResource{}
 var _ resource.ResourceWithImportState = &{{ .Connection }}ConnectionResource{}
 
-func (t *{{ .Connection }}ConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
-	return tfsdk.Schema{
+func (t *{{ .Connection }}ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = schema.Schema{
 		MarkdownDescription: ":meta:subcategory:Connections: {{ .Name }} Connection",
-		Attributes: map[string]tfsdk.Attribute{
-			"organization": {
+		Attributes: map[string]schema.Attribute{
+			"organization": schema.StringAttribute{
 				MarkdownDescription: "Organization ID",
-				Optional: 		     true,
-				Computed: 		     true,
-				Type:                types.StringType,
+				Optional:            true,
+				Computed:            true,
 			},
-			"name": {
-				Type:     types.StringType,
+			"name": schema.StringAttribute{
 				Required: true,
 			},
-			"configuration": {
-				Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
-					{{ range .Attributes }}"{{ .AttrName }}": {
+			"configuration": schema.SingleNestedAttribute{
+				Attributes: map[string]schema.Attribute{
+					{{ range .Attributes }}"{{ .AttrName }}": {{ .AttrType }} {
 						MarkdownDescription: "{{ .Description }}",
-						Type:      {{ .AttrType }},
 						Required:  {{ .Required }},
 						Optional:  {{ .Optional }},
 						Sensitive: {{ .Sensitive }},
 					},
 					{{ end }}
-				}),
+				},
 				{{ if .Attributes}}
 				Required: true,
 				{{ else }}
@@ -53,16 +54,15 @@ func (t *{{ .Connection }}ConnectionResource) GetSchema(ctx context.Context) (tf
 				Type: types.ObjectType{},
 				{{ end }}
 			},
-			"id": {
+			"id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "{{ .Name }} Connection identifier",
-				PlanModifiers: tfsdk.AttributePlanModifiers{
-					resource.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
 				},
-				Type: types.StringType,
 			},
 		},
-	}, nil
+	}
 }
 
 func (r *{{ .Connection }}ConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
