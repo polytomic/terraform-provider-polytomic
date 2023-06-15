@@ -2,7 +2,9 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"net/http"
 	"sort"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -281,6 +283,13 @@ func (r *bulkSyncResource) Read(ctx context.Context, req resource.ReadRequest, r
 
 	bulkSync, err := r.client.Bulk().GetBulkSync(ctx, data.Id.ValueString())
 	if err != nil {
+		pErr := polytomic.ApiError{}
+		if errors.As(err, &pErr) {
+			if pErr.StatusCode == http.StatusNotFound {
+				resp.State.RemoveResource(ctx)
+				return
+			}
+		}
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error reading bulk sync: %s", err))
 		return
 	}
