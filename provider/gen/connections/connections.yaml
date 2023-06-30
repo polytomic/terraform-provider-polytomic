@@ -994,3 +994,35 @@ connections:
         required: true
         sensitive: true
         example: my-api-key
+  - connection: jira
+    name: Jira
+    type: polytomic.JiraConnectionType
+    config: polytomic.JiraConnectionConfiguration
+    resource: true
+    datasource: true
+    attributes:
+      - name: URL
+        type: string
+        required: true
+        sensitive: true
+        example: https://example.atlassian.net
+      - name: AuthMethod
+        type: string
+        required: true
+        sensitive: false
+        example: apikey/pat
+      - name: Username
+        type: string
+        optional: true
+        sensitive: false
+        example: user
+      - name: APIKey
+        type: string
+        optional: true
+        sensitive: true
+        example: my-api-key
+      - name: AccessToken
+        type: string
+        optional: true
+        sensitive: true
+        example: my-access-token

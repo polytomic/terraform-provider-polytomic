@@ -51,6 +51,7 @@ var (
 		func() resource.Resource { return &AsanaConnectionResource{} },
 		func() resource.Resource { return &DelightedConnectionResource{} },
 		func() resource.Resource { return &LinearConnectionResource{} },
+		func() resource.Resource { return &JiraConnectionResource{} },
 	}
 
 	connectionDatasources = []func() datasource.DataSource{
@@ -105,6 +106,7 @@ var (
 		func() datasource.DataSource { return &AsanaConnectionDataSource{} },
 		func() datasource.DataSource { return &DelightedConnectionDataSource{} },
 		func() datasource.DataSource { return &LinearConnectionDataSource{} },
+		func() datasource.DataSource { return &JiraConnectionDataSource{} },
 	}
 
 	connectionImportableResources = map[string]resource.Resource{
@@ -149,6 +151,7 @@ var (
 		"asana":      &AsanaConnectionResource{},
 		"delighted":  &DelightedConnectionResource{},
 		"linear":     &LinearConnectionResource{},
+		"jira":       &JiraConnectionResource{},
 	}
 
 	connectionImportableDatasources = map[string]datasource.DataSource{
@@ -203,5 +206,6 @@ var (
 		"asana":      &AsanaConnectionDataSource{},
 		"delighted":  &DelightedConnectionDataSource{},
 		"linear":     &LinearConnectionDataSource{},
+		"jira":       &JiraConnectionDataSource{},
 	}
 )
