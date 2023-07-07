@@ -1,3 +1,10 @@
+## 0.3.18 (7 July 2023)
+* Add Jira connection
+
+## 0.3.17 (16 Jun 2023)
+* Improve error messaging
+* Fix handling of 404s for users, organizations, and bulk syncs
+
 ## 0.3.16 (15 May 2023)
 * Ensure resource names from importer are valid
 * Add SSL parameter to SQL Server connection
