@@ -52,6 +52,7 @@ resource "polytomic_sync" "sync" {
 
 ### Optional
 
+- `active` (Boolean)
 - `filter_logic` (String)
 - `filters` (Attributes Set) (see [below for nested schema](#nestedatt--filters))
 - `identity` (Attributes) (see [below for nested schema](#nestedatt--identity))

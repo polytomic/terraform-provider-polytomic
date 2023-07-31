@@ -76,6 +76,11 @@ func (r *syncResource) Schema(ctx context.Context, req resource.SchemaRequest, r
 				},
 				Required: true,
 			},
+			"active": schema.BoolAttribute{
+				MarkdownDescription: "",
+				Optional:            true,
+				Computed:            true,
+			},
 			"mode": schema.StringAttribute{
 				MarkdownDescription: "",
 				Required:            true,
@@ -325,6 +330,7 @@ type syncResourceResourceData struct {
 	Schedule       types.Object `tfsdk:"schedule"`
 	Identity       types.Object `tfsdk:"identity"`
 	SyncAllRecords types.Bool   `tfsdk:"sync_all_records"`
+	Active         types.Bool   `tfsdk:"active"`
 }
 
 type Filter struct {
@@ -515,6 +521,7 @@ func (r *syncResource) Create(ctx context.Context, req resource.CreateRequest, r
 		Overrides:      poverrides,
 		Schedule:       schedule,
 		SyncAllRecords: data.SyncAllRecords.ValueBool(),
+		Active:         data.Active.ValueBool(),
 	}
 
 	if identity.Source.ModelID != "" && identity.Source.Field != "" {
@@ -719,6 +726,7 @@ func (r *syncResource) Create(ctx context.Context, req resource.CreateRequest, r
 		return
 	}
 	data.SyncAllRecords = types.BoolValue(sync.SyncAllRecords)
+	data.Active = types.BoolValue(sync.Active)
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -939,6 +947,7 @@ func (r *syncResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 		return
 	}
 	data.SyncAllRecords = types.BoolValue(sync.SyncAllRecords)
+	data.Active = types.BoolValue(sync.Active)
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -1111,6 +1120,7 @@ func (r *syncResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		Schedule:       schedule,
 		Identity:       identity,
 		SyncAllRecords: data.SyncAllRecords.ValueBool(),
+		Active:         data.Active.ValueBool(),
 	}
 	sync, err := r.client.Syncs().Update(ctx, data.ID.ValueString(), request)
 	if err != nil {
@@ -1311,6 +1321,7 @@ func (r *syncResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		return
 	}
 	data.SyncAllRecords = types.BoolValue(sync.SyncAllRecords)
+	data.Active = types.BoolValue(sync.Active)
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
