@@ -1026,3 +1026,25 @@ connections:
         optional: true
         sensitive: true
         example: my-access-token
+  - connection: dynamodb
+    name: DynamoDB
+    type: polytomic.DynamoDBConnectionType
+    config: polytomic.DynamoDBConnectionConfiguration
+    datasource: true
+    resource: true
+    attributes:
+      - name: AccessID
+        type: string
+        required: true
+        sensitive: true
+        example: my-access-key-id
+      - name: SecretAccessKey
+        type: string
+        required: true
+        sensitive: true
+        example: my-secret-access-key
+      - name: Region
+        type: string
+        required: true
+        sensitive: false
+        example: us-east-1
