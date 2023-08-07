@@ -52,6 +52,7 @@ var (
 		func() resource.Resource { return &DelightedConnectionResource{} },
 		func() resource.Resource { return &LinearConnectionResource{} },
 		func() resource.Resource { return &JiraConnectionResource{} },
+		func() resource.Resource { return &DynamodbConnectionResource{} },
 	}
 
 	connectionDatasources = []func() datasource.DataSource{
@@ -107,6 +108,7 @@ var (
 		func() datasource.DataSource { return &DelightedConnectionDataSource{} },
 		func() datasource.DataSource { return &LinearConnectionDataSource{} },
 		func() datasource.DataSource { return &JiraConnectionDataSource{} },
+		func() datasource.DataSource { return &DynamodbConnectionDataSource{} },
 	}
 
 	connectionImportableResources = map[string]resource.Resource{
@@ -152,6 +154,7 @@ var (
 		"delighted":  &DelightedConnectionResource{},
 		"linear":     &LinearConnectionResource{},
 		"jira":       &JiraConnectionResource{},
+		"dynamodb":   &DynamodbConnectionResource{},
 	}
 
 	connectionImportableDatasources = map[string]datasource.DataSource{
@@ -207,5 +210,6 @@ var (
 		"delighted":  &DelightedConnectionDataSource{},
 		"linear":     &LinearConnectionDataSource{},
 		"jira":       &JiraConnectionDataSource{},
+		"dynamodb":   &DynamodbConnectionDataSource{},
 	}
 )
