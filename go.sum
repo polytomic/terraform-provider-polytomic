@@ -204,8 +204,8 @@ github.com/hashicorp/terraform-exec v0.18.1 h1:LAbfDvNQU1l0NOQlTuudjczVhHj061fNX
 github.com/hashicorp/terraform-exec v0.18.1/go.mod h1:58wg4IeuAJ6LVsLUeD2DWZZoc/bYi6dzhLHzxM41980=
 github.com/hashicorp/terraform-json v0.17.0 h1:EiA1Wp07nknYQAiv+jIt4dX4Cq5crgP+TsTE45MjMmM=
 github.com/hashicorp/terraform-json v0.17.0/go.mod h1:Huy6zt6euxaY9knPAFKjUITn8QxUFIe9VuSzb4zn/0o=
-github.com/hashicorp/terraform-plugin-framework v1.3.4 h1:dOTLsALgmQu+PawAvhfGQ04H0MeIz3EZmBw7OFvj7qs=
-github.com/hashicorp/terraform-plugin-framework v1.3.4/go.mod h1:2gGDpWiTI0irr9NSTLFAKlTi6KwGti3AoU19rFqU30o=
+github.com/hashicorp/terraform-plugin-framework v1.3.5 h1:FJ6s3CVWVAxlhiF/jhy6hzs4AnPHiflsp9KgzTGl1wo=
+github.com/hashicorp/terraform-plugin-framework v1.3.5/go.mod h1:2gGDpWiTI0irr9NSTLFAKlTi6KwGti3AoU19rFqU30o=
 github.com/hashicorp/terraform-plugin-go v0.18.0 h1:IwTkOS9cOW1ehLd/rG0y+u/TGLK9y6fGoBjXVUquzpE=
 github.com/hashicorp/terraform-plugin-go v0.18.0/go.mod h1:l7VK+2u5Kf2y+A+742GX0ouLut3gttudmvMgN0PA74Y=
 github.com/hashicorp/terraform-plugin-log v0.9.0 h1:i7hOA+vdAItN1/7UrfBqBwvYPQ9TFvymaRGZED3FCV0=
@@ -274,8 +274,6 @@ github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINE
 github.com/pkg/sftp v1.13.1/go.mod h1:3HaPG6Dq1ILlpPZRO0HVMrsydcdLt6HRDccSgb87qRg=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
-github.com/polytomic/polytomic-go v0.0.0-20230728194459-f98ea2ba4638 h1:S/3enkkzfuzjl1UQRGKpStuZtgbkm5n/yUYGyC7XozM=
-github.com/polytomic/polytomic-go v0.0.0-20230728194459-f98ea2ba4638/go.mod h1:+XkC/jjW7clbyvuUrL973eCzno0HmGoYZO5qNMUNSfU=
 github.com/polytomic/polytomic-go v0.0.0-20230804183226-a24c44fcef26 h1:3N3jPwo8iM9SneMbmLPeFv4SIft8hdT9YcEQ9q3NLgY=
 github.com/polytomic/polytomic-go v0.0.0-20230804183226-a24c44fcef26/go.mod h1:+XkC/jjW7clbyvuUrL973eCzno0HmGoYZO5qNMUNSfU=
 github.com/posener/complete v1.1.1/go.mod h1:em0nMJCgc9GFtwrmVmEMR/ZL6WyhyjMBndrE9hABlRI=
