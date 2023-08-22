@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/AlekSi/pointer v1.2.0
 	github.com/fbreckle/terraform-plugin-docs v0.0.0-20220812121758-a828466500d3
-	github.com/google/uuid v1.3.0
+	github.com/google/uuid v1.3.1
 	github.com/hashicorp/hcl/v2 v2.17.0
 	github.com/hashicorp/terraform-plugin-framework v1.3.4
 	github.com/hashicorp/terraform-plugin-go v0.18.0
