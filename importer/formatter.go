@@ -2,11 +2,25 @@ package importer
 
 import (
 	"fmt"
+	"regexp"
 
 	"github.com/hashicorp/hcl/v2/hclwrite"
 	"github.com/zclconf/go-cty/cty"
 	"golang.org/x/exp/slices"
 )
+
+// ReplaceRefs takes in an array of bytes and a map of references
+// It will parse the array of bytes and replace any reference byte sequences
+// with the value from the map.
+func ReplaceRefs(b []byte, refs map[string]string) []byte {
+	s := string(b)
+	for k, v := range refs {
+		// Repalce all instances of the reference and the enclosing quotes
+		re := regexp.MustCompile(`"` + k + `"`)
+		s = re.ReplaceAllString(s, v)
+	}
+	return []byte(s)
+}
 
 // convert arbitrary values to cty.Value
 func typeConverter(value any) cty.Value {
@@ -208,4 +222,13 @@ func jsonEncodeMap(v map[string]any, wrapped ...string) hclwrite.Tokens {
 	tokens = append(tokens, &hclwrite.Token{Bytes: []byte("}")})
 
 	return tokens
+}
+
+// referenceTokens takes in reference
+// and returns an unquoted value as hclwrite.Tokens
+func referenceTokens(ref string) hclwrite.Tokens {
+	return hclwrite.Tokens{
+		&hclwrite.Token{Bytes: []byte(" ")},
+		&hclwrite.Token{Bytes: []byte(ref)},
+	}
 }

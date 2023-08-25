@@ -97,11 +97,17 @@ func (r *bulkSyncResource) Schema(ctx context.Context, req resource.SchemaReques
 						MarkdownDescription: "",
 						Optional:            true,
 						Computed:            true,
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.UseStateForUnknown(),
+						},
 					},
 					"day_of_month": schema.StringAttribute{
 						MarkdownDescription: "",
 						Optional:            true,
 						Computed:            true,
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.UseStateForUnknown(),
+						},
 					},
 				},
 				Required: true,
@@ -117,31 +123,6 @@ func (r *bulkSyncResource) Schema(ctx context.Context, req resource.SchemaReques
 			},
 		},
 	}
-}
-
-func (r *bulkSyncResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
-	if req.State.Raw.IsNull() || !req.State.Raw.IsKnown() {
-		return
-	}
-
-	config := &bulkSyncResourceData{}
-	resp.Diagnostics.Append(req.Config.Get(ctx, config)...)
-
-	plan := &bulkSyncResourceData{}
-	resp.Diagnostics.Append(req.Plan.Get(ctx, plan)...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	keys := []string{"day_of_week", "hour", "minute", "month", "day_of_month"}
-	for _, key := range keys {
-		if config.Schedule.Attributes()[key].IsNull() {
-			plan.Schedule.Attributes()[key] = types.StringValue("")
-		}
-	}
-
-	resp.Diagnostics.Append(resp.Plan.Set(ctx, plan)...)
-
 }
 
 func (r *bulkSyncResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
@@ -214,7 +195,10 @@ func (r *bulkSyncResource) Create(ctx context.Context, req resource.CreateReques
 	}
 
 	var schedule polytomic.Schedule
-	diags = data.Schedule.As(ctx, &schedule, basetypes.ObjectAsOptions{})
+	diags = data.Schedule.As(ctx, &schedule, basetypes.ObjectAsOptions{
+		UnhandledNullAsEmpty:    true,
+		UnhandledUnknownAsEmpty: true,
+	})
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -335,7 +319,10 @@ func (r *bulkSyncResource) Update(ctx context.Context, req resource.UpdateReques
 	}
 
 	var schedule polytomic.Schedule
-	diags = data.Schedule.As(ctx, &schedule, basetypes.ObjectAsOptions{})
+	diags = data.Schedule.As(ctx, &schedule, basetypes.ObjectAsOptions{
+		UnhandledNullAsEmpty:    true,
+		UnhandledUnknownAsEmpty: true,
+	})
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
