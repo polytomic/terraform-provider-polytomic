@@ -44,7 +44,7 @@ func (m *Main) Init(ctx context.Context) error {
 	return nil
 }
 
-func (m *Main) GenerateTerraformFiles(ctx context.Context, writer io.Writer) error {
+func (m *Main) GenerateTerraformFiles(ctx context.Context, writer io.Writer, refs map[string]string) error {
 	tmpl, err := template.New("main").Parse(mainTemplate)
 	if err != nil {
 		return err
@@ -70,4 +70,12 @@ func (m *Main) GenerateImports(ctx context.Context, writer io.Writer) error {
 
 func (m *Main) Filename() string {
 	return "main.tf"
+}
+
+func (m *Main) ResourceRefs() map[string]string {
+	return nil
+}
+
+func (m *Main) DatasourceRefs() map[string]string {
+	return nil
 }

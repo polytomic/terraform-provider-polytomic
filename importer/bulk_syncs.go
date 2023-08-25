@@ -24,12 +24,13 @@ var (
 type BulkSyncs struct {
 	c *polytomic.Client
 
-	Resources []polytomic.BulkSyncResponse
+	Resources map[string]polytomic.BulkSyncResponse
 }
 
 func NewBulkSyncs(c *polytomic.Client) *BulkSyncs {
 	return &BulkSyncs{
-		c: c,
+		c:         c,
+		Resources: make(map[string]polytomic.BulkSyncResponse),
 	}
 }
 
@@ -38,13 +39,18 @@ func (b *BulkSyncs) Init(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	b.Resources = bulkSyncs
+	for _, bulk := range bulkSyncs {
+		// Bulk sync names are not unique, so we need to a slug to the name
+		// to make it unique.
+		name := provider.ValidName(provider.ToSnakeCase(bulk.Name) + "_" + bulk.ID[:8])
+		b.Resources[name] = bulk
+	}
 
 	return nil
 }
 
-func (b *BulkSyncs) GenerateTerraformFiles(ctx context.Context, writer io.Writer) error {
-	for _, bulkSync := range b.Resources {
+func (b *BulkSyncs) GenerateTerraformFiles(ctx context.Context, writer io.Writer, refs map[string]string) error {
+	for name, bulkSync := range b.Resources {
 		bulkSchemas, err := b.c.Bulk().GetBulkSyncSchemas(ctx, bulkSync.ID)
 		if err != nil {
 			return err
@@ -57,9 +63,7 @@ func (b *BulkSyncs) GenerateTerraformFiles(ctx context.Context, writer io.Writer
 		}
 		hclFile := hclwrite.NewEmptyFile()
 		body := hclFile.Body()
-		// Bulk sync names are not unique, so we need to a slug to the name
-		// to make it unique.
-		name := provider.ValidName(provider.ToSnakeCase(bulkSync.Name) + "_" + bulkSync.ID[:8])
+
 		resourceBlock := body.AppendNewBlock("resource", []string{BulkSyncResource, name})
 		resourceBlock.Body().SetAttributeValue("name", cty.StringVal(bulkSync.Name))
 		resourceBlock.Body().SetAttributeValue("source_connection_id", cty.StringVal(bulkSync.SourceConnectionID))
@@ -79,17 +83,14 @@ func (b *BulkSyncs) GenerateTerraformFiles(ctx context.Context, writer io.Writer
 		resourceBlock.Body().SetAttributeValue("schedule", typeConverter(schedule))
 		body.AppendNewline()
 
-		writer.Write(hclFile.Bytes())
+		writer.Write(ReplaceRefs(hclFile.Bytes(), refs))
 	}
 
 	return nil
 }
 
 func (b *BulkSyncs) GenerateImports(ctx context.Context, writer io.Writer) error {
-	for _, bulkSync := range b.Resources {
-		// Bulk sync names are not unique, so we need to a slug to the name
-		// to make it unique.
-		name := provider.ValidName(provider.ToSnakeCase(bulkSync.Name) + "_" + bulkSync.ID[:8])
+	for name, bulkSync := range b.Resources {
 		writer.Write([]byte(fmt.Sprintf("terraform import %s.%s %s",
 			BulkSyncResource,
 			name,
@@ -101,4 +102,16 @@ func (b *BulkSyncs) GenerateImports(ctx context.Context, writer io.Writer) error
 
 func (b *BulkSyncs) Filename() string {
 	return BulkSyncResourceFileName
+}
+
+func (b *BulkSyncs) ResourceRefs() map[string]string {
+	result := make(map[string]string)
+	for name, bulk := range b.Resources {
+		result[bulk.ID] = name
+	}
+	return result
+}
+
+func (b *BulkSyncs) DatasourceRefs() map[string]string {
+	return nil
 }

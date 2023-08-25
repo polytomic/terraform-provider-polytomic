@@ -26,7 +26,7 @@ type Models struct {
 	modelNames  map[string]string
 	uniqueNames map[string]bool
 
-	Resources []*polytomic.Model
+	Resources map[string]*polytomic.Model
 }
 
 func NewModels(c *polytomic.Client) *Models {
@@ -34,6 +34,7 @@ func NewModels(c *polytomic.Client) *Models {
 		c:           c,
 		modelNames:  map[string]string{},
 		uniqueNames: map[string]bool{},
+		Resources:   make(map[string]*polytomic.Model),
 	}
 }
 
@@ -49,17 +50,6 @@ func (m *Models) Init(ctx context.Context) error {
 			return err
 		}
 
-		m.Resources = append(m.Resources, hydratedModel)
-	}
-
-	return nil
-
-}
-
-func (m *Models) GenerateTerraformFiles(ctx context.Context, writer io.Writer) error {
-	for _, model := range m.Resources {
-		hclFile := hclwrite.NewEmptyFile()
-		body := hclFile.Body()
 		name := provider.ValidName(
 			provider.ToSnakeCase(model.Name),
 		)
@@ -68,6 +58,17 @@ func (m *Models) GenerateTerraformFiles(ctx context.Context, writer io.Writer) e
 		}
 		m.uniqueNames[name] = true
 		m.modelNames[model.ID] = name
+		m.Resources[name] = hydratedModel
+	}
+
+	return nil
+
+}
+
+func (m *Models) GenerateTerraformFiles(ctx context.Context, writer io.Writer, refs map[string]string) error {
+	for name, model := range m.Resources {
+		hclFile := hclwrite.NewEmptyFile()
+		body := hclFile.Body()
 
 		resourceBlock := body.AppendNewBlock("resource", []string{ModelResource, name})
 		resourceBlock.Body().SetAttributeValue("connection_id", cty.StringVal(model.ConnectionID))
@@ -114,7 +115,7 @@ func (m *Models) GenerateTerraformFiles(ctx context.Context, writer io.Writer) e
 		resourceBlock.Body().SetAttributeValue("identifier", cty.StringVal(model.Identifier))
 		resourceBlock.Body().SetAttributeValue("tracking_columns", typeConverter(model.TrackingColumns))
 
-		writer.Write(hclFile.Bytes())
+		writer.Write(ReplaceRefs(hclFile.Bytes(), refs))
 	}
 	return nil
 }
@@ -132,4 +133,16 @@ func (m *Models) GenerateImports(ctx context.Context, writer io.Writer) error {
 
 func (m *Models) Filename() string {
 	return ModelsResourceFileName
+}
+
+func (m *Models) ResourceRefs() map[string]string {
+	result := make(map[string]string)
+	for name, model := range m.Resources {
+		result[model.ID] = fmt.Sprintf("%s.%s.id", ModelResource, name)
+	}
+	return result
+}
+
+func (m *Models) DatasourceRefs() map[string]string {
+	return nil
 }

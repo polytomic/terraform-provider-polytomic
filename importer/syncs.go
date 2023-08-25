@@ -24,12 +24,13 @@ var (
 type Syncs struct {
 	c *polytomic.Client
 
-	Resources []polytomic.SyncResponse
+	Resources map[string]polytomic.SyncResponse
 }
 
 func NewSyncs(c *polytomic.Client) *Syncs {
 	return &Syncs{
-		c: c,
+		c:         c,
+		Resources: make(map[string]polytomic.SyncResponse),
 	}
 }
 
@@ -39,16 +40,19 @@ func (s *Syncs) Init(ctx context.Context) error {
 		return err
 	}
 
-	s.Resources = append(s.Resources, syncs...)
+	for _, sync := range syncs {
+		name := provider.ValidName(provider.ToSnakeCase(sync.Name))
+		s.Resources[name] = sync
+	}
 
 	return nil
 }
 
-func (s *Syncs) GenerateTerraformFiles(ctx context.Context, writer io.Writer) error {
-	for _, sync := range s.Resources {
+func (s *Syncs) GenerateTerraformFiles(ctx context.Context, writer io.Writer, refs map[string]string) error {
+	for name, sync := range s.Resources {
 		hclFile := hclwrite.NewEmptyFile()
 		body := hclFile.Body()
-		resourceBlock := body.AppendNewBlock("resource", []string{SyncResource, provider.ValidName(provider.ToSnakeCase(sync.Name))})
+		resourceBlock := body.AppendNewBlock("resource", []string{SyncResource, name})
 		resourceBlock.Body().SetAttributeValue("name", cty.StringVal(sync.Name))
 		resourceBlock.Body().SetAttributeValue("mode", cty.StringVal(sync.Mode))
 		var schedule map[string]*string
@@ -112,17 +116,17 @@ func (s *Syncs) GenerateTerraformFiles(ctx context.Context, writer io.Writer) er
 		resourceBlock.Body().SetAttributeValue("sync_all_records", cty.BoolVal(sync.SyncAllRecords))
 		body.AppendNewline()
 
-		writer.Write(hclFile.Bytes())
+		writer.Write(ReplaceRefs(hclFile.Bytes(), refs))
 
 	}
 	return nil
 }
 
 func (s *Syncs) GenerateImports(ctx context.Context, writer io.Writer) error {
-	for _, sync := range s.Resources {
+	for name, sync := range s.Resources {
 		writer.Write([]byte(fmt.Sprintf("terraform import %s.%s %s",
 			SyncResource,
-			provider.ValidName(provider.ToSnakeCase(sync.Name)),
+			name,
 			sync.ID)))
 		writer.Write([]byte(fmt.Sprintf(" # %s\n", sync.Name)))
 	}
@@ -131,4 +135,16 @@ func (s *Syncs) GenerateImports(ctx context.Context, writer io.Writer) error {
 
 func (s *Syncs) Filename() string {
 	return SyncResourceFileName
+}
+
+func (s *Syncs) ResourceRefs() map[string]string {
+	result := make(map[string]string)
+	for name, sync := range s.Resources {
+		result[sync.ID] = name
+	}
+	return result
+}
+
+func (s *Syncs) DatasourceRefs() map[string]string {
+	return nil
 }

@@ -23,12 +23,13 @@ var (
 type Policies struct {
 	c *polytomic.Client
 
-	Resources []*polytomic.Policy
+	Resources map[string]*polytomic.Policy
 }
 
 func NewPolicies(c *polytomic.Client) *Policies {
 	return &Policies{
-		c: c,
+		c:         c,
+		Resources: make(map[string]*polytomic.Policy),
 	}
 }
 
@@ -43,24 +44,22 @@ func (p *Policies) Init(ctx context.Context) error {
 		if policy.System {
 			continue
 		}
-
 		hyrdatedPolicy, err := p.c.Permissions().GetPolicy(ctx, policy.ID)
 		if err != nil {
 			return err
 		}
-
-		p.Resources = append(p.Resources, hyrdatedPolicy)
+		name := provider.ValidName(provider.ToSnakeCase(policy.Name))
+		p.Resources[name] = hyrdatedPolicy
 	}
 
 	return nil
 
 }
 
-func (p *Policies) GenerateTerraformFiles(ctx context.Context, writer io.Writer) error {
-	for _, policy := range p.Resources {
+func (p *Policies) GenerateTerraformFiles(ctx context.Context, writer io.Writer, refs map[string]string) error {
+	for name, policy := range p.Resources {
 		hclFile := hclwrite.NewEmptyFile()
 		body := hclFile.Body()
-		name := provider.ValidName(provider.ToSnakeCase(policy.Name))
 
 		resourceBlock := body.AppendNewBlock("resource", []string{PolicyResource, name})
 
@@ -84,10 +83,10 @@ func (p *Policies) GenerateTerraformFiles(ctx context.Context, writer io.Writer)
 }
 
 func (p *Policies) GenerateImports(ctx context.Context, writer io.Writer) error {
-	for _, policy := range p.Resources {
+	for name, policy := range p.Resources {
 		writer.Write([]byte(fmt.Sprintf("terraform import %s.%s %s",
 			PolicyResource,
-			provider.ValidName(provider.ToSnakeCase(policy.Name)),
+			name,
 			policy.ID)))
 		writer.Write([]byte(fmt.Sprintf(" # %s\n", policy.Name)))
 	}
@@ -96,4 +95,16 @@ func (p *Policies) GenerateImports(ctx context.Context, writer io.Writer) error 
 
 func (p *Policies) Filename() string {
 	return PoliciesResourceFileName
+}
+
+func (p *Policies) ResourceRefs() map[string]string {
+	result := make(map[string]string)
+	for name, policy := range p.Resources {
+		result[policy.ID] = name
+	}
+	return result
+}
+
+func (p *Policies) DatasourceRefs() map[string]string {
+	return nil
 }

@@ -23,17 +23,18 @@ var (
 type Roles struct {
 	c *polytomic.Client
 
-	Resources []polytomic.Role
+	Resources map[string]polytomic.Role
 }
 
 func NewRoles(c *polytomic.Client) *Roles {
 	return &Roles{
-		c: c,
+		c:         c,
+		Resources: make(map[string]polytomic.Role),
 	}
 }
 
-func (p *Roles) Init(ctx context.Context) error {
-	roles, err := p.c.Permissions().ListRoles(ctx)
+func (r *Roles) Init(ctx context.Context) error {
+	roles, err := r.c.Permissions().ListRoles(ctx)
 	if err != nil {
 		return err
 	}
@@ -43,43 +44,52 @@ func (p *Roles) Init(ctx context.Context) error {
 		if role.System {
 			continue
 		}
-
-		p.Resources = append(p.Resources, role)
+		name := provider.ValidName(provider.ToSnakeCase(role.Name))
+		r.Resources[name] = role
 	}
 
 	return nil
 
 }
 
-func (p *Roles) GenerateTerraformFiles(ctx context.Context, writer io.Writer) error {
-	for _, role := range p.Resources {
+func (r *Roles) GenerateTerraformFiles(ctx context.Context, writer io.Writer, refs map[string]string) error {
+	for name, role := range r.Resources {
 		hclFile := hclwrite.NewEmptyFile()
 		body := hclFile.Body()
-		name := provider.ValidName(provider.ToSnakeCase(role.Name))
-
 		resourceBlock := body.AppendNewBlock("resource", []string{RoleResource, name})
-
 		resourceBlock.Body().SetAttributeValue("name", cty.StringVal(role.Name))
 		if role.OrganizationID != "" {
 			resourceBlock.Body().SetAttributeValue("organization", cty.StringVal(role.OrganizationID))
 		}
 
-		writer.Write(hclFile.Bytes())
+		writer.Write(ReplaceRefs(hclFile.Bytes(), refs))
 	}
 	return nil
 }
 
-func (p *Roles) GenerateImports(ctx context.Context, writer io.Writer) error {
-	for _, role := range p.Resources {
+func (r *Roles) GenerateImports(ctx context.Context, writer io.Writer) error {
+	for name, role := range r.Resources {
 		writer.Write([]byte(fmt.Sprintf("terraform import %s.%s %s",
 			RoleResource,
-			provider.ValidName(provider.ToSnakeCase(role.Name)),
+			name,
 			role.ID)))
 		writer.Write([]byte(fmt.Sprintf(" # %s\n", role.Name)))
 	}
 	return nil
 }
 
-func (p *Roles) Filename() string {
+func (r *Roles) Filename() string {
 	return RolesResourceFileName
+}
+
+func (r *Roles) ResourceRefs() map[string]string {
+	result := make(map[string]string)
+	for name, role := range r.Resources {
+		result[role.ID] = name
+	}
+	return result
+}
+
+func (r *Roles) DatasourceRefs() map[string]string {
+	return nil
 }

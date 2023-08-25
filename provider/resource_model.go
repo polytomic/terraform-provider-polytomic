@@ -120,27 +120,6 @@ func (r *modelResource) Schema(ctx context.Context, req resource.SchemaRequest, 
 	}
 }
 
-func (r *modelResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
-	if req.State.Raw.IsNull() || !req.State.Raw.IsKnown() {
-		return
-	}
-	config := &modelResourceResourceData{}
-	resp.Diagnostics.Append(req.Config.Get(ctx, config)...)
-
-	plan := &modelResourceResourceData{}
-	resp.Diagnostics.Append(req.Plan.Get(ctx, plan)...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	if config.Identifier.IsNull() {
-		plan.Identifier = types.StringValue("")
-	}
-
-	resp.Diagnostics.Append(resp.Plan.Set(ctx, plan)...)
-
-}
-
 func (r *modelResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {

@@ -14,7 +14,9 @@ const (
 
 type Importable interface {
 	Init(ctx context.Context) error
-	GenerateTerraformFiles(ctx context.Context, writer io.Writer) error
+	ResourceRefs() map[string]string
+	DatasourceRefs() map[string]string
+	GenerateTerraformFiles(ctx context.Context, writer io.Writer, refs map[string]string) error
 	GenerateImports(ctx context.Context, writer io.Writer) error
 	Filename() string
 }
@@ -48,10 +50,19 @@ func Init(url, key, path string, recreate bool, includePermissions bool) {
 	}
 	defer importFile.Close()
 
+	refs := make(map[string]string)
 	for _, i := range importables {
 		err := i.Init(ctx)
 		if err != nil {
 			log.Fatal().AnErr("error", err).Msg("failed to initialize")
+		}
+		// Add resource refs
+		for k, v := range i.ResourceRefs() {
+			refs[k] = v
+		}
+		// Add datasource refs
+		for k, v := range i.DatasourceRefs() {
+			refs[k] = v
 		}
 		file := i.Filename()
 		f, err := createFile(recreate, 0644, path, file)
@@ -60,7 +71,7 @@ func Init(url, key, path string, recreate bool, includePermissions bool) {
 		}
 		defer f.Close()
 
-		err = i.GenerateTerraformFiles(ctx, f)
+		err = i.GenerateTerraformFiles(ctx, f, refs)
 		if err != nil {
 			log.Fatal().AnErr("error", err).Msg("failed to generate terraform files")
 		}
