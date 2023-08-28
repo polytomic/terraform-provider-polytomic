@@ -85,7 +85,8 @@ func (c *Connections) Init(ctx context.Context) error {
 }
 
 func (c *Connections) GenerateTerraformFiles(ctx context.Context, writer io.Writer, refs map[string]string) error {
-	for name, conn := range c.Datasources {
+	for _, name := range sortedKeys(c.Datasources) {
+		conn := c.Datasources[name]
 		hclFile := hclwrite.NewEmptyFile()
 		body := hclFile.Body()
 		resourceBlock := body.AppendNewBlock("data", []string{conn.Resource, name})
@@ -97,7 +98,8 @@ func (c *Connections) GenerateTerraformFiles(ctx context.Context, writer io.Writ
 		writer.Write(ReplaceRefs(hclFile.Bytes(), refs))
 	}
 
-	for name, conn := range c.Resources {
+	for _, name := range sortedKeys(c.Resources) {
+		conn := c.Resources[name]
 		config := typeConverter(conn.Configuration)
 		hclFile := hclwrite.NewEmptyFile()
 		body := hclFile.Body()
@@ -114,7 +116,8 @@ func (c *Connections) GenerateTerraformFiles(ctx context.Context, writer io.Writ
 }
 
 func (c *Connections) GenerateImports(ctx context.Context, writer io.Writer) error {
-	for name, conn := range c.Resources {
+	for _, name := range sortedKeys(c.Resources) {
+		conn := c.Resources[name]
 		writer.Write([]byte(fmt.Sprintf("terraform import %s.%s %s",
 			conn.Resource,
 			name,
