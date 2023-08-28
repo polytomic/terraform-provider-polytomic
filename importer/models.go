@@ -66,7 +66,8 @@ func (m *Models) Init(ctx context.Context) error {
 }
 
 func (m *Models) GenerateTerraformFiles(ctx context.Context, writer io.Writer, refs map[string]string) error {
-	for name, model := range m.Resources {
+	for _, name := range sortedKeys(m.Resources) {
+		model := m.Resources[name]
 		hclFile := hclwrite.NewEmptyFile()
 		body := hclFile.Body()
 
@@ -121,7 +122,8 @@ func (m *Models) GenerateTerraformFiles(ctx context.Context, writer io.Writer, r
 }
 
 func (m *Models) GenerateImports(ctx context.Context, writer io.Writer) error {
-	for _, model := range m.Resources {
+	for _, name := range sortedKeys(m.Resources) {
+		model := m.Resources[name]
 		writer.Write([]byte(fmt.Sprintf("terraform import %s.%s %s",
 			ModelResource,
 			m.modelNames[model.ID],

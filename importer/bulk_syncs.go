@@ -50,7 +50,8 @@ func (b *BulkSyncs) Init(ctx context.Context) error {
 }
 
 func (b *BulkSyncs) GenerateTerraformFiles(ctx context.Context, writer io.Writer, refs map[string]string) error {
-	for name, bulkSync := range b.Resources {
+	for _, name := range sortedKeys(b.Resources) {
+		bulkSync := b.Resources[name]
 		bulkSchemas, err := b.c.Bulk().GetBulkSyncSchemas(ctx, bulkSync.ID)
 		if err != nil {
 			return err
@@ -90,7 +91,8 @@ func (b *BulkSyncs) GenerateTerraformFiles(ctx context.Context, writer io.Writer
 }
 
 func (b *BulkSyncs) GenerateImports(ctx context.Context, writer io.Writer) error {
-	for name, bulkSync := range b.Resources {
+	for _, name := range sortedKeys(b.Resources) {
+		bulkSync := b.Resources[name]
 		writer.Write([]byte(fmt.Sprintf("terraform import %s.%s %s",
 			BulkSyncResource,
 			name,

@@ -49,7 +49,8 @@ func (s *Syncs) Init(ctx context.Context) error {
 }
 
 func (s *Syncs) GenerateTerraformFiles(ctx context.Context, writer io.Writer, refs map[string]string) error {
-	for name, sync := range s.Resources {
+	for _, name := range sortedKeys(s.Resources) {
+		sync := s.Resources[name]
 		hclFile := hclwrite.NewEmptyFile()
 		body := hclFile.Body()
 		resourceBlock := body.AppendNewBlock("resource", []string{SyncResource, name})
@@ -123,7 +124,8 @@ func (s *Syncs) GenerateTerraformFiles(ctx context.Context, writer io.Writer, re
 }
 
 func (s *Syncs) GenerateImports(ctx context.Context, writer io.Writer) error {
-	for name, sync := range s.Resources {
+	for _, name := range sortedKeys(s.Resources) {
+		sync := s.Resources[name]
 		writer.Write([]byte(fmt.Sprintf("terraform import %s.%s %s",
 			SyncResource,
 			name,

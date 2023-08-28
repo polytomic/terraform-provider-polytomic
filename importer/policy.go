@@ -57,7 +57,8 @@ func (p *Policies) Init(ctx context.Context) error {
 }
 
 func (p *Policies) GenerateTerraformFiles(ctx context.Context, writer io.Writer, refs map[string]string) error {
-	for name, policy := range p.Resources {
+	for _, name := range sortedKeys(p.Resources) {
+		policy := p.Resources[name]
 		hclFile := hclwrite.NewEmptyFile()
 		body := hclFile.Body()
 
@@ -83,7 +84,8 @@ func (p *Policies) GenerateTerraformFiles(ctx context.Context, writer io.Writer,
 }
 
 func (p *Policies) GenerateImports(ctx context.Context, writer io.Writer) error {
-	for name, policy := range p.Resources {
+	for _, name := range sortedKeys(p.Resources) {
+		policy := p.Resources[name]
 		writer.Write([]byte(fmt.Sprintf("terraform import %s.%s %s",
 			PolicyResource,
 			name,

@@ -196,10 +196,11 @@ func wrapJSONEncode(v interface{}, wrapped ...string) hclwrite.Tokens {
 }
 
 // jsonEncodeMap wraps the given attribute names with a jsonencode function.
-func jsonEncodeMap(v map[string]any, wrapped ...string) hclwrite.Tokens {
+func jsonEncodeMap(m map[string]any, wrapped ...string) hclwrite.Tokens {
 	var tokens hclwrite.Tokens
 	tokens = append(tokens, &hclwrite.Token{Bytes: []byte("{\n")})
-	for k, v := range v {
+	for _, k := range sortedKeys(m) {
+		v := m[k]
 		value := typeConverter(v)
 		if value == cty.NilVal {
 			continue
@@ -222,13 +223,4 @@ func jsonEncodeMap(v map[string]any, wrapped ...string) hclwrite.Tokens {
 	tokens = append(tokens, &hclwrite.Token{Bytes: []byte("}")})
 
 	return tokens
-}
-
-// referenceTokens takes in reference
-// and returns an unquoted value as hclwrite.Tokens
-func referenceTokens(ref string) hclwrite.Tokens {
-	return hclwrite.Tokens{
-		&hclwrite.Token{Bytes: []byte(" ")},
-		&hclwrite.Token{Bytes: []byte(ref)},
-	}
 }

@@ -53,7 +53,8 @@ func (r *Roles) Init(ctx context.Context) error {
 }
 
 func (r *Roles) GenerateTerraformFiles(ctx context.Context, writer io.Writer, refs map[string]string) error {
-	for name, role := range r.Resources {
+	for _, name := range sortedKeys(r.Resources) {
+		role := r.Resources[name]
 		hclFile := hclwrite.NewEmptyFile()
 		body := hclFile.Body()
 		resourceBlock := body.AppendNewBlock("resource", []string{RoleResource, name})
@@ -68,7 +69,8 @@ func (r *Roles) GenerateTerraformFiles(ctx context.Context, writer io.Writer, re
 }
 
 func (r *Roles) GenerateImports(ctx context.Context, writer io.Writer) error {
-	for name, role := range r.Resources {
+	for _, name := range sortedKeys(r.Resources) {
+		role := r.Resources[name]
 		writer.Write([]byte(fmt.Sprintf("terraform import %s.%s %s",
 			RoleResource,
 			name,
