@@ -30,3 +30,14 @@ provider "polytomic" {
 ```
 
 {{ .SchemaMarkdown | trimspace }}
+
+
+## Importing existing resources
+Polytomic offers the ability to import existing resources from your Polytomic account into your Terraform state. This allows you to manage existing resources via Terraform. 
+
+### Running the importer
+The importer is a separate binary that can be downloaded from the [releases page](https://github.com/polytomic/terraform-provider-polytomic/releases). The following command will run the importer and import all resources into the specified directory.
+
+```bash
+./polytomic-importer run --api-key $POLYTOMIC_API_KEY --output $OUTPUT_DIRECTORY
+```
