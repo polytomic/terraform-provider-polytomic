@@ -1,3 +1,8 @@
+## 0.3.19 (28 Aug 2023)
+* Various dependency updates
+* Use referential identifiers in importer
+* Add Facebooks Ads and DynamoDB connections
+
 ## 0.3.18 (7 July 2023)
 * Add Jira connection
 
