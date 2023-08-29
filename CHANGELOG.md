@@ -1,3 +1,6 @@
+## 0.3.20 (29 Aug 2023)
+* Add `force-destroy` attribute to connection resources
+
 ## 0.3.19 (28 Aug 2023)
 * Various dependency updates
 * Use referential identifiers in importer
