@@ -116,6 +116,10 @@ func (t *APIConnectionResource) Schema(ctx context.Context, req resource.SchemaR
 					},
 				},
 			},
+			"force_destroy": schema.BoolAttribute{
+				MarkdownDescription: forceDestroyMessage,
+				Optional:            true,
+			},
 			"id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "API Connection identifier",
@@ -309,8 +313,41 @@ func (r *APIConnectionResource) Delete(ctx context.Context, req resource.DeleteR
 		return
 	}
 
+	if data.ForceDestroy.ValueBool() {
+		err := r.client.Connections().Delete(ctx, uuid.MustParse(data.Id.ValueString()), polytomic.WithForceDelete())
+		if err != nil {
+			pErr := polytomic.ApiError{}
+			if errors.As(err, &pErr) {
+				if pErr.StatusCode == http.StatusNotFound {
+					resp.State.RemoveResource(ctx)
+					return
+				}
+			}
+			resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting connection: %s", err))
+		}
+		return
+	}
+
 	err := r.client.Connections().Delete(ctx, uuid.MustParse(data.Id.ValueString()))
 	if err != nil {
+		pErr := polytomic.ApiError{}
+		if errors.As(err, &pErr) {
+			if pErr.StatusCode == http.StatusNotFound {
+				resp.State.RemoveResource(ctx)
+				return
+			}
+			if strings.Contains(pErr.Message, "connection in use") {
+				for _, meta := range pErr.Metadata {
+					info := meta.(map[string]interface{})
+					resp.Diagnostics.AddError("Connection in use",
+						fmt.Sprintf("Connection is used by %s \"%s\" (%s). Please remove before deleting this connection.",
+							info["type"], info["name"], info["id"]),
+					)
+				}
+				return
+			}
+		}
+
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting connection: %s", err))
 		return
 	}
