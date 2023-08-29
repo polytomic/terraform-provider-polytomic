@@ -49,6 +49,10 @@ func (t *IntercomConnectionResource) Schema(ctx context.Context, req resource.Sc
 
 				Required: true,
 			},
+			"force_destroy": schema.BoolAttribute{
+				MarkdownDescription: forceDestroyMessage,
+				Optional:            true,
+			},
 			"id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Intercom Connection identifier",
@@ -221,6 +225,21 @@ func (r *IntercomConnectionResource) Delete(ctx context.Context, req resource.De
 	resp.Diagnostics.Append(diags...)
 
 	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if data.ForceDestroy.ValueBool() {
+		err := r.client.Connections().Delete(ctx, uuid.MustParse(data.Id.ValueString()), polytomic.WithForceDelete())
+		if err != nil {
+			pErr := polytomic.ApiError{}
+			if errors.As(err, &pErr) {
+				if pErr.StatusCode == http.StatusNotFound {
+					resp.State.RemoveResource(ctx)
+					return
+				}
+			}
+			resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting connection: %s", err))
+		}
 		return
 	}
 
