@@ -1,3 +1,6 @@
+## 0.3.21 (29 Aug 2023)
+* Documentation template tweaks
+
 ## 0.3.20 (29 Aug 2023)
 * Add `force-destroy` attribute to connection resources
 
