@@ -154,11 +154,11 @@ func (p *ptProvider) Schema(ctx context.Context, req provider.SchemaRequest, res
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"deployment_url": schema.StringAttribute{
-				MarkdownDescription: "Polytomic deployment URL",
+				MarkdownDescription: "Polytomic deployment URL (defaults to app.polytomic.com)",
 				Optional:            true,
 			},
 			"deployment_api_key": schema.StringAttribute{
-				MarkdownDescription: "Polytomic deployment key",
+				MarkdownDescription: "Polytomic deployment key (required if `api_key` is not set)",
 				Optional:            true,
 				Sensitive:           true,
 			},
