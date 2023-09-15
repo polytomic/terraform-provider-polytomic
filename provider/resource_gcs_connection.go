@@ -105,6 +105,7 @@ func (r *GcsConnectionResource) Create(ctx context.Context, req resource.CreateR
 				Bucket:         data.Configuration.Attributes()["bucket"].(types.String).ValueString(),
 			},
 		},
+		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
@@ -212,6 +213,7 @@ func (r *GcsConnectionResource) Update(ctx context.Context, req resource.UpdateR
 				Bucket:         data.Configuration.Attributes()["bucket"].(types.String).ValueString(),
 			},
 		},
+		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))

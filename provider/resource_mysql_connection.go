@@ -161,6 +161,7 @@ func (r *MysqlConnectionResource) Create(ctx context.Context, req resource.Creat
 				ChangeDetection: data.Configuration.Attributes()["change_detection"].(types.Bool).ValueBool(),
 			},
 		},
+		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
@@ -308,6 +309,7 @@ func (r *MysqlConnectionResource) Update(ctx context.Context, req resource.Updat
 				ChangeDetection: data.Configuration.Attributes()["change_detection"].(types.Bool).ValueBool(),
 			},
 		},
+		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))

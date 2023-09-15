@@ -62,6 +62,10 @@ func (d *S3ConnectionDataSource) Schema(ctx context.Context, req datasource.Sche
 				},
 				Optional: true,
 			},
+			"force_destroy": schema.BoolAttribute{
+				MarkdownDescription: forceDestroyMessage,
+				Optional:            true,
+			},
 		},
 	}
 }

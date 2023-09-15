@@ -95,7 +95,7 @@ func (c *Connections) GenerateTerraformFiles(ctx context.Context, writer io.Writ
 		resourceBlock.Body().SetAttributeValue("organization", cty.StringVal(conn.Organization))
 		body.AppendNewline()
 
-		writer.Write(ReplaceRefs(hclFile.Bytes(), refs))
+		writer.Write(hclFile.Bytes())
 	}
 
 	for _, name := range sortedKeys(c.Resources) {
@@ -142,7 +142,7 @@ func (c *Connections) ResourceRefs() map[string]string {
 func (c *Connections) DatasourceRefs() map[string]string {
 	result := make(map[string]string)
 	for name, conn := range c.Datasources {
-		result[conn.ID] = fmt.Sprintf("%s.%s.id", conn.Resource, name)
+		result[conn.ID] = fmt.Sprintf("data.%s.%s.id", conn.Resource, name)
 	}
 	return result
 }

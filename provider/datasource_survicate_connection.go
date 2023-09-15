@@ -46,6 +46,10 @@ func (d *SurvicateConnectionDataSource) Schema(ctx context.Context, req datasour
 				Attributes: map[string]schema.Attribute{},
 				Optional:   true,
 			},
+			"force_destroy": schema.BoolAttribute{
+				MarkdownDescription: forceDestroyMessage,
+				Optional:            true,
+			},
 		},
 	}
 }

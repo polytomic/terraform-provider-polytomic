@@ -46,6 +46,10 @@ func (d *SmartsheetConnectionDataSource) Schema(ctx context.Context, req datasou
 				Attributes: map[string]schema.Attribute{},
 				Optional:   true,
 			},
+			"force_destroy": schema.BoolAttribute{
+				MarkdownDescription: forceDestroyMessage,
+				Optional:            true,
+			},
 		},
 	}
 }

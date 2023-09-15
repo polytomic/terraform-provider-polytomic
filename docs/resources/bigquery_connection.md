@@ -45,11 +45,11 @@ resource "polytomic_bigquery_connection" "bigquery" {
 
 Required:
 
-- `project_id` (String)
 - `service_account` (String, Sensitive)
 
 Optional:
 
 - `location` (String)
+- `project_id` (String)
 
 

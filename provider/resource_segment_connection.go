@@ -91,6 +91,7 @@ func (r *SegmentConnectionResource) Create(ctx context.Context, req resource.Cre
 				WriteKey: data.Configuration.Attributes()["write_key"].(types.String).ValueString(),
 			},
 		},
+		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
@@ -188,6 +189,7 @@ func (r *SegmentConnectionResource) Update(ctx context.Context, req resource.Upd
 				WriteKey: data.Configuration.Attributes()["write_key"].(types.String).ValueString(),
 			},
 		},
+		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))

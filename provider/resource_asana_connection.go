@@ -91,6 +91,7 @@ func (r *AsanaConnectionResource) Create(ctx context.Context, req resource.Creat
 				PAT: data.Configuration.Attributes()["pat"].(types.String).ValueString(),
 			},
 		},
+		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
@@ -188,6 +189,7 @@ func (r *AsanaConnectionResource) Update(ctx context.Context, req resource.Updat
 				PAT: data.Configuration.Attributes()["pat"].(types.String).ValueString(),
 			},
 		},
+		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))

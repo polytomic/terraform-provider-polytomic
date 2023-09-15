@@ -15,7 +15,7 @@ import (
 func ReplaceRefs(b []byte, refs map[string]string) []byte {
 	s := string(b)
 	for k, v := range refs {
-		// Repalce all instances of the reference and the enclosing quotes
+		// Replace all instances of the reference and the enclosing quotes
 		re := regexp.MustCompile(`"` + k + `"`)
 		s = re.ReplaceAllString(s, v)
 	}

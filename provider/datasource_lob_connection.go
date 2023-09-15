@@ -46,6 +46,10 @@ func (d *LobConnectionDataSource) Schema(ctx context.Context, req datasource.Sch
 				Attributes: map[string]schema.Attribute{},
 				Optional:   true,
 			},
+			"force_destroy": schema.BoolAttribute{
+				MarkdownDescription: forceDestroyMessage,
+				Optional:            true,
+			},
 		},
 	}
 }

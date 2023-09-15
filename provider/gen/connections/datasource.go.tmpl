@@ -64,6 +64,10 @@ func (d *{{ .Connection }}ConnectionDataSource) Schema(ctx context.Context, req 
 				},
 				Optional: true,
 			},
+			"force_destroy": schema.BoolAttribute{
+				MarkdownDescription: forceDestroyMessage,
+				Optional:            true,
+			},
 		},
 	}
 }

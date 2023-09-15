@@ -82,16 +82,25 @@ func (r *bulkSyncResource) Schema(ctx context.Context, req resource.SchemaReques
 						MarkdownDescription: "",
 						Optional:            true,
 						Computed:            true,
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.UseStateForUnknown(),
+						},
 					},
 					"hour": schema.StringAttribute{
 						MarkdownDescription: "",
 						Optional:            true,
 						Computed:            true,
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.UseStateForUnknown(),
+						},
 					},
 					"minute": schema.StringAttribute{
 						MarkdownDescription: "",
 						Optional:            true,
 						Computed:            true,
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.UseStateForUnknown(),
+						},
 					},
 					"month": schema.StringAttribute{
 						MarkdownDescription: "",

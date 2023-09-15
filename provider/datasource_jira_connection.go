@@ -62,6 +62,10 @@ func (d *JiraConnectionDataSource) Schema(ctx context.Context, req datasource.Sc
 				},
 				Optional: true,
 			},
+			"force_destroy": schema.BoolAttribute{
+				MarkdownDescription: forceDestroyMessage,
+				Optional:            true,
+			},
 		},
 	}
 }

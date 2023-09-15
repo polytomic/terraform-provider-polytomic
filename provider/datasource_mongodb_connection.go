@@ -80,6 +80,10 @@ func (d *MongodbConnectionDataSource) Schema(ctx context.Context, req datasource
 				},
 				Optional: true,
 			},
+			"force_destroy": schema.BoolAttribute{
+				MarkdownDescription: forceDestroyMessage,
+				Optional:            true,
+			},
 		},
 	}
 }

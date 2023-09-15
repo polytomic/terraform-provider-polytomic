@@ -46,6 +46,10 @@ func (d *AffinityConnectionDataSource) Schema(ctx context.Context, req datasourc
 				Attributes: map[string]schema.Attribute{},
 				Optional:   true,
 			},
+			"force_destroy": schema.BoolAttribute{
+				MarkdownDescription: forceDestroyMessage,
+				Optional:            true,
+			},
 		},
 	}
 }

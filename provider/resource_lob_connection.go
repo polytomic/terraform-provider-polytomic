@@ -91,6 +91,7 @@ func (r *LobConnectionResource) Create(ctx context.Context, req resource.CreateR
 				Apikey: data.Configuration.Attributes()["apikey"].(types.String).ValueString(),
 			},
 		},
+		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
@@ -188,6 +189,7 @@ func (r *LobConnectionResource) Update(ctx context.Context, req resource.UpdateR
 				Apikey: data.Configuration.Attributes()["apikey"].(types.String).ValueString(),
 			},
 		},
+		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))

@@ -112,6 +112,7 @@ func (r *AthenaConnectionResource) Create(ctx context.Context, req resource.Crea
 				OutputBucket:    data.Configuration.Attributes()["output_bucket"].(types.String).ValueString(),
 			},
 		},
+		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
@@ -224,6 +225,7 @@ func (r *AthenaConnectionResource) Update(ctx context.Context, req resource.Upda
 				OutputBucket:    data.Configuration.Attributes()["output_bucket"].(types.String).ValueString(),
 			},
 		},
+		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))

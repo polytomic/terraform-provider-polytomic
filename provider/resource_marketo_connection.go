@@ -126,6 +126,7 @@ func (r *MarketoConnectionResource) Create(ctx context.Context, req resource.Cre
 				ConcurrentImports: int(data.Configuration.Attributes()["concurrent_imports"].(types.Int64).ValueInt64()),
 			},
 		},
+		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
@@ -248,6 +249,7 @@ func (r *MarketoConnectionResource) Update(ctx context.Context, req resource.Upd
 				ConcurrentImports: int(data.Configuration.Attributes()["concurrent_imports"].(types.Int64).ValueInt64()),
 			},
 		},
+		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))
