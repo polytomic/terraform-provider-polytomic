@@ -98,6 +98,7 @@ func (r *CosmosdbConnectionResource) Create(ctx context.Context, req resource.Cr
 				Key: data.Configuration.Attributes()["key"].(types.String).ValueString(),
 			},
 		},
+		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
@@ -200,6 +201,7 @@ func (r *CosmosdbConnectionResource) Update(ctx context.Context, req resource.Up
 				Key: data.Configuration.Attributes()["key"].(types.String).ValueString(),
 			},
 		},
+		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))

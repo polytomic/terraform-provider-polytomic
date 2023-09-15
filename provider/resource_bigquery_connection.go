@@ -41,8 +41,8 @@ func (t *BigqueryConnectionResource) Schema(ctx context.Context, req resource.Sc
 				Attributes: map[string]schema.Attribute{
 					"project_id": schema.StringAttribute{
 						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
+						Required:            false,
+						Optional:            true,
 						Sensitive:           false,
 					},
 					"service_account": schema.StringAttribute{
@@ -105,6 +105,7 @@ func (r *BigqueryConnectionResource) Create(ctx context.Context, req resource.Cr
 				Location:       data.Configuration.Attributes()["location"].(types.String).ValueString(),
 			},
 		},
+		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
@@ -212,6 +213,7 @@ func (r *BigqueryConnectionResource) Update(ctx context.Context, req resource.Up
 				Location:       data.Configuration.Attributes()["location"].(types.String).ValueString(),
 			},
 		},
+		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))

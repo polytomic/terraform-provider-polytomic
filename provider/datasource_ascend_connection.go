@@ -46,6 +46,10 @@ func (d *AscendConnectionDataSource) Schema(ctx context.Context, req datasource.
 				Attributes: map[string]schema.Attribute{},
 				Optional:   true,
 			},
+			"force_destroy": schema.BoolAttribute{
+				MarkdownDescription: forceDestroyMessage,
+				Optional:            true,
+			},
 		},
 	}
 }

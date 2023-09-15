@@ -74,7 +74,7 @@ connections:
     attributes:
       - name: ProjectID
         type: string
-        required: true
+        optional: true
         example: my-project
       - name: ServiceAccount
         type: string

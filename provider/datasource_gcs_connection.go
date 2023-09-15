@@ -62,6 +62,10 @@ func (d *GcsConnectionDataSource) Schema(ctx context.Context, req datasource.Sch
 				},
 				Optional: true,
 			},
+			"force_destroy": schema.BoolAttribute{
+				MarkdownDescription: forceDestroyMessage,
+				Optional:            true,
+			},
 		},
 	}
 }

@@ -56,6 +56,10 @@ func (d *UservoiceConnectionDataSource) Schema(ctx context.Context, req datasour
 				},
 				Optional: true,
 			},
+			"force_destroy": schema.BoolAttribute{
+				MarkdownDescription: forceDestroyMessage,
+				Optional:            true,
+			},
 		},
 	}
 }

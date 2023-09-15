@@ -119,6 +119,7 @@ func (r *CloudsqlConnectionResource) Create(ctx context.Context, req resource.Cr
 				Credentials:    data.Configuration.Attributes()["credentials"].(types.String).ValueString(),
 			},
 		},
+		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
@@ -236,6 +237,7 @@ func (r *CloudsqlConnectionResource) Update(ctx context.Context, req resource.Up
 				Credentials:    data.Configuration.Attributes()["credentials"].(types.String).ValueString(),
 			},
 		},
+		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))

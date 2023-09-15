@@ -86,6 +86,10 @@ func (d *DatabricksConnectionDataSource) Schema(ctx context.Context, req datasou
 				},
 				Optional: true,
 			},
+			"force_destroy": schema.BoolAttribute{
+				MarkdownDescription: forceDestroyMessage,
+				Optional:            true,
+			},
 		},
 	}
 }

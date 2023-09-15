@@ -105,6 +105,7 @@ func (r *CustomerioConnectionResource) Create(ctx context.Context, req resource.
 				AppAPIKey:      data.Configuration.Attributes()["app_api_key"].(types.String).ValueString(),
 			},
 		},
+		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
@@ -212,6 +213,7 @@ func (r *CustomerioConnectionResource) Update(ctx context.Context, req resource.
 				AppAPIKey:      data.Configuration.Attributes()["app_api_key"].(types.String).ValueString(),
 			},
 		},
+		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))

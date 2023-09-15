@@ -104,6 +104,10 @@ func (d *MysqlConnectionDataSource) Schema(ctx context.Context, req datasource.S
 				},
 				Optional: true,
 			},
+			"force_destroy": schema.BoolAttribute{
+				MarkdownDescription: forceDestroyMessage,
+				Optional:            true,
+			},
 		},
 	}
 }

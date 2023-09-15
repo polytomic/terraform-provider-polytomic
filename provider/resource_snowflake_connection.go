@@ -126,6 +126,7 @@ func (r *SnowflakeConnectionResource) Create(ctx context.Context, req resource.C
 				Params:    data.Configuration.Attributes()["params"].(types.String).ValueString(),
 			},
 		},
+		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
@@ -248,6 +249,7 @@ func (r *SnowflakeConnectionResource) Update(ctx context.Context, req resource.U
 				Params:    data.Configuration.Attributes()["params"].(types.String).ValueString(),
 			},
 		},
+		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))

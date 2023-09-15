@@ -105,6 +105,7 @@ func (r *DynamodbConnectionResource) Create(ctx context.Context, req resource.Cr
 				Region:          data.Configuration.Attributes()["region"].(types.String).ValueString(),
 			},
 		},
+		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
@@ -212,6 +213,7 @@ func (r *DynamodbConnectionResource) Update(ctx context.Context, req resource.Up
 				Region:          data.Configuration.Attributes()["region"].(types.String).ValueString(),
 			},
 		},
+		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))

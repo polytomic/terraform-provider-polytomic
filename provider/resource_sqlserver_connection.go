@@ -126,6 +126,7 @@ func (r *SqlserverConnectionResource) Create(ctx context.Context, req resource.C
 				SSL:      data.Configuration.Attributes()["ssl"].(types.Bool).ValueBool(),
 			},
 		},
+		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
@@ -248,6 +249,7 @@ func (r *SqlserverConnectionResource) Update(ctx context.Context, req resource.U
 				SSL:      data.Configuration.Attributes()["ssl"].(types.Bool).ValueBool(),
 			},
 		},
+		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))

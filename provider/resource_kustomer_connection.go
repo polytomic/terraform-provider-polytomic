@@ -98,6 +98,7 @@ func (r *KustomerConnectionResource) Create(ctx context.Context, req resource.Cr
 				Domain: data.Configuration.Attributes()["domain"].(types.String).ValueString(),
 			},
 		},
+		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
@@ -200,6 +201,7 @@ func (r *KustomerConnectionResource) Update(ctx context.Context, req resource.Up
 				Domain: data.Configuration.Attributes()["domain"].(types.String).ValueString(),
 			},
 		},
+		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))

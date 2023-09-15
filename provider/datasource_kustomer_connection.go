@@ -56,6 +56,10 @@ func (d *KustomerConnectionDataSource) Schema(ctx context.Context, req datasourc
 				},
 				Optional: true,
 			},
+			"force_destroy": schema.BoolAttribute{
+				MarkdownDescription: forceDestroyMessage,
+				Optional:            true,
+			},
 		},
 	}
 }

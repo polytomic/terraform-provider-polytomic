@@ -91,6 +91,7 @@ func (r *DialpadConnectionResource) Create(ctx context.Context, req resource.Cre
 				APIKey: data.Configuration.Attributes()["api_key"].(types.String).ValueString(),
 			},
 		},
+		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
@@ -188,6 +189,7 @@ func (r *DialpadConnectionResource) Update(ctx context.Context, req resource.Upd
 				APIKey: data.Configuration.Attributes()["api_key"].(types.String).ValueString(),
 			},
 		},
+		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))

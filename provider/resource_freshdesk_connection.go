@@ -98,6 +98,7 @@ func (r *FreshdeskConnectionResource) Create(ctx context.Context, req resource.C
 				Subdomain: data.Configuration.Attributes()["subdomain"].(types.String).ValueString(),
 			},
 		},
+		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
@@ -200,6 +201,7 @@ func (r *FreshdeskConnectionResource) Update(ctx context.Context, req resource.U
 				Subdomain: data.Configuration.Attributes()["subdomain"].(types.String).ValueString(),
 			},
 		},
+		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))

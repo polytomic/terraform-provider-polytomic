@@ -91,6 +91,7 @@ func (r *AscendConnectionResource) Create(ctx context.Context, req resource.Crea
 				APIKey: data.Configuration.Attributes()["api_key"].(types.String).ValueString(),
 			},
 		},
+		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
@@ -188,6 +189,7 @@ func (r *AscendConnectionResource) Update(ctx context.Context, req resource.Upda
 				APIKey: data.Configuration.Attributes()["api_key"].(types.String).ValueString(),
 			},
 		},
+		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))

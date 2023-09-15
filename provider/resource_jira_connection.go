@@ -119,6 +119,7 @@ func (r *JiraConnectionResource) Create(ctx context.Context, req resource.Create
 				AccessToken: data.Configuration.Attributes()["access_token"].(types.String).ValueString(),
 			},
 		},
+		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
@@ -236,6 +237,7 @@ func (r *JiraConnectionResource) Update(ctx context.Context, req resource.Update
 				AccessToken: data.Configuration.Attributes()["access_token"].(types.String).ValueString(),
 			},
 		},
+		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))

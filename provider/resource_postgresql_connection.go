@@ -203,6 +203,7 @@ func (r *PostgresqlConnectionResource) Create(ctx context.Context, req resource.
 				SSHPrivateKey:     data.Configuration.Attributes()["ssh_private_key"].(types.String).ValueString(),
 			},
 		},
+		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
@@ -380,6 +381,7 @@ func (r *PostgresqlConnectionResource) Update(ctx context.Context, req resource.
 				SSHPrivateKey:     data.Configuration.Attributes()["ssh_private_key"].(types.String).ValueString(),
 			},
 		},
+		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))

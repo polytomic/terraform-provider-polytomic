@@ -119,6 +119,7 @@ func (r *NetsuiteConnectionResource) Create(ctx context.Context, req resource.Cr
 				TokenSecret:    data.Configuration.Attributes()["token_secret"].(types.String).ValueString(),
 			},
 		},
+		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
@@ -236,6 +237,7 @@ func (r *NetsuiteConnectionResource) Update(ctx context.Context, req resource.Up
 				TokenSecret:    data.Configuration.Attributes()["token_secret"].(types.String).ValueString(),
 			},
 		},
+		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))

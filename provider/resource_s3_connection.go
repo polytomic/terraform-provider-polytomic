@@ -112,6 +112,7 @@ func (r *S3ConnectionResource) Create(ctx context.Context, req resource.CreateRe
 				S3BucketName:       data.Configuration.Attributes()["s3_bucket_name"].(types.String).ValueString(),
 			},
 		},
+		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
@@ -224,6 +225,7 @@ func (r *S3ConnectionResource) Update(ctx context.Context, req resource.UpdateRe
 				S3BucketName:       data.Configuration.Attributes()["s3_bucket_name"].(types.String).ValueString(),
 			},
 		},
+		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))

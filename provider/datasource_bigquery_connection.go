@@ -49,8 +49,8 @@ func (d *BigqueryConnectionDataSource) Schema(ctx context.Context, req datasourc
 				Attributes: map[string]schema.Attribute{
 					"project_id": schema.StringAttribute{
 						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
+						Required:            false,
+						Optional:            true,
 						Sensitive:           false,
 					},
 					"location": schema.StringAttribute{
@@ -61,6 +61,10 @@ func (d *BigqueryConnectionDataSource) Schema(ctx context.Context, req datasourc
 					},
 				},
 				Optional: true,
+			},
+			"force_destroy": schema.BoolAttribute{
+				MarkdownDescription: forceDestroyMessage,
+				Optional:            true,
 			},
 		},
 	}

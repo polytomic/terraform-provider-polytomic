@@ -119,6 +119,7 @@ func (r *SynapseConnectionResource) Create(ctx context.Context, req resource.Cre
 				Port:     int(data.Configuration.Attributes()["port"].(types.Int64).ValueInt64()),
 			},
 		},
+		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
@@ -236,6 +237,7 @@ func (r *SynapseConnectionResource) Update(ctx context.Context, req resource.Upd
 				Port:     int(data.Configuration.Attributes()["port"].(types.Int64).ValueInt64()),
 			},
 		},
+		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))
