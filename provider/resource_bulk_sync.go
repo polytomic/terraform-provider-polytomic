@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -219,20 +220,40 @@ func (r *bulkSyncResource) Create(ctx context.Context, req resource.CreateReques
 		resp.Diagnostics.Append(diags...)
 		return
 	}
-	destConfig := make(map[string]interface{})
+	destConf := make(map[string]interface{})
 	for k, v := range destConfigRaw {
-		destConfig[k] = v
+		if k == "advanced" {
+			var advanced map[string]interface{}
+			err := json.Unmarshal([]byte(v), &advanced)
+			if err != nil {
+				resp.Diagnostics.AddError("Error unmarshalling advanced", err.Error())
+				return
+			}
+			destConf[k] = v
+		} else {
+			destConf[k] = v
+		}
 	}
 
-	sourceConfgRaw := make(map[string]string)
-	diags = data.SourceConfiguration.ElementsAs(ctx, &sourceConfgRaw, false)
+	sourceConfigRaw := make(map[string]string)
+	diags = data.SourceConfiguration.ElementsAs(ctx, &sourceConfigRaw, false)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
-	sourceConfig := make(map[string]interface{})
-	for k, v := range sourceConfgRaw {
-		sourceConfig[k] = v
+	sourceConf := make(map[string]interface{})
+	for k, v := range sourceConfigRaw {
+		if k == "advanced" {
+			var advanced map[string]interface{}
+			err := json.Unmarshal([]byte(v), &advanced)
+			if err != nil {
+				resp.Diagnostics.AddError("Error unmarshalling advanced", err.Error())
+				return
+			}
+			sourceConf[k] = v
+		} else {
+			sourceConf[k] = v
+		}
 	}
 
 	created, err := r.client.Bulk().CreateBulkSync(ctx,
@@ -247,8 +268,8 @@ func (r *bulkSyncResource) Create(ctx context.Context, req resource.CreateReques
 			Schemas:                  schemas,
 			Policies:                 policies,
 			Schedule:                 schedule,
-			DestinationConfiguration: destConfig,
-			SourceConfiguration:      sourceConfig,
+			DestinationConfiguration: destConf,
+			SourceConfiguration:      sourceConf,
 		},
 	)
 	if err != nil {

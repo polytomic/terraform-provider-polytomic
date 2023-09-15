@@ -168,6 +168,8 @@ func typeConverter(value any) cty.Value {
 		return cty.StringVal(value)
 	case nil:
 		return cty.NilVal
+	case bool:
+		return cty.BoolVal(value)
 	default:
 		fmt.Printf("Unknown type: %T\n", value)
 		return cty.NilVal
