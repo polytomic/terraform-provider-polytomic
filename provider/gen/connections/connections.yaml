@@ -1076,3 +1076,4 @@ connections:
         type: string
         required: true
         sensitive: false
+        example: events
