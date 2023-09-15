@@ -1048,3 +1048,31 @@ connections:
         required: true
         sensitive: false
         example: us-east-1
+  - connection: datadog
+    name: Datadog
+    type: polytomic.DatadogConnectionType
+    config: polytomic.DatadogConnectionConfiguration
+    datasource: true
+    resource: true
+    attributes:
+      - name: APIKey
+        type: string
+        required: true
+        sensitive: true
+        example: my-api-key
+  - connection: honeycomb
+    name: Honeycomb
+    type: polytomic.HoneycombConnectionType
+    config: polytomic.HoneycombConnectionConfiguration
+    datasource: true
+    resource: true
+    attributes:
+      - name: APIKey
+        type: string
+        required: true
+        sensitive: true
+        example: my-api-key
+      - name: Dataset
+        type: string
+        required: true
+        sensitive: false

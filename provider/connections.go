@@ -53,6 +53,8 @@ var (
 		func() resource.Resource { return &LinearConnectionResource{} },
 		func() resource.Resource { return &JiraConnectionResource{} },
 		func() resource.Resource { return &DynamodbConnectionResource{} },
+		func() resource.Resource { return &DatadogConnectionResource{} },
+		func() resource.Resource { return &HoneycombConnectionResource{} },
 	}
 
 	connectionDatasources = []func() datasource.DataSource{
@@ -109,6 +111,8 @@ var (
 		func() datasource.DataSource { return &LinearConnectionDataSource{} },
 		func() datasource.DataSource { return &JiraConnectionDataSource{} },
 		func() datasource.DataSource { return &DynamodbConnectionDataSource{} },
+		func() datasource.DataSource { return &DatadogConnectionDataSource{} },
+		func() datasource.DataSource { return &HoneycombConnectionDataSource{} },
 	}
 
 	connectionImportableResources = map[string]resource.Resource{
@@ -155,6 +159,8 @@ var (
 		"linear":     &LinearConnectionResource{},
 		"jira":       &JiraConnectionResource{},
 		"dynamodb":   &DynamodbConnectionResource{},
+		"datadog":    &DatadogConnectionResource{},
+		"honeycomb":  &HoneycombConnectionResource{},
 	}
 
 	connectionImportableDatasources = map[string]datasource.DataSource{
@@ -211,5 +217,7 @@ var (
 		"linear":     &LinearConnectionDataSource{},
 		"jira":       &JiraConnectionDataSource{},
 		"dynamodb":   &DynamodbConnectionDataSource{},
+		"datadog":    &DatadogConnectionDataSource{},
+		"honeycomb":  &HoneycombConnectionDataSource{},
 	}
 )
