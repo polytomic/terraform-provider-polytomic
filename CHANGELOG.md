@@ -1,3 +1,9 @@
+## 0.3.22 (15 Sep 2023)
+* Fix datasource references in importer
+* Add `force-destroy` attribute to datasource resources
+* Skip strict connection configuration validate
+* Fix bug with bulk sync schedule empty values
+
 ## 0.3.21 (29 Aug 2023)
 * Documentation template tweaks
 
