@@ -73,12 +73,11 @@ func (b *BulkSyncs) GenerateTerraformFiles(ctx context.Context, writer io.Writer
 		resourceBlock.Body().SetAttributeValue("discover", cty.BoolVal(bulkSync.Discover))
 		resourceBlock.Body().SetAttributeValue("mode", cty.StringVal(bulkSync.Mode))
 
-		// Remove "advanced" fields TODO: add support for these
-		delete(bulkSync.DestinationConfiguration, "advanced")
-		delete(bulkSync.SourceConfiguration, "advanced")
+		dTokens := wrapJSONEncode(bulkSync.DestinationConfiguration, "advanced")
+		resourceBlock.Body().SetAttributeRaw("dest_configuration", dTokens)
+		sTokens := wrapJSONEncode(bulkSync.SourceConfiguration, "advanced")
+		resourceBlock.Body().SetAttributeRaw("source_configuration", sTokens)
 
-		resourceBlock.Body().SetAttributeValue("dest_configuration", typeConverter(bulkSync.DestinationConfiguration))
-		resourceBlock.Body().SetAttributeValue("source_configuration", typeConverter(bulkSync.SourceConfiguration))
 		resourceBlock.Body().SetAttributeValue("schemas", typeConverter(schemas))
 
 		var schedule map[string]*string
