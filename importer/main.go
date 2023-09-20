@@ -12,19 +12,20 @@ import (
 var (
 	_ Importable = &Main{}
 
-	mainTemplate = `
-terraform {
-		required_providers {
-		  polytomic = {
+	mainTemplate = `terraform {
+	required_providers {
+		polytomic = {
 			source = "polytomic/polytomic"
-		  }
 		}
-	  }
+	}
+}
 
-	  provider "polytomic" {
-		deployment_url = "{{ .URL }}"
-		api_key = "{{ .APIKey }}"
-	  }
+provider "polytomic" {
+	deployment_url = "{{ .URL }}"
+	{{- if .WriteAPIKey }}
+	api_key = "{{ .APIKey }}"
+	{{- end }}
+}
 `
 )
 
@@ -33,13 +34,15 @@ func NewMain() *Main {
 }
 
 type Main struct {
-	URL    string
-	APIKey string
+	URL         string
+	APIKey      string
+	WriteAPIKey bool
 }
 
 func (m *Main) Init(ctx context.Context) error {
 	m.URL = viper.GetString("url")
 	m.APIKey = viper.GetString("api-key")
+	m.WriteAPIKey = viper.GetBool("with-api-key")
 
 	return nil
 }
@@ -51,11 +54,13 @@ func (m *Main) GenerateTerraformFiles(ctx context.Context, writer io.Writer, ref
 	}
 	var buf bytes.Buffer
 	err = tmpl.Execute(&buf, struct {
-		URL    string
-		APIKey string
+		URL         string
+		APIKey      string
+		WriteAPIKey bool
 	}{
-		URL:    m.URL,
-		APIKey: m.APIKey,
+		URL:         m.URL,
+		APIKey:      m.APIKey,
+		WriteAPIKey: m.WriteAPIKey,
 	})
 	if err != nil {
 		return err
