@@ -1,3 +1,7 @@
+## 0.3.23 (21 Sep 2023)
+* Add runAfter support for sync resources
+* Importer will only optionally write API key into provider block
+
 ## 0.3.22 (15 Sep 2023)
 * Fix datasource references in importer
 * Add `force-destroy` attribute to datasource resources
