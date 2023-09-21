@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -224,22 +225,58 @@ func (r *syncResource) Schema(ctx context.Context, req resource.SchemaRequest, r
 					"day_of_week": schema.StringAttribute{
 						MarkdownDescription: "",
 						Optional:            true,
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.UseStateForUnknown(),
+						},
 					},
 					"hour": schema.StringAttribute{
 						MarkdownDescription: "",
 						Optional:            true,
+						Computed:            true,
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.UseStateForUnknown(),
+						},
 					},
 					"minute": schema.StringAttribute{
 						MarkdownDescription: "",
 						Optional:            true,
+						Computed:            true,
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.UseStateForUnknown(),
+						},
 					},
 					"month": schema.StringAttribute{
-						MarkdownDescription: "",
-						Optional:            true,
+						Optional: true,
+						Computed: true,
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.UseStateForUnknown(),
+						},
 					},
 					"day_of_month": schema.StringAttribute{
 						MarkdownDescription: "",
 						Optional:            true,
+						Computed:            true,
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.UseStateForUnknown(),
+						},
+					},
+					"run_after": schema.SingleNestedAttribute{
+						Attributes: map[string]schema.Attribute{
+							"sync_ids": schema.SetAttribute{
+								MarkdownDescription: "",
+								ElementType:         types.StringType,
+								Optional:            true,
+							},
+							"bulk_sync_ids": schema.SetAttribute{
+								MarkdownDescription: "",
+								ElementType:         types.StringType,
+								Optional:            true,
+							},
+						},
+						Optional: true,
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseStateForUnknown(),
+						},
 					},
 				},
 				Required: true,
@@ -493,7 +530,8 @@ func (r *syncResource) Create(ctx context.Context, req resource.CreateRequest, r
 
 	var schedule polytomic.Schedule
 	diags = data.Schedule.As(ctx, &schedule, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty: true,
+		UnhandledNullAsEmpty:    true,
+		UnhandledUnknownAsEmpty: true,
 	})
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -704,6 +742,12 @@ func (r *syncResource) Create(ctx context.Context, req resource.CreateRequest, r
 		"minute":       types.StringType,
 		"month":        types.StringType,
 		"day_of_month": types.StringType,
+		"run_after": types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				"sync_ids":      types.SetType{ElemType: types.StringType},
+				"bulk_sync_ids": types.SetType{ElemType: types.StringType},
+			},
+		},
 	}, sync.Schedule)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -925,6 +969,12 @@ func (r *syncResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 		"minute":       types.StringType,
 		"month":        types.StringType,
 		"day_of_month": types.StringType,
+		"run_after": types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				"sync_ids":      types.SetType{ElemType: types.StringType},
+				"bulk_sync_ids": types.SetType{ElemType: types.StringType},
+			},
+		},
 	}, sync.Schedule)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -1092,7 +1142,10 @@ func (r *syncResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	}
 
 	var schedule polytomic.Schedule
-	diags = data.Schedule.As(ctx, &schedule, basetypes.ObjectAsOptions{})
+	diags = data.Schedule.As(ctx, &schedule, basetypes.ObjectAsOptions{
+		UnhandledNullAsEmpty:    true,
+		UnhandledUnknownAsEmpty: true,
+	})
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -1299,6 +1352,12 @@ func (r *syncResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		"minute":       types.StringType,
 		"month":        types.StringType,
 		"day_of_month": types.StringType,
+		"run_after": types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				"sync_ids":      types.SetType{ElemType: types.StringType},
+				"bulk_sync_ids": types.SetType{ElemType: types.StringType},
+			},
+		},
 	}, sync.Schedule)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
