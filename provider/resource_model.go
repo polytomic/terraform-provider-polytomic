@@ -631,8 +631,6 @@ func (r *modelResource) Update(ctx context.Context, req resource.UpdateRequest, 
 		return
 	}
 
-	resp.Diagnostics.AddWarning(model.ID, fmt.Sprintf("%+v", modelFields))
-
 	additionalFields, diags := types.SetValueFrom(ctx, types.ObjectType{
 		AttrTypes: map[string]attr.Type{
 			"name":  types.StringType,
