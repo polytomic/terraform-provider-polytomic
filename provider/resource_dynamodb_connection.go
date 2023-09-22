@@ -105,6 +105,7 @@ func (r *DynamodbConnectionResource) Create(ctx context.Context, req resource.Cr
 				Region:          data.Configuration.Attributes()["region"].(types.String).ValueString(),
 			},
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
@@ -213,6 +214,7 @@ func (r *DynamodbConnectionResource) Update(ctx context.Context, req resource.Up
 				Region:          data.Configuration.Attributes()["region"].(types.String).ValueString(),
 			},
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {

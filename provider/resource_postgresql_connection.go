@@ -203,6 +203,7 @@ func (r *PostgresqlConnectionResource) Create(ctx context.Context, req resource.
 				SSHPrivateKey:     data.Configuration.Attributes()["ssh_private_key"].(types.String).ValueString(),
 			},
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
@@ -381,6 +382,7 @@ func (r *PostgresqlConnectionResource) Update(ctx context.Context, req resource.
 				SSHPrivateKey:     data.Configuration.Attributes()["ssh_private_key"].(types.String).ValueString(),
 			},
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {

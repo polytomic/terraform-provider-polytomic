@@ -98,6 +98,7 @@ func (r *AmplitudeConnectionResource) Create(ctx context.Context, req resource.C
 				SecretKey: data.Configuration.Attributes()["secret_key"].(types.String).ValueString(),
 			},
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
@@ -201,6 +202,7 @@ func (r *AmplitudeConnectionResource) Update(ctx context.Context, req resource.U
 				SecretKey: data.Configuration.Attributes()["secret_key"].(types.String).ValueString(),
 			},
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {

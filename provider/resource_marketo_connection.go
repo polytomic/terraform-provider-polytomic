@@ -126,6 +126,7 @@ func (r *MarketoConnectionResource) Create(ctx context.Context, req resource.Cre
 				ConcurrentImports: int(data.Configuration.Attributes()["concurrent_imports"].(types.Int64).ValueInt64()),
 			},
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
@@ -249,6 +250,7 @@ func (r *MarketoConnectionResource) Update(ctx context.Context, req resource.Upd
 				ConcurrentImports: int(data.Configuration.Attributes()["concurrent_imports"].(types.Int64).ValueInt64()),
 			},
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {

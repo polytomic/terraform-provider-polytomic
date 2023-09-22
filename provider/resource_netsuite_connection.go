@@ -119,6 +119,7 @@ func (r *NetsuiteConnectionResource) Create(ctx context.Context, req resource.Cr
 				TokenSecret:    data.Configuration.Attributes()["token_secret"].(types.String).ValueString(),
 			},
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
@@ -237,6 +238,7 @@ func (r *NetsuiteConnectionResource) Update(ctx context.Context, req resource.Up
 				TokenSecret:    data.Configuration.Attributes()["token_secret"].(types.String).ValueString(),
 			},
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {

@@ -126,6 +126,7 @@ func (r *SqlserverConnectionResource) Create(ctx context.Context, req resource.C
 				SSL:      data.Configuration.Attributes()["ssl"].(types.Bool).ValueBool(),
 			},
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
@@ -249,6 +250,7 @@ func (r *SqlserverConnectionResource) Update(ctx context.Context, req resource.U
 				SSL:      data.Configuration.Attributes()["ssl"].(types.Bool).ValueBool(),
 			},
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {

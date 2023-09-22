@@ -91,6 +91,7 @@ func (r *SegmentConnectionResource) Create(ctx context.Context, req resource.Cre
 				WriteKey: data.Configuration.Attributes()["write_key"].(types.String).ValueString(),
 			},
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
@@ -189,6 +190,7 @@ func (r *SegmentConnectionResource) Update(ctx context.Context, req resource.Upd
 				WriteKey: data.Configuration.Attributes()["write_key"].(types.String).ValueString(),
 			},
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {

@@ -112,6 +112,7 @@ func (r *S3ConnectionResource) Create(ctx context.Context, req resource.CreateRe
 				S3BucketName:       data.Configuration.Attributes()["s3_bucket_name"].(types.String).ValueString(),
 			},
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
@@ -225,6 +226,7 @@ func (r *S3ConnectionResource) Update(ctx context.Context, req resource.UpdateRe
 				S3BucketName:       data.Configuration.Attributes()["s3_bucket_name"].(types.String).ValueString(),
 			},
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {

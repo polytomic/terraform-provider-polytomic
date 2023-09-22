@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/AlekSi/pointer"
+	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -566,7 +567,7 @@ func (r *syncResource) Create(ctx context.Context, req resource.CreateRequest, r
 		request.Identity = &identity
 	}
 
-	sync, err := r.client.Syncs().Create(ctx, request)
+	sync, err := r.client.Syncs().Create(ctx, request, polytomic.WithIdempotencyKey(uuid.NewString()))
 	if err != nil {
 		resp.Diagnostics.AddError("Error creating sync", err.Error())
 		return
@@ -1175,7 +1176,7 @@ func (r *syncResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		SyncAllRecords: data.SyncAllRecords.ValueBool(),
 		Active:         data.Active.ValueBool(),
 	}
-	sync, err := r.client.Syncs().Update(ctx, data.ID.ValueString(), request)
+	sync, err := r.client.Syncs().Update(ctx, data.ID.ValueString(), request, polytomic.WithIdempotencyKey(uuid.NewString()))
 	if err != nil {
 		resp.Diagnostics.AddError("Error creating sync", err.Error())
 		return

@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -99,6 +100,7 @@ func (r *policyResource) Create(ctx context.Context, req resource.CreateRequest,
 			OrganizationID: data.Organization.ValueString(),
 			PolicyActions:  policyActions,
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating policy: %s", err))
@@ -243,7 +245,9 @@ func (r *policyResource) Update(ctx context.Context, req resource.UpdateRequest,
 			Name:           data.Name.ValueString(),
 			OrganizationID: data.Organization.ValueString(),
 			PolicyActions:  policyActions,
-		})
+		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
+	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating policy: %s", err))
 		return

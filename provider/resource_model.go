@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -224,7 +225,7 @@ func (r *modelResource) Create(ctx context.Context, req resource.CreateRequest, 
 		TrackingColumns:  trackingColumnsRequest,
 	}
 
-	model, err := r.client.Models().Create(ctx, request)
+	model, err := r.client.Models().Create(ctx, request, polytomic.WithIdempotencyKey(uuid.NewString()))
 	if err != nil {
 		resp.Diagnostics.AddError("Error creating model", err.Error())
 		return
@@ -584,7 +585,7 @@ func (r *modelResource) Update(ctx context.Context, req resource.UpdateRequest, 
 			Relations:        relationsRequest,
 			Identifier:       data.Identifier.ValueString(),
 			TrackingColumns:  trackingRequest,
-		})
+		}, polytomic.WithIdempotencyKey(uuid.NewString()))
 
 	if err != nil {
 		resp.Diagnostics.AddError("Error updating model", err.Error())

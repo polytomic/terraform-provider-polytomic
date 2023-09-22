@@ -105,6 +105,7 @@ func (r *GcsConnectionResource) Create(ctx context.Context, req resource.CreateR
 				Bucket:         data.Configuration.Attributes()["bucket"].(types.String).ValueString(),
 			},
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
@@ -213,6 +214,7 @@ func (r *GcsConnectionResource) Update(ctx context.Context, req resource.UpdateR
 				Bucket:         data.Configuration.Attributes()["bucket"].(types.String).ValueString(),
 			},
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {

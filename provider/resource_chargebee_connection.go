@@ -105,6 +105,7 @@ func (r *ChargebeeConnectionResource) Create(ctx context.Context, req resource.C
 				RatelimitRPM: int(data.Configuration.Attributes()["ratelimit_rpm"].(types.Int64).ValueInt64()),
 			},
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
@@ -213,6 +214,7 @@ func (r *ChargebeeConnectionResource) Update(ctx context.Context, req resource.U
 				RatelimitRPM: int(data.Configuration.Attributes()["ratelimit_rpm"].(types.Int64).ValueInt64()),
 			},
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {

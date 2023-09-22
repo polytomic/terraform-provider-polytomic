@@ -112,6 +112,7 @@ func (r *AthenaConnectionResource) Create(ctx context.Context, req resource.Crea
 				OutputBucket:    data.Configuration.Attributes()["output_bucket"].(types.String).ValueString(),
 			},
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
@@ -225,6 +226,7 @@ func (r *AthenaConnectionResource) Update(ctx context.Context, req resource.Upda
 				OutputBucket:    data.Configuration.Attributes()["output_bucket"].(types.String).ValueString(),
 			},
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
