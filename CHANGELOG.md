@@ -1,3 +1,6 @@
+## 0.3.25 (22 Sep 2023)
+* Support float64 types in importer
+
 ## 0.3.24 (22 Sep 2023)
 * Fix schedule handling in importer
 * Write API key as variable in provider block
