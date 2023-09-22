@@ -105,6 +105,7 @@ func (r *AzureblobConnectionResource) Create(ctx context.Context, req resource.C
 				ContainerName: data.Configuration.Attributes()["container_name"].(types.String).ValueString(),
 			},
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
@@ -213,6 +214,7 @@ func (r *AzureblobConnectionResource) Update(ctx context.Context, req resource.U
 				ContainerName: data.Configuration.Attributes()["container_name"].(types.String).ValueString(),
 			},
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {

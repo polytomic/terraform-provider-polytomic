@@ -98,6 +98,7 @@ func (r *KustomerConnectionResource) Create(ctx context.Context, req resource.Cr
 				Domain: data.Configuration.Attributes()["domain"].(types.String).ValueString(),
 			},
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
@@ -201,6 +202,7 @@ func (r *KustomerConnectionResource) Update(ctx context.Context, req resource.Up
 				Domain: data.Configuration.Attributes()["domain"].(types.String).ValueString(),
 			},
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {

@@ -91,6 +91,7 @@ func (r *LobConnectionResource) Create(ctx context.Context, req resource.CreateR
 				Apikey: data.Configuration.Attributes()["apikey"].(types.String).ValueString(),
 			},
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
@@ -189,6 +190,7 @@ func (r *LobConnectionResource) Update(ctx context.Context, req resource.UpdateR
 				Apikey: data.Configuration.Attributes()["apikey"].(types.String).ValueString(),
 			},
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {

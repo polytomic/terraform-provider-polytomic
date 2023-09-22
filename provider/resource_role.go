@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -71,6 +72,7 @@ func (r *roleResource) Create(ctx context.Context, req resource.CreateRequest, r
 			Name:           data.Name.ValueString(),
 			OrganizationID: data.Organization.ValueString(),
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating role: %s", err))
@@ -131,7 +133,9 @@ func (r *roleResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		polytomic.RoleRequest{
 			Name:           data.Name.ValueString(),
 			OrganizationID: data.Organization.ValueString(),
-		})
+		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
+	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating role: %s", err))
 		return

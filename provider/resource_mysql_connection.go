@@ -161,6 +161,7 @@ func (r *MysqlConnectionResource) Create(ctx context.Context, req resource.Creat
 				ChangeDetection: data.Configuration.Attributes()["change_detection"].(types.Bool).ValueBool(),
 			},
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
@@ -309,6 +310,7 @@ func (r *MysqlConnectionResource) Update(ctx context.Context, req resource.Updat
 				ChangeDetection: data.Configuration.Attributes()["change_detection"].(types.Bool).ValueBool(),
 			},
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {

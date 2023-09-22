@@ -140,6 +140,7 @@ func (r *DatabricksConnectionResource) Create(ctx context.Context, req resource.
 				S3BucketRegion:     data.Configuration.Attributes()["s3_bucket_region"].(types.String).ValueString(),
 			},
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
@@ -273,6 +274,7 @@ func (r *DatabricksConnectionResource) Update(ctx context.Context, req resource.
 				S3BucketRegion:     data.Configuration.Attributes()["s3_bucket_region"].(types.String).ValueString(),
 			},
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {

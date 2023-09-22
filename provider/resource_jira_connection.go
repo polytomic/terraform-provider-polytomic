@@ -119,6 +119,7 @@ func (r *JiraConnectionResource) Create(ctx context.Context, req resource.Create
 				AccessToken: data.Configuration.Attributes()["access_token"].(types.String).ValueString(),
 			},
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
@@ -237,6 +238,7 @@ func (r *JiraConnectionResource) Update(ctx context.Context, req resource.Update
 				AccessToken: data.Configuration.Attributes()["access_token"].(types.String).ValueString(),
 			},
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {

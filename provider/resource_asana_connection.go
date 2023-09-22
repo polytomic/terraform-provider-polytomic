@@ -91,6 +91,7 @@ func (r *AsanaConnectionResource) Create(ctx context.Context, req resource.Creat
 				PAT: data.Configuration.Attributes()["pat"].(types.String).ValueString(),
 			},
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
@@ -189,6 +190,7 @@ func (r *AsanaConnectionResource) Update(ctx context.Context, req resource.Updat
 				PAT: data.Configuration.Attributes()["pat"].(types.String).ValueString(),
 			},
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {

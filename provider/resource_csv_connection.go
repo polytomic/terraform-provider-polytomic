@@ -183,6 +183,7 @@ func (r *CSVConnectionResource) Create(ctx context.Context, req resource.CreateR
 				Auth:                  auth,
 			},
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
@@ -284,6 +285,7 @@ func (r *CSVConnectionResource) Update(ctx context.Context, req resource.UpdateR
 				Auth:                  auth,
 			},
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))

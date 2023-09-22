@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"sort"
 
+	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -271,6 +272,7 @@ func (r *bulkSyncResource) Create(ctx context.Context, req resource.CreateReques
 			DestinationConfiguration: destConf,
 			SourceConfiguration:      sourceConf,
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating bulk sync: %s", err))
@@ -370,6 +372,7 @@ func (r *bulkSyncResource) Update(ctx context.Context, req resource.UpdateReques
 			DestConnectionID:   data.DestConnectionID.ValueString(),
 			Schedule:           schedule,
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating organization: %s", err))

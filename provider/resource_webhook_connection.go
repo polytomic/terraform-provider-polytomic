@@ -113,6 +113,7 @@ func (r *WebhookConnectionResource) Create(ctx context.Context, req resource.Cre
 				Headers: headers,
 			},
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
@@ -196,6 +197,7 @@ func (r *WebhookConnectionResource) Update(ctx context.Context, req resource.Upd
 				Headers: headers,
 			},
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))

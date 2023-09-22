@@ -98,6 +98,7 @@ func (r *HoneycombConnectionResource) Create(ctx context.Context, req resource.C
 				Dataset: data.Configuration.Attributes()["dataset"].(types.String).ValueString(),
 			},
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
@@ -201,6 +202,7 @@ func (r *HoneycombConnectionResource) Update(ctx context.Context, req resource.U
 				Dataset: data.Configuration.Attributes()["dataset"].(types.String).ValueString(),
 			},
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {

@@ -105,6 +105,7 @@ func (r *BigqueryConnectionResource) Create(ctx context.Context, req resource.Cr
 				Location:       data.Configuration.Attributes()["location"].(types.String).ValueString(),
 			},
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
@@ -213,6 +214,7 @@ func (r *BigqueryConnectionResource) Update(ctx context.Context, req resource.Up
 				Location:       data.Configuration.Attributes()["location"].(types.String).ValueString(),
 			},
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {

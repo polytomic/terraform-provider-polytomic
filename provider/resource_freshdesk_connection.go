@@ -98,6 +98,7 @@ func (r *FreshdeskConnectionResource) Create(ctx context.Context, req resource.C
 				Subdomain: data.Configuration.Attributes()["subdomain"].(types.String).ValueString(),
 			},
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
@@ -201,6 +202,7 @@ func (r *FreshdeskConnectionResource) Update(ctx context.Context, req resource.U
 				Subdomain: data.Configuration.Attributes()["subdomain"].(types.String).ValueString(),
 			},
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {

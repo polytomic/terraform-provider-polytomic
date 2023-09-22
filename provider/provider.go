@@ -4,7 +4,9 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"time"
 
+	"github.com/hashicorp/go-retryablehttp"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
@@ -98,6 +100,13 @@ func (p *ptProvider) Configure(ctx context.Context, req provider.ConfigureReques
 	if deployURL == "" {
 		deployURL = PolytomicDefaultURL
 	}
+
+	rc := retryablehttp.NewClient()
+	rc.RetryMax = 10
+	rc.RetryWaitMax = 2 * time.Minute
+
+	rc.StandardClient()
+
 	var client *polytomic.Client
 	// Deployment key is the default and takes precedence
 	if apiKey != "" && deployKey == "" {
@@ -105,12 +114,14 @@ func (p *ptProvider) Configure(ctx context.Context, req provider.ConfigureReques
 			deployURL,
 			polytomic.APIKey(apiKey),
 			polytomic.WithUserAgent(UserAgent),
+			polytomic.WithClient(rc.StandardClient()),
 		)
 	} else {
 		client = polytomic.NewClient(
 			deployURL,
 			polytomic.DeploymentKey(deployKey),
 			polytomic.WithUserAgent(UserAgent),
+			polytomic.WithClient(rc.StandardClient()),
 		)
 	}
 

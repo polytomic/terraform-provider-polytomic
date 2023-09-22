@@ -6,13 +6,14 @@ require (
 	github.com/AlekSi/pointer v1.2.0
 	github.com/fbreckle/terraform-plugin-docs v0.0.0-20220812121758-a828466500d3
 	github.com/google/uuid v1.3.1
+	github.com/hashicorp/go-retryablehttp v0.7.4
 	github.com/hashicorp/hcl/v2 v2.18.0
 	github.com/hashicorp/terraform-plugin-framework v1.4.0
 	github.com/hashicorp/terraform-plugin-go v0.19.0
 	github.com/hashicorp/terraform-plugin-log v0.9.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.29.0
 	github.com/mitchellh/mapstructure v1.5.0
-	github.com/polytomic/polytomic-go v0.0.0-20230921150226-303bca1242eb
+	github.com/polytomic/polytomic-go v0.0.0-20230921203950-174b849d3c58
 	github.com/rs/zerolog v1.30.0
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/viper v1.16.0

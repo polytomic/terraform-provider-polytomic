@@ -182,6 +182,7 @@ func (r *RedshiftConnectionResource) Create(ctx context.Context, req resource.Cr
 				S3BucketRegion:     data.Configuration.Attributes()["s3_bucket_region"].(types.String).ValueString(),
 			},
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
@@ -345,6 +346,7 @@ func (r *RedshiftConnectionResource) Update(ctx context.Context, req resource.Up
 				S3BucketRegion:     data.Configuration.Attributes()["s3_bucket_region"].(types.String).ValueString(),
 			},
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {

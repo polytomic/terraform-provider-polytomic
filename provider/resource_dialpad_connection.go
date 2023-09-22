@@ -91,6 +91,7 @@ func (r *DialpadConnectionResource) Create(ctx context.Context, req resource.Cre
 				APIKey: data.Configuration.Attributes()["api_key"].(types.String).ValueString(),
 			},
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
@@ -189,6 +190,7 @@ func (r *DialpadConnectionResource) Update(ctx context.Context, req resource.Upd
 				APIKey: data.Configuration.Attributes()["api_key"].(types.String).ValueString(),
 			},
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {

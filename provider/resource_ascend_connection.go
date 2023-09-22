@@ -91,6 +91,7 @@ func (r *AscendConnectionResource) Create(ctx context.Context, req resource.Crea
 				APIKey: data.Configuration.Attributes()["api_key"].(types.String).ValueString(),
 			},
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
@@ -189,6 +190,7 @@ func (r *AscendConnectionResource) Update(ctx context.Context, req resource.Upda
 				APIKey: data.Configuration.Attributes()["api_key"].(types.String).ValueString(),
 			},
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {

@@ -93,6 +93,7 @@ func (r *userResource) Create(ctx context.Context, req resource.CreateRequest, r
 			Email: data.Email.ValueString(),
 			Role:  data.Role.ValueString(),
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating user: %s", err))
@@ -163,6 +164,7 @@ func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, r
 			Email: data.Email.ValueString(),
 			Role:  data.Role.ValueString(),
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating user: %s", err))

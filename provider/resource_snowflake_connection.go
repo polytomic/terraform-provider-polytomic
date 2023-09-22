@@ -126,6 +126,7 @@ func (r *SnowflakeConnectionResource) Create(ctx context.Context, req resource.C
 				Params:    data.Configuration.Attributes()["params"].(types.String).ValueString(),
 			},
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
@@ -249,6 +250,7 @@ func (r *SnowflakeConnectionResource) Update(ctx context.Context, req resource.U
 				Params:    data.Configuration.Attributes()["params"].(types.String).ValueString(),
 			},
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {

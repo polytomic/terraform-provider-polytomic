@@ -98,6 +98,7 @@ func (r *CosmosdbConnectionResource) Create(ctx context.Context, req resource.Cr
 				Key: data.Configuration.Attributes()["key"].(types.String).ValueString(),
 			},
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
@@ -201,6 +202,7 @@ func (r *CosmosdbConnectionResource) Update(ctx context.Context, req resource.Up
 				Key: data.Configuration.Attributes()["key"].(types.String).ValueString(),
 			},
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {

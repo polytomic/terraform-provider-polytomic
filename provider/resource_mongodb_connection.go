@@ -126,6 +126,7 @@ func (r *MongodbConnectionResource) Create(ctx context.Context, req resource.Cre
 				Params:   data.Configuration.Attributes()["params"].(types.String).ValueString(),
 			},
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
@@ -249,6 +250,7 @@ func (r *MongodbConnectionResource) Update(ctx context.Context, req resource.Upd
 				Params:   data.Configuration.Attributes()["params"].(types.String).ValueString(),
 			},
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {

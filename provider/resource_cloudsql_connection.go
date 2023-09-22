@@ -119,6 +119,7 @@ func (r *CloudsqlConnectionResource) Create(ctx context.Context, req resource.Cr
 				Credentials:    data.Configuration.Attributes()["credentials"].(types.String).ValueString(),
 			},
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
@@ -237,6 +238,7 @@ func (r *CloudsqlConnectionResource) Update(ctx context.Context, req resource.Up
 				Credentials:    data.Configuration.Attributes()["credentials"].(types.String).ValueString(),
 			},
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {

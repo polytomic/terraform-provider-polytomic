@@ -105,6 +105,7 @@ func (r *CustomerioConnectionResource) Create(ctx context.Context, req resource.
 				AppAPIKey:      data.Configuration.Attributes()["app_api_key"].(types.String).ValueString(),
 			},
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {
@@ -213,6 +214,7 @@ func (r *CustomerioConnectionResource) Update(ctx context.Context, req resource.
 				AppAPIKey:      data.Configuration.Attributes()["app_api_key"].(types.String).ValueString(),
 			},
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 		polytomic.SkipConfigValidation(),
 	)
 	if err != nil {

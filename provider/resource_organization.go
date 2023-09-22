@@ -98,6 +98,7 @@ func (r *organizationResource) Create(ctx context.Context, req resource.CreateRe
 			SSODomain: data.SSODomain.ValueString(),
 			SSOOrgId:  data.SSOOrgId.ValueString(),
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating organization: %s", err))
@@ -168,6 +169,7 @@ func (r *organizationResource) Update(ctx context.Context, req resource.UpdateRe
 			SSODomain: data.SSODomain.ValueString(),
 			SSOOrgId:  data.SSOOrgId.ValueString(),
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating organization: %s", err))
