@@ -15,20 +15,20 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
-var _ datasource.DataSource = &GithubConnectionDataSource{}
+var _ datasource.DataSource = &SlackConnectionDataSource{}
 
 // ExampleDataSource defines the data source implementation.
-type GithubConnectionDataSource struct {
+type SlackConnectionDataSource struct {
 	client *polytomic.Client
 }
 
-func (d *GithubConnectionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_github_connection"
+func (d *SlackConnectionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_slack_connection"
 }
 
-func (d *GithubConnectionDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+func (d *SlackConnectionDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: ":meta:subcategory:Connections: GitHub Connection",
+		MarkdownDescription: ":meta:subcategory:Connections: Slack Connection",
 		Attributes: map[string]schema.Attribute{
 			"name": schema.StringAttribute{
 				MarkdownDescription: "",
@@ -54,7 +54,7 @@ func (d *GithubConnectionDataSource) Schema(ctx context.Context, req datasource.
 	}
 }
 
-func (d *GithubConnectionDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *SlackConnectionDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -74,7 +74,7 @@ func (d *GithubConnectionDataSource) Configure(ctx context.Context, req datasour
 	d.client = client
 }
 
-func (d *GithubConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+func (d *SlackConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionData
 
 	// Read Terraform configuration data into the model

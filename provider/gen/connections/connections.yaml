@@ -949,27 +949,6 @@ connections:
         required: true
         sensitive: true
         example: my-personal-access-token
-  # Maybe one day we can support nested struct attributes
-  #
-  # - connection: github
-  #   name: GitHub
-  #   type: polytomic.GitHubConnectionType
-  #   config: polytomic.GitHubConnectionConfiguration
-  #   datasource: true
-  #   resource: true
-  #   attributes:
-  #     - name: Repositories
-  #       type: object
-  #       required: true
-  # - connection: linkedinads
-  #   name: LinkedIn Ads
-  #   type: polytomic.LinkedInAdsConnectionType
-  #   config: polytomic.LinkedInAdsConnectionConfiguration
-  #   datasource: true
-  #   attributes:
-  #     - name: Accounts
-  #       type: object
-  #       required: true
   - connection: delighted
     name: Delighted
     type: polytomic.DelightedConnectionType
@@ -1077,3 +1056,60 @@ connections:
         required: true
         sensitive: false
         example: events
+  - connection: fbaudience
+    name: Facebook Ads
+    type: polytomic.FacebookAdsConnectionType
+    config: polytomic.FacebookAdsConnectionConfiguration
+    datasource: true
+    attributes: []  
+  - connection: github
+    name: GitHub
+    type: polytomic.GithubConnectionType
+    config: polytomic.GithubConnectionConfiguration
+    datasource: true
+    attributes: []
+    # Maybe one day we can support nested struct attributes
+    # attributes:
+    #   - name: Repositories
+    #     type: object
+    #     required: true
+  - connection: linkedinads
+    name: LinkedIn Ads
+    type: polytomic.LinkedinAdsConnectionType
+    config: polytomic.LinkedinAdsConnectionConfiguration
+    datasource: true
+    attributes: []
+    # attributes:
+    #   - name: Accounts
+    #     type: object
+    #     required: true
+  - connection: googlesearchconsole
+    name: Google Search Console
+    type: polytomic.GoogleSearchConsoleConnectionType
+    config: polytomic.GoogleSearchConsoleConnectionConfiguration
+    datasource: true
+    attributes: []
+  - connection: slack
+    name: Slack
+    type: polytomic.SlackConnectionType
+    config: polytomic.SlackConnectionConfiguration
+    datasource: true
+    resource: true
+    attributes:
+    - name: APIKey
+      type: string
+      required: true
+      sensitive: true
+      example: my-api-key
+  - connection: outreach
+    name: Outreach
+    type: polytomic.OutreachConnectionType
+    config: polytomic.OutreachConnectionConfiguration
+    datasource: true
+    attributes: []
+  - connection: datalite
+    name: Datalite
+    type: polytomic.DataliteConnectionType
+    config: polytomic.DataliteConnectionConfiguration
+    datasource: true
+    attributes: []
