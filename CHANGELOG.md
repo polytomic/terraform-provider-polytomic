@@ -1,3 +1,7 @@
+## 0.3.24 (22 Sep 2023)
+* Fix schedule handling in importer
+* Write API key as variable in provider block
+
 ## 0.3.23 (21 Sep 2023)
 * Add runAfter support for sync resources
 * Importer will only optionally write API key into provider block
