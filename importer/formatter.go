@@ -5,6 +5,7 @@ import (
 	"regexp"
 
 	"github.com/hashicorp/hcl/v2/hclwrite"
+	"github.com/polytomic/polytomic-go"
 	"github.com/zclconf/go-cty/cty"
 	"golang.org/x/exp/slices"
 )
@@ -92,6 +93,11 @@ func typeConverter(value any) cty.Value {
 					continue
 				}
 				config[k] = cty.ListVal(vals)
+			case *polytomic.RunAfter:
+				if v == nil {
+					continue
+				}
+				config[k] = typeConverter(v)
 			default:
 				fmt.Printf("Unknown type for %s: %T in map\n", k, v)
 				continue

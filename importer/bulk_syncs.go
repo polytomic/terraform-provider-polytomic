@@ -80,7 +80,7 @@ func (b *BulkSyncs) GenerateTerraformFiles(ctx context.Context, writer io.Writer
 
 		resourceBlock.Body().SetAttributeValue("schemas", typeConverter(schemas))
 
-		var schedule map[string]*string
+		var schedule map[string]interface{}
 		err = mapstructure.Decode(bulkSync.Schedule, &schedule)
 		if err != nil {
 			return err
@@ -113,7 +113,7 @@ func (b *BulkSyncs) Filename() string {
 func (b *BulkSyncs) ResourceRefs() map[string]string {
 	result := make(map[string]string)
 	for name, bulk := range b.Resources {
-		result[bulk.ID] = name
+		result[bulk.ID] = fmt.Sprintf("%s.%s.id", BulkSyncResource, name)
 	}
 	return result
 }

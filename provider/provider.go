@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"time"
 
 	"github.com/hashicorp/go-retryablehttp"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -102,8 +101,7 @@ func (p *ptProvider) Configure(ctx context.Context, req provider.ConfigureReques
 	}
 
 	rc := retryablehttp.NewClient()
-	rc.RetryMax = 10
-	rc.RetryWaitMax = 2 * time.Minute
+	rc.RetryMax = 6
 
 	rc.StandardClient()
 
