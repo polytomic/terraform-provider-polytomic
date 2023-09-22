@@ -24,8 +24,16 @@ provider "polytomic" {
 	deployment_url = "{{ .URL }}"
 	{{- if .WriteAPIKey }}
 	api_key = "{{ .APIKey }}"
+	{{- else }}
+	api_key = var.polytomic_api_key
 	{{- end }}
 }
+
+{{- if not .WriteAPIKey }}
+variable "polytomic_api_key" {
+	type = string
+}
+{{- end }}
 `
 )
 

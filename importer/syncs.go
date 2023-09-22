@@ -50,14 +50,18 @@ func (s *Syncs) Init(ctx context.Context) error {
 
 func (s *Syncs) GenerateTerraformFiles(ctx context.Context, writer io.Writer, refs map[string]string) error {
 	for _, name := range sortedKeys(s.Resources) {
-		sync := s.Resources[name]
+		syn := s.Resources[name]
+		sync, err := s.c.Syncs().Get(ctx, syn.ID)
+		if err != nil {
+			return err
+		}
 		hclFile := hclwrite.NewEmptyFile()
 		body := hclFile.Body()
 		resourceBlock := body.AppendNewBlock("resource", []string{SyncResource, name})
 		resourceBlock.Body().SetAttributeValue("name", cty.StringVal(sync.Name))
 		resourceBlock.Body().SetAttributeValue("mode", cty.StringVal(sync.Mode))
-		var schedule map[string]*string
-		err := mapstructure.Decode(sync.Schedule, &schedule)
+		var schedule map[string]interface{}
+		err = mapstructure.Decode(sync.Schedule, &schedule)
 		if err != nil {
 			return err
 		}
@@ -142,7 +146,7 @@ func (s *Syncs) Filename() string {
 func (s *Syncs) ResourceRefs() map[string]string {
 	result := make(map[string]string)
 	for name, sync := range s.Resources {
-		result[sync.ID] = name
+		result[sync.ID] = fmt.Sprintf("%s.%s.id", SyncResource, name)
 	}
 	return result
 }

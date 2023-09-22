@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -118,6 +119,25 @@ func (r *bulkSyncResource) Schema(ctx context.Context, req resource.SchemaReques
 						Computed:            true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
+						},
+					},
+					"run_after": schema.SingleNestedAttribute{
+						MarkdownDescription: "Only supported for model syncs",
+						Attributes: map[string]schema.Attribute{
+							"sync_ids": schema.SetAttribute{
+								MarkdownDescription: "",
+								ElementType:         types.StringType,
+								Optional:            true,
+							},
+							"bulk_sync_ids": schema.SetAttribute{
+								MarkdownDescription: "",
+								ElementType:         types.StringType,
+								Optional:            true,
+							},
+						},
+						Optional: true,
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseStateForUnknown(),
 						},
 					},
 				},
