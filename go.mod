@@ -14,7 +14,7 @@ require (
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.29.0
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/polytomic/polytomic-go v0.0.0-20230922154757-50806bd052c2
-	github.com/rs/zerolog v1.30.0
+	github.com/rs/zerolog v1.31.0
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/viper v1.16.0
 	github.com/zclconf/go-cty v1.14.0
@@ -58,8 +58,8 @@ require (
 	github.com/imdario/mergo v0.3.15 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
-	github.com/mattn/go-colorable v0.1.12 // indirect
-	github.com/mattn/go-isatty v0.0.14 // indirect
+	github.com/mattn/go-colorable v0.1.13 // indirect
+	github.com/mattn/go-isatty v0.0.19 // indirect
 	github.com/mitchellh/cli v1.1.5 // indirect
 	github.com/mitchellh/copystructure v1.2.0 // indirect
 	github.com/mitchellh/go-testing-interface v1.14.1 // indirect
