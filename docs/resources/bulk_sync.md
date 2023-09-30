@@ -77,14 +77,5 @@ Optional:
 - `hour` (String)
 - `minute` (String)
 - `month` (String)
-- `run_after` (Attributes) Only supported for model syncs (see [below for nested schema](#nestedatt--schedule--run_after))
-
-<a id="nestedatt--schedule--run_after"></a>
-### Nested Schema for `schedule.run_after`
-
-Optional:
-
-- `bulk_sync_ids` (Set of String)
-- `sync_ids` (Set of String)
 
 
