@@ -1,3 +1,7 @@
+## 0.3.27 (30 Sep 2023)
+* Bug fix for runAfter marshalling in bulk sync resources
+
+
 ## 0.3.26 (22 Sep 2023)
 * Add support for Facebook Ads, Github, Slack, Google Search Console, LinkedInAds, Outreach and Datalite connections
 
