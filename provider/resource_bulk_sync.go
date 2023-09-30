@@ -13,7 +13,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -121,25 +120,6 @@ func (r *bulkSyncResource) Schema(ctx context.Context, req resource.SchemaReques
 							stringplanmodifier.UseStateForUnknown(),
 						},
 					},
-					"run_after": schema.SingleNestedAttribute{
-						MarkdownDescription: "Only supported for model syncs",
-						Attributes: map[string]schema.Attribute{
-							"sync_ids": schema.SetAttribute{
-								MarkdownDescription: "",
-								ElementType:         types.StringType,
-								Optional:            true,
-							},
-							"bulk_sync_ids": schema.SetAttribute{
-								MarkdownDescription: "",
-								ElementType:         types.StringType,
-								Optional:            true,
-							},
-						},
-						Optional: true,
-						PlanModifiers: []planmodifier.Object{
-							objectplanmodifier.UseStateForUnknown(),
-						},
-					},
 				},
 				Required: true,
 			},
@@ -225,7 +205,7 @@ func (r *bulkSyncResource) Create(ctx context.Context, req resource.CreateReques
 		return
 	}
 
-	var schedule polytomic.Schedule
+	var schedule polytomic.BulkSchedule
 	diags = data.Schedule.As(ctx, &schedule, basetypes.ObjectAsOptions{
 		UnhandledNullAsEmpty:    true,
 		UnhandledUnknownAsEmpty: true,
@@ -250,7 +230,7 @@ func (r *bulkSyncResource) Create(ctx context.Context, req resource.CreateReques
 				resp.Diagnostics.AddError("Error unmarshalling advanced", err.Error())
 				return
 			}
-			destConf[k] = v
+			destConf[k] = advanced
 		} else {
 			destConf[k] = v
 		}
@@ -330,17 +310,30 @@ func (r *bulkSyncResource) Read(ctx context.Context, req resource.ReadRequest, r
 		return
 	}
 
-	schedule, diags := types.ObjectValueFrom(ctx,
-		map[string]attr.Type{
-			"frequency":    types.StringType,
-			"day_of_week":  types.StringType,
-			"hour":         types.StringType,
-			"minute":       types.StringType,
-			"month":        types.StringType,
-			"day_of_month": types.StringType,
-		},
-		bulkSync.Schedule)
+	sched := struct {
+		Frequency  *string `json:"frequency" tfsdk:"frequency"`
+		DayOfWeek  *string `json:"day_of_week" tfsdk:"day_of_week"`
+		Hour       *string `json:"hour" tfsdk:"hour"`
+		Minute     *string `json:"minute" tfsdk:"minute"`
+		Month      *string `json:"month" tfsdk:"month"`
+		DayOfMonth *string `json:"day_of_month" tfsdk:"day_of_month"`
+	}{
+		Frequency:  bulkSync.Schedule.Frequency,
+		DayOfWeek:  bulkSync.Schedule.DayOfWeek,
+		Hour:       bulkSync.Schedule.Hour,
+		Minute:     bulkSync.Schedule.Minute,
+		Month:      bulkSync.Schedule.Month,
+		DayOfMonth: bulkSync.Schedule.DayOfMonth,
+	}
 
+	schedule, diags := types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"frequency":    types.StringType,
+		"day_of_week":  types.StringType,
+		"hour":         types.StringType,
+		"minute":       types.StringType,
+		"month":        types.StringType,
+		"day_of_month": types.StringType,
+	}, sched)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -370,7 +363,7 @@ func (r *bulkSyncResource) Update(ctx context.Context, req resource.UpdateReques
 		return
 	}
 
-	var schedule polytomic.Schedule
+	var schedule polytomic.BulkSchedule
 	diags = data.Schedule.As(ctx, &schedule, basetypes.ObjectAsOptions{
 		UnhandledNullAsEmpty:    true,
 		UnhandledUnknownAsEmpty: true,
