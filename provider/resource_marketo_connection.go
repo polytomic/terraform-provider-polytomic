@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -18,6 +19,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/polytomic-go"
 )
 
@@ -137,31 +139,24 @@ func (r *MarketoConnectionResource) Create(ctx context.Context, req resource.Cre
 	data.Name = types.StringValue(created.Name)
 	data.Organization = types.StringValue(created.OrganizationId)
 
-	//var output polytomic.MarketoConfiguration
-	//cfg := &mapstructure.DecoderConfig{
-	//    Result:   &output,
-	//}
-	//decoder, _ := mapstructure.NewDecoder(cfg)
-	//decoder.Decode(created.Configuration)
-	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-	//
-	//	"client_id": schema.StringAttribute,
-	//
-	//	"client_secret": schema.StringAttribute,
-	//
-	//	"rest_endpoint": schema.StringAttribute,
-	//
-	//	"enforce_api_limits": schema.BoolAttribute,
-	//
-	//	"daily_api_calls": schema.Int64Attribute,
-	//
-	//	"concurrent_imports": schema.Int64Attribute,
-	//
-	//}, output)
-	//if diags.HasError() {
-	//	resp.Diagnostics.Append(diags...)
-	//	return
-	//}
+	var output polytomic.MarketoConfiguration
+	cfg := &mapstructure.DecoderConfig{
+		Result: &output,
+	}
+	decoder, _ := mapstructure.NewDecoder(cfg)
+	decoder.Decode(created.Configuration)
+	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"client_id":          types.StringType,
+		"client_secret":      types.StringType,
+		"rest_endpoint":      types.StringType,
+		"enforce_api_limits": types.BoolType,
+		"daily_api_calls":    types.NumberType,
+		"concurrent_imports": types.NumberType,
+	}, output)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
 
 	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Marketo", "id": created.ID})
 
@@ -196,31 +191,24 @@ func (r *MarketoConnectionResource) Read(ctx context.Context, req resource.ReadR
 	data.Name = types.StringValue(connection.Name)
 	data.Organization = types.StringValue(connection.OrganizationId)
 
-	//var output polytomic.MarketoConfiguration
-	//cfg := &mapstructure.DecoderConfig{
-	//    Result:   &output,
-	//}
-	//decoder, _ := mapstructure.NewDecoder(cfg)
-	//decoder.Decode(connection.Configuration)
-	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-	//
-	//	"client_id": schema.StringAttribute,
-	//
-	//	"client_secret": schema.StringAttribute,
-	//
-	//	"rest_endpoint": schema.StringAttribute,
-	//
-	//	"enforce_api_limits": schema.BoolAttribute,
-	//
-	//	"daily_api_calls": schema.Int64Attribute,
-	//
-	//	"concurrent_imports": schema.Int64Attribute,
-	//
-	//}, output)
-	//if diags.HasError() {
-	//	resp.Diagnostics.Append(diags...)
-	//	return
-	//}
+	var output polytomic.MarketoConfiguration
+	cfg := &mapstructure.DecoderConfig{
+		Result: &output,
+	}
+	decoder, _ := mapstructure.NewDecoder(cfg)
+	decoder.Decode(connection.Configuration)
+	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"client_id":          types.StringType,
+		"client_secret":      types.StringType,
+		"rest_endpoint":      types.StringType,
+		"enforce_api_limits": types.BoolType,
+		"daily_api_calls":    types.NumberType,
+		"concurrent_imports": types.NumberType,
+	}, output)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -262,31 +250,24 @@ func (r *MarketoConnectionResource) Update(ctx context.Context, req resource.Upd
 	data.Name = types.StringValue(updated.Name)
 	data.Organization = types.StringValue(updated.OrganizationId)
 
-	//var output polytomic.MarketoConfiguration
-	//cfg := &mapstructure.DecoderConfig{
-	//    Result:   &output,
-	//}
-	//decoder, _ := mapstructure.NewDecoder(cfg)
-	//decoder.Decode(updated.Configuration)
-	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-	//
-	//	"client_id": schema.StringAttribute,
-	//
-	//	"client_secret": schema.StringAttribute,
-	//
-	//	"rest_endpoint": schema.StringAttribute,
-	//
-	//	"enforce_api_limits": schema.BoolAttribute,
-	//
-	//	"daily_api_calls": schema.Int64Attribute,
-	//
-	//	"concurrent_imports": schema.Int64Attribute,
-	//
-	//}, output)
-	//if diags.HasError() {
-	//	resp.Diagnostics.Append(diags...)
-	//	return
-	//}
+	var output polytomic.MarketoConfiguration
+	cfg := &mapstructure.DecoderConfig{
+		Result: &output,
+	}
+	decoder, _ := mapstructure.NewDecoder(cfg)
+	decoder.Decode(updated.Configuration)
+	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"client_id":          types.StringType,
+		"client_secret":      types.StringType,
+		"rest_endpoint":      types.StringType,
+		"enforce_api_limits": types.BoolType,
+		"daily_api_calls":    types.NumberType,
+		"concurrent_imports": types.NumberType,
+	}, output)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)

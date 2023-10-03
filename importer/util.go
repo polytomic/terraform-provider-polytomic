@@ -1,6 +1,8 @@
 package importer
 
-import "sort"
+import (
+	"sort"
+)
 
 func sortedKeys[V any](m map[string]V) []string {
 	keys := make([]string, 0, len(m))

@@ -14,6 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -39,6 +40,9 @@ func (r *bulkSyncResource) Schema(ctx context.Context, req resource.SchemaReques
 				MarkdownDescription: "",
 				Optional:            true,
 				Computed:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"name": schema.StringAttribute{
 				MarkdownDescription: "",
@@ -68,6 +72,9 @@ func (r *bulkSyncResource) Schema(ctx context.Context, req resource.SchemaReques
 				MarkdownDescription: "",
 				ElementType:         types.StringType,
 				Optional:            true,
+				PlanModifiers: []planmodifier.Set{
+					setplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"policies": schema.SetAttribute{
 				MarkdownDescription: "",
@@ -124,8 +131,9 @@ func (r *bulkSyncResource) Schema(ctx context.Context, req resource.SchemaReques
 				Required: true,
 			},
 			"dest_configuration": schema.MapAttribute{
-				ElementType: types.StringType,
-				Required:    true,
+				MarkdownDescription: "",
+				ElementType:         types.StringType,
+				Optional:            true,
 			},
 			"source_configuration": schema.MapAttribute{
 				MarkdownDescription: "",
@@ -278,7 +286,78 @@ func (r *bulkSyncResource) Create(ctx context.Context, req resource.CreateReques
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating bulk sync: %s", err))
 		return
 	}
+
+	sch, diags := types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"frequency":    types.StringType,
+		"day_of_week":  types.StringType,
+		"hour":         types.StringType,
+		"minute":       types.StringType,
+		"month":        types.StringType,
+		"day_of_month": types.StringType,
+	}, created.Schedule)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
+	schemaVal, diags := types.SetValueFrom(ctx, types.StringType, schemas)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
+	sourceConfRaw := make(map[string]string)
+	for k, v := range created.SourceConfiguration {
+		if k == "advanced" {
+			advanced, err := json.Marshal(v)
+			if err != nil {
+				resp.Diagnostics.AddError("Error marshalling advanced", err.Error())
+				return
+			}
+			sourceConfRaw[k] = string(advanced)
+		} else {
+			sourceConfRaw[k] = stringy(v)
+		}
+	}
+
+	sourceConfVal, diags := types.MapValueFrom(ctx, types.StringType, sourceConfRaw)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
+	destConfRaw := make(map[string]string)
+	for k, v := range created.DestinationConfiguration {
+		if k == "advanced" {
+			advanced, err := json.Marshal(v)
+			if err != nil {
+				resp.Diagnostics.AddError("Error marshalling advanced", err.Error())
+				return
+			}
+			destConfRaw[k] = string(advanced)
+		} else {
+			destConfRaw[k] = stringy(v)
+		}
+	}
+
+	destConfVal, diags := types.MapValueFrom(ctx, types.StringType, destConfRaw)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
 	data.Id = types.StringValue(created.ID)
+	data.Organization = types.StringValue(created.OrganizationID)
+	data.Name = types.StringValue(created.Name)
+	data.DestConnectionID = types.StringValue(created.DestConnectionID)
+	data.SourceConnectionID = types.StringValue(created.SourceConnectionID)
+	data.Mode = types.StringValue(created.Mode)
+	data.Discover = types.BoolValue(created.Discover)
+	data.Active = types.BoolValue(created.Active)
+	data.Schedule = sch
+	data.Schemas = schemaVal
+	data.SourceConfiguration = sourceConfVal
+	data.DestinationConfiguration = destConfVal
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -310,22 +389,6 @@ func (r *bulkSyncResource) Read(ctx context.Context, req resource.ReadRequest, r
 		return
 	}
 
-	sched := struct {
-		Frequency  *string `json:"frequency" tfsdk:"frequency"`
-		DayOfWeek  *string `json:"day_of_week" tfsdk:"day_of_week"`
-		Hour       *string `json:"hour" tfsdk:"hour"`
-		Minute     *string `json:"minute" tfsdk:"minute"`
-		Month      *string `json:"month" tfsdk:"month"`
-		DayOfMonth *string `json:"day_of_month" tfsdk:"day_of_month"`
-	}{
-		Frequency:  bulkSync.Schedule.Frequency,
-		DayOfWeek:  bulkSync.Schedule.DayOfWeek,
-		Hour:       bulkSync.Schedule.Hour,
-		Minute:     bulkSync.Schedule.Minute,
-		Month:      bulkSync.Schedule.Month,
-		DayOfMonth: bulkSync.Schedule.DayOfMonth,
-	}
-
 	schedule, diags := types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"frequency":    types.StringType,
 		"day_of_week":  types.StringType,
@@ -333,13 +396,74 @@ func (r *bulkSyncResource) Read(ctx context.Context, req resource.ReadRequest, r
 		"minute":       types.StringType,
 		"month":        types.StringType,
 		"day_of_month": types.StringType,
-	}, sched)
+	}, bulkSync.Schedule)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
+	// Get schemas
+	var schemas []string
+	schemasRes, err := r.client.Bulk().GetBulkSyncSchemas(ctx, data.Id.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error reading bulk sync schemas: %s", err))
+		return
+	}
+	for _, schema := range schemasRes {
+		if schema.Enabled {
+			schemas = append(schemas, schema.ID)
+		}
+	}
+
+	schemaValue, diags := types.SetValueFrom(ctx, types.StringType, schemas)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
+	sourceConfRaw := make(map[string]string)
+	for k, v := range bulkSync.SourceConfiguration {
+		if k == "advanced" {
+			advanced, err := json.Marshal(v)
+			if err != nil {
+				resp.Diagnostics.AddError("Error marshalling advanced", err.Error())
+				return
+			}
+			sourceConfRaw[k] = string(advanced)
+		} else {
+			sourceConfRaw[k] = stringy(v)
+		}
+	}
+
+	sourceConfVal, diags := types.MapValueFrom(ctx, types.StringType, sourceConfRaw)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
+	destConfRaw := make(map[string]string)
+	for k, v := range bulkSync.DestinationConfiguration {
+		if k == "advanced" {
+			advanced, err := json.Marshal(v)
+			if err != nil {
+				resp.Diagnostics.AddError("Error marshalling advanced", err.Error())
+				return
+			}
+			destConfRaw[k] = string(advanced)
+		} else {
+			destConfRaw[k] = stringy(v)
+		}
+	}
+	diags.AddWarning("dest config", fmt.Sprintf("%v", destConfRaw))
+
+	destConfVal, diags := types.MapValueFrom(ctx, types.StringType, destConfRaw)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
 
 	data.Id = types.StringValue(bulkSync.ID)
+	data.Organization = types.StringValue(bulkSync.OrganizationID)
 	data.Name = types.StringValue(bulkSync.Name)
 	data.DestConnectionID = types.StringValue(bulkSync.DestConnectionID)
 	data.SourceConnectionID = types.StringValue(bulkSync.SourceConnectionID)
@@ -347,6 +471,10 @@ func (r *bulkSyncResource) Read(ctx context.Context, req resource.ReadRequest, r
 	data.Discover = types.BoolValue(bulkSync.Discover)
 	data.Active = types.BoolValue(bulkSync.Active)
 	data.Schedule = schedule
+	data.Schemas = schemaValue
+	data.SourceConfiguration = sourceConfVal
+	data.DestinationConfiguration = destConfVal
+	diags.AddWarning("dest config", fmt.Sprintf("%v", destConfVal))
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -392,8 +520,91 @@ func (r *bulkSyncResource) Update(ctx context.Context, req resource.UpdateReques
 		return
 	}
 
-	data.Name = types.StringValue(updated.Name)
+	// Get schemas
+	var schemas []string
+	schemasRes, err := r.client.Bulk().GetBulkSyncSchemas(ctx, data.Id.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error reading bulk sync schemas: %s", err))
+		return
+	}
+	for _, schema := range schemasRes {
+		if schema.Enabled {
+			schemas = append(schemas, schema.ID)
+		}
+	}
+
+	sch, diags := types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"frequency":    types.StringType,
+		"day_of_week":  types.StringType,
+		"hour":         types.StringType,
+		"minute":       types.StringType,
+		"month":        types.StringType,
+		"day_of_month": types.StringType,
+	}, updated.Schedule)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
+	schemaValue, diags := types.SetValueFrom(ctx, types.StringType, schemas)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
+	sourceConfRaw := make(map[string]string)
+	for k, v := range updated.SourceConfiguration {
+		if k == "advanced" {
+			advanced, err := json.Marshal(v)
+			if err != nil {
+				resp.Diagnostics.AddError("Error marshalling advanced", err.Error())
+				return
+			}
+			sourceConfRaw[k] = string(advanced)
+		} else {
+			sourceConfRaw[k] = stringy(v)
+		}
+	}
+
+	sourceConfVal, diags := types.MapValueFrom(ctx, types.StringType, sourceConfRaw)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
+	destConfRaw := make(map[string]string)
+	for k, v := range updated.DestinationConfiguration {
+		if k == "advanced" {
+			advanced, err := json.Marshal(v)
+			if err != nil {
+				resp.Diagnostics.AddError("Error marshalling advanced", err.Error())
+				return
+			}
+			destConfRaw[k] = string(advanced)
+		} else {
+			destConfRaw[k] = stringy(v)
+		}
+	}
+
+	destConfVal, diags := types.MapValueFrom(ctx, types.StringType, destConfRaw)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
+	data.Id = types.StringValue(updated.ID)
 	data.Organization = types.StringValue(updated.OrganizationID)
+	data.Name = types.StringValue(updated.Name)
+	data.DestConnectionID = types.StringValue(updated.DestConnectionID)
+	data.SourceConnectionID = types.StringValue(updated.SourceConnectionID)
+	data.Mode = types.StringValue(updated.Mode)
+	data.Discover = types.BoolValue(updated.Discover)
+	data.Active = types.BoolValue(updated.Active)
+	data.Schedule = sch
+	data.Schemas = schemaValue
+	data.SourceConfiguration = sourceConfVal
+	data.DestinationConfiguration = destConfVal
+
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 

@@ -35,31 +35,37 @@ const (
 var (
 	TypeMap = map[string]Typer{
 		"string": {
-			AttrType: "schema.StringAttribute",
-			TfType:   "types.String",
+			AttrType:    "schema.StringAttribute",
+			TfType:      "types.String",
+			NewAttrType: "types.StringType",
 		},
 		"number": {
-			AttrType: "schema.NumberAttribute",
-			TfType:   "types.Number",
+			AttrType:    "schema.NumberAttribute",
+			TfType:      "types.Number",
+			NewAttrType: "types.NumberType",
 		},
 		"bool": {
-			AttrType: "schema.BoolAttribute",
-			TfType:   "types.Bool",
+			AttrType:    "schema.BoolAttribute",
+			TfType:      "types.Bool",
+			NewAttrType: "types.BoolType",
 		},
 		"int": {
-			AttrType: "schema.Int64Attribute",
-			TfType:   "types.Int64",
+			AttrType:    "schema.Int64Attribute",
+			TfType:      "types.Int64",
+			NewAttrType: "types.NumberType",
 		},
 		"int64": {
-			AttrType: "schema.Int64Attribute",
-			TfType:   "types.Int64",
+			AttrType:    "schema.Int64Attribute",
+			TfType:      "types.Int64",
+			NewAttrType: "types.NumberType",
 		},
 	}
 )
 
 type Typer struct {
-	AttrType string
-	TfType   string
+	AttrType    string
+	TfType      string
+	NewAttrType string
 }
 
 type Connections struct {
@@ -88,9 +94,10 @@ type Attribute struct {
 	Example             string `yaml:"example"`
 	ExampleTypeOverride string `yaml:"example_type_override"`
 
-	TfType   string `yaml:"-"`
-	AttrType string `yaml:"-"`
-	AttrName string `yaml:"-"`
+	TfType      string `yaml:"-"`
+	AttrType    string `yaml:"-"`
+	NewAttrType string `yaml:"-"`
+	AttrName    string `yaml:"-"`
 }
 
 type Importable struct {
@@ -120,6 +127,7 @@ func GenerateConnections() error {
 			}
 			r.Attributes[i].TfType = t.TfType
 			r.Attributes[i].AttrType = t.AttrType
+			r.Attributes[i].NewAttrType = t.NewAttrType
 			r.Attributes[i].AttrName = provider.ToSnakeCase(a.Name)
 		}
 		if r.Name == "" {

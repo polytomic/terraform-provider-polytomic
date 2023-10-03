@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"fmt"
 	"strings"
 	"unicode"
 )
@@ -74,4 +75,17 @@ func ToSnakeCase(s string) string {
 	}
 
 	return n.String()
+}
+
+func stringy(v any) string {
+	switch t := v.(type) {
+	case string:
+		return t
+	case []byte:
+		return string(t)
+	case bool:
+		return fmt.Sprintf("%t", t)
+	default:
+		panic(fmt.Sprintf("unsupported type %T", t))
+	}
 }
