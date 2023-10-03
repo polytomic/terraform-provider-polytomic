@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -18,6 +19,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/polytomic-go"
 )
 
@@ -214,53 +216,35 @@ func (r *PostgresqlConnectionResource) Create(ctx context.Context, req resource.
 	data.Name = types.StringValue(created.Name)
 	data.Organization = types.StringValue(created.OrganizationId)
 
-	//var output polytomic.PostgresqlConfiguration
-	//cfg := &mapstructure.DecoderConfig{
-	//    Result:   &output,
-	//}
-	//decoder, _ := mapstructure.NewDecoder(cfg)
-	//decoder.Decode(created.Configuration)
-	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-	//
-	//	"hostname": schema.StringAttribute,
-	//
-	//	"username": schema.StringAttribute,
-	//
-	//	"password": schema.StringAttribute,
-	//
-	//	"database": schema.StringAttribute,
-	//
-	//	"port": schema.Int64Attribute,
-	//
-	//	"ssl": schema.BoolAttribute,
-	//
-	//	"client_certs": schema.BoolAttribute,
-	//
-	//	"client_certificate": schema.StringAttribute,
-	//
-	//	"client_key": schema.StringAttribute,
-	//
-	//	"ca_cert": schema.StringAttribute,
-	//
-	//	"change_detection": schema.BoolAttribute,
-	//
-	//	"publication": schema.StringAttribute,
-	//
-	//	"ssh": schema.BoolAttribute,
-	//
-	//	"ssh_user": schema.StringAttribute,
-	//
-	//	"ssh_host": schema.StringAttribute,
-	//
-	//	"ssh_port": schema.Int64Attribute,
-	//
-	//	"ssh_private_key": schema.StringAttribute,
-	//
-	//}, output)
-	//if diags.HasError() {
-	//	resp.Diagnostics.Append(diags...)
-	//	return
-	//}
+	var output polytomic.PostgresqlConfiguration
+	cfg := &mapstructure.DecoderConfig{
+		Result: &output,
+	}
+	decoder, _ := mapstructure.NewDecoder(cfg)
+	decoder.Decode(created.Configuration)
+	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"hostname":           types.StringType,
+		"username":           types.StringType,
+		"password":           types.StringType,
+		"database":           types.StringType,
+		"port":               types.NumberType,
+		"ssl":                types.BoolType,
+		"client_certs":       types.BoolType,
+		"client_certificate": types.StringType,
+		"client_key":         types.StringType,
+		"ca_cert":            types.StringType,
+		"change_detection":   types.BoolType,
+		"publication":        types.StringType,
+		"ssh":                types.BoolType,
+		"ssh_user":           types.StringType,
+		"ssh_host":           types.StringType,
+		"ssh_port":           types.NumberType,
+		"ssh_private_key":    types.StringType,
+	}, output)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
 
 	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Postgresql", "id": created.ID})
 
@@ -295,53 +279,35 @@ func (r *PostgresqlConnectionResource) Read(ctx context.Context, req resource.Re
 	data.Name = types.StringValue(connection.Name)
 	data.Organization = types.StringValue(connection.OrganizationId)
 
-	//var output polytomic.PostgresqlConfiguration
-	//cfg := &mapstructure.DecoderConfig{
-	//    Result:   &output,
-	//}
-	//decoder, _ := mapstructure.NewDecoder(cfg)
-	//decoder.Decode(connection.Configuration)
-	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-	//
-	//	"hostname": schema.StringAttribute,
-	//
-	//	"username": schema.StringAttribute,
-	//
-	//	"password": schema.StringAttribute,
-	//
-	//	"database": schema.StringAttribute,
-	//
-	//	"port": schema.Int64Attribute,
-	//
-	//	"ssl": schema.BoolAttribute,
-	//
-	//	"client_certs": schema.BoolAttribute,
-	//
-	//	"client_certificate": schema.StringAttribute,
-	//
-	//	"client_key": schema.StringAttribute,
-	//
-	//	"ca_cert": schema.StringAttribute,
-	//
-	//	"change_detection": schema.BoolAttribute,
-	//
-	//	"publication": schema.StringAttribute,
-	//
-	//	"ssh": schema.BoolAttribute,
-	//
-	//	"ssh_user": schema.StringAttribute,
-	//
-	//	"ssh_host": schema.StringAttribute,
-	//
-	//	"ssh_port": schema.Int64Attribute,
-	//
-	//	"ssh_private_key": schema.StringAttribute,
-	//
-	//}, output)
-	//if diags.HasError() {
-	//	resp.Diagnostics.Append(diags...)
-	//	return
-	//}
+	var output polytomic.PostgresqlConfiguration
+	cfg := &mapstructure.DecoderConfig{
+		Result: &output,
+	}
+	decoder, _ := mapstructure.NewDecoder(cfg)
+	decoder.Decode(connection.Configuration)
+	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"hostname":           types.StringType,
+		"username":           types.StringType,
+		"password":           types.StringType,
+		"database":           types.StringType,
+		"port":               types.NumberType,
+		"ssl":                types.BoolType,
+		"client_certs":       types.BoolType,
+		"client_certificate": types.StringType,
+		"client_key":         types.StringType,
+		"ca_cert":            types.StringType,
+		"change_detection":   types.BoolType,
+		"publication":        types.StringType,
+		"ssh":                types.BoolType,
+		"ssh_user":           types.StringType,
+		"ssh_host":           types.StringType,
+		"ssh_port":           types.NumberType,
+		"ssh_private_key":    types.StringType,
+	}, output)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -394,53 +360,35 @@ func (r *PostgresqlConnectionResource) Update(ctx context.Context, req resource.
 	data.Name = types.StringValue(updated.Name)
 	data.Organization = types.StringValue(updated.OrganizationId)
 
-	//var output polytomic.PostgresqlConfiguration
-	//cfg := &mapstructure.DecoderConfig{
-	//    Result:   &output,
-	//}
-	//decoder, _ := mapstructure.NewDecoder(cfg)
-	//decoder.Decode(updated.Configuration)
-	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-	//
-	//	"hostname": schema.StringAttribute,
-	//
-	//	"username": schema.StringAttribute,
-	//
-	//	"password": schema.StringAttribute,
-	//
-	//	"database": schema.StringAttribute,
-	//
-	//	"port": schema.Int64Attribute,
-	//
-	//	"ssl": schema.BoolAttribute,
-	//
-	//	"client_certs": schema.BoolAttribute,
-	//
-	//	"client_certificate": schema.StringAttribute,
-	//
-	//	"client_key": schema.StringAttribute,
-	//
-	//	"ca_cert": schema.StringAttribute,
-	//
-	//	"change_detection": schema.BoolAttribute,
-	//
-	//	"publication": schema.StringAttribute,
-	//
-	//	"ssh": schema.BoolAttribute,
-	//
-	//	"ssh_user": schema.StringAttribute,
-	//
-	//	"ssh_host": schema.StringAttribute,
-	//
-	//	"ssh_port": schema.Int64Attribute,
-	//
-	//	"ssh_private_key": schema.StringAttribute,
-	//
-	//}, output)
-	//if diags.HasError() {
-	//	resp.Diagnostics.Append(diags...)
-	//	return
-	//}
+	var output polytomic.PostgresqlConfiguration
+	cfg := &mapstructure.DecoderConfig{
+		Result: &output,
+	}
+	decoder, _ := mapstructure.NewDecoder(cfg)
+	decoder.Decode(updated.Configuration)
+	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"hostname":           types.StringType,
+		"username":           types.StringType,
+		"password":           types.StringType,
+		"database":           types.StringType,
+		"port":               types.NumberType,
+		"ssl":                types.BoolType,
+		"client_certs":       types.BoolType,
+		"client_certificate": types.StringType,
+		"client_key":         types.StringType,
+		"ca_cert":            types.StringType,
+		"change_detection":   types.BoolType,
+		"publication":        types.StringType,
+		"ssh":                types.BoolType,
+		"ssh_user":           types.StringType,
+		"ssh_host":           types.StringType,
+		"ssh_port":           types.NumberType,
+		"ssh_private_key":    types.StringType,
+	}, output)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)

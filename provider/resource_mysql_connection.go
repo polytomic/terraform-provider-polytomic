@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -18,6 +19,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/polytomic-go"
 )
 
@@ -172,41 +174,29 @@ func (r *MysqlConnectionResource) Create(ctx context.Context, req resource.Creat
 	data.Name = types.StringValue(created.Name)
 	data.Organization = types.StringValue(created.OrganizationId)
 
-	//var output polytomic.MysqlConnectionConfiguration
-	//cfg := &mapstructure.DecoderConfig{
-	//    Result:   &output,
-	//}
-	//decoder, _ := mapstructure.NewDecoder(cfg)
-	//decoder.Decode(created.Configuration)
-	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-	//
-	//	"hostname": schema.StringAttribute,
-	//
-	//	"account": schema.StringAttribute,
-	//
-	//	"passwd": schema.StringAttribute,
-	//
-	//	"dbname": schema.StringAttribute,
-	//
-	//	"port": schema.Int64Attribute,
-	//
-	//	"ssh": schema.BoolAttribute,
-	//
-	//	"ssh_user": schema.StringAttribute,
-	//
-	//	"ssh_host": schema.StringAttribute,
-	//
-	//	"ssh_port": schema.Int64Attribute,
-	//
-	//	"ssh_private_key": schema.StringAttribute,
-	//
-	//	"change_detection": schema.BoolAttribute,
-	//
-	//}, output)
-	//if diags.HasError() {
-	//	resp.Diagnostics.Append(diags...)
-	//	return
-	//}
+	var output polytomic.MysqlConnectionConfiguration
+	cfg := &mapstructure.DecoderConfig{
+		Result: &output,
+	}
+	decoder, _ := mapstructure.NewDecoder(cfg)
+	decoder.Decode(created.Configuration)
+	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"hostname":         types.StringType,
+		"account":          types.StringType,
+		"passwd":           types.StringType,
+		"dbname":           types.StringType,
+		"port":             types.NumberType,
+		"ssh":              types.BoolType,
+		"ssh_user":         types.StringType,
+		"ssh_host":         types.StringType,
+		"ssh_port":         types.NumberType,
+		"ssh_private_key":  types.StringType,
+		"change_detection": types.BoolType,
+	}, output)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
 
 	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Mysql", "id": created.ID})
 
@@ -241,41 +231,29 @@ func (r *MysqlConnectionResource) Read(ctx context.Context, req resource.ReadReq
 	data.Name = types.StringValue(connection.Name)
 	data.Organization = types.StringValue(connection.OrganizationId)
 
-	//var output polytomic.MysqlConnectionConfiguration
-	//cfg := &mapstructure.DecoderConfig{
-	//    Result:   &output,
-	//}
-	//decoder, _ := mapstructure.NewDecoder(cfg)
-	//decoder.Decode(connection.Configuration)
-	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-	//
-	//	"hostname": schema.StringAttribute,
-	//
-	//	"account": schema.StringAttribute,
-	//
-	//	"passwd": schema.StringAttribute,
-	//
-	//	"dbname": schema.StringAttribute,
-	//
-	//	"port": schema.Int64Attribute,
-	//
-	//	"ssh": schema.BoolAttribute,
-	//
-	//	"ssh_user": schema.StringAttribute,
-	//
-	//	"ssh_host": schema.StringAttribute,
-	//
-	//	"ssh_port": schema.Int64Attribute,
-	//
-	//	"ssh_private_key": schema.StringAttribute,
-	//
-	//	"change_detection": schema.BoolAttribute,
-	//
-	//}, output)
-	//if diags.HasError() {
-	//	resp.Diagnostics.Append(diags...)
-	//	return
-	//}
+	var output polytomic.MysqlConnectionConfiguration
+	cfg := &mapstructure.DecoderConfig{
+		Result: &output,
+	}
+	decoder, _ := mapstructure.NewDecoder(cfg)
+	decoder.Decode(connection.Configuration)
+	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"hostname":         types.StringType,
+		"account":          types.StringType,
+		"passwd":           types.StringType,
+		"dbname":           types.StringType,
+		"port":             types.NumberType,
+		"ssh":              types.BoolType,
+		"ssh_user":         types.StringType,
+		"ssh_host":         types.StringType,
+		"ssh_port":         types.NumberType,
+		"ssh_private_key":  types.StringType,
+		"change_detection": types.BoolType,
+	}, output)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -322,41 +300,29 @@ func (r *MysqlConnectionResource) Update(ctx context.Context, req resource.Updat
 	data.Name = types.StringValue(updated.Name)
 	data.Organization = types.StringValue(updated.OrganizationId)
 
-	//var output polytomic.MysqlConnectionConfiguration
-	//cfg := &mapstructure.DecoderConfig{
-	//    Result:   &output,
-	//}
-	//decoder, _ := mapstructure.NewDecoder(cfg)
-	//decoder.Decode(updated.Configuration)
-	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-	//
-	//	"hostname": schema.StringAttribute,
-	//
-	//	"account": schema.StringAttribute,
-	//
-	//	"passwd": schema.StringAttribute,
-	//
-	//	"dbname": schema.StringAttribute,
-	//
-	//	"port": schema.Int64Attribute,
-	//
-	//	"ssh": schema.BoolAttribute,
-	//
-	//	"ssh_user": schema.StringAttribute,
-	//
-	//	"ssh_host": schema.StringAttribute,
-	//
-	//	"ssh_port": schema.Int64Attribute,
-	//
-	//	"ssh_private_key": schema.StringAttribute,
-	//
-	//	"change_detection": schema.BoolAttribute,
-	//
-	//}, output)
-	//if diags.HasError() {
-	//	resp.Diagnostics.Append(diags...)
-	//	return
-	//}
+	var output polytomic.MysqlConnectionConfiguration
+	cfg := &mapstructure.DecoderConfig{
+		Result: &output,
+	}
+	decoder, _ := mapstructure.NewDecoder(cfg)
+	decoder.Decode(updated.Configuration)
+	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"hostname":         types.StringType,
+		"account":          types.StringType,
+		"passwd":           types.StringType,
+		"dbname":           types.StringType,
+		"port":             types.NumberType,
+		"ssh":              types.BoolType,
+		"ssh_user":         types.StringType,
+		"ssh_host":         types.StringType,
+		"ssh_port":         types.NumberType,
+		"ssh_private_key":  types.StringType,
+		"change_detection": types.BoolType,
+	}, output)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)

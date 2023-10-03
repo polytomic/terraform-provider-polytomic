@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -18,6 +19,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/polytomic-go"
 )
 
@@ -130,29 +132,23 @@ func (r *CloudsqlConnectionResource) Create(ctx context.Context, req resource.Cr
 	data.Name = types.StringValue(created.Name)
 	data.Organization = types.StringValue(created.OrganizationId)
 
-	//var output polytomic.CloudSQLConnectionConfiguration
-	//cfg := &mapstructure.DecoderConfig{
-	//    Result:   &output,
-	//}
-	//decoder, _ := mapstructure.NewDecoder(cfg)
-	//decoder.Decode(created.Configuration)
-	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-	//
-	//	"connection_name": schema.StringAttribute,
-	//
-	//	"database": schema.StringAttribute,
-	//
-	//	"username": schema.StringAttribute,
-	//
-	//	"password": schema.StringAttribute,
-	//
-	//	"credentials": schema.StringAttribute,
-	//
-	//}, output)
-	//if diags.HasError() {
-	//	resp.Diagnostics.Append(diags...)
-	//	return
-	//}
+	var output polytomic.CloudSQLConnectionConfiguration
+	cfg := &mapstructure.DecoderConfig{
+		Result: &output,
+	}
+	decoder, _ := mapstructure.NewDecoder(cfg)
+	decoder.Decode(created.Configuration)
+	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"connection_name": types.StringType,
+		"database":        types.StringType,
+		"username":        types.StringType,
+		"password":        types.StringType,
+		"credentials":     types.StringType,
+	}, output)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
 
 	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Cloudsql", "id": created.ID})
 
@@ -187,29 +183,23 @@ func (r *CloudsqlConnectionResource) Read(ctx context.Context, req resource.Read
 	data.Name = types.StringValue(connection.Name)
 	data.Organization = types.StringValue(connection.OrganizationId)
 
-	//var output polytomic.CloudSQLConnectionConfiguration
-	//cfg := &mapstructure.DecoderConfig{
-	//    Result:   &output,
-	//}
-	//decoder, _ := mapstructure.NewDecoder(cfg)
-	//decoder.Decode(connection.Configuration)
-	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-	//
-	//	"connection_name": schema.StringAttribute,
-	//
-	//	"database": schema.StringAttribute,
-	//
-	//	"username": schema.StringAttribute,
-	//
-	//	"password": schema.StringAttribute,
-	//
-	//	"credentials": schema.StringAttribute,
-	//
-	//}, output)
-	//if diags.HasError() {
-	//	resp.Diagnostics.Append(diags...)
-	//	return
-	//}
+	var output polytomic.CloudSQLConnectionConfiguration
+	cfg := &mapstructure.DecoderConfig{
+		Result: &output,
+	}
+	decoder, _ := mapstructure.NewDecoder(cfg)
+	decoder.Decode(connection.Configuration)
+	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"connection_name": types.StringType,
+		"database":        types.StringType,
+		"username":        types.StringType,
+		"password":        types.StringType,
+		"credentials":     types.StringType,
+	}, output)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -250,29 +240,23 @@ func (r *CloudsqlConnectionResource) Update(ctx context.Context, req resource.Up
 	data.Name = types.StringValue(updated.Name)
 	data.Organization = types.StringValue(updated.OrganizationId)
 
-	//var output polytomic.CloudSQLConnectionConfiguration
-	//cfg := &mapstructure.DecoderConfig{
-	//    Result:   &output,
-	//}
-	//decoder, _ := mapstructure.NewDecoder(cfg)
-	//decoder.Decode(updated.Configuration)
-	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-	//
-	//	"connection_name": schema.StringAttribute,
-	//
-	//	"database": schema.StringAttribute,
-	//
-	//	"username": schema.StringAttribute,
-	//
-	//	"password": schema.StringAttribute,
-	//
-	//	"credentials": schema.StringAttribute,
-	//
-	//}, output)
-	//if diags.HasError() {
-	//	resp.Diagnostics.Append(diags...)
-	//	return
-	//}
+	var output polytomic.CloudSQLConnectionConfiguration
+	cfg := &mapstructure.DecoderConfig{
+		Result: &output,
+	}
+	decoder, _ := mapstructure.NewDecoder(cfg)
+	decoder.Decode(updated.Configuration)
+	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"connection_name": types.StringType,
+		"database":        types.StringType,
+		"username":        types.StringType,
+		"password":        types.StringType,
+		"credentials":     types.StringType,
+	}, output)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)

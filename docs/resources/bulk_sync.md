@@ -44,7 +44,6 @@ resource "polytomic_bulk_sync" "sync" {
 ### Required
 
 - `active` (Boolean)
-- `dest_configuration` (Map of String)
 - `dest_connection_id` (String)
 - `discover` (Boolean)
 - `mode` (String)
@@ -54,6 +53,7 @@ resource "polytomic_bulk_sync" "sync" {
 
 ### Optional
 
+- `dest_configuration` (Map of String)
 - `organization` (String)
 - `policies` (Set of String)
 - `schemas` (Set of String)

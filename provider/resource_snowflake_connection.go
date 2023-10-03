@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -18,6 +19,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/polytomic-go"
 )
 
@@ -137,31 +139,24 @@ func (r *SnowflakeConnectionResource) Create(ctx context.Context, req resource.C
 	data.Name = types.StringValue(created.Name)
 	data.Organization = types.StringValue(created.OrganizationId)
 
-	//var output polytomic.SnowflakeConfiguration
-	//cfg := &mapstructure.DecoderConfig{
-	//    Result:   &output,
-	//}
-	//decoder, _ := mapstructure.NewDecoder(cfg)
-	//decoder.Decode(created.Configuration)
-	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-	//
-	//	"account": schema.StringAttribute,
-	//
-	//	"username": schema.StringAttribute,
-	//
-	//	"password": schema.StringAttribute,
-	//
-	//	"dbname": schema.StringAttribute,
-	//
-	//	"warehouse": schema.StringAttribute,
-	//
-	//	"params": schema.StringAttribute,
-	//
-	//}, output)
-	//if diags.HasError() {
-	//	resp.Diagnostics.Append(diags...)
-	//	return
-	//}
+	var output polytomic.SnowflakeConfiguration
+	cfg := &mapstructure.DecoderConfig{
+		Result: &output,
+	}
+	decoder, _ := mapstructure.NewDecoder(cfg)
+	decoder.Decode(created.Configuration)
+	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"account":   types.StringType,
+		"username":  types.StringType,
+		"password":  types.StringType,
+		"dbname":    types.StringType,
+		"warehouse": types.StringType,
+		"params":    types.StringType,
+	}, output)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
 
 	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Snowflake", "id": created.ID})
 
@@ -196,31 +191,24 @@ func (r *SnowflakeConnectionResource) Read(ctx context.Context, req resource.Rea
 	data.Name = types.StringValue(connection.Name)
 	data.Organization = types.StringValue(connection.OrganizationId)
 
-	//var output polytomic.SnowflakeConfiguration
-	//cfg := &mapstructure.DecoderConfig{
-	//    Result:   &output,
-	//}
-	//decoder, _ := mapstructure.NewDecoder(cfg)
-	//decoder.Decode(connection.Configuration)
-	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-	//
-	//	"account": schema.StringAttribute,
-	//
-	//	"username": schema.StringAttribute,
-	//
-	//	"password": schema.StringAttribute,
-	//
-	//	"dbname": schema.StringAttribute,
-	//
-	//	"warehouse": schema.StringAttribute,
-	//
-	//	"params": schema.StringAttribute,
-	//
-	//}, output)
-	//if diags.HasError() {
-	//	resp.Diagnostics.Append(diags...)
-	//	return
-	//}
+	var output polytomic.SnowflakeConfiguration
+	cfg := &mapstructure.DecoderConfig{
+		Result: &output,
+	}
+	decoder, _ := mapstructure.NewDecoder(cfg)
+	decoder.Decode(connection.Configuration)
+	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"account":   types.StringType,
+		"username":  types.StringType,
+		"password":  types.StringType,
+		"dbname":    types.StringType,
+		"warehouse": types.StringType,
+		"params":    types.StringType,
+	}, output)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -262,31 +250,24 @@ func (r *SnowflakeConnectionResource) Update(ctx context.Context, req resource.U
 	data.Name = types.StringValue(updated.Name)
 	data.Organization = types.StringValue(updated.OrganizationId)
 
-	//var output polytomic.SnowflakeConfiguration
-	//cfg := &mapstructure.DecoderConfig{
-	//    Result:   &output,
-	//}
-	//decoder, _ := mapstructure.NewDecoder(cfg)
-	//decoder.Decode(updated.Configuration)
-	//data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-	//
-	//	"account": schema.StringAttribute,
-	//
-	//	"username": schema.StringAttribute,
-	//
-	//	"password": schema.StringAttribute,
-	//
-	//	"dbname": schema.StringAttribute,
-	//
-	//	"warehouse": schema.StringAttribute,
-	//
-	//	"params": schema.StringAttribute,
-	//
-	//}, output)
-	//if diags.HasError() {
-	//	resp.Diagnostics.Append(diags...)
-	//	return
-	//}
+	var output polytomic.SnowflakeConfiguration
+	cfg := &mapstructure.DecoderConfig{
+		Result: &output,
+	}
+	decoder, _ := mapstructure.NewDecoder(cfg)
+	decoder.Decode(updated.Configuration)
+	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"account":   types.StringType,
+		"username":  types.StringType,
+		"password":  types.StringType,
+		"dbname":    types.StringType,
+		"warehouse": types.StringType,
+		"params":    types.StringType,
+	}, output)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
