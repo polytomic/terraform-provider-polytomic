@@ -54,6 +54,7 @@ Required:
 Optional:
 
 - `auth` (Attributes) (see [below for nested schema](#nestedatt--configuration--auth))
+- `body` (String)
 - `headers` (Set of Object) (see [below for nested schema](#nestedatt--configuration--headers))
 - `healthcheck` (String)
 - `parameters` (Set of Object) (see [below for nested schema](#nestedatt--configuration--parameters))
