@@ -13,10 +13,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/polytomic-go"
 )
 
@@ -52,6 +54,10 @@ func (t *APIConnectionResource) Schema(ctx context.Context, req resource.SchemaR
 							},
 						},
 						Optional: true,
+						Computed: true,
+						PlanModifiers: []planmodifier.Set{
+							setplanmodifier.UseStateForUnknown(),
+						},
 					},
 					"parameters": schema.SetAttribute{
 						MarkdownDescription: "",
@@ -62,10 +68,18 @@ func (t *APIConnectionResource) Schema(ctx context.Context, req resource.SchemaR
 							},
 						},
 						Optional: true,
+						Computed: true,
+						PlanModifiers: []planmodifier.Set{
+							setplanmodifier.UseStateForUnknown(),
+						},
 					},
 					"healthcheck": schema.StringAttribute{
 						MarkdownDescription: "",
 						Optional:            true,
+					},
+					"body": schema.StringAttribute{
+						Optional: true,
+						Computed: true,
 					},
 					"auth": schema.SingleNestedAttribute{
 						Attributes: map[string]schema.Attribute{
@@ -193,6 +207,70 @@ func (r *APIConnectionResource) Create(ctx context.Context, req resource.CreateR
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
 		return
 	}
+
+	var output polytomic.APIConnectionConfiguration
+	cfg := &mapstructure.DecoderConfig{
+		Result: &output,
+	}
+	decoder, _ := mapstructure.NewDecoder(cfg)
+	decoder.Decode(created.Configuration)
+	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"url": types.StringType,
+		"headers": types.SetType{
+			ElemType: types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"name":  types.StringType,
+					"value": types.StringType,
+				},
+			},
+		},
+		"parameters": types.SetType{
+			ElemType: types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"name":  types.StringType,
+					"value": types.StringType,
+				},
+			},
+		},
+		"body":        types.StringType,
+		"healthcheck": types.StringType,
+		"auth": types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				"basic": types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						"username": types.StringType,
+						"password": types.StringType,
+					},
+				},
+				"header": types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						"name":  types.StringType,
+						"value": types.StringType,
+					},
+				},
+				"oauth": types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						"client_id":      types.StringType,
+						"client_secret":  types.StringType,
+						"token_endpoint": types.StringType,
+						"extra_form_data": types.SetType{
+							ElemType: types.ObjectType{
+								AttrTypes: map[string]attr.Type{
+									"name":  types.StringType,
+									"value": types.StringType,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}, output)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
 	data.Id = types.StringValue(created.ID)
 	data.Name = types.StringValue(created.Name)
 	data.Organization = types.StringValue(created.OrganizationId)
@@ -232,6 +310,69 @@ func (r *APIConnectionResource) Read(ctx context.Context, req resource.ReadReque
 				return
 			}
 		}
+	}
+
+	var output polytomic.APIConnectionConfiguration
+	cfg := &mapstructure.DecoderConfig{
+		Result: &output,
+	}
+	decoder, _ := mapstructure.NewDecoder(cfg)
+	decoder.Decode(connection.Configuration)
+	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"url": types.StringType,
+		"headers": types.SetType{
+			ElemType: types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"name":  types.StringType,
+					"value": types.StringType,
+				},
+			},
+		},
+		"parameters": types.SetType{
+			ElemType: types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"name":  types.StringType,
+					"value": types.StringType,
+				},
+			},
+		},
+		"body":        types.StringType,
+		"healthcheck": types.StringType,
+		"auth": types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				"basic": types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						"username": types.StringType,
+						"password": types.StringType,
+					},
+				},
+				"header": types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						"name":  types.StringType,
+						"value": types.StringType,
+					},
+				},
+				"oauth": types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						"client_id":      types.StringType,
+						"client_secret":  types.StringType,
+						"token_endpoint": types.StringType,
+						"extra_form_data": types.SetType{
+							ElemType: types.ObjectType{
+								AttrTypes: map[string]attr.Type{
+									"name":  types.StringType,
+									"value": types.StringType,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}, output)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
 	}
 
 	data.Id = types.StringValue(connection.ID)
@@ -294,6 +435,69 @@ func (r *APIConnectionResource) Update(ctx context.Context, req resource.UpdateR
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))
+		return
+	}
+
+	var output polytomic.APIConnectionConfiguration
+	cfg := &mapstructure.DecoderConfig{
+		Result: &output,
+	}
+	decoder, _ := mapstructure.NewDecoder(cfg)
+	decoder.Decode(updated.Configuration)
+	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"url": types.StringType,
+		"headers": types.SetType{
+			ElemType: types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"name":  types.StringType,
+					"value": types.StringType,
+				},
+			},
+		},
+		"parameters": types.SetType{
+			ElemType: types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"name":  types.StringType,
+					"value": types.StringType,
+				},
+			},
+		},
+		"body":        types.StringType,
+		"healthcheck": types.StringType,
+		"auth": types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				"basic": types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						"username": types.StringType,
+						"password": types.StringType,
+					},
+				},
+				"header": types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						"name":  types.StringType,
+						"value": types.StringType,
+					},
+				},
+				"oauth": types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						"client_id":      types.StringType,
+						"client_secret":  types.StringType,
+						"token_endpoint": types.StringType,
+						"extra_form_data": types.SetType{
+							ElemType: types.ObjectType{
+								AttrTypes: map[string]attr.Type{
+									"name":  types.StringType,
+									"value": types.StringType,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}, output)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
 		return
 	}
 
