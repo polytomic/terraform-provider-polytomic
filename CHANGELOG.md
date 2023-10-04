@@ -1,3 +1,6 @@
+## 0.3.29 (4 Oct 2023)
+* State enhancements api connection resources
+
 ## 0.3.28 (4 Oct 2023)
 * State enhancements for bulk syncs and connection resources
 
