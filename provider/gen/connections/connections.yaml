@@ -937,6 +937,10 @@ connections:
         type: string
         optional: true
         example: us-east-1
+      - name: AwsUser
+        type: string
+        computed: true
+        example: my-user
   - connection: asana
     name: Asana
     type: polytomic.AsanaConnectionType

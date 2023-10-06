@@ -51,6 +51,7 @@ func (d *ZendeskConnectionDataSource) Schema(ctx context.Context, req datasource
 						MarkdownDescription: "",
 						Required:            true,
 						Optional:            false,
+						Computed:            false,
 						Sensitive:           false,
 					},
 				},

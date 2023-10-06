@@ -45,6 +45,7 @@ func (t *LobConnectionResource) Schema(ctx context.Context, req resource.SchemaR
 						MarkdownDescription: "",
 						Required:            true,
 						Optional:            false,
+						Computed:            false,
 						Sensitive:           true,
 					},
 				},

@@ -44,6 +44,7 @@ resource "polytomic_sync" "sync" {
 
 ### Required
 
+- `active` (Boolean)
 - `fields` (Attributes Set) (see [below for nested schema](#nestedatt--fields))
 - `mode` (String)
 - `name` (String)
@@ -52,7 +53,6 @@ resource "polytomic_sync" "sync" {
 
 ### Optional
 
-- `active` (Boolean)
 - `filter_logic` (String)
 - `filters` (Attributes Set) (see [below for nested schema](#nestedatt--filters))
 - `identity` (Attributes) (see [below for nested schema](#nestedatt--identity))
@@ -151,12 +151,12 @@ Optional:
 
 Required:
 
+- `function` (String)
 - `source` (Attributes) (see [below for nested schema](#nestedatt--identity--source))
 - `target` (String)
 
 Optional:
 
-- `function` (String)
 - `new_field` (Boolean)
 - `remote_field_type_id` (String)
 

@@ -51,6 +51,7 @@ func (d *CosmosdbConnectionDataSource) Schema(ctx context.Context, req datasourc
 						MarkdownDescription: "",
 						Required:            true,
 						Optional:            false,
+						Computed:            false,
 						Sensitive:           false,
 					},
 				},

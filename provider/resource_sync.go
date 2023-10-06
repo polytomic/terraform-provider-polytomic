@@ -40,6 +40,9 @@ func (r *syncResource) Schema(ctx context.Context, req resource.SchemaRequest, r
 				MarkdownDescription: "",
 				Optional:            true,
 				Computed:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"name": schema.StringAttribute{
 				MarkdownDescription: "",
@@ -66,6 +69,9 @@ func (r *syncResource) Schema(ctx context.Context, req resource.SchemaRequest, r
 						MarkdownDescription: "",
 						Optional:            true,
 						Computed:            true,
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.UseStateForUnknown(),
+						},
 					},
 					"new_name": schema.StringAttribute{
 						MarkdownDescription: "",
@@ -80,8 +86,7 @@ func (r *syncResource) Schema(ctx context.Context, req resource.SchemaRequest, r
 			},
 			"active": schema.BoolAttribute{
 				MarkdownDescription: "",
-				Optional:            true,
-				Computed:            true,
+				Required:            true,
 			},
 			"mode": schema.StringAttribute{
 				MarkdownDescription: "",
@@ -233,7 +238,6 @@ func (r *syncResource) Schema(ctx context.Context, req resource.SchemaRequest, r
 					"hour": schema.StringAttribute{
 						MarkdownDescription: "",
 						Optional:            true,
-						Computed:            true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
@@ -241,14 +245,12 @@ func (r *syncResource) Schema(ctx context.Context, req resource.SchemaRequest, r
 					"minute": schema.StringAttribute{
 						MarkdownDescription: "",
 						Optional:            true,
-						Computed:            true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
 					},
 					"month": schema.StringAttribute{
 						Optional: true,
-						Computed: true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
@@ -256,7 +258,6 @@ func (r *syncResource) Schema(ctx context.Context, req resource.SchemaRequest, r
 					"day_of_month": schema.StringAttribute{
 						MarkdownDescription: "",
 						Optional:            true,
-						Computed:            true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
@@ -305,8 +306,7 @@ func (r *syncResource) Schema(ctx context.Context, req resource.SchemaRequest, r
 					},
 					"function": schema.StringAttribute{
 						MarkdownDescription: "",
-						Optional:            true,
-						Computed:            true,
+						Required:            true,
 					},
 					"remote_field_type_id": schema.StringAttribute{
 						MarkdownDescription: "",
@@ -436,16 +436,16 @@ func (r *syncResource) Create(ctx context.Context, req resource.CreateRequest, r
 		pt.SearchValues = make(map[string]interface{})
 	}
 
+	tConf := map[string]interface{}{}
 	if target.Configuration != "" {
-		var configuration map[string]interface{}
-		err := json.Unmarshal([]byte(target.Configuration), &configuration)
+		err := json.Unmarshal([]byte(target.Configuration), &tConf)
 		if err != nil {
 			resp.Diagnostics.AddError("Error unmarshalling configuration", err.Error())
 			return
 		}
-		pt.Configuration = configuration
+		pt.Configuration = tConf
 	} else {
-		pt.Configuration = make(map[string]interface{})
+		pt.Configuration = tConf
 	}
 
 	var fields []polytomic.SyncField
@@ -519,8 +519,8 @@ func (r *syncResource) Create(ctx context.Context, req resource.CreateRequest, r
 		if override.Override != nil {
 			err := json.Unmarshal([]byte(*override.Override), &ov)
 			if err != nil {
-				resp.Diagnostics.AddError("Failed to unmarshal override override", err.Error())
-				return
+				// if marshalling fails, we assume the override is a string
+				ov = *override.Override
 			}
 			o.Override = ov
 		}
@@ -591,7 +591,7 @@ func (r *syncResource) Create(ctx context.Context, req resource.CreateRequest, r
 	}
 	t.SearchValues = string(sval)
 
-	tval, err := json.Marshal(sync.Target.Configuration)
+	tval, err := json.Marshal(tConf)
 	if err != nil {
 		resp.Diagnostics.AddError("Error marshaling configuration", err.Error())
 		return
@@ -938,15 +938,19 @@ func (r *syncResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 		} else {
 			res.Value = pointer.ToString(string(val))
 		}
-		oval, err := json.Marshal(o.Override)
-		if err != nil {
-			resp.Diagnostics.AddError("Error marshaling override override", err.Error())
-			return
-		}
-		if string(oval) == "null" {
-			res.Override = nil
+		if v, ok := o.Override.(string); !ok {
+			oval, err := json.Marshal(o.Override)
+			if err != nil {
+				resp.Diagnostics.AddError("Error marshaling override override", err.Error())
+				return
+			}
+			if string(oval) == "null" {
+				res.Override = nil
+			} else {
+				res.Override = pointer.ToString(string(oval))
+			}
 		} else {
-			res.Override = pointer.ToString(string(oval))
+			res.Override = pointer.ToString(v)
 		}
 		resOverrides = append(resOverrides, res)
 	}
@@ -1049,16 +1053,16 @@ func (r *syncResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		pt.SearchValues = make(map[string]interface{})
 	}
 
+	tConf := map[string]interface{}{}
 	if target.Configuration != "" {
-		var configuration map[string]interface{}
-		err := json.Unmarshal([]byte(target.Configuration), &configuration)
+		err := json.Unmarshal([]byte(target.Configuration), &tConf)
 		if err != nil {
 			resp.Diagnostics.AddError("Error unmarshalling configuration", err.Error())
 			return
 		}
-		pt.Configuration = configuration
+		pt.Configuration = tConf
 	} else {
-		pt.Configuration = make(map[string]interface{})
+		pt.Configuration = tConf
 	}
 
 	var fields []polytomic.SyncField
@@ -1122,8 +1126,8 @@ func (r *syncResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		if override.Value != nil {
 			err := json.Unmarshal([]byte(*override.Value), &val)
 			if err != nil {
-				resp.Diagnostics.AddError("Failed to unmarshal override value", err.Error())
-				return
+				// if marshalling fails, we assume the value is a string
+				val = *override.Value
 			}
 			o.Value = val
 		}
@@ -1132,8 +1136,8 @@ func (r *syncResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		if override.Override != nil {
 			err := json.Unmarshal([]byte(*override.Override), &ov)
 			if err != nil {
-				resp.Diagnostics.AddError("Failed to unmarshal override override", err.Error())
-				return
+				// if marshalling fails, we assume the override is a string
+				ov = *override.Override
 			}
 			o.Override = ov
 		}
@@ -1200,7 +1204,7 @@ func (r *syncResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	}
 	t.SearchValues = string(sval)
 
-	tval, err := json.Marshal(sync.Target.Configuration)
+	tval, err := json.Marshal(tConf)
 	if err != nil {
 		resp.Diagnostics.AddError("Error marshalling target configuration", err.Error())
 		return
@@ -1321,16 +1325,19 @@ func (r *syncResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		} else {
 			res.Value = pointer.ToString(string(val))
 		}
-		oval, err := json.Marshal(o.Override)
-		if err != nil {
-			resp.Diagnostics.AddError("Error marshaling override override", err.Error())
-			return
-		}
-
-		if string(oval) == "null" {
-			res.Override = nil
+		if v, ok := o.Override.(string); !ok {
+			oval, err := json.Marshal(o.Override)
+			if err != nil {
+				resp.Diagnostics.AddError("Error marshaling override override", err.Error())
+				return
+			}
+			if string(oval) == "null" {
+				res.Override = nil
+			} else {
+				res.Override = pointer.ToString(string(oval))
+			}
 		} else {
-			res.Override = pointer.ToString(string(oval))
+			res.Override = pointer.ToString(v)
 		}
 		resOverrides = append(resOverrides, res)
 	}

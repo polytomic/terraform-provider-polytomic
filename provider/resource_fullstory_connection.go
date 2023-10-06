@@ -45,6 +45,7 @@ func (t *FullstoryConnectionResource) Schema(ctx context.Context, req resource.S
 						MarkdownDescription: "",
 						Required:            true,
 						Optional:            false,
+						Computed:            false,
 						Sensitive:           true,
 					},
 				},

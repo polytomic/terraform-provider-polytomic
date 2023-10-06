@@ -89,6 +89,7 @@ type Attribute struct {
 	Sensitive           bool   `yaml:"sensitive"`
 	Required            bool   `yaml:"required"`
 	Optional            bool   `yaml:"optional"`
+	Computed            bool   `yaml:"computed"`
 	Type                string `yaml:"type"`
 	Description         string `yaml:"description"`
 	Example             string `yaml:"example"`
