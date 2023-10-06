@@ -134,7 +134,6 @@ func (r *bulkSyncResource) Schema(ctx context.Context, req resource.SchemaReques
 				MarkdownDescription: "",
 				ElementType:         types.StringType,
 				Optional:            true,
-				Computed:            true,
 				// PlanModifiers: []planmodifier.Map{
 				// 	advancedKeyModifier{},
 				// 	mapplanmodifier.UseStateForUnknown(),
@@ -331,24 +330,20 @@ func (r *bulkSyncResource) Create(ctx context.Context, req resource.CreateReques
 		return
 	}
 
-	destConfRaw := make(map[string]string)
-	for k, v := range created.DestinationConfiguration {
+	destConfFinal := make(map[string]string)
+	for k, v := range destConf {
 		if k == "advanced" {
-			if _, ok := destConfigRaw[k]; !ok {
-				continue
-			}
 			advanced, err := json.Marshal(v)
 			if err != nil {
 				resp.Diagnostics.AddError("Error marshalling advanced", err.Error())
 				return
 			}
-			destConfRaw[k] = string(advanced)
+			destConfFinal[k] = string(advanced)
 		} else {
-			destConfRaw[k] = stringy(v)
+			destConfFinal[k] = stringy(v)
 		}
 	}
-
-	destConfVal, diags := types.MapValueFrom(ctx, types.StringType, destConfRaw)
+	destConfVal, diags := types.MapValueFrom(ctx, types.StringType, destConfFinal)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -462,8 +457,6 @@ func (r *bulkSyncResource) Read(ctx context.Context, req resource.ReadRequest, r
 			destConfRaw[k] = stringy(v)
 		}
 	}
-	diags.AddWarning("dest config", fmt.Sprintf("%v", destConfRaw))
-
 	destConfVal, diags := types.MapValueFrom(ctx, types.StringType, destConfRaw)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -482,7 +475,6 @@ func (r *bulkSyncResource) Read(ctx context.Context, req resource.ReadRequest, r
 	data.Schemas = schemaValue
 	data.SourceConfiguration = sourceConfVal
 	data.DestinationConfiguration = destConfVal
-	diags.AddWarning("dest config", fmt.Sprintf("%v", destConfVal))
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -641,24 +633,20 @@ func (r *bulkSyncResource) Update(ctx context.Context, req resource.UpdateReques
 		return
 	}
 
-	destConfRaw := make(map[string]string)
-	for k, v := range updated.DestinationConfiguration {
+	destConfFinal := make(map[string]string)
+	for k, v := range destConf {
 		if k == "advanced" {
-			if _, ok := destConfigRaw[k]; !ok {
-				continue
-			}
 			advanced, err := json.Marshal(v)
 			if err != nil {
 				resp.Diagnostics.AddError("Error marshalling advanced", err.Error())
 				return
 			}
-			destConfRaw[k] = string(advanced)
+			destConfFinal[k] = string(advanced)
 		} else {
-			destConfRaw[k] = stringy(v)
+			destConfFinal[k] = stringy(v)
 		}
 	}
-
-	destConfVal, diags := types.MapValueFrom(ctx, types.StringType, destConfRaw)
+	destConfVal, diags := types.MapValueFrom(ctx, types.StringType, destConfFinal)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
