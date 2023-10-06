@@ -1,3 +1,8 @@
+## 0.3.30 (6 Oct 2023)
+* General improvements to state handling
+* Make `active` attribute on sync resources required
+* Add support for read-only connection attributes
+
 ## 0.3.29 (4 Oct 2023)
 * State enhancements api connection resources
 
