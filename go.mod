@@ -1,6 +1,6 @@
 module github.com/polytomic/terraform-provider-polytomic
 
-go 1.18
+go 1.21
 
 require (
 	github.com/AlekSi/pointer v1.2.0
