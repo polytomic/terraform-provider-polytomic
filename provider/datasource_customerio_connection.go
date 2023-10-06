@@ -51,6 +51,7 @@ func (d *CustomerioConnectionDataSource) Schema(ctx context.Context, req datasou
 						MarkdownDescription: "",
 						Required:            true,
 						Optional:            false,
+						Computed:            false,
 						Sensitive:           false,
 					},
 				},

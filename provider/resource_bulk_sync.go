@@ -134,6 +134,11 @@ func (r *bulkSyncResource) Schema(ctx context.Context, req resource.SchemaReques
 				MarkdownDescription: "",
 				ElementType:         types.StringType,
 				Optional:            true,
+				Computed:            true,
+				// PlanModifiers: []planmodifier.Map{
+				// 	advancedKeyModifier{},
+				// 	mapplanmodifier.UseStateForUnknown(),
+				// },
 			},
 			"source_configuration": schema.MapAttribute{
 				MarkdownDescription: "",
@@ -329,6 +334,9 @@ func (r *bulkSyncResource) Create(ctx context.Context, req resource.CreateReques
 	destConfRaw := make(map[string]string)
 	for k, v := range created.DestinationConfiguration {
 		if k == "advanced" {
+			if _, ok := destConfigRaw[k]; !ok {
+				continue
+			}
 			advanced, err := json.Marshal(v)
 			if err != nil {
 				resp.Diagnostics.AddError("Error marshalling advanced", err.Error())
@@ -501,17 +509,78 @@ func (r *bulkSyncResource) Update(ctx context.Context, req resource.UpdateReques
 		return
 	}
 
+	var schemas []string
+	diags = data.Schemas.ElementsAs(ctx, &schemas, false)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+	sort.Strings(schemas)
+
+	var policies []string
+	diags = data.Policies.ElementsAs(ctx, &policies, false)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
+	destConfigRaw := make(map[string]string)
+	diags = data.DestinationConfiguration.ElementsAs(ctx, &destConfigRaw, false)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+	destConf := make(map[string]interface{})
+	for k, v := range destConfigRaw {
+		if k == "advanced" {
+			var advanced map[string]interface{}
+			err := json.Unmarshal([]byte(v), &advanced)
+			if err != nil {
+				resp.Diagnostics.AddError("Error unmarshalling advanced", err.Error())
+				return
+			}
+			destConf[k] = advanced
+		} else {
+			destConf[k] = v
+		}
+	}
+
+	sourceConfigRaw := make(map[string]string)
+	diags = data.SourceConfiguration.ElementsAs(ctx, &sourceConfigRaw, false)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+	sourceConf := make(map[string]interface{})
+	for k, v := range sourceConfigRaw {
+		if k == "advanced" {
+			var advanced map[string]interface{}
+			err := json.Unmarshal([]byte(v), &advanced)
+			if err != nil {
+				resp.Diagnostics.AddError("Error unmarshalling advanced", err.Error())
+				return
+			}
+			sourceConf[k] = v
+		} else {
+			sourceConf[k] = v
+		}
+	}
+
 	updated, err := r.client.Bulk().UpdateBulkSync(ctx,
 		data.Id.ValueString(),
 		polytomic.BulkSyncRequest{
-			OrganizationID:     data.Organization.ValueString(),
-			Name:               data.Name.ValueString(),
-			Active:             data.Active.ValueBool(),
-			Discover:           data.Discover.ValueBool(),
-			Mode:               data.Mode.ValueString(),
-			SourceConnectionID: data.SourceConnectionID.ValueString(),
-			DestConnectionID:   data.DestConnectionID.ValueString(),
-			Schedule:           schedule,
+			OrganizationID:           data.Organization.ValueString(),
+			Name:                     data.Name.ValueString(),
+			DestConnectionID:         data.DestConnectionID.ValueString(),
+			SourceConnectionID:       data.SourceConnectionID.ValueString(),
+			Mode:                     data.Mode.ValueString(),
+			Discover:                 data.Discover.ValueBool(),
+			Active:                   data.Active.ValueBool(),
+			Schemas:                  schemas,
+			Policies:                 policies,
+			Schedule:                 schedule,
+			DestinationConfiguration: destConf,
+			SourceConfiguration:      sourceConf,
 		},
 		polytomic.WithIdempotencyKey(uuid.NewString()),
 	)
@@ -521,7 +590,7 @@ func (r *bulkSyncResource) Update(ctx context.Context, req resource.UpdateReques
 	}
 
 	// Get schemas
-	var schemas []string
+	var respSchemas []string
 	schemasRes, err := r.client.Bulk().GetBulkSyncSchemas(ctx, data.Id.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error reading bulk sync schemas: %s", err))
@@ -529,7 +598,7 @@ func (r *bulkSyncResource) Update(ctx context.Context, req resource.UpdateReques
 	}
 	for _, schema := range schemasRes {
 		if schema.Enabled {
-			schemas = append(schemas, schema.ID)
+			respSchemas = append(respSchemas, schema.ID)
 		}
 	}
 
@@ -546,7 +615,7 @@ func (r *bulkSyncResource) Update(ctx context.Context, req resource.UpdateReques
 		return
 	}
 
-	schemaValue, diags := types.SetValueFrom(ctx, types.StringType, schemas)
+	schemaValue, diags := types.SetValueFrom(ctx, types.StringType, respSchemas)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -575,6 +644,9 @@ func (r *bulkSyncResource) Update(ctx context.Context, req resource.UpdateReques
 	destConfRaw := make(map[string]string)
 	for k, v := range updated.DestinationConfiguration {
 		if k == "advanced" {
+			if _, ok := destConfigRaw[k]; !ok {
+				continue
+			}
 			advanced, err := json.Marshal(v)
 			if err != nil {
 				resp.Diagnostics.AddError("Error marshalling advanced", err.Error())

@@ -47,4 +47,8 @@ Optional:
 - `s3_bucket_name` (String)
 - `s3_bucket_region` (String)
 
+Read-Only:
+
+- `aws_user` (String)
+
 

@@ -45,6 +45,7 @@ func (t *SlackConnectionResource) Schema(ctx context.Context, req resource.Schem
 						MarkdownDescription: "",
 						Required:            true,
 						Optional:            false,
+						Computed:            false,
 						Sensitive:           true,
 					},
 				},

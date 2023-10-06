@@ -57,6 +57,7 @@ func (d *{{ .Connection }}ConnectionDataSource) Schema(ctx context.Context, req 
 						MarkdownDescription: "{{ .Description }}",
 						Required:  {{ .Required }},
 						Optional:  {{ .Optional }},
+						Computed:  {{ .Computed }},
 						Sensitive: {{ .Sensitive }},
 					},
 					{{- end }}

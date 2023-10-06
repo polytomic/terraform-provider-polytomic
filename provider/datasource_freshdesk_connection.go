@@ -51,6 +51,7 @@ func (d *FreshdeskConnectionDataSource) Schema(ctx context.Context, req datasour
 						MarkdownDescription: "",
 						Required:            true,
 						Optional:            false,
+						Computed:            false,
 						Sensitive:           false,
 					},
 				},

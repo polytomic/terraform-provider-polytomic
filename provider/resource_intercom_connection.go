@@ -45,6 +45,7 @@ func (t *IntercomConnectionResource) Schema(ctx context.Context, req resource.Sc
 						MarkdownDescription: "",
 						Required:            true,
 						Optional:            false,
+						Computed:            false,
 						Sensitive:           true,
 					},
 				},

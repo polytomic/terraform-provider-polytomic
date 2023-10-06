@@ -45,6 +45,7 @@ func (t *StripeConnectionResource) Schema(ctx context.Context, req resource.Sche
 						MarkdownDescription: "",
 						Required:            true,
 						Optional:            false,
+						Computed:            false,
 						Sensitive:           true,
 					},
 				},

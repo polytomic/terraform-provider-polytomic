@@ -59,6 +59,7 @@ func (s *Syncs) GenerateTerraformFiles(ctx context.Context, writer io.Writer, re
 		body := hclFile.Body()
 		resourceBlock := body.AppendNewBlock("resource", []string{SyncResource, name})
 		resourceBlock.Body().SetAttributeValue("name", cty.StringVal(sync.Name))
+		resourceBlock.Body().SetAttributeValue("active", cty.BoolVal(sync.Active))
 		resourceBlock.Body().SetAttributeValue("mode", cty.StringVal(sync.Mode))
 		var schedule map[string]interface{}
 		err = mapstructure.Decode(sync.Schedule, &schedule)
@@ -116,7 +117,8 @@ func (s *Syncs) GenerateTerraformFiles(ctx context.Context, writer io.Writer, re
 			if err != nil {
 				return err
 			}
-			resourceBlock.Body().SetAttributeValue("overrides", typeConverter(overrides))
+			overrideTokens := wrapJSONEncode(overrides, "value")
+			resourceBlock.Body().SetAttributeRaw("overrides", overrideTokens)
 		}
 		resourceBlock.Body().SetAttributeValue("sync_all_records", cty.BoolVal(sync.SyncAllRecords))
 		body.AppendNewline()

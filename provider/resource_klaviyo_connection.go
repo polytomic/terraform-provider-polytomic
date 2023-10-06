@@ -45,6 +45,7 @@ func (t *KlaviyoConnectionResource) Schema(ctx context.Context, req resource.Sch
 						MarkdownDescription: "",
 						Required:            true,
 						Optional:            false,
+						Computed:            false,
 						Sensitive:           true,
 					},
 				},

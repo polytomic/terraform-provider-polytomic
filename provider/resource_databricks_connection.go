@@ -45,48 +45,63 @@ func (t *DatabricksConnectionResource) Schema(ctx context.Context, req resource.
 						MarkdownDescription: "",
 						Required:            true,
 						Optional:            false,
+						Computed:            false,
 						Sensitive:           false,
 					},
 					"port": schema.Int64Attribute{
 						MarkdownDescription: "",
 						Required:            true,
 						Optional:            false,
+						Computed:            false,
 						Sensitive:           false,
 					},
 					"access_token": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            true,
 						Optional:            false,
+						Computed:            false,
 						Sensitive:           true,
 					},
 					"http_path": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            true,
 						Optional:            false,
+						Computed:            false,
 						Sensitive:           false,
 					},
 					"aws_access_key_id": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
+						Computed:            false,
 						Sensitive:           false,
 					},
 					"aws_secret_access_key": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
+						Computed:            false,
 						Sensitive:           true,
 					},
 					"s3_bucket_name": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
+						Computed:            false,
 						Sensitive:           false,
 					},
 					"s3_bucket_region": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
+						Computed:            false,
+						Sensitive:           false,
+					},
+					"aws_user": schema.StringAttribute{
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            false,
+						Computed:            true,
 						Sensitive:           false,
 					},
 				},
@@ -140,6 +155,7 @@ func (r *DatabricksConnectionResource) Create(ctx context.Context, req resource.
 				AwsSecretAccessKey: data.Configuration.Attributes()["aws_secret_access_key"].(types.String).ValueString(),
 				S3BucketName:       data.Configuration.Attributes()["s3_bucket_name"].(types.String).ValueString(),
 				S3BucketRegion:     data.Configuration.Attributes()["s3_bucket_region"].(types.String).ValueString(),
+				AwsUser:            data.Configuration.Attributes()["aws_user"].(types.String).ValueString(),
 			},
 		},
 		polytomic.WithIdempotencyKey(uuid.NewString()),
@@ -168,6 +184,7 @@ func (r *DatabricksConnectionResource) Create(ctx context.Context, req resource.
 		"aws_secret_access_key": types.StringType,
 		"s3_bucket_name":        types.StringType,
 		"s3_bucket_region":      types.StringType,
+		"aws_user":              types.StringType,
 	}, output)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -222,6 +239,7 @@ func (r *DatabricksConnectionResource) Read(ctx context.Context, req resource.Re
 		"aws_secret_access_key": types.StringType,
 		"s3_bucket_name":        types.StringType,
 		"s3_bucket_region":      types.StringType,
+		"aws_user":              types.StringType,
 	}, output)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -256,6 +274,7 @@ func (r *DatabricksConnectionResource) Update(ctx context.Context, req resource.
 				AwsSecretAccessKey: data.Configuration.Attributes()["aws_secret_access_key"].(types.String).ValueString(),
 				S3BucketName:       data.Configuration.Attributes()["s3_bucket_name"].(types.String).ValueString(),
 				S3BucketRegion:     data.Configuration.Attributes()["s3_bucket_region"].(types.String).ValueString(),
+				AwsUser:            data.Configuration.Attributes()["aws_user"].(types.String).ValueString(),
 			},
 		},
 		polytomic.WithIdempotencyKey(uuid.NewString()),
@@ -285,6 +304,7 @@ func (r *DatabricksConnectionResource) Update(ctx context.Context, req resource.
 		"aws_secret_access_key": types.StringType,
 		"s3_bucket_name":        types.StringType,
 		"s3_bucket_region":      types.StringType,
+		"aws_user":              types.StringType,
 	}, output)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
