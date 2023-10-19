@@ -1,3 +1,7 @@
+## 0.3.32 (19 Oct 2023)
+* Add dittofeed, ironclad, mailercheck, tixr, and zoominfo connections
+* Security updates
+
 ## 0.3.30 (6 Oct 2023)
 * General improvements to state handling
 * Make `active` attribute on sync resources required
