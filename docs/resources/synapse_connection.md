@@ -3,12 +3,12 @@
 page_title: "polytomic_synapse_connection Resource - terraform-provider-polytomic"
 subcategory: "Connections"
 description: |-
-  Synapse Connection
+  Azure Synapse Connection
 ---
 
 # polytomic_synapse_connection (Resource)
 
-Synapse Connection
+Azure Synapse Connection
 
 ## Example Usage
 
@@ -40,7 +40,7 @@ resource "polytomic_synapse_connection" "synapse" {
 
 ### Read-Only
 
-- `id` (String) Synapse Connection identifier
+- `id` (String) Azure Synapse Connection identifier
 
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`

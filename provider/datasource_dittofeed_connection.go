@@ -18,20 +18,20 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
-var _ datasource.DataSource = &SynapseConnectionDataSource{}
+var _ datasource.DataSource = &DittofeedConnectionDataSource{}
 
 // ExampleDataSource defines the data source implementation.
-type SynapseConnectionDataSource struct {
+type DittofeedConnectionDataSource struct {
 	client *polytomic.Client
 }
 
-func (d *SynapseConnectionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_synapse_connection"
+func (d *DittofeedConnectionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_dittofeed_connection"
 }
 
-func (d *SynapseConnectionDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+func (d *DittofeedConnectionDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: ":meta:subcategory:Connections: Azure Synapse Connection",
+		MarkdownDescription: ":meta:subcategory:Connections: DittoFeed Connection",
 		Attributes: map[string]schema.Attribute{
 			"name": schema.StringAttribute{
 				MarkdownDescription: "",
@@ -47,28 +47,7 @@ func (d *SynapseConnectionDataSource) Schema(ctx context.Context, req datasource
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
-					"hostname": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
-					"username": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
-					"database": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
-					"port": schema.Int64Attribute{
+					"url": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            true,
 						Optional:            false,
@@ -86,7 +65,7 @@ func (d *SynapseConnectionDataSource) Schema(ctx context.Context, req datasource
 	}
 }
 
-func (d *SynapseConnectionDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *DittofeedConnectionDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -106,7 +85,7 @@ func (d *SynapseConnectionDataSource) Configure(ctx context.Context, req datasou
 	d.client = client
 }
 
-func (d *SynapseConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+func (d *DittofeedConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionData
 
 	// Read Terraform configuration data into the model
@@ -128,7 +107,7 @@ func (d *SynapseConnectionDataSource) Read(ctx context.Context, req datasource.R
 	data.Id = types.StringValue(connection.ID)
 	data.Name = types.StringValue(connection.Name)
 	data.Organization = types.StringValue(connection.OrganizationId)
-	var conf polytomic.SynapseConnectionConfiguration
+	var conf polytomic.DittofeedConnectionConfiguration
 	err = mapstructure.Decode(connection.Configuration, &conf)
 	if err != nil {
 		resp.Diagnostics.AddError("Error decoding connection", err.Error())
@@ -139,17 +118,8 @@ func (d *SynapseConnectionDataSource) Read(ctx context.Context, req datasource.R
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttributeTypes(ctx),
 		map[string]attr.Value{
-			"hostname": types.StringValue(
-				conf.Hostname,
-			),
-			"username": types.StringValue(
-				conf.Username,
-			),
-			"database": types.StringValue(
-				conf.Database,
-			),
-			"port": types.Int64Value(
-				int64(conf.Port),
+			"url": types.StringValue(
+				conf.URL,
 			),
 		},
 	)

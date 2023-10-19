@@ -29,7 +29,7 @@ var _ resource.ResourceWithImportState = &SynapseConnectionResource{}
 
 func (t *SynapseConnectionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: ":meta:subcategory:Connections: Synapse Connection",
+		MarkdownDescription: ":meta:subcategory:Connections: Azure Synapse Connection",
 		Attributes: map[string]schema.Attribute{
 			"organization": schema.StringAttribute{
 				MarkdownDescription: "Organization ID",
@@ -86,7 +86,7 @@ func (t *SynapseConnectionResource) Schema(ctx context.Context, req resource.Sch
 			},
 			"id": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "Synapse Connection identifier",
+				MarkdownDescription: "Azure Synapse Connection identifier",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},

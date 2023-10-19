@@ -578,7 +578,7 @@ connections:
     datasource: true
     resource: true
     attributes:
-      - name: Apikey
+      - name: APIKey
         type: string
         required: true
         sensitive: true
@@ -823,7 +823,7 @@ connections:
         sensitive: true
         example: my-api-key
   - connection: synapse
-    name: Synapse
+    name: Azure Synapse
     type: polytomic.SynapseConnectionType
     config: polytomic.SynapseConnectionConfiguration
     resource: true
@@ -1117,3 +1117,83 @@ connections:
     config: polytomic.DataliteConnectionConfiguration
     datasource: true
     attributes: []
+  - connection: dittofeed
+    name: DittoFeed
+    type: polytomic.DittofeedConnectionType
+    config: polytomic.DittofeedConnectionConfiguration
+    datasource: true
+    resource: true
+    attributes:
+    - name: URL
+      type: string
+      required: true
+      sensitive: false
+      example: https://example.dittofeed.com
+    - name: WriteKey
+      type: string
+      required: true
+      sensitive: true
+      example: my-write-key
+  - connection: ironclad
+    name: Ironclad
+    type: polytomic.IronCladConnectionType
+    config: polytomic.IronCladConnectionConfiguration
+    datasource: true
+    resource: true
+    attributes:
+    - name: APIKey
+      type: string
+      required: true
+      sensitive: true
+      example: my-api-key
+  - connection: mailercheck
+    name: MailerCheck
+    type: polytomic.MailerCheckConnectionType
+    config: polytomic.MailerCheckConnectionConfiguration
+    datasource: true
+    resource: true
+    attributes:
+    - name: APIKey
+      type: string
+      required: true
+      sensitive: true
+      example: my-api-key
+  - connection: tixr
+    name: Tixr
+    type: polytomic.TixrConnectionType
+    config: polytomic.TixrConnectionConfiguration
+    datasource: true
+    resource: true
+    attributes:
+    - name: ClientPrivateKey
+      type: string
+      required: true
+      sensitive: true
+      example: my-client-private-key
+    - name: ClientSecret
+      type: string
+      required: true
+      sensitive: true
+      example: super-secret
+  - connection: zoominfo
+    name: ZoomInfo
+    type: polytomic.ZoomInfoConnectionType
+    config: polytomic.ZoomInfoConnectionConfiguration
+    datasource: true
+    resource: true
+    attributes:
+    - name: Username
+      type: string
+      required: true
+      sensitive: false
+      example: my-username
+    - name: ClientID
+      type: string
+      required: true
+      sensitive: true
+      example: my-client-id
+    - name: PrivateKey
+      type: string
+      required: true
+      sensitive: true
+      example: my-private-key

@@ -24,12 +24,12 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
-var _ resource.Resource = &LobConnectionResource{}
-var _ resource.ResourceWithImportState = &LobConnectionResource{}
+var _ resource.Resource = &ZoominfoConnectionResource{}
+var _ resource.ResourceWithImportState = &ZoominfoConnectionResource{}
 
-func (t *LobConnectionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (t *ZoominfoConnectionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: ":meta:subcategory:Connections: Lob Connection",
+		MarkdownDescription: ":meta:subcategory:Connections: ZoomInfo Connection",
 		Attributes: map[string]schema.Attribute{
 			"organization": schema.StringAttribute{
 				MarkdownDescription: "Organization ID",
@@ -41,7 +41,21 @@ func (t *LobConnectionResource) Schema(ctx context.Context, req resource.SchemaR
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
-					"api_key": schema.StringAttribute{
+					"username": schema.StringAttribute{
+						MarkdownDescription: "",
+						Required:            true,
+						Optional:            false,
+						Computed:            false,
+						Sensitive:           false,
+					},
+					"client_id": schema.StringAttribute{
+						MarkdownDescription: "",
+						Required:            true,
+						Optional:            false,
+						Computed:            false,
+						Sensitive:           true,
+					},
+					"private_key": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            true,
 						Optional:            false,
@@ -58,7 +72,7 @@ func (t *LobConnectionResource) Schema(ctx context.Context, req resource.SchemaR
 			},
 			"id": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "Lob Connection identifier",
+				MarkdownDescription: "ZoomInfo Connection identifier",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
@@ -67,15 +81,15 @@ func (t *LobConnectionResource) Schema(ctx context.Context, req resource.SchemaR
 	}
 }
 
-func (r *LobConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_lob_connection"
+func (r *ZoominfoConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_zoominfo_connection"
 }
 
-type LobConnectionResource struct {
+type ZoominfoConnectionResource struct {
 	client *polytomic.Client
 }
 
-func (r *LobConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *ZoominfoConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data connectionData
 
 	diags := req.Config.Get(ctx, &data)
@@ -88,10 +102,12 @@ func (r *LobConnectionResource) Create(ctx context.Context, req resource.CreateR
 	created, err := r.client.Connections().Create(ctx,
 		polytomic.CreateConnectionMutation{
 			Name:           data.Name.ValueString(),
-			Type:           polytomic.LobConnectionType,
+			Type:           polytomic.ZoomInfoConnectionType,
 			OrganizationId: data.Organization.ValueString(),
-			Configuration: polytomic.LobConnectionConfiguration{
-				APIKey: data.Configuration.Attributes()["api_key"].(types.String).ValueString(),
+			Configuration: polytomic.ZoomInfoConnectionConfiguration{
+				Username:   data.Configuration.Attributes()["username"].(types.String).ValueString(),
+				ClientID:   data.Configuration.Attributes()["client_id"].(types.String).ValueString(),
+				PrivateKey: data.Configuration.Attributes()["private_key"].(types.String).ValueString(),
 			},
 		},
 		polytomic.WithIdempotencyKey(uuid.NewString()),
@@ -105,27 +121,29 @@ func (r *LobConnectionResource) Create(ctx context.Context, req resource.CreateR
 	data.Name = types.StringValue(created.Name)
 	data.Organization = types.StringValue(created.OrganizationId)
 
-	var output polytomic.LobConnectionConfiguration
+	var output polytomic.ZoomInfoConnectionConfiguration
 	cfg := &mapstructure.DecoderConfig{
 		Result: &output,
 	}
 	decoder, _ := mapstructure.NewDecoder(cfg)
 	decoder.Decode(created.Configuration)
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"api_key": types.StringType,
+		"username":    types.StringType,
+		"client_id":   types.StringType,
+		"private_key": types.StringType,
 	}, output)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Lob", "id": created.ID})
+	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Zoominfo", "id": created.ID})
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r *LobConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *ZoominfoConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data connectionData
 
 	diags := req.State.Get(ctx, &data)
@@ -152,14 +170,16 @@ func (r *LobConnectionResource) Read(ctx context.Context, req resource.ReadReque
 	data.Name = types.StringValue(connection.Name)
 	data.Organization = types.StringValue(connection.OrganizationId)
 
-	var output polytomic.LobConnectionConfiguration
+	var output polytomic.ZoomInfoConnectionConfiguration
 	cfg := &mapstructure.DecoderConfig{
 		Result: &output,
 	}
 	decoder, _ := mapstructure.NewDecoder(cfg)
 	decoder.Decode(connection.Configuration)
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"api_key": types.StringType,
+		"username":    types.StringType,
+		"client_id":   types.StringType,
+		"private_key": types.StringType,
 	}, output)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -170,7 +190,7 @@ func (r *LobConnectionResource) Read(ctx context.Context, req resource.ReadReque
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r *LobConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *ZoominfoConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var data connectionData
 
 	diags := req.Plan.Get(ctx, &data)
@@ -185,8 +205,10 @@ func (r *LobConnectionResource) Update(ctx context.Context, req resource.UpdateR
 		polytomic.UpdateConnectionMutation{
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueString(),
-			Configuration: polytomic.LobConnectionConfiguration{
-				APIKey: data.Configuration.Attributes()["api_key"].(types.String).ValueString(),
+			Configuration: polytomic.ZoomInfoConnectionConfiguration{
+				Username:   data.Configuration.Attributes()["username"].(types.String).ValueString(),
+				ClientID:   data.Configuration.Attributes()["client_id"].(types.String).ValueString(),
+				PrivateKey: data.Configuration.Attributes()["private_key"].(types.String).ValueString(),
 			},
 		},
 		polytomic.WithIdempotencyKey(uuid.NewString()),
@@ -201,14 +223,16 @@ func (r *LobConnectionResource) Update(ctx context.Context, req resource.UpdateR
 	data.Name = types.StringValue(updated.Name)
 	data.Organization = types.StringValue(updated.OrganizationId)
 
-	var output polytomic.LobConnectionConfiguration
+	var output polytomic.ZoomInfoConnectionConfiguration
 	cfg := &mapstructure.DecoderConfig{
 		Result: &output,
 	}
 	decoder, _ := mapstructure.NewDecoder(cfg)
 	decoder.Decode(updated.Configuration)
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"api_key": types.StringType,
+		"username":    types.StringType,
+		"client_id":   types.StringType,
+		"private_key": types.StringType,
 	}, output)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -219,7 +243,7 @@ func (r *LobConnectionResource) Update(ctx context.Context, req resource.UpdateR
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r *LobConnectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *ZoominfoConnectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var data connectionData
 
 	diags := req.State.Get(ctx, &data)
@@ -270,11 +294,11 @@ func (r *LobConnectionResource) Delete(ctx context.Context, req resource.DeleteR
 
 }
 
-func (r *LobConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *ZoominfoConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
 
-func (r *LobConnectionResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *ZoominfoConnectionResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
