@@ -45,7 +45,7 @@ func (t *{{ .Connection }}ConnectionResource) Schema(ctx context.Context, req re
 						Optional:  {{ .Optional }},
 						Computed:  {{ .Computed }},
 						Sensitive: {{ .Sensitive }},
-						{{ if .Default }}
+						{{ if .Default -}}
 						Default: {{ .Default }},
 						{{ end }}
 					},

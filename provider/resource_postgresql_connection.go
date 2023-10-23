@@ -15,7 +15,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -96,6 +98,7 @@ func (t *PostgresqlConnectionResource) Schema(ctx context.Context, req resource.
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
+						Default:             stringdefault.StaticString(""),
 					},
 					"client_key": schema.StringAttribute{
 						MarkdownDescription: "",
@@ -103,6 +106,7 @@ func (t *PostgresqlConnectionResource) Schema(ctx context.Context, req resource.
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           true,
+						Default:             stringdefault.StaticString(""),
 					},
 					"ca_cert": schema.StringAttribute{
 						MarkdownDescription: "",
@@ -110,6 +114,7 @@ func (t *PostgresqlConnectionResource) Schema(ctx context.Context, req resource.
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
+						Default:             stringdefault.StaticString(""),
 					},
 					"change_detection": schema.BoolAttribute{
 						MarkdownDescription: "",
@@ -124,6 +129,7 @@ func (t *PostgresqlConnectionResource) Schema(ctx context.Context, req resource.
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
+						Default:             stringdefault.StaticString(""),
 					},
 					"ssh": schema.BoolAttribute{
 						MarkdownDescription: "",
@@ -138,6 +144,7 @@ func (t *PostgresqlConnectionResource) Schema(ctx context.Context, req resource.
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
+						Default:             stringdefault.StaticString(""),
 					},
 					"ssh_host": schema.StringAttribute{
 						MarkdownDescription: "",
@@ -145,6 +152,7 @@ func (t *PostgresqlConnectionResource) Schema(ctx context.Context, req resource.
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
+						Default:             stringdefault.StaticString(""),
 					},
 					"ssh_port": schema.Int64Attribute{
 						MarkdownDescription: "",
@@ -152,6 +160,7 @@ func (t *PostgresqlConnectionResource) Schema(ctx context.Context, req resource.
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
+						Default:             int64default.StaticInt64(0),
 					},
 					"ssh_private_key": schema.StringAttribute{
 						MarkdownDescription: "",
@@ -159,6 +168,7 @@ func (t *PostgresqlConnectionResource) Schema(ctx context.Context, req resource.
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           true,
+						Default:             stringdefault.StaticString(""),
 					},
 				},
 

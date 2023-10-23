@@ -137,7 +137,7 @@ func GenerateConnections() error {
 			r.Attributes[i].NewAttrType = t.NewAttrType
 			r.Attributes[i].AttrName = provider.ToSnakeCase(a.Name)
 			r.Attributes[i].Computed = a.Computed || a.Optional
-			if a.Default != "" {
+			if !a.Required {
 				r.Attributes[i].Default = t.Default
 			}
 		}
