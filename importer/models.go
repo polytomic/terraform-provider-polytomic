@@ -148,3 +148,7 @@ func (m *Models) ResourceRefs() map[string]string {
 func (m *Models) DatasourceRefs() map[string]string {
 	return nil
 }
+
+func (m *Models) Variables() []Variable {
+	return nil
+}

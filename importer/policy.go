@@ -110,3 +110,7 @@ func (p *Policies) ResourceRefs() map[string]string {
 func (p *Policies) DatasourceRefs() map[string]string {
 	return nil
 }
+
+func (p *Policies) Variables() []Variable {
+	return nil
+}

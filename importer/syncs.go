@@ -156,3 +156,7 @@ func (s *Syncs) ResourceRefs() map[string]string {
 func (s *Syncs) DatasourceRefs() map[string]string {
 	return nil
 }
+
+func (s *Syncs) Variables() []Variable {
+	return nil
+}

@@ -95,3 +95,7 @@ func (r *Roles) ResourceRefs() map[string]string {
 func (r *Roles) DatasourceRefs() map[string]string {
 	return nil
 }
+
+func (r *Roles) Variables() []Variable {
+	return nil
+}
