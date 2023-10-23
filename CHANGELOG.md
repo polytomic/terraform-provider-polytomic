@@ -1,3 +1,7 @@
+## 0.3.33 (23 Oct 2023)
+* Write sensitive values as variables when writing HCL files
+* Add default values in optional connection configuration schema attributes
+
 ## 0.3.32 (19 Oct 2023)
 * Add dittofeed, ironclad, mailercheck, tixr, and zoominfo connections
 * Security updates
