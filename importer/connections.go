@@ -8,6 +8,8 @@ import (
 	"github.com/hashicorp/hcl/v2/hclwrite"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/polytomic-go"
 	"github.com/polytomic/terraform-provider-polytomic/provider"
 	"github.com/rs/zerolog/log"
@@ -27,6 +29,7 @@ type Connections struct {
 
 	Resources   map[string]Connection
 	Datasources map[string]Connection
+	variables   []Variable
 }
 
 type Connection struct {
@@ -58,12 +61,39 @@ func (c *Connections) Init(ctx context.Context) error {
 			r.Metadata(ctx, resource.MetadataRequest{
 				ProviderTypeName: provider.Name,
 			}, resp)
+
+			schemaResp := &resource.SchemaResponse{}
+			r.Schema(ctx, resource.SchemaRequest{}, schemaResp)
+
+			var config map[string]interface{}
+			err := mapstructure.Decode(conn.Configuration, &config)
+			if err != nil {
+				return err
+			}
+
+			configSchema, ok := schemaResp.Schema.Attributes["configuration"].(schema.SingleNestedAttribute)
+			if !ok {
+				return fmt.Errorf("not single nested attribute %s", resp.TypeName)
+			}
+			for k, v := range configSchema.Attributes {
+				if configVal, ok := config[k]; ok {
+					if v.IsSensitive() && !isEmpty(configVal) {
+						config[k] = variableRef(name, k)
+						c.variables = append(c.variables, Variable{
+							Name:      variableName(name, k),
+							Type:      varTypeMap[v.GetType().String()],
+							Sensitive: true,
+						})
+					}
+				}
+			}
+
 			c.Resources[name] = Connection{
 				ID:            conn.ID,
 				Resource:      resp.TypeName,
 				Name:          conn.Name,
 				Organization:  conn.OrganizationId,
-				Configuration: conn.Configuration,
+				Configuration: config,
 			}
 
 		} else if d, ok := provider.ConnectionDatasourcesMap[conn.Type.ID]; ok {
@@ -109,7 +139,7 @@ func (c *Connections) GenerateTerraformFiles(ctx context.Context, writer io.Writ
 		resourceBlock.Body().SetAttributeValue("configuration", config)
 		body.AppendNewline()
 
-		writer.Write(hclFile.Bytes())
+		writer.Write(unquoteVariableRef(hclFile.Bytes()))
 	}
 	return nil
 
@@ -145,4 +175,8 @@ func (c *Connections) DatasourceRefs() map[string]string {
 		result[conn.ID] = fmt.Sprintf("data.%s.%s.id", conn.Resource, name)
 	}
 	return result
+}
+
+func (c *Connections) Variables() []Variable {
+	return c.variables
 }

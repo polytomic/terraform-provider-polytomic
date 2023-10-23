@@ -92,3 +92,7 @@ func (m *Main) ResourceRefs() map[string]string {
 func (m *Main) DatasourceRefs() map[string]string {
 	return nil
 }
+
+func (m *Main) Variables() []Variable {
+	return nil
+}

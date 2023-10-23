@@ -121,3 +121,7 @@ func (b *BulkSyncs) ResourceRefs() map[string]string {
 func (b *BulkSyncs) DatasourceRefs() map[string]string {
 	return nil
 }
+
+func (b *BulkSyncs) Variables() []Variable {
+	return nil
+}

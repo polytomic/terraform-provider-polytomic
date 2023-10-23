@@ -23,6 +23,13 @@ func ReplaceRefs(b []byte, refs map[string]string) []byte {
 	return []byte(s)
 }
 
+func unquoteVariableRef(b []byte) []byte {
+	s := string(b)
+	re := regexp.MustCompile(`\"(var\..*)\"`)
+	s = re.ReplaceAllString(s, "$1")
+	return []byte(s)
+}
+
 // convert arbitrary values to cty.Value
 func typeConverter(value any) cty.Value {
 	switch value := value.(type) {

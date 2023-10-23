@@ -19,6 +19,7 @@ type Importable interface {
 	GenerateTerraformFiles(ctx context.Context, writer io.Writer, refs map[string]string) error
 	GenerateImports(ctx context.Context, writer io.Writer) error
 	Filename() string
+	Variables() []Variable
 }
 
 func Init(url, key, path string, recreate bool, includePermissions bool) {
@@ -50,6 +51,7 @@ func Init(url, key, path string, recreate bool, includePermissions bool) {
 	}
 	defer importFile.Close()
 
+	vars := []Variable{}
 	refs := make(map[string]string)
 	for _, i := range importables {
 		err := i.Init(ctx)
@@ -64,6 +66,9 @@ func Init(url, key, path string, recreate bool, includePermissions bool) {
 		for k, v := range i.DatasourceRefs() {
 			refs[k] = v
 		}
+		// Add variables
+		vars = append(vars, i.Variables()...)
+
 		file := i.Filename()
 		f, err := createFile(recreate, 0644, path, file)
 		if err != nil {
@@ -79,6 +84,18 @@ func Init(url, key, path string, recreate bool, includePermissions bool) {
 		if err != nil {
 			log.Fatal().AnErr("error", err).Msg("failed to generate imports")
 		}
+	}
+
+	// Create variables.tf
+	variablesFile, err := createFile(recreate, 0644, path, "variables.tf")
+	if err != nil {
+		log.Fatal().AnErr("error", err).Msg("failed to create variables.tf")
+	}
+	defer variablesFile.Close()
+
+	err = generateVariables(variablesFile, vars)
+	if err != nil {
+		log.Fatal().AnErr("error", err).Msg("failed to generate variables")
 	}
 
 }
