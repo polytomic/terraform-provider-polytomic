@@ -65,7 +65,7 @@ func (d *CloudsqlConnectionDataSource) Schema(ctx context.Context, req datasourc
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
-						Computed:            false,
+						Computed:            true,
 						Sensitive:           false,
 					},
 				},

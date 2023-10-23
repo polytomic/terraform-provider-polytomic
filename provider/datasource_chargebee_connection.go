@@ -58,7 +58,7 @@ func (d *ChargebeeConnectionDataSource) Schema(ctx context.Context, req datasour
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
-						Computed:            false,
+						Computed:            true,
 						Sensitive:           false,
 					},
 				},

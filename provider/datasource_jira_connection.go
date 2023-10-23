@@ -58,7 +58,7 @@ func (d *JiraConnectionDataSource) Schema(ctx context.Context, req datasource.Sc
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
-						Computed:            false,
+						Computed:            true,
 						Sensitive:           false,
 					},
 				},
