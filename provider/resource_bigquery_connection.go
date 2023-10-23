@@ -45,7 +45,7 @@ func (t *BigqueryConnectionResource) Schema(ctx context.Context, req resource.Sc
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
-						Computed:            false,
+						Computed:            true,
 						Sensitive:           false,
 					},
 					"service_account": schema.StringAttribute{
@@ -59,7 +59,7 @@ func (t *BigqueryConnectionResource) Schema(ctx context.Context, req resource.Sc
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
-						Computed:            false,
+						Computed:            true,
 						Sensitive:           false,
 					},
 				},

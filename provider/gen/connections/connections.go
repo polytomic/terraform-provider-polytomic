@@ -38,11 +38,13 @@ var (
 			AttrType:    "schema.StringAttribute",
 			TfType:      "types.String",
 			NewAttrType: "types.StringType",
+			Default:     "stringdefault.StaticString(\"\")",
 		},
 		"number": {
 			AttrType:    "schema.NumberAttribute",
 			TfType:      "types.Number",
 			NewAttrType: "types.NumberType",
+			Default:     "int64default.StaticInt64(0)",
 		},
 		"bool": {
 			AttrType:    "schema.BoolAttribute",
@@ -53,11 +55,13 @@ var (
 			AttrType:    "schema.Int64Attribute",
 			TfType:      "types.Int64",
 			NewAttrType: "types.NumberType",
+			Default:     "int64default.StaticInt64(0)",
 		},
 		"int64": {
 			AttrType:    "schema.Int64Attribute",
 			TfType:      "types.Int64",
 			NewAttrType: "types.NumberType",
+			Default:     "int64default.StaticInt64(0)",
 		},
 	}
 )
@@ -66,6 +70,7 @@ type Typer struct {
 	AttrType    string
 	TfType      string
 	NewAttrType string
+	Default     string
 }
 
 type Connections struct {
@@ -99,6 +104,7 @@ type Attribute struct {
 	AttrType    string `yaml:"-"`
 	NewAttrType string `yaml:"-"`
 	AttrName    string `yaml:"-"`
+	Default     string `yaml:"-"`
 }
 
 type Importable struct {
@@ -130,6 +136,10 @@ func GenerateConnections() error {
 			r.Attributes[i].AttrType = t.AttrType
 			r.Attributes[i].NewAttrType = t.NewAttrType
 			r.Attributes[i].AttrName = provider.ToSnakeCase(a.Name)
+			r.Attributes[i].Computed = a.Computed || a.Optional
+			if a.Default != "" {
+				r.Attributes[i].Default = t.Default
+			}
 		}
 		if r.Name == "" {
 			r.Name = strings.Title(r.Connection)

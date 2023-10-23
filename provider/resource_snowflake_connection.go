@@ -80,7 +80,7 @@ func (t *SnowflakeConnectionResource) Schema(ctx context.Context, req resource.S
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
-						Computed:            false,
+						Computed:            true,
 						Sensitive:           false,
 					},
 				},
