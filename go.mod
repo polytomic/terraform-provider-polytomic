@@ -15,7 +15,7 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/polytomic/polytomic-go v0.0.0-20231013151150-dffa2b5fc391
 	github.com/rs/zerolog v1.31.0
-	github.com/spf13/cobra v1.7.0
+	github.com/spf13/cobra v1.8.0
 	github.com/spf13/viper v1.17.0
 	github.com/zclconf/go-cty v1.14.1
 	golang.org/x/exp v0.0.0-20230905200255-921286631fa9
