@@ -1,3 +1,6 @@
+## 0.3.34 (10 Nove 2023)
+* Depedency updates
+
 ## 0.3.33 (23 Oct 2023)
 * Write sensitive values as variables when writing HCL files
 * Add default values in optional connection configuration schema attributes
