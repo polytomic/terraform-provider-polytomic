@@ -152,6 +152,7 @@ func (p *ptProvider) DataSources(ctx context.Context) []func() datasource.DataSo
 		func() datasource.DataSource { return &bulkSourceDatasource{} },
 		func() datasource.DataSource { return &bulkDestinationDatasource{} },
 		func() datasource.DataSource { return &FacebookAdsConnectionDataSource{} },
+		func() datasource.DataSource { return &identityDatasource{} },
 	}
 	all := append(connectionDatasources, datasources...)
 	return all

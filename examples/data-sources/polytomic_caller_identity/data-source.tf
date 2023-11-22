@@ -1,0 +1,1 @@
+data "polytomic_caller_identity" "self" {}
