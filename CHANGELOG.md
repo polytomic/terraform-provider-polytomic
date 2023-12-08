@@ -1,4 +1,9 @@
-## 0.3.34 (10 Nove 2023)
+## 0.3.35 (08 Dec 2023)
+* Add unbounce, aws opensearch, and quickbooks connections
+* Add identity endpoint data source
+* Depedency updates
+
+## 0.3.34 (10 Nov 2023)
 * Depedency updates
 
 ## 0.3.33 (23 Oct 2023)
