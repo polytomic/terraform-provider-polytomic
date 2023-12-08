@@ -189,8 +189,8 @@ github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINE
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 h1:Jamvg5psRIccs7FGNTlIRMkT8wgtp5eCXdBlqhYGL6U=
 github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
-github.com/polytomic/polytomic-go v0.0.0-20231122202521-de5a9b1e149d h1:B8AABa607Ak0ZUeEP3dbBkoLhTPAEdJLSiav2awBK8A=
-github.com/polytomic/polytomic-go v0.0.0-20231122202521-de5a9b1e149d/go.mod h1:gogzQHtdEBWZQ2jF53P7ANtNz+eey+xt4YTMdnXMNXk=
+github.com/polytomic/polytomic-go v0.0.0-20231208141101-41a5458da245 h1:zNhUjYSqFv846AFNGsgEbexV6cyWFa1fhZRnyYvdinw=
+github.com/polytomic/polytomic-go v0.0.0-20231208141101-41a5458da245/go.mod h1:gogzQHtdEBWZQ2jF53P7ANtNz+eey+xt4YTMdnXMNXk=
 github.com/posener/complete v1.1.1/go.mod h1:em0nMJCgc9GFtwrmVmEMR/ZL6WyhyjMBndrE9hABlRI=
 github.com/posener/complete v1.2.3 h1:NP0eAhjcjImqslEwo/1hq7gpajME0fTLTezBKDqfXqo=
 github.com/posener/complete v1.2.3/go.mod h1:WZIdtGGp+qx0sLrYKtIRAruyNpv6hFCicSgv7Sy7s/s=

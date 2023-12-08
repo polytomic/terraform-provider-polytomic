@@ -1234,3 +1234,15 @@ connections:
       type: string
       required: true
       example: "us-east-1"
+  - connection: unbounce
+    name: Unbounce
+    type: polytomic.UnbounceConnectionType
+    config: polytomic.UnbounceConnectionConfiguration
+    datasource: true
+    resource: true
+    attributes:
+    - name: APIKey
+      type: string
+      required: true
+      sensitive: true
+      example: my-api-key

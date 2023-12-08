@@ -62,6 +62,7 @@ var (
 		func() resource.Resource { return &TixrConnectionResource{} },
 		func() resource.Resource { return &ZoominfoConnectionResource{} },
 		func() resource.Resource { return &AwsopensearchConnectionResource{} },
+		func() resource.Resource { return &UnbounceConnectionResource{} },
 	}
 
 	connectionDatasources = []func() datasource.DataSource{
@@ -134,6 +135,7 @@ var (
 		func() datasource.DataSource { return &ZoominfoConnectionDataSource{} },
 		func() datasource.DataSource { return &QuickbooksConnectionDataSource{} },
 		func() datasource.DataSource { return &AwsopensearchConnectionDataSource{} },
+		func() datasource.DataSource { return &UnbounceConnectionDataSource{} },
 	}
 
 	connectionImportableResources = map[string]resource.Resource{
@@ -189,6 +191,7 @@ var (
 		"tixr":          &TixrConnectionResource{},
 		"zoominfo":      &ZoominfoConnectionResource{},
 		"awsopensearch": &AwsopensearchConnectionResource{},
+		"unbounce":      &UnbounceConnectionResource{},
 	}
 
 	connectionImportableDatasources = map[string]datasource.DataSource{
@@ -261,5 +264,6 @@ var (
 		"zoominfo":            &ZoominfoConnectionDataSource{},
 		"quickbooks":          &QuickbooksConnectionDataSource{},
 		"awsopensearch":       &AwsopensearchConnectionDataSource{},
+		"unbounce":            &UnbounceConnectionDataSource{},
 	}
 )
