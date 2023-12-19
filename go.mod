@@ -16,7 +16,7 @@ require (
 	github.com/polytomic/polytomic-go v0.0.0-20231208141101-41a5458da245
 	github.com/rs/zerolog v1.31.0
 	github.com/spf13/cobra v1.8.0
-	github.com/spf13/viper v1.18.1
+	github.com/spf13/viper v1.18.2
 	github.com/zclconf/go-cty v1.14.1
 	golang.org/x/exp v0.0.0-20230905200255-921286631fa9
 	gopkg.in/yaml.v2 v2.4.0
