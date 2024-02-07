@@ -16,10 +16,10 @@ AWS Athena Connection
 resource "polytomic_athena_connection" "athena" {
   name = "example"
   configuration = {
-    access_key_id     = "EXAMPLEACCESSKEYID"
-    access_key_secret = "EXAMPLEACCESSKEYSECRET"
+    access_id         = "EXAMPLEACCESSKEYID"
+    secret_access_key = "EXAMPLEACCESSKEYSECRET"
     region            = "us-east-1"
-    output_bucket     = "athena-output-bucket"
+    outputbucket      = "athena-output-bucket"
   }
 }
 ```
@@ -46,9 +46,9 @@ resource "polytomic_athena_connection" "athena" {
 
 Required:
 
-- `access_key_id` (String, Sensitive)
-- `access_key_secret` (String, Sensitive)
-- `output_bucket` (String) S3 bucket for output storage, with optional prefix. Examples: `bucket-name`, `bucket-name/prefix`.
+- `access_id` (String, Sensitive)
+- `outputbucket` (String) S3 bucket for output storage, with optional prefix. Examples: `bucket-name`, `bucket-name/prefix`.
 - `region` (String)
+- `secret_access_key` (String, Sensitive)
 
 
