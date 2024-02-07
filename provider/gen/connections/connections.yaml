@@ -735,6 +735,30 @@ connections:
         type: string
         optional: true
         example: us-east-1
+  - connection: redshiftserverless
+    name: Redshift Serverless
+    type: polytomic.RedshiftServerlessConnectionType
+    config: polytomic.RedshiftServerlessConnectionConfiguration
+    datasource: true
+    resource: true
+    attributes:
+      - name: Database
+        type: string
+        required: true
+        example: dev
+      - name: Workgroup
+        type: string
+        required: true
+        example: default-workgroup
+      - name: IAMRoleARN
+        type: string
+        required: true
+        example: arn:aws:iam::XXXX:role/polytomic-redshiftserverless
+      - name: ExternalID
+        type: string
+        required: true
+        example: db
+        sensitive: true
   - connection: segment
     name: Segment
     type: polytomic.SegmentConnectionType
@@ -1065,7 +1089,7 @@ connections:
     type: polytomic.FacebookAdsConnectionType
     config: polytomic.FacebookAdsConnectionConfiguration
     datasource: true
-    attributes: []  
+    attributes: []
   - connection: github
     name: GitHub
     type: polytomic.GithubConnectionType

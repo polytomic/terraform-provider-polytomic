@@ -1,3 +1,6 @@
+## 0.3.37 (7 Feb 2024)
+* Add support for Redshift Serverless connections
+
 ## 0.3.36 (12 Jan 2024)
 * Depedency updates
 
