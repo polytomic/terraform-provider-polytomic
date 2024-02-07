@@ -54,11 +54,11 @@ func (d *AthenaConnectionDataSource) Schema(ctx context.Context, req datasource.
 						Computed:            false,
 						Sensitive:           false,
 					},
-					"output_bucket": schema.StringAttribute{
+					"outputbucket": schema.StringAttribute{
 						MarkdownDescription: "S3 bucket for output storage, with optional prefix. Examples: `bucket-name`, `bucket-name/prefix`.",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
 						Sensitive:           false,
 					},
 				},
@@ -128,7 +128,7 @@ func (d *AthenaConnectionDataSource) Read(ctx context.Context, req datasource.Re
 			"region": types.StringValue(
 				conf.Region,
 			),
-			"output_bucket": types.StringValue(
+			"outputbucket": types.StringValue(
 				conf.OutputBucket,
 			),
 		},

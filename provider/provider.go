@@ -141,6 +141,7 @@ func (p *ptProvider) Resources(ctx context.Context) []func() resource.Resource {
 		func() resource.Resource { return &APIConnectionResource{} },
 		func() resource.Resource { return &CSVConnectionResource{} },
 		func() resource.Resource { return &WebhookConnectionResource{} },
+		func() resource.Resource { return &AthenaConnectionResource{} },
 	}
 	all := append(connectionResources, resourceList...)
 	return all
@@ -153,6 +154,7 @@ func (p *ptProvider) DataSources(ctx context.Context) []func() datasource.DataSo
 		func() datasource.DataSource { return &bulkDestinationDatasource{} },
 		func() datasource.DataSource { return &FacebookAdsConnectionDataSource{} },
 		func() datasource.DataSource { return &identityDatasource{} },
+		func() datasource.DataSource { return &AthenaConnectionDataSource{} },
 	}
 	all := append(connectionDatasources, datasources...)
 	return all

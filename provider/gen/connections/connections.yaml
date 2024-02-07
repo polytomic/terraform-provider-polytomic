@@ -195,32 +195,36 @@ connections:
         type: bool
         optional: true
         example: true
-  - connection: athena
-    name: AWS Athena
-    type: polytomic.AthenaConnectionType
-    config: polytomic.AthenaConfiguration
-    resource: true
-    datasource: true
-    attributes:
-      - name: AccessKeyID
-        type: string
-        required: true
-        sensitive: true
-        example: "EXAMPLEACCESSKEYID"
-      - name: AccessKeySecret
-        type: string
-        required: true
-        sensitive: true
-        example: "EXAMPLEACCESSKEYSECRET"
-      - name: Region
-        type: string
-        required: true
-        example: "us-east-1"
-      - name: OutputBucket
-        type: string
-        required: true
-        description: "S3 bucket for output storage, with optional prefix. Examples: `bucket-name`, `bucket-name/prefix`."
-        example: "athena-output-bucket"
+  # - connection: athena
+  #   name: AWS Athena
+  #   type: polytomic.AthenaConnectionType
+  #   config: polytomic.AthenaConfiguration
+  #   resource: true
+  #   datasource: true
+  #   attributes:
+  #     - name: AccessKeyID
+  #       name_override: access_id
+  #       type: string
+  #       required: true
+  #       sensitive: true
+  #       example: "EXAMPLEACCESSKEYID"
+  #     - name: AccessKeySecret
+  #       name_override: secret_access_key
+  #       type: string
+  #       required: true
+  #       sensitive: true
+  #       example: "EXAMPLEACCESSKEYSECRET"
+  #     - name: Region
+  #       type: string
+  #       required: true
+  #       example: "us-east-1"
+  #     - name: OutputBucket
+  #       name_override: outputbucket
+  #       type: string
+  #       description: "S3 bucket for output storage, with optional prefix. Examples: `bucket-name`, `bucket-name/prefix`."
+  #       example: "athena-output-bucket"
+  #       computed: true
+  #       optional: true
   - connection: salesforce
     name: Salesforce
     type: polytomic.SalesforceConnectionType

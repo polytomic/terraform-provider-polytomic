@@ -90,6 +90,7 @@ type Connection struct {
 
 type Attribute struct {
 	Name                string `yaml:"name"`
+	NameOverride        string `yaml:"name_override"`
 	Alias               string `yaml:"alias"`
 	Sensitive           bool   `yaml:"sensitive"`
 	Required            bool   `yaml:"required"`
@@ -136,6 +137,9 @@ func GenerateConnections() error {
 			r.Attributes[i].AttrType = t.AttrType
 			r.Attributes[i].NewAttrType = t.NewAttrType
 			r.Attributes[i].AttrName = provider.ToSnakeCase(a.Name)
+			if a.NameOverride != "" {
+				r.Attributes[i].AttrName = a.NameOverride
+			}
 			r.Attributes[i].Computed = a.Computed || a.Optional
 			if !a.Required {
 				r.Attributes[i].Default = t.Default
