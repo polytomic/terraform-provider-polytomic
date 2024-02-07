@@ -1,3 +1,6 @@
+## 0.3.38 (7 Feb 2024)
+* Fix AWS athena connections
+
 ## 0.3.37 (7 Feb 2024)
 * Add support for Redshift Serverless connections
 
