@@ -23,6 +23,7 @@ resource "polytomic_user" "acme_admin" {
 ```
 
 ## Terraform Importer
+
 See [Polytomic Importer](./importer/README.md)
 
 ## Development
@@ -37,7 +38,7 @@ To generate or update documentation, run `go generate`.
 
 In order to run the full suite of Acceptance tests, run `make testacc`.
 
-*Note:* Acceptance tests create real resources, and often cost money to run.
+_Note:_ Acceptance tests create real resources, and often cost money to run.
 
 ```shell
 make testacc
@@ -72,20 +73,44 @@ go mod tidy
 
 Then commit the changes to `go.mod` and `go.sum`.
 
+### Testing a pre-release version
+
+If you wish to test a pre-release version of the provider, you can use the a
+`.tfrc` file to specify the location of your local provider binary. If you
+installed the provider using `go install`, create a `dev.tfrc` file with the
+following contents, substituting the correct home directory path.
+
+```terraform
+provider_installation {
+  dev_overrides {
+    "polytomic/polytomic" = "/Users/username/go/bin"
+  }
+
+  # all the other providers, install them as usual
+  direct {}
+}
+```
+
+To instruct Terraform to use those settings, set the `TF_CLI_CONFIG` environment
+variable.
+
+```sh
+$ TF_CLI_CONFIG_FILE=dev.tfrc terraform apply
+```
 
 ## Releasing
 
 1. Update [CHANGELOG.md](./CHANGELOG.md) with release details and date and commit.
 1. Create an annotated version tag; a version tag consists of the letter `v` followed by `MAJOR.MINOR.PATCH`. For example:
 
-    ```shell
-    git tag -a v0.2.0
-    ```
+   ```shell
+   git tag -a v0.2.0
+   ```
 
 1. Push the tag to Github.
 
-    ```shell
-    git push origin v0.2.0
-    ```
+   ```shell
+   git push origin v0.2.0
+   ```
 
 Github Actions are configured to build release tags and create a new release. Once the release has been created, the Terraform registry will pick it up within a few minutes.
