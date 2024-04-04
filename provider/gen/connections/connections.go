@@ -11,7 +11,6 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/polytomic/terraform-provider-polytomic/provider"
 	"gopkg.in/yaml.v2"
 )
 
@@ -35,16 +34,18 @@ const (
 var (
 	TypeMap = map[string]Typer{
 		"string": {
-			AttrType:    "schema.StringAttribute",
-			TfType:      "types.String",
-			NewAttrType: "types.StringType",
-			Default:     "stringdefault.StaticString(\"\")",
+			AttrType:      "schema.StringAttribute",
+			TfType:        "types.String",
+			NewAttrType:   "types.StringType",
+			Default:       "stringdefault.StaticString(\"\")",
+			DefaultImport: "github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault",
 		},
 		"number": {
-			AttrType:    "schema.NumberAttribute",
-			TfType:      "types.Number",
-			NewAttrType: "types.NumberType",
-			Default:     "int64default.StaticInt64(0)",
+			AttrType:      "schema.NumberAttribute",
+			TfType:        "types.Number",
+			NewAttrType:   "types.NumberType",
+			Default:       "int64default.StaticInt64(0)",
+			DefaultImport: "github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default",
 		},
 		"bool": {
 			AttrType:    "schema.BoolAttribute",
@@ -52,25 +53,28 @@ var (
 			NewAttrType: "types.BoolType",
 		},
 		"int": {
-			AttrType:    "schema.Int64Attribute",
-			TfType:      "types.Int64",
-			NewAttrType: "types.NumberType",
-			Default:     "int64default.StaticInt64(0)",
+			AttrType:      "schema.Int64Attribute",
+			TfType:        "types.Int64",
+			NewAttrType:   "types.NumberType",
+			Default:       "int64default.StaticInt64(0)",
+			DefaultImport: "github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default",
 		},
 		"int64": {
-			AttrType:    "schema.Int64Attribute",
-			TfType:      "types.Int64",
-			NewAttrType: "types.NumberType",
-			Default:     "int64default.StaticInt64(0)",
+			AttrType:      "schema.Int64Attribute",
+			TfType:        "types.Int64",
+			NewAttrType:   "types.NumberType",
+			Default:       "int64default.StaticInt64(0)",
+			DefaultImport: "github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default",
 		},
 	}
 )
 
 type Typer struct {
-	AttrType    string
-	TfType      string
-	NewAttrType string
-	Default     string
+	AttrType      string
+	TfType        string
+	NewAttrType   string
+	Default       string
+	DefaultImport string
 }
 
 type Connections struct {
@@ -79,17 +83,21 @@ type Connections struct {
 
 type Connection struct {
 	Name         string `yaml:"name"`
+	Conn         string `yaml:"-"`
 	Connection   string `yaml:"connection"`
 	ResourceName string
-	Type         string      `yaml:"type"`
-	Attributes   []Attribute `yaml:"attributes"`
-	Config       string      `yaml:"config"`
-	Datasource   bool        `yaml:"datasource"`
-	Resource     bool        `yaml:"resource"`
+	Type         string          `yaml:"type"`
+	Attributes   []Attribute     `yaml:"attributes"`
+	Config       string          `yaml:"config"`
+	Datasource   bool            `yaml:"datasource"`
+	Resource     bool            `yaml:"resource"`
+	ExtraImports map[string]bool `yaml:"-"`
+	Imports      string          `yaml:"-"`
 }
 
 type Attribute struct {
 	Name                string `yaml:"name"`
+	CapName             string `yaml:"-"`
 	NameOverride        string `yaml:"name_override"`
 	Alias               string `yaml:"alias"`
 	Sensitive           bool   `yaml:"sensitive"`
@@ -107,6 +115,27 @@ type Attribute struct {
 	AttrName    string `yaml:"-"`
 	Default     string `yaml:"-"`
 }
+
+var defaultImports = `
+"context"
+"errors"
+"fmt"
+"net/http"
+"strings"
+
+"github.com/AlekSi/pointer"
+"github.com/hashicorp/terraform-plugin-framework/attr"
+"github.com/hashicorp/terraform-plugin-framework/path"
+"github.com/hashicorp/terraform-plugin-framework/resource"
+"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+"github.com/hashicorp/terraform-plugin-framework/types"
+"github.com/hashicorp/terraform-plugin-log/tflog"
+"github.com/polytomic/polytomic-go"
+ptclient "github.com/polytomic/polytomic-go/client"
+ptcore "github.com/polytomic/polytomic-go/core"
+`
 
 type Importable struct {
 	Name         string
@@ -128,6 +157,7 @@ func GenerateConnections() error {
 	datasources := []Importable{}
 
 	for _, r := range data.Connections {
+		r.ExtraImports = make(map[string]bool)
 		for i, a := range r.Attributes {
 			t, ok := TypeMap[a.Type]
 			if !ok {
@@ -136,13 +166,17 @@ func GenerateConnections() error {
 			r.Attributes[i].TfType = t.TfType
 			r.Attributes[i].AttrType = t.AttrType
 			r.Attributes[i].NewAttrType = t.NewAttrType
-			r.Attributes[i].AttrName = provider.ToSnakeCase(a.Name)
+			r.Attributes[i].AttrName = a.Name
+			r.Attributes[i].CapName = strings.Title(a.Name)
 			if a.NameOverride != "" {
 				r.Attributes[i].AttrName = a.NameOverride
 			}
 			r.Attributes[i].Computed = a.Computed || a.Optional
 			if !a.Required {
 				r.Attributes[i].Default = t.Default
+				if t.DefaultImport != "" {
+					r.ExtraImports[t.DefaultImport] = true
+				}
 			}
 		}
 		if r.Name == "" {
@@ -153,10 +187,14 @@ func GenerateConnections() error {
 			if err != nil {
 				return err
 			}
-			resources = append(resources, Importable{
+			i := Importable{
 				Name:         r.Connection,
 				ResourceName: fmt.Sprintf("%sConnectionResource", strings.Title(r.Connection)),
-			})
+			}
+			if r.Type != "" {
+				i.Name = r.Type
+			}
+			resources = append(resources, i)
 		}
 		if r.Datasource {
 			err := writeConnectionDataSource(r)
@@ -274,18 +312,30 @@ func writeConnectionResource(r Connection) error {
 	var buf bytes.Buffer
 	f, err := os.Create(
 		filepath.Join(outputPath, fmt.Sprintf("resource_%s_connection.go", r.Connection)))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	imports := defaultImports
+	for k := range r.ExtraImports {
+		imports += fmt.Sprintf("\n\"%s\"", k)
+	}
+
 	defer f.Close()
 	err = tmpl.Execute(&buf, Connection{
 		Name:         r.Name,
+		Conn:         r.Connection,
 		Connection:   strings.Title(r.Connection),
 		ResourceName: r.Connection,
 		Attributes:   r.Attributes,
 		Type:         r.Type,
 		Config:       r.Config,
+		Imports:      imports,
 	})
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	p, err := format.Source(buf.Bytes())
 	if err != nil {
 		log.Fatal(err)

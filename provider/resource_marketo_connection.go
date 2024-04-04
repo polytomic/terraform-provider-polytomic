@@ -10,18 +10,21 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/google/uuid"
+	"github.com/AlekSi/pointer"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/polytomic-go"
+	ptclient "github.com/polytomic/polytomic-go/client"
+	ptcore "github.com/polytomic/polytomic-go/core"
+
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -110,7 +113,21 @@ func (r *MarketoConnectionResource) Metadata(ctx context.Context, req resource.M
 }
 
 type MarketoConnectionResource struct {
-	client *polytomic.Client
+	client *ptclient.Client
+}
+
+type MarketoConf struct {
+	Client_id string `mapstructure:"client_id" tfsdk:"client_id"`
+
+	Client_secret string `mapstructure:"client_secret" tfsdk:"client_secret"`
+
+	Rest_endpoint string `mapstructure:"rest_endpoint" tfsdk:"rest_endpoint"`
+
+	Enforce_api_limits bool `mapstructure:"enforce_api_limits" tfsdk:"enforce_api_limits"`
+
+	Daily_api_calls int `mapstructure:"daily_api_calls" tfsdk:"daily_api_calls"`
+
+	Concurrent_imports int `mapstructure:"concurrent_imports" tfsdk:"concurrent_imports"`
 }
 
 func (r *MarketoConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -123,37 +140,34 @@ func (r *MarketoConnectionResource) Create(ctx context.Context, req resource.Cre
 		return
 	}
 
-	created, err := r.client.Connections().Create(ctx,
-		polytomic.CreateConnectionMutation{
-			Name:           data.Name.ValueString(),
-			Type:           polytomic.MarketoConnectionType,
-			OrganizationId: data.Organization.ValueString(),
-			Configuration: polytomic.MarketoConfiguration{
-				ClientID:          data.Configuration.Attributes()["client_id"].(types.String).ValueString(),
-				ClientSecret:      data.Configuration.Attributes()["client_secret"].(types.String).ValueString(),
-				RESTEndpoint:      data.Configuration.Attributes()["rest_endpoint"].(types.String).ValueString(),
-				EnforceAPILimits:  data.Configuration.Attributes()["enforce_api_limits"].(types.Bool).ValueBool(),
-				DailyAPICalls:     int(data.Configuration.Attributes()["daily_api_calls"].(types.Int64).ValueInt64()),
-				ConcurrentImports: int(data.Configuration.Attributes()["concurrent_imports"].(types.Int64).ValueInt64()),
-			},
+	created, err := r.client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
+		Name:           data.Name.ValueString(),
+		Type:           "marketo",
+		OrganizationId: data.Organization.ValueStringPointer(),
+		Configuration: map[string]interface{}{
+			"client_id":          data.Configuration.Attributes()["client_id"].(types.String).ValueString(),
+			"client_secret":      data.Configuration.Attributes()["client_secret"].(types.String).ValueString(),
+			"rest_endpoint":      data.Configuration.Attributes()["rest_endpoint"].(types.String).ValueString(),
+			"enforce_api_limits": data.Configuration.Attributes()["enforce_api_limits"].(types.Bool).ValueBool(),
+			"daily_api_calls":    int(data.Configuration.Attributes()["daily_api_calls"].(types.Int64).ValueInt64()),
+			"concurrent_imports": int(data.Configuration.Attributes()["concurrent_imports"].(types.Int64).ValueInt64()),
 		},
-		polytomic.WithIdempotencyKey(uuid.NewString()),
-		polytomic.SkipConfigValidation(),
-	)
+		Validate: pointer.ToBool(false),
+	})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
 		return
 	}
-	data.Id = types.StringValue(created.ID)
-	data.Name = types.StringValue(created.Name)
-	data.Organization = types.StringValue(created.OrganizationId)
+	data.Id = types.StringPointerValue(created.Data.Id)
+	data.Name = types.StringPointerValue(created.Data.Name)
+	data.Organization = types.StringPointerValue(created.Data.OrganizationId)
 
-	var output polytomic.MarketoConfiguration
-	cfg := &mapstructure.DecoderConfig{
-		Result: &output,
+	conf := MarketoConf{}
+	err = mapstructure.Decode(created.Data.Configuration, &conf)
+	if err != nil {
+		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error decoding connection configuration: %s", err))
 	}
-	decoder, _ := mapstructure.NewDecoder(cfg)
-	decoder.Decode(created.Configuration)
+
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"client_id":          types.StringType,
 		"client_secret":      types.StringType,
@@ -161,13 +175,13 @@ func (r *MarketoConnectionResource) Create(ctx context.Context, req resource.Cre
 		"enforce_api_limits": types.BoolType,
 		"daily_api_calls":    types.NumberType,
 		"concurrent_imports": types.NumberType,
-	}, output)
+	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Marketo", "id": created.ID})
+	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Marketo", "id": created.Data.Id})
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -183,9 +197,9 @@ func (r *MarketoConnectionResource) Read(ctx context.Context, req resource.ReadR
 		return
 	}
 
-	connection, err := r.client.Connections().Get(ctx, uuid.MustParse(data.Id.ValueString()))
+	connection, err := r.client.Connections.Get(ctx, data.Id.ValueString())
 	if err != nil {
-		pErr := polytomic.ApiError{}
+		pErr := &ptcore.APIError{}
 		if errors.As(err, &pErr) {
 			if pErr.StatusCode == http.StatusNotFound {
 				resp.State.RemoveResource(ctx)
@@ -195,17 +209,16 @@ func (r *MarketoConnectionResource) Read(ctx context.Context, req resource.ReadR
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error reading connection: %s", err))
 		return
 	}
+	data.Id = types.StringPointerValue(connection.Data.Id)
+	data.Name = types.StringPointerValue(connection.Data.Name)
+	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
 
-	data.Id = types.StringValue(connection.ID)
-	data.Name = types.StringValue(connection.Name)
-	data.Organization = types.StringValue(connection.OrganizationId)
-
-	var output polytomic.MarketoConfiguration
-	cfg := &mapstructure.DecoderConfig{
-		Result: &output,
+	conf := MarketoConf{}
+	err = mapstructure.Decode(connection.Data.Configuration, &conf)
+	if err != nil {
+		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error decoding connection configuration: %s", err))
 	}
-	decoder, _ := mapstructure.NewDecoder(cfg)
-	decoder.Decode(connection.Configuration)
+
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"client_id":          types.StringType,
 		"client_secret":      types.StringType,
@@ -213,7 +226,7 @@ func (r *MarketoConnectionResource) Read(ctx context.Context, req resource.ReadR
 		"enforce_api_limits": types.BoolType,
 		"daily_api_calls":    types.NumberType,
 		"concurrent_imports": types.NumberType,
-	}, output)
+	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -233,38 +246,36 @@ func (r *MarketoConnectionResource) Update(ctx context.Context, req resource.Upd
 		return
 	}
 
-	updated, err := r.client.Connections().Update(ctx,
-		uuid.MustParse(data.Id.ValueString()),
-		polytomic.UpdateConnectionMutation{
+	updated, err := r.client.Connections.Update(ctx,
+		data.Id.ValueString(),
+		&polytomic.UpdateConnectionRequestSchema{
 			Name:           data.Name.ValueString(),
-			OrganizationId: data.Organization.ValueString(),
-			Configuration: polytomic.MarketoConfiguration{
-				ClientID:          data.Configuration.Attributes()["client_id"].(types.String).ValueString(),
-				ClientSecret:      data.Configuration.Attributes()["client_secret"].(types.String).ValueString(),
-				RESTEndpoint:      data.Configuration.Attributes()["rest_endpoint"].(types.String).ValueString(),
-				EnforceAPILimits:  data.Configuration.Attributes()["enforce_api_limits"].(types.Bool).ValueBool(),
-				DailyAPICalls:     int(data.Configuration.Attributes()["daily_api_calls"].(types.Int64).ValueInt64()),
-				ConcurrentImports: int(data.Configuration.Attributes()["concurrent_imports"].(types.Int64).ValueInt64()),
+			OrganizationId: data.Organization.ValueStringPointer(),
+			Configuration: map[string]interface{}{
+				"client_id":          data.Configuration.Attributes()["client_id"].(types.String).ValueString(),
+				"client_secret":      data.Configuration.Attributes()["client_secret"].(types.String).ValueString(),
+				"rest_endpoint":      data.Configuration.Attributes()["rest_endpoint"].(types.String).ValueString(),
+				"enforce_api_limits": data.Configuration.Attributes()["enforce_api_limits"].(types.Bool).ValueBool(),
+				"daily_api_calls":    int(data.Configuration.Attributes()["daily_api_calls"].(types.Int64).ValueInt64()),
+				"concurrent_imports": int(data.Configuration.Attributes()["concurrent_imports"].(types.Int64).ValueInt64()),
 			},
-		},
-		polytomic.WithIdempotencyKey(uuid.NewString()),
-		polytomic.SkipConfigValidation(),
-	)
+			Validate: pointer.ToBool(false),
+		})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))
 		return
 	}
 
-	data.Id = types.StringValue(updated.ID)
-	data.Name = types.StringValue(updated.Name)
-	data.Organization = types.StringValue(updated.OrganizationId)
+	data.Id = types.StringPointerValue(updated.Data.Id)
+	data.Name = types.StringPointerValue(updated.Data.Name)
+	data.Organization = types.StringPointerValue(updated.Data.OrganizationId)
 
-	var output polytomic.MarketoConfiguration
-	cfg := &mapstructure.DecoderConfig{
-		Result: &output,
+	conf := MarketoConf{}
+	err = mapstructure.Decode(updated.Data.Configuration, &conf)
+	if err != nil {
+		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error decoding connection configuration: %s", err))
 	}
-	decoder, _ := mapstructure.NewDecoder(cfg)
-	decoder.Decode(updated.Configuration)
+
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"client_id":          types.StringType,
 		"client_secret":      types.StringType,
@@ -272,12 +283,11 @@ func (r *MarketoConnectionResource) Update(ctx context.Context, req resource.Upd
 		"enforce_api_limits": types.BoolType,
 		"daily_api_calls":    types.NumberType,
 		"concurrent_imports": types.NumberType,
-	}, output)
+	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
-
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
@@ -293,43 +303,46 @@ func (r *MarketoConnectionResource) Delete(ctx context.Context, req resource.Del
 	}
 
 	if data.ForceDestroy.ValueBool() {
-		err := r.client.Connections().Delete(ctx, uuid.MustParse(data.Id.ValueString()), polytomic.WithForceDelete())
+		err := r.client.Connections.Remove(ctx, data.Id.ValueString(), &polytomic.ConnectionsRemoveRequest{
+			Force: pointer.ToBool(true),
+		})
 		if err != nil {
-			pErr := polytomic.ApiError{}
+			pErr := &polytomic.NotFoundError{}
 			if errors.As(err, &pErr) {
-				if pErr.StatusCode == http.StatusNotFound {
-					resp.State.RemoveResource(ctx)
-					return
-				}
+				resp.State.RemoveResource(ctx)
+				return
 			}
+
 			resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting connection: %s", err))
 		}
 		return
 	}
 
-	err := r.client.Connections().Delete(ctx, uuid.MustParse(data.Id.ValueString()))
+	err := r.client.Connections.Remove(ctx, data.Id.ValueString(), &polytomic.ConnectionsRemoveRequest{
+		Force: pointer.ToBool(false),
+	})
 	if err != nil {
-		pErr := polytomic.ApiError{}
+		pErr := &polytomic.NotFoundError{}
 		if errors.As(err, &pErr) {
-			if pErr.StatusCode == http.StatusNotFound {
-				resp.State.RemoveResource(ctx)
-				return
-			}
-			if strings.Contains(pErr.Message, "connection in use") {
-				for _, meta := range pErr.Metadata {
-					info := meta.(map[string]interface{})
-					resp.Diagnostics.AddError("Connection in use",
-						fmt.Sprintf("Connection is used by %s \"%s\" (%s). Please remove before deleting this connection.",
-							info["type"], info["name"], info["id"]),
-					)
-				}
-				return
-			}
+			resp.State.RemoveResource(ctx)
+			return
 		}
-
-		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting connection: %s", err))
-		return
 	}
+	pErr := &polytomic.UnprocessableEntityError{}
+	if errors.As(err, &pErr) {
+		if strings.Contains(*pErr.Body.Message, "connection in use") {
+			for _, meta := range pErr.Body.Metadata.([]interface{}) {
+				info := meta.(map[string]interface{})
+				resp.Diagnostics.AddError("Connection in use",
+					fmt.Sprintf("Connection is used by %s \"%s\" (%s). Please remove before deleting this connection.",
+						info["type"], info["name"], info["id"]),
+				)
+			}
+			return
+		}
+	}
+
+	resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting connection: %s", err))
 
 }
 
@@ -343,7 +356,7 @@ func (r *MarketoConnectionResource) Configure(ctx context.Context, req resource.
 		return
 	}
 
-	client, ok := req.ProviderData.(*polytomic.Client)
+	client, ok := req.ProviderData.(*ptclient.Client)
 
 	if !ok {
 		resp.Diagnostics.AddError(

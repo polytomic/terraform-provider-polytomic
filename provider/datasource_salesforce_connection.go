@@ -7,14 +7,12 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/mitchellh/mapstructure"
-	"github.com/polytomic/polytomic-go"
+	ptclient "github.com/polytomic/polytomic-go/client"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -22,7 +20,7 @@ var _ datasource.DataSource = &SalesforceConnectionDataSource{}
 
 // ExampleDataSource defines the data source implementation.
 type SalesforceConnectionDataSource struct {
-	client *polytomic.Client
+	client *ptclient.Client
 }
 
 func (d *SalesforceConnectionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
@@ -92,7 +90,7 @@ func (d *SalesforceConnectionDataSource) Configure(ctx context.Context, req data
 		return
 	}
 
-	client, ok := req.ProviderData.(*polytomic.Client)
+	client, ok := req.ProviderData.(*ptclient.Client)
 
 	if !ok {
 		resp.Diagnostics.AddError(
@@ -117,7 +115,7 @@ func (d *SalesforceConnectionDataSource) Read(ctx context.Context, req datasourc
 	}
 
 	// Get the connection
-	connection, err := d.client.Connections().Get(ctx, uuid.MustParse(data.Id.ValueString()))
+	connection, err := d.client.Connections.Get(ctx, data.Id.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection", err.Error())
 		return
@@ -125,31 +123,24 @@ func (d *SalesforceConnectionDataSource) Read(ctx context.Context, req datasourc
 
 	// For the purposes of this example code, hardcoding a response value to
 	// save into the Terraform state.
-	data.Id = types.StringValue(connection.ID)
-	data.Name = types.StringValue(connection.Name)
-	data.Organization = types.StringValue(connection.OrganizationId)
-	var conf polytomic.SalesforceConfiguration
-	err = mapstructure.Decode(connection.Configuration, &conf)
-	if err != nil {
-		resp.Diagnostics.AddError("Error decoding connection", err.Error())
-		return
-	}
-
+	data.Id = types.StringPointerValue(connection.Data.Id)
+	data.Name = types.StringPointerValue(connection.Data.Name)
+	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
 	var diags diag.Diagnostics
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttributeTypes(ctx),
 		map[string]attr.Value{
 			"username": types.StringValue(
-				conf.Username,
+				getValueOrEmpty(connection.Data.Configuration["username"], "string").(string),
 			),
 			"domain": types.StringValue(
-				conf.Domain,
+				getValueOrEmpty(connection.Data.Configuration["domain"], "string").(string),
 			),
 			"instance_url": types.StringValue(
-				conf.InstanceURL,
+				getValueOrEmpty(connection.Data.Configuration["instance_url"], "string").(string),
 			),
 			"api_version": types.Int64Value(
-				int64(conf.APIVersion),
+				getValueOrEmpty(connection.Data.Configuration["api_version"], "int64").(int64),
 			),
 		},
 	)

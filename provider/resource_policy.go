@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -16,6 +15,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/polytomic/polytomic-go"
+	ptclient "github.com/polytomic/polytomic-go/client"
+	ptcore "github.com/polytomic/polytomic-go/core"
+	"github.com/polytomic/polytomic-go/permissions"
 )
 
 var _ resource.Resource = &policyResource{}
@@ -73,7 +75,7 @@ type policyResourceData struct {
 }
 
 type policyResource struct {
-	client *polytomic.Client
+	client *ptclient.Client
 }
 
 func (r *policyResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -86,21 +88,20 @@ func (r *policyResource) Create(ctx context.Context, req resource.CreateRequest,
 		return
 	}
 
-	var policyActions []polytomic.PolicyAction
+	var policyActions []*polytomic.PolicyAction
 	diags = data.PolicyActions.ElementsAs(ctx, &policyActions, true)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	policy, err := r.client.Permissions().CreatePolicy(
+	policy, err := r.client.Permissions.Policies.Create(
 		ctx,
-		polytomic.PolicyRequest{
+		&permissions.CreatePolicyRequest{
 			Name:           data.Name.ValueString(),
-			OrganizationID: data.Organization.ValueString(),
+			OrganizationId: data.Organization.ValueStringPointer(),
 			PolicyActions:  policyActions,
 		},
-		polytomic.WithIdempotencyKey(uuid.NewString()),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating policy: %s", err))
@@ -114,14 +115,14 @@ func (r *policyResource) Create(ctx context.Context, req resource.CreateRequest,
 	// We only want to track the actions in the configuration
 	// additional actions may be returned by the API
 	// and we don't want to track them in the state
-	var prunedPolicyActions []polytomic.PolicyAction
-	for _, action := range policy.PolicyActions {
+	var prunedPolicyActions []*polytomic.PolicyAction
+	for _, action := range policy.Data.PolicyActions {
 		if tracked[action.Action] {
 			prunedPolicyActions = append(prunedPolicyActions, action)
 			continue
 		}
 
-		if action.RoleIDs != nil && len(action.RoleIDs) > 0 {
+		if action.RoleIds != nil && len(action.RoleIds) > 0 {
 			resp.Diagnostics.AddWarning(
 				"Policy has actions not tracked by Terraform",
 				fmt.Sprintf("Policy action %s has roles set but is not tracked in the state. This may cause data to be overwritten",
@@ -140,9 +141,9 @@ func (r *policyResource) Create(ctx context.Context, req resource.CreateRequest,
 		return
 	}
 
-	data.Id = types.StringValue(policy.ID)
-	data.Name = types.StringValue(policy.Name)
-	data.Organization = types.StringValue(policy.OrganizationID)
+	data.Id = types.StringPointerValue(policy.Data.Id)
+	data.Name = types.StringPointerValue(policy.Data.Name)
+	data.Organization = types.StringPointerValue(policy.Data.OrganizationId)
 	data.PolicyActions = resultPolicies
 
 	diags = resp.State.Set(ctx, &data)
@@ -166,9 +167,9 @@ func (r *policyResource) Read(ctx context.Context, req resource.ReadRequest, res
 		return
 	}
 
-	policy, err := r.client.Permissions().GetPolicy(ctx, data.Id.ValueString())
+	policy, err := r.client.Permissions.Policies.Get(ctx, data.Id.ValueString())
 	if err != nil {
-		pErr := polytomic.ApiError{}
+		pErr := &ptcore.APIError{}
 		if errors.As(err, &pErr) {
 			if pErr.StatusCode == http.StatusNotFound {
 				resp.State.RemoveResource(ctx)
@@ -186,14 +187,14 @@ func (r *policyResource) Read(ctx context.Context, req resource.ReadRequest, res
 	// We only want to track the actions in the configuration
 	// additional actions may be returned by the API
 	// and we don't want to track them in the state
-	var prunedPolicyActions []polytomic.PolicyAction
-	for _, action := range policy.PolicyActions {
+	var prunedPolicyActions []*polytomic.PolicyAction
+	for _, action := range policy.Data.PolicyActions {
 		if tracked[action.Action] {
 			prunedPolicyActions = append(prunedPolicyActions, action)
 			continue
 		}
 
-		if action.RoleIDs != nil && len(action.RoleIDs) > 0 {
+		if action.RoleIds != nil && len(action.RoleIds) > 0 {
 			resp.Diagnostics.AddWarning(
 				"Policy has actions not tracked by Terraform",
 				fmt.Sprintf("Policy action %s has roles set but is not tracked in the state. This may cause data to be overwritten",
@@ -213,9 +214,9 @@ func (r *policyResource) Read(ctx context.Context, req resource.ReadRequest, res
 		return
 	}
 
-	data.Id = types.StringValue(policy.ID)
-	data.Name = types.StringValue(policy.Name)
-	data.Organization = types.StringValue(policy.OrganizationID)
+	data.Id = types.StringPointerValue(policy.Data.Id)
+	data.Name = types.StringPointerValue(policy.Data.Name)
+	data.Organization = types.StringPointerValue(policy.Data.OrganizationId)
 	data.PolicyActions = resultPolicies
 
 	diags = resp.State.Set(ctx, &data)
@@ -231,22 +232,21 @@ func (r *policyResource) Update(ctx context.Context, req resource.UpdateRequest,
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	var policyActions []polytomic.PolicyAction
+	var policyActions []*polytomic.PolicyAction
 	diags = data.PolicyActions.ElementsAs(ctx, &policyActions, true)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	policy, err := r.client.Permissions().UpdatePolicy(
+	policy, err := r.client.Permissions.Policies.Update(
 		ctx,
 		data.Id.ValueString(),
-		polytomic.PolicyRequest{
+		&permissions.UpdatePolicyRequest{
 			Name:           data.Name.ValueString(),
-			OrganizationID: data.Organization.ValueString(),
+			OrganizationId: data.Organization.ValueStringPointer(),
 			PolicyActions:  policyActions,
 		},
-		polytomic.WithIdempotencyKey(uuid.NewString()),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating policy: %s", err))
@@ -260,14 +260,14 @@ func (r *policyResource) Update(ctx context.Context, req resource.UpdateRequest,
 	// We only want to track the actions in the configuration
 	// additional actions may be returned by the API
 	// and we don't want to track them in the state
-	var prunedPolicyActions []polytomic.PolicyAction
-	for _, action := range policy.PolicyActions {
+	var prunedPolicyActions []*polytomic.PolicyAction
+	for _, action := range policy.Data.PolicyActions {
 		if tracked[action.Action] {
 			prunedPolicyActions = append(prunedPolicyActions, action)
 			continue
 		}
 
-		if action.RoleIDs != nil && len(action.RoleIDs) > 0 {
+		if action.RoleIds != nil && len(action.RoleIds) > 0 {
 			resp.Diagnostics.AddWarning(
 				"Policy has actions not tracked by Terraform",
 				fmt.Sprintf("Policy action %s has roles set but is not tracked in the state. This may cause data to be overwritten",
@@ -287,9 +287,9 @@ func (r *policyResource) Update(ctx context.Context, req resource.UpdateRequest,
 		return
 	}
 
-	data.Id = types.StringValue(policy.ID)
-	data.Name = types.StringValue(policy.Name)
-	data.Organization = types.StringValue(policy.OrganizationID)
+	data.Id = types.StringPointerValue(policy.Data.Id)
+	data.Name = types.StringPointerValue(policy.Data.Name)
+	data.Organization = types.StringPointerValue(policy.Data.OrganizationId)
 	data.PolicyActions = resultPolicies
 
 	diags = resp.State.Set(ctx, &data)
@@ -306,7 +306,7 @@ func (r *policyResource) Delete(ctx context.Context, req resource.DeleteRequest,
 		return
 	}
 
-	err := r.client.Permissions().DeletePolicy(ctx, data.Id.ValueString())
+	err := r.client.Permissions.Policies.Remove(ctx, data.Id.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting policy: %s", err))
 		return
@@ -323,7 +323,7 @@ func (r *policyResource) Configure(ctx context.Context, req resource.ConfigureRe
 		return
 	}
 
-	client, ok := req.ProviderData.(*polytomic.Client)
+	client, ok := req.ProviderData.(*ptclient.Client)
 
 	if !ok {
 		resp.Diagnostics.AddError(

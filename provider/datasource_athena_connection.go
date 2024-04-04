@@ -7,14 +7,12 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/mitchellh/mapstructure"
-	"github.com/polytomic/polytomic-go"
+	ptclient "github.com/polytomic/polytomic-go/client"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -22,7 +20,7 @@ var _ datasource.DataSource = &AthenaConnectionDataSource{}
 
 // ExampleDataSource defines the data source implementation.
 type AthenaConnectionDataSource struct {
-	client *polytomic.Client
+	client *ptclient.Client
 }
 
 func (d *AthenaConnectionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
@@ -56,9 +54,9 @@ func (d *AthenaConnectionDataSource) Schema(ctx context.Context, req datasource.
 					},
 					"outputbucket": schema.StringAttribute{
 						MarkdownDescription: "S3 bucket for output storage, with optional prefix. Examples: `bucket-name`, `bucket-name/prefix`.",
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
+						Required:            true,
+						Optional:            false,
+						Computed:            false,
 						Sensitive:           false,
 					},
 				},
@@ -78,7 +76,7 @@ func (d *AthenaConnectionDataSource) Configure(ctx context.Context, req datasour
 		return
 	}
 
-	client, ok := req.ProviderData.(*polytomic.Client)
+	client, ok := req.ProviderData.(*ptclient.Client)
 
 	if !ok {
 		resp.Diagnostics.AddError(
@@ -103,7 +101,7 @@ func (d *AthenaConnectionDataSource) Read(ctx context.Context, req datasource.Re
 	}
 
 	// Get the connection
-	connection, err := d.client.Connections().Get(ctx, uuid.MustParse(data.Id.ValueString()))
+	connection, err := d.client.Connections.Get(ctx, data.Id.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection", err.Error())
 		return
@@ -111,25 +109,18 @@ func (d *AthenaConnectionDataSource) Read(ctx context.Context, req datasource.Re
 
 	// For the purposes of this example code, hardcoding a response value to
 	// save into the Terraform state.
-	data.Id = types.StringValue(connection.ID)
-	data.Name = types.StringValue(connection.Name)
-	data.Organization = types.StringValue(connection.OrganizationId)
-	var conf polytomic.AthenaConfiguration
-	err = mapstructure.Decode(connection.Configuration, &conf)
-	if err != nil {
-		resp.Diagnostics.AddError("Error decoding connection", err.Error())
-		return
-	}
-
+	data.Id = types.StringPointerValue(connection.Data.Id)
+	data.Name = types.StringPointerValue(connection.Data.Name)
+	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
 	var diags diag.Diagnostics
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttributeTypes(ctx),
 		map[string]attr.Value{
 			"region": types.StringValue(
-				conf.Region,
+				getValueOrEmpty(connection.Data.Configuration["region"], "string").(string),
 			),
 			"outputbucket": types.StringValue(
-				conf.OutputBucket,
+				getValueOrEmpty(connection.Data.Configuration["outputbucket"], "string").(string),
 			),
 		},
 	)

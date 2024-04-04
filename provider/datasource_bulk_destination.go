@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/polytomic/polytomic-go"
+	ptclient "github.com/polytomic/polytomic-go/client"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -17,7 +17,7 @@ var _ datasource.DataSource = &bulkDestinationDatasource{}
 
 // ExampleDataSource defines the data source implementation.
 type bulkDestinationDatasource struct {
-	client *polytomic.Client
+	client *ptclient.Client
 }
 
 func (d *bulkDestinationDatasource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
@@ -58,7 +58,7 @@ func (d *bulkDestinationDatasource) Configure(ctx context.Context, req datasourc
 		return
 	}
 
-	client, ok := req.ProviderData.(*polytomic.Client)
+	client, ok := req.ProviderData.(*ptclient.Client)
 
 	if !ok {
 		resp.Diagnostics.AddError(
@@ -82,7 +82,7 @@ func (d *bulkDestinationDatasource) Read(ctx context.Context, req datasource.Rea
 		return
 	}
 
-	dest, err := d.client.Bulk().GetDestination(ctx, data.ConnectionID.ValueString())
+	dest, err := d.client.BulkSync.GetDestination(ctx, data.ConnectionID.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection", err.Error())
 		return
@@ -94,13 +94,13 @@ func (d *bulkDestinationDatasource) Read(ctx context.Context, req datasource.Rea
 			"label":       types.StringType,
 			"description": types.StringType,
 		},
-	}, dest.Modes)
+	}, dest.Data.Modes)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	raw := dest.Configuration.(map[string]interface{})
+	raw := dest.Data.Configuration
 	required := make([]string, len(raw))
 	i := 0
 	for k := range raw {

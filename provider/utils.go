@@ -89,3 +89,35 @@ func stringy(v any) string {
 		panic(fmt.Sprintf("unsupported type %T", t))
 	}
 }
+
+func getValueOrEmpty(v any, typ string) any {
+	switch typ {
+	case "string":
+		if v == nil {
+			return ""
+		}
+		return v.(string)
+	case "bool":
+		if v == nil {
+			return false
+		}
+		return v.(bool)
+	case "int":
+		if v == nil {
+			return 0
+		}
+		return v.(int)
+	case "float64":
+		if v == nil {
+			return 0.0
+		}
+		return v.(float64)
+	case "int64":
+		if v == nil {
+			return int64(0)
+		}
+		return v.(int64)
+	default:
+		panic(fmt.Sprintf("unsupported type %s", typ))
+	}
+}

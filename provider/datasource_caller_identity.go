@@ -7,14 +7,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/polytomic/polytomic-go"
+	ptclient "github.com/polytomic/polytomic-go/client"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
 var _ datasource.DataSource = &identityDatasource{}
 
 type identityDatasource struct {
-	client *polytomic.Client
+	client *ptclient.Client
 }
 
 type identityDatasourceData struct {
@@ -83,7 +83,7 @@ func (id *identityDatasource) Configure(ctx context.Context, req datasource.Conf
 		return
 	}
 
-	client, ok := req.ProviderData.(*polytomic.Client)
+	client, ok := req.ProviderData.(*ptclient.Client)
 
 	if !ok {
 		resp.Diagnostics.AddError(
@@ -108,21 +108,21 @@ func (id *identityDatasource) Read(ctx context.Context, req datasource.ReadReque
 	}
 
 	// Get the schemas
-	identity, err := id.client.Identity().Get(ctx)
+	identity, err := id.client.Identity.Get(ctx)
 	if err != nil {
 		resp.Diagnostics.AddError("error getting identity", err.Error())
 		return
 	}
 
-	data.ID = types.StringValue(identity.ID.String())
-	data.Email = types.StringValue(identity.Email)
-	data.Role = types.StringValue(identity.Role)
-	data.OrganizationID = types.StringValue(identity.OrganizationID.String())
-	data.OrganizationName = types.StringValue(identity.Organization)
-	data.IsUser = types.BoolValue(identity.IsUser)
-	data.IsOrganization = types.BoolValue(identity.IsOrganization)
-	data.IsPartner = types.BoolValue(identity.IsPartner)
-	data.IsSystem = types.BoolValue(identity.IsSystem)
+	data.ID = types.StringPointerValue(identity.Data.Id)
+	data.Email = types.StringPointerValue(identity.Data.Email)
+	data.Role = types.StringPointerValue(identity.Data.Role)
+	data.OrganizationID = types.StringPointerValue(identity.Data.OrganizationId)
+	data.OrganizationName = types.StringPointerValue(identity.Data.OrganizationName)
+	data.IsUser = types.BoolPointerValue(identity.Data.IsUser)
+	data.IsOrganization = types.BoolPointerValue(identity.Data.IsOrganization)
+	data.IsPartner = types.BoolPointerValue(identity.Data.IsPartner)
+	data.IsSystem = types.BoolPointerValue(identity.Data.IsSystem)
 
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)

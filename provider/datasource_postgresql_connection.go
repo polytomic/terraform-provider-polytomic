@@ -7,14 +7,12 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/mitchellh/mapstructure"
-	"github.com/polytomic/polytomic-go"
+	ptclient "github.com/polytomic/polytomic-go/client"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -22,7 +20,7 @@ var _ datasource.DataSource = &PostgresqlConnectionDataSource{}
 
 // ExampleDataSource defines the data source implementation.
 type PostgresqlConnectionDataSource struct {
-	client *polytomic.Client
+	client *ptclient.Client
 }
 
 func (d *PostgresqlConnectionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
@@ -162,7 +160,7 @@ func (d *PostgresqlConnectionDataSource) Configure(ctx context.Context, req data
 		return
 	}
 
-	client, ok := req.ProviderData.(*polytomic.Client)
+	client, ok := req.ProviderData.(*ptclient.Client)
 
 	if !ok {
 		resp.Diagnostics.AddError(
@@ -187,7 +185,7 @@ func (d *PostgresqlConnectionDataSource) Read(ctx context.Context, req datasourc
 	}
 
 	// Get the connection
-	connection, err := d.client.Connections().Get(ctx, uuid.MustParse(data.Id.ValueString()))
+	connection, err := d.client.Connections.Get(ctx, data.Id.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection", err.Error())
 		return
@@ -195,61 +193,54 @@ func (d *PostgresqlConnectionDataSource) Read(ctx context.Context, req datasourc
 
 	// For the purposes of this example code, hardcoding a response value to
 	// save into the Terraform state.
-	data.Id = types.StringValue(connection.ID)
-	data.Name = types.StringValue(connection.Name)
-	data.Organization = types.StringValue(connection.OrganizationId)
-	var conf polytomic.PostgresqlConfiguration
-	err = mapstructure.Decode(connection.Configuration, &conf)
-	if err != nil {
-		resp.Diagnostics.AddError("Error decoding connection", err.Error())
-		return
-	}
-
+	data.Id = types.StringPointerValue(connection.Data.Id)
+	data.Name = types.StringPointerValue(connection.Data.Name)
+	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
 	var diags diag.Diagnostics
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttributeTypes(ctx),
 		map[string]attr.Value{
 			"hostname": types.StringValue(
-				conf.Hostname,
+				getValueOrEmpty(connection.Data.Configuration["hostname"], "string").(string),
 			),
 			"username": types.StringValue(
-				conf.Username,
+				getValueOrEmpty(connection.Data.Configuration["username"], "string").(string),
 			),
 			"database": types.StringValue(
-				conf.Database,
+				getValueOrEmpty(connection.Data.Configuration["database"], "string").(string),
 			),
 			"port": types.Int64Value(
-				int64(conf.Port),
+				getValueOrEmpty(connection.Data.Configuration["port"], "int64").(int64),
 			),
 			"ssl": types.BoolValue(
-				conf.SSL,
+				getValueOrEmpty(connection.Data.Configuration["ssl"], "bool").(bool),
 			),
 			"client_certs": types.BoolValue(
-				conf.ClientCerts,
+				getValueOrEmpty(connection.Data.Configuration["client_certs"], "bool").(bool),
 			),
 			"client_certificate": types.StringValue(
-				conf.ClientCertificate,
+				getValueOrEmpty(connection.Data.Configuration["client_certificate"], "string").(string),
 			),
 			"ca_cert": types.StringValue(
-				conf.CACert,
+				getValueOrEmpty(connection.Data.Configuration["ca_cert"], "string").(string),
 			),
 			"change_detection": types.BoolValue(
-				conf.ChangeDetection,
+				getValueOrEmpty(connection.Data.Configuration["change_detection"], "bool").(bool),
 			),
 			"publication": types.StringValue(
-				conf.Publication,
+				getValueOrEmpty(connection.Data.Configuration["publication"], "string").(string),
 			),
 			"ssh": types.BoolValue(
-				conf.SSH,
+				getValueOrEmpty(connection.Data.Configuration["ssh"], "bool").(bool),
 			),
 			"ssh_user": types.StringValue(
-				conf.SSHUser,
+				getValueOrEmpty(connection.Data.Configuration["ssh_user"], "string").(string),
 			),
 			"ssh_host": types.StringValue(
-				conf.SSHHost,
+				getValueOrEmpty(connection.Data.Configuration["ssh_host"], "string").(string),
 			),
 			"ssh_port": types.Int64Value(
-				int64(conf.SSHPort),
+				getValueOrEmpty(connection.Data.Configuration["ssh_port"], "int64").(int64),
 			),
 		},
 	)
