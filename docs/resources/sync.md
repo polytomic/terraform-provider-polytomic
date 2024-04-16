@@ -98,9 +98,11 @@ Required:
 
 Optional:
 
+- `connection_id` (String)
 - `day_of_month` (String)
 - `day_of_week` (String)
 - `hour` (String)
+- `job_id` (Number)
 - `minute` (String)
 - `month` (String)
 - `run_after` (Attributes) (see [below for nested schema](#nestedatt--schedule--run_after))

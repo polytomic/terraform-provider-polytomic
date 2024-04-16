@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"sort"
 
-	"github.com/google/uuid"
+	"github.com/AlekSi/pointer"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -19,6 +19,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/polytomic/polytomic-go"
+	"github.com/polytomic/polytomic-go/bulksync"
+	ptclient "github.com/polytomic/polytomic-go/client"
+	ptcore "github.com/polytomic/polytomic-go/core"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -154,7 +157,7 @@ func (r *bulkSyncResource) Configure(ctx context.Context, req resource.Configure
 		return
 	}
 
-	client, ok := req.ProviderData.(*polytomic.Client)
+	client, ok := req.ProviderData.(*ptclient.Client)
 
 	if !ok {
 		resp.Diagnostics.AddError(
@@ -189,7 +192,16 @@ type bulkSyncResourceData struct {
 }
 
 type bulkSyncResource struct {
-	client *polytomic.Client
+	client *ptclient.Client
+}
+
+type BulkSchedule struct {
+	DayOfMonth *string `json:"day_of_month" url:"day_of_month,omitempty" tfsdk:"day_of_month"`
+	DayOfWeek  *string `json:"day_of_week" url:"day_of_week,omitempty" tfsdk:"day_of_week"`
+	Frequency  string  `json:"frequency" url:"frequency,omitempty" tfsdk:"frequency"`
+	Hour       *string `json:"hour" url:"hour,omitempty" tfsdk:"hour"`
+	Minute     *string `json:"minute" url:"minute,omitempty" tfsdk:"minute"`
+	Month      *string `json:"month" url:"month,omitempty" tfsdk:"month"`
 }
 
 func (r *bulkSyncResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -217,7 +229,7 @@ func (r *bulkSyncResource) Create(ctx context.Context, req resource.CreateReques
 		return
 	}
 
-	var schedule polytomic.BulkSchedule
+	var schedule BulkSchedule
 	diags = data.Schedule.As(ctx, &schedule, basetypes.ObjectAsOptions{
 		UnhandledNullAsEmpty:    true,
 		UnhandledUnknownAsEmpty: true,
@@ -225,6 +237,15 @@ func (r *bulkSyncResource) Create(ctx context.Context, req resource.CreateReques
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
+	}
+
+	sche := &polytomic.BulkSchedule{
+		DayOfMonth: schedule.DayOfMonth,
+		DayOfWeek:  schedule.DayOfWeek,
+		Frequency:  polytomic.ScheduleFrequency(schedule.Frequency),
+		Hour:       schedule.Hour,
+		Minute:     schedule.Minute,
+		Month:      schedule.Month,
 	}
 
 	destConfigRaw := make(map[string]string)
@@ -269,22 +290,21 @@ func (r *bulkSyncResource) Create(ctx context.Context, req resource.CreateReques
 		}
 	}
 
-	created, err := r.client.Bulk().CreateBulkSync(ctx,
-		polytomic.BulkSyncRequest{
-			OrganizationID:           data.Organization.ValueString(),
+	created, err := r.client.BulkSync.Create(ctx,
+		&polytomic.CreateBulkSyncRequest{
+			OrganizationId:           data.Organization.ValueStringPointer(),
 			Name:                     data.Name.ValueString(),
-			DestConnectionID:         data.DestConnectionID.ValueString(),
-			SourceConnectionID:       data.SourceConnectionID.ValueString(),
-			Mode:                     data.Mode.ValueString(),
-			Discover:                 data.Discover.ValueBool(),
-			Active:                   data.Active.ValueBool(),
+			DestinationConnectionId:  data.DestConnectionID.ValueString(),
+			SourceConnectionId:       data.SourceConnectionID.ValueString(),
+			Mode:                     data.Mode.ValueStringPointer(),
+			Discover:                 data.Discover.ValueBoolPointer(),
+			Active:                   data.Active.ValueBoolPointer(),
 			Schemas:                  schemas,
 			Policies:                 policies,
-			Schedule:                 schedule,
+			Schedule:                 sche,
 			DestinationConfiguration: destConf,
 			SourceConfiguration:      sourceConf,
 		},
-		polytomic.WithIdempotencyKey(uuid.NewString()),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating bulk sync: %s", err))
@@ -298,7 +318,14 @@ func (r *bulkSyncResource) Create(ctx context.Context, req resource.CreateReques
 		"minute":       types.StringType,
 		"month":        types.StringType,
 		"day_of_month": types.StringType,
-	}, created.Schedule)
+	}, BulkSchedule{
+		DayOfMonth: created.Data.Schedule.DayOfMonth,
+		DayOfWeek:  created.Data.Schedule.DayOfWeek,
+		Frequency:  string(created.Data.Schedule.Frequency),
+		Hour:       created.Data.Schedule.Hour,
+		Minute:     created.Data.Schedule.Minute,
+		Month:      created.Data.Schedule.Month,
+	})
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -311,7 +338,7 @@ func (r *bulkSyncResource) Create(ctx context.Context, req resource.CreateReques
 	}
 
 	sourceConfRaw := make(map[string]string)
-	for k, v := range created.SourceConfiguration {
+	for k, v := range created.Data.SourceConfiguration {
 		if k == "advanced" {
 			advanced, err := json.Marshal(v)
 			if err != nil {
@@ -349,14 +376,14 @@ func (r *bulkSyncResource) Create(ctx context.Context, req resource.CreateReques
 		return
 	}
 
-	data.Id = types.StringValue(created.ID)
-	data.Organization = types.StringValue(created.OrganizationID)
-	data.Name = types.StringValue(created.Name)
-	data.DestConnectionID = types.StringValue(created.DestConnectionID)
-	data.SourceConnectionID = types.StringValue(created.SourceConnectionID)
-	data.Mode = types.StringValue(created.Mode)
-	data.Discover = types.BoolValue(created.Discover)
-	data.Active = types.BoolValue(created.Active)
+	data.Id = types.StringPointerValue(created.Data.Id)
+	data.Organization = types.StringPointerValue(created.Data.OrganizationId)
+	data.Name = types.StringPointerValue(created.Data.Name)
+	data.DestConnectionID = types.StringPointerValue(created.Data.DestinationConnectionId)
+	data.SourceConnectionID = types.StringPointerValue(created.Data.SourceConnectionId)
+	data.Mode = types.StringPointerValue(created.Data.Mode)
+	data.Discover = types.BoolPointerValue(created.Data.Discover)
+	data.Active = types.BoolPointerValue(created.Data.Active)
 	data.Schedule = sch
 	data.Schemas = schemaVal
 	data.SourceConfiguration = sourceConfVal
@@ -379,9 +406,9 @@ func (r *bulkSyncResource) Read(ctx context.Context, req resource.ReadRequest, r
 		return
 	}
 
-	bulkSync, err := r.client.Bulk().GetBulkSync(ctx, data.Id.ValueString())
+	bulkSync, err := r.client.BulkSync.Get(ctx, data.Id.ValueString(), &polytomic.BulkSyncGetRequest{})
 	if err != nil {
-		pErr := polytomic.ApiError{}
+		pErr := &ptcore.APIError{}
 		if errors.As(err, &pErr) {
 			if pErr.StatusCode == http.StatusNotFound {
 				resp.State.RemoveResource(ctx)
@@ -399,22 +426,29 @@ func (r *bulkSyncResource) Read(ctx context.Context, req resource.ReadRequest, r
 		"minute":       types.StringType,
 		"month":        types.StringType,
 		"day_of_month": types.StringType,
-	}, bulkSync.Schedule)
+	}, BulkSchedule{
+		DayOfMonth: bulkSync.Data.Schedule.DayOfMonth,
+		DayOfWeek:  bulkSync.Data.Schedule.DayOfWeek,
+		Frequency:  string(bulkSync.Data.Schedule.Frequency),
+		Hour:       bulkSync.Data.Schedule.Hour,
+		Minute:     bulkSync.Data.Schedule.Minute,
+		Month:      bulkSync.Data.Schedule.Month,
+	})
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
 
 	// Get schemas
-	var schemas []string
-	schemasRes, err := r.client.Bulk().GetBulkSyncSchemas(ctx, data.Id.ValueString())
+	var schemas []*string
+	schemasRes, err := r.client.BulkSync.Schemas.List(ctx, data.Id.ValueString(), &bulksync.SchemasListRequest{})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error reading bulk sync schemas: %s", err))
 		return
 	}
-	for _, schema := range schemasRes {
-		if schema.Enabled {
-			schemas = append(schemas, schema.ID)
+	for _, schema := range schemasRes.Data {
+		if pointer.GetBool(schema.Enabled) {
+			schemas = append(schemas, schema.Id)
 		}
 	}
 
@@ -425,7 +459,7 @@ func (r *bulkSyncResource) Read(ctx context.Context, req resource.ReadRequest, r
 	}
 
 	sourceConfRaw := make(map[string]string)
-	for k, v := range bulkSync.SourceConfiguration {
+	for k, v := range bulkSync.Data.SourceConfiguration {
 		if k == "advanced" {
 			advanced, err := json.Marshal(v)
 			if err != nil {
@@ -445,7 +479,7 @@ func (r *bulkSyncResource) Read(ctx context.Context, req resource.ReadRequest, r
 	}
 
 	destConfRaw := make(map[string]string)
-	for k, v := range bulkSync.DestinationConfiguration {
+	for k, v := range bulkSync.Data.DestinationConfiguration {
 		if k == "advanced" {
 			advanced, err := json.Marshal(v)
 			if err != nil {
@@ -463,14 +497,14 @@ func (r *bulkSyncResource) Read(ctx context.Context, req resource.ReadRequest, r
 		return
 	}
 
-	data.Id = types.StringValue(bulkSync.ID)
-	data.Organization = types.StringValue(bulkSync.OrganizationID)
-	data.Name = types.StringValue(bulkSync.Name)
-	data.DestConnectionID = types.StringValue(bulkSync.DestConnectionID)
-	data.SourceConnectionID = types.StringValue(bulkSync.SourceConnectionID)
-	data.Mode = types.StringValue(bulkSync.Mode)
-	data.Discover = types.BoolValue(bulkSync.Discover)
-	data.Active = types.BoolValue(bulkSync.Active)
+	data.Id = types.StringPointerValue(bulkSync.Data.Id)
+	data.Organization = types.StringPointerValue(bulkSync.Data.OrganizationId)
+	data.Name = types.StringPointerValue(bulkSync.Data.Name)
+	data.DestConnectionID = types.StringPointerValue(bulkSync.Data.DestinationConnectionId)
+	data.SourceConnectionID = types.StringPointerValue(bulkSync.Data.SourceConnectionId)
+	data.Mode = types.StringPointerValue(bulkSync.Data.Mode)
+	data.Discover = types.BoolPointerValue(bulkSync.Data.Discover)
+	data.Active = types.BoolPointerValue(bulkSync.Data.Active)
 	data.Schedule = schedule
 	data.Schemas = schemaValue
 	data.SourceConfiguration = sourceConfVal
@@ -491,7 +525,7 @@ func (r *bulkSyncResource) Update(ctx context.Context, req resource.UpdateReques
 		return
 	}
 
-	var schedule polytomic.BulkSchedule
+	var schedule BulkSchedule
 	diags = data.Schedule.As(ctx, &schedule, basetypes.ObjectAsOptions{
 		UnhandledNullAsEmpty:    true,
 		UnhandledUnknownAsEmpty: true,
@@ -499,6 +533,15 @@ func (r *bulkSyncResource) Update(ctx context.Context, req resource.UpdateReques
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
+	}
+
+	sche := &polytomic.BulkSchedule{
+		DayOfMonth: schedule.DayOfMonth,
+		DayOfWeek:  schedule.DayOfWeek,
+		Frequency:  polytomic.ScheduleFrequency(schedule.Frequency),
+		Hour:       schedule.Hour,
+		Minute:     schedule.Minute,
+		Month:      schedule.Month,
 	}
 
 	var schemas []string
@@ -558,23 +601,22 @@ func (r *bulkSyncResource) Update(ctx context.Context, req resource.UpdateReques
 		}
 	}
 
-	updated, err := r.client.Bulk().UpdateBulkSync(ctx,
+	updated, err := r.client.BulkSync.Update(ctx,
 		data.Id.ValueString(),
-		polytomic.BulkSyncRequest{
-			OrganizationID:           data.Organization.ValueString(),
+		&polytomic.UpdateBulkSyncRequest{
+			OrganizationId:           data.Organization.ValueStringPointer(),
 			Name:                     data.Name.ValueString(),
-			DestConnectionID:         data.DestConnectionID.ValueString(),
-			SourceConnectionID:       data.SourceConnectionID.ValueString(),
-			Mode:                     data.Mode.ValueString(),
-			Discover:                 data.Discover.ValueBool(),
-			Active:                   data.Active.ValueBool(),
+			DestinationConnectionId:  data.DestConnectionID.ValueString(),
+			SourceConnectionId:       data.SourceConnectionID.ValueString(),
+			Mode:                     data.Mode.ValueStringPointer(),
+			Discover:                 data.Discover.ValueBoolPointer(),
+			Active:                   data.Active.ValueBoolPointer(),
 			Schemas:                  schemas,
 			Policies:                 policies,
-			Schedule:                 schedule,
+			Schedule:                 sche,
 			DestinationConfiguration: destConf,
 			SourceConfiguration:      sourceConf,
 		},
-		polytomic.WithIdempotencyKey(uuid.NewString()),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating organization: %s", err))
@@ -582,15 +624,17 @@ func (r *bulkSyncResource) Update(ctx context.Context, req resource.UpdateReques
 	}
 
 	// Get schemas
-	var respSchemas []string
-	schemasRes, err := r.client.Bulk().GetBulkSyncSchemas(ctx, data.Id.ValueString())
+	var respSchemas []*string
+	schemasRes, err := r.client.BulkSync.Schemas.List(ctx, data.Id.ValueString(), &bulksync.SchemasListRequest{Filters: map[string]*string{
+		"enabled": pointer.ToString("true"),
+	}})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error reading bulk sync schemas: %s", err))
 		return
 	}
-	for _, schema := range schemasRes {
-		if schema.Enabled {
-			respSchemas = append(respSchemas, schema.ID)
+	for _, schema := range schemasRes.Data {
+		if pointer.GetBool(schema.Enabled) {
+			respSchemas = append(respSchemas, schema.Id)
 		}
 	}
 
@@ -601,7 +645,14 @@ func (r *bulkSyncResource) Update(ctx context.Context, req resource.UpdateReques
 		"minute":       types.StringType,
 		"month":        types.StringType,
 		"day_of_month": types.StringType,
-	}, updated.Schedule)
+	}, BulkSchedule{
+		DayOfMonth: updated.Data.Schedule.DayOfMonth,
+		DayOfWeek:  updated.Data.Schedule.DayOfWeek,
+		Frequency:  string(updated.Data.Schedule.Frequency),
+		Hour:       updated.Data.Schedule.Hour,
+		Minute:     updated.Data.Schedule.Minute,
+		Month:      updated.Data.Schedule.Month,
+	})
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -614,7 +665,7 @@ func (r *bulkSyncResource) Update(ctx context.Context, req resource.UpdateReques
 	}
 
 	sourceConfRaw := make(map[string]string)
-	for k, v := range updated.SourceConfiguration {
+	for k, v := range updated.Data.SourceConfiguration {
 		if k == "advanced" {
 			advanced, err := json.Marshal(v)
 			if err != nil {
@@ -652,14 +703,14 @@ func (r *bulkSyncResource) Update(ctx context.Context, req resource.UpdateReques
 		return
 	}
 
-	data.Id = types.StringValue(updated.ID)
-	data.Organization = types.StringValue(updated.OrganizationID)
-	data.Name = types.StringValue(updated.Name)
-	data.DestConnectionID = types.StringValue(updated.DestConnectionID)
-	data.SourceConnectionID = types.StringValue(updated.SourceConnectionID)
-	data.Mode = types.StringValue(updated.Mode)
-	data.Discover = types.BoolValue(updated.Discover)
-	data.Active = types.BoolValue(updated.Active)
+	data.Id = types.StringPointerValue(updated.Data.Id)
+	data.Organization = types.StringPointerValue(updated.Data.OrganizationId)
+	data.Name = types.StringPointerValue(updated.Data.Name)
+	data.DestConnectionID = types.StringPointerValue(updated.Data.DestinationConnectionId)
+	data.SourceConnectionID = types.StringPointerValue(updated.Data.SourceConnectionId)
+	data.Mode = types.StringPointerValue(updated.Data.Mode)
+	data.Discover = types.BoolPointerValue(updated.Data.Discover)
+	data.Active = types.BoolPointerValue(updated.Data.Active)
 	data.Schedule = sch
 	data.Schemas = schemaValue
 	data.SourceConfiguration = sourceConfVal
@@ -680,7 +731,7 @@ func (r *bulkSyncResource) Delete(ctx context.Context, req resource.DeleteReques
 		return
 	}
 
-	err := r.client.Bulk().DeleteBulkSync(ctx, data.Id.ValueString())
+	err := r.client.BulkSync.Remove(ctx, data.Id.ValueString(), &polytomic.BulkSyncRemoveRequest{})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting organization: %s", err))
 		return

@@ -1,12 +1,14 @@
 package provider
 
 import (
+	"net/http"
 	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
-	"github.com/polytomic/polytomic-go"
+	ptclient "github.com/polytomic/polytomic-go/client"
+	ptoption "github.com/polytomic/polytomic-go/option"
 )
 
 // testAccProtoV6ProviderFactories are used to instantiate a provider during
@@ -31,21 +33,23 @@ func testAccPreCheck(t *testing.T) {
 	}
 }
 
-func testClient() *polytomic.Client {
+func testClient() *ptclient.Client {
 	deployURL := os.Getenv(PolytomicDeploymentURL)
 	deployKey := os.Getenv(PolytomicDeploymentKey)
 	apiKey := os.Getenv(PolytomicAPIKey)
 
-	var client *polytomic.Client
+	var client *ptclient.Client
 	if deployKey != "" {
-		client = polytomic.NewClient(
-			deployURL,
-			polytomic.DeploymentKey(deployKey),
+		client = ptclient.NewClient(
+			ptoption.WithBaseURL(deployURL),
+			ptoption.WithHTTPHeader(http.Header{
+				"Authorization ": []string{"Basic " + basicAuth(deployKey, "")},
+			}),
 		)
 	} else {
-		client = polytomic.NewClient(
-			deployURL,
-			polytomic.APIKey(apiKey),
+		client = ptclient.NewClient(
+			ptoption.WithBaseURL(deployURL),
+			ptoption.WithToken(apiKey),
 		)
 	}
 
