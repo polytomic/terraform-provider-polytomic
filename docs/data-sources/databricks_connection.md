@@ -43,6 +43,7 @@ Required:
 
 Optional:
 
+- `auth_mode` (String)
 - `aws_access_key_id` (String)
 - `s3_bucket_name` (String)
 - `s3_bucket_region` (String)

@@ -43,12 +43,22 @@ func typeConverter(value any) cty.Value {
 			case *string:
 				if v == nil {
 					continue
+				} else if *v == "" {
+					continue
 				}
 				config[k] = cty.StringVal(*v)
 			case string:
+				if v == "" {
+					continue
+				}
 				config[k] = cty.StringVal(v)
 			case int:
 				config[k] = cty.NumberIntVal(int64(v))
+			case *int:
+				if v == nil {
+					continue
+				}
+				config[k] = cty.NumberIntVal(int64(*v))
 			case float64:
 				config[k] = cty.NumberFloatVal(v)
 			case *bool:
@@ -105,6 +115,13 @@ func typeConverter(value any) cty.Value {
 					continue
 				}
 				config[k] = typeConverter(v)
+			case *polytomic.Source:
+				if v == nil {
+					continue
+				}
+				config[k] = typeConverter(v)
+			case polytomic.ScheduleFrequency:
+				config[k] = cty.StringVal(string(v))
 			default:
 				fmt.Printf("Unknown type for %s: %T in map\n", k, v)
 				continue
@@ -152,7 +169,6 @@ func typeConverter(value any) cty.Value {
 			}
 		}
 		return cty.ListVal(vals)
-
 	case map[string]*string:
 		config := make(map[string]cty.Value)
 		for k, v := range value {
@@ -178,6 +194,9 @@ func typeConverter(value any) cty.Value {
 		}
 		return cty.StringVal(*value)
 	case string:
+		if value == "" {
+			return cty.NilVal
+		}
 		return cty.StringVal(value)
 	case nil:
 		return cty.NilVal
@@ -185,6 +204,15 @@ func typeConverter(value any) cty.Value {
 		return cty.BoolVal(value)
 	case float64:
 		return cty.NumberFloatVal(value)
+	case *polytomic.Source:
+		if value == nil {
+			return cty.NilVal
+		}
+		config := map[string]cty.Value{
+			"field":    cty.StringVal(value.Field),
+			"model_id": cty.StringVal(value.ModelId),
+		}
+		return cty.ObjectVal(config)
 	default:
 		fmt.Printf("Unknown type: %T\n", value)
 		return cty.NilVal
@@ -195,6 +223,15 @@ func typeConverter(value any) cty.Value {
 // or []map[string]any with a jsonencode function.
 func wrapJSONEncode(v interface{}, wrapped ...string) hclwrite.Tokens {
 	var tokens hclwrite.Tokens
+
+	if len(wrapped) == 0 {
+		// Assume the whole thing is wrapped
+		tokens = append(tokens, hclwrite.Tokens{{Bytes: []byte("jsonencode(")}}...)
+		tokens = append(tokens, hclwrite.TokensForValue(typeConverter(v))...)
+		tokens = append(tokens, hclwrite.Tokens{{Bytes: []byte(")")}}...)
+		return tokens
+	}
+
 	switch v := v.(type) {
 	case map[string]any:
 		tokens = append(tokens, jsonEncodeMap(v, wrapped...)...)

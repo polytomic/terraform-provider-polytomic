@@ -5,9 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"strings"
 
-	"github.com/google/uuid"
+	"github.com/AlekSi/pointer"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -17,6 +16,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/polytomic/polytomic-go"
+	ptclient "github.com/polytomic/polytomic-go/client"
+	ptcore "github.com/polytomic/polytomic-go/core"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -81,7 +82,13 @@ func (r *WebhookConnectionResource) Metadata(ctx context.Context, req resource.M
 }
 
 type WebhookConnectionResource struct {
-	client *polytomic.Client
+	client *ptclient.Client
+}
+
+type WebhookConf struct {
+	URL     string             `json:"url" mapstructure:"url" tfsdk:"url"`
+	Secret  string             `json:"secret" mapstructure:"secret" tfsdk:"secret"`
+	Headers []RequestParameter `json:"headers" mapstructure:"headers" tfsdk:"headers"`
 }
 
 func (r *WebhookConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -94,7 +101,7 @@ func (r *WebhookConnectionResource) Create(ctx context.Context, req resource.Cre
 		return
 	}
 
-	var headers []polytomic.RequestParameter
+	var headers []RequestParameter
 	if data.Configuration.Attributes()["headers"] != nil {
 		diags = data.Configuration.Attributes()["headers"].(types.Set).ElementsAs(ctx, &headers, true)
 		if diags.HasError() {
@@ -103,27 +110,26 @@ func (r *WebhookConnectionResource) Create(ctx context.Context, req resource.Cre
 		}
 	}
 
-	created, err := r.client.Connections().Create(ctx,
-		polytomic.CreateConnectionMutation{
+	created, err := r.client.Connections.Create(ctx,
+		&polytomic.CreateConnectionRequestSchema{
 			Name:           data.Name.ValueString(),
-			Type:           polytomic.WebhookConnectionType,
-			OrganizationId: data.Organization.ValueString(),
-			Configuration: polytomic.WebhookConnectionConfiguration{
-				URL:     data.Configuration.Attributes()["url"].(types.String).ValueString(),
-				Headers: headers,
+			Type:           "webhook",
+			OrganizationId: data.Organization.ValueStringPointer(),
+			Configuration: map[string]interface{}{
+				"url":     data.Configuration.Attributes()["url"].(types.String).ValueString(),
+				"headers": headers,
 			},
 		},
-		polytomic.WithIdempotencyKey(uuid.NewString()),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
 		return
 	}
-	data.Id = types.StringValue(created.ID)
-	data.Name = types.StringValue(created.Name)
-	data.Organization = types.StringValue(created.OrganizationId)
+	data.Id = types.StringPointerValue(created.Data.Id)
+	data.Name = types.StringPointerValue(created.Data.Name)
+	data.Organization = types.StringPointerValue(created.Data.OrganizationId)
 
-	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Webhook", "id": created.ID})
+	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Webhook", "id": created.Data.Id})
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -139,30 +145,30 @@ func (r *WebhookConnectionResource) Read(ctx context.Context, req resource.ReadR
 		return
 	}
 
-	connection, err := r.client.Connections().Get(ctx, uuid.MustParse(data.Id.ValueString()))
+	connection, err := r.client.Connections.Get(ctx, data.Id.ValueString())
 	if err != nil {
-		pErr := polytomic.ApiError{}
+		pErr := &ptcore.APIError{}
 		if errors.As(err, &pErr) {
 			if pErr.StatusCode == http.StatusNotFound {
 				resp.State.RemoveResource(ctx)
 				return
 			}
-			if strings.Contains(pErr.Message, "connection in use") {
-				for _, meta := range pErr.Metadata {
-					info := meta.(map[string]interface{})
-					resp.Diagnostics.AddError("Connection in use",
-						fmt.Sprintf("Connection is used by %s \"%s\" (%s). Please remove before deleting this connection.",
-							info["type"], info["name"], info["id"]),
-					)
-				}
-				return
-			}
+			// if strings.Contains(pErr.Message, "connection in use") {
+			// 	for _, meta := range pErr.Metadata {
+			// 		info := meta.(map[string]interface{})
+			// 		resp.Diagnostics.AddError("Connection in use",
+			// 			fmt.Sprintf("Connection is used by %s \"%s\" (%s). Please remove before deleting this connection.",
+			// 				info["type"], info["name"], info["id"]),
+			// 		)
+			// 	}
+			// 	return
+			// }
 		}
 	}
 
-	data.Id = types.StringValue(connection.ID)
-	data.Name = types.StringValue(connection.Name)
-	data.Organization = types.StringValue(connection.OrganizationId)
+	data.Id = types.StringPointerValue(connection.Data.Id)
+	data.Name = types.StringPointerValue(connection.Data.Name)
+	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -178,7 +184,7 @@ func (r *WebhookConnectionResource) Update(ctx context.Context, req resource.Upd
 		return
 	}
 
-	var headers []polytomic.RequestParameter
+	var headers []RequestParameter
 	if data.Configuration.Attributes()["headers"] != nil {
 		diags = data.Configuration.Attributes()["headers"].(types.Set).ElementsAs(ctx, &headers, true)
 		if diags.HasError() {
@@ -187,26 +193,25 @@ func (r *WebhookConnectionResource) Update(ctx context.Context, req resource.Upd
 		}
 	}
 
-	updated, err := r.client.Connections().Update(ctx,
-		uuid.MustParse(data.Id.ValueString()),
-		polytomic.UpdateConnectionMutation{
+	updated, err := r.client.Connections.Update(ctx,
+		data.Id.ValueString(),
+		&polytomic.UpdateConnectionRequestSchema{
 			Name:           data.Name.ValueString(),
-			OrganizationId: data.Organization.ValueString(),
-			Configuration: polytomic.WebhookConnectionConfiguration{
-				URL:     data.Configuration.Attributes()["url"].(types.String).ValueString(),
-				Headers: headers,
+			OrganizationId: data.Organization.ValueStringPointer(),
+			Configuration: map[string]interface{}{
+				"url":     data.Configuration.Attributes()["url"].(types.String).ValueString(),
+				"headers": headers,
 			},
 		},
-		polytomic.WithIdempotencyKey(uuid.NewString()),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))
 		return
 	}
 
-	data.Id = types.StringValue(updated.ID)
-	data.Name = types.StringValue(updated.Name)
-	data.Organization = types.StringValue(updated.OrganizationId)
+	data.Id = types.StringPointerValue(updated.Data.Id)
+	data.Name = types.StringPointerValue(updated.Data.Name)
+	data.Organization = types.StringPointerValue(updated.Data.OrganizationId)
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -223,9 +228,9 @@ func (r *WebhookConnectionResource) Delete(ctx context.Context, req resource.Del
 	}
 
 	if data.ForceDestroy.ValueBool() {
-		err := r.client.Connections().Delete(ctx, uuid.MustParse(data.Id.ValueString()), polytomic.WithForceDelete())
+		err := r.client.Connections.Remove(ctx, data.Id.ValueString(), &polytomic.ConnectionsRemoveRequest{Force: pointer.ToBool(true)})
 		if err != nil {
-			pErr := polytomic.ApiError{}
+			pErr := &ptcore.APIError{}
 			if errors.As(err, &pErr) {
 				if pErr.StatusCode == http.StatusNotFound {
 					resp.State.RemoveResource(ctx)
@@ -237,24 +242,24 @@ func (r *WebhookConnectionResource) Delete(ctx context.Context, req resource.Del
 		return
 	}
 
-	err := r.client.Connections().Delete(ctx, uuid.MustParse(data.Id.ValueString()))
+	err := r.client.Connections.Remove(ctx, data.Id.ValueString(), &polytomic.ConnectionsRemoveRequest{Force: pointer.ToBool(false)})
 	if err != nil {
-		pErr := polytomic.ApiError{}
+		pErr := &ptcore.APIError{}
 		if errors.As(err, &pErr) {
 			if pErr.StatusCode == http.StatusNotFound {
 				resp.State.RemoveResource(ctx)
 				return
 			}
-			if strings.Contains(pErr.Message, "connection in use") {
-				for _, meta := range pErr.Metadata {
-					info := meta.(map[string]interface{})
-					resp.Diagnostics.AddError("Connection in use",
-						fmt.Sprintf("Connection is used by %s \"%s\" (%s). Please remove before deleting this connection.",
-							info["type"], info["name"], info["id"]),
-					)
-				}
-				return
-			}
+			// if strings.Contains(pErr.Message, "connection in use") {
+			// 	for _, meta := range pErr.Metadata {
+			// 		info := meta.(map[string]interface{})
+			// 		resp.Diagnostics.AddError("Connection in use",
+			// 			fmt.Sprintf("Connection is used by %s \"%s\" (%s). Please remove before deleting this connection.",
+			// 				info["type"], info["name"], info["id"]),
+			// 		)
+			// 	}
+			// 	return
+			// }
 		}
 
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting connection: %s", err))
@@ -272,7 +277,7 @@ func (r *WebhookConnectionResource) Configure(ctx context.Context, req resource.
 		return
 	}
 
-	client, ok := req.ProviderData.(*polytomic.Client)
+	client, ok := req.ProviderData.(*ptclient.Client)
 
 	if !ok {
 		resp.Diagnostics.AddError(

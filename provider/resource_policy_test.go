@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/AlekSi/pointer"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
@@ -40,13 +41,13 @@ func testAccPolicyExists(name string) resource.TestCheckFunc {
 		}
 
 		client := testClient()
-		policies, err := client.Permissions().ListPolicies(context.TODO())
+		policies, err := client.Permissions.Policies.List(context.TODO())
 		if err != nil {
 			return err
 		}
 		var found bool
-		for _, policy := range policies {
-			if policy.Name == name {
+		for _, policy := range policies.Data {
+			if policy.Name == pointer.ToString(name) {
 				found = true
 				break
 			}

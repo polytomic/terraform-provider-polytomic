@@ -4,21 +4,18 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/mitchellh/mapstructure"
-	"github.com/polytomic/polytomic-go"
+	ptclient "github.com/polytomic/polytomic-go/client"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
 var _ datasource.DataSource = &FacebookAdsConnectionDataSource{}
 
 type FacebookAdsConnectionDataSource struct {
-	client *polytomic.Client
+	client *ptclient.Client
 }
 
 func (d *FacebookAdsConnectionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
@@ -69,7 +66,7 @@ func (d *FacebookAdsConnectionDataSource) Configure(ctx context.Context, req dat
 		return
 	}
 
-	client, ok := req.ProviderData.(*polytomic.Client)
+	client, ok := req.ProviderData.(*ptclient.Client)
 
 	if !ok {
 		resp.Diagnostics.AddError(
@@ -94,7 +91,7 @@ func (d *FacebookAdsConnectionDataSource) Read(ctx context.Context, req datasour
 	}
 
 	// Get the connection
-	connection, err := d.client.Connections().Get(ctx, uuid.MustParse(data.Id.ValueString()))
+	connection, err := d.client.Connections.Get(ctx, data.Id.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection", err.Error())
 		return
@@ -102,50 +99,9 @@ func (d *FacebookAdsConnectionDataSource) Read(ctx context.Context, req datasour
 
 	// For the purposes of this example code, hardcoding a response value to
 	// save into the Terraform state.
-	data.Id = types.StringValue(connection.ID)
-	data.Name = types.StringValue(connection.Name)
-	data.Organization = types.StringValue(connection.OrganizationId)
-	var conf polytomic.LinkedinAdsConnectionConfiguration
-	err = mapstructure.Decode(connection.Configuration, &conf)
-	if err != nil {
-		resp.Diagnostics.AddError("Error decoding connection", err.Error())
-		return
-	}
-
-	var accounts []attr.Value
-	for _, acc := range conf.Accounts {
-		accounts = append(accounts, types.ObjectValueMust(
-			map[string]attr.Type{
-				"value": types.StringType,
-				"label": types.StringType,
-			},
-			map[string]attr.Value{
-				"value": types.StringValue(acc.Value),
-				"label": types.StringValue(*acc.Label),
-			},
-		))
-	}
-
-	var diags diag.Diagnostics
-	data.Configuration, diags = types.ObjectValue(
-		data.Configuration.AttributeTypes(ctx),
-		map[string]attr.Value{
-			"accounts": types.SetValueMust(
-				types.ObjectType{
-					AttrTypes: map[string]attr.Type{
-						"value": types.StringType,
-						"label": types.StringType,
-					},
-				},
-				accounts,
-			),
-		},
-	)
-
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
+	data.Id = types.StringPointerValue(connection.Data.Id)
+	data.Name = types.StringPointerValue(connection.Data.Name)
+	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
 
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)

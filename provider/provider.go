@@ -1,9 +1,12 @@
 package provider
 
 import (
+	"cmp"
 	"context"
 	"fmt"
+	"net/http"
 	"os"
+	"strings"
 
 	"github.com/hashicorp/go-retryablehttp"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -11,7 +14,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/polytomic/polytomic-go"
+	ptclient "github.com/polytomic/polytomic-go/client"
+	ptoption "github.com/polytomic/polytomic-go/option"
 )
 
 const (
@@ -99,33 +103,29 @@ func (p *ptProvider) Configure(ctx context.Context, req provider.ConfigureReques
 	if deployURL == "" {
 		deployURL = PolytomicDefaultURL
 	}
+	deployURL = strings.TrimSuffix(deployURL, "/")
+	if _, _, ok := strings.Cut(deployURL, "://"); !ok && deployURL != "" {
+		deployURL = "https://" + deployURL
+	}
 
 	rc := retryablehttp.NewClient()
 	rc.RetryMax = 6
 
 	rc.StandardClient()
 
-	var client *polytomic.Client
+	var client *ptclient.Client
 	// Deployment key is the default and takes precedence
-	if apiKey != "" && deployKey == "" {
-		client = polytomic.NewClient(
-			deployURL,
-			polytomic.APIKey(apiKey),
-			polytomic.WithUserAgent(UserAgent),
-			polytomic.WithClient(rc.StandardClient()),
-		)
-	} else {
-		client = polytomic.NewClient(
-			deployURL,
-			polytomic.DeploymentKey(deployKey),
-			polytomic.WithUserAgent(UserAgent),
-			polytomic.WithClient(rc.StandardClient()),
-		)
-	}
+	client = ptclient.NewClient(
+		ptoption.WithBaseURL(deployURL),
+		ptoption.WithHTTPHeader(http.Header{
+			"User-Agent": []string{UserAgent},
+		}),
+		ptoption.WithHTTPClient(rc.StandardClient()),
+		ptoption.WithToken(cmp.Or(deployKey, apiKey)),
+	)
 
 	resp.DataSourceData = client
 	resp.ResourceData = client
-
 }
 
 func (p *ptProvider) Resources(ctx context.Context) []func() resource.Resource {
@@ -141,7 +141,6 @@ func (p *ptProvider) Resources(ctx context.Context) []func() resource.Resource {
 		func() resource.Resource { return &APIConnectionResource{} },
 		func() resource.Resource { return &CSVConnectionResource{} },
 		func() resource.Resource { return &WebhookConnectionResource{} },
-		func() resource.Resource { return &AthenaConnectionResource{} },
 	}
 	all := append(connectionResources, resourceList...)
 	return all
@@ -154,7 +153,6 @@ func (p *ptProvider) DataSources(ctx context.Context) []func() datasource.DataSo
 		func() datasource.DataSource { return &bulkDestinationDatasource{} },
 		func() datasource.DataSource { return &FacebookAdsConnectionDataSource{} },
 		func() datasource.DataSource { return &identityDatasource{} },
-		func() datasource.DataSource { return &AthenaConnectionDataSource{} },
 	}
 	all := append(connectionDatasources, datasources...)
 	return all

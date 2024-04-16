@@ -1,7 +1,9 @@
 # Polytomic Terraform Provider
 
 This repository contains the [Polytomic](https://polytomic.com) Terraform
-provider. This provider may be used to manage on premises deployments.
+provider. This provider may be used to manage Polytomic configurations. For
+managing deployment resources, see
+[polytomic/on-premises](https://github.com/polytomic/on-premises).
 
 ## Example Organization configuration with users
 

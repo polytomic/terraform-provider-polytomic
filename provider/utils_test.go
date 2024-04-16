@@ -1,6 +1,8 @@
 package provider
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestValidNamer(t *testing.T) {
 	testCases := []struct {

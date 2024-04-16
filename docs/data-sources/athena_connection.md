@@ -37,10 +37,7 @@ data "polytomic_athena_connection" "athena" {
 
 Required:
 
-- `region` (String)
-
-Optional:
-
 - `outputbucket` (String) S3 bucket for output storage, with optional prefix. Examples: `bucket-name`, `bucket-name/prefix`.
+- `region` (String)
 
 
