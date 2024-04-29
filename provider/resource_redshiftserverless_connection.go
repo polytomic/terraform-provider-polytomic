@@ -23,6 +23,8 @@ import (
 	"github.com/polytomic/polytomic-go"
 	ptclient "github.com/polytomic/polytomic-go/client"
 	ptcore "github.com/polytomic/polytomic-go/core"
+
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -71,6 +73,21 @@ func (t *RedshiftserverlessConnectionResource) Schema(ctx context.Context, req r
 						Computed:            false,
 						Sensitive:           true,
 					},
+					"override_endpoint": schema.BoolAttribute{
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+						Sensitive:           false,
+					},
+					"data_api_endpoint": schema.StringAttribute{
+						MarkdownDescription: "Required if `override_endpoint` is `true`.",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+						Sensitive:           false,
+						Default:             stringdefault.StaticString(""),
+					},
 				},
 
 				Required: true,
@@ -106,6 +123,10 @@ type RedshiftserverlessConf struct {
 	Iam_role_arn string `mapstructure:"iam_role_arn" tfsdk:"iam_role_arn"`
 
 	External_id string `mapstructure:"external_id" tfsdk:"external_id"`
+
+	Override_endpoint bool `mapstructure:"override_endpoint" tfsdk:"override_endpoint"`
+
+	Data_api_endpoint string `mapstructure:"data_api_endpoint" tfsdk:"data_api_endpoint"`
 }
 
 func (r *RedshiftserverlessConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -123,10 +144,12 @@ func (r *RedshiftserverlessConnectionResource) Create(ctx context.Context, req r
 		Type:           "redshiftserverless",
 		OrganizationId: data.Organization.ValueStringPointer(),
 		Configuration: map[string]interface{}{
-			"database":     data.Configuration.Attributes()["database"].(types.String).ValueString(),
-			"workgroup":    data.Configuration.Attributes()["workgroup"].(types.String).ValueString(),
-			"iam_role_arn": data.Configuration.Attributes()["iam_role_arn"].(types.String).ValueString(),
-			"external_id":  data.Configuration.Attributes()["external_id"].(types.String).ValueString(),
+			"database":          data.Configuration.Attributes()["database"].(types.String).ValueString(),
+			"workgroup":         data.Configuration.Attributes()["workgroup"].(types.String).ValueString(),
+			"iam_role_arn":      data.Configuration.Attributes()["iam_role_arn"].(types.String).ValueString(),
+			"external_id":       data.Configuration.Attributes()["external_id"].(types.String).ValueString(),
+			"override_endpoint": data.Configuration.Attributes()["override_endpoint"].(types.Bool).ValueBool(),
+			"data_api_endpoint": data.Configuration.Attributes()["data_api_endpoint"].(types.String).ValueString(),
 		},
 		Validate: pointer.ToBool(false),
 	})
@@ -145,10 +168,12 @@ func (r *RedshiftserverlessConnectionResource) Create(ctx context.Context, req r
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"database":     types.StringType,
-		"workgroup":    types.StringType,
-		"iam_role_arn": types.StringType,
-		"external_id":  types.StringType,
+		"database":          types.StringType,
+		"workgroup":         types.StringType,
+		"iam_role_arn":      types.StringType,
+		"external_id":       types.StringType,
+		"override_endpoint": types.BoolType,
+		"data_api_endpoint": types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -194,10 +219,12 @@ func (r *RedshiftserverlessConnectionResource) Read(ctx context.Context, req res
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"database":     types.StringType,
-		"workgroup":    types.StringType,
-		"iam_role_arn": types.StringType,
-		"external_id":  types.StringType,
+		"database":          types.StringType,
+		"workgroup":         types.StringType,
+		"iam_role_arn":      types.StringType,
+		"external_id":       types.StringType,
+		"override_endpoint": types.BoolType,
+		"data_api_endpoint": types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -224,10 +251,12 @@ func (r *RedshiftserverlessConnectionResource) Update(ctx context.Context, req r
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueStringPointer(),
 			Configuration: map[string]interface{}{
-				"database":     data.Configuration.Attributes()["database"].(types.String).ValueString(),
-				"workgroup":    data.Configuration.Attributes()["workgroup"].(types.String).ValueString(),
-				"iam_role_arn": data.Configuration.Attributes()["iam_role_arn"].(types.String).ValueString(),
-				"external_id":  data.Configuration.Attributes()["external_id"].(types.String).ValueString(),
+				"database":          data.Configuration.Attributes()["database"].(types.String).ValueString(),
+				"workgroup":         data.Configuration.Attributes()["workgroup"].(types.String).ValueString(),
+				"iam_role_arn":      data.Configuration.Attributes()["iam_role_arn"].(types.String).ValueString(),
+				"external_id":       data.Configuration.Attributes()["external_id"].(types.String).ValueString(),
+				"override_endpoint": data.Configuration.Attributes()["override_endpoint"].(types.Bool).ValueBool(),
+				"data_api_endpoint": data.Configuration.Attributes()["data_api_endpoint"].(types.String).ValueString(),
 			},
 			Validate: pointer.ToBool(false),
 		})
@@ -247,10 +276,12 @@ func (r *RedshiftserverlessConnectionResource) Update(ctx context.Context, req r
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"database":     types.StringType,
-		"workgroup":    types.StringType,
-		"iam_role_arn": types.StringType,
-		"external_id":  types.StringType,
+		"database":          types.StringType,
+		"workgroup":         types.StringType,
+		"iam_role_arn":      types.StringType,
+		"external_id":       types.StringType,
+		"override_endpoint": types.BoolType,
+		"data_api_endpoint": types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

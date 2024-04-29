@@ -690,6 +690,15 @@ connections:
         required: true
         example: db
         sensitive: true
+      - name: override_endpoint
+        type: bool
+        example: true
+        optional: true
+      - name: data_api_endpoint
+        type: string
+        description: Required if `override_endpoint` is `true`.
+        example: https://redshift-data.us-west-2.amazonaws.com
+        optional: true
   - connection: segment
     name: Segment
     datasource: true

@@ -66,6 +66,20 @@ func (d *RedshiftserverlessConnectionDataSource) Schema(ctx context.Context, req
 						Computed:            false,
 						Sensitive:           false,
 					},
+					"override_endpoint": schema.BoolAttribute{
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+						Sensitive:           false,
+					},
+					"data_api_endpoint": schema.StringAttribute{
+						MarkdownDescription: "Required if `override_endpoint` is `true`.",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+						Sensitive:           false,
+					},
 				},
 				Optional: true,
 			},
@@ -131,6 +145,12 @@ func (d *RedshiftserverlessConnectionDataSource) Read(ctx context.Context, req d
 			),
 			"iam_role_arn": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["iam_role_arn"], "string").(string),
+			),
+			"override_endpoint": types.BoolValue(
+				getValueOrEmpty(connection.Data.Configuration["override_endpoint"], "bool").(bool),
+			),
+			"data_api_endpoint": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["data_api_endpoint"], "string").(string),
 			),
 		},
 	)
