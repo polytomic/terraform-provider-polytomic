@@ -41,4 +41,9 @@ Required:
 - `iam_role_arn` (String)
 - `workgroup` (String)
 
+Optional:
+
+- `data_api_endpoint` (String) Required if `override_endpoint` is `true`.
+- `override_endpoint` (Boolean)
+
 
