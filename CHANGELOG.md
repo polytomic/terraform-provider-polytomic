@@ -1,10 +1,10 @@
-## 0.3.40 (9 May 2024)
+## 0.3.41 (9 May 2024)
 
 - Reverted breaking change from v0.3.39.
 
 ## ~~0.3.39 (29 Apr 2024)~~
 
-**This release included a breaking change for connection configuration; v0.3.40 should be used instead.**
+**This release included a breaking change for connection configuration; v0.3.41 should be used instead.**
 
 - Add support for overriding endpoint for Redshift Serverless connections
 
