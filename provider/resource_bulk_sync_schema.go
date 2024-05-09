@@ -7,16 +7,12 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/AlekSi/pointer"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/polytomic/polytomic-go"
-	"github.com/polytomic/polytomic-go/bulksync"
-	ptclient "github.com/polytomic/polytomic-go/client"
-	ptcore "github.com/polytomic/polytomic-go/core"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -83,7 +79,7 @@ func (r *bulkSyncSchemaResource) Configure(ctx context.Context, req resource.Con
 		return
 	}
 
-	client, ok := req.ProviderData.(*ptclient.Client)
+	client, ok := req.ProviderData.(*polytomic.Client)
 
 	if !ok {
 		resp.Diagnostics.AddError(
@@ -109,7 +105,7 @@ type bulkSyncSchemaResourceData struct {
 }
 
 type bulkSyncSchemaResource struct {
-	client *ptclient.Client
+	client *polytomic.Client
 }
 
 func (r *bulkSyncSchemaResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -122,31 +118,31 @@ func (r *bulkSyncSchemaResource) Create(ctx context.Context, req resource.Create
 		return
 	}
 
-	var fields []*polytomic.BulkField
+	var fields []polytomic.Field
 	diags = data.Fields.ElementsAs(ctx, &fields, false)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	update := &bulksync.UpdateBulkSchema{
-		PartitionKey: data.PartitionKey.ValueStringPointer(),
-		Fields:       fields,
-		Enabled:      pointer.ToBool(true),
-	}
+	var schema polytomic.BulkSchema
+	schema.ID = data.Id.ValueString()
+	schema.PartitionKey = data.PartitionKey.ValueString()
+	schema.Fields = fields
+	schema.Enabled = true
 
-	updated, err := r.client.BulkSync.Schemas.Update(ctx, data.SyncID.ValueString(), data.Id.ValueString(), update)
+	updated, err := r.client.Bulk().UpdateBulkSyncSchema(ctx, data.SyncID.ValueString(), schema.ID, schema)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating bulk sync: %s", err))
 		return
 	}
 
-	data.Id = types.StringPointerValue(updated.Data.Id)
-	data.PartitionKey = types.StringPointerValue(updated.Data.PartitionKey)
+	data.Id = types.StringValue(updated.ID)
+	data.PartitionKey = types.StringValue(updated.PartitionKey)
 
-	var resultFields []*polytomic.BulkField
-	for _, field := range updated.Data.Fields {
-		if pointer.GetBool(field.Enabled) {
+	var resultFields []polytomic.Field
+	for _, field := range updated.Fields {
+		if field.Enabled {
 			resultFields = append(resultFields, field)
 		}
 	}
@@ -179,9 +175,9 @@ func (r *bulkSyncSchemaResource) Read(ctx context.Context, req resource.ReadRequ
 		return
 	}
 
-	schema, err := r.client.BulkSync.Schemas.Get(ctx, data.SyncID.ValueString(), data.Id.ValueString())
+	schema, err := r.client.Bulk().GetBulkSyncSchema(ctx, data.SyncID.ValueString(), data.Id.ValueString())
 	if err != nil {
-		pErr := &ptcore.APIError{}
+		pErr := polytomic.ApiError{}
 		if errors.As(err, &pErr) {
 			if pErr.StatusCode == http.StatusNotFound {
 				resp.State.RemoveResource(ctx)
@@ -192,12 +188,12 @@ func (r *bulkSyncSchemaResource) Read(ctx context.Context, req resource.ReadRequ
 		return
 	}
 
-	data.Id = types.StringPointerValue(schema.Data.Id)
-	data.PartitionKey = types.StringPointerValue(schema.Data.PartitionKey)
+	data.Id = types.StringValue(schema.ID)
+	data.PartitionKey = types.StringValue(schema.PartitionKey)
 
-	var resultFields []*polytomic.BulkField
-	for _, field := range schema.Data.Fields {
-		if pointer.GetBool(field.Enabled) {
+	var resultFields []polytomic.Field
+	for _, field := range schema.Fields {
+		if field.Enabled {
 			resultFields = append(resultFields, field)
 		}
 	}
@@ -227,19 +223,19 @@ func (r *bulkSyncSchemaResource) Update(ctx context.Context, req resource.Update
 		return
 	}
 
-	var fields []*polytomic.BulkField
+	var fields []polytomic.Field
 	diags = data.Fields.ElementsAs(ctx, &fields, false)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	updated, err := r.client.BulkSync.Schemas.Update(ctx,
+	updated, err := r.client.Bulk().UpdateBulkSyncSchema(ctx,
 		data.SyncID.ValueString(),
 		data.Id.ValueString(),
-		&bulksync.UpdateBulkSchema{
-			Enabled:      pointer.ToBool(true),
-			PartitionKey: data.PartitionKey.ValueStringPointer(),
+		polytomic.BulkSchema{
+			Enabled:      true,
+			PartitionKey: data.PartitionKey.ValueString(),
 			Fields:       fields,
 		},
 	)
@@ -248,14 +244,14 @@ func (r *bulkSyncSchemaResource) Update(ctx context.Context, req resource.Update
 		return
 	}
 
-	var resultFields []*polytomic.BulkField
-	for _, field := range updated.Data.Fields {
-		if pointer.GetBool(field.Enabled) {
+	var resultFields []polytomic.Field
+	for _, field := range updated.Fields {
+		if field.Enabled {
 			resultFields = append(resultFields, field)
 		}
 	}
 
-	data.PartitionKey = types.StringPointerValue(updated.Data.PartitionKey)
+	data.PartitionKey = types.StringValue(updated.PartitionKey)
 	data.Fields, diags = types.SetValueFrom(ctx, types.ObjectType{
 		AttrTypes: map[string]attr.Type{
 			"id":         types.StringType,
@@ -281,8 +277,8 @@ func (r *bulkSyncSchemaResource) Delete(ctx context.Context, req resource.Delete
 		return
 	}
 
-	_, err := r.client.BulkSync.Schemas.Update(ctx, data.SyncID.ValueString(), data.Id.ValueString(), &bulksync.UpdateBulkSchema{
-		Enabled: pointer.ToBool(false),
+	_, err := r.client.Bulk().UpdateBulkSyncSchema(ctx, data.SyncID.ValueString(), data.Id.ValueString(), polytomic.BulkSchema{
+		Enabled: false,
 	})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting bulk sync schema: %s", err))

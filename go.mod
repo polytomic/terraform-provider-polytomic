@@ -5,6 +5,7 @@ go 1.21
 require (
 	github.com/AlekSi/pointer v1.2.0
 	github.com/fbreckle/terraform-plugin-docs v0.0.0-20220812121758-a828466500d3
+	github.com/google/uuid v1.6.0
 	github.com/hashicorp/go-retryablehttp v0.7.5
 	github.com/hashicorp/hcl/v2 v2.20.1
 	github.com/hashicorp/terraform-plugin-framework v1.8.0
@@ -12,7 +13,7 @@ require (
 	github.com/hashicorp/terraform-plugin-log v0.9.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.33.0
 	github.com/mitchellh/mapstructure v1.5.0
-	github.com/polytomic/polytomic-go v0.2.1-0.20240416175622-09865140ff34
+	github.com/polytomic/polytomic-go v0.0.0-20240207221158-b63782ba72a7
 	github.com/rs/zerolog v1.32.0
 	github.com/spf13/cobra v1.8.0
 	github.com/spf13/viper v1.18.2
@@ -30,12 +31,12 @@ require (
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
 	github.com/armon/go-radix v1.0.0 // indirect
 	github.com/bgentry/speakeasy v0.1.0 // indirect
+	github.com/carlmjohnson/requests v0.22.3 // indirect
 	github.com/cloudflare/circl v1.3.7 // indirect
 	github.com/fatih/color v1.16.0 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
-	github.com/google/uuid v1.6.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-checkpoint v0.5.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect

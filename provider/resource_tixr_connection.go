@@ -10,7 +10,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/AlekSi/pointer"
+	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -21,8 +21,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/polytomic-go"
-	ptclient "github.com/polytomic/polytomic-go/client"
-	ptcore "github.com/polytomic/polytomic-go/core"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -81,13 +79,7 @@ func (r *TixrConnectionResource) Metadata(ctx context.Context, req resource.Meta
 }
 
 type TixrConnectionResource struct {
-	client *ptclient.Client
-}
-
-type TixrConf struct {
-	Client_private_key string `mapstructure:"client_private_key" tfsdk:"client_private_key"`
-
-	Client_secret string `mapstructure:"client_secret" tfsdk:"client_secret"`
+	client *polytomic.Client
 }
 
 func (r *TixrConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -100,40 +92,43 @@ func (r *TixrConnectionResource) Create(ctx context.Context, req resource.Create
 		return
 	}
 
-	created, err := r.client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
-		Name:           data.Name.ValueString(),
-		Type:           "tixr",
-		OrganizationId: data.Organization.ValueStringPointer(),
-		Configuration: map[string]interface{}{
-			"client_private_key": data.Configuration.Attributes()["client_private_key"].(types.String).ValueString(),
-			"client_secret":      data.Configuration.Attributes()["client_secret"].(types.String).ValueString(),
+	created, err := r.client.Connections().Create(ctx,
+		polytomic.CreateConnectionMutation{
+			Name:           data.Name.ValueString(),
+			Type:           polytomic.TixrConnectionType,
+			OrganizationId: data.Organization.ValueString(),
+			Configuration: polytomic.TixrConnectionConfiguration{
+				ClientPrivateKey: data.Configuration.Attributes()["client_private_key"].(types.String).ValueString(),
+				ClientSecret:     data.Configuration.Attributes()["client_secret"].(types.String).ValueString(),
+			},
 		},
-		Validate: pointer.ToBool(false),
-	})
+		polytomic.WithIdempotencyKey(uuid.NewString()),
+		polytomic.SkipConfigValidation(),
+	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
 		return
 	}
-	data.Id = types.StringPointerValue(created.Data.Id)
-	data.Name = types.StringPointerValue(created.Data.Name)
-	data.Organization = types.StringPointerValue(created.Data.OrganizationId)
+	data.Id = types.StringValue(created.ID)
+	data.Name = types.StringValue(created.Name)
+	data.Organization = types.StringValue(created.OrganizationId)
 
-	conf := TixrConf{}
-	err = mapstructure.Decode(created.Data.Configuration, &conf)
-	if err != nil {
-		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error decoding connection configuration: %s", err))
+	var output polytomic.TixrConnectionConfiguration
+	cfg := &mapstructure.DecoderConfig{
+		Result: &output,
 	}
-
+	decoder, _ := mapstructure.NewDecoder(cfg)
+	decoder.Decode(created.Configuration)
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"client_private_key": types.StringType,
 		"client_secret":      types.StringType,
-	}, conf)
+	}, output)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Tixr", "id": created.Data.Id})
+	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Tixr", "id": created.ID})
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -149,9 +144,9 @@ func (r *TixrConnectionResource) Read(ctx context.Context, req resource.ReadRequ
 		return
 	}
 
-	connection, err := r.client.Connections.Get(ctx, data.Id.ValueString())
+	connection, err := r.client.Connections().Get(ctx, uuid.MustParse(data.Id.ValueString()))
 	if err != nil {
-		pErr := &ptcore.APIError{}
+		pErr := polytomic.ApiError{}
 		if errors.As(err, &pErr) {
 			if pErr.StatusCode == http.StatusNotFound {
 				resp.State.RemoveResource(ctx)
@@ -161,20 +156,21 @@ func (r *TixrConnectionResource) Read(ctx context.Context, req resource.ReadRequ
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error reading connection: %s", err))
 		return
 	}
-	data.Id = types.StringPointerValue(connection.Data.Id)
-	data.Name = types.StringPointerValue(connection.Data.Name)
-	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
 
-	conf := TixrConf{}
-	err = mapstructure.Decode(connection.Data.Configuration, &conf)
-	if err != nil {
-		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error decoding connection configuration: %s", err))
+	data.Id = types.StringValue(connection.ID)
+	data.Name = types.StringValue(connection.Name)
+	data.Organization = types.StringValue(connection.OrganizationId)
+
+	var output polytomic.TixrConnectionConfiguration
+	cfg := &mapstructure.DecoderConfig{
+		Result: &output,
 	}
-
+	decoder, _ := mapstructure.NewDecoder(cfg)
+	decoder.Decode(connection.Configuration)
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"client_private_key": types.StringType,
 		"client_secret":      types.StringType,
-	}, conf)
+	}, output)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -194,40 +190,43 @@ func (r *TixrConnectionResource) Update(ctx context.Context, req resource.Update
 		return
 	}
 
-	updated, err := r.client.Connections.Update(ctx,
-		data.Id.ValueString(),
-		&polytomic.UpdateConnectionRequestSchema{
+	updated, err := r.client.Connections().Update(ctx,
+		uuid.MustParse(data.Id.ValueString()),
+		polytomic.UpdateConnectionMutation{
 			Name:           data.Name.ValueString(),
-			OrganizationId: data.Organization.ValueStringPointer(),
-			Configuration: map[string]interface{}{
-				"client_private_key": data.Configuration.Attributes()["client_private_key"].(types.String).ValueString(),
-				"client_secret":      data.Configuration.Attributes()["client_secret"].(types.String).ValueString(),
+			OrganizationId: data.Organization.ValueString(),
+			Configuration: polytomic.TixrConnectionConfiguration{
+				ClientPrivateKey: data.Configuration.Attributes()["client_private_key"].(types.String).ValueString(),
+				ClientSecret:     data.Configuration.Attributes()["client_secret"].(types.String).ValueString(),
 			},
-			Validate: pointer.ToBool(false),
-		})
+		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
+		polytomic.SkipConfigValidation(),
+	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))
 		return
 	}
 
-	data.Id = types.StringPointerValue(updated.Data.Id)
-	data.Name = types.StringPointerValue(updated.Data.Name)
-	data.Organization = types.StringPointerValue(updated.Data.OrganizationId)
+	data.Id = types.StringValue(updated.ID)
+	data.Name = types.StringValue(updated.Name)
+	data.Organization = types.StringValue(updated.OrganizationId)
 
-	conf := TixrConf{}
-	err = mapstructure.Decode(updated.Data.Configuration, &conf)
-	if err != nil {
-		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error decoding connection configuration: %s", err))
+	var output polytomic.TixrConnectionConfiguration
+	cfg := &mapstructure.DecoderConfig{
+		Result: &output,
 	}
-
+	decoder, _ := mapstructure.NewDecoder(cfg)
+	decoder.Decode(updated.Configuration)
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"client_private_key": types.StringType,
 		"client_secret":      types.StringType,
-	}, conf)
+	}, output)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
+
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
@@ -243,46 +242,43 @@ func (r *TixrConnectionResource) Delete(ctx context.Context, req resource.Delete
 	}
 
 	if data.ForceDestroy.ValueBool() {
-		err := r.client.Connections.Remove(ctx, data.Id.ValueString(), &polytomic.ConnectionsRemoveRequest{
-			Force: pointer.ToBool(true),
-		})
+		err := r.client.Connections().Delete(ctx, uuid.MustParse(data.Id.ValueString()), polytomic.WithForceDelete())
 		if err != nil {
-			pErr := &polytomic.NotFoundError{}
+			pErr := polytomic.ApiError{}
 			if errors.As(err, &pErr) {
-				resp.State.RemoveResource(ctx)
-				return
+				if pErr.StatusCode == http.StatusNotFound {
+					resp.State.RemoveResource(ctx)
+					return
+				}
 			}
-
 			resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting connection: %s", err))
 		}
 		return
 	}
 
-	err := r.client.Connections.Remove(ctx, data.Id.ValueString(), &polytomic.ConnectionsRemoveRequest{
-		Force: pointer.ToBool(false),
-	})
+	err := r.client.Connections().Delete(ctx, uuid.MustParse(data.Id.ValueString()))
 	if err != nil {
-		pErr := &polytomic.NotFoundError{}
+		pErr := polytomic.ApiError{}
 		if errors.As(err, &pErr) {
-			resp.State.RemoveResource(ctx)
-			return
-		}
-	}
-	pErr := &polytomic.UnprocessableEntityError{}
-	if errors.As(err, &pErr) {
-		if strings.Contains(*pErr.Body.Message, "connection in use") {
-			for _, meta := range pErr.Body.Metadata.([]interface{}) {
-				info := meta.(map[string]interface{})
-				resp.Diagnostics.AddError("Connection in use",
-					fmt.Sprintf("Connection is used by %s \"%s\" (%s). Please remove before deleting this connection.",
-						info["type"], info["name"], info["id"]),
-				)
+			if pErr.StatusCode == http.StatusNotFound {
+				resp.State.RemoveResource(ctx)
+				return
 			}
-			return
+			if strings.Contains(pErr.Message, "connection in use") {
+				for _, meta := range pErr.Metadata {
+					info := meta.(map[string]interface{})
+					resp.Diagnostics.AddError("Connection in use",
+						fmt.Sprintf("Connection is used by %s \"%s\" (%s). Please remove before deleting this connection.",
+							info["type"], info["name"], info["id"]),
+					)
+				}
+				return
+			}
 		}
-	}
 
-	resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting connection: %s", err))
+		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting connection: %s", err))
+		return
+	}
 
 }
 
@@ -296,7 +292,7 @@ func (r *TixrConnectionResource) Configure(ctx context.Context, req resource.Con
 		return
 	}
 
-	client, ok := req.ProviderData.(*ptclient.Client)
+	client, ok := req.ProviderData.(*polytomic.Client)
 
 	if !ok {
 		resp.Diagnostics.AddError(

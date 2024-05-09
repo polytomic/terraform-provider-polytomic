@@ -1,403 +1,446 @@
 connections:
   - connection: postgresql
     name: PostgresSQL
+    type: polytomic.PostgresqlConnectionType
+    config: polytomic.PostgresqlConfiguration
     resource: true
     datasource: true
     attributes:
-      - name: hostname
+      - name: Hostname
         type: string
         required: true
         example: acme.postgres.database.example.com
-      - name: username
+      - name: Username
         type: string
         required: true
         example: acme
-      - name: password
+      - name: Password
         type: string
         required: true
         sensitive: true
         example: 1234567890
-      - name: database
+      - name: Database
         type: string
         required: true
         example: acme
-      - name: port
+      - name: Port
         type: int
         required: true
         example: 5432
-      - name: ssl
+      - name: SSL
         type: bool
         optional: true
-      - name: client_certs
+      - name: ClientCerts
         type: bool
         optional: true
-      - name: client_certificate
+      - name: ClientCertificate
         type: string
         optional: true
-      - name: client_key
+      - name: ClientKey
         type: string
         optional: true
         sensitive: true
-      - name: ca_cert
+      - name: CACert
         type: string
         optional: true
-      - name: change_detection
+      - name: ChangeDetection
         type: bool
         optional: true
-      - name: publication
+      - name: Publication
         type: string
         optional: true
-      - name: ssh
+      - name: SSH
         type: bool
         optional: true
-      - name: ssh_user
+      - name: SSHUser
         type: string
         optional: true
-      - name: ssh_host
+      - name: SSHHost
         type: string
         optional: true
-      - name: ssh_port
+      - name: SSHPort
         type: int
         optional: true
-      - name: ssh_private_key
+      - name: SSHPrivateKey
         type: string
         optional: true
         sensitive: true
   - connection: bigquery
     name: BigQuery
+    type: polytomic.BigQueryConnectionType
+    config: polytomic.BigQueryConfiguration
     resource: true
     datasource: true
     attributes:
-      - name: project_id
+      - name: ProjectID
         type: string
         optional: true
         example: my-project
-      - name: service_account
+      - name: ServiceAccount
         type: string
         required: true
         sensitive: true
         example: data.account_credentials.json
         example_type_override: variable
-      - name: location
+      - name: Location
         type: string
         optional: true
         example: us-central1
   - connection: ascend
     name: Ascend
+    type: polytomic.AscendConnectionType
+    config: polytomic.AscendConnectionConfiguration
     resource: true
     datasource: true
     attributes:
-      - name: api_key
+      - name: APIKey
         type: string
         required: true
         sensitive: true
         example: my-api-key
   - connection: gcs
     name: Google Cloud Storage
+    type: polytomic.GoogleCloudStorageConnectionType
+    config: polytomic.GCSConfiguration
     resource: true
     datasource: true
     attributes:
-      - name: project_id
+      - name: ProjectId
         type: string
         required: true
         example: my-project
-      - name: service_account
+      - name: ServiceAccount
         type: string
         required: true
         sensitive: true
         example: data.account_credentials.json
         example_type_override: variable
-      - name: bucket
+      - name: Bucket
         type: string
         required: true
         example: my-bucket
   - connection: azureblob
     name: Azure Blob Storage
+    type: polytomic.AzureBlobConnectionType
+    config: polytomic.AzureBlobConfiguration
     resource: true
     datasource: true
     attributes:
-      - name: account_name
+      - name: AccountName
         type: string
         required: true
         example: my-account
-      - name: access_key
+      - name: AccessKey
         type: string
         required: true
         sensitive: true
         example: abcdefghijklmnopqrstuvwxyz0123456789==
-      - name: container_name
+      - name: ContainerName
         type: string
         required: true
         example: my-container
   - connection: s3
+    type: polytomic.S3ConnectionType
+    config: polytomic.S3Configuration
     resource: true
     datasource: true
     attributes:
-      - name: aws_access_key_id
+      - name: AwsAccessKeyID
         type: string
         required: true
         sensitive: true
         example: "EXAMPLEACCESSKEYID"
-      - name: aws_secret_access_key
+      - name: AwsSecretAccessKey
         type: string
         required: true
         sensitive: true
         example: "EXAMPLEACCESSKEYSECRET"
-      - name: s3_bucket_region
+      - name: S3BucketRegion
         type: string
         required: true
         example: "us-east-1"
-      - name: s3_bucket_name
+      - name: S3BucketName
         type: string
         required: true
         example: "my-bucket"
   - connection: sqlserver
     name: SQL Server
+    type: polytomic.SQLServerConnectionType
+    config: polytomic.SQLServerConfiguration
     resource: true
     datasource: true
     attributes:
-      - name: hostname
+      - name: Hostname
         type: string
         required: true
         example: "sqlserver.azure.example.com"
-      - name: username
+      - name: Username
         type: string
         required: true
         example: "polytomic"
-      - name: password
+      - name: Password
         type: string
         required: true
         sensitive: true
         example: "secret"
-      - name: database
+      - name: Database
         type: string
         required: true
         example: "acme"
-      - name: port
+      - name: Port
         type: int
         required: true
         example: 1443
-      - name: ssl
+      - name: SSL
         type: bool
         optional: true
         example: true
-  - connection: athena
-    type: awsathena
-    name: AWS Athena
-    resource: true
-    datasource: true
-    attributes:
-      - name: access_id
-        type: string
-        required: true
-        sensitive: true
-        example: "EXAMPLEACCESSKEYID"
-      - name: secret_access_key
-        type: string
-        required: true
-        sensitive: true
-        example: "EXAMPLEACCESSKEYSECRET"
-      - name: region
-        type: string
-        required: true
-        example: "us-east-1"
-      - name: outputbucket
-        type: string
-        description: "S3 bucket for output storage, with optional prefix. Examples: `bucket-name`, `bucket-name/prefix`."
-        example: "athena-output-bucket"
-        required: true
+  # - connection: athena
+  #   name: AWS Athena
+  #   type: polytomic.AthenaConnectionType
+  #   config: polytomic.AthenaConfiguration
+  #   resource: true
+  #   datasource: true
+  #   attributes:
+  #     - name: AccessKeyID
+  #       name_override: access_id
+  #       type: string
+  #       required: true
+  #       sensitive: true
+  #       example: "EXAMPLEACCESSKEYID"
+  #     - name: AccessKeySecret
+  #       name_override: secret_access_key
+  #       type: string
+  #       required: true
+  #       sensitive: true
+  #       example: "EXAMPLEACCESSKEYSECRET"
+  #     - name: Region
+  #       type: string
+  #       required: true
+  #       example: "us-east-1"
+  #     - name: OutputBucket
+  #       name_override: outputbucket
+  #       type: string
+  #       description: "S3 bucket for output storage, with optional prefix. Examples: `bucket-name`, `bucket-name/prefix`."
+  #       example: "athena-output-bucket"
+  #       computed: true
+  #       optional: true
   - connection: salesforce
     name: Salesforce
+    type: polytomic.SalesforceConnectionType
+    config: polytomic.SalesforceConfiguration
     datasource: true
     attributes:
-      - name: username
+      - name: Username
         type: string
         optional: true
-      - name: domain
+      - name: Domain
         type: string
         optional: true
-      - name: instance_url
+      - name: InstanceURL
         type: string
         optional: true
-      - name: api_version
+      - name: APIVersion
         type: int
         optional: true
   - connection: hubspot
     name: Hubspot
+    type: polytomic.HubspotConnectionType
+    config: polytomic.HubspotConfiguration
     datasource: true
     attributes:
-      - name: hub_domain
+      - name: HubDomain
         type: string
         optional: true
         example: example-123456.com
-      - name: hub_id
+      - name: HubId
         type: int
         optional: true
   - connection: googleads
     name: Google Ads
+    type: polytomic.GoogleAdsConnectionType
+    config: polytomic.GoogleAdsConfiguration
     datasource: true
     attributes: []
   - connection: gsheets
     name: Google Sheets
+    type: polytomic.GoogleSheetsConnectionType
+    config: polytomic.GoogleSheetsConfiguration
     datasource: true
     attributes: []
   - connection: snowflake
     name: Snowflake
+    type: polytomic.SnowflakeConnectionType
+    config: polytomic.SnowflakeConfiguration
     datasource: true
     resource: true
     attributes:
-      - name: account
+      - name: Account
         type: string
         required: true
         example: acme
-      - name: username
+      - name: Username
         type: string
         required: true
         example: user
-      - name: password
+      - name: Password
         type: string
         required: true
         sensitive: true
         example: secret
-      - name: dbname
+      - name: Dbname
         type: string
         required: true
         example: db
-      - name: warehouse
+      - name: Warehouse
         type: string
         required: true
         example: warehouse
-      - name: params
+      - name: Params
         type: string
         optional: true
   - connection: affinity
     name: Affinity
+    type: polytomic.AffinityConnectionType
+    config: polytomic.AffinityConfiguration
     datasource: true
     resource: true
     attributes:
-      - name: api_key
+      - name: APIKey
         type: string
         required: true
         sensitive: true
         example: my-api-key
   - connection: airtable
     name: Airtable
+    type: polytomic.AirtableConnectionType
+    config: polytomic.AirtableConfiguration
     datasource: true
     resource: true
     attributes:
-      - name: api_key
+      - name: APIKey
         type: string
         required: true
         sensitive: true
         example: my-api-key
   - connection: amplitude
     name: Amplitude
+    type: polytomic.AmplitudeConnectionType
+    config: polytomic.AmplitudeConfiguration
     datasource: true
     resource: true
     attributes:
-      - name: api_key
+      - name: APIKey
         type: string
         required: true
         example: my-api-key
-      - name: secret_key
+      - name: SecretKey
         type: string
         required: true
         sensitive: true
         example: my-secret-key
   - connection: marketo
     name: Marketo
+    type: polytomic.MarketoConnectionType
+    config: polytomic.MarketoConfiguration
     datasource: true
     resource: true
     attributes:
-      - name: client_id
+      - name: ClientID
         type: string
         required: true
         example: my-client-id
-      - name: client_secret
+      - name: ClientSecret
         type: string
         required: true
         sensitive: true
         example: my-client-secret
-      - name: rest_endpoint
+      - name: RESTEndpoint
         type: string
         required: true
         example: https://marketo.example.com
-      - name: enforce_api_limits
+      - name: EnforceAPILimits
         type: bool
         optional: true
-      - name: daily_api_calls
+      - name: DailyAPICalls
         type: int
         optional: true
-      - name: concurrent_imports
+      - name: ConcurrentImports
         type: int
         optional: true
   - connection: mongodb
     name: MongoDB
+    type: polytomic.MongoDBConnectionType
+    config: polytomic.MongoDBConfiguration
     datasource: true
     resource: true
     attributes:
-      - name: hosts
+      - name: Hosts
         type: string
         required: true
         example: mongodb.example.com
-      - name: username
+      - name: Username
         type: string
         required: true
         example: user
-      - name: password
+      - name: Password
         type: string
         required: true
         sensitive: true
         example: secret
-      - name: database
+      - name: Database
         type: string
         optional: true
         example: db
-      - name: srv
+      - name: SRV
         type: bool
         optional: true
-      - name: params
+      - name: Params
         type: string
         optional: true
   - connection: chargebee
     name: Chargebee
+    type: polytomic.ChargebeeConnectionType
+    config: polytomic.ChargeBeeConnectionConfiguration
     datasource: true
     resource: true
     attributes:
-      - name: site
+      - name: Site
         type: string
         required: true
         example: site.example.com
-      - name: api_key
+      - name: APIKey
         type: string
         required: true
         sensitive: true
         example: my-api-key
-      - name: ratelimit_rpm
+      - name: RatelimitRPM
         type: int
         optional: true
   - connection: cloudsql
     name: Cloud SQL
+    type: polytomic.CloudSQLConnectionType
+    config: polytomic.CloudSQLConnectionConfiguration
     datasource: true
     resource: true
     attributes:
-      - name: connection_name
+      - name: ConnectionName
         type: string
         required: true
         example: my-project:us-central1:my-instance
-      - name: database
+      - name: Database
         type: string
         required: true
         example: my-db
-      - name: username
+      - name: Username
         type: string
         optional: true
         example: cloudsql
-      - name: password
+      - name: Password
         type: string
         optional: true
         sensitive: true
-      - name: credentials
+      - name: Credentials
         type: string
         optional: true
         sensitive: true
@@ -405,287 +448,317 @@ connections:
         example_type_override: variable
   - connection: cosmosdb
     name: Cosmos DB
+    type: polytomic.CosmosDBConnectionType
+    config: polytomic.CosmosDBConnectionConfiguration
     datasource: true
     resource: true
     attributes:
-      - name: uri
+      - name: URI
         type: string
         required: true
         example: https://my-account.documents.example.com:443
-      - name: key
+      - name: Key
         type: string
         required: true
         sensitive: true
         example: cosmosdb-secret-key
   - connection: customerio
     name: Customer.io
+    type: polytomic.CustomerIOConnectionType
+    config: polytomic.CustomerIOConnectionConfiguration
     datasource: true
     resource: true
     attributes:
-      - name: site_id
+      - name: SiteID
         type: string
         required: true
         example: my-site-id
-      - name: tracking_api_key
+      - name: TrackingAPIKey
         type: string
         required: true
         sensitive: true
         example: my-tracking-api-key
-      - name: app_api_key
+      - name: AppAPIKey
         type: string
         required: true
         sensitive: true
         example: my-app-api-key
   - connection: dialpad
     name: Dialpad
+    type: polytomic.DialpadConnectionType
+    config: polytomic.DialpadConnectionConfiguration
     datasource: true
     resource: true
     attributes:
-      - name: api_key
+      - name: APIKey
         type: string
         required: true
         sensitive: true
         example: my-api-key
   - connection: freshdesk
     name: Freshdesk
+    type: polytomic.FreshdeskConnectionType
+    config: polytomic.FreshdeskConnectionConfiguration
     datasource: true
     resource: true
     attributes:
-      - name: apikey
+      - name: Apikey
         type: string
         required: true
         sensitive: true
         example: my-api-key
-      - name: subdomain
+      - name: Subdomain
         type: string
         required: true
         example: example.freshdesk.com
   - connection: fullstory
     name: FullStory
+    type: polytomic.FullstoryConnectionType
+    config: polytomic.FullstoryConnectionConfiguration
     datasource: true
     resource: true
     attributes:
-      - name: api_key
+      - name: APIKey
         type: string
         required: true
         sensitive: true
         example: my-api-key
   - connection: harmonic
     name: Harmonic
+    type: polytomic.HarmonicConnectionType
+    config: polytomic.HarmonicConnectionConfiguration
     datasource: true
     resource: true
     attributes:
-      - name: api_key
+      - name: APIKey
         type: string
         required: true
         sensitive: true
         example: my-api-key
   - connection: intercom
     name: Intercom
+    type: polytomic.IntercomConnectionType
+    config: polytomic.IntercomConnectionConfiguration
     datasource: true
     resource: true
     attributes:
-      - name: api_key
+      - name: APIKey
         type: string
         required: true
         sensitive: true
         example: my-api-key
   - connection: klaviyo
     name: Klaviyo
+    type: polytomic.KlaviyoConnectionType
+    config: polytomic.KlaviyoConnectionConfiguration
     datasource: true
     resource: true
     attributes:
-      - name: api_key
+      - name: APIKey
         type: string
         required: true
         sensitive: true
         example: my-api-key
   - connection: kustomer
     name: Kustomer
+    type: polytomic.KustomerConnectionType
+    config: polytomic.KustomerConnectionConfiguration
     datasource: true
     resource: true
     attributes:
-      - name: apikey
+      - name: Apikey
         type: string
         required: true
         sensitive: true
         example: my-api-key
-      - name: domain
+      - name: Domain
         type: string
         required: true
         example: my-domain.example.com
   - connection: lob
     name: Lob
+    type: polytomic.LobConnectionType
+    config: polytomic.LobConnectionConfiguration
     datasource: true
     resource: true
     attributes:
-      - name: api_key
+      - name: APIKey
         type: string
         required: true
         sensitive: true
         example: my-api-key
   - connection: mysql
     name: MySQL
+    type: polytomic.MysqlConnectionType
+    config: polytomic.MysqlConnectionConfiguration
     datasource: true
     resource: true
     attributes:
-      - name: hostname
+      - name: Hostname
         type: string
         required: true
         example: mysql.example.com
-      - name: account
+      - name: Account
         type: string
         required: true
         example: acme
-      - name: passwd
+      - name: Passwd
         type: string
         required: true
         sensitive: true
         example: super-secret-password
-      - name: dbname
+      - name: Dbname
         type: string
         required: true
         example: db
-      - name: port
+      - name: Port
         type: int
         optional: true
         example: 3306
-      - name: ssh
+      - name: SSH
         type: bool
         optional: true
-      - name: ssh_user
+      - name: SSHUser
         type: string
         optional: true
-      - name: ssh_host
+      - name: SSHHost
         type: string
         optional: true
-      - name: ssh_port
+      - name: SSHPort
         type: int
         optional: true
-      - name: ssh_private_key
+      - name: SSHPrivateKey
         type: string
         optional: true
         sensitive: true
-      - name: change_detection
+      - name: ChangeDetection
         type: bool
         optional: true
         example: false
   - connection: netsuite
     name: NetSuite
+    type: polytomic.NetsuiteConnectionType
+    config: polytomic.NetsuiteConnectionConfiguration
     datasource: true
     resource: true
     attributes:
-      - name: account_id
+      - name: AccountID
         type: string
         required: true
         example: my-account-id
-      - name: consumer_key
+      - name: ConsumerKey
         type: string
         required: true
         example: my-consumer-key
-      - name: consumer_secret
+      - name: ConsumerSecret
         type: string
         required: true
         sensitive: true
         example: my-consumer-secret
-      - name: token
+      - name: Token
         type: string
         required: true
-      - name: token_secret
+      - name: TokenSecret
         type: string
         required: true
         sensitive: true
   - connection: pipedrive
     name: Pipedrive
+    type: polytomic.PipedriveConnectionType
+    config: polytomic.PipedriveConnectionConfiguration
     datasource: true
     resource: true
     attributes:
-      - name: api_key
+      - name: APIKey
         type: string
         required: true
         sensitive: true
         example: my-api-key
-      - name: domain
+      - name: Domain
         type: string
         required: true
         example: my-domain.example.com
   - connection: redshift
     name: Redshift
+    type: polytomic.RedshiftConnectionType
+    config: polytomic.RedshiftConnectionConfiguration
     datasource: true
     resource: true
     attributes:
-      - name: hostname
+      - name: Hostname
         type: string
         required: true
         example: redshift.example.com
-      - name: username
+      - name: Username
         type: string
         required: true
         example: acme
-      - name: password
+      - name: Password
         type: string
         required: true
         sensitive: true
         example: super-secret-password
-      - name: database
+      - name: Database
         type: string
         required: true
         example: db
-      - name: port
+      - name: Port
         type: int
         optional: true
         example: 5439
-      - name: ssh
+      - name: SSH
         type: bool
         optional: true
-      - name: ssh_user
+      - name: SSHUser
         type: string
         optional: true
-      - name: ssh_host
+      - name: SSHHost
         type: string
         optional: true
-      - name: ssh_port
+      - name: SSHPort
         type: int
         optional: true
-      - name: ssh_private_key
+      - name: SSHPrivateKey
         type: string
         optional: true
         sensitive: true
-      - name: aws_access_key_id
+      - name: AwsAccessKeyID
         type: string
         optional: true
         example: EXAMPLEKEY
-      - name: aws_secret_access_key
+      - name: AwsSecretAccessKey
         type: string
         optional: true
         sensitive: true
         example: EXAMPLESECRET
-      - name: s3_bucket_name
+      - name: S3BucketName
         type: string
         optional: true
         example: my-bucket
-      - name: s3_bucket_region
+      - name: S3BucketRegion
         type: string
         optional: true
         example: us-east-1
   - connection: redshiftserverless
     name: Redshift Serverless
+    type: polytomic.RedshiftServerlessConnectionType
+    config: polytomic.RedshiftServerlessConnectionConfiguration
     datasource: true
     resource: true
     attributes:
-      - name: database
+      - name: Database
         type: string
         required: true
         example: dev
-      - name: workgroup
+      - name: Workgroup
         type: string
         required: true
         example: default-workgroup
-      - name: iam_role_arn
+      - name: IAMRoleARN
         type: string
         required: true
         example: arn:aws:iam::XXXX:role/polytomic-redshiftserverless
-      - name: external_id
+      - name: ExternalID
         type: string
         required: true
         example: db
@@ -701,293 +774,339 @@ connections:
         optional: true
   - connection: segment
     name: Segment
+    type: polytomic.SegmentConnectionType
+    config: polytomic.SegmentConnectionConfiguration
     datasource: true
     resource: true
     attributes:
-      - name: write_key
+      - name: WriteKey
         type: string
         required: true
         sensitive: true
         example: my-write-key
   - connection: stripe
     name: Stripe
+    type: polytomic.StripeConnectionType
+    config: polytomic.StripeConnectionConfiguration
     datasource: true
     resource: true
     attributes:
-      - name: api_key
+      - name: APIKey
         type: string
         required: true
         sensitive: true
         example: my-api-key
   - connection: bingads
     name: Bing Ads
+    type: polytomic.BingAdsConnectionType
+    config: polytomic.BingAdsConnectionConfiguration
     datasource: true
     attributes: []
   - connection: iterable
     name: Iterable
+    type: polytomic.IterableConnectionType
+    config: polytomic.IterableConnectionConfiguration
     datasource: true
     attributes:
-      - name: api_key
+      - name: APIKey
         type: string
         required: true
         sensitive: true
         example: my-api-key
   - connection: shipbob
     name: ShipBob
+    type: polytomic.ShipBobConnectionType
+    config: polytomic.ShipBobConnectionConfiguration
     datasource: true
     attributes: []
   - connection: shopify
     name: Shopify
+    type: polytomic.ShopifyConnectionType
+    config: polytomic.ShopifyConnectionConfiguration
     datasource: true
     attributes:
-      - name: store
+      - name: Store
         type: string
         required: true
         example: my-store
   - connection: statsig
     Name: Statsig
+    type: polytomic.StatsigConnectionType
+    config: polytomic.StatsigConnectionConfiguration
     datasource: true
     resource: true
     attributes:
-      - name: api_key
+      - name: APIKey
         type: string
         required: true
         sensitive: true
         example: my-api-key
   - connection: smartsheet
     name: Smartsheet
+    type: polytomic.SmartSheetConnectionType
+    config: polytomic.SmartSheetConnectionConfiguration
     datasource: true
     attributes: []
   - connection: survicate
     name: Survicate
+    type: polytomic.SurvicateConnectionType
+    config: polytomic.SurvicateConnectionConfiguration
     datasource: true
     resource: true
     attributes:
-      - name: api_key
+      - name: APIKey
         type: string
         required: true
         sensitive: true
         example: my-api-key
   - connection: synapse
     name: Azure Synapse
+    type: polytomic.SynapseConnectionType
+    config: polytomic.SynapseConnectionConfiguration
     resource: true
     datasource: true
     attributes:
-      - name: hostname
+      - name: Hostname
         type: string
         required: true
         sensitive: false
         example: host.example.com
-      - name: username
+      - name: Username
         type: string
         required: true
         sensitive: false
         example: user
-      - name: password
+      - name: Password
         type: string
         required: true
         sensitive: true
         example: password
-      - name: database
+      - name: Database
         type: string
         required: true
         sensitive: false
         example: database
-      - name: port
+      - name: Port
         type: int
         required: true
         sensitive: false
         example: 5439
   - connection: uservoice
     name: UserVoice
+    type: polytomic.UserVoiceConnectionType
+    config: polytomic.UserVoiceConnectionConfiguration
     resource: true
     datasource: true
     attributes:
-      - name: api_key
+      - name: APIKey
         type: string
         required: true
         sensitive: true
         example: my-api-key
-      - name: domain
+      - name: Domain
         type: string
         required: true
         example: example.com
   - connection: vanilla
     name: Vanilla Forums
+    type: polytomic.VanillaConnectionType
+    config: polytomic.VanillaConnectionConfiguration
     datasource: true
     resource: true
     attributes:
-      - name: api_key
+      - name: APIKey
         type: string
         required: true
         sensitive: true
         example: my-api-key
-      - name: domain
+      - name: Domain
         type: string
         required: true
         example: example.com
   - connection: zendesk
     name: Zendesk
+    type: polytomic.ZendeskConnectionType
+    config: polytomic.ZendeskConnectionConfiguration
     datasource: true
     attributes:
-      - name: domain
+      - name: Domain
         type: string
         required: true
         example: example.zendesk.com
   - connection: databricks
     name: Databricks
+    type: polytomic.DatabricksConnectionType
+    config: polytomic.DatabricksConnectionConfiguration
     datasource: true
     resource: true
     attributes:
-      - name: server_hostname
+      - name: ServerHostname
         type: string
         required: true
         example: https://my.databricks.com
-      - name: port
+      - name: Port
         type: int
         required: true
         example: 443
-      - name: access_token
+      - name: AccessToken
         type: string
         required: true
         sensitive: true
         example: my-access-token
-      - name: http_path
+      - name: HTTPPath
         type: string
         required: true
         example: /sql
-      - name: aws_access_key_id
+      - name: AwsAccessKeyID
         type: string
         optional: true
         example: EXAMPLEKEY
-      - name: aws_secret_access_key
+      - name: AwsSecretAccessKey
         type: string
         optional: true
         sensitive: true
         example: EXAMPLESECRET
-      - name: s3_bucket_name
+      - name: S3BucketName
         type: string
         optional: true
         example: my-bucket
-      - name: s3_bucket_region
+      - name: S3BucketRegion
         type: string
         optional: true
         example: us-east-1
-      - name: aws_user
+      - name: AwsUser
         type: string
         computed: true
         example: my-user
   - connection: asana
     name: Asana
+    type: polytomic.AsanaConnectionType
+    config: polytomic.AsanaConnectionConfiguration
     datasource: true
     resource: true
     attributes:
-      - name: pat
+      - name: PAT
         type: string
         required: true
         sensitive: true
         example: my-personal-access-token
   - connection: delighted
     name: Delighted
+    type: polytomic.DelightedConnectionType
+    config: polytomic.DelightedConnectionConfiguration
     datasource: true
     resource: true
     attributes:
-      - name: api_key
+      - name: APIKey
         type: string
         required: true
         sensitive: true
         example: my-api-key
   - connection: linear
     name: Linear
+    type: polytomic.LinearConnectionType
+    config: polytomic.LinearConnectionConfiguration
     datasource: true
     resource: true
     attributes:
-      - name: api_key
+      - name: APIKey
         type: string
         required: true
         sensitive: true
         example: my-api-key
   - connection: jira
     name: Jira
+    type: polytomic.JiraConnectionType
+    config: polytomic.JiraConnectionConfiguration
     resource: true
     datasource: true
     attributes:
-      - name: url
+      - name: URL
         type: string
         required: true
         sensitive: true
         example: https://example.atlassian.net
-      - name: auth_method
+      - name: AuthMethod
         type: string
         required: true
         sensitive: false
         example: apikey/pat
-      - name: username
+      - name: Username
         type: string
         optional: true
         sensitive: false
         example: user
-      - name: api_key
+      - name: APIKey
         type: string
         optional: true
         sensitive: true
         example: my-api-key
-      - name: access_token
+      - name: AccessToken
         type: string
         optional: true
         sensitive: true
         example: my-access-token
   - connection: dynamodb
     name: DynamoDB
+    type: polytomic.DynamoDBConnectionType
+    config: polytomic.DynamoDBConnectionConfiguration
     datasource: true
     resource: true
     attributes:
-      - name: access_id
+      - name: AccessID
         type: string
         required: true
         sensitive: true
         example: my-access-key-id
-      - name: secret_access_key
+      - name: SecretAccessKey
         type: string
         required: true
         sensitive: true
         example: my-secret-access-key
-      - name: region
+      - name: Region
         type: string
         required: true
         sensitive: false
         example: us-east-1
   - connection: datadog
     name: Datadog
+    type: polytomic.DatadogConnectionType
+    config: polytomic.DatadogConnectionConfiguration
     datasource: true
     resource: true
     attributes:
-      - name: api_key
+      - name: APIKey
         type: string
         required: true
         sensitive: true
         example: my-api-key
   - connection: honeycomb
     name: Honeycomb
+    type: polytomic.HoneycombConnectionType
+    config: polytomic.HoneycombConnectionConfiguration
     datasource: true
     resource: true
     attributes:
-      - name: api_key
+      - name: APIKey
         type: string
         required: true
         sensitive: true
         example: my-api-key
-      - name: dataset
+      - name: Dataset
         type: string
         required: true
         sensitive: false
         example: events
   - connection: fbaudience
     name: Facebook Ads
+    type: polytomic.FacebookAdsConnectionType
+    config: polytomic.FacebookAdsConnectionConfiguration
     datasource: true
     attributes: []
   - connection: github
     name: GitHub
+    type: polytomic.GithubConnectionType
+    config: polytomic.GithubConnectionConfiguration
     datasource: true
     attributes: []
     # Maybe one day we can support nested struct attributes
@@ -997,6 +1116,8 @@ connections:
     #     required: true
   - connection: linkedinads
     name: LinkedIn Ads
+    type: polytomic.LinkedinAdsConnectionType
+    config: polytomic.LinkedinAdsConnectionConfiguration
     datasource: true
     attributes: []
     # attributes:
@@ -1005,135 +1126,159 @@ connections:
     #     required: true
   - connection: googlesearchconsole
     name: Google Search Console
+    type: polytomic.GoogleSearchConsoleConnectionType
+    config: polytomic.GoogleSearchConsoleConnectionConfiguration
     datasource: true
     attributes: []
   - connection: slack
     name: Slack
+    type: polytomic.SlackConnectionType
+    config: polytomic.SlackConnectionConfiguration
     datasource: true
     resource: true
     attributes:
-    - name: api_key
+    - name: APIKey
       type: string
       required: true
       sensitive: true
       example: my-api-key
   - connection: outreach
     name: Outreach
+    type: polytomic.OutreachConnectionType
+    config: polytomic.OutreachConnectionConfiguration
     datasource: true
     attributes: []
   - connection: datalite
     name: Datalite
+    type: polytomic.DataliteConnectionType
+    config: polytomic.DataliteConnectionConfiguration
     datasource: true
     attributes: []
   - connection: dittofeed
     name: DittoFeed
+    type: polytomic.DittofeedConnectionType
+    config: polytomic.DittofeedConnectionConfiguration
     datasource: true
     resource: true
     attributes:
-    - name: url
+    - name: URL
       type: string
       required: true
       sensitive: false
       example: https://example.dittofeed.com
-    - name: write_key
+    - name: WriteKey
       type: string
       required: true
       sensitive: true
       example: my-write-key
   - connection: ironclad
     name: Ironclad
+    type: polytomic.IronCladConnectionType
+    config: polytomic.IronCladConnectionConfiguration
     datasource: true
     resource: true
     attributes:
-    - name: api_key
+    - name: APIKey
       type: string
       required: true
       sensitive: true
       example: my-api-key
   - connection: mailercheck
     name: MailerCheck
+    type: polytomic.MailerCheckConnectionType
+    config: polytomic.MailerCheckConnectionConfiguration
     datasource: true
     resource: true
     attributes:
-    - name: api_key
+    - name: APIKey
       type: string
       required: true
       sensitive: true
       example: my-api-key
   - connection: tixr
     name: Tixr
+    type: polytomic.TixrConnectionType
+    config: polytomic.TixrConnectionConfiguration
     datasource: true
     resource: true
     attributes:
-    - name: client_private_key
+    - name: ClientPrivateKey
       type: string
       required: true
       sensitive: true
       example: my-client-private-key
-    - name: client_secret
+    - name: ClientSecret
       type: string
       required: true
       sensitive: true
       example: super-secret
   - connection: zoominfo
     name: ZoomInfo
+    type: polytomic.ZoomInfoConnectionType
+    config: polytomic.ZoomInfoConnectionConfiguration
     datasource: true
     resource: true
     attributes:
-    - name: username
+    - name: Username
       type: string
       required: true
       sensitive: false
       example: my-username
-    - name: client_id
+    - name: ClientID
       type: string
       required: true
       sensitive: true
       example: my-client-id
-    - name: private_key
+    - name: PrivateKey
       type: string
       required: true
       sensitive: true
       example: my-private-key
   - connection: quickbooks
     name: QuickBooks
+    type: polytomic.QuickbooksConnectionType
+    config: polytomic.QuickbooksConnectionConfiguration
     datasource: true
     resource: false
     attributes:
-    - name: realm_id
+    - name: RealmID
       type: string
       required: true
       example: 1234567891011121314
   - connection: awsopensearch
     name: AWS OpenSearch
+    type: polytomic.AWSOpenSearchConnectionType
+    config: polytomic.AWSOpenSearchConnectionConfiguration
     datasource: true
     resource: true
     attributes:
-    - name: endpoint
+    - name: Endpoint
       type: string
       required: true
       sensitive: false
       example: https://example-domain-123abcdefg.us-west-2.es.amazonaws.com
-    - name: aws_access_key_id
+    - name: AwsAccessKeyID
       type: string
       required: true
       sensitive: true
       example: "EXAMPLEACCESSKEYID"
-    - name: aws_secret_access_key
+    - name: AwsSecretAccessKey
       type: string
       required: true
       sensitive: true
       example: "EXAMPLEACCESSKEYSECRET"
-    - name: region
+    - name: Region
       type: string
       required: true
       example: "us-east-1"
   - connection: unbounce
     name: Unbounce
+    type: polytomic.UnbounceConnectionType
+    config: polytomic.UnbounceConnectionConfiguration
     datasource: true
     resource: true
     attributes:
-    - name: api_key
+    - name: APIKey
       type: string
       required: true
       sensitive: true

@@ -6,15 +6,14 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	ptclient "github.com/polytomic/polytomic-go/client"
-	ptcore "github.com/polytomic/polytomic-go/core"
-	"github.com/polytomic/polytomic-go/permissions"
+	"github.com/polytomic/polytomic-go"
 )
 
 var _ resource.Resource = &roleResource{}
@@ -54,7 +53,7 @@ type roleResourceData struct {
 }
 
 type roleResource struct {
-	client *ptclient.Client
+	client *polytomic.Client
 }
 
 func (r *roleResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -67,20 +66,21 @@ func (r *roleResource) Create(ctx context.Context, req resource.CreateRequest, r
 		return
 	}
 
-	role, err := r.client.Permissions.Roles.Create(
+	role, err := r.client.Permissions().CreateRole(
 		ctx,
-		&permissions.CreateRoleRequest{
+		polytomic.RoleRequest{
 			Name:           data.Name.ValueString(),
-			OrganizationId: data.Organization.ValueStringPointer(),
+			OrganizationID: data.Organization.ValueString(),
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating role: %s", err))
 		return
 	}
-	data.Id = types.StringPointerValue(role.Data.Id)
-	data.Name = types.StringPointerValue(role.Data.Name)
-	data.Organization = types.StringPointerValue(role.Data.OrganizationId)
+	data.Id = types.StringValue(role.ID)
+	data.Name = types.StringValue(role.Name)
+	data.Organization = types.StringValue(role.OrganizationID)
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -96,9 +96,9 @@ func (r *roleResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 		return
 	}
 
-	role, err := r.client.Permissions.Roles.Get(ctx, data.Id.ValueString())
+	role, err := r.client.Permissions().GetRole(ctx, data.Id.ValueString())
 	if err != nil {
-		pErr := &ptcore.APIError{}
+		pErr := polytomic.ApiError{}
 		if errors.As(err, &pErr) {
 			if pErr.StatusCode == http.StatusNotFound {
 				resp.State.RemoveResource(ctx)
@@ -109,9 +109,9 @@ func (r *roleResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 		return
 	}
 
-	data.Id = types.StringPointerValue(role.Data.Id)
-	data.Name = types.StringPointerValue(role.Data.Name)
-	data.Organization = types.StringPointerValue(role.Data.OrganizationId)
+	data.Id = types.StringValue(role.ID)
+	data.Name = types.StringValue(role.Name)
+	data.Organization = types.StringValue(role.OrganizationID)
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -127,22 +127,23 @@ func (r *roleResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		return
 	}
 
-	role, err := r.client.Permissions.Roles.Update(
+	role, err := r.client.Permissions().UpdateRole(
 		ctx,
 		data.Id.ValueString(),
-		&permissions.UpdateRoleRequest{
+		polytomic.RoleRequest{
 			Name:           data.Name.ValueString(),
-			OrganizationId: data.Organization.ValueStringPointer(),
+			OrganizationID: data.Organization.ValueString(),
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating role: %s", err))
 		return
 	}
 
-	data.Id = types.StringPointerValue(role.Data.Id)
-	data.Name = types.StringPointerValue(role.Data.Name)
-	data.Organization = types.StringPointerValue(role.Data.OrganizationId)
+	data.Id = types.StringValue(role.ID)
+	data.Name = types.StringValue(role.Name)
+	data.Organization = types.StringValue(role.OrganizationID)
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -158,7 +159,7 @@ func (r *roleResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 		return
 	}
 
-	err := r.client.Permissions.Roles.Remove(ctx, data.Id.ValueString())
+	err := r.client.Permissions().DeleteRole(ctx, data.Id.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting role: %s", err))
 		return
@@ -175,7 +176,7 @@ func (r *roleResource) Configure(ctx context.Context, req resource.ConfigureRequ
 		return
 	}
 
-	client, ok := req.ProviderData.(*ptclient.Client)
+	client, ok := req.ProviderData.(*polytomic.Client)
 
 	if !ok {
 		resp.Diagnostics.AddError(

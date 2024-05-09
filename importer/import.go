@@ -3,11 +3,8 @@ package importer
 import (
 	"context"
 	"io"
-	"net/http"
 
-	ptclient "github.com/polytomic/polytomic-go/client"
-	ptoption "github.com/polytomic/polytomic-go/option"
-	"github.com/polytomic/terraform-provider-polytomic/provider"
+	"github.com/polytomic/polytomic-go"
 	"github.com/rs/zerolog/log"
 )
 
@@ -32,13 +29,7 @@ func Init(url, key, path string, recreate bool, includePermissions bool) {
 	}
 
 	ctx := context.Background()
-	c := ptclient.NewClient(
-		ptoption.WithBaseURL(url),
-		ptoption.WithToken(key),
-		ptoption.WithHTTPHeader(http.Header{
-			"User-Agent": []string{provider.UserAgent},
-		}),
-	)
+	c := polytomic.NewClient(url, polytomic.APIKey(key))
 
 	importables := []Importable{
 		NewMain(),

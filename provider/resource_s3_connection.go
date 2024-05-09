@@ -10,7 +10,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/AlekSi/pointer"
+	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -21,8 +21,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/polytomic-go"
-	ptclient "github.com/polytomic/polytomic-go/client"
-	ptcore "github.com/polytomic/polytomic-go/core"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -95,17 +93,7 @@ func (r *S3ConnectionResource) Metadata(ctx context.Context, req resource.Metada
 }
 
 type S3ConnectionResource struct {
-	client *ptclient.Client
-}
-
-type S3Conf struct {
-	Aws_access_key_id string `mapstructure:"aws_access_key_id" tfsdk:"aws_access_key_id"`
-
-	Aws_secret_access_key string `mapstructure:"aws_secret_access_key" tfsdk:"aws_secret_access_key"`
-
-	S3_bucket_region string `mapstructure:"s3_bucket_region" tfsdk:"s3_bucket_region"`
-
-	S3_bucket_name string `mapstructure:"s3_bucket_name" tfsdk:"s3_bucket_name"`
+	client *polytomic.Client
 }
 
 func (r *S3ConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -118,44 +106,47 @@ func (r *S3ConnectionResource) Create(ctx context.Context, req resource.CreateRe
 		return
 	}
 
-	created, err := r.client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
-		Name:           data.Name.ValueString(),
-		Type:           "s3",
-		OrganizationId: data.Organization.ValueStringPointer(),
-		Configuration: map[string]interface{}{
-			"aws_access_key_id":     data.Configuration.Attributes()["aws_access_key_id"].(types.String).ValueString(),
-			"aws_secret_access_key": data.Configuration.Attributes()["aws_secret_access_key"].(types.String).ValueString(),
-			"s3_bucket_region":      data.Configuration.Attributes()["s3_bucket_region"].(types.String).ValueString(),
-			"s3_bucket_name":        data.Configuration.Attributes()["s3_bucket_name"].(types.String).ValueString(),
+	created, err := r.client.Connections().Create(ctx,
+		polytomic.CreateConnectionMutation{
+			Name:           data.Name.ValueString(),
+			Type:           polytomic.S3ConnectionType,
+			OrganizationId: data.Organization.ValueString(),
+			Configuration: polytomic.S3Configuration{
+				AwsAccessKeyID:     data.Configuration.Attributes()["aws_access_key_id"].(types.String).ValueString(),
+				AwsSecretAccessKey: data.Configuration.Attributes()["aws_secret_access_key"].(types.String).ValueString(),
+				S3BucketRegion:     data.Configuration.Attributes()["s3_bucket_region"].(types.String).ValueString(),
+				S3BucketName:       data.Configuration.Attributes()["s3_bucket_name"].(types.String).ValueString(),
+			},
 		},
-		Validate: pointer.ToBool(false),
-	})
+		polytomic.WithIdempotencyKey(uuid.NewString()),
+		polytomic.SkipConfigValidation(),
+	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
 		return
 	}
-	data.Id = types.StringPointerValue(created.Data.Id)
-	data.Name = types.StringPointerValue(created.Data.Name)
-	data.Organization = types.StringPointerValue(created.Data.OrganizationId)
+	data.Id = types.StringValue(created.ID)
+	data.Name = types.StringValue(created.Name)
+	data.Organization = types.StringValue(created.OrganizationId)
 
-	conf := S3Conf{}
-	err = mapstructure.Decode(created.Data.Configuration, &conf)
-	if err != nil {
-		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error decoding connection configuration: %s", err))
+	var output polytomic.S3Configuration
+	cfg := &mapstructure.DecoderConfig{
+		Result: &output,
 	}
-
+	decoder, _ := mapstructure.NewDecoder(cfg)
+	decoder.Decode(created.Configuration)
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"aws_access_key_id":     types.StringType,
 		"aws_secret_access_key": types.StringType,
 		"s3_bucket_region":      types.StringType,
 		"s3_bucket_name":        types.StringType,
-	}, conf)
+	}, output)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "S3", "id": created.Data.Id})
+	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "S3", "id": created.ID})
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -171,9 +162,9 @@ func (r *S3ConnectionResource) Read(ctx context.Context, req resource.ReadReques
 		return
 	}
 
-	connection, err := r.client.Connections.Get(ctx, data.Id.ValueString())
+	connection, err := r.client.Connections().Get(ctx, uuid.MustParse(data.Id.ValueString()))
 	if err != nil {
-		pErr := &ptcore.APIError{}
+		pErr := polytomic.ApiError{}
 		if errors.As(err, &pErr) {
 			if pErr.StatusCode == http.StatusNotFound {
 				resp.State.RemoveResource(ctx)
@@ -183,22 +174,23 @@ func (r *S3ConnectionResource) Read(ctx context.Context, req resource.ReadReques
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error reading connection: %s", err))
 		return
 	}
-	data.Id = types.StringPointerValue(connection.Data.Id)
-	data.Name = types.StringPointerValue(connection.Data.Name)
-	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
 
-	conf := S3Conf{}
-	err = mapstructure.Decode(connection.Data.Configuration, &conf)
-	if err != nil {
-		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error decoding connection configuration: %s", err))
+	data.Id = types.StringValue(connection.ID)
+	data.Name = types.StringValue(connection.Name)
+	data.Organization = types.StringValue(connection.OrganizationId)
+
+	var output polytomic.S3Configuration
+	cfg := &mapstructure.DecoderConfig{
+		Result: &output,
 	}
-
+	decoder, _ := mapstructure.NewDecoder(cfg)
+	decoder.Decode(connection.Configuration)
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"aws_access_key_id":     types.StringType,
 		"aws_secret_access_key": types.StringType,
 		"s3_bucket_region":      types.StringType,
 		"s3_bucket_name":        types.StringType,
-	}, conf)
+	}, output)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -218,44 +210,47 @@ func (r *S3ConnectionResource) Update(ctx context.Context, req resource.UpdateRe
 		return
 	}
 
-	updated, err := r.client.Connections.Update(ctx,
-		data.Id.ValueString(),
-		&polytomic.UpdateConnectionRequestSchema{
+	updated, err := r.client.Connections().Update(ctx,
+		uuid.MustParse(data.Id.ValueString()),
+		polytomic.UpdateConnectionMutation{
 			Name:           data.Name.ValueString(),
-			OrganizationId: data.Organization.ValueStringPointer(),
-			Configuration: map[string]interface{}{
-				"aws_access_key_id":     data.Configuration.Attributes()["aws_access_key_id"].(types.String).ValueString(),
-				"aws_secret_access_key": data.Configuration.Attributes()["aws_secret_access_key"].(types.String).ValueString(),
-				"s3_bucket_region":      data.Configuration.Attributes()["s3_bucket_region"].(types.String).ValueString(),
-				"s3_bucket_name":        data.Configuration.Attributes()["s3_bucket_name"].(types.String).ValueString(),
+			OrganizationId: data.Organization.ValueString(),
+			Configuration: polytomic.S3Configuration{
+				AwsAccessKeyID:     data.Configuration.Attributes()["aws_access_key_id"].(types.String).ValueString(),
+				AwsSecretAccessKey: data.Configuration.Attributes()["aws_secret_access_key"].(types.String).ValueString(),
+				S3BucketRegion:     data.Configuration.Attributes()["s3_bucket_region"].(types.String).ValueString(),
+				S3BucketName:       data.Configuration.Attributes()["s3_bucket_name"].(types.String).ValueString(),
 			},
-			Validate: pointer.ToBool(false),
-		})
+		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
+		polytomic.SkipConfigValidation(),
+	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))
 		return
 	}
 
-	data.Id = types.StringPointerValue(updated.Data.Id)
-	data.Name = types.StringPointerValue(updated.Data.Name)
-	data.Organization = types.StringPointerValue(updated.Data.OrganizationId)
+	data.Id = types.StringValue(updated.ID)
+	data.Name = types.StringValue(updated.Name)
+	data.Organization = types.StringValue(updated.OrganizationId)
 
-	conf := S3Conf{}
-	err = mapstructure.Decode(updated.Data.Configuration, &conf)
-	if err != nil {
-		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error decoding connection configuration: %s", err))
+	var output polytomic.S3Configuration
+	cfg := &mapstructure.DecoderConfig{
+		Result: &output,
 	}
-
+	decoder, _ := mapstructure.NewDecoder(cfg)
+	decoder.Decode(updated.Configuration)
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"aws_access_key_id":     types.StringType,
 		"aws_secret_access_key": types.StringType,
 		"s3_bucket_region":      types.StringType,
 		"s3_bucket_name":        types.StringType,
-	}, conf)
+	}, output)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
+
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
@@ -271,46 +266,43 @@ func (r *S3ConnectionResource) Delete(ctx context.Context, req resource.DeleteRe
 	}
 
 	if data.ForceDestroy.ValueBool() {
-		err := r.client.Connections.Remove(ctx, data.Id.ValueString(), &polytomic.ConnectionsRemoveRequest{
-			Force: pointer.ToBool(true),
-		})
+		err := r.client.Connections().Delete(ctx, uuid.MustParse(data.Id.ValueString()), polytomic.WithForceDelete())
 		if err != nil {
-			pErr := &polytomic.NotFoundError{}
+			pErr := polytomic.ApiError{}
 			if errors.As(err, &pErr) {
-				resp.State.RemoveResource(ctx)
-				return
+				if pErr.StatusCode == http.StatusNotFound {
+					resp.State.RemoveResource(ctx)
+					return
+				}
 			}
-
 			resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting connection: %s", err))
 		}
 		return
 	}
 
-	err := r.client.Connections.Remove(ctx, data.Id.ValueString(), &polytomic.ConnectionsRemoveRequest{
-		Force: pointer.ToBool(false),
-	})
+	err := r.client.Connections().Delete(ctx, uuid.MustParse(data.Id.ValueString()))
 	if err != nil {
-		pErr := &polytomic.NotFoundError{}
+		pErr := polytomic.ApiError{}
 		if errors.As(err, &pErr) {
-			resp.State.RemoveResource(ctx)
-			return
-		}
-	}
-	pErr := &polytomic.UnprocessableEntityError{}
-	if errors.As(err, &pErr) {
-		if strings.Contains(*pErr.Body.Message, "connection in use") {
-			for _, meta := range pErr.Body.Metadata.([]interface{}) {
-				info := meta.(map[string]interface{})
-				resp.Diagnostics.AddError("Connection in use",
-					fmt.Sprintf("Connection is used by %s \"%s\" (%s). Please remove before deleting this connection.",
-						info["type"], info["name"], info["id"]),
-				)
+			if pErr.StatusCode == http.StatusNotFound {
+				resp.State.RemoveResource(ctx)
+				return
 			}
-			return
+			if strings.Contains(pErr.Message, "connection in use") {
+				for _, meta := range pErr.Metadata {
+					info := meta.(map[string]interface{})
+					resp.Diagnostics.AddError("Connection in use",
+						fmt.Sprintf("Connection is used by %s \"%s\" (%s). Please remove before deleting this connection.",
+							info["type"], info["name"], info["id"]),
+					)
+				}
+				return
+			}
 		}
-	}
 
-	resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting connection: %s", err))
+		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting connection: %s", err))
+		return
+	}
 
 }
 
@@ -324,7 +316,7 @@ func (r *S3ConnectionResource) Configure(ctx context.Context, req resource.Confi
 		return
 	}
 
-	client, ok := req.ProviderData.(*ptclient.Client)
+	client, ok := req.ProviderData.(*polytomic.Client)
 
 	if !ok {
 		resp.Diagnostics.AddError(

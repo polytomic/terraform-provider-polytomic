@@ -7,10 +7,11 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	ptclient "github.com/polytomic/polytomic-go/client"
+	"github.com/polytomic/polytomic-go"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -18,7 +19,7 @@ var _ datasource.DataSource = &IntercomConnectionDataSource{}
 
 // ExampleDataSource defines the data source implementation.
 type IntercomConnectionDataSource struct {
-	client *ptclient.Client
+	client *polytomic.Client
 }
 
 func (d *IntercomConnectionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
@@ -59,7 +60,7 @@ func (d *IntercomConnectionDataSource) Configure(ctx context.Context, req dataso
 		return
 	}
 
-	client, ok := req.ProviderData.(*ptclient.Client)
+	client, ok := req.ProviderData.(*polytomic.Client)
 
 	if !ok {
 		resp.Diagnostics.AddError(
@@ -84,7 +85,7 @@ func (d *IntercomConnectionDataSource) Read(ctx context.Context, req datasource.
 	}
 
 	// Get the connection
-	connection, err := d.client.Connections.Get(ctx, data.Id.ValueString())
+	connection, err := d.client.Connections().Get(ctx, uuid.MustParse(data.Id.ValueString()))
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection", err.Error())
 		return
@@ -92,9 +93,9 @@ func (d *IntercomConnectionDataSource) Read(ctx context.Context, req datasource.
 
 	// For the purposes of this example code, hardcoding a response value to
 	// save into the Terraform state.
-	data.Id = types.StringPointerValue(connection.Data.Id)
-	data.Name = types.StringPointerValue(connection.Data.Name)
-	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
+	data.Id = types.StringValue(connection.ID)
+	data.Name = types.StringValue(connection.Name)
+	data.Organization = types.StringValue(connection.OrganizationId)
 
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)

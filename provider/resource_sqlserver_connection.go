@@ -10,7 +10,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/AlekSi/pointer"
+	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -21,8 +21,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/polytomic-go"
-	ptclient "github.com/polytomic/polytomic-go/client"
-	ptcore "github.com/polytomic/polytomic-go/core"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -109,21 +107,7 @@ func (r *SqlserverConnectionResource) Metadata(ctx context.Context, req resource
 }
 
 type SqlserverConnectionResource struct {
-	client *ptclient.Client
-}
-
-type SqlserverConf struct {
-	Hostname string `mapstructure:"hostname" tfsdk:"hostname"`
-
-	Username string `mapstructure:"username" tfsdk:"username"`
-
-	Password string `mapstructure:"password" tfsdk:"password"`
-
-	Database string `mapstructure:"database" tfsdk:"database"`
-
-	Port int `mapstructure:"port" tfsdk:"port"`
-
-	Ssl bool `mapstructure:"ssl" tfsdk:"ssl"`
+	client *polytomic.Client
 }
 
 func (r *SqlserverConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -136,34 +120,37 @@ func (r *SqlserverConnectionResource) Create(ctx context.Context, req resource.C
 		return
 	}
 
-	created, err := r.client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
-		Name:           data.Name.ValueString(),
-		Type:           "sqlserver",
-		OrganizationId: data.Organization.ValueStringPointer(),
-		Configuration: map[string]interface{}{
-			"hostname": data.Configuration.Attributes()["hostname"].(types.String).ValueString(),
-			"username": data.Configuration.Attributes()["username"].(types.String).ValueString(),
-			"password": data.Configuration.Attributes()["password"].(types.String).ValueString(),
-			"database": data.Configuration.Attributes()["database"].(types.String).ValueString(),
-			"port":     int(data.Configuration.Attributes()["port"].(types.Int64).ValueInt64()),
-			"ssl":      data.Configuration.Attributes()["ssl"].(types.Bool).ValueBool(),
+	created, err := r.client.Connections().Create(ctx,
+		polytomic.CreateConnectionMutation{
+			Name:           data.Name.ValueString(),
+			Type:           polytomic.SQLServerConnectionType,
+			OrganizationId: data.Organization.ValueString(),
+			Configuration: polytomic.SQLServerConfiguration{
+				Hostname: data.Configuration.Attributes()["hostname"].(types.String).ValueString(),
+				Username: data.Configuration.Attributes()["username"].(types.String).ValueString(),
+				Password: data.Configuration.Attributes()["password"].(types.String).ValueString(),
+				Database: data.Configuration.Attributes()["database"].(types.String).ValueString(),
+				Port:     int(data.Configuration.Attributes()["port"].(types.Int64).ValueInt64()),
+				SSL:      data.Configuration.Attributes()["ssl"].(types.Bool).ValueBool(),
+			},
 		},
-		Validate: pointer.ToBool(false),
-	})
+		polytomic.WithIdempotencyKey(uuid.NewString()),
+		polytomic.SkipConfigValidation(),
+	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
 		return
 	}
-	data.Id = types.StringPointerValue(created.Data.Id)
-	data.Name = types.StringPointerValue(created.Data.Name)
-	data.Organization = types.StringPointerValue(created.Data.OrganizationId)
+	data.Id = types.StringValue(created.ID)
+	data.Name = types.StringValue(created.Name)
+	data.Organization = types.StringValue(created.OrganizationId)
 
-	conf := SqlserverConf{}
-	err = mapstructure.Decode(created.Data.Configuration, &conf)
-	if err != nil {
-		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error decoding connection configuration: %s", err))
+	var output polytomic.SQLServerConfiguration
+	cfg := &mapstructure.DecoderConfig{
+		Result: &output,
 	}
-
+	decoder, _ := mapstructure.NewDecoder(cfg)
+	decoder.Decode(created.Configuration)
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"hostname": types.StringType,
 		"username": types.StringType,
@@ -171,13 +158,13 @@ func (r *SqlserverConnectionResource) Create(ctx context.Context, req resource.C
 		"database": types.StringType,
 		"port":     types.NumberType,
 		"ssl":      types.BoolType,
-	}, conf)
+	}, output)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Sqlserver", "id": created.Data.Id})
+	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Sqlserver", "id": created.ID})
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -193,9 +180,9 @@ func (r *SqlserverConnectionResource) Read(ctx context.Context, req resource.Rea
 		return
 	}
 
-	connection, err := r.client.Connections.Get(ctx, data.Id.ValueString())
+	connection, err := r.client.Connections().Get(ctx, uuid.MustParse(data.Id.ValueString()))
 	if err != nil {
-		pErr := &ptcore.APIError{}
+		pErr := polytomic.ApiError{}
 		if errors.As(err, &pErr) {
 			if pErr.StatusCode == http.StatusNotFound {
 				resp.State.RemoveResource(ctx)
@@ -205,16 +192,17 @@ func (r *SqlserverConnectionResource) Read(ctx context.Context, req resource.Rea
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error reading connection: %s", err))
 		return
 	}
-	data.Id = types.StringPointerValue(connection.Data.Id)
-	data.Name = types.StringPointerValue(connection.Data.Name)
-	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
 
-	conf := SqlserverConf{}
-	err = mapstructure.Decode(connection.Data.Configuration, &conf)
-	if err != nil {
-		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error decoding connection configuration: %s", err))
+	data.Id = types.StringValue(connection.ID)
+	data.Name = types.StringValue(connection.Name)
+	data.Organization = types.StringValue(connection.OrganizationId)
+
+	var output polytomic.SQLServerConfiguration
+	cfg := &mapstructure.DecoderConfig{
+		Result: &output,
 	}
-
+	decoder, _ := mapstructure.NewDecoder(cfg)
+	decoder.Decode(connection.Configuration)
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"hostname": types.StringType,
 		"username": types.StringType,
@@ -222,7 +210,7 @@ func (r *SqlserverConnectionResource) Read(ctx context.Context, req resource.Rea
 		"database": types.StringType,
 		"port":     types.NumberType,
 		"ssl":      types.BoolType,
-	}, conf)
+	}, output)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -242,36 +230,38 @@ func (r *SqlserverConnectionResource) Update(ctx context.Context, req resource.U
 		return
 	}
 
-	updated, err := r.client.Connections.Update(ctx,
-		data.Id.ValueString(),
-		&polytomic.UpdateConnectionRequestSchema{
+	updated, err := r.client.Connections().Update(ctx,
+		uuid.MustParse(data.Id.ValueString()),
+		polytomic.UpdateConnectionMutation{
 			Name:           data.Name.ValueString(),
-			OrganizationId: data.Organization.ValueStringPointer(),
-			Configuration: map[string]interface{}{
-				"hostname": data.Configuration.Attributes()["hostname"].(types.String).ValueString(),
-				"username": data.Configuration.Attributes()["username"].(types.String).ValueString(),
-				"password": data.Configuration.Attributes()["password"].(types.String).ValueString(),
-				"database": data.Configuration.Attributes()["database"].(types.String).ValueString(),
-				"port":     int(data.Configuration.Attributes()["port"].(types.Int64).ValueInt64()),
-				"ssl":      data.Configuration.Attributes()["ssl"].(types.Bool).ValueBool(),
+			OrganizationId: data.Organization.ValueString(),
+			Configuration: polytomic.SQLServerConfiguration{
+				Hostname: data.Configuration.Attributes()["hostname"].(types.String).ValueString(),
+				Username: data.Configuration.Attributes()["username"].(types.String).ValueString(),
+				Password: data.Configuration.Attributes()["password"].(types.String).ValueString(),
+				Database: data.Configuration.Attributes()["database"].(types.String).ValueString(),
+				Port:     int(data.Configuration.Attributes()["port"].(types.Int64).ValueInt64()),
+				SSL:      data.Configuration.Attributes()["ssl"].(types.Bool).ValueBool(),
 			},
-			Validate: pointer.ToBool(false),
-		})
+		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
+		polytomic.SkipConfigValidation(),
+	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))
 		return
 	}
 
-	data.Id = types.StringPointerValue(updated.Data.Id)
-	data.Name = types.StringPointerValue(updated.Data.Name)
-	data.Organization = types.StringPointerValue(updated.Data.OrganizationId)
+	data.Id = types.StringValue(updated.ID)
+	data.Name = types.StringValue(updated.Name)
+	data.Organization = types.StringValue(updated.OrganizationId)
 
-	conf := SqlserverConf{}
-	err = mapstructure.Decode(updated.Data.Configuration, &conf)
-	if err != nil {
-		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error decoding connection configuration: %s", err))
+	var output polytomic.SQLServerConfiguration
+	cfg := &mapstructure.DecoderConfig{
+		Result: &output,
 	}
-
+	decoder, _ := mapstructure.NewDecoder(cfg)
+	decoder.Decode(updated.Configuration)
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"hostname": types.StringType,
 		"username": types.StringType,
@@ -279,11 +269,12 @@ func (r *SqlserverConnectionResource) Update(ctx context.Context, req resource.U
 		"database": types.StringType,
 		"port":     types.NumberType,
 		"ssl":      types.BoolType,
-	}, conf)
+	}, output)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
+
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
@@ -299,46 +290,43 @@ func (r *SqlserverConnectionResource) Delete(ctx context.Context, req resource.D
 	}
 
 	if data.ForceDestroy.ValueBool() {
-		err := r.client.Connections.Remove(ctx, data.Id.ValueString(), &polytomic.ConnectionsRemoveRequest{
-			Force: pointer.ToBool(true),
-		})
+		err := r.client.Connections().Delete(ctx, uuid.MustParse(data.Id.ValueString()), polytomic.WithForceDelete())
 		if err != nil {
-			pErr := &polytomic.NotFoundError{}
+			pErr := polytomic.ApiError{}
 			if errors.As(err, &pErr) {
-				resp.State.RemoveResource(ctx)
-				return
+				if pErr.StatusCode == http.StatusNotFound {
+					resp.State.RemoveResource(ctx)
+					return
+				}
 			}
-
 			resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting connection: %s", err))
 		}
 		return
 	}
 
-	err := r.client.Connections.Remove(ctx, data.Id.ValueString(), &polytomic.ConnectionsRemoveRequest{
-		Force: pointer.ToBool(false),
-	})
+	err := r.client.Connections().Delete(ctx, uuid.MustParse(data.Id.ValueString()))
 	if err != nil {
-		pErr := &polytomic.NotFoundError{}
+		pErr := polytomic.ApiError{}
 		if errors.As(err, &pErr) {
-			resp.State.RemoveResource(ctx)
-			return
-		}
-	}
-	pErr := &polytomic.UnprocessableEntityError{}
-	if errors.As(err, &pErr) {
-		if strings.Contains(*pErr.Body.Message, "connection in use") {
-			for _, meta := range pErr.Body.Metadata.([]interface{}) {
-				info := meta.(map[string]interface{})
-				resp.Diagnostics.AddError("Connection in use",
-					fmt.Sprintf("Connection is used by %s \"%s\" (%s). Please remove before deleting this connection.",
-						info["type"], info["name"], info["id"]),
-				)
+			if pErr.StatusCode == http.StatusNotFound {
+				resp.State.RemoveResource(ctx)
+				return
 			}
-			return
+			if strings.Contains(pErr.Message, "connection in use") {
+				for _, meta := range pErr.Metadata {
+					info := meta.(map[string]interface{})
+					resp.Diagnostics.AddError("Connection in use",
+						fmt.Sprintf("Connection is used by %s \"%s\" (%s). Please remove before deleting this connection.",
+							info["type"], info["name"], info["id"]),
+					)
+				}
+				return
+			}
 		}
-	}
 
-	resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting connection: %s", err))
+		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting connection: %s", err))
+		return
+	}
 
 }
 
@@ -352,7 +340,7 @@ func (r *SqlserverConnectionResource) Configure(ctx context.Context, req resourc
 		return
 	}
 
-	client, ok := req.ProviderData.(*ptclient.Client)
+	client, ok := req.ProviderData.(*polytomic.Client)
 
 	if !ok {
 		resp.Diagnostics.AddError(

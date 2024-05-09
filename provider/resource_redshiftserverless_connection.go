@@ -10,7 +10,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/AlekSi/pointer"
+	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -21,10 +21,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/polytomic-go"
-	ptclient "github.com/polytomic/polytomic-go/client"
-	ptcore "github.com/polytomic/polytomic-go/core"
-
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -86,7 +82,6 @@ func (t *RedshiftserverlessConnectionResource) Schema(ctx context.Context, req r
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             stringdefault.StaticString(""),
 					},
 				},
 
@@ -112,21 +107,18 @@ func (r *RedshiftserverlessConnectionResource) Metadata(ctx context.Context, req
 }
 
 type RedshiftserverlessConnectionResource struct {
-	client *ptclient.Client
+	client *polytomic.Client
 }
 
-type RedshiftserverlessConf struct {
-	Database string `mapstructure:"database" tfsdk:"database"`
+type RedshiftServerlessConnectionConfiguration struct {
+	Database  string `json:"database" mapstructure:"database" tfsdk:"database"`
+	Workgroup string `json:"workgroup" mapstructure:"workgroup" tfsdk:"workgroup"`
 
-	Workgroup string `mapstructure:"workgroup" tfsdk:"workgroup"`
+	IAMRoleARN string `json:"iam_role_arn,omitempty" mapstructure:"iam_role_arn" tfsdk:"iam_role_arn"`
+	ExternalID string `json:"external_id,omitempty" mapstructure:"external_id" tfsdk:"external_id"`
 
-	Iam_role_arn string `mapstructure:"iam_role_arn" tfsdk:"iam_role_arn"`
-
-	External_id string `mapstructure:"external_id" tfsdk:"external_id"`
-
-	Override_endpoint bool `mapstructure:"override_endpoint" tfsdk:"override_endpoint"`
-
-	Data_api_endpoint string `mapstructure:"data_api_endpoint" tfsdk:"data_api_endpoint"`
+	OverrideEndpoint bool `json:"override_endpoint,omitempty" mapstructure:"override_endpoint" tfsdk:"override_endpoint"`
+	DataAPIEndpoint string `json:"data_api_endpoint,omitempty" mapstructure:"data_api_endpoint" tfsdk:"data_api_endpoint"`
 }
 
 func (r *RedshiftserverlessConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -139,48 +131,51 @@ func (r *RedshiftserverlessConnectionResource) Create(ctx context.Context, req r
 		return
 	}
 
-	created, err := r.client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
-		Name:           data.Name.ValueString(),
-		Type:           "redshiftserverless",
-		OrganizationId: data.Organization.ValueStringPointer(),
-		Configuration: map[string]interface{}{
-			"database":          data.Configuration.Attributes()["database"].(types.String).ValueString(),
-			"workgroup":         data.Configuration.Attributes()["workgroup"].(types.String).ValueString(),
-			"iam_role_arn":      data.Configuration.Attributes()["iam_role_arn"].(types.String).ValueString(),
-			"external_id":       data.Configuration.Attributes()["external_id"].(types.String).ValueString(),
-			"override_endpoint": data.Configuration.Attributes()["override_endpoint"].(types.Bool).ValueBool(),
-			"data_api_endpoint": data.Configuration.Attributes()["data_api_endpoint"].(types.String).ValueString(),
+	created, err := r.client.Connections().Create(ctx,
+		polytomic.CreateConnectionMutation{
+			Name:           data.Name.ValueString(),
+			Type:           polytomic.RedshiftServerlessConnectionType,
+			OrganizationId: data.Organization.ValueString(),
+			Configuration: RedshiftServerlessConnectionConfiguration{
+				Database:   data.Configuration.Attributes()["database"].(types.String).ValueString(),
+				Workgroup:  data.Configuration.Attributes()["workgroup"].(types.String).ValueString(),
+				IAMRoleARN: data.Configuration.Attributes()["iam_role_arn"].(types.String).ValueString(),
+				ExternalID: data.Configuration.Attributes()["external_id"].(types.String).ValueString(),
+				OverrideEndpoint: data.Configuration.Attributes()["override_endpoint"].(types.Bool).ValueBool(),
+				DataAPIEndpoint: data.Configuration.Attributes()["data_api_endpoint"].(types.String).ValueString(),
+			},
 		},
-		Validate: pointer.ToBool(false),
-	})
+		polytomic.WithIdempotencyKey(uuid.NewString()),
+		polytomic.SkipConfigValidation(),
+	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
 		return
 	}
-	data.Id = types.StringPointerValue(created.Data.Id)
-	data.Name = types.StringPointerValue(created.Data.Name)
-	data.Organization = types.StringPointerValue(created.Data.OrganizationId)
+	data.Id = types.StringValue(created.ID)
+	data.Name = types.StringValue(created.Name)
+	data.Organization = types.StringValue(created.OrganizationId)
 
-	conf := RedshiftserverlessConf{}
-	err = mapstructure.Decode(created.Data.Configuration, &conf)
-	if err != nil {
-		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error decoding connection configuration: %s", err))
+	var output RedshiftServerlessConnectionConfiguration
+	cfg := &mapstructure.DecoderConfig{
+		Result: &output,
 	}
-
+	decoder, _ := mapstructure.NewDecoder(cfg)
+	decoder.Decode(created.Configuration)
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"database":          types.StringType,
-		"workgroup":         types.StringType,
-		"iam_role_arn":      types.StringType,
-		"external_id":       types.StringType,
+		"database":     types.StringType,
+		"workgroup":    types.StringType,
+		"iam_role_arn": types.StringType,
+		"external_id":  types.StringType,
 		"override_endpoint": types.BoolType,
 		"data_api_endpoint": types.StringType,
-	}, conf)
+	}, output)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Redshiftserverless", "id": created.Data.Id})
+	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Redshiftserverless", "id": created.ID})
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -196,9 +191,9 @@ func (r *RedshiftserverlessConnectionResource) Read(ctx context.Context, req res
 		return
 	}
 
-	connection, err := r.client.Connections.Get(ctx, data.Id.ValueString())
+	connection, err := r.client.Connections().Get(ctx, uuid.MustParse(data.Id.ValueString()))
 	if err != nil {
-		pErr := &ptcore.APIError{}
+		pErr := polytomic.ApiError{}
 		if errors.As(err, &pErr) {
 			if pErr.StatusCode == http.StatusNotFound {
 				resp.State.RemoveResource(ctx)
@@ -208,24 +203,23 @@ func (r *RedshiftserverlessConnectionResource) Read(ctx context.Context, req res
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error reading connection: %s", err))
 		return
 	}
-	data.Id = types.StringPointerValue(connection.Data.Id)
-	data.Name = types.StringPointerValue(connection.Data.Name)
-	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
 
-	conf := RedshiftserverlessConf{}
-	err = mapstructure.Decode(connection.Data.Configuration, &conf)
-	if err != nil {
-		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error decoding connection configuration: %s", err))
+	data.Id = types.StringValue(connection.ID)
+	data.Name = types.StringValue(connection.Name)
+	data.Organization = types.StringValue(connection.OrganizationId)
+
+	var output polytomic.RedshiftServerlessConnectionConfiguration
+	cfg := &mapstructure.DecoderConfig{
+		Result: &output,
 	}
-
+	decoder, _ := mapstructure.NewDecoder(cfg)
+	decoder.Decode(connection.Configuration)
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"database":          types.StringType,
-		"workgroup":         types.StringType,
-		"iam_role_arn":      types.StringType,
-		"external_id":       types.StringType,
-		"override_endpoint": types.BoolType,
-		"data_api_endpoint": types.StringType,
-	}, conf)
+		"database":     types.StringType,
+		"workgroup":    types.StringType,
+		"iam_role_arn": types.StringType,
+		"external_id":  types.StringType,
+	}, output)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -245,48 +239,47 @@ func (r *RedshiftserverlessConnectionResource) Update(ctx context.Context, req r
 		return
 	}
 
-	updated, err := r.client.Connections.Update(ctx,
-		data.Id.ValueString(),
-		&polytomic.UpdateConnectionRequestSchema{
+	updated, err := r.client.Connections().Update(ctx,
+		uuid.MustParse(data.Id.ValueString()),
+		polytomic.UpdateConnectionMutation{
 			Name:           data.Name.ValueString(),
-			OrganizationId: data.Organization.ValueStringPointer(),
-			Configuration: map[string]interface{}{
-				"database":          data.Configuration.Attributes()["database"].(types.String).ValueString(),
-				"workgroup":         data.Configuration.Attributes()["workgroup"].(types.String).ValueString(),
-				"iam_role_arn":      data.Configuration.Attributes()["iam_role_arn"].(types.String).ValueString(),
-				"external_id":       data.Configuration.Attributes()["external_id"].(types.String).ValueString(),
-				"override_endpoint": data.Configuration.Attributes()["override_endpoint"].(types.Bool).ValueBool(),
-				"data_api_endpoint": data.Configuration.Attributes()["data_api_endpoint"].(types.String).ValueString(),
+			OrganizationId: data.Organization.ValueString(),
+			Configuration: polytomic.RedshiftServerlessConnectionConfiguration{
+				Database:   data.Configuration.Attributes()["database"].(types.String).ValueString(),
+				Workgroup:  data.Configuration.Attributes()["workgroup"].(types.String).ValueString(),
+				IAMRoleARN: data.Configuration.Attributes()["iam_role_arn"].(types.String).ValueString(),
+				ExternalID: data.Configuration.Attributes()["external_id"].(types.String).ValueString(),
 			},
-			Validate: pointer.ToBool(false),
-		})
+		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
+		polytomic.SkipConfigValidation(),
+	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))
 		return
 	}
 
-	data.Id = types.StringPointerValue(updated.Data.Id)
-	data.Name = types.StringPointerValue(updated.Data.Name)
-	data.Organization = types.StringPointerValue(updated.Data.OrganizationId)
+	data.Id = types.StringValue(updated.ID)
+	data.Name = types.StringValue(updated.Name)
+	data.Organization = types.StringValue(updated.OrganizationId)
 
-	conf := RedshiftserverlessConf{}
-	err = mapstructure.Decode(updated.Data.Configuration, &conf)
-	if err != nil {
-		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error decoding connection configuration: %s", err))
+	var output polytomic.RedshiftServerlessConnectionConfiguration
+	cfg := &mapstructure.DecoderConfig{
+		Result: &output,
 	}
-
+	decoder, _ := mapstructure.NewDecoder(cfg)
+	decoder.Decode(updated.Configuration)
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"database":          types.StringType,
-		"workgroup":         types.StringType,
-		"iam_role_arn":      types.StringType,
-		"external_id":       types.StringType,
-		"override_endpoint": types.BoolType,
-		"data_api_endpoint": types.StringType,
-	}, conf)
+		"database":     types.StringType,
+		"workgroup":    types.StringType,
+		"iam_role_arn": types.StringType,
+		"external_id":  types.StringType,
+	}, output)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
+
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
@@ -302,46 +295,43 @@ func (r *RedshiftserverlessConnectionResource) Delete(ctx context.Context, req r
 	}
 
 	if data.ForceDestroy.ValueBool() {
-		err := r.client.Connections.Remove(ctx, data.Id.ValueString(), &polytomic.ConnectionsRemoveRequest{
-			Force: pointer.ToBool(true),
-		})
+		err := r.client.Connections().Delete(ctx, uuid.MustParse(data.Id.ValueString()), polytomic.WithForceDelete())
 		if err != nil {
-			pErr := &polytomic.NotFoundError{}
+			pErr := polytomic.ApiError{}
 			if errors.As(err, &pErr) {
-				resp.State.RemoveResource(ctx)
-				return
+				if pErr.StatusCode == http.StatusNotFound {
+					resp.State.RemoveResource(ctx)
+					return
+				}
 			}
-
 			resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting connection: %s", err))
 		}
 		return
 	}
 
-	err := r.client.Connections.Remove(ctx, data.Id.ValueString(), &polytomic.ConnectionsRemoveRequest{
-		Force: pointer.ToBool(false),
-	})
+	err := r.client.Connections().Delete(ctx, uuid.MustParse(data.Id.ValueString()))
 	if err != nil {
-		pErr := &polytomic.NotFoundError{}
+		pErr := polytomic.ApiError{}
 		if errors.As(err, &pErr) {
-			resp.State.RemoveResource(ctx)
-			return
-		}
-	}
-	pErr := &polytomic.UnprocessableEntityError{}
-	if errors.As(err, &pErr) {
-		if strings.Contains(*pErr.Body.Message, "connection in use") {
-			for _, meta := range pErr.Body.Metadata.([]interface{}) {
-				info := meta.(map[string]interface{})
-				resp.Diagnostics.AddError("Connection in use",
-					fmt.Sprintf("Connection is used by %s \"%s\" (%s). Please remove before deleting this connection.",
-						info["type"], info["name"], info["id"]),
-				)
+			if pErr.StatusCode == http.StatusNotFound {
+				resp.State.RemoveResource(ctx)
+				return
 			}
-			return
+			if strings.Contains(pErr.Message, "connection in use") {
+				for _, meta := range pErr.Metadata {
+					info := meta.(map[string]interface{})
+					resp.Diagnostics.AddError("Connection in use",
+						fmt.Sprintf("Connection is used by %s \"%s\" (%s). Please remove before deleting this connection.",
+							info["type"], info["name"], info["id"]),
+					)
+				}
+				return
+			}
 		}
-	}
 
-	resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting connection: %s", err))
+		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting connection: %s", err))
+		return
+	}
 
 }
 
@@ -355,7 +345,7 @@ func (r *RedshiftserverlessConnectionResource) Configure(ctx context.Context, re
 		return
 	}
 
-	client, ok := req.ProviderData.(*ptclient.Client)
+	client, ok := req.ProviderData.(*polytomic.Client)
 
 	if !ok {
 		resp.Diagnostics.AddError(

@@ -2,9 +2,7 @@ package provider
 
 import (
 	"context"
-	"encoding/base64"
 	"fmt"
-	"net/http"
 	"os"
 
 	"github.com/hashicorp/go-retryablehttp"
@@ -13,8 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	ptclient "github.com/polytomic/polytomic-go/client"
-	ptoption "github.com/polytomic/polytomic-go/option"
+	"github.com/polytomic/polytomic-go"
 )
 
 const (
@@ -59,11 +56,6 @@ type ProviderData struct {
 func (p *ptProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
 	resp.TypeName = Name
 	resp.Version = p.version
-}
-
-func basicAuth(username, password string) string {
-	auth := username + ":" + password
-	return base64.StdEncoding.EncodeToString([]byte(auth))
 }
 
 func (p *ptProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
@@ -113,27 +105,21 @@ func (p *ptProvider) Configure(ctx context.Context, req provider.ConfigureReques
 
 	rc.StandardClient()
 
-	var client *ptclient.Client
+	var client *polytomic.Client
 	// Deployment key is the default and takes precedence
 	if apiKey != "" && deployKey == "" {
-		client = ptclient.NewClient(
-			ptoption.WithBaseURL(deployURL),
-			ptoption.WithHTTPHeader(http.Header{
-				"User-Agent": []string{UserAgent},
-			}),
-			ptoption.WithHTTPClient(rc.StandardClient()),
-			ptoption.WithToken(apiKey),
+		client = polytomic.NewClient(
+			deployURL,
+			polytomic.APIKey(apiKey),
+			polytomic.WithUserAgent(UserAgent),
+			polytomic.WithClient(rc.StandardClient()),
 		)
 	} else {
-		client = ptclient.NewClient(
-			ptoption.WithBaseURL(deployURL),
-			ptoption.WithHTTPHeader(http.Header{
-				"User-Agent": []string{UserAgent},
-			}),
-			ptoption.WithHTTPHeader(http.Header{
-				"Authorization": []string{"Basic " + basicAuth(deployKey, "")},
-			}),
-			ptoption.WithHTTPClient(rc.StandardClient()),
+		client = polytomic.NewClient(
+			deployURL,
+			polytomic.DeploymentKey(deployKey),
+			polytomic.WithUserAgent(UserAgent),
+			polytomic.WithClient(rc.StandardClient()),
 		)
 	}
 
@@ -155,6 +141,7 @@ func (p *ptProvider) Resources(ctx context.Context) []func() resource.Resource {
 		func() resource.Resource { return &APIConnectionResource{} },
 		func() resource.Resource { return &CSVConnectionResource{} },
 		func() resource.Resource { return &WebhookConnectionResource{} },
+		func() resource.Resource { return &AthenaConnectionResource{} },
 	}
 	all := append(connectionResources, resourceList...)
 	return all
@@ -167,6 +154,7 @@ func (p *ptProvider) DataSources(ctx context.Context) []func() datasource.DataSo
 		func() datasource.DataSource { return &bulkDestinationDatasource{} },
 		func() datasource.DataSource { return &FacebookAdsConnectionDataSource{} },
 		func() datasource.DataSource { return &identityDatasource{} },
+		func() datasource.DataSource { return &AthenaConnectionDataSource{} },
 	}
 	all := append(connectionDatasources, datasources...)
 	return all

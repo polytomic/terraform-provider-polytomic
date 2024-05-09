@@ -5,8 +5,9 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 
-	"github.com/AlekSi/pointer"
+	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -19,8 +20,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/polytomic-go"
-	ptclient "github.com/polytomic/polytomic-go/client"
-	ptcore "github.com/polytomic/polytomic-go/core"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -144,14 +143,7 @@ func (r *CSVConnectionResource) Metadata(ctx context.Context, req resource.Metad
 }
 
 type CSVConnectionResource struct {
-	client *ptclient.Client
-}
-
-type CSVConf struct {
-	URL                   string             `json:"url" mapstructure:"url" tfsdk:"url"`
-	Headers               []RequestParameter `json:"headers" mapstructure:"headers" tfsdk:"headers"`
-	QueryStringParameters []RequestParameter `json:"parameters" mapstructure:"parameters" tfsdk:"parameters"`
-	Auth                  Auth               `json:"auth" mapstructure:",squash" tfsdk:"auth"`
+	client *polytomic.Client
 }
 
 func (r *CSVConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -164,7 +156,7 @@ func (r *CSVConnectionResource) Create(ctx context.Context, req resource.CreateR
 		return
 	}
 
-	var headers []RequestParameter
+	var headers []polytomic.RequestParameter
 	if data.Configuration.Attributes()["headers"] != nil {
 		diags = data.Configuration.Attributes()["headers"].(types.Set).ElementsAs(ctx, &headers, true)
 		if diags.HasError() {
@@ -173,7 +165,7 @@ func (r *CSVConnectionResource) Create(ctx context.Context, req resource.CreateR
 		}
 	}
 
-	var params []RequestParameter
+	var params []polytomic.RequestParameter
 	if data.Configuration.Attributes()["parameters"] != nil {
 		diags = data.Configuration.Attributes()["parameters"].(types.Set).ElementsAs(ctx, &params, true)
 		if diags.HasError() {
@@ -182,37 +174,38 @@ func (r *CSVConnectionResource) Create(ctx context.Context, req resource.CreateR
 		}
 	}
 
-	var auth Auth
+	var auth polytomic.Auth
 	diags = data.Configuration.Attributes()["auth"].(types.Object).As(ctx, &auth, basetypes.ObjectAsOptions{UnhandledNullAsEmpty: true})
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	created, err := r.client.Connections.Create(ctx,
-		&polytomic.CreateConnectionRequestSchema{
+	created, err := r.client.Connections().Create(ctx,
+		polytomic.CreateConnectionMutation{
 			Name:           data.Name.ValueString(),
-			Type:           "csv",
-			OrganizationId: data.Organization.ValueStringPointer(),
-			Configuration: map[string]interface{}{
-				"url":        data.Configuration.Attributes()["url"].(types.String).ValueString(),
-				"headers":    headers,
-				"parameters": params,
-				"auth":       auth,
+			Type:           polytomic.CsvConnectionType,
+			OrganizationId: data.Organization.ValueString(),
+			Configuration: polytomic.CSVConnectionConfiguration{
+				URL:                   data.Configuration.Attributes()["url"].(types.String).ValueString(),
+				Headers:               headers,
+				QueryStringParameters: params,
+				Auth:                  auth,
 			},
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
 		return
 	}
 
-	conf := CSVConf{}
-	err = mapstructure.Decode(created.Data.Configuration, &conf)
-	if err != nil {
-		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error decoding connection configuration: %s", err))
+	var output polytomic.CSVConnectionConfiguration
+	cfg := &mapstructure.DecoderConfig{
+		Result: &output,
 	}
-
+	decoder, _ := mapstructure.NewDecoder(cfg)
+	decoder.Decode(created.Configuration)
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"url": types.StringType,
 		"headers": types.SetType{
@@ -262,17 +255,17 @@ func (r *CSVConnectionResource) Create(ctx context.Context, req resource.CreateR
 				},
 			},
 		},
-	}, conf)
+	}, output)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	data.Id = types.StringPointerValue(created.Data.Id)
-	data.Name = types.StringPointerValue(created.Data.Name)
-	data.Organization = types.StringPointerValue(created.Data.OrganizationId)
+	data.Id = types.StringValue(created.ID)
+	data.Name = types.StringValue(created.Name)
+	data.Organization = types.StringValue(created.OrganizationId)
 
-	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "CSV", "id": created.Data.Id})
+	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "CSV", "id": created.ID})
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -288,34 +281,33 @@ func (r *CSVConnectionResource) Read(ctx context.Context, req resource.ReadReque
 		return
 	}
 
-	connection, err := r.client.Connections.Get(ctx, data.Id.ValueString())
+	connection, err := r.client.Connections().Get(ctx, uuid.MustParse(data.Id.ValueString()))
 	if err != nil {
-		pErr := &ptcore.APIError{}
+		pErr := polytomic.ApiError{}
 		if errors.As(err, &pErr) {
 			if pErr.StatusCode == http.StatusNotFound {
 				resp.State.RemoveResource(ctx)
 				return
 			}
-			// 	if strings.Contains(pErr.Message, "connection in use") {
-			// 		for _, meta := range pErr.Metadata {
-			// 			info := meta.(map[string]interface{})
-			// 			resp.Diagnostics.AddError("Connection in use",
-			// 				fmt.Sprintf("Connection is used by %s \"%s\" (%s). Please remove before deleting this connection.",
-			// 					info["type"], info["name"], info["id"]),
-			// 			)
-			// 		}
-			// 		return
-			// 	}
-			// }
+			if strings.Contains(pErr.Message, "connection in use") {
+				for _, meta := range pErr.Metadata {
+					info := meta.(map[string]interface{})
+					resp.Diagnostics.AddError("Connection in use",
+						fmt.Sprintf("Connection is used by %s \"%s\" (%s). Please remove before deleting this connection.",
+							info["type"], info["name"], info["id"]),
+					)
+				}
+				return
+			}
 		}
 	}
 
-	conf := CSVConf{}
-	err = mapstructure.Decode(connection.Data.Configuration, &conf)
-	if err != nil {
-		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error decoding connection configuration: %s", err))
+	var output polytomic.CSVConnectionConfiguration
+	cfg := &mapstructure.DecoderConfig{
+		Result: &output,
 	}
-
+	decoder, _ := mapstructure.NewDecoder(cfg)
+	decoder.Decode(connection.Configuration)
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"url": types.StringType,
 		"headers": types.SetType{
@@ -365,15 +357,15 @@ func (r *CSVConnectionResource) Read(ctx context.Context, req resource.ReadReque
 				},
 			},
 		},
-	}, conf)
+	}, output)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	data.Id = types.StringPointerValue(connection.Data.Id)
-	data.Name = types.StringPointerValue(connection.Data.Name)
-	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
+	data.Id = types.StringValue(connection.ID)
+	data.Name = types.StringValue(connection.Name)
+	data.Organization = types.StringValue(connection.OrganizationId)
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -389,7 +381,7 @@ func (r *CSVConnectionResource) Update(ctx context.Context, req resource.UpdateR
 		return
 	}
 
-	var headers []RequestParameter
+	var headers []polytomic.RequestParameter
 	if data.Configuration.Attributes()["headers"] != nil {
 		diags = data.Configuration.Attributes()["headers"].(types.Set).ElementsAs(ctx, &headers, true)
 		if diags.HasError() {
@@ -398,7 +390,7 @@ func (r *CSVConnectionResource) Update(ctx context.Context, req resource.UpdateR
 		}
 	}
 
-	var params []RequestParameter
+	var params []polytomic.RequestParameter
 	if data.Configuration.Attributes()["parameters"] != nil {
 		diags = data.Configuration.Attributes()["parameters"].(types.Set).ElementsAs(ctx, &params, true)
 		if diags.HasError() {
@@ -407,37 +399,38 @@ func (r *CSVConnectionResource) Update(ctx context.Context, req resource.UpdateR
 		}
 	}
 
-	var auth Auth
+	var auth polytomic.Auth
 	diags = data.Configuration.Attributes()["auth"].(types.Object).As(ctx, &auth, basetypes.ObjectAsOptions{UnhandledNullAsEmpty: true})
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	updated, err := r.client.Connections.Update(ctx,
-		data.Id.ValueString(),
-		&polytomic.UpdateConnectionRequestSchema{
+	updated, err := r.client.Connections().Update(ctx,
+		uuid.MustParse(data.Id.ValueString()),
+		polytomic.UpdateConnectionMutation{
 			Name:           data.Name.ValueString(),
-			OrganizationId: data.Organization.ValueStringPointer(),
-			Configuration: map[string]interface{}{
-				"url":        data.Configuration.Attributes()["url"].(types.String).ValueString(),
-				"headers":    headers,
-				"parameters": params,
-				"auth":       auth,
+			OrganizationId: data.Organization.ValueString(),
+			Configuration: polytomic.CSVConnectionConfiguration{
+				URL:                   data.Configuration.Attributes()["url"].(types.String).ValueString(),
+				Headers:               headers,
+				QueryStringParameters: params,
+				Auth:                  auth,
 			},
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))
 		return
 	}
 
-	conf := CSVConf{}
-	err = mapstructure.Decode(updated.Data.Configuration, &conf)
-	if err != nil {
-		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error decoding connection configuration: %s", err))
+	var output polytomic.CSVConnectionConfiguration
+	cfg := &mapstructure.DecoderConfig{
+		Result: &output,
 	}
-
+	decoder, _ := mapstructure.NewDecoder(cfg)
+	decoder.Decode(updated.Configuration)
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"url": types.StringType,
 		"headers": types.SetType{
@@ -487,15 +480,15 @@ func (r *CSVConnectionResource) Update(ctx context.Context, req resource.UpdateR
 				},
 			},
 		},
-	}, conf)
+	}, output)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	data.Id = types.StringPointerValue(updated.Data.Id)
-	data.Name = types.StringPointerValue(updated.Data.Name)
-	data.Organization = types.StringPointerValue(updated.Data.OrganizationId)
+	data.Id = types.StringValue(updated.ID)
+	data.Name = types.StringValue(updated.Name)
+	data.Organization = types.StringValue(updated.OrganizationId)
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -512,9 +505,9 @@ func (r *CSVConnectionResource) Delete(ctx context.Context, req resource.DeleteR
 	}
 
 	if data.ForceDestroy.ValueBool() {
-		err := r.client.Connections.Remove(ctx, data.Id.ValueString(), &polytomic.ConnectionsRemoveRequest{Force: pointer.ToBool(true)})
+		err := r.client.Connections().Delete(ctx, uuid.MustParse(data.Id.ValueString()), polytomic.WithForceDelete())
 		if err != nil {
-			pErr := &ptcore.APIError{}
+			pErr := polytomic.ApiError{}
 			if errors.As(err, &pErr) {
 				if pErr.StatusCode == http.StatusNotFound {
 					resp.State.RemoveResource(ctx)
@@ -526,24 +519,24 @@ func (r *CSVConnectionResource) Delete(ctx context.Context, req resource.DeleteR
 		return
 	}
 
-	err := r.client.Connections.Remove(ctx, data.Id.ValueString(), &polytomic.ConnectionsRemoveRequest{Force: pointer.ToBool(false)})
+	err := r.client.Connections().Delete(ctx, uuid.MustParse(data.Id.ValueString()))
 	if err != nil {
-		pErr := &ptcore.APIError{}
+		pErr := polytomic.ApiError{}
 		if errors.As(err, &pErr) {
 			if pErr.StatusCode == http.StatusNotFound {
 				resp.State.RemoveResource(ctx)
 				return
 			}
-			// if strings.Contains(pErr.Message, "connection in use") {
-			// 	for _, meta := range pErr.Metadata {
-			// 		info := meta.(map[string]interface{})
-			// 		resp.Diagnostics.AddError("Connection in use",
-			// 			fmt.Sprintf("Connection is used by %s \"%s\" (%s). Please remove before deleting this connection.",
-			// 				info["type"], info["name"], info["id"]),
-			// 		)
-			// 	}
-			// 	return
-			// }
+			if strings.Contains(pErr.Message, "connection in use") {
+				for _, meta := range pErr.Metadata {
+					info := meta.(map[string]interface{})
+					resp.Diagnostics.AddError("Connection in use",
+						fmt.Sprintf("Connection is used by %s \"%s\" (%s). Please remove before deleting this connection.",
+							info["type"], info["name"], info["id"]),
+					)
+				}
+				return
+			}
 		}
 
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting connection: %s", err))
@@ -561,7 +554,7 @@ func (r *CSVConnectionResource) Configure(ctx context.Context, req resource.Conf
 		return
 	}
 
-	client, ok := req.ProviderData.(*ptclient.Client)
+	client, ok := req.ProviderData.(*polytomic.Client)
 
 	if !ok {
 		resp.Diagnostics.AddError(

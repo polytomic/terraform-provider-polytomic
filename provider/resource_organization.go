@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -14,8 +15,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/polytomic/polytomic-go"
-	ptclient "github.com/polytomic/polytomic-go/client"
-	ptcore "github.com/polytomic/polytomic-go/core"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -54,7 +53,7 @@ func (r *organizationResource) Configure(ctx context.Context, req resource.Confi
 		return
 	}
 
-	client, ok := req.ProviderData.(*ptclient.Client)
+	client, ok := req.ProviderData.(*polytomic.Client)
 
 	if !ok {
 		resp.Diagnostics.AddError(
@@ -80,7 +79,7 @@ type organizationResourceData struct {
 }
 
 type organizationResource struct {
-	client *ptclient.Client
+	client *polytomic.Client
 }
 
 func (r *organizationResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -93,18 +92,19 @@ func (r *organizationResource) Create(ctx context.Context, req resource.CreateRe
 		return
 	}
 
-	created, err := r.client.Organization.Create(ctx,
-		&polytomic.CreateOrganizationRequestSchema{
+	created, err := r.client.Organizations().Create(ctx,
+		polytomic.OrganizationMutation{
 			Name:      data.Name.ValueString(),
-			SsoDomain: data.SSODomain.ValueStringPointer(),
-			SsoOrgId:  data.SSOOrgId.ValueStringPointer(),
+			SSODomain: data.SSODomain.ValueString(),
+			SSOOrgId:  data.SSOOrgId.ValueString(),
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating organization: %s", err))
 		return
 	}
-	data.Id = types.StringPointerValue(created.Data.Id)
+	data.Id = types.StringValue(created.ID.String())
 	tflog.Trace(ctx, "created a organization")
 
 	diags = resp.State.Set(ctx, &data)
@@ -123,9 +123,14 @@ func (r *organizationResource) Read(ctx context.Context, req resource.ReadReques
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	organization, err := r.client.Organization.Get(ctx, data.Id.ValueString())
+	wsId, err := uuid.Parse(data.Id.ValueString())
 	if err != nil {
-		pErr := &ptcore.APIError{}
+		resp.Diagnostics.AddError("Value Error", fmt.Sprintf("Invalid organization ID %s; error when parsing: %s", data.Id.ValueString(), err))
+		return
+	}
+	organization, err := r.client.Organizations().Get(ctx, wsId)
+	if err != nil {
+		pErr := polytomic.ApiError{}
 		if errors.As(err, &pErr) {
 			if pErr.StatusCode == http.StatusNotFound {
 				resp.State.RemoveResource(ctx)
@@ -136,8 +141,8 @@ func (r *organizationResource) Read(ctx context.Context, req resource.ReadReques
 		return
 	}
 
-	data.Id = types.StringPointerValue(organization.Data.Id)
-	data.Name = types.StringPointerValue(organization.Data.Name)
+	data.Id = types.StringValue(organization.ID.String())
+	data.Name = types.StringValue(organization.Name)
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -152,20 +157,26 @@ func (r *organizationResource) Update(ctx context.Context, req resource.UpdateRe
 	if resp.Diagnostics.HasError() {
 		return
 	}
+	wsId, err := uuid.Parse(data.Id.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Value Error", fmt.Sprintf("Invalid organization ID %s; error when parsing: %s", data.Id.ValueString(), err))
+		return
+	}
 
-	updated, err := r.client.Organization.Update(ctx, data.Id.ValueString(),
-		&polytomic.UpdateOrganizationRequestSchema{
+	updated, err := r.client.Organizations().Update(ctx, wsId,
+		polytomic.OrganizationMutation{
 			Name:      data.Name.ValueString(),
-			SsoDomain: data.SSODomain.ValueStringPointer(),
-			SsoOrgId:  data.SSOOrgId.ValueStringPointer(),
+			SSODomain: data.SSODomain.ValueString(),
+			SSOOrgId:  data.SSOOrgId.ValueString(),
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating organization: %s", err))
 		return
 	}
 
-	data.Name = types.StringPointerValue(updated.Data.Name)
+	data.Name = types.StringValue(updated.Name)
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
@@ -180,7 +191,13 @@ func (r *organizationResource) Delete(ctx context.Context, req resource.DeleteRe
 		return
 	}
 
-	err := r.client.Organization.Remove(ctx, data.Id.ValueString())
+	wsId, err := uuid.Parse(data.Id.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Value Error", fmt.Sprintf("Invalid organization ID %s; error when parsing: %s", data.Id.ValueString(), err))
+		return
+	}
+
+	err = r.client.Organizations().Delete(ctx, wsId)
 	if err != nil {
 		resp.Diagnostics.AddError("Error deleting organization", err.Error())
 		return

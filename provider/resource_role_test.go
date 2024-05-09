@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/AlekSi/pointer"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
@@ -37,13 +36,13 @@ func testAccRoleExists(name string) resource.TestCheckFunc {
 		}
 
 		client := testClient()
-		roles, err := client.Permissions.Roles.List(context.TODO())
+		roles, err := client.Permissions().ListRoles(context.TODO())
 		if err != nil {
 			return err
 		}
 		var found bool
-		for _, role := range roles.Data {
-			if role.Name == pointer.ToString(name) {
+		for _, role := range roles {
+			if role.Name == name {
 				found = true
 				break
 			}

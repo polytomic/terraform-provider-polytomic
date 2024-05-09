@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/AlekSi/pointer"
+	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -16,8 +16,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/polytomic/polytomic-go"
-	ptclient "github.com/polytomic/polytomic-go/client"
-	ptcore "github.com/polytomic/polytomic-go/core"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -39,9 +37,11 @@ func (r *userResource) Schema(ctx context.Context, req resource.SchemaRequest, r
 				MarkdownDescription: "Email address",
 				Required:            true,
 				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplaceIf(func(ctx context.Context, req planmodifier.StringRequest, resp *stringplanmodifier.RequiresReplaceIfFuncResponse) {
-						resp.RequiresReplace = !strings.EqualFold(req.StateValue.ValueString(), req.ConfigValue.ValueString())
-					},
+					stringplanmodifier.RequiresReplaceIf(
+						func(ctx context.Context, req planmodifier.StringRequest, resp *stringplanmodifier.RequiresReplaceIfFuncResponse) {
+							resp.RequiresReplace = !(strings.ToLower(req.StateValue.ValueString()) == strings.ToLower(req.ConfigValue.ValueString()))
+
+						},
 						"Case-insensitively compares email addresses to determine if replacement is needed.",
 						"Case-insensitively compares email addresses to determine if replacement is needed.",
 					),
@@ -74,7 +74,7 @@ type userResourceData struct {
 }
 
 type userResource struct {
-	client *ptclient.Client
+	client *polytomic.Client
 }
 
 func (r *userResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -87,18 +87,19 @@ func (r *userResource) Create(ctx context.Context, req resource.CreateRequest, r
 		return
 	}
 
-	created, err := r.client.Users.Create(ctx,
-		data.Organization.ValueString(),
-		&polytomic.CreateUserRequestSchema{
+	created, err := r.client.Users().Create(ctx,
+		uuid.MustParse(data.Organization.ValueString()),
+		polytomic.UserMutation{
 			Email: data.Email.ValueString(),
-			Role:  data.Role.ValueStringPointer(),
+			Role:  data.Role.ValueString(),
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating user: %s", err))
 		return
 	}
-	data.Id = types.StringPointerValue(created.Data.Id)
+	data.Id = types.StringValue(created.ID.String())
 	tflog.Trace(ctx, "created a user")
 
 	diags = resp.State.Set(ctx, &data)
@@ -115,9 +116,9 @@ func (r *userResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 		return
 	}
 
-	user, err := r.client.Users.Get(ctx, data.Id.ValueString(), data.Organization.ValueString())
+	user, err := r.client.Users().Get(ctx, uuid.MustParse(data.Organization.ValueString()), uuid.MustParse(data.Id.ValueString()))
 	if err != nil {
-		pErr := &ptcore.APIError{}
+		pErr := polytomic.ApiError{}
 		if errors.As(err, &pErr) {
 			if pErr.StatusCode == http.StatusNotFound {
 				resp.State.RemoveResource(ctx)
@@ -127,19 +128,19 @@ func (r *userResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error reading user: %s", err))
 		return
 	}
-	if user.Data.Id == nil {
+	if user.ID == uuid.Nil {
 		resp.State.RemoveResource(ctx)
 		return
 	}
 
-	data.Id = types.StringPointerValue(user.Data.Id)
-	data.Organization = types.StringPointerValue(user.Data.OrganizationId)
-	data.Role = types.StringPointerValue(user.Data.Role)
+	data.Id = types.StringValue(user.ID.String())
+	data.Organization = types.StringValue(user.OrganizationId.String())
+	data.Role = types.StringValue(user.Role)
 
 	// Our backend normalizes email addresses to lowercase. As a result,
 	// we need to do the same here to ensure that the state is consistent
-	if !strings.EqualFold(data.Email.ValueString(), pointer.GetString(user.Data.Email)) {
-		data.Email = types.StringPointerValue(user.Data.Email)
+	if strings.ToLower(data.Email.ValueString()) != strings.ToLower(user.Email) {
+		data.Email = types.StringValue(user.Email)
 	}
 
 	diags = resp.State.Set(ctx, &data)
@@ -156,22 +157,23 @@ func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		return
 	}
 
-	user, err := r.client.Users.Update(ctx,
-		data.Id.ValueString(),
-		data.Organization.ValueString(),
-		&polytomic.UpdateUserRequestSchema{
+	user, err := r.client.Users().Update(ctx,
+		uuid.MustParse(data.Organization.ValueString()),
+		uuid.MustParse(data.Id.ValueString()),
+		polytomic.UserMutation{
 			Email: data.Email.ValueString(),
-			Role:  data.Role.ValueStringPointer(),
+			Role:  data.Role.ValueString(),
 		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating user: %s", err))
 		return
 	}
 
-	data.Id = types.StringPointerValue(user.Data.Id)
-	data.Organization = types.StringPointerValue(user.Data.OrganizationId)
-	data.Role = types.StringPointerValue(user.Data.Role)
+	data.Id = types.StringValue(user.ID.String())
+	data.Organization = types.StringValue(user.OrganizationId.String())
+	data.Role = types.StringValue(user.Role)
 	// Our backend normalizes email addresses to lowercase. As a result we do
 	// not set the email here to prevent Terraform errors about inconsistent
 	// state.
@@ -192,7 +194,7 @@ func (r *userResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 		return
 	}
 
-	_, err := r.client.Users.Remove(ctx, data.Id.ValueString(), data.Organization.ValueString())
+	err := r.client.Users().Delete(ctx, uuid.MustParse(data.Organization.ValueString()), uuid.MustParse(data.Id.ValueString()))
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting user: %s", err))
 		return
@@ -209,7 +211,7 @@ func (r *userResource) Configure(ctx context.Context, req resource.ConfigureRequ
 		return
 	}
 
-	client, ok := req.ProviderData.(*ptclient.Client)
+	client, ok := req.ProviderData.(*polytomic.Client)
 
 	if !ok {
 		resp.Diagnostics.AddError(

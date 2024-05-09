@@ -10,7 +10,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/polytomic/polytomic-go"
-	ptclient "github.com/polytomic/polytomic-go/client"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -18,7 +17,7 @@ var _ datasource.DataSource = &bulkSourceDatasource{}
 
 // ExampleDataSource defines the data source implementation.
 type bulkSourceDatasource struct {
-	client *ptclient.Client
+	client *polytomic.Client
 }
 
 func (d *bulkSourceDatasource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
@@ -62,7 +61,7 @@ func (d *bulkSourceDatasource) Configure(ctx context.Context, req datasource.Con
 		return
 	}
 
-	client, ok := req.ProviderData.(*ptclient.Client)
+	client, ok := req.ProviderData.(*polytomic.Client)
 
 	if !ok {
 		resp.Diagnostics.AddError(
@@ -87,7 +86,7 @@ func (d *bulkSourceDatasource) Read(ctx context.Context, req datasource.ReadRequ
 	}
 
 	// Get the schemas
-	source, err := d.client.BulkSync.GetSource(ctx, data.ConnectionID.ValueString(), &polytomic.BulkSyncGetSourceRequest{})
+	source, err := d.client.Bulk().GetSource(ctx, data.ConnectionID.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection", err.Error())
 		return
@@ -107,7 +106,7 @@ func (d *bulkSourceDatasource) Read(ctx context.Context, req datasource.ReadRequ
 					},
 				},
 			},
-		}}, source.Data.Schemas)
+		}}, source.Schemas)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return

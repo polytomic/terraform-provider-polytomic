@@ -2,12 +2,11 @@ package provider
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
 
-	"github.com/AlekSi/pointer"
+	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -18,8 +17,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/polytomic/polytomic-go"
-	ptclient "github.com/polytomic/polytomic-go/client"
-	ptcore "github.com/polytomic/polytomic-go/core"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -64,13 +61,10 @@ func (r *modelResource) Schema(ctx context.Context, req resource.SchemaRequest, 
 					int64planmodifier.UseStateForUnknown(),
 				},
 			},
-			"configuration": schema.StringAttribute{
+			"configuration": schema.MapAttribute{
 				MarkdownDescription: "",
-				Optional:            true,
-				Computed:            true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
+				ElementType:         types.StringType,
+				Required:            true,
 			},
 			"fields": schema.SetAttribute{
 				MarkdownDescription: "",
@@ -133,7 +127,7 @@ func (r *modelResource) Configure(ctx context.Context, req resource.ConfigureReq
 		return
 	}
 
-	client, ok := req.ProviderData.(*ptclient.Client)
+	client, ok := req.ProviderData.(*polytomic.Client)
 
 	if !ok {
 		resp.Diagnostics.AddError(
@@ -158,7 +152,7 @@ type modelResourceResourceData struct {
 	Type             types.String `tfsdk:"type"`
 	Version          types.Int64  `tfsdk:"version"`
 	ConnectionID     types.String `tfsdk:"connection_id"`
-	Configuration    types.String `tfsdk:"configuration"`
+	Configuration    types.Map    `tfsdk:"configuration"`
 	Fields           types.Set    `tfsdk:"fields"`
 	AdditionalFields types.Set    `tfsdk:"additional_fields"`
 	Relations        types.Set    `tfsdk:"relations"`
@@ -167,7 +161,7 @@ type modelResourceResourceData struct {
 }
 
 type modelResource struct {
-	client *ptclient.Client
+	client *polytomic.Client
 }
 
 func (r *modelResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -187,21 +181,25 @@ func (r *modelResource) Create(ctx context.Context, req resource.CreateRequest, 
 		return
 	}
 
-	var additionalRequestFields []*polytomic.ModelModelFieldRequest
+	var additionalRequestFields []polytomic.ModelFieldRequest
 	diags = data.AdditionalFields.ElementsAs(ctx, &additionalRequestFields, true)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	var confRequest map[string]interface{}
-	err := json.Unmarshal([]byte(data.Configuration.ValueString()), &confRequest)
-	if err != nil {
-		resp.Diagnostics.AddError("Error creating model", err.Error())
+	var confRequest map[string]string
+	diags = data.Configuration.ElementsAs(ctx, &confRequest, true)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
 		return
 	}
+	confRequestTyped := make(map[string]interface{})
+	for k, v := range confRequest {
+		confRequestTyped[k] = v
+	}
 
-	var relationsRequest []*polytomic.ModelRelation
+	var relationsRequest []polytomic.Relation
 	diags = data.Relations.ElementsAs(ctx, &relationsRequest, true)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -215,23 +213,19 @@ func (r *modelResource) Create(ctx context.Context, req resource.CreateRequest, 
 		return
 	}
 
-	request := &polytomic.CreateModelRequest{
+	request := polytomic.ModelRequest{
 		Name:             data.Name.ValueString(),
-		ConnectionId:     data.ConnectionID.ValueString(),
-		Configuration:    confRequest,
+		OrganizationID:   data.Organization.ValueString(),
+		ConnectionID:     data.ConnectionID.ValueString(),
+		Configuration:    confRequestTyped,
 		Fields:           requestFields,
 		AdditionalFields: additionalRequestFields,
 		Relations:        relationsRequest,
+		Identifier:       data.Identifier.ValueString(),
 		TrackingColumns:  trackingColumnsRequest,
 	}
-	if !data.Identifier.IsNull() && data.Identifier.ValueString() != "" {
-		request.Identifier = data.Identifier.ValueStringPointer()
-	}
-	if !data.Organization.IsNull() && data.Organization.ValueString() != "" {
-		request.OrganizationId = data.Organization.ValueStringPointer()
-	}
 
-	model, err := r.client.Models.Create(ctx, request)
+	model, err := r.client.Models().Create(ctx, request, polytomic.WithIdempotencyKey(uuid.NewString()))
 	if err != nil {
 		resp.Diagnostics.AddError("Error creating model", err.Error())
 		return
@@ -240,33 +234,33 @@ func (r *modelResource) Create(ctx context.Context, req resource.CreateRequest, 
 	// Remove any non-string values from the configuration
 	// this is a limitation of variable-typed map values seemingly not being supported
 	// by the tfsdk
-	for k, val := range model.Data.Configuration {
+	for k, val := range model.Configuration {
 		switch val.(type) {
 		case string:
 		default:
-			delete(model.Data.Configuration, k)
+			delete(model.Configuration, k)
 		}
 		if val == nil || val == "" {
-			delete(model.Data.Configuration, k)
+			delete(model.Configuration, k)
 		}
 	}
 
-	enc, err := json.Marshal(model.Data.Configuration)
-	if err != nil {
-		resp.Diagnostics.AddError("Error creating model", err.Error())
+	config, diags := types.MapValueFrom(ctx, types.StringType, model.Configuration)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	var modelFields []*string
-	var modelAdditionalFields []polytomic.ModelModelFieldRequest
-	for _, field := range model.Data.Fields {
-		if !pointer.GetBool(field.UserAdded) {
+	var modelFields []string
+	var modelAdditionalFields []polytomic.ModelFieldRequest
+	for _, field := range model.Fields {
+		if !field.UserAdded {
 			modelFields = append(modelFields, field.Name)
 		} else {
-			modelAdditionalFields = append(modelAdditionalFields, polytomic.ModelModelFieldRequest{
-				Name:  pointer.GetString(field.Name),
-				Type:  pointer.GetString(field.Type),
-				Label: pointer.GetString(field.Label),
+			modelAdditionalFields = append(modelAdditionalFields, polytomic.ModelFieldRequest{
+				Name:  field.Name,
+				Type:  field.Type,
+				Label: field.Label,
 			})
 		}
 	}
@@ -314,7 +308,7 @@ func (r *modelResource) Create(ctx context.Context, req resource.CreateRequest, 
 			},
 			"from": types.StringType,
 		},
-	}, model.Data.Relations)
+	}, model.Relations)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -338,7 +332,7 @@ func (r *modelResource) Create(ctx context.Context, req resource.CreateRequest, 
 		}
 	}
 
-	trackingColumns, diags := types.SetValueFrom(ctx, types.StringType, model.Data.TrackingColumns)
+	trackingColumns, diags := types.SetValueFrom(ctx, types.StringType, model.TrackingColumns)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -352,16 +346,16 @@ func (r *modelResource) Create(ctx context.Context, req resource.CreateRequest, 
 		}
 	}
 
-	data.ID = types.StringPointerValue(model.Data.Id)
-	data.Organization = types.StringPointerValue(model.Data.OrganizationId)
-	data.Name = types.StringPointerValue(model.Data.Name)
-	data.Type = types.StringPointerValue(model.Data.Type)
-	data.Version = types.Int64Value(int64(pointer.GetInt(model.Data.Version)))
-	data.ConnectionID = types.StringPointerValue(model.Data.ConnectionId)
-	data.Configuration = types.StringValue(string(enc))
+	data.ID = types.StringValue(model.ID)
+	data.Organization = types.StringValue(model.OrganizationID)
+	data.Name = types.StringValue(model.Name)
+	data.Type = types.StringValue(model.Type)
+	data.Version = types.Int64Value(int64(model.Version))
+	data.ConnectionID = types.StringValue(model.ConnectionID)
+	data.Configuration = config
 	data.Fields = fields
 	data.Relations = relations
-	data.Identifier = types.StringPointerValue(model.Data.Identifier)
+	data.Identifier = types.StringValue(model.Identifier)
 	data.TrackingColumns = trackingColumns
 	data.AdditionalFields = additionalFields
 
@@ -382,9 +376,9 @@ func (r *modelResource) Read(ctx context.Context, req resource.ReadRequest, resp
 		return
 	}
 
-	model, err := r.client.Models.Get(ctx, data.ID.ValueString())
+	model, err := r.client.Models().Get(ctx, data.ID.ValueString())
 	if err != nil {
-		pErr := &ptcore.APIError{}
+		pErr := polytomic.ApiError{}
 		if errors.As(err, &pErr) {
 			if pErr.StatusCode == http.StatusNotFound {
 				resp.State.RemoveResource(ctx)
@@ -398,33 +392,33 @@ func (r *modelResource) Read(ctx context.Context, req resource.ReadRequest, resp
 	// Remove any non-string values from the configuration
 	// this is a limitation of variable-typed map values seemingly not being supported
 	// by the tfsdk
-	for k, val := range model.Data.Configuration {
+	for k, val := range model.Configuration {
 		switch val.(type) {
 		case string:
 		default:
-			delete(model.Data.Configuration, k)
+			delete(model.Configuration, k)
 		}
 		if val == nil || val == "" {
-			delete(model.Data.Configuration, k)
+			delete(model.Configuration, k)
 		}
 	}
 
-	enc, err := json.Marshal(model.Data.Configuration)
-	if err != nil {
-		resp.Diagnostics.AddError("Error creating model", err.Error())
+	config, diags := types.MapValueFrom(ctx, types.StringType, model.Configuration)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	var modelFields []*string
-	var modelAdditionalFields []polytomic.ModelModelFieldRequest
-	for _, field := range model.Data.Fields {
-		if !pointer.GetBool(field.UserAdded) {
+	var modelFields []string
+	var modelAdditionalFields []polytomic.ModelFieldRequest
+	for _, field := range model.Fields {
+		if !field.UserAdded {
 			modelFields = append(modelFields, field.Name)
 		} else {
-			modelAdditionalFields = append(modelAdditionalFields, polytomic.ModelModelFieldRequest{
-				Name:  pointer.GetString(field.Name),
-				Type:  pointer.GetString(field.Type),
-				Label: pointer.GetString(field.Label),
+			modelAdditionalFields = append(modelAdditionalFields, polytomic.ModelFieldRequest{
+				Name:  field.Name,
+				Type:  field.Type,
+				Label: field.Label,
 			})
 		}
 	}
@@ -471,7 +465,7 @@ func (r *modelResource) Read(ctx context.Context, req resource.ReadRequest, resp
 			},
 			"from": types.StringType,
 		},
-	}, model.Data.Relations)
+	}, model.Relations)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -495,7 +489,7 @@ func (r *modelResource) Read(ctx context.Context, req resource.ReadRequest, resp
 		}
 	}
 
-	trackingColumns, diags := types.SetValueFrom(ctx, types.StringType, model.Data.TrackingColumns)
+	trackingColumns, diags := types.SetValueFrom(ctx, types.StringType, model.TrackingColumns)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -509,16 +503,16 @@ func (r *modelResource) Read(ctx context.Context, req resource.ReadRequest, resp
 		}
 	}
 
-	data.ID = types.StringPointerValue(model.Data.Id)
-	data.Organization = types.StringPointerValue(model.Data.OrganizationId)
-	data.Name = types.StringPointerValue(model.Data.Name)
-	data.Type = types.StringPointerValue(model.Data.Type)
-	data.Version = types.Int64Value(int64(pointer.GetInt(model.Data.Version)))
-	data.ConnectionID = types.StringPointerValue(model.Data.ConnectionId)
-	data.Configuration = types.StringValue(string(enc))
+	data.ID = types.StringValue(model.ID)
+	data.Organization = types.StringValue(model.OrganizationID)
+	data.Name = types.StringValue(model.Name)
+	data.Type = types.StringValue(model.Type)
+	data.Version = types.Int64Value(int64(model.Version))
+	data.ConnectionID = types.StringValue(model.ConnectionID)
+	data.Configuration = config
 	data.Fields = fields
 	data.Relations = relations
-	data.Identifier = types.StringPointerValue(model.Data.Identifier)
+	data.Identifier = types.StringValue(model.Identifier)
 	data.TrackingColumns = trackingColumns
 	data.AdditionalFields = additionalFields
 
@@ -544,21 +538,25 @@ func (r *modelResource) Update(ctx context.Context, req resource.UpdateRequest, 
 		return
 	}
 
-	var additionalRequestFields []*polytomic.ModelModelFieldRequest
+	var additionalRequestFields []polytomic.ModelFieldRequest
 	diags = data.AdditionalFields.ElementsAs(ctx, &additionalRequestFields, true)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	var confRequest map[string]interface{}
-	err := json.Unmarshal([]byte(data.Configuration.ValueString()), &confRequest)
-	if err != nil {
-		resp.Diagnostics.AddError("Error creating model", err.Error())
+	var confRequest map[string]string
+	diags = data.Configuration.ElementsAs(ctx, &confRequest, true)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
 		return
 	}
+	confRequestTyped := make(map[string]interface{})
+	for k, v := range confRequest {
+		confRequestTyped[k] = v
+	}
 
-	var relationsRequest []*polytomic.ModelRelation
+	var relationsRequest []polytomic.Relation
 	if !data.Relations.IsNull() {
 		diags = data.Relations.ElementsAs(ctx, &relationsRequest, true)
 		if diags.HasError() {
@@ -576,23 +574,19 @@ func (r *modelResource) Update(ctx context.Context, req resource.UpdateRequest, 
 		}
 	}
 
-	request := &polytomic.UpdateModelRequest{
-		Name:             data.Name.ValueString(),
-		ConnectionId:     data.ConnectionID.ValueString(),
-		Configuration:    confRequest,
-		Fields:           requestFields,
-		AdditionalFields: additionalRequestFields,
-		Relations:        relationsRequest,
-		TrackingColumns:  trackingRequest,
-	}
-	if !data.Identifier.IsNull() && data.Identifier.ValueString() != "" {
-		request.Identifier = data.Identifier.ValueStringPointer()
-	}
-	if !data.Organization.IsNull() && data.Organization.ValueString() != "" {
-		request.OrganizationId = data.Organization.ValueStringPointer()
-	}
+	model, err := r.client.Models().Update(ctx, data.ID.ValueString(),
+		polytomic.ModelRequest{
+			Name:             data.Name.ValueString(),
+			OrganizationID:   data.Organization.ValueString(),
+			ConnectionID:     data.ConnectionID.ValueString(),
+			Configuration:    confRequestTyped,
+			Fields:           requestFields,
+			AdditionalFields: additionalRequestFields,
+			Relations:        relationsRequest,
+			Identifier:       data.Identifier.ValueString(),
+			TrackingColumns:  trackingRequest,
+		}, polytomic.WithIdempotencyKey(uuid.NewString()))
 
-	model, err := r.client.Models.Update(ctx, data.ID.ValueString(), request)
 	if err != nil {
 		resp.Diagnostics.AddError("Error updating model", err.Error())
 		return
@@ -601,33 +595,33 @@ func (r *modelResource) Update(ctx context.Context, req resource.UpdateRequest, 
 	// Remove any non-string values from the configuration
 	// this is a limitation of variable-typed map values seemingly not being supported
 	// by the tfsdk
-	for k, val := range model.Data.Configuration {
+	for k, val := range model.Configuration {
 		switch val.(type) {
 		case string:
 		default:
-			delete(model.Data.Configuration, k)
+			delete(model.Configuration, k)
 		}
 		if val == nil || val == "" {
-			delete(model.Data.Configuration, k)
+			delete(model.Configuration, k)
 		}
 	}
 
-	enc, err := json.Marshal(model.Data.Configuration)
-	if err != nil {
-		resp.Diagnostics.AddError("Error updating model", err.Error())
+	config, diags := types.MapValueFrom(ctx, types.StringType, model.Configuration)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	var modelFields []*string
-	var modelAdditionalFields []polytomic.ModelModelFieldRequest
-	for _, field := range model.Data.Fields {
-		if !pointer.GetBool(field.UserAdded) {
+	var modelFields []string
+	var modelAdditionalFields []polytomic.ModelFieldRequest
+	for _, field := range model.Fields {
+		if !field.UserAdded {
 			modelFields = append(modelFields, field.Name)
 		} else {
-			modelAdditionalFields = append(modelAdditionalFields, polytomic.ModelModelFieldRequest{
-				Name:  pointer.GetString(field.Name),
-				Type:  pointer.GetString(field.Type),
-				Label: pointer.GetString(field.Label),
+			modelAdditionalFields = append(modelAdditionalFields, polytomic.ModelFieldRequest{
+				Name:  field.Name,
+				Type:  field.Type,
+				Label: field.Label,
 			})
 		}
 	}
@@ -675,7 +669,7 @@ func (r *modelResource) Update(ctx context.Context, req resource.UpdateRequest, 
 			},
 			"from": types.StringType,
 		},
-	}, model.Data.Relations)
+	}, model.Relations)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -699,7 +693,7 @@ func (r *modelResource) Update(ctx context.Context, req resource.UpdateRequest, 
 		}
 	}
 
-	trackingColumns, diags := types.SetValueFrom(ctx, types.StringType, model.Data.TrackingColumns)
+	trackingColumns, diags := types.SetValueFrom(ctx, types.StringType, model.TrackingColumns)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -713,16 +707,16 @@ func (r *modelResource) Update(ctx context.Context, req resource.UpdateRequest, 
 		}
 	}
 
-	data.ID = types.StringPointerValue(model.Data.Id)
-	data.Organization = types.StringPointerValue(model.Data.OrganizationId)
-	data.Name = types.StringPointerValue(model.Data.Name)
-	data.Type = types.StringPointerValue(model.Data.Type)
-	data.Version = types.Int64Value(int64(pointer.GetInt(model.Data.Version)))
-	data.ConnectionID = types.StringPointerValue(model.Data.ConnectionId)
-	data.Configuration = types.StringValue(string(enc))
+	data.ID = types.StringValue(model.ID)
+	data.Organization = types.StringValue(model.OrganizationID)
+	data.Name = types.StringValue(model.Name)
+	data.Type = types.StringValue(model.Type)
+	data.Version = types.Int64Value(int64(model.Version))
+	data.ConnectionID = types.StringValue(model.ConnectionID)
+	data.Configuration = config
 	data.Fields = fields
 	data.Relations = relations
-	data.Identifier = types.StringPointerValue(model.Data.Identifier)
+	data.Identifier = types.StringValue(model.Identifier)
 	data.TrackingColumns = trackingColumns
 	data.AdditionalFields = additionalFields
 
@@ -741,7 +735,7 @@ func (r *modelResource) Delete(ctx context.Context, req resource.DeleteRequest, 
 		return
 	}
 
-	err := r.client.Models.Remove(ctx, data.ID.ValueString())
+	err := r.client.Models().Delete(ctx, data.ID.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Error deleting model", err.Error())
 	}

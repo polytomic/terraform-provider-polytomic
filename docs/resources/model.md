@@ -30,13 +30,13 @@ resource "polytomic_model" "model" {
 
 ### Required
 
+- `configuration` (Map of String)
 - `connection_id` (String)
 - `name` (String)
 
 ### Optional
 
 - `additional_fields` (Set of Object) (see [below for nested schema](#nestedatt--additional_fields))
-- `configuration` (String)
 - `fields` (Set of String)
 - `identifier` (String)
 - `organization` (String)

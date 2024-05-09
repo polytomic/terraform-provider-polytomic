@@ -7,12 +7,14 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	ptclient "github.com/polytomic/polytomic-go/client"
+	"github.com/mitchellh/mapstructure"
+	"github.com/polytomic/polytomic-go"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -20,7 +22,7 @@ var _ datasource.DataSource = &MarketoConnectionDataSource{}
 
 // ExampleDataSource defines the data source implementation.
 type MarketoConnectionDataSource struct {
-	client *ptclient.Client
+	client *polytomic.Client
 }
 
 func (d *MarketoConnectionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
@@ -97,7 +99,7 @@ func (d *MarketoConnectionDataSource) Configure(ctx context.Context, req datasou
 		return
 	}
 
-	client, ok := req.ProviderData.(*ptclient.Client)
+	client, ok := req.ProviderData.(*polytomic.Client)
 
 	if !ok {
 		resp.Diagnostics.AddError(
@@ -122,7 +124,7 @@ func (d *MarketoConnectionDataSource) Read(ctx context.Context, req datasource.R
 	}
 
 	// Get the connection
-	connection, err := d.client.Connections.Get(ctx, data.Id.ValueString())
+	connection, err := d.client.Connections().Get(ctx, uuid.MustParse(data.Id.ValueString()))
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection", err.Error())
 		return
@@ -130,27 +132,34 @@ func (d *MarketoConnectionDataSource) Read(ctx context.Context, req datasource.R
 
 	// For the purposes of this example code, hardcoding a response value to
 	// save into the Terraform state.
-	data.Id = types.StringPointerValue(connection.Data.Id)
-	data.Name = types.StringPointerValue(connection.Data.Name)
-	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
+	data.Id = types.StringValue(connection.ID)
+	data.Name = types.StringValue(connection.Name)
+	data.Organization = types.StringValue(connection.OrganizationId)
+	var conf polytomic.MarketoConfiguration
+	err = mapstructure.Decode(connection.Configuration, &conf)
+	if err != nil {
+		resp.Diagnostics.AddError("Error decoding connection", err.Error())
+		return
+	}
+
 	var diags diag.Diagnostics
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttributeTypes(ctx),
 		map[string]attr.Value{
 			"client_id": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["client_id"], "string").(string),
+				conf.ClientID,
 			),
 			"rest_endpoint": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["rest_endpoint"], "string").(string),
+				conf.RESTEndpoint,
 			),
 			"enforce_api_limits": types.BoolValue(
-				getValueOrEmpty(connection.Data.Configuration["enforce_api_limits"], "bool").(bool),
+				conf.EnforceAPILimits,
 			),
 			"daily_api_calls": types.Int64Value(
-				getValueOrEmpty(connection.Data.Configuration["daily_api_calls"], "int64").(int64),
+				int64(conf.DailyAPICalls),
 			),
 			"concurrent_imports": types.Int64Value(
-				getValueOrEmpty(connection.Data.Configuration["concurrent_imports"], "int64").(int64),
+				int64(conf.ConcurrentImports),
 			),
 		},
 	)

@@ -5,13 +5,12 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/AlekSi/pointer"
 	"github.com/hashicorp/hcl/v2/hclwrite"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/mitchellh/mapstructure"
-	ptclient "github.com/polytomic/polytomic-go/client"
+	"github.com/polytomic/polytomic-go"
 	"github.com/polytomic/terraform-provider-polytomic/provider"
 	"github.com/rs/zerolog/log"
 	"github.com/zclconf/go-cty/cty"
@@ -26,7 +25,7 @@ var (
 )
 
 type Connections struct {
-	c *ptclient.Client
+	c *polytomic.Client
 
 	Resources   map[string]Connection
 	Datasources map[string]Connection
@@ -34,15 +33,15 @@ type Connections struct {
 }
 
 type Connection struct {
-	ID            *string
-	Type          *string
+	ID            string
+	Type          string
 	Resource      string
-	Name          *string
-	Organization  *string
+	Name          string
+	Organization  string
 	Configuration interface{}
 }
 
-func NewConnections(c *ptclient.Client) *Connections {
+func NewConnections(c *polytomic.Client) *Connections {
 	return &Connections{
 		c:           c,
 		Resources:   make(map[string]Connection),
@@ -51,13 +50,13 @@ func NewConnections(c *ptclient.Client) *Connections {
 }
 
 func (c *Connections) Init(ctx context.Context) error {
-	conns, err := c.c.Connections.List(ctx)
+	conns, err := c.c.Connections().List(ctx)
 	if err != nil {
 		return err
 	}
-	for _, conn := range conns.Data {
-		name := provider.ValidName(provider.ToSnakeCase(pointer.GetString(conn.Name)))
-		if r, ok := provider.ConnectionsMap[pointer.GetString(conn.Type.Id)]; ok {
+	for _, conn := range conns {
+		name := provider.ValidName(provider.ToSnakeCase(conn.Name))
+		if r, ok := provider.ConnectionsMap[conn.Type.ID]; ok {
 			resp := &resource.MetadataResponse{}
 			r.Metadata(ctx, resource.MetadataRequest{
 				ProviderTypeName: provider.Name,
@@ -90,26 +89,26 @@ func (c *Connections) Init(ctx context.Context) error {
 			}
 
 			c.Resources[name] = Connection{
-				ID:            conn.Id,
+				ID:            conn.ID,
 				Resource:      resp.TypeName,
 				Name:          conn.Name,
 				Organization:  conn.OrganizationId,
 				Configuration: config,
 			}
 
-		} else if d, ok := provider.ConnectionDatasourcesMap[pointer.GetString(conn.Type.Id)]; ok {
+		} else if d, ok := provider.ConnectionDatasourcesMap[conn.Type.ID]; ok {
 			resp := &datasource.MetadataResponse{}
 			d.Metadata(ctx, datasource.MetadataRequest{
 				ProviderTypeName: provider.Name,
 			}, resp)
 			c.Datasources[name] = Connection{
-				ID:           conn.Id,
+				ID:           conn.ID,
 				Resource:     resp.TypeName,
 				Name:         conn.Name,
 				Organization: conn.OrganizationId,
 			}
 		} else {
-			log.Warn().Msgf("connection type %s not supported", pointer.GetString(conn.Type.Id))
+			log.Warn().Msgf("connection type %s not supported", conn.Type.ID)
 		}
 	}
 	return nil
@@ -121,9 +120,9 @@ func (c *Connections) GenerateTerraformFiles(ctx context.Context, writer io.Writ
 		hclFile := hclwrite.NewEmptyFile()
 		body := hclFile.Body()
 		resourceBlock := body.AppendNewBlock("data", []string{conn.Resource, name})
-		resourceBlock.Body().SetAttributeValue("id", cty.StringVal(pointer.GetString(conn.ID)))
-		resourceBlock.Body().SetAttributeValue("name", cty.StringVal(pointer.GetString(conn.Name)))
-		resourceBlock.Body().SetAttributeValue("organization", cty.StringVal(pointer.GetString(conn.Organization)))
+		resourceBlock.Body().SetAttributeValue("id", cty.StringVal(conn.ID))
+		resourceBlock.Body().SetAttributeValue("name", cty.StringVal(conn.Name))
+		resourceBlock.Body().SetAttributeValue("organization", cty.StringVal(conn.Organization))
 		body.AppendNewline()
 
 		writer.Write(hclFile.Bytes())
@@ -135,8 +134,8 @@ func (c *Connections) GenerateTerraformFiles(ctx context.Context, writer io.Writ
 		hclFile := hclwrite.NewEmptyFile()
 		body := hclFile.Body()
 		resourceBlock := body.AppendNewBlock("resource", []string{conn.Resource, name})
-		resourceBlock.Body().SetAttributeValue("name", cty.StringVal(pointer.GetString(conn.Name)))
-		resourceBlock.Body().SetAttributeValue("organization", cty.StringVal(pointer.GetString(conn.Organization)))
+		resourceBlock.Body().SetAttributeValue("name", cty.StringVal(conn.Name))
+		resourceBlock.Body().SetAttributeValue("organization", cty.StringVal(conn.Organization))
 		resourceBlock.Body().SetAttributeValue("configuration", config)
 		body.AppendNewline()
 
@@ -152,8 +151,8 @@ func (c *Connections) GenerateImports(ctx context.Context, writer io.Writer) err
 		writer.Write([]byte(fmt.Sprintf("terraform import %s.%s %s",
 			conn.Resource,
 			name,
-			pointer.GetString(conn.ID))))
-		writer.Write([]byte(fmt.Sprintf(" # %s\n", pointer.GetString(conn.Name))))
+			conn.ID)))
+		writer.Write([]byte(fmt.Sprintf(" # %s\n", conn.Name)))
 	}
 	return nil
 }
@@ -165,7 +164,7 @@ func (c *Connections) Filename() string {
 func (c *Connections) ResourceRefs() map[string]string {
 	result := make(map[string]string)
 	for name, conn := range c.Resources {
-		result[pointer.GetString(conn.ID)] = fmt.Sprintf("%s.%s.id", conn.Resource, name)
+		result[conn.ID] = fmt.Sprintf("%s.%s.id", conn.Resource, name)
 	}
 	return result
 }
@@ -173,7 +172,7 @@ func (c *Connections) ResourceRefs() map[string]string {
 func (c *Connections) DatasourceRefs() map[string]string {
 	result := make(map[string]string)
 	for name, conn := range c.Datasources {
-		result[pointer.GetString(conn.ID)] = fmt.Sprintf("data.%s.%s.id", conn.Resource, name)
+		result[conn.ID] = fmt.Sprintf("data.%s.%s.id", conn.Resource, name)
 	}
 	return result
 }

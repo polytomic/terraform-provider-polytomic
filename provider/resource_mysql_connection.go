@@ -10,22 +10,19 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/AlekSi/pointer"
+	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/polytomic-go"
-	ptclient "github.com/polytomic/polytomic-go/client"
-	ptcore "github.com/polytomic/polytomic-go/core"
-
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -152,31 +149,7 @@ func (r *MysqlConnectionResource) Metadata(ctx context.Context, req resource.Met
 }
 
 type MysqlConnectionResource struct {
-	client *ptclient.Client
-}
-
-type MysqlConf struct {
-	Hostname string `mapstructure:"hostname" tfsdk:"hostname"`
-
-	Account string `mapstructure:"account" tfsdk:"account"`
-
-	Passwd string `mapstructure:"passwd" tfsdk:"passwd"`
-
-	Dbname string `mapstructure:"dbname" tfsdk:"dbname"`
-
-	Port int `mapstructure:"port" tfsdk:"port"`
-
-	Ssh bool `mapstructure:"ssh" tfsdk:"ssh"`
-
-	Ssh_user string `mapstructure:"ssh_user" tfsdk:"ssh_user"`
-
-	Ssh_host string `mapstructure:"ssh_host" tfsdk:"ssh_host"`
-
-	Ssh_port int `mapstructure:"ssh_port" tfsdk:"ssh_port"`
-
-	Ssh_private_key string `mapstructure:"ssh_private_key" tfsdk:"ssh_private_key"`
-
-	Change_detection bool `mapstructure:"change_detection" tfsdk:"change_detection"`
+	client *polytomic.Client
 }
 
 func (r *MysqlConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -189,39 +162,42 @@ func (r *MysqlConnectionResource) Create(ctx context.Context, req resource.Creat
 		return
 	}
 
-	created, err := r.client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
-		Name:           data.Name.ValueString(),
-		Type:           "mysql",
-		OrganizationId: data.Organization.ValueStringPointer(),
-		Configuration: map[string]interface{}{
-			"hostname":         data.Configuration.Attributes()["hostname"].(types.String).ValueString(),
-			"account":          data.Configuration.Attributes()["account"].(types.String).ValueString(),
-			"passwd":           data.Configuration.Attributes()["passwd"].(types.String).ValueString(),
-			"dbname":           data.Configuration.Attributes()["dbname"].(types.String).ValueString(),
-			"port":             int(data.Configuration.Attributes()["port"].(types.Int64).ValueInt64()),
-			"ssh":              data.Configuration.Attributes()["ssh"].(types.Bool).ValueBool(),
-			"ssh_user":         data.Configuration.Attributes()["ssh_user"].(types.String).ValueString(),
-			"ssh_host":         data.Configuration.Attributes()["ssh_host"].(types.String).ValueString(),
-			"ssh_port":         int(data.Configuration.Attributes()["ssh_port"].(types.Int64).ValueInt64()),
-			"ssh_private_key":  data.Configuration.Attributes()["ssh_private_key"].(types.String).ValueString(),
-			"change_detection": data.Configuration.Attributes()["change_detection"].(types.Bool).ValueBool(),
+	created, err := r.client.Connections().Create(ctx,
+		polytomic.CreateConnectionMutation{
+			Name:           data.Name.ValueString(),
+			Type:           polytomic.MysqlConnectionType,
+			OrganizationId: data.Organization.ValueString(),
+			Configuration: polytomic.MysqlConnectionConfiguration{
+				Hostname:        data.Configuration.Attributes()["hostname"].(types.String).ValueString(),
+				Account:         data.Configuration.Attributes()["account"].(types.String).ValueString(),
+				Passwd:          data.Configuration.Attributes()["passwd"].(types.String).ValueString(),
+				Dbname:          data.Configuration.Attributes()["dbname"].(types.String).ValueString(),
+				Port:            int(data.Configuration.Attributes()["port"].(types.Int64).ValueInt64()),
+				SSH:             data.Configuration.Attributes()["ssh"].(types.Bool).ValueBool(),
+				SSHUser:         data.Configuration.Attributes()["ssh_user"].(types.String).ValueString(),
+				SSHHost:         data.Configuration.Attributes()["ssh_host"].(types.String).ValueString(),
+				SSHPort:         int(data.Configuration.Attributes()["ssh_port"].(types.Int64).ValueInt64()),
+				SSHPrivateKey:   data.Configuration.Attributes()["ssh_private_key"].(types.String).ValueString(),
+				ChangeDetection: data.Configuration.Attributes()["change_detection"].(types.Bool).ValueBool(),
+			},
 		},
-		Validate: pointer.ToBool(false),
-	})
+		polytomic.WithIdempotencyKey(uuid.NewString()),
+		polytomic.SkipConfigValidation(),
+	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
 		return
 	}
-	data.Id = types.StringPointerValue(created.Data.Id)
-	data.Name = types.StringPointerValue(created.Data.Name)
-	data.Organization = types.StringPointerValue(created.Data.OrganizationId)
+	data.Id = types.StringValue(created.ID)
+	data.Name = types.StringValue(created.Name)
+	data.Organization = types.StringValue(created.OrganizationId)
 
-	conf := MysqlConf{}
-	err = mapstructure.Decode(created.Data.Configuration, &conf)
-	if err != nil {
-		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error decoding connection configuration: %s", err))
+	var output polytomic.MysqlConnectionConfiguration
+	cfg := &mapstructure.DecoderConfig{
+		Result: &output,
 	}
-
+	decoder, _ := mapstructure.NewDecoder(cfg)
+	decoder.Decode(created.Configuration)
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"hostname":         types.StringType,
 		"account":          types.StringType,
@@ -234,13 +210,13 @@ func (r *MysqlConnectionResource) Create(ctx context.Context, req resource.Creat
 		"ssh_port":         types.NumberType,
 		"ssh_private_key":  types.StringType,
 		"change_detection": types.BoolType,
-	}, conf)
+	}, output)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Mysql", "id": created.Data.Id})
+	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Mysql", "id": created.ID})
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -256,9 +232,9 @@ func (r *MysqlConnectionResource) Read(ctx context.Context, req resource.ReadReq
 		return
 	}
 
-	connection, err := r.client.Connections.Get(ctx, data.Id.ValueString())
+	connection, err := r.client.Connections().Get(ctx, uuid.MustParse(data.Id.ValueString()))
 	if err != nil {
-		pErr := &ptcore.APIError{}
+		pErr := polytomic.ApiError{}
 		if errors.As(err, &pErr) {
 			if pErr.StatusCode == http.StatusNotFound {
 				resp.State.RemoveResource(ctx)
@@ -268,16 +244,17 @@ func (r *MysqlConnectionResource) Read(ctx context.Context, req resource.ReadReq
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error reading connection: %s", err))
 		return
 	}
-	data.Id = types.StringPointerValue(connection.Data.Id)
-	data.Name = types.StringPointerValue(connection.Data.Name)
-	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
 
-	conf := MysqlConf{}
-	err = mapstructure.Decode(connection.Data.Configuration, &conf)
-	if err != nil {
-		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error decoding connection configuration: %s", err))
+	data.Id = types.StringValue(connection.ID)
+	data.Name = types.StringValue(connection.Name)
+	data.Organization = types.StringValue(connection.OrganizationId)
+
+	var output polytomic.MysqlConnectionConfiguration
+	cfg := &mapstructure.DecoderConfig{
+		Result: &output,
 	}
-
+	decoder, _ := mapstructure.NewDecoder(cfg)
+	decoder.Decode(connection.Configuration)
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"hostname":         types.StringType,
 		"account":          types.StringType,
@@ -290,7 +267,7 @@ func (r *MysqlConnectionResource) Read(ctx context.Context, req resource.ReadReq
 		"ssh_port":         types.NumberType,
 		"ssh_private_key":  types.StringType,
 		"change_detection": types.BoolType,
-	}, conf)
+	}, output)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -310,41 +287,43 @@ func (r *MysqlConnectionResource) Update(ctx context.Context, req resource.Updat
 		return
 	}
 
-	updated, err := r.client.Connections.Update(ctx,
-		data.Id.ValueString(),
-		&polytomic.UpdateConnectionRequestSchema{
+	updated, err := r.client.Connections().Update(ctx,
+		uuid.MustParse(data.Id.ValueString()),
+		polytomic.UpdateConnectionMutation{
 			Name:           data.Name.ValueString(),
-			OrganizationId: data.Organization.ValueStringPointer(),
-			Configuration: map[string]interface{}{
-				"hostname":         data.Configuration.Attributes()["hostname"].(types.String).ValueString(),
-				"account":          data.Configuration.Attributes()["account"].(types.String).ValueString(),
-				"passwd":           data.Configuration.Attributes()["passwd"].(types.String).ValueString(),
-				"dbname":           data.Configuration.Attributes()["dbname"].(types.String).ValueString(),
-				"port":             int(data.Configuration.Attributes()["port"].(types.Int64).ValueInt64()),
-				"ssh":              data.Configuration.Attributes()["ssh"].(types.Bool).ValueBool(),
-				"ssh_user":         data.Configuration.Attributes()["ssh_user"].(types.String).ValueString(),
-				"ssh_host":         data.Configuration.Attributes()["ssh_host"].(types.String).ValueString(),
-				"ssh_port":         int(data.Configuration.Attributes()["ssh_port"].(types.Int64).ValueInt64()),
-				"ssh_private_key":  data.Configuration.Attributes()["ssh_private_key"].(types.String).ValueString(),
-				"change_detection": data.Configuration.Attributes()["change_detection"].(types.Bool).ValueBool(),
+			OrganizationId: data.Organization.ValueString(),
+			Configuration: polytomic.MysqlConnectionConfiguration{
+				Hostname:        data.Configuration.Attributes()["hostname"].(types.String).ValueString(),
+				Account:         data.Configuration.Attributes()["account"].(types.String).ValueString(),
+				Passwd:          data.Configuration.Attributes()["passwd"].(types.String).ValueString(),
+				Dbname:          data.Configuration.Attributes()["dbname"].(types.String).ValueString(),
+				Port:            int(data.Configuration.Attributes()["port"].(types.Int64).ValueInt64()),
+				SSH:             data.Configuration.Attributes()["ssh"].(types.Bool).ValueBool(),
+				SSHUser:         data.Configuration.Attributes()["ssh_user"].(types.String).ValueString(),
+				SSHHost:         data.Configuration.Attributes()["ssh_host"].(types.String).ValueString(),
+				SSHPort:         int(data.Configuration.Attributes()["ssh_port"].(types.Int64).ValueInt64()),
+				SSHPrivateKey:   data.Configuration.Attributes()["ssh_private_key"].(types.String).ValueString(),
+				ChangeDetection: data.Configuration.Attributes()["change_detection"].(types.Bool).ValueBool(),
 			},
-			Validate: pointer.ToBool(false),
-		})
+		},
+		polytomic.WithIdempotencyKey(uuid.NewString()),
+		polytomic.SkipConfigValidation(),
+	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))
 		return
 	}
 
-	data.Id = types.StringPointerValue(updated.Data.Id)
-	data.Name = types.StringPointerValue(updated.Data.Name)
-	data.Organization = types.StringPointerValue(updated.Data.OrganizationId)
+	data.Id = types.StringValue(updated.ID)
+	data.Name = types.StringValue(updated.Name)
+	data.Organization = types.StringValue(updated.OrganizationId)
 
-	conf := MysqlConf{}
-	err = mapstructure.Decode(updated.Data.Configuration, &conf)
-	if err != nil {
-		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error decoding connection configuration: %s", err))
+	var output polytomic.MysqlConnectionConfiguration
+	cfg := &mapstructure.DecoderConfig{
+		Result: &output,
 	}
-
+	decoder, _ := mapstructure.NewDecoder(cfg)
+	decoder.Decode(updated.Configuration)
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"hostname":         types.StringType,
 		"account":          types.StringType,
@@ -357,11 +336,12 @@ func (r *MysqlConnectionResource) Update(ctx context.Context, req resource.Updat
 		"ssh_port":         types.NumberType,
 		"ssh_private_key":  types.StringType,
 		"change_detection": types.BoolType,
-	}, conf)
+	}, output)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
+
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
@@ -377,46 +357,43 @@ func (r *MysqlConnectionResource) Delete(ctx context.Context, req resource.Delet
 	}
 
 	if data.ForceDestroy.ValueBool() {
-		err := r.client.Connections.Remove(ctx, data.Id.ValueString(), &polytomic.ConnectionsRemoveRequest{
-			Force: pointer.ToBool(true),
-		})
+		err := r.client.Connections().Delete(ctx, uuid.MustParse(data.Id.ValueString()), polytomic.WithForceDelete())
 		if err != nil {
-			pErr := &polytomic.NotFoundError{}
+			pErr := polytomic.ApiError{}
 			if errors.As(err, &pErr) {
-				resp.State.RemoveResource(ctx)
-				return
+				if pErr.StatusCode == http.StatusNotFound {
+					resp.State.RemoveResource(ctx)
+					return
+				}
 			}
-
 			resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting connection: %s", err))
 		}
 		return
 	}
 
-	err := r.client.Connections.Remove(ctx, data.Id.ValueString(), &polytomic.ConnectionsRemoveRequest{
-		Force: pointer.ToBool(false),
-	})
+	err := r.client.Connections().Delete(ctx, uuid.MustParse(data.Id.ValueString()))
 	if err != nil {
-		pErr := &polytomic.NotFoundError{}
+		pErr := polytomic.ApiError{}
 		if errors.As(err, &pErr) {
-			resp.State.RemoveResource(ctx)
-			return
-		}
-	}
-	pErr := &polytomic.UnprocessableEntityError{}
-	if errors.As(err, &pErr) {
-		if strings.Contains(*pErr.Body.Message, "connection in use") {
-			for _, meta := range pErr.Body.Metadata.([]interface{}) {
-				info := meta.(map[string]interface{})
-				resp.Diagnostics.AddError("Connection in use",
-					fmt.Sprintf("Connection is used by %s \"%s\" (%s). Please remove before deleting this connection.",
-						info["type"], info["name"], info["id"]),
-				)
+			if pErr.StatusCode == http.StatusNotFound {
+				resp.State.RemoveResource(ctx)
+				return
 			}
-			return
+			if strings.Contains(pErr.Message, "connection in use") {
+				for _, meta := range pErr.Metadata {
+					info := meta.(map[string]interface{})
+					resp.Diagnostics.AddError("Connection in use",
+						fmt.Sprintf("Connection is used by %s \"%s\" (%s). Please remove before deleting this connection.",
+							info["type"], info["name"], info["id"]),
+					)
+				}
+				return
+			}
 		}
-	}
 
-	resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting connection: %s", err))
+		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting connection: %s", err))
+		return
+	}
 
 }
 
@@ -430,7 +407,7 @@ func (r *MysqlConnectionResource) Configure(ctx context.Context, req resource.Co
 		return
 	}
 
-	client, ok := req.ProviderData.(*ptclient.Client)
+	client, ok := req.ProviderData.(*polytomic.Client)
 
 	if !ok {
 		resp.Diagnostics.AddError(
