@@ -83,6 +83,7 @@ func (t *RedshiftserverlessConnectionResource) Schema(ctx context.Context, req r
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
+						Default:             stringdefault.StaticString(""),
 					},
 				},
 
@@ -153,10 +154,10 @@ func (r *RedshiftserverlessConnectionResource) Create(ctx context.Context, req r
 	decoder, _ := mapstructure.NewDecoder(cfg)
 	decoder.Decode(created.Configuration)
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"database":     types.StringType,
-		"workgroup":    types.StringType,
-		"iam_role_arn": types.StringType,
-		"external_id":  types.StringType,
+		"database":          types.StringType,
+		"workgroup":         types.StringType,
+		"iam_role_arn":      types.StringType,
+		"external_id":       types.StringType,
 		"override_endpoint": types.BoolType,
 		"data_api_endpoint": types.StringType,
 	}, output)
