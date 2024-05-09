@@ -763,11 +763,11 @@ connections:
         required: true
         example: db
         sensitive: true
-      - name: override_endpoint
+      - name: OverrideEndpoint
         type: bool
         example: true
         optional: true
-      - name: data_api_endpoint
+      - name: DataAPIEndpoint
         type: string
         description: Required if `override_endpoint` is `true`.
         example: https://redshift-data.us-west-2.amazonaws.com

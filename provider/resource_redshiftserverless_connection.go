@@ -16,6 +16,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -110,17 +111,6 @@ type RedshiftserverlessConnectionResource struct {
 	client *polytomic.Client
 }
 
-type RedshiftServerlessConnectionConfiguration struct {
-	Database  string `json:"database" mapstructure:"database" tfsdk:"database"`
-	Workgroup string `json:"workgroup" mapstructure:"workgroup" tfsdk:"workgroup"`
-
-	IAMRoleARN string `json:"iam_role_arn,omitempty" mapstructure:"iam_role_arn" tfsdk:"iam_role_arn"`
-	ExternalID string `json:"external_id,omitempty" mapstructure:"external_id" tfsdk:"external_id"`
-
-	OverrideEndpoint bool `json:"override_endpoint,omitempty" mapstructure:"override_endpoint" tfsdk:"override_endpoint"`
-	DataAPIEndpoint string `json:"data_api_endpoint,omitempty" mapstructure:"data_api_endpoint" tfsdk:"data_api_endpoint"`
-}
-
 func (r *RedshiftserverlessConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data connectionData
 
@@ -136,13 +126,13 @@ func (r *RedshiftserverlessConnectionResource) Create(ctx context.Context, req r
 			Name:           data.Name.ValueString(),
 			Type:           polytomic.RedshiftServerlessConnectionType,
 			OrganizationId: data.Organization.ValueString(),
-			Configuration: RedshiftServerlessConnectionConfiguration{
-				Database:   data.Configuration.Attributes()["database"].(types.String).ValueString(),
-				Workgroup:  data.Configuration.Attributes()["workgroup"].(types.String).ValueString(),
-				IAMRoleARN: data.Configuration.Attributes()["iam_role_arn"].(types.String).ValueString(),
-				ExternalID: data.Configuration.Attributes()["external_id"].(types.String).ValueString(),
+			Configuration: polytomic.RedshiftServerlessConnectionConfiguration{
+				Database:         data.Configuration.Attributes()["database"].(types.String).ValueString(),
+				Workgroup:        data.Configuration.Attributes()["workgroup"].(types.String).ValueString(),
+				IAMRoleARN:       data.Configuration.Attributes()["iam_role_arn"].(types.String).ValueString(),
+				ExternalID:       data.Configuration.Attributes()["external_id"].(types.String).ValueString(),
 				OverrideEndpoint: data.Configuration.Attributes()["override_endpoint"].(types.Bool).ValueBool(),
-				DataAPIEndpoint: data.Configuration.Attributes()["data_api_endpoint"].(types.String).ValueString(),
+				DataAPIEndpoint:  data.Configuration.Attributes()["data_api_endpoint"].(types.String).ValueString(),
 			},
 		},
 		polytomic.WithIdempotencyKey(uuid.NewString()),
@@ -156,7 +146,7 @@ func (r *RedshiftserverlessConnectionResource) Create(ctx context.Context, req r
 	data.Name = types.StringValue(created.Name)
 	data.Organization = types.StringValue(created.OrganizationId)
 
-	var output RedshiftServerlessConnectionConfiguration
+	var output polytomic.RedshiftServerlessConnectionConfiguration
 	cfg := &mapstructure.DecoderConfig{
 		Result: &output,
 	}
@@ -215,10 +205,12 @@ func (r *RedshiftserverlessConnectionResource) Read(ctx context.Context, req res
 	decoder, _ := mapstructure.NewDecoder(cfg)
 	decoder.Decode(connection.Configuration)
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"database":     types.StringType,
-		"workgroup":    types.StringType,
-		"iam_role_arn": types.StringType,
-		"external_id":  types.StringType,
+		"database":          types.StringType,
+		"workgroup":         types.StringType,
+		"iam_role_arn":      types.StringType,
+		"external_id":       types.StringType,
+		"override_endpoint": types.BoolType,
+		"data_api_endpoint": types.StringType,
 	}, output)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -245,10 +237,12 @@ func (r *RedshiftserverlessConnectionResource) Update(ctx context.Context, req r
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueString(),
 			Configuration: polytomic.RedshiftServerlessConnectionConfiguration{
-				Database:   data.Configuration.Attributes()["database"].(types.String).ValueString(),
-				Workgroup:  data.Configuration.Attributes()["workgroup"].(types.String).ValueString(),
-				IAMRoleARN: data.Configuration.Attributes()["iam_role_arn"].(types.String).ValueString(),
-				ExternalID: data.Configuration.Attributes()["external_id"].(types.String).ValueString(),
+				Database:         data.Configuration.Attributes()["database"].(types.String).ValueString(),
+				Workgroup:        data.Configuration.Attributes()["workgroup"].(types.String).ValueString(),
+				IAMRoleARN:       data.Configuration.Attributes()["iam_role_arn"].(types.String).ValueString(),
+				ExternalID:       data.Configuration.Attributes()["external_id"].(types.String).ValueString(),
+				OverrideEndpoint: data.Configuration.Attributes()["override_endpoint"].(types.Bool).ValueBool(),
+				DataAPIEndpoint:  data.Configuration.Attributes()["data_api_endpoint"].(types.String).ValueString(),
 			},
 		},
 		polytomic.WithIdempotencyKey(uuid.NewString()),
@@ -270,10 +264,12 @@ func (r *RedshiftserverlessConnectionResource) Update(ctx context.Context, req r
 	decoder, _ := mapstructure.NewDecoder(cfg)
 	decoder.Decode(updated.Configuration)
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"database":     types.StringType,
-		"workgroup":    types.StringType,
-		"iam_role_arn": types.StringType,
-		"external_id":  types.StringType,
+		"database":          types.StringType,
+		"workgroup":         types.StringType,
+		"iam_role_arn":      types.StringType,
+		"external_id":       types.StringType,
+		"override_endpoint": types.BoolType,
+		"data_api_endpoint": types.StringType,
 	}, output)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

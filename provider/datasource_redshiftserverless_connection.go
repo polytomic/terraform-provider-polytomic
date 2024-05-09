@@ -135,7 +135,7 @@ func (d *RedshiftserverlessConnectionDataSource) Read(ctx context.Context, req d
 	data.Id = types.StringValue(connection.ID)
 	data.Name = types.StringValue(connection.Name)
 	data.Organization = types.StringValue(connection.OrganizationId)
-	var conf RedshiftServerlessConnectionConfiguration
+	var conf polytomic.RedshiftServerlessConnectionConfiguration
 	err = mapstructure.Decode(connection.Configuration, &conf)
 	if err != nil {
 		resp.Diagnostics.AddError("Error decoding connection", err.Error())
