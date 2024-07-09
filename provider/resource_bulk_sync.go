@@ -290,16 +290,22 @@ func (r *bulkSyncResource) Create(ctx context.Context, req resource.CreateReques
 		}
 	}
 
+	schemaItems := make([]*polytomic.V2CreateBulkSyncRequestSchemasItem, len(schemas))
+	for i, s := range schemas {
+		schemaItems[i] = &polytomic.V2CreateBulkSyncRequestSchemasItem{
+			String: s,
+		}
+	}
 	created, err := r.client.BulkSync.Create(ctx,
 		&polytomic.CreateBulkSyncRequest{
 			OrganizationId:           data.Organization.ValueStringPointer(),
 			Name:                     data.Name.ValueString(),
 			DestinationConnectionId:  data.DestConnectionID.ValueString(),
 			SourceConnectionId:       data.SourceConnectionID.ValueString(),
-			Mode:                     data.Mode.ValueStringPointer(),
+			Mode:                     data.Mode.ValueString(),
 			Discover:                 data.Discover.ValueBoolPointer(),
 			Active:                   data.Active.ValueBoolPointer(),
-			Schemas:                  schemas,
+			Schemas:                  schemaItems,
 			Policies:                 policies,
 			Schedule:                 sche,
 			DestinationConfiguration: destConf,
@@ -601,6 +607,12 @@ func (r *bulkSyncResource) Update(ctx context.Context, req resource.UpdateReques
 		}
 	}
 
+	schemaItems := make([]*polytomic.V2UpdateBulkSyncRequestSchemasItem, len(schemas))
+	for i, s := range schemas {
+		schemaItems[i] = &polytomic.V2UpdateBulkSyncRequestSchemasItem{
+			String: s,
+		}
+	}
 	updated, err := r.client.BulkSync.Update(ctx,
 		data.Id.ValueString(),
 		&polytomic.UpdateBulkSyncRequest{
@@ -608,10 +620,10 @@ func (r *bulkSyncResource) Update(ctx context.Context, req resource.UpdateReques
 			Name:                     data.Name.ValueString(),
 			DestinationConnectionId:  data.DestConnectionID.ValueString(),
 			SourceConnectionId:       data.SourceConnectionID.ValueString(),
-			Mode:                     data.Mode.ValueStringPointer(),
+			Mode:                     data.Mode.ValueString(),
 			Discover:                 data.Discover.ValueBoolPointer(),
 			Active:                   data.Active.ValueBoolPointer(),
-			Schemas:                  schemas,
+			Schemas:                  schemaItems,
 			Policies:                 policies,
 			Schedule:                 sche,
 			DestinationConfiguration: destConf,

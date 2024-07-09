@@ -47,7 +47,7 @@ func (m *Models) Init(ctx context.Context) error {
 	}
 
 	for _, model := range models.Data {
-		hydratedModel, err := m.c.Models.Get(ctx, pointer.GetString(model.Id))
+		hydratedModel, err := m.c.Models.Get(ctx, pointer.GetString(model.Id), nil)
 		if err != nil {
 			return err
 		}

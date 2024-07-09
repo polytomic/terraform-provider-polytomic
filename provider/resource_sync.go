@@ -494,9 +494,9 @@ func (r *syncResource) Create(ctx context.Context, req resource.CreateRequest, r
 	var pfilters []*polytomic.Filter
 	for _, filter := range filters {
 		f := &polytomic.Filter{
-			FieldId:   filter.FieldID,
-			FieldType: filter.FieldType,
-			Function:  filter.Function,
+			FieldId:   pointer.To(filter.FieldID),
+			FieldType: pointer.To(polytomic.FilterFieldReferenceType(filter.FieldType)),
+			Function:  polytomic.FilterFunction(filter.Function),
 			Label:     &filter.Label,
 		}
 
@@ -524,7 +524,7 @@ func (r *syncResource) Create(ctx context.Context, req resource.CreateRequest, r
 	for _, override := range overrides {
 		o := &polytomic.Override{
 			FieldId:  &override.FieldID,
-			Function: &override.Function,
+			Function: polytomic.FilterFunction(override.Function).Ptr(),
 		}
 
 		var val interface{}
@@ -690,9 +690,9 @@ func (r *syncResource) Create(ctx context.Context, req resource.CreateRequest, r
 	var resFilters []Filter
 	for _, f := range sync.Data.Filters {
 		res := Filter{
-			FieldID:   f.FieldId,
-			Function:  f.Function,
-			FieldType: f.FieldType,
+			FieldID:   pointer.Get(f.FieldId),
+			Function:  string(f.Function),
+			FieldType: string(pointer.Get(f.FieldType)),
 			Label:     pointer.GetString(f.Label),
 		}
 		val, err := json.Marshal(f.Value)
@@ -725,8 +725,8 @@ func (r *syncResource) Create(ctx context.Context, req resource.CreateRequest, r
 	var resOverrides []Override
 	for _, o := range sync.Data.Overrides {
 		res := Override{
-			FieldID:  pointer.GetString(o.FieldId),
-			Function: pointer.GetString(o.Function),
+			FieldID:  pointer.Get(o.FieldId),
+			Function: string(pointer.Get(o.Function)),
 		}
 		val, err := json.Marshal(o.Value)
 		if err != nil {
@@ -921,9 +921,9 @@ func (r *syncResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 	var resFilters []Filter
 	for _, f := range sync.Data.Filters {
 		res := Filter{
-			FieldID:   f.FieldId,
-			Function:  f.Function,
-			FieldType: f.FieldType,
+			FieldID:   pointer.Get(f.FieldId),
+			Function:  string(f.Function),
+			FieldType: string(pointer.Get(f.FieldType)),
 			Label:     pointer.GetString(f.Label),
 		}
 		val, err := json.Marshal(f.Value)
@@ -956,8 +956,8 @@ func (r *syncResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 	var resOverrides []Override
 	for _, o := range sync.Data.Overrides {
 		res := Override{
-			FieldID:  pointer.GetString(o.FieldId),
-			Function: pointer.GetString(o.Function),
+			FieldID:  pointer.Get(o.FieldId),
+			Function: string(pointer.Get(o.Function)),
 		}
 		val, err := json.Marshal(o.Value)
 		if err != nil {
@@ -1121,9 +1121,9 @@ func (r *syncResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	var pfilters []*polytomic.Filter
 	for _, filter := range filters {
 		f := &polytomic.Filter{
-			FieldId:   filter.FieldID,
-			FieldType: filter.FieldType,
-			Function:  filter.Function,
+			FieldId:   pointer.To(filter.FieldID),
+			FieldType: pointer.To(polytomic.FilterFieldReferenceType(filter.FieldType)),
+			Function:  polytomic.FilterFunction(filter.Function),
 			Label:     pointer.ToString(filter.Label),
 		}
 
@@ -1150,8 +1150,8 @@ func (r *syncResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	var poverrides []*polytomic.Override
 	for _, override := range overrides {
 		o := &polytomic.Override{
-			FieldId:  pointer.ToString(override.FieldID),
-			Function: pointer.ToString(override.Function),
+			FieldId:  pointer.To(override.FieldID),
+			Function: pointer.To(polytomic.FilterFunction(override.Function)),
 		}
 
 		var val interface{}
@@ -1316,9 +1316,9 @@ func (r *syncResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	var resFilters []Filter
 	for _, f := range sync.Data.Filters {
 		res := Filter{
-			FieldID:   f.FieldId,
-			Function:  f.Function,
-			FieldType: f.FieldType,
+			FieldID:   pointer.Get(f.FieldId),
+			Function:  string(f.Function),
+			FieldType: string(pointer.Get(f.FieldType)),
 			Label:     pointer.GetString(f.Label),
 		}
 		val, err := json.Marshal(f.Value)
@@ -1351,8 +1351,8 @@ func (r *syncResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	var resOverrides []Override
 	for _, o := range sync.Data.Overrides {
 		res := Override{
-			FieldID:  pointer.GetString(o.FieldId),
-			Function: pointer.GetString(o.Function),
+			FieldID:  pointer.Get(o.FieldId),
+			Function: string(pointer.Get(o.Function)),
 		}
 		val, err := json.Marshal(o.Value)
 		if err != nil {

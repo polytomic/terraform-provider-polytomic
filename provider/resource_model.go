@@ -386,7 +386,7 @@ func (r *modelResource) Read(ctx context.Context, req resource.ReadRequest, resp
 		return
 	}
 
-	model, err := r.client.Models.Get(ctx, data.ID.ValueString())
+	model, err := r.client.Models.Get(ctx, data.ID.ValueString(), nil)
 	if err != nil {
 		pErr := &ptcore.APIError{}
 		if errors.As(err, &pErr) {
@@ -749,7 +749,7 @@ func (r *modelResource) Delete(ctx context.Context, req resource.DeleteRequest, 
 		return
 	}
 
-	err := r.client.Models.Remove(ctx, data.ID.ValueString())
+	err := r.client.Models.Remove(ctx, data.ID.ValueString(), nil)
 	if err != nil {
 		resp.Diagnostics.AddError("Error deleting model", err.Error())
 	}
