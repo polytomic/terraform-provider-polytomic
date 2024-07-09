@@ -96,4 +96,4 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace github.com/hashicorp/terraform-plugin-framework => github.com/polytomic/terraform-plugin-framework v1.9.0
+replace github.com/hashicorp/terraform-plugin-framework => github.com/polytomic/terraform-plugin-framework v1.9.1-0.20240705194911-c95acee92c18
