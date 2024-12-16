@@ -1,0 +1,1 @@
+{"$id":"https://github.com/polytomic/app/services/polytomic/backend/vanilla/connection-conf","$schema":"https://json-schema.org/draft/2020-12/schema","properties":{"api_key":{"examples":["secret"],"title":"API key","type":"string"},"domain":{"examples":["yourcompany.vanillacommunities.com"],"title":"Domain","type":"string"}},"required":["domain","api_key"],"type":"object"}

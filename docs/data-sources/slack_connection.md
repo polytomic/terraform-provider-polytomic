@@ -35,4 +35,12 @@ data "polytomic_slack_connection" "slack" {
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
+Required:
+
+- `api_key` (String)
+
+Optional:
+
+- `event_url` (String) Used if ingesting Slack events.
+
 

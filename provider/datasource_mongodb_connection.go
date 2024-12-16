@@ -5,16 +5,13 @@ package provider
 
 import (
 	"context"
-	"fmt"
 
-	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/mitchellh/mapstructure"
-	"github.com/polytomic/polytomic-go"
+	"github.com/polytomic/terraform-provider-polytomic/provider/internal/client"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -22,7 +19,13 @@ var _ datasource.DataSource = &MongodbConnectionDataSource{}
 
 // ExampleDataSource defines the data source implementation.
 type MongodbConnectionDataSource struct {
-	client *polytomic.Client
+	provider *client.Provider
+}
+
+func (d *MongodbConnectionDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+	if provider := client.GetProvider(req.ProviderData, resp.Diagnostics); provider != nil {
+		d.provider = provider
+	}
 }
 
 func (d *MongodbConnectionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
@@ -47,6 +50,13 @@ func (d *MongodbConnectionDataSource) Schema(ctx context.Context, req datasource
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
+					"database": schema.StringAttribute{
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Sensitive:           false,
+					},
 					"hosts": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            true,
@@ -54,32 +64,39 @@ func (d *MongodbConnectionDataSource) Schema(ctx context.Context, req datasource
 						Computed:            false,
 						Sensitive:           false,
 					},
-					"username": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
+					"params": schema.StringAttribute{
+						MarkdownDescription: "Additional connection parameters, formatted as a query string",
+						Required:            false,
+						Optional:            true,
 						Computed:            false,
 						Sensitive:           false,
 					},
-					"database": schema.StringAttribute{
+					"password": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
-						Computed:            true,
+						Computed:            false,
 						Sensitive:           false,
 					},
 					"srv": schema.BoolAttribute{
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
-						Computed:            true,
+						Computed:            false,
 						Sensitive:           false,
 					},
-					"params": schema.StringAttribute{
+					"ssl": schema.BoolAttribute{
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
-						Computed:            true,
+						Computed:            false,
+						Sensitive:           false,
+					},
+					"username": schema.StringAttribute{
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
 						Sensitive:           false,
 					},
 				},
@@ -93,26 +110,6 @@ func (d *MongodbConnectionDataSource) Schema(ctx context.Context, req datasource
 	}
 }
 
-func (d *MongodbConnectionDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
-	// Prevent panic if the provider has not been configured.
-	if req.ProviderData == nil {
-		return
-	}
-
-	client, ok := req.ProviderData.(*polytomic.Client)
-
-	if !ok {
-		resp.Diagnostics.AddError(
-			"Unexpected Resource Configure Type",
-			fmt.Sprintf("Expected *polytomic.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
-		)
-
-		return
-	}
-
-	d.client = client
-}
-
 func (d *MongodbConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionData
 
@@ -124,7 +121,12 @@ func (d *MongodbConnectionDataSource) Read(ctx context.Context, req datasource.R
 	}
 
 	// Get the connection
-	connection, err := d.client.Connections().Get(ctx, uuid.MustParse(data.Id.ValueString()))
+	client, err := d.provider.Client(data.Organization.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting client", err.Error())
+		return
+	}
+	connection, err := client.Connections.Get(ctx, data.Id.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection", err.Error())
 		return
@@ -132,34 +134,33 @@ func (d *MongodbConnectionDataSource) Read(ctx context.Context, req datasource.R
 
 	// For the purposes of this example code, hardcoding a response value to
 	// save into the Terraform state.
-	data.Id = types.StringValue(connection.ID)
-	data.Name = types.StringValue(connection.Name)
-	data.Organization = types.StringValue(connection.OrganizationId)
-	var conf polytomic.MongoDBConfiguration
-	err = mapstructure.Decode(connection.Configuration, &conf)
-	if err != nil {
-		resp.Diagnostics.AddError("Error decoding connection", err.Error())
-		return
-	}
-
+	data.Id = types.StringPointerValue(connection.Data.Id)
+	data.Name = types.StringPointerValue(connection.Data.Name)
+	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
 	var diags diag.Diagnostics
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttributeTypes(ctx),
 		map[string]attr.Value{
-			"hosts": types.StringValue(
-				conf.Hosts,
-			),
-			"username": types.StringValue(
-				conf.Username,
-			),
 			"database": types.StringValue(
-				conf.Database,
+				getValueOrEmpty(connection.Data.Configuration["database"], "string").(string),
 			),
-			"srv": types.BoolValue(
-				conf.SRV,
+			"hosts": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["hosts"], "string").(string),
 			),
 			"params": types.StringValue(
-				conf.Params,
+				getValueOrEmpty(connection.Data.Configuration["params"], "string").(string),
+			),
+			"password": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["password"], "string").(string),
+			),
+			"srv": types.BoolValue(
+				getValueOrEmpty(connection.Data.Configuration["srv"], "bool").(bool),
+			),
+			"ssl": types.BoolValue(
+				getValueOrEmpty(connection.Data.Configuration["ssl"], "bool").(bool),
+			),
+			"username": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["username"], "string").(string),
 			),
 		},
 	)

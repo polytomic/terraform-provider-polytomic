@@ -16,7 +16,7 @@ Delighted Connection
 resource "polytomic_delighted_connection" "delighted" {
   name = "example"
   configuration = {
-    api_key = "my-api-key"
+    api_key = "secret"
   }
 }
 ```
@@ -43,6 +43,6 @@ resource "polytomic_delighted_connection" "delighted" {
 
 Required:
 
-- `api_key` (String, Sensitive)
+- `api_key` (String)
 
 

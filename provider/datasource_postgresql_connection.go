@@ -5,16 +5,13 @@ package provider
 
 import (
 	"context"
-	"fmt"
 
-	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/mitchellh/mapstructure"
-	"github.com/polytomic/polytomic-go"
+	"github.com/polytomic/terraform-provider-polytomic/provider/internal/client"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -22,7 +19,13 @@ var _ datasource.DataSource = &PostgresqlConnectionDataSource{}
 
 // ExampleDataSource defines the data source implementation.
 type PostgresqlConnectionDataSource struct {
-	client *polytomic.Client
+	provider *client.Provider
+}
+
+func (d *PostgresqlConnectionDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+	if provider := client.GetProvider(req.ProviderData, resp.Diagnostics); provider != nil {
+		d.provider = provider
+	}
 }
 
 func (d *PostgresqlConnectionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
@@ -31,7 +34,7 @@ func (d *PostgresqlConnectionDataSource) Metadata(ctx context.Context, req datas
 
 func (d *PostgresqlConnectionDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: ":meta:subcategory:Connections: PostgresSQL Connection",
+		MarkdownDescription: ":meta:subcategory:Connections: PostgreSQL Connection",
 		Attributes: map[string]schema.Attribute{
 			"name": schema.StringAttribute{
 				MarkdownDescription: "",
@@ -47,6 +50,48 @@ func (d *PostgresqlConnectionDataSource) Schema(ctx context.Context, req datasou
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
+					"ca_cert": schema.StringAttribute{
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Sensitive:           false,
+					},
+					"change_detection": schema.BoolAttribute{
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Sensitive:           false,
+					},
+					"client_certificate": schema.StringAttribute{
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Sensitive:           false,
+					},
+					"client_certs": schema.BoolAttribute{
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Sensitive:           false,
+					},
+					"client_key": schema.StringAttribute{
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Sensitive:           false,
+					},
+					"database": schema.StringAttribute{
+						MarkdownDescription: "",
+						Required:            true,
+						Optional:            false,
+						Computed:            false,
+						Sensitive:           false,
+					},
 					"hostname": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            true,
@@ -54,14 +99,7 @@ func (d *PostgresqlConnectionDataSource) Schema(ctx context.Context, req datasou
 						Computed:            false,
 						Sensitive:           false,
 					},
-					"username": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
-					"database": schema.StringAttribute{
+					"password": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            true,
 						Optional:            false,
@@ -75,74 +113,60 @@ func (d *PostgresqlConnectionDataSource) Schema(ctx context.Context, req datasou
 						Computed:            false,
 						Sensitive:           false,
 					},
-					"ssl": schema.BoolAttribute{
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
-					},
-					"client_certs": schema.BoolAttribute{
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
-					},
-					"client_certificate": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
-					},
-					"ca_cert": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
-					},
-					"change_detection": schema.BoolAttribute{
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
-					},
 					"publication": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
-						Computed:            true,
+						Computed:            false,
 						Sensitive:           false,
 					},
 					"ssh": schema.BoolAttribute{
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
-					},
-					"ssh_user": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
+						Computed:            false,
 						Sensitive:           false,
 					},
 					"ssh_host": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
-						Computed:            true,
+						Computed:            false,
 						Sensitive:           false,
 					},
 					"ssh_port": schema.Int64Attribute{
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
-						Computed:            true,
+						Computed:            false,
+						Sensitive:           false,
+					},
+					"ssh_private_key": schema.StringAttribute{
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Sensitive:           false,
+					},
+					"ssh_user": schema.StringAttribute{
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Sensitive:           false,
+					},
+					"ssl": schema.BoolAttribute{
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Sensitive:           false,
+					},
+					"username": schema.StringAttribute{
+						MarkdownDescription: "",
+						Required:            true,
+						Optional:            false,
+						Computed:            false,
 						Sensitive:           false,
 					},
 				},
@@ -156,26 +180,6 @@ func (d *PostgresqlConnectionDataSource) Schema(ctx context.Context, req datasou
 	}
 }
 
-func (d *PostgresqlConnectionDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
-	// Prevent panic if the provider has not been configured.
-	if req.ProviderData == nil {
-		return
-	}
-
-	client, ok := req.ProviderData.(*polytomic.Client)
-
-	if !ok {
-		resp.Diagnostics.AddError(
-			"Unexpected Resource Configure Type",
-			fmt.Sprintf("Expected *polytomic.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
-		)
-
-		return
-	}
-
-	d.client = client
-}
-
 func (d *PostgresqlConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionData
 
@@ -187,7 +191,12 @@ func (d *PostgresqlConnectionDataSource) Read(ctx context.Context, req datasourc
 	}
 
 	// Get the connection
-	connection, err := d.client.Connections().Get(ctx, uuid.MustParse(data.Id.ValueString()))
+	client, err := d.provider.Client(data.Organization.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting client", err.Error())
+		return
+	}
+	connection, err := client.Connections.Get(ctx, data.Id.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection", err.Error())
 		return
@@ -195,61 +204,63 @@ func (d *PostgresqlConnectionDataSource) Read(ctx context.Context, req datasourc
 
 	// For the purposes of this example code, hardcoding a response value to
 	// save into the Terraform state.
-	data.Id = types.StringValue(connection.ID)
-	data.Name = types.StringValue(connection.Name)
-	data.Organization = types.StringValue(connection.OrganizationId)
-	var conf polytomic.PostgresqlConfiguration
-	err = mapstructure.Decode(connection.Configuration, &conf)
-	if err != nil {
-		resp.Diagnostics.AddError("Error decoding connection", err.Error())
-		return
-	}
-
+	data.Id = types.StringPointerValue(connection.Data.Id)
+	data.Name = types.StringPointerValue(connection.Data.Name)
+	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
 	var diags diag.Diagnostics
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttributeTypes(ctx),
 		map[string]attr.Value{
-			"hostname": types.StringValue(
-				conf.Hostname,
-			),
-			"username": types.StringValue(
-				conf.Username,
-			),
-			"database": types.StringValue(
-				conf.Database,
-			),
-			"port": types.Int64Value(
-				int64(conf.Port),
-			),
-			"ssl": types.BoolValue(
-				conf.SSL,
-			),
-			"client_certs": types.BoolValue(
-				conf.ClientCerts,
-			),
-			"client_certificate": types.StringValue(
-				conf.ClientCertificate,
-			),
 			"ca_cert": types.StringValue(
-				conf.CACert,
+				getValueOrEmpty(connection.Data.Configuration["ca_cert"], "string").(string),
 			),
 			"change_detection": types.BoolValue(
-				conf.ChangeDetection,
+				getValueOrEmpty(connection.Data.Configuration["change_detection"], "bool").(bool),
+			),
+			"client_certificate": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["client_certificate"], "string").(string),
+			),
+			"client_certs": types.BoolValue(
+				getValueOrEmpty(connection.Data.Configuration["client_certs"], "bool").(bool),
+			),
+			"client_key": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["client_key"], "string").(string),
+			),
+			"database": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["database"], "string").(string),
+			),
+			"hostname": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["hostname"], "string").(string),
+			),
+			"password": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["password"], "string").(string),
+			),
+			"port": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["port"], "string").(string),
 			),
 			"publication": types.StringValue(
-				conf.Publication,
+				getValueOrEmpty(connection.Data.Configuration["publication"], "string").(string),
 			),
 			"ssh": types.BoolValue(
-				conf.SSH,
-			),
-			"ssh_user": types.StringValue(
-				conf.SSHUser,
+				getValueOrEmpty(connection.Data.Configuration["ssh"], "bool").(bool),
 			),
 			"ssh_host": types.StringValue(
-				conf.SSHHost,
+				getValueOrEmpty(connection.Data.Configuration["ssh_host"], "string").(string),
 			),
-			"ssh_port": types.Int64Value(
-				int64(conf.SSHPort),
+			"ssh_port": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["ssh_port"], "string").(string),
+			),
+			"ssh_private_key": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["ssh_private_key"], "string").(string),
+			),
+			"ssh_user": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["ssh_user"], "string").(string),
+			),
+			"ssl": types.BoolValue(
+				getValueOrEmpty(connection.Data.Configuration["ssl"], "bool").(bool),
+			),
+			"username": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["username"], "string").(string),
 			),
 		},
 	)

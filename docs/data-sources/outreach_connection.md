@@ -35,4 +35,11 @@ data "polytomic_outreach_connection" "outreach" {
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
+Optional:
+
+- `client_id` (String)
+- `client_secret` (String)
+- `oauth_refresh_token` (String)
+- `oauth_token_expiry` (String)
+
 

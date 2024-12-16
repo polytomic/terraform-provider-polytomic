@@ -16,9 +16,6 @@ ZoomInfo Connection
 resource "polytomic_zoominfo_connection" "zoominfo" {
   name = "example"
   configuration = {
-    username    = "my-username"
-    client_id   = "my-client-id"
-    private_key = "my-private-key"
   }
 }
 ```
@@ -45,8 +42,8 @@ resource "polytomic_zoominfo_connection" "zoominfo" {
 
 Required:
 
-- `client_id` (String, Sensitive)
-- `private_key` (String, Sensitive)
+- `client_id` (String)
+- `private_key` (String)
 - `username` (String)
 
 

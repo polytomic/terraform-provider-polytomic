@@ -10,19 +10,19 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/google/uuid"
+	"github.com/AlekSi/pointer"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/polytomic-go"
+	ptcore "github.com/polytomic/polytomic-go/core"
+	"github.com/polytomic/terraform-provider-polytomic/provider/internal/client"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -31,7 +31,7 @@ var _ resource.ResourceWithImportState = &PostgresqlConnectionResource{}
 
 func (t *PostgresqlConnectionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: ":meta:subcategory:Connections: PostgresSQL Connection",
+		MarkdownDescription: ":meta:subcategory:Connections: PostgreSQL Connection",
 		Attributes: map[string]schema.Attribute{
 			"organization": schema.StringAttribute{
 				MarkdownDescription: "Organization ID",
@@ -43,6 +43,48 @@ func (t *PostgresqlConnectionResource) Schema(ctx context.Context, req resource.
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
+					"ca_cert": schema.StringAttribute{
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Sensitive:           false,
+					},
+					"change_detection": schema.BoolAttribute{
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Sensitive:           false,
+					},
+					"client_certificate": schema.StringAttribute{
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Sensitive:           false,
+					},
+					"client_certs": schema.BoolAttribute{
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Sensitive:           false,
+					},
+					"client_key": schema.StringAttribute{
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Sensitive:           false,
+					},
+					"database": schema.StringAttribute{
+						MarkdownDescription: "",
+						Required:            true,
+						Optional:            false,
+						Computed:            false,
+						Sensitive:           false,
+					},
 					"hostname": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            true,
@@ -50,21 +92,7 @@ func (t *PostgresqlConnectionResource) Schema(ctx context.Context, req resource.
 						Computed:            false,
 						Sensitive:           false,
 					},
-					"username": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
 					"password": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           true,
-					},
-					"database": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            true,
 						Optional:            false,
@@ -78,97 +106,61 @@ func (t *PostgresqlConnectionResource) Schema(ctx context.Context, req resource.
 						Computed:            false,
 						Sensitive:           false,
 					},
-					"ssl": schema.BoolAttribute{
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
-					},
-					"client_certs": schema.BoolAttribute{
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
-					},
-					"client_certificate": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
-						Default:             stringdefault.StaticString(""),
-					},
-					"client_key": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           true,
-						Default:             stringdefault.StaticString(""),
-					},
-					"ca_cert": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
-						Default:             stringdefault.StaticString(""),
-					},
-					"change_detection": schema.BoolAttribute{
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
-					},
 					"publication": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
-						Computed:            true,
+						Computed:            false,
 						Sensitive:           false,
-						Default:             stringdefault.StaticString(""),
 					},
 					"ssh": schema.BoolAttribute{
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
-						Computed:            true,
+						Computed:            false,
+						Sensitive:           false,
+					},
+					"ssh_host": schema.StringAttribute{
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Sensitive:           false,
+					},
+					"ssh_port": schema.Int64Attribute{
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Sensitive:           false,
+					},
+					"ssh_private_key": schema.StringAttribute{
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
 						Sensitive:           false,
 					},
 					"ssh_user": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
-						Computed:            true,
+						Computed:            false,
 						Sensitive:           false,
-						Default:             stringdefault.StaticString(""),
 					},
-					"ssh_host": schema.StringAttribute{
+					"ssl": schema.BoolAttribute{
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
-						Computed:            true,
+						Computed:            false,
 						Sensitive:           false,
-						Default:             stringdefault.StaticString(""),
 					},
-					"ssh_port": schema.Int64Attribute{
+					"username": schema.StringAttribute{
 						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
+						Required:            true,
+						Optional:            false,
+						Computed:            false,
 						Sensitive:           false,
-						Default:             int64default.StaticInt64(0),
-					},
-					"ssh_private_key": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           true,
-						Default:             stringdefault.StaticString(""),
 					},
 				},
 
@@ -180,7 +172,7 @@ func (t *PostgresqlConnectionResource) Schema(ctx context.Context, req resource.
 			},
 			"id": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "PostgresSQL Connection identifier",
+				MarkdownDescription: "PostgreSQL Connection identifier",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
@@ -189,12 +181,54 @@ func (t *PostgresqlConnectionResource) Schema(ctx context.Context, req resource.
 	}
 }
 
-func (r *PostgresqlConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_postgresql_connection"
+type PostgresqlConf struct {
+	Ca_cert string `mapstructure:"ca_cert" tfsdk:"ca_cert"`
+
+	Change_detection bool `mapstructure:"change_detection" tfsdk:"change_detection"`
+
+	Client_certificate string `mapstructure:"client_certificate" tfsdk:"client_certificate"`
+
+	Client_certs bool `mapstructure:"client_certs" tfsdk:"client_certs"`
+
+	Client_key string `mapstructure:"client_key" tfsdk:"client_key"`
+
+	Database string `mapstructure:"database" tfsdk:"database"`
+
+	Hostname string `mapstructure:"hostname" tfsdk:"hostname"`
+
+	Password string `mapstructure:"password" tfsdk:"password"`
+
+	Port int64 `mapstructure:"port" tfsdk:"port"`
+
+	Publication string `mapstructure:"publication" tfsdk:"publication"`
+
+	Ssh bool `mapstructure:"ssh" tfsdk:"ssh"`
+
+	Ssh_host string `mapstructure:"ssh_host" tfsdk:"ssh_host"`
+
+	Ssh_port int64 `mapstructure:"ssh_port" tfsdk:"ssh_port"`
+
+	Ssh_private_key string `mapstructure:"ssh_private_key" tfsdk:"ssh_private_key"`
+
+	Ssh_user string `mapstructure:"ssh_user" tfsdk:"ssh_user"`
+
+	Ssl bool `mapstructure:"ssl" tfsdk:"ssl"`
+
+	Username string `mapstructure:"username" tfsdk:"username"`
 }
 
 type PostgresqlConnectionResource struct {
-	client *polytomic.Client
+	provider *client.Provider
+}
+
+func (r *PostgresqlConnectionResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+	if provider := client.GetProvider(req.ProviderData, resp.Diagnostics); provider != nil {
+		r.provider = provider
+	}
+}
+
+func (r *PostgresqlConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_postgresql_connection"
 }
 
 func (r *PostgresqlConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -207,73 +241,75 @@ func (r *PostgresqlConnectionResource) Create(ctx context.Context, req resource.
 		return
 	}
 
-	created, err := r.client.Connections().Create(ctx,
-		polytomic.CreateConnectionMutation{
-			Name:           data.Name.ValueString(),
-			Type:           polytomic.PostgresqlConnectionType,
-			OrganizationId: data.Organization.ValueString(),
-			Configuration: polytomic.PostgresqlConfiguration{
-				Hostname:          data.Configuration.Attributes()["hostname"].(types.String).ValueString(),
-				Username:          data.Configuration.Attributes()["username"].(types.String).ValueString(),
-				Password:          data.Configuration.Attributes()["password"].(types.String).ValueString(),
-				Database:          data.Configuration.Attributes()["database"].(types.String).ValueString(),
-				Port:              int(data.Configuration.Attributes()["port"].(types.Int64).ValueInt64()),
-				SSL:               data.Configuration.Attributes()["ssl"].(types.Bool).ValueBool(),
-				ClientCerts:       data.Configuration.Attributes()["client_certs"].(types.Bool).ValueBool(),
-				ClientCertificate: data.Configuration.Attributes()["client_certificate"].(types.String).ValueString(),
-				ClientKey:         data.Configuration.Attributes()["client_key"].(types.String).ValueString(),
-				CACert:            data.Configuration.Attributes()["ca_cert"].(types.String).ValueString(),
-				ChangeDetection:   data.Configuration.Attributes()["change_detection"].(types.Bool).ValueBool(),
-				Publication:       data.Configuration.Attributes()["publication"].(types.String).ValueString(),
-				SSH:               data.Configuration.Attributes()["ssh"].(types.Bool).ValueBool(),
-				SSHUser:           data.Configuration.Attributes()["ssh_user"].(types.String).ValueString(),
-				SSHHost:           data.Configuration.Attributes()["ssh_host"].(types.String).ValueString(),
-				SSHPort:           int(data.Configuration.Attributes()["ssh_port"].(types.Int64).ValueInt64()),
-				SSHPrivateKey:     data.Configuration.Attributes()["ssh_private_key"].(types.String).ValueString(),
-			},
+	client, err := r.provider.Client(data.Organization.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting client", err.Error())
+		return
+	}
+	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
+		Name:           data.Name.ValueString(),
+		Type:           "postgresql",
+		OrganizationId: data.Organization.ValueStringPointer(),
+		Configuration: map[string]interface{}{
+			"ca_cert":            data.Configuration.Attributes()["ca_cert"].(types.String).ValueString(),
+			"change_detection":   data.Configuration.Attributes()["change_detection"].(types.Bool).ValueBool(),
+			"client_certificate": data.Configuration.Attributes()["client_certificate"].(types.String).ValueString(),
+			"client_certs":       data.Configuration.Attributes()["client_certs"].(types.Bool).ValueBool(),
+			"client_key":         data.Configuration.Attributes()["client_key"].(types.String).ValueString(),
+			"database":           data.Configuration.Attributes()["database"].(types.String).ValueString(),
+			"hostname":           data.Configuration.Attributes()["hostname"].(types.String).ValueString(),
+			"password":           data.Configuration.Attributes()["password"].(types.String).ValueString(),
+			"port":               int(data.Configuration.Attributes()["port"].(types.Int64).ValueInt64()),
+			"publication":        data.Configuration.Attributes()["publication"].(types.String).ValueString(),
+			"ssh":                data.Configuration.Attributes()["ssh"].(types.Bool).ValueBool(),
+			"ssh_host":           data.Configuration.Attributes()["ssh_host"].(types.String).ValueString(),
+			"ssh_port":           int(data.Configuration.Attributes()["ssh_port"].(types.Int64).ValueInt64()),
+			"ssh_private_key":    data.Configuration.Attributes()["ssh_private_key"].(types.String).ValueString(),
+			"ssh_user":           data.Configuration.Attributes()["ssh_user"].(types.String).ValueString(),
+			"ssl":                data.Configuration.Attributes()["ssl"].(types.Bool).ValueBool(),
+			"username":           data.Configuration.Attributes()["username"].(types.String).ValueString(),
 		},
-		polytomic.WithIdempotencyKey(uuid.NewString()),
-		polytomic.SkipConfigValidation(),
-	)
+		Validate: pointer.ToBool(false),
+	})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
 		return
 	}
-	data.Id = types.StringValue(created.ID)
-	data.Name = types.StringValue(created.Name)
-	data.Organization = types.StringValue(created.OrganizationId)
+	data.Id = types.StringPointerValue(created.Data.Id)
+	data.Name = types.StringPointerValue(created.Data.Name)
+	data.Organization = types.StringPointerValue(created.Data.OrganizationId)
 
-	var output polytomic.PostgresqlConfiguration
-	cfg := &mapstructure.DecoderConfig{
-		Result: &output,
+	conf := PostgresqlConf{}
+	err = mapstructure.Decode(created.Data.Configuration, &conf)
+	if err != nil {
+		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error decoding connection configuration: %s", err))
 	}
-	decoder, _ := mapstructure.NewDecoder(cfg)
-	decoder.Decode(created.Configuration)
+
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"hostname":           types.StringType,
-		"username":           types.StringType,
-		"password":           types.StringType,
-		"database":           types.StringType,
-		"port":               types.NumberType,
-		"ssl":                types.BoolType,
-		"client_certs":       types.BoolType,
-		"client_certificate": types.StringType,
-		"client_key":         types.StringType,
 		"ca_cert":            types.StringType,
 		"change_detection":   types.BoolType,
+		"client_certificate": types.StringType,
+		"client_certs":       types.BoolType,
+		"client_key":         types.StringType,
+		"database":           types.StringType,
+		"hostname":           types.StringType,
+		"password":           types.StringType,
+		"port":               types.NumberType,
 		"publication":        types.StringType,
 		"ssh":                types.BoolType,
-		"ssh_user":           types.StringType,
 		"ssh_host":           types.StringType,
 		"ssh_port":           types.NumberType,
 		"ssh_private_key":    types.StringType,
-	}, output)
+		"ssh_user":           types.StringType,
+		"ssl":                types.BoolType,
+		"username":           types.StringType,
+	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Postgresql", "id": created.ID})
+	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Postgresql", "id": created.Data.Id})
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -289,9 +325,14 @@ func (r *PostgresqlConnectionResource) Read(ctx context.Context, req resource.Re
 		return
 	}
 
-	connection, err := r.client.Connections().Get(ctx, uuid.MustParse(data.Id.ValueString()))
+	client, err := r.provider.Client(data.Organization.ValueString())
 	if err != nil {
-		pErr := polytomic.ApiError{}
+		resp.Diagnostics.AddError("Error getting client", err.Error())
+		return
+	}
+	connection, err := client.Connections.Get(ctx, data.Id.ValueString())
+	if err != nil {
+		pErr := &ptcore.APIError{}
 		if errors.As(err, &pErr) {
 			if pErr.StatusCode == http.StatusNotFound {
 				resp.State.RemoveResource(ctx)
@@ -301,36 +342,35 @@ func (r *PostgresqlConnectionResource) Read(ctx context.Context, req resource.Re
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error reading connection: %s", err))
 		return
 	}
+	data.Id = types.StringPointerValue(connection.Data.Id)
+	data.Name = types.StringPointerValue(connection.Data.Name)
+	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
 
-	data.Id = types.StringValue(connection.ID)
-	data.Name = types.StringValue(connection.Name)
-	data.Organization = types.StringValue(connection.OrganizationId)
-
-	var output polytomic.PostgresqlConfiguration
-	cfg := &mapstructure.DecoderConfig{
-		Result: &output,
+	conf := PostgresqlConf{}
+	err = mapstructure.Decode(connection.Data.Configuration, &conf)
+	if err != nil {
+		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error decoding connection configuration: %s", err))
 	}
-	decoder, _ := mapstructure.NewDecoder(cfg)
-	decoder.Decode(connection.Configuration)
+
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"hostname":           types.StringType,
-		"username":           types.StringType,
-		"password":           types.StringType,
-		"database":           types.StringType,
-		"port":               types.NumberType,
-		"ssl":                types.BoolType,
-		"client_certs":       types.BoolType,
-		"client_certificate": types.StringType,
-		"client_key":         types.StringType,
 		"ca_cert":            types.StringType,
 		"change_detection":   types.BoolType,
+		"client_certificate": types.StringType,
+		"client_certs":       types.BoolType,
+		"client_key":         types.StringType,
+		"database":           types.StringType,
+		"hostname":           types.StringType,
+		"password":           types.StringType,
+		"port":               types.NumberType,
 		"publication":        types.StringType,
 		"ssh":                types.BoolType,
-		"ssh_user":           types.StringType,
 		"ssh_host":           types.StringType,
 		"ssh_port":           types.NumberType,
 		"ssh_private_key":    types.StringType,
-	}, output)
+		"ssh_user":           types.StringType,
+		"ssl":                types.BoolType,
+		"username":           types.StringType,
+	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -350,73 +390,75 @@ func (r *PostgresqlConnectionResource) Update(ctx context.Context, req resource.
 		return
 	}
 
-	updated, err := r.client.Connections().Update(ctx,
-		uuid.MustParse(data.Id.ValueString()),
-		polytomic.UpdateConnectionMutation{
+	client, err := r.provider.Client(data.Organization.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting client", err.Error())
+		return
+	}
+	updated, err := client.Connections.Update(ctx,
+		data.Id.ValueString(),
+		&polytomic.UpdateConnectionRequestSchema{
 			Name:           data.Name.ValueString(),
-			OrganizationId: data.Organization.ValueString(),
-			Configuration: polytomic.PostgresqlConfiguration{
-				Hostname:          data.Configuration.Attributes()["hostname"].(types.String).ValueString(),
-				Username:          data.Configuration.Attributes()["username"].(types.String).ValueString(),
-				Password:          data.Configuration.Attributes()["password"].(types.String).ValueString(),
-				Database:          data.Configuration.Attributes()["database"].(types.String).ValueString(),
-				Port:              int(data.Configuration.Attributes()["port"].(types.Int64).ValueInt64()),
-				SSL:               data.Configuration.Attributes()["ssl"].(types.Bool).ValueBool(),
-				ClientCerts:       data.Configuration.Attributes()["client_certs"].(types.Bool).ValueBool(),
-				ClientCertificate: data.Configuration.Attributes()["client_certificate"].(types.String).ValueString(),
-				ClientKey:         data.Configuration.Attributes()["client_key"].(types.String).ValueString(),
-				CACert:            data.Configuration.Attributes()["ca_cert"].(types.String).ValueString(),
-				ChangeDetection:   data.Configuration.Attributes()["change_detection"].(types.Bool).ValueBool(),
-				Publication:       data.Configuration.Attributes()["publication"].(types.String).ValueString(),
-				SSH:               data.Configuration.Attributes()["ssh"].(types.Bool).ValueBool(),
-				SSHUser:           data.Configuration.Attributes()["ssh_user"].(types.String).ValueString(),
-				SSHHost:           data.Configuration.Attributes()["ssh_host"].(types.String).ValueString(),
-				SSHPort:           int(data.Configuration.Attributes()["ssh_port"].(types.Int64).ValueInt64()),
-				SSHPrivateKey:     data.Configuration.Attributes()["ssh_private_key"].(types.String).ValueString(),
+			OrganizationId: data.Organization.ValueStringPointer(),
+			Configuration: map[string]interface{}{
+				"ca_cert":            data.Configuration.Attributes()["ca_cert"].(types.String).ValueString(),
+				"change_detection":   data.Configuration.Attributes()["change_detection"].(types.Bool).ValueBool(),
+				"client_certificate": data.Configuration.Attributes()["client_certificate"].(types.String).ValueString(),
+				"client_certs":       data.Configuration.Attributes()["client_certs"].(types.Bool).ValueBool(),
+				"client_key":         data.Configuration.Attributes()["client_key"].(types.String).ValueString(),
+				"database":           data.Configuration.Attributes()["database"].(types.String).ValueString(),
+				"hostname":           data.Configuration.Attributes()["hostname"].(types.String).ValueString(),
+				"password":           data.Configuration.Attributes()["password"].(types.String).ValueString(),
+				"port":               int(data.Configuration.Attributes()["port"].(types.Int64).ValueInt64()),
+				"publication":        data.Configuration.Attributes()["publication"].(types.String).ValueString(),
+				"ssh":                data.Configuration.Attributes()["ssh"].(types.Bool).ValueBool(),
+				"ssh_host":           data.Configuration.Attributes()["ssh_host"].(types.String).ValueString(),
+				"ssh_port":           int(data.Configuration.Attributes()["ssh_port"].(types.Int64).ValueInt64()),
+				"ssh_private_key":    data.Configuration.Attributes()["ssh_private_key"].(types.String).ValueString(),
+				"ssh_user":           data.Configuration.Attributes()["ssh_user"].(types.String).ValueString(),
+				"ssl":                data.Configuration.Attributes()["ssl"].(types.Bool).ValueBool(),
+				"username":           data.Configuration.Attributes()["username"].(types.String).ValueString(),
 			},
-		},
-		polytomic.WithIdempotencyKey(uuid.NewString()),
-		polytomic.SkipConfigValidation(),
-	)
+			Validate: pointer.ToBool(false),
+		})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))
 		return
 	}
 
-	data.Id = types.StringValue(updated.ID)
-	data.Name = types.StringValue(updated.Name)
-	data.Organization = types.StringValue(updated.OrganizationId)
+	data.Id = types.StringPointerValue(updated.Data.Id)
+	data.Name = types.StringPointerValue(updated.Data.Name)
+	data.Organization = types.StringPointerValue(updated.Data.OrganizationId)
 
-	var output polytomic.PostgresqlConfiguration
-	cfg := &mapstructure.DecoderConfig{
-		Result: &output,
+	conf := PostgresqlConf{}
+	err = mapstructure.Decode(updated.Data.Configuration, &conf)
+	if err != nil {
+		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error decoding connection configuration: %s", err))
 	}
-	decoder, _ := mapstructure.NewDecoder(cfg)
-	decoder.Decode(updated.Configuration)
+
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"hostname":           types.StringType,
-		"username":           types.StringType,
-		"password":           types.StringType,
-		"database":           types.StringType,
-		"port":               types.NumberType,
-		"ssl":                types.BoolType,
-		"client_certs":       types.BoolType,
-		"client_certificate": types.StringType,
-		"client_key":         types.StringType,
 		"ca_cert":            types.StringType,
 		"change_detection":   types.BoolType,
+		"client_certificate": types.StringType,
+		"client_certs":       types.BoolType,
+		"client_key":         types.StringType,
+		"database":           types.StringType,
+		"hostname":           types.StringType,
+		"password":           types.StringType,
+		"port":               types.NumberType,
 		"publication":        types.StringType,
 		"ssh":                types.BoolType,
-		"ssh_user":           types.StringType,
 		"ssh_host":           types.StringType,
 		"ssh_port":           types.NumberType,
 		"ssh_private_key":    types.StringType,
-	}, output)
+		"ssh_user":           types.StringType,
+		"ssl":                types.BoolType,
+		"username":           types.StringType,
+	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
-
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
@@ -431,67 +473,52 @@ func (r *PostgresqlConnectionResource) Delete(ctx context.Context, req resource.
 		return
 	}
 
+	client, err := r.provider.Client(data.Organization.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting client", err.Error())
+		return
+	}
 	if data.ForceDestroy.ValueBool() {
-		err := r.client.Connections().Delete(ctx, uuid.MustParse(data.Id.ValueString()), polytomic.WithForceDelete())
+		err := client.Connections.Remove(ctx, data.Id.ValueString(), &polytomic.ConnectionsRemoveRequest{
+			Force: pointer.ToBool(true),
+		})
 		if err != nil {
-			pErr := polytomic.ApiError{}
+			pErr := &polytomic.NotFoundError{}
 			if errors.As(err, &pErr) {
-				if pErr.StatusCode == http.StatusNotFound {
-					resp.State.RemoveResource(ctx)
-					return
-				}
+				resp.State.RemoveResource(ctx)
+				return
 			}
+
 			resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting connection: %s", err))
 		}
 		return
 	}
 
-	err := r.client.Connections().Delete(ctx, uuid.MustParse(data.Id.ValueString()))
+	err = client.Connections.Remove(ctx, data.Id.ValueString(), &polytomic.ConnectionsRemoveRequest{
+		Force: pointer.ToBool(false),
+	})
 	if err != nil {
-		pErr := polytomic.ApiError{}
+		pErr := &polytomic.NotFoundError{}
 		if errors.As(err, &pErr) {
-			if pErr.StatusCode == http.StatusNotFound {
-				resp.State.RemoveResource(ctx)
-				return
-			}
-			if strings.Contains(pErr.Message, "connection in use") {
-				for _, meta := range pErr.Metadata {
-					info := meta.(map[string]interface{})
-					resp.Diagnostics.AddError("Connection in use",
-						fmt.Sprintf("Connection is used by %s \"%s\" (%s). Please remove before deleting this connection.",
-							info["type"], info["name"], info["id"]),
-					)
-				}
-				return
-			}
+			resp.State.RemoveResource(ctx)
+			return
 		}
-
-		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting connection: %s", err))
-		return
 	}
+	pErr := &polytomic.UnprocessableEntityError{}
+	if errors.As(err, &pErr) {
+		if strings.Contains(*pErr.Body.Message, "connection in use") {
+			resp.Diagnostics.AddError("Connection in use",
+				fmt.Sprintf("Connection is used by %s \"%s\" (%s). Please remove before deleting this connection.",
+					pErr.Body.Metadata["type"], pErr.Body.Metadata["name"], pErr.Body.Metadata["id"]),
+			)
+			return
+		}
+	}
+
+	resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting connection: %s", err))
 
 }
 
 func (r *PostgresqlConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
-}
-
-func (r *PostgresqlConnectionResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
-	// Prevent panic if the provider has not been configured.
-	if req.ProviderData == nil {
-		return
-	}
-
-	client, ok := req.ProviderData.(*polytomic.Client)
-
-	if !ok {
-		resp.Diagnostics.AddError(
-			"Unexpected Resource Configure Type",
-			fmt.Sprintf("Expected *polytomic.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
-		)
-
-		return
-	}
-
-	r.client = client
 }

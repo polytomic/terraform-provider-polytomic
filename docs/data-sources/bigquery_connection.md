@@ -3,12 +3,12 @@
 page_title: "polytomic_bigquery_connection Data Source - terraform-provider-polytomic"
 subcategory: "Connections"
 description: |-
-  BigQuery Connection
+  Google BigQuery Connection
 ---
 
 # polytomic_bigquery_connection (Data Source)
 
-BigQuery Connection
+Google BigQuery Connection
 
 ## Example Usage
 
@@ -35,9 +35,16 @@ data "polytomic_bigquery_connection" "bigquery" {
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
+Required:
+
+- `service_account` (String)
+
 Optional:
 
-- `location` (String)
+- `client_email` (String)
+- `location` (String) Region or multi-region for query operations
+- `override_project_id` (String) Override service key's project ID for cross-account access
 - `project_id` (String)
+- `structured_values_as_json` (Boolean)
 
 

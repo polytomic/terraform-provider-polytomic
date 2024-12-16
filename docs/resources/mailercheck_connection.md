@@ -16,7 +16,7 @@ MailerCheck Connection
 resource "polytomic_mailercheck_connection" "mailercheck" {
   name = "example"
   configuration = {
-    api_key = "my-api-key"
+    api_key = "secret"
   }
 }
 ```
@@ -43,6 +43,6 @@ resource "polytomic_mailercheck_connection" "mailercheck" {
 
 Required:
 
-- `api_key` (String, Sensitive)
+- `api_key` (String)
 
 

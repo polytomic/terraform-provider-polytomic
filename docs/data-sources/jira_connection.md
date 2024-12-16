@@ -38,9 +38,12 @@ data "polytomic_jira_connection" "jira" {
 Required:
 
 - `auth_method` (String)
+- `url` (String)
 
 Optional:
 
+- `access_token` (String)
+- `api_key` (String)
 - `username` (String)
 
 

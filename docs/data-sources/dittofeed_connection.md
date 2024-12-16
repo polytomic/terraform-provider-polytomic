@@ -3,12 +3,12 @@
 page_title: "polytomic_dittofeed_connection Data Source - terraform-provider-polytomic"
 subcategory: "Connections"
 description: |-
-  DittoFeed Connection
+  Dittofeed Connection
 ---
 
 # polytomic_dittofeed_connection (Data Source)
 
-DittoFeed Connection
+Dittofeed Connection
 
 ## Example Usage
 
@@ -38,5 +38,6 @@ data "polytomic_dittofeed_connection" "dittofeed" {
 Required:
 
 - `url` (String)
+- `write_key` (String)
 
 

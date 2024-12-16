@@ -43,7 +43,8 @@ Required:
 
 Optional:
 
-- `data_api_endpoint` (String) Required if `override_endpoint` is `true`.
+- `external_id` (String)
 - `override_endpoint` (Boolean)
+- `region` (String)
 
 

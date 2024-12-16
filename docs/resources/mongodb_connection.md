@@ -16,10 +16,9 @@ MongoDB Connection
 resource "polytomic_mongodb_connection" "mongodb" {
   name = "example"
   configuration = {
-    hosts    = "mongodb.example.com"
-    username = "user"
-    password = "secret"
-    database = "db"
+    hosts    = "mongodb.example.net"
+    password = "password"
+    username = "admin"
   }
 }
 ```
@@ -47,13 +46,14 @@ resource "polytomic_mongodb_connection" "mongodb" {
 Required:
 
 - `hosts` (String)
-- `password` (String, Sensitive)
-- `username` (String)
 
 Optional:
 
 - `database` (String)
-- `params` (String)
+- `params` (String) Additional connection parameters, formatted as a query string
+- `password` (String)
 - `srv` (Boolean)
+- `ssl` (Boolean)
+- `username` (String)
 
 

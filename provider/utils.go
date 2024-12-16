@@ -28,6 +28,9 @@ func ValidName(s string) string {
 		if !strings.Contains(legalCharacters, string(v)) {
 			s = s[:i] + "_" + s[i+1:]
 		}
+		if unicode.IsLower(rune(v)) && i < len(s)-1 && unicode.IsUpper(rune(s[i+1])) {
+			s = s[:i+1] + "_" + strings.ToLower(s[i+1:])
+		}
 	}
 
 	return s
@@ -87,5 +90,37 @@ func stringy(v any) string {
 		return fmt.Sprintf("%t", t)
 	default:
 		panic(fmt.Sprintf("unsupported type %T", t))
+	}
+}
+
+func getValueOrEmpty(v any, typ string) any {
+	switch typ {
+	case "string":
+		if v == nil {
+			return ""
+		}
+		return v.(string)
+	case "bool":
+		if v == nil {
+			return false
+		}
+		return v.(bool)
+	case "int":
+		if v == nil {
+			return 0
+		}
+		return v.(int)
+	case "float64":
+		if v == nil {
+			return 0.0
+		}
+		return v.(float64)
+	case "int64":
+		if v == nil {
+			return int64(0)
+		}
+		return v.(int64)
+	default:
+		panic(fmt.Sprintf("unsupported type %s", typ))
 	}
 }

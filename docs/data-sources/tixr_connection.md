@@ -35,4 +35,9 @@ data "polytomic_tixr_connection" "tixr" {
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
+Required:
+
+- `client_private_key` (String) e.g. MDAwMA==
+- `client_secret` (String)
+
 

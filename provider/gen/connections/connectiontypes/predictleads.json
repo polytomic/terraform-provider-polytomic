@@ -1,0 +1,1 @@
+{"$id":"https://github.com/polytomic/app/services/polytomic/backend/predictleads/connection-configuration","$schema":"https://json-schema.org/draft/2020-12/schema","properties":{"api_key":{"examples":["token"],"title":"API Key","type":"string"},"api_token":{"examples":["key"],"title":"API Token","type":"string"}},"required":["api_token","api_key"],"type":"object"}

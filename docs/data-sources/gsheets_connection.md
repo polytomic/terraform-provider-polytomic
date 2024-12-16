@@ -35,4 +35,19 @@ data "polytomic_gsheets_connection" "gsheets" {
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
+Required:
+
+- `spreadsheet_id` (String)
+
+Optional:
+
+- `client_id` (String)
+- `client_secret` (String)
+- `connect_mode` (String) Default: browser
+- `has_headers` (Boolean)
+- `oauth_refresh_token` (String)
+- `oauth_token_expiry` (String)
+- `service_account` (String)
+- `user_email` (String)
+
 

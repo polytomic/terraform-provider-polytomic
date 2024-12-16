@@ -1,0 +1,1 @@
+{"$id":"https://github.com/polytomic/app/services/polytomic/backend/yotpo/connection-conf","$schema":"https://json-schema.org/draft/2020-12/schema","properties":{"secret":{"title":"Secret","type":"string"},"store_id":{"description":"Also known as Client ID or Store ID.","title":"App Key","type":"string"}},"required":["store_id","secret"],"type":"object"}

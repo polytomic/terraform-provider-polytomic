@@ -3,26 +3,22 @@
 page_title: "polytomic_api_connection Resource - terraform-provider-polytomic"
 subcategory: "Connections"
 description: |-
-  API Connection
+  HTTP API Connection
 ---
 
 # polytomic_api_connection (Resource)
 
-API Connection
+HTTP API Connection
 
 ## Example Usage
 
 ```terraform
-resource "polytomic_api_connection" "example" {
-  name = "Example"
+resource "polytomic_api_connection" "api" {
+  name = "example"
   configuration = {
-    auth = {
-      "header" : {
-        "name" : "foo",
-        "value" : "bar"
-      },
-    }
-    url = "https://example.com"
+    body        = jsonencode({ "key" : "value" })
+    healthcheck = "https://example.com/healthz"
+    url         = "https://example.com"
   }
 }
 ```
@@ -42,7 +38,7 @@ resource "polytomic_api_connection" "example" {
 
 ### Read-Only
 
-- `id` (String) API Connection identifier
+- `id` (String) HTTP API Connection identifier
 
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
@@ -53,75 +49,10 @@ Required:
 
 Optional:
 
-- `auth` (Attributes) (see [below for nested schema](#nestedatt--configuration--auth))
+- `auth` (String)
 - `body` (String)
-- `headers` (Set of Object) (see [below for nested schema](#nestedatt--configuration--headers))
-- `healthcheck` (String)
-- `parameters` (Set of Object) (see [below for nested schema](#nestedatt--configuration--parameters))
-
-<a id="nestedatt--configuration--auth"></a>
-### Nested Schema for `configuration.auth`
-
-Optional:
-
-- `basic` (Attributes) (see [below for nested schema](#nestedatt--configuration--auth--basic))
-- `header` (Object) (see [below for nested schema](#nestedatt--configuration--auth--header))
-- `oauth` (Attributes) (see [below for nested schema](#nestedatt--configuration--auth--oauth))
-
-<a id="nestedatt--configuration--auth--basic"></a>
-### Nested Schema for `configuration.auth.basic`
-
-Optional:
-
-- `password` (String, Sensitive)
-- `username` (String)
-
-
-<a id="nestedatt--configuration--auth--header"></a>
-### Nested Schema for `configuration.auth.header`
-
-Required:
-
-- `name` (String)
-- `value` (String)
-
-
-<a id="nestedatt--configuration--auth--oauth"></a>
-### Nested Schema for `configuration.auth.oauth`
-
-Optional:
-
-- `client_id` (String)
-- `client_secret` (String, Sensitive)
-- `extra_form_data` (Set of Object) (see [below for nested schema](#nestedatt--configuration--auth--oauth--extra_form_data))
-- `token_endpoint` (String)
-
-<a id="nestedatt--configuration--auth--oauth--extra_form_data"></a>
-### Nested Schema for `configuration.auth.oauth.token_endpoint`
-
-Required:
-
-- `name` (String)
-- `value` (String)
-
-
-
-
-<a id="nestedatt--configuration--headers"></a>
-### Nested Schema for `configuration.headers`
-
-Required:
-
-- `name` (String)
-- `value` (String)
-
-
-<a id="nestedatt--configuration--parameters"></a>
-### Nested Schema for `configuration.parameters`
-
-Required:
-
-- `name` (String)
-- `value` (String)
+- `headers` (String)
+- `healthcheck` (String) Path to request when checking the health of this connection. No health check will be performed if left empty.
+- `parameters` (String)
 
 

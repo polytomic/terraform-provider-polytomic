@@ -10,7 +10,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/google/uuid"
+	"github.com/AlekSi/pointer"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -21,6 +21,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/polytomic-go"
+	ptcore "github.com/polytomic/polytomic-go/core"
+	"github.com/polytomic/terraform-provider-polytomic/provider/internal/client"
+
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -41,21 +45,37 @@ func (t *GcsConnectionResource) Schema(ctx context.Context, req resource.SchemaR
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
-					"project_id": schema.StringAttribute{
+					"bucket": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
 						Sensitive:           false,
 					},
-					"service_account": schema.StringAttribute{
+					"client_email": schema.StringAttribute{
 						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           true,
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+						Sensitive:           false,
+						Default:             stringdefault.StaticString(""),
 					},
-					"bucket": schema.StringAttribute{
+					"is_single_table": schema.BoolAttribute{
+						MarkdownDescription: "Treat the files as a single table.",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Sensitive:           false,
+					},
+					"project_id": schema.StringAttribute{
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+						Sensitive:           false,
+						Default:             stringdefault.StaticString(""),
+					},
+					"service_account": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            true,
 						Optional:            false,
@@ -81,12 +101,30 @@ func (t *GcsConnectionResource) Schema(ctx context.Context, req resource.SchemaR
 	}
 }
 
-func (r *GcsConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_gcs_connection"
+type GcsConf struct {
+	Bucket string `mapstructure:"bucket" tfsdk:"bucket"`
+
+	Client_email string `mapstructure:"client_email" tfsdk:"client_email"`
+
+	Is_single_table bool `mapstructure:"is_single_table" tfsdk:"is_single_table"`
+
+	Project_id string `mapstructure:"project_id" tfsdk:"project_id"`
+
+	Service_account string `mapstructure:"service_account" tfsdk:"service_account"`
 }
 
 type GcsConnectionResource struct {
-	client *polytomic.Client
+	provider *client.Provider
+}
+
+func (r *GcsConnectionResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+	if provider := client.GetProvider(req.ProviderData, resp.Diagnostics); provider != nil {
+		r.provider = provider
+	}
+}
+
+func (r *GcsConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_gcs_connection"
 }
 
 func (r *GcsConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -99,45 +137,51 @@ func (r *GcsConnectionResource) Create(ctx context.Context, req resource.CreateR
 		return
 	}
 
-	created, err := r.client.Connections().Create(ctx,
-		polytomic.CreateConnectionMutation{
-			Name:           data.Name.ValueString(),
-			Type:           polytomic.GoogleCloudStorageConnectionType,
-			OrganizationId: data.Organization.ValueString(),
-			Configuration: polytomic.GCSConfiguration{
-				ProjectId:      data.Configuration.Attributes()["project_id"].(types.String).ValueString(),
-				ServiceAccount: data.Configuration.Attributes()["service_account"].(types.String).ValueString(),
-				Bucket:         data.Configuration.Attributes()["bucket"].(types.String).ValueString(),
-			},
+	client, err := r.provider.Client(data.Organization.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting client", err.Error())
+		return
+	}
+	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
+		Name:           data.Name.ValueString(),
+		Type:           "gcs",
+		OrganizationId: data.Organization.ValueStringPointer(),
+		Configuration: map[string]interface{}{
+			"bucket":          data.Configuration.Attributes()["bucket"].(types.String).ValueString(),
+			"client_email":    data.Configuration.Attributes()["client_email"].(types.String).ValueString(),
+			"is_single_table": data.Configuration.Attributes()["is_single_table"].(types.Bool).ValueBool(),
+			"project_id":      data.Configuration.Attributes()["project_id"].(types.String).ValueString(),
+			"service_account": data.Configuration.Attributes()["service_account"].(types.String).ValueString(),
 		},
-		polytomic.WithIdempotencyKey(uuid.NewString()),
-		polytomic.SkipConfigValidation(),
-	)
+		Validate: pointer.ToBool(false),
+	})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
 		return
 	}
-	data.Id = types.StringValue(created.ID)
-	data.Name = types.StringValue(created.Name)
-	data.Organization = types.StringValue(created.OrganizationId)
+	data.Id = types.StringPointerValue(created.Data.Id)
+	data.Name = types.StringPointerValue(created.Data.Name)
+	data.Organization = types.StringPointerValue(created.Data.OrganizationId)
 
-	var output polytomic.GCSConfiguration
-	cfg := &mapstructure.DecoderConfig{
-		Result: &output,
+	conf := GcsConf{}
+	err = mapstructure.Decode(created.Data.Configuration, &conf)
+	if err != nil {
+		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error decoding connection configuration: %s", err))
 	}
-	decoder, _ := mapstructure.NewDecoder(cfg)
-	decoder.Decode(created.Configuration)
+
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"bucket":          types.StringType,
+		"client_email":    types.StringType,
+		"is_single_table": types.BoolType,
 		"project_id":      types.StringType,
 		"service_account": types.StringType,
-		"bucket":          types.StringType,
-	}, output)
+	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Gcs", "id": created.ID})
+	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Gcs", "id": created.Data.Id})
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -153,9 +197,14 @@ func (r *GcsConnectionResource) Read(ctx context.Context, req resource.ReadReque
 		return
 	}
 
-	connection, err := r.client.Connections().Get(ctx, uuid.MustParse(data.Id.ValueString()))
+	client, err := r.provider.Client(data.Organization.ValueString())
 	if err != nil {
-		pErr := polytomic.ApiError{}
+		resp.Diagnostics.AddError("Error getting client", err.Error())
+		return
+	}
+	connection, err := client.Connections.Get(ctx, data.Id.ValueString())
+	if err != nil {
+		pErr := &ptcore.APIError{}
 		if errors.As(err, &pErr) {
 			if pErr.StatusCode == http.StatusNotFound {
 				resp.State.RemoveResource(ctx)
@@ -165,22 +214,23 @@ func (r *GcsConnectionResource) Read(ctx context.Context, req resource.ReadReque
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error reading connection: %s", err))
 		return
 	}
+	data.Id = types.StringPointerValue(connection.Data.Id)
+	data.Name = types.StringPointerValue(connection.Data.Name)
+	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
 
-	data.Id = types.StringValue(connection.ID)
-	data.Name = types.StringValue(connection.Name)
-	data.Organization = types.StringValue(connection.OrganizationId)
-
-	var output polytomic.GCSConfiguration
-	cfg := &mapstructure.DecoderConfig{
-		Result: &output,
+	conf := GcsConf{}
+	err = mapstructure.Decode(connection.Data.Configuration, &conf)
+	if err != nil {
+		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error decoding connection configuration: %s", err))
 	}
-	decoder, _ := mapstructure.NewDecoder(cfg)
-	decoder.Decode(connection.Configuration)
+
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"bucket":          types.StringType,
+		"client_email":    types.StringType,
+		"is_single_table": types.BoolType,
 		"project_id":      types.StringType,
 		"service_account": types.StringType,
-		"bucket":          types.StringType,
-	}, output)
+	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -200,45 +250,51 @@ func (r *GcsConnectionResource) Update(ctx context.Context, req resource.UpdateR
 		return
 	}
 
-	updated, err := r.client.Connections().Update(ctx,
-		uuid.MustParse(data.Id.ValueString()),
-		polytomic.UpdateConnectionMutation{
+	client, err := r.provider.Client(data.Organization.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting client", err.Error())
+		return
+	}
+	updated, err := client.Connections.Update(ctx,
+		data.Id.ValueString(),
+		&polytomic.UpdateConnectionRequestSchema{
 			Name:           data.Name.ValueString(),
-			OrganizationId: data.Organization.ValueString(),
-			Configuration: polytomic.GCSConfiguration{
-				ProjectId:      data.Configuration.Attributes()["project_id"].(types.String).ValueString(),
-				ServiceAccount: data.Configuration.Attributes()["service_account"].(types.String).ValueString(),
-				Bucket:         data.Configuration.Attributes()["bucket"].(types.String).ValueString(),
+			OrganizationId: data.Organization.ValueStringPointer(),
+			Configuration: map[string]interface{}{
+				"bucket":          data.Configuration.Attributes()["bucket"].(types.String).ValueString(),
+				"client_email":    data.Configuration.Attributes()["client_email"].(types.String).ValueString(),
+				"is_single_table": data.Configuration.Attributes()["is_single_table"].(types.Bool).ValueBool(),
+				"project_id":      data.Configuration.Attributes()["project_id"].(types.String).ValueString(),
+				"service_account": data.Configuration.Attributes()["service_account"].(types.String).ValueString(),
 			},
-		},
-		polytomic.WithIdempotencyKey(uuid.NewString()),
-		polytomic.SkipConfigValidation(),
-	)
+			Validate: pointer.ToBool(false),
+		})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))
 		return
 	}
 
-	data.Id = types.StringValue(updated.ID)
-	data.Name = types.StringValue(updated.Name)
-	data.Organization = types.StringValue(updated.OrganizationId)
+	data.Id = types.StringPointerValue(updated.Data.Id)
+	data.Name = types.StringPointerValue(updated.Data.Name)
+	data.Organization = types.StringPointerValue(updated.Data.OrganizationId)
 
-	var output polytomic.GCSConfiguration
-	cfg := &mapstructure.DecoderConfig{
-		Result: &output,
+	conf := GcsConf{}
+	err = mapstructure.Decode(updated.Data.Configuration, &conf)
+	if err != nil {
+		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error decoding connection configuration: %s", err))
 	}
-	decoder, _ := mapstructure.NewDecoder(cfg)
-	decoder.Decode(updated.Configuration)
+
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"bucket":          types.StringType,
+		"client_email":    types.StringType,
+		"is_single_table": types.BoolType,
 		"project_id":      types.StringType,
 		"service_account": types.StringType,
-		"bucket":          types.StringType,
-	}, output)
+	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
-
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
@@ -253,67 +309,52 @@ func (r *GcsConnectionResource) Delete(ctx context.Context, req resource.DeleteR
 		return
 	}
 
+	client, err := r.provider.Client(data.Organization.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting client", err.Error())
+		return
+	}
 	if data.ForceDestroy.ValueBool() {
-		err := r.client.Connections().Delete(ctx, uuid.MustParse(data.Id.ValueString()), polytomic.WithForceDelete())
+		err := client.Connections.Remove(ctx, data.Id.ValueString(), &polytomic.ConnectionsRemoveRequest{
+			Force: pointer.ToBool(true),
+		})
 		if err != nil {
-			pErr := polytomic.ApiError{}
+			pErr := &polytomic.NotFoundError{}
 			if errors.As(err, &pErr) {
-				if pErr.StatusCode == http.StatusNotFound {
-					resp.State.RemoveResource(ctx)
-					return
-				}
+				resp.State.RemoveResource(ctx)
+				return
 			}
+
 			resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting connection: %s", err))
 		}
 		return
 	}
 
-	err := r.client.Connections().Delete(ctx, uuid.MustParse(data.Id.ValueString()))
+	err = client.Connections.Remove(ctx, data.Id.ValueString(), &polytomic.ConnectionsRemoveRequest{
+		Force: pointer.ToBool(false),
+	})
 	if err != nil {
-		pErr := polytomic.ApiError{}
+		pErr := &polytomic.NotFoundError{}
 		if errors.As(err, &pErr) {
-			if pErr.StatusCode == http.StatusNotFound {
-				resp.State.RemoveResource(ctx)
-				return
-			}
-			if strings.Contains(pErr.Message, "connection in use") {
-				for _, meta := range pErr.Metadata {
-					info := meta.(map[string]interface{})
-					resp.Diagnostics.AddError("Connection in use",
-						fmt.Sprintf("Connection is used by %s \"%s\" (%s). Please remove before deleting this connection.",
-							info["type"], info["name"], info["id"]),
-					)
-				}
-				return
-			}
+			resp.State.RemoveResource(ctx)
+			return
 		}
-
-		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting connection: %s", err))
-		return
 	}
+	pErr := &polytomic.UnprocessableEntityError{}
+	if errors.As(err, &pErr) {
+		if strings.Contains(*pErr.Body.Message, "connection in use") {
+			resp.Diagnostics.AddError("Connection in use",
+				fmt.Sprintf("Connection is used by %s \"%s\" (%s). Please remove before deleting this connection.",
+					pErr.Body.Metadata["type"], pErr.Body.Metadata["name"], pErr.Body.Metadata["id"]),
+			)
+			return
+		}
+	}
+
+	resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting connection: %s", err))
 
 }
 
 func (r *GcsConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
-}
-
-func (r *GcsConnectionResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
-	// Prevent panic if the provider has not been configured.
-	if req.ProviderData == nil {
-		return
-	}
-
-	client, ok := req.ProviderData.(*polytomic.Client)
-
-	if !ok {
-		resp.Diagnostics.AddError(
-			"Unexpected Resource Configure Type",
-			fmt.Sprintf("Expected *polytomic.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
-		)
-
-		return
-	}
-
-	r.client = client
 }

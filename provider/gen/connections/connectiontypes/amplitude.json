@@ -1,0 +1,1 @@
+{"$id":"https://github.com/polytomic/app/services/polytomic/backend/amplitude/connection-conf","$schema":"https://json-schema.org/draft/2020-12/schema","properties":{"api_key":{"examples":["api-key"],"title":"API Key","type":"string"},"secret_key":{"examples":["******"],"title":"Secret Key","type":"string"}},"required":["api_key","secret_key"],"type":"object"}

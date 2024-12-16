@@ -1,0 +1,1 @@
+{"$id":"https://github.com/polytomic/app/services/polytomic/backend/uservoice/connection-conf","$schema":"https://json-schema.org/draft/2020-12/schema","properties":{"api_key":{"examples":["secret"],"title":"API key","type":"string"},"domain":{"examples":["polytomic"],"title":"Subdomain","type":"string"}},"required":["domain","api_key"],"type":"object"}

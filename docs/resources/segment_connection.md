@@ -16,7 +16,7 @@ Segment Connection
 resource "polytomic_segment_connection" "segment" {
   name = "example"
   configuration = {
-    write_key = "my-write-key"
+    write_key = "write-key"
   }
 }
 ```
@@ -43,6 +43,6 @@ resource "polytomic_segment_connection" "segment" {
 
 Required:
 
-- `write_key` (String, Sensitive)
+- `write_key` (String)
 
 

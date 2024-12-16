@@ -2,14 +2,13 @@ package provider
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/polytomic/polytomic-go"
+	"github.com/polytomic/terraform-provider-polytomic/provider/internal/client"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -17,7 +16,13 @@ var _ datasource.DataSource = &bulkDestinationDatasource{}
 
 // ExampleDataSource defines the data source implementation.
 type bulkDestinationDatasource struct {
-	client *polytomic.Client
+	provider *client.Provider
+}
+
+func (d *bulkDestinationDatasource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+	if provider := client.GetProvider(req.ProviderData, resp.Diagnostics); provider != nil {
+		d.provider = provider
+	}
 }
 
 func (d *bulkDestinationDatasource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
@@ -31,6 +36,10 @@ func (d *bulkDestinationDatasource) Schema(ctx context.Context, req datasource.S
 			"connection_id": schema.StringAttribute{
 				MarkdownDescription: "",
 				Required:            true,
+			},
+			"organization": schema.StringAttribute{
+				MarkdownDescription: "",
+				Computed:            true,
 			},
 			"required_configuration": schema.SetAttribute{
 				MarkdownDescription: "",
@@ -52,26 +61,6 @@ func (d *bulkDestinationDatasource) Schema(ctx context.Context, req datasource.S
 	}
 }
 
-func (d *bulkDestinationDatasource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
-	// Prevent panic if the provider has not been configured.
-	if req.ProviderData == nil {
-		return
-	}
-
-	client, ok := req.ProviderData.(*polytomic.Client)
-
-	if !ok {
-		resp.Diagnostics.AddError(
-			"Unexpected Resource Configure Type",
-			fmt.Sprintf("Expected *polytomic.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
-		)
-
-		return
-	}
-
-	d.client = client
-}
-
 func (d *bulkDestinationDatasource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data bulkDestinationDatasourceData
 
@@ -82,7 +71,12 @@ func (d *bulkDestinationDatasource) Read(ctx context.Context, req datasource.Rea
 		return
 	}
 
-	dest, err := d.client.Bulk().GetDestination(ctx, data.ConnectionID.ValueString())
+	client, err := d.provider.Client(data.Organization.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting client", err.Error())
+		return
+	}
+	dest, err := client.BulkSync.GetDestination(ctx, data.ConnectionID.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection", err.Error())
 		return
@@ -94,13 +88,13 @@ func (d *bulkDestinationDatasource) Read(ctx context.Context, req datasource.Rea
 			"label":       types.StringType,
 			"description": types.StringType,
 		},
-	}, dest.Modes)
+	}, dest.Data.Modes)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	raw := dest.Configuration.(map[string]interface{})
+	raw := dest.Data.Configuration
 	required := make([]string, len(raw))
 	i := 0
 	for k := range raw {

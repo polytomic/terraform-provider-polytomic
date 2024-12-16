@@ -5,16 +5,13 @@ package provider
 
 import (
 	"context"
-	"fmt"
 
-	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/mitchellh/mapstructure"
-	"github.com/polytomic/polytomic-go"
+	"github.com/polytomic/terraform-provider-polytomic/provider/internal/client"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -22,7 +19,13 @@ var _ datasource.DataSource = &DatabricksConnectionDataSource{}
 
 // ExampleDataSource defines the data source implementation.
 type DatabricksConnectionDataSource struct {
-	client *polytomic.Client
+	provider *client.Provider
+}
+
+func (d *DatabricksConnectionDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+	if provider := client.GetProvider(req.ProviderData, resp.Diagnostics); provider != nil {
+		d.provider = provider
+	}
 }
 
 func (d *DatabricksConnectionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
@@ -47,7 +50,35 @@ func (d *DatabricksConnectionDataSource) Schema(ctx context.Context, req datasou
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
-					"server_hostname": schema.StringAttribute{
+					"access_token": schema.StringAttribute{
+						MarkdownDescription: "",
+						Required:            true,
+						Optional:            false,
+						Computed:            false,
+						Sensitive:           false,
+					},
+					"cloud_provider": schema.StringAttribute{
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Sensitive:           false,
+					},
+					"enable_delta_uniform": schema.BoolAttribute{
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Sensitive:           false,
+					},
+					"enforce_query_limit": schema.BoolAttribute{
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Sensitive:           false,
+					},
+					"http_path": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            true,
 						Optional:            false,
@@ -61,39 +92,18 @@ func (d *DatabricksConnectionDataSource) Schema(ctx context.Context, req datasou
 						Computed:            false,
 						Sensitive:           false,
 					},
-					"http_path": schema.StringAttribute{
+					"server_hostname": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
 						Sensitive:           false,
 					},
-					"aws_access_key_id": schema.StringAttribute{
+					"unity_catalog_enabled": schema.BoolAttribute{
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
-					},
-					"s3_bucket_name": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
-					},
-					"s3_bucket_region": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
-					},
-					"aws_user": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            false,
-						Computed:            true,
+						Computed:            false,
 						Sensitive:           false,
 					},
 				},
@@ -107,26 +117,6 @@ func (d *DatabricksConnectionDataSource) Schema(ctx context.Context, req datasou
 	}
 }
 
-func (d *DatabricksConnectionDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
-	// Prevent panic if the provider has not been configured.
-	if req.ProviderData == nil {
-		return
-	}
-
-	client, ok := req.ProviderData.(*polytomic.Client)
-
-	if !ok {
-		resp.Diagnostics.AddError(
-			"Unexpected Resource Configure Type",
-			fmt.Sprintf("Expected *polytomic.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
-		)
-
-		return
-	}
-
-	d.client = client
-}
-
 func (d *DatabricksConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionData
 
@@ -138,7 +128,12 @@ func (d *DatabricksConnectionDataSource) Read(ctx context.Context, req datasourc
 	}
 
 	// Get the connection
-	connection, err := d.client.Connections().Get(ctx, uuid.MustParse(data.Id.ValueString()))
+	client, err := d.provider.Client(data.Organization.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting client", err.Error())
+		return
+	}
+	connection, err := client.Connections.Get(ctx, data.Id.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection", err.Error())
 		return
@@ -146,40 +141,36 @@ func (d *DatabricksConnectionDataSource) Read(ctx context.Context, req datasourc
 
 	// For the purposes of this example code, hardcoding a response value to
 	// save into the Terraform state.
-	data.Id = types.StringValue(connection.ID)
-	data.Name = types.StringValue(connection.Name)
-	data.Organization = types.StringValue(connection.OrganizationId)
-	var conf polytomic.DatabricksConnectionConfiguration
-	err = mapstructure.Decode(connection.Configuration, &conf)
-	if err != nil {
-		resp.Diagnostics.AddError("Error decoding connection", err.Error())
-		return
-	}
-
+	data.Id = types.StringPointerValue(connection.Data.Id)
+	data.Name = types.StringPointerValue(connection.Data.Name)
+	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
 	var diags diag.Diagnostics
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttributeTypes(ctx),
 		map[string]attr.Value{
-			"server_hostname": types.StringValue(
-				conf.ServerHostname,
+			"access_token": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["access_token"], "string").(string),
 			),
-			"port": types.Int64Value(
-				int64(conf.Port),
+			"cloud_provider": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["cloud_provider"], "string").(string),
+			),
+			"enable_delta_uniform": types.BoolValue(
+				getValueOrEmpty(connection.Data.Configuration["enable_delta_uniform"], "bool").(bool),
+			),
+			"enforce_query_limit": types.BoolValue(
+				getValueOrEmpty(connection.Data.Configuration["enforce_query_limit"], "bool").(bool),
 			),
 			"http_path": types.StringValue(
-				conf.HTTPPath,
+				getValueOrEmpty(connection.Data.Configuration["http_path"], "string").(string),
 			),
-			"aws_access_key_id": types.StringValue(
-				conf.AwsAccessKeyID,
+			"port": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["port"], "string").(string),
 			),
-			"s3_bucket_name": types.StringValue(
-				conf.S3BucketName,
+			"server_hostname": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["server_hostname"], "string").(string),
 			),
-			"s3_bucket_region": types.StringValue(
-				conf.S3BucketRegion,
-			),
-			"aws_user": types.StringValue(
-				conf.AwsUser,
+			"unity_catalog_enabled": types.BoolValue(
+				getValueOrEmpty(connection.Data.Configuration["unity_catalog_enabled"], "bool").(bool),
 			),
 		},
 	)

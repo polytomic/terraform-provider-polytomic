@@ -16,7 +16,7 @@ Linear Connection
 resource "polytomic_linear_connection" "linear" {
   name = "example"
   configuration = {
-    api_key = "my-api-key"
+    api_key = "secret"
   }
 }
 ```
@@ -43,6 +43,6 @@ resource "polytomic_linear_connection" "linear" {
 
 Required:
 
-- `api_key` (String, Sensitive)
+- `api_key` (String)
 
 

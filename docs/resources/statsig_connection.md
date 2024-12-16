@@ -16,7 +16,7 @@ Statsig Connection
 resource "polytomic_statsig_connection" "statsig" {
   name = "example"
   configuration = {
-    api_key = "my-api-key"
+    api_key = "secret"
   }
 }
 ```
@@ -43,6 +43,6 @@ resource "polytomic_statsig_connection" "statsig" {
 
 Required:
 
-- `api_key` (String, Sensitive)
+- `api_key` (String)
 
 

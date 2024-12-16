@@ -16,8 +16,8 @@ Amplitude Connection
 resource "polytomic_amplitude_connection" "amplitude" {
   name = "example"
   configuration = {
-    api_key    = "my-api-key"
-    secret_key = "my-secret-key"
+    api_key    = "api-key"
+    secret_key = "******"
   }
 }
 ```
@@ -45,6 +45,6 @@ resource "polytomic_amplitude_connection" "amplitude" {
 Required:
 
 - `api_key` (String)
-- `secret_key` (String, Sensitive)
+- `secret_key` (String)
 
 

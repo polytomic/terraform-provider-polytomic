@@ -3,12 +3,12 @@
 page_title: "polytomic_fullstory_connection Data Source - terraform-provider-polytomic"
 subcategory: "Connections"
 description: |-
-  FullStory Connection
+  Fullstory Connection
 ---
 
 # polytomic_fullstory_connection (Data Source)
 
-FullStory Connection
+Fullstory Connection
 
 ## Example Usage
 
@@ -34,5 +34,9 @@ data "polytomic_fullstory_connection" "fullstory" {
 
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
+
+Required:
+
+- `api_key` (String)
 
 

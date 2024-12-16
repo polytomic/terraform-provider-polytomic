@@ -37,6 +37,8 @@ data "polytomic_customerio_connection" "customerio" {
 
 Required:
 
+- `app_api_key` (String)
 - `site_id` (String)
+- `tracking_api_key` (String)
 
 

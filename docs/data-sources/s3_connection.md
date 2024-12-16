@@ -37,7 +37,12 @@ data "polytomic_s3_connection" "s3" {
 
 Required:
 
-- `s3_bucket_name` (String)
+- `auth_mode` (String) How to authenticate with AWS. Defaults to Access Key and Secret
+- `s3_bucket_name` (String) Bucket name (folder optional); ex: s3://polytomic/dataset
 - `s3_bucket_region` (String)
+
+Optional:
+
+- `is_single_table` (Boolean) Treat the files as a single table.
 
 

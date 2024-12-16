@@ -5,16 +5,13 @@ package provider
 
 import (
 	"context"
-	"fmt"
 
-	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/mitchellh/mapstructure"
-	"github.com/polytomic/polytomic-go"
+	"github.com/polytomic/terraform-provider-polytomic/provider/internal/client"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -22,7 +19,13 @@ var _ datasource.DataSource = &RedshiftConnectionDataSource{}
 
 // ExampleDataSource defines the data source implementation.
 type RedshiftConnectionDataSource struct {
-	client *polytomic.Client
+	provider *client.Provider
+}
+
+func (d *RedshiftConnectionDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+	if provider := client.GetProvider(req.ProviderData, resp.Diagnostics); provider != nil {
+		d.provider = provider
+	}
 }
 
 func (d *RedshiftConnectionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
@@ -47,17 +50,24 @@ func (d *RedshiftConnectionDataSource) Schema(ctx context.Context, req datasourc
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
-					"hostname": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
+					"aws_access_key_id": schema.StringAttribute{
+						MarkdownDescription: "Access Key ID with read/write access to a bucket. More info: https://docs.polytomic.com/docs/redshift",
+						Required:            false,
+						Optional:            true,
 						Computed:            false,
 						Sensitive:           false,
 					},
-					"username": schema.StringAttribute{
+					"aws_secret_access_key": schema.StringAttribute{
 						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Sensitive:           false,
+					},
+					"aws_user": schema.StringAttribute{
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
 						Computed:            false,
 						Sensitive:           false,
 					},
@@ -68,60 +78,81 @@ func (d *RedshiftConnectionDataSource) Schema(ctx context.Context, req datasourc
 						Computed:            false,
 						Sensitive:           false,
 					},
+					"hostname": schema.StringAttribute{
+						MarkdownDescription: "",
+						Required:            true,
+						Optional:            false,
+						Computed:            false,
+						Sensitive:           false,
+					},
+					"password": schema.StringAttribute{
+						MarkdownDescription: "",
+						Required:            true,
+						Optional:            false,
+						Computed:            false,
+						Sensitive:           false,
+					},
 					"port": schema.Int64Attribute{
 						MarkdownDescription: "",
+						Required:            true,
+						Optional:            false,
+						Computed:            false,
+						Sensitive:           false,
+					},
+					"s3_bucket_name": schema.StringAttribute{
+						MarkdownDescription: "Name of bucket used for staging data load files",
 						Required:            false,
 						Optional:            true,
-						Computed:            true,
+						Computed:            false,
+						Sensitive:           false,
+					},
+					"s3_bucket_region": schema.StringAttribute{
+						MarkdownDescription: "Region of bucket. Note: must match region of redshift server",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
 						Sensitive:           false,
 					},
 					"ssh": schema.BoolAttribute{
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
-					},
-					"ssh_user": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
+						Computed:            false,
 						Sensitive:           false,
 					},
 					"ssh_host": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
-						Computed:            true,
+						Computed:            false,
 						Sensitive:           false,
 					},
 					"ssh_port": schema.Int64Attribute{
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
-						Computed:            true,
+						Computed:            false,
 						Sensitive:           false,
 					},
-					"aws_access_key_id": schema.StringAttribute{
+					"ssh_private_key": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
-						Computed:            true,
+						Computed:            false,
 						Sensitive:           false,
 					},
-					"s3_bucket_name": schema.StringAttribute{
+					"ssh_user": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
-						Computed:            true,
+						Computed:            false,
 						Sensitive:           false,
 					},
-					"s3_bucket_region": schema.StringAttribute{
+					"username": schema.StringAttribute{
 						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
+						Required:            true,
+						Optional:            false,
+						Computed:            false,
 						Sensitive:           false,
 					},
 				},
@@ -135,26 +166,6 @@ func (d *RedshiftConnectionDataSource) Schema(ctx context.Context, req datasourc
 	}
 }
 
-func (d *RedshiftConnectionDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
-	// Prevent panic if the provider has not been configured.
-	if req.ProviderData == nil {
-		return
-	}
-
-	client, ok := req.ProviderData.(*polytomic.Client)
-
-	if !ok {
-		resp.Diagnostics.AddError(
-			"Unexpected Resource Configure Type",
-			fmt.Sprintf("Expected *polytomic.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
-		)
-
-		return
-	}
-
-	d.client = client
-}
-
 func (d *RedshiftConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionData
 
@@ -166,7 +177,12 @@ func (d *RedshiftConnectionDataSource) Read(ctx context.Context, req datasource.
 	}
 
 	// Get the connection
-	connection, err := d.client.Connections().Get(ctx, uuid.MustParse(data.Id.ValueString()))
+	client, err := d.provider.Client(data.Organization.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting client", err.Error())
+		return
+	}
+	connection, err := client.Connections.Get(ctx, data.Id.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection", err.Error())
 		return
@@ -174,52 +190,57 @@ func (d *RedshiftConnectionDataSource) Read(ctx context.Context, req datasource.
 
 	// For the purposes of this example code, hardcoding a response value to
 	// save into the Terraform state.
-	data.Id = types.StringValue(connection.ID)
-	data.Name = types.StringValue(connection.Name)
-	data.Organization = types.StringValue(connection.OrganizationId)
-	var conf polytomic.RedshiftConnectionConfiguration
-	err = mapstructure.Decode(connection.Configuration, &conf)
-	if err != nil {
-		resp.Diagnostics.AddError("Error decoding connection", err.Error())
-		return
-	}
-
+	data.Id = types.StringPointerValue(connection.Data.Id)
+	data.Name = types.StringPointerValue(connection.Data.Name)
+	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
 	var diags diag.Diagnostics
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttributeTypes(ctx),
 		map[string]attr.Value{
-			"hostname": types.StringValue(
-				conf.Hostname,
+			"aws_access_key_id": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["aws_access_key_id"], "string").(string),
 			),
-			"username": types.StringValue(
-				conf.Username,
+			"aws_secret_access_key": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["aws_secret_access_key"], "string").(string),
+			),
+			"aws_user": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["aws_user"], "string").(string),
 			),
 			"database": types.StringValue(
-				conf.Database,
+				getValueOrEmpty(connection.Data.Configuration["database"], "string").(string),
 			),
-			"port": types.Int64Value(
-				int64(conf.Port),
+			"hostname": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["hostname"], "string").(string),
 			),
-			"ssh": types.BoolValue(
-				conf.SSH,
+			"password": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["password"], "string").(string),
 			),
-			"ssh_user": types.StringValue(
-				conf.SSHUser,
-			),
-			"ssh_host": types.StringValue(
-				conf.SSHHost,
-			),
-			"ssh_port": types.Int64Value(
-				int64(conf.SSHPort),
-			),
-			"aws_access_key_id": types.StringValue(
-				conf.AwsAccessKeyID,
+			"port": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["port"], "string").(string),
 			),
 			"s3_bucket_name": types.StringValue(
-				conf.S3BucketName,
+				getValueOrEmpty(connection.Data.Configuration["s3_bucket_name"], "string").(string),
 			),
 			"s3_bucket_region": types.StringValue(
-				conf.S3BucketRegion,
+				getValueOrEmpty(connection.Data.Configuration["s3_bucket_region"], "string").(string),
+			),
+			"ssh": types.BoolValue(
+				getValueOrEmpty(connection.Data.Configuration["ssh"], "bool").(bool),
+			),
+			"ssh_host": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["ssh_host"], "string").(string),
+			),
+			"ssh_port": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["ssh_port"], "string").(string),
+			),
+			"ssh_private_key": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["ssh_private_key"], "string").(string),
+			),
+			"ssh_user": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["ssh_user"], "string").(string),
+			),
+			"username": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["username"], "string").(string),
 			),
 		},
 	)

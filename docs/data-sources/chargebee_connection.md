@@ -37,10 +37,12 @@ data "polytomic_chargebee_connection" "chargebee" {
 
 Required:
 
-- `site` (String)
+- `api_key` (String)
+- `product_catalog` (String)
+- `site` (String) https://{site}.chargebee.com
 
 Optional:
 
-- `ratelimit_rpm` (Number)
+- `ratelimit_rpm` (Number) Default rate limits can be found at https://support.chargebee.com/support/solutions/articles/243576-what-are-the-chargebee-api-limits-
 
 

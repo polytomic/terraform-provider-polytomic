@@ -38,16 +38,19 @@ data "polytomic_mysql_connection" "mysql" {
 Required:
 
 - `account` (String)
-- `dbname` (String)
 - `hostname` (String)
+- `passwd` (String)
+- `port` (Number)
 
 Optional:
 
 - `change_detection` (Boolean)
-- `port` (Number)
+- `dbname` (String)
 - `ssh` (Boolean)
 - `ssh_host` (String)
 - `ssh_port` (Number)
+- `ssh_private_key` (String)
 - `ssh_user` (String)
+- `ssl` (Boolean)
 
 

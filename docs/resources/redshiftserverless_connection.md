@@ -16,12 +16,10 @@ Redshift Serverless Connection
 resource "polytomic_redshiftserverless_connection" "redshiftserverless" {
   name = "example"
   configuration = {
-    database          = "dev"
-    workgroup         = "default-workgroup"
-    iam_role_arn      = "arn:aws:iam::XXXX:role/polytomic-redshiftserverless"
-    external_id       = "db"
-    override_endpoint = true
-    data_api_endpoint = "https://redshift-data.us-west-2.amazonaws.com"
+    database     = "users"
+    iam_role_arn = "arn:aws:iam::012345678910:role/role"
+    region       = "us-west-2"
+    workgroup    = "default"
   }
 }
 ```
@@ -49,13 +47,13 @@ resource "polytomic_redshiftserverless_connection" "redshiftserverless" {
 Required:
 
 - `database` (String)
-- `external_id` (String, Sensitive)
 - `iam_role_arn` (String)
 - `workgroup` (String)
 
 Optional:
 
-- `data_api_endpoint` (String) Required if `override_endpoint` is `true`.
+- `external_id` (String)
 - `override_endpoint` (Boolean)
+- `region` (String)
 
 

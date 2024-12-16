@@ -4,21 +4,23 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 
 	"github.com/AlekSi/pointer"
-	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/polytomic/polytomic-go"
+	ptcore "github.com/polytomic/polytomic-go/core"
+	"github.com/polytomic/terraform-provider-polytomic/provider/internal/client"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -262,6 +264,20 @@ func (r *syncResource) Schema(ctx context.Context, req resource.SchemaRequest, r
 							stringplanmodifier.UseStateForUnknown(),
 						},
 					},
+					"job_id": schema.Int64Attribute{
+						MarkdownDescription: "",
+						Optional:            true,
+						PlanModifiers: []planmodifier.Int64{
+							int64planmodifier.UseStateForUnknown(),
+						},
+					},
+					"connection_id": schema.StringAttribute{
+						MarkdownDescription: "",
+						Optional:            true,
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.UseStateForUnknown(),
+						},
+					},
 					"run_after": schema.SingleNestedAttribute{
 						Attributes: map[string]schema.Attribute{
 							"sync_ids": schema.SetAttribute{
@@ -325,29 +341,10 @@ func (r *syncResource) Schema(ctx context.Context, req resource.SchemaRequest, r
 				MarkdownDescription: "",
 				Optional:            true,
 				Computed:            true,
+				Default:             booldefault.StaticBool(false),
 			},
 		},
 	}
-}
-
-func (r *syncResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
-	// Prevent panic if the provider has not been configured.
-	if req.ProviderData == nil {
-		return
-	}
-
-	client, ok := req.ProviderData.(*polytomic.Client)
-
-	if !ok {
-		resp.Diagnostics.AddError(
-			"Unexpected Resource Configure Type",
-			fmt.Sprintf("Expected *polytomic.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
-		)
-
-		return
-	}
-
-	r.client = client
 }
 
 func (r *syncResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -396,7 +393,13 @@ type Override struct {
 }
 
 type syncResource struct {
-	client *polytomic.Client
+	provider *client.Provider
+}
+
+func (r *syncResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+	if provider := client.GetProvider(req.ProviderData, resp.Diagnostics); provider != nil {
+		r.provider = provider
+	}
 }
 
 func (r *syncResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -417,9 +420,9 @@ func (r *syncResource) Create(ctx context.Context, req resource.CreateRequest, r
 		return
 	}
 
-	pt := polytomic.Target{
-		ConnectionID: target.ConnectionID,
-		Object:       target.Object,
+	pt := &polytomic.Target{
+		ConnectionId: target.ConnectionID,
+		Object:       pointer.GetString(target.Object),
 		NewName:      target.NewName,
 		FilterLogic:  target.FilterLogic,
 	}
@@ -448,14 +451,14 @@ func (r *syncResource) Create(ctx context.Context, req resource.CreateRequest, r
 		pt.Configuration = tConf
 	}
 
-	var fields []polytomic.SyncField
+	var fields []*polytomic.ModelSyncField
 	diags = data.Fields.ElementsAs(ctx, &fields, true)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	var overrideFields []polytomic.SyncField
+	var overrideFields []*polytomic.ModelSyncField
 	diags = data.OverrideFields.ElementsAs(ctx, &overrideFields, true)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -469,13 +472,13 @@ func (r *syncResource) Create(ctx context.Context, req resource.CreateRequest, r
 		return
 	}
 
-	var pfilters []polytomic.Filter
+	var pfilters []*polytomic.Filter
 	for _, filter := range filters {
-		f := polytomic.Filter{
-			FieldID:   filter.FieldID,
-			FieldType: filter.FieldType,
-			Function:  filter.Function,
-			Label:     filter.Label,
+		f := &polytomic.Filter{
+			FieldId:   pointer.To(filter.FieldID),
+			FieldType: pointer.To(polytomic.FilterFieldReferenceType(filter.FieldType)),
+			Function:  polytomic.FilterFunction(filter.Function),
+			Label:     pointer.To(filter.Label),
 		}
 
 		var val interface{}
@@ -498,11 +501,11 @@ func (r *syncResource) Create(ctx context.Context, req resource.CreateRequest, r
 		return
 	}
 
-	var poverrides []polytomic.Override
+	var poverrides []*polytomic.Override
 	for _, override := range overrides {
-		o := polytomic.Override{
-			FieldID:  override.FieldID,
-			Function: override.Function,
+		o := &polytomic.Override{
+			FieldId:  &override.FieldID,
+			Function: pointer.To(polytomic.FilterFunction(override.Function)),
 		}
 
 		var val interface{}
@@ -541,50 +544,64 @@ func (r *syncResource) Create(ctx context.Context, req resource.CreateRequest, r
 
 	var identity polytomic.Identity
 	diags = data.Identity.As(ctx, &identity, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty: true,
+		UnhandledNullAsEmpty:    true,
+		UnhandledUnknownAsEmpty: true,
 	})
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	request := polytomic.SyncRequest{
+	request := &polytomic.CreateModelSyncRequest{
 		Name:           data.Name.ValueString(),
-		OrganizationID: data.Organization.ValueString(),
 		Target:         pt,
 		Mode:           data.Mode.ValueString(),
 		Fields:         fields,
 		OverrideFields: overrideFields,
 		Filters:        pfilters,
-		FilterLogic:    data.FilterLogic.ValueString(),
 		Overrides:      poverrides,
-		Schedule:       schedule,
-		SyncAllRecords: data.SyncAllRecords.ValueBool(),
-		Active:         data.Active.ValueBool(),
+		Schedule:       &schedule,
 	}
 
-	if identity.Source.ModelID != "" && identity.Source.Field != "" {
+	if !data.Organization.IsNull() {
+		request.OrganizationId = data.Organization.ValueStringPointer()
+	}
+	if !data.FilterLogic.IsNull() {
+		request.FilterLogic = data.FilterLogic.ValueStringPointer()
+	}
+	if !data.SyncAllRecords.IsNull() {
+		request.SyncAllRecords = data.SyncAllRecords.ValueBoolPointer()
+	}
+	if !data.Active.IsNull() {
+		request.Active = data.Active.ValueBoolPointer()
+	}
+
+	if identity.Source.ModelId != "" && identity.Source.Field != "" {
 		request.Identity = &identity
 	}
-
-	sync, err := r.client.Syncs().Create(ctx, request, polytomic.WithIdempotencyKey(uuid.NewString()))
+	client, err := r.provider.Client(data.Organization.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting client", err.Error())
+		return
+	}
+	sync, err := client.ModelSync.Create(ctx, request)
 	if err != nil {
 		resp.Diagnostics.AddError("Error creating sync", err.Error())
 		return
 	}
 
-	data.ID = types.StringValue(sync.ID)
-	data.Organization = types.StringValue(sync.OrganizationID)
-	data.Name = types.StringValue(sync.Name)
+	data.ID = types.StringPointerValue(sync.Data.Id)
+	data.Organization = types.StringPointerValue(sync.Data.OrganizationId)
+	data.Name = types.StringPointerValue(sync.Data.Name)
 
 	t := Target{
-		ConnectionID: sync.Target.ConnectionID,
-		Object:       sync.Target.Object,
-		NewName:      sync.Target.NewName,
-		FilterLogic:  sync.Target.FilterLogic,
+		ConnectionID: sync.Data.Target.ConnectionId,
+		Object:       &sync.Data.Target.Object,
+		NewName:      sync.Data.Target.NewName,
+		FilterLogic:  sync.Data.Target.FilterLogic,
 	}
 
-	sval, err := json.Marshal(sync.Target.SearchValues)
+	sval, err := json.Marshal(sync.Data.Target.SearchValues)
 	if err != nil {
 		resp.Diagnostics.AddError("Error marshaling search values", err.Error())
 		return
@@ -619,7 +636,7 @@ func (r *syncResource) Create(ctx context.Context, req resource.CreateRequest, r
 		data.Target.Attributes()["configuration"] = types.StringNull()
 	}
 
-	data.Mode = types.StringValue(sync.Mode)
+	data.Mode = types.StringPointerValue(sync.Data.Mode)
 	data.Fields, diags = types.SetValueFrom(ctx, types.ObjectType{
 		AttrTypes: map[string]attr.Type{
 			"source": types.ObjectType{
@@ -631,7 +648,7 @@ func (r *syncResource) Create(ctx context.Context, req resource.CreateRequest, r
 			"new":            types.BoolType,
 			"override_value": types.StringType,
 			"sync_mode":      types.StringType,
-		}}, sync.Fields)
+		}}, sync.Data.Fields)
 
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -648,23 +665,23 @@ func (r *syncResource) Create(ctx context.Context, req resource.CreateRequest, r
 			"new":            types.BoolType,
 			"override_value": types.StringType,
 			"sync_mode":      types.StringType,
-		}}, sync.OverrideFields)
+		}}, sync.Data.OverrideFields)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	if sync.FilterLogic != "" {
-		data.FilterLogic = types.StringValue(sync.FilterLogic)
+	if sync.Data.FilterLogic != nil {
+		data.FilterLogic = types.StringPointerValue(sync.Data.FilterLogic)
 	}
 
 	var resFilters []Filter
-	for _, f := range sync.Filters {
+	for _, f := range sync.Data.Filters {
 		res := Filter{
-			FieldID:   f.FieldID,
-			Function:  f.Function,
-			FieldType: f.FieldType,
-			Label:     f.Label,
+			FieldID:   pointer.Get(f.FieldId),
+			Function:  string(f.Function),
+			FieldType: string(pointer.Get(f.FieldType)),
+			Label:     pointer.GetString(f.Label),
 		}
 		val, err := json.Marshal(f.Value)
 		if err != nil {
@@ -694,10 +711,10 @@ func (r *syncResource) Create(ctx context.Context, req resource.CreateRequest, r
 	}
 
 	var resOverrides []Override
-	for _, o := range sync.Overrides {
+	for _, o := range sync.Data.Overrides {
 		res := Override{
-			FieldID:  o.FieldID,
-			Function: o.Function,
+			FieldID:  pointer.Get(o.FieldId),
+			Function: string(pointer.Get(o.Function)),
 		}
 		val, err := json.Marshal(o.Value)
 		if err != nil {
@@ -737,19 +754,21 @@ func (r *syncResource) Create(ctx context.Context, req resource.CreateRequest, r
 	}
 
 	data.Schedule, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"frequency":    types.StringType,
-		"day_of_week":  types.StringType,
-		"hour":         types.StringType,
-		"minute":       types.StringType,
-		"month":        types.StringType,
-		"day_of_month": types.StringType,
+		"connection_id": types.StringType,
+		"frequency":     types.StringType,
+		"day_of_week":   types.StringType,
+		"hour":          types.StringType,
+		"minute":        types.StringType,
+		"month":         types.StringType,
+		"day_of_month":  types.StringType,
+		"job_id":        types.Int64Type,
 		"run_after": types.ObjectType{
 			AttrTypes: map[string]attr.Type{
 				"sync_ids":      types.SetType{ElemType: types.StringType},
 				"bulk_sync_ids": types.SetType{ElemType: types.StringType},
 			},
 		},
-	}, sync.Schedule)
+	}, sync.Data.Schedule)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -765,13 +784,13 @@ func (r *syncResource) Create(ctx context.Context, req resource.CreateRequest, r
 		"function":             types.StringType,
 		"remote_field_type_id": types.StringType,
 		"new_field":            types.BoolType,
-	}, sync.Identity)
+	}, sync.Data.Identity)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
-	data.SyncAllRecords = types.BoolValue(sync.SyncAllRecords)
-	data.Active = types.BoolValue(sync.Active)
+	data.SyncAllRecords = types.BoolPointerValue(sync.Data.SyncAllRecords)
+	data.Active = types.BoolPointerValue(sync.Data.Active)
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -787,9 +806,14 @@ func (r *syncResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 		return
 	}
 
-	sync, err := r.client.Syncs().Get(ctx, data.ID.ValueString())
+	client, err := r.provider.Client(data.Organization.ValueString())
 	if err != nil {
-		pErr := polytomic.ApiError{}
+		resp.Diagnostics.AddError("Error getting client", err.Error())
+		return
+	}
+	sync, err := client.ModelSync.Get(ctx, data.ID.ValueString())
+	if err != nil {
+		pErr := &ptcore.APIError{}
 		if errors.As(err, &pErr) {
 			if pErr.StatusCode == http.StatusNotFound {
 				resp.State.RemoveResource(ctx)
@@ -800,25 +824,25 @@ func (r *syncResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 		return
 	}
 
-	data.ID = types.StringValue(sync.ID)
-	data.Organization = types.StringValue(sync.OrganizationID)
-	data.Name = types.StringValue(sync.Name)
+	data.ID = types.StringPointerValue(sync.Data.Id)
+	data.Organization = types.StringPointerValue(sync.Data.OrganizationId)
+	data.Name = types.StringPointerValue(sync.Data.Name)
 
 	t := Target{
-		ConnectionID: sync.Target.ConnectionID,
-		Object:       sync.Target.Object,
-		NewName:      sync.Target.NewName,
-		FilterLogic:  sync.Target.FilterLogic,
+		ConnectionID: sync.Data.Target.ConnectionId,
+		Object:       &sync.Data.Target.Object,
+		NewName:      sync.Data.Target.NewName,
+		FilterLogic:  sync.Data.Target.FilterLogic,
 	}
 
-	sval, err := json.Marshal(sync.Target.SearchValues)
+	sval, err := json.Marshal(sync.Data.Target.SearchValues)
 	if err != nil {
 		resp.Diagnostics.AddError("Error marshaling search values", err.Error())
 		return
 	}
 	t.SearchValues = string(sval)
 
-	tval, err := json.Marshal(sync.Target.Configuration)
+	tval, err := json.Marshal(sync.Data.Target.Configuration)
 	if err != nil {
 		resp.Diagnostics.AddError("Error marshaling configuration", err.Error())
 		return
@@ -847,7 +871,7 @@ func (r *syncResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 		data.Target.Attributes()["configuration"] = types.StringNull()
 	}
 
-	data.Mode = types.StringValue(sync.Mode)
+	data.Mode = types.StringPointerValue(sync.Data.Mode)
 	data.Fields, diags = types.SetValueFrom(ctx, types.ObjectType{
 		AttrTypes: map[string]attr.Type{
 			"source": types.ObjectType{
@@ -859,7 +883,7 @@ func (r *syncResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 			"new":            types.BoolType,
 			"override_value": types.StringType,
 			"sync_mode":      types.StringType,
-		}}, sync.Fields)
+		}}, sync.Data.Fields)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -875,25 +899,25 @@ func (r *syncResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 			"new":            types.BoolType,
 			"override_value": types.StringType,
 			"sync_mode":      types.StringType,
-		}}, sync.OverrideFields)
+		}}, sync.Data.OverrideFields)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	if sync.FilterLogic != "" {
-		data.FilterLogic = types.StringValue(sync.FilterLogic)
+	if sync.Data.FilterLogic != nil {
+		data.FilterLogic = types.StringPointerValue(sync.Data.FilterLogic)
 	} else {
 		data.FilterLogic = types.StringNull()
 	}
 
 	var resFilters []Filter
-	for _, f := range sync.Filters {
+	for _, f := range sync.Data.Filters {
 		res := Filter{
-			FieldID:   f.FieldID,
-			Function:  f.Function,
-			FieldType: f.FieldType,
-			Label:     f.Label,
+			FieldID:   pointer.Get(f.FieldId),
+			Function:  string(f.Function),
+			FieldType: string(pointer.Get(f.FieldType)),
+			Label:     pointer.GetString(f.Label),
 		}
 		val, err := json.Marshal(f.Value)
 		if err != nil {
@@ -923,10 +947,10 @@ func (r *syncResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 	}
 
 	var resOverrides []Override
-	for _, o := range sync.Overrides {
+	for _, o := range sync.Data.Overrides {
 		res := Override{
-			FieldID:  o.FieldID,
-			Function: o.Function,
+			FieldID:  pointer.Get(o.FieldId),
+			Function: string(pointer.Get(o.Function)),
 		}
 		val, err := json.Marshal(o.Value)
 		if err != nil {
@@ -968,19 +992,21 @@ func (r *syncResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 	}
 
 	data.Schedule, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"frequency":    types.StringType,
-		"day_of_week":  types.StringType,
-		"hour":         types.StringType,
-		"minute":       types.StringType,
-		"month":        types.StringType,
-		"day_of_month": types.StringType,
+		"connection_id": types.StringType,
+		"frequency":     types.StringType,
+		"day_of_week":   types.StringType,
+		"hour":          types.StringType,
+		"minute":        types.StringType,
+		"month":         types.StringType,
+		"day_of_month":  types.StringType,
+		"job_id":        types.Int64Type,
 		"run_after": types.ObjectType{
 			AttrTypes: map[string]attr.Type{
 				"sync_ids":      types.SetType{ElemType: types.StringType},
 				"bulk_sync_ids": types.SetType{ElemType: types.StringType},
 			},
 		},
-	}, sync.Schedule)
+	}, sync.Data.Schedule)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -996,13 +1022,13 @@ func (r *syncResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 		"function":             types.StringType,
 		"remote_field_type_id": types.StringType,
 		"new_field":            types.BoolType,
-	}, sync.Identity)
+	}, sync.Data.Identity)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
-	data.SyncAllRecords = types.BoolValue(sync.SyncAllRecords)
-	data.Active = types.BoolValue(sync.Active)
+	data.SyncAllRecords = types.BoolPointerValue(sync.Data.SyncAllRecords)
+	data.Active = types.BoolPointerValue(sync.Data.Active)
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -1034,9 +1060,9 @@ func (r *syncResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		return
 	}
 
-	pt := polytomic.Target{
-		ConnectionID: target.ConnectionID,
-		Object:       target.Object,
+	pt := &polytomic.Target{
+		ConnectionId: target.ConnectionID,
+		Object:       pointer.GetString(target.Object),
 		NewName:      target.NewName,
 		FilterLogic:  target.FilterLogic,
 	}
@@ -1065,34 +1091,34 @@ func (r *syncResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		pt.Configuration = tConf
 	}
 
-	var fields []polytomic.SyncField
+	var fields []*polytomic.ModelSyncField
 	diags = data.Fields.ElementsAs(ctx, &fields, true)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	var overrideFields []polytomic.SyncField
+	var overrideFields []*polytomic.ModelSyncField
 	diags = data.OverrideFields.ElementsAs(ctx, &overrideFields, true)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	var filters []Filter
+	var filters []*Filter
 	diags = data.Filters.ElementsAs(ctx, &filters, true)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	var pfilters []polytomic.Filter
+	var pfilters []*polytomic.Filter
 	for _, filter := range filters {
-		f := polytomic.Filter{
-			FieldID:   filter.FieldID,
-			FieldType: filter.FieldType,
-			Function:  filter.Function,
-			Label:     filter.Label,
+		f := &polytomic.Filter{
+			FieldId:   pointer.To(filter.FieldID),
+			FieldType: pointer.To(polytomic.FilterFieldReferenceType(filter.FieldType)),
+			Function:  polytomic.FilterFunction(filter.Function),
+			Label:     pointer.To(filter.Label),
 		}
 
 		var val interface{}
@@ -1115,11 +1141,11 @@ func (r *syncResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		return
 	}
 
-	var poverrides []polytomic.Override
+	var poverrides []*polytomic.Override
 	for _, override := range overrides {
-		o := polytomic.Override{
-			FieldID:  override.FieldID,
-			Function: override.Function,
+		o := &polytomic.Override{
+			FieldId:  pointer.To(override.FieldID),
+			Function: pointer.To(polytomic.FilterFunction(override.Function)),
 		}
 
 		var val interface{}
@@ -1158,46 +1184,62 @@ func (r *syncResource) Update(ctx context.Context, req resource.UpdateRequest, r
 
 	var identity *polytomic.Identity
 	diags = data.Identity.As(ctx, &identity, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty: false,
+		UnhandledNullAsEmpty:    false,
+		UnhandledUnknownAsEmpty: true,
 	})
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	request := polytomic.SyncRequest{
+	request := &polytomic.UpdateModelSyncRequest{
 		Name:           data.Name.ValueString(),
-		OrganizationID: data.Organization.ValueString(),
 		Target:         pt,
 		Mode:           data.Mode.ValueString(),
 		Fields:         fields,
 		OverrideFields: overrideFields,
 		Filters:        pfilters,
-		FilterLogic:    data.FilterLogic.ValueString(),
 		Overrides:      poverrides,
-		Schedule:       schedule,
+		Schedule:       &schedule,
 		Identity:       identity,
-		SyncAllRecords: data.SyncAllRecords.ValueBool(),
-		Active:         data.Active.ValueBool(),
 	}
-	sync, err := r.client.Syncs().Update(ctx, data.ID.ValueString(), request, polytomic.WithIdempotencyKey(uuid.NewString()))
+
+	if !data.Organization.IsNull() {
+		request.OrganizationId = data.Organization.ValueStringPointer()
+	}
+	if !data.FilterLogic.IsNull() {
+		request.FilterLogic = data.FilterLogic.ValueStringPointer()
+	}
+	if !data.SyncAllRecords.IsNull() {
+		request.SyncAllRecords = data.SyncAllRecords.ValueBoolPointer()
+	}
+	if !data.Active.IsNull() {
+		request.Active = data.Active.ValueBoolPointer()
+	}
+
+	client, err := r.provider.Client(data.Organization.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting client", err.Error())
+		return
+	}
+	sync, err := client.ModelSync.Update(ctx, data.ID.ValueString(), request)
 	if err != nil {
 		resp.Diagnostics.AddError("Error creating sync", err.Error())
 		return
 	}
 
-	data.ID = types.StringValue(sync.ID)
-	data.Organization = types.StringValue(sync.OrganizationID)
-	data.Name = types.StringValue(sync.Name)
+	data.ID = types.StringPointerValue(sync.Data.Id)
+	data.Organization = types.StringPointerValue(sync.Data.OrganizationId)
+	data.Name = types.StringPointerValue(sync.Data.Name)
 
 	t := Target{
-		ConnectionID: sync.Target.ConnectionID,
-		Object:       sync.Target.Object,
-		NewName:      sync.Target.NewName,
-		FilterLogic:  sync.Target.FilterLogic,
+		ConnectionID: sync.Data.Target.ConnectionId,
+		Object:       pointer.ToString(sync.Data.Target.Object),
+		NewName:      sync.Data.Target.NewName,
+		FilterLogic:  sync.Data.Target.FilterLogic,
 	}
 
-	sval, err := json.Marshal(sync.Target.SearchValues)
+	sval, err := json.Marshal(sync.Data.Target.SearchValues)
 	if err != nil {
 		resp.Diagnostics.AddError("Error marshalling search values", err.Error())
 		return
@@ -1233,7 +1275,7 @@ func (r *syncResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		data.Target.Attributes()["configuration"] = types.StringNull()
 	}
 
-	data.Mode = types.StringValue(sync.Mode)
+	data.Mode = types.StringPointerValue(sync.Data.Mode)
 	data.Fields, diags = types.SetValueFrom(ctx, types.ObjectType{
 		AttrTypes: map[string]attr.Type{
 			"source": types.ObjectType{
@@ -1245,7 +1287,7 @@ func (r *syncResource) Update(ctx context.Context, req resource.UpdateRequest, r
 			"new":            types.BoolType,
 			"override_value": types.StringType,
 			"sync_mode":      types.StringType,
-		}}, sync.Fields)
+		}}, sync.Data.Fields)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -1261,7 +1303,7 @@ func (r *syncResource) Update(ctx context.Context, req resource.UpdateRequest, r
 			"new":            types.BoolType,
 			"override_value": types.StringType,
 			"sync_mode":      types.StringType,
-		}}, sync.OverrideFields)
+		}}, sync.Data.OverrideFields)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -1270,16 +1312,16 @@ func (r *syncResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	if configuration.FilterLogic.IsNull() {
 		data.FilterLogic = configuration.FilterLogic
 	} else {
-		data.FilterLogic = types.StringValue(sync.FilterLogic)
+		data.FilterLogic = types.StringPointerValue(sync.Data.FilterLogic)
 	}
 
 	var resFilters []Filter
-	for _, f := range sync.Filters {
+	for _, f := range sync.Data.Filters {
 		res := Filter{
-			FieldID:   f.FieldID,
-			Function:  f.Function,
-			FieldType: f.FieldType,
-			Label:     f.Label,
+			FieldID:   pointer.Get(f.FieldId),
+			Function:  string(f.Function),
+			FieldType: string(pointer.Get(f.FieldType)),
+			Label:     pointer.GetString(f.Label),
 		}
 		val, err := json.Marshal(f.Value)
 		if err != nil {
@@ -1309,10 +1351,10 @@ func (r *syncResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	}
 
 	var resOverrides []Override
-	for _, o := range sync.Overrides {
+	for _, o := range sync.Data.Overrides {
 		res := Override{
-			FieldID:  o.FieldID,
-			Function: o.Function,
+			FieldID:  pointer.Get(o.FieldId),
+			Function: string(pointer.Get(o.Function)),
 		}
 		val, err := json.Marshal(o.Value)
 		if err != nil {
@@ -1354,19 +1396,21 @@ func (r *syncResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	}
 
 	data.Schedule, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"frequency":    types.StringType,
-		"day_of_week":  types.StringType,
-		"hour":         types.StringType,
-		"minute":       types.StringType,
-		"month":        types.StringType,
-		"day_of_month": types.StringType,
+		"frequency":     types.StringType,
+		"connection_id": types.StringType,
+		"day_of_week":   types.StringType,
+		"hour":          types.StringType,
+		"minute":        types.StringType,
+		"month":         types.StringType,
+		"day_of_month":  types.StringType,
+		"job_id":        types.Int64Type,
 		"run_after": types.ObjectType{
 			AttrTypes: map[string]attr.Type{
 				"sync_ids":      types.SetType{ElemType: types.StringType},
 				"bulk_sync_ids": types.SetType{ElemType: types.StringType},
 			},
 		},
-	}, sync.Schedule)
+	}, sync.Data.Schedule)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -1382,13 +1426,13 @@ func (r *syncResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		"function":             types.StringType,
 		"remote_field_type_id": types.StringType,
 		"new_field":            types.BoolType,
-	}, sync.Identity)
+	}, sync.Data.Identity)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
-	data.SyncAllRecords = types.BoolValue(sync.SyncAllRecords)
-	data.Active = types.BoolValue(sync.Active)
+	data.SyncAllRecords = types.BoolPointerValue(sync.Data.SyncAllRecords)
+	data.Active = types.BoolPointerValue(sync.Data.Active)
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -1401,7 +1445,12 @@ func (r *syncResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 	diags := req.State.Get(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 
-	err := r.client.Syncs().Delete(ctx, data.ID.ValueString())
+	client, err := r.provider.Client(data.Organization.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting client", err.Error())
+		return
+	}
+	err = client.ModelSync.Remove(ctx, data.ID.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Error deleting sync", err.Error())
 		return
@@ -1415,5 +1464,4 @@ func (r *syncResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 
 func (r *syncResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
-
 }

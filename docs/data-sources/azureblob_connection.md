@@ -37,7 +37,12 @@ data "polytomic_azureblob_connection" "azureblob" {
 
 Required:
 
+- `access_key` (String)
 - `account_name` (String)
 - `container_name` (String)
+
+Optional:
+
+- `is_single_table` (Boolean) Treat the files as a single table.
 
 

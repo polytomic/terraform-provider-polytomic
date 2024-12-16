@@ -16,8 +16,8 @@ Freshdesk Connection
 resource "polytomic_freshdesk_connection" "freshdesk" {
   name = "example"
   configuration = {
-    apikey    = "my-api-key"
-    subdomain = "example.freshdesk.com"
+    apikey    = "secret"
+    subdomain = "polytomic"
   }
 }
 ```
@@ -44,7 +44,7 @@ resource "polytomic_freshdesk_connection" "freshdesk" {
 
 Required:
 
-- `apikey` (String, Sensitive)
-- `subdomain` (String)
+- `apikey` (String)
+- `subdomain` (String) e.g. 'polytomic' if your helpdesk is at https://polytomic.freshdesk.com
 
 

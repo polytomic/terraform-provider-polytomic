@@ -16,10 +16,10 @@ Snowflake Connection
 resource "polytomic_snowflake_connection" "snowflake" {
   name = "example"
   configuration = {
-    account   = "acme"
+    account   = "uc193736182"
+    dbname    = "database_name"
+    password  = "password"
     username  = "user"
-    password  = "secret"
-    dbname    = "db"
     warehouse = "warehouse"
   }
 }
@@ -47,14 +47,17 @@ resource "polytomic_snowflake_connection" "snowflake" {
 
 Required:
 
-- `account` (String)
+- `account` (String) e.g. uc193736182, ja8382948.us-central-1.gcp
 - `dbname` (String)
-- `password` (String, Sensitive)
 - `username` (String)
-- `warehouse` (String)
 
 Optional:
 
-- `params` (String)
+- `key_pair_auth` (Boolean)
+- `params` (String) Additional connection parameters, formatted as a query string
+- `password` (String)
+- `private_key` (String)
+- `private_key_passphrase` (String)
+- `warehouse` (String)
 
 

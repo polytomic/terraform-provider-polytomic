@@ -35,4 +35,16 @@ data "polytomic_fbaudience_connection" "fbaudience" {
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
+Required:
+
+- `auth_method` (String)
+
+Optional:
+
+- `account_id` (String)
+- `accounts` (String)
+- `byo_app_token` (String)
+- `graph_api_version` (String)
+- `user_name` (String)
+
 

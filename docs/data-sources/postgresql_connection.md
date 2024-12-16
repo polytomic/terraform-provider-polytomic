@@ -3,12 +3,12 @@
 page_title: "polytomic_postgresql_connection Data Source - terraform-provider-polytomic"
 subcategory: "Connections"
 description: |-
-  PostgresSQL Connection
+  PostgreSQL Connection
 ---
 
 # polytomic_postgresql_connection (Data Source)
 
-PostgresSQL Connection
+PostgreSQL Connection
 
 ## Example Usage
 
@@ -39,6 +39,7 @@ Required:
 
 - `database` (String)
 - `hostname` (String)
+- `password` (String)
 - `port` (Number)
 - `username` (String)
 
@@ -48,10 +49,12 @@ Optional:
 - `change_detection` (Boolean)
 - `client_certificate` (String)
 - `client_certs` (Boolean)
+- `client_key` (String)
 - `publication` (String)
 - `ssh` (Boolean)
 - `ssh_host` (String)
 - `ssh_port` (Number)
+- `ssh_private_key` (String)
 - `ssh_user` (String)
 - `ssl` (Boolean)
 

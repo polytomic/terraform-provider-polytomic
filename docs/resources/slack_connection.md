@@ -16,7 +16,7 @@ Slack Connection
 resource "polytomic_slack_connection" "slack" {
   name = "example"
   configuration = {
-    api_key = "my-api-key"
+    api_key = "secret"
   }
 }
 ```
@@ -43,6 +43,10 @@ resource "polytomic_slack_connection" "slack" {
 
 Required:
 
-- `api_key` (String, Sensitive)
+- `api_key` (String)
+
+Optional:
+
+- `event_url` (String) Used if ingesting Slack events.
 
 

@@ -3,12 +3,12 @@
 page_title: "polytomic_cosmosdb_connection Data Source - terraform-provider-polytomic"
 subcategory: "Connections"
 description: |-
-  Cosmos DB Connection
+  Azure Cosmos DB Connection
 ---
 
 # polytomic_cosmosdb_connection (Data Source)
 
-Cosmos DB Connection
+Azure Cosmos DB Connection
 
 ## Example Usage
 
@@ -37,6 +37,7 @@ data "polytomic_cosmosdb_connection" "cosmosdb" {
 
 Required:
 
+- `key` (String)
 - `uri` (String)
 
 

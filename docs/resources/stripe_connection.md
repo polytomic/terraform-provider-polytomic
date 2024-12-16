@@ -16,7 +16,7 @@ Stripe Connection
 resource "polytomic_stripe_connection" "stripe" {
   name = "example"
   configuration = {
-    api_key = "my-api-key"
+    api_key = "secret"
   }
 }
 ```
@@ -43,6 +43,6 @@ resource "polytomic_stripe_connection" "stripe" {
 
 Required:
 
-- `api_key` (String, Sensitive)
+- `api_key` (String)
 
 

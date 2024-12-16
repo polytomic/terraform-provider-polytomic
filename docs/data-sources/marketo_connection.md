@@ -38,6 +38,7 @@ data "polytomic_marketo_connection" "marketo" {
 Required:
 
 - `client_id` (String)
+- `client_secret` (String)
 - `rest_endpoint` (String)
 
 Optional:
@@ -45,5 +46,6 @@ Optional:
 - `concurrent_imports` (Number)
 - `daily_api_calls` (Number)
 - `enforce_api_limits` (Boolean)
+- `oauth_token_expiry` (String)
 
 

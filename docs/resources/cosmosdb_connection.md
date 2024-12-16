@@ -3,12 +3,12 @@
 page_title: "polytomic_cosmosdb_connection Resource - terraform-provider-polytomic"
 subcategory: "Connections"
 description: |-
-  Cosmos DB Connection
+  Azure Cosmos DB Connection
 ---
 
 # polytomic_cosmosdb_connection (Resource)
 
-Cosmos DB Connection
+Azure Cosmos DB Connection
 
 ## Example Usage
 
@@ -16,8 +16,8 @@ Cosmos DB Connection
 resource "polytomic_cosmosdb_connection" "cosmosdb" {
   name = "example"
   configuration = {
-    uri = "https://my-account.documents.example.com:443"
-    key = "cosmosdb-secret-key"
+    key = "dasfdasz62px8lqeoakuea2ccl4rxmhu1i20kc8ruvksmzxq=="
+    uri = "https://contosomarketing.documents.azure.com"
   }
 }
 ```
@@ -37,14 +37,14 @@ resource "polytomic_cosmosdb_connection" "cosmosdb" {
 
 ### Read-Only
 
-- `id` (String) Cosmos DB Connection identifier
+- `id` (String) Azure Cosmos DB Connection identifier
 
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
 Required:
 
-- `key` (String, Sensitive)
+- `key` (String)
 - `uri` (String)
 
 

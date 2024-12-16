@@ -3,12 +3,12 @@
 page_title: "polytomic_postgresql_connection Resource - terraform-provider-polytomic"
 subcategory: "Connections"
 description: |-
-  PostgresSQL Connection
+  PostgreSQL Connection
 ---
 
 # polytomic_postgresql_connection (Resource)
 
-PostgresSQL Connection
+PostgreSQL Connection
 
 ## Example Usage
 
@@ -16,11 +16,12 @@ PostgresSQL Connection
 resource "polytomic_postgresql_connection" "postgresql" {
   name = "example"
   configuration = {
-    hostname = "acme.postgres.database.example.com"
-    username = "acme"
-    password = "1234567890"
-    database = "acme"
-    port     = 5432
+    database    = "sampledb"
+    hostname    = "database.example.com"
+    password    = "password"
+    publication = "polytomic"
+    ssh_host    = "bastion.example.com"
+    username    = "postgres"
   }
 }
 ```
@@ -40,7 +41,7 @@ resource "polytomic_postgresql_connection" "postgresql" {
 
 ### Read-Only
 
-- `id` (String) PostgresSQL Connection identifier
+- `id` (String) PostgreSQL Connection identifier
 
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
@@ -49,7 +50,7 @@ Required:
 
 - `database` (String)
 - `hostname` (String)
-- `password` (String, Sensitive)
+- `password` (String)
 - `port` (Number)
 - `username` (String)
 
@@ -59,12 +60,12 @@ Optional:
 - `change_detection` (Boolean)
 - `client_certificate` (String)
 - `client_certs` (Boolean)
-- `client_key` (String, Sensitive)
+- `client_key` (String)
 - `publication` (String)
 - `ssh` (Boolean)
 - `ssh_host` (String)
 - `ssh_port` (Number)
-- `ssh_private_key` (String, Sensitive)
+- `ssh_private_key` (String)
 - `ssh_user` (String)
 - `ssl` (Boolean)
 

@@ -35,4 +35,14 @@ data "polytomic_airtable_connection" "airtable" {
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
+Optional:
+
+- `api_key` (String)
+- `client_id` (String)
+- `client_secret` (String)
+- `connected_user` (String)
+- `oauth_access_token` (String)
+- `oauth_refresh_token` (String)
+- `oauth_token_expiry` (String)
+
 

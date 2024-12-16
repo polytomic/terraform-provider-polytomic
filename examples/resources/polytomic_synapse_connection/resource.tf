@@ -1,11 +1,10 @@
 resource "polytomic_synapse_connection" "synapse" {
   name = "example"
   configuration = {
-    hostname = "host.example.com"
+    database = "yourdatabase"
+    hostname = "yourserver.sql.azuresynapse.net"
+    password = "secret"
     username = "user"
-    password = "password"
-    database = "database"
-    port     = 5439
   }
 }
 

@@ -16,12 +16,11 @@ MySQL Connection
 resource "polytomic_mysql_connection" "mysql" {
   name = "example"
   configuration = {
-    hostname         = "mysql.example.com"
-    account          = "acme"
-    passwd           = "super-secret-password"
-    dbname           = "db"
-    port             = 3306
-    change_detection = false
+    account  = "admin"
+    dbname   = "mydb"
+    hostname = "database.example.com"
+    passwd   = "password"
+    ssh_host = "bastion.example.com"
   }
 }
 ```
@@ -49,18 +48,19 @@ resource "polytomic_mysql_connection" "mysql" {
 Required:
 
 - `account` (String)
-- `dbname` (String)
 - `hostname` (String)
-- `passwd` (String, Sensitive)
+- `passwd` (String)
+- `port` (Number)
 
 Optional:
 
 - `change_detection` (Boolean)
-- `port` (Number)
+- `dbname` (String)
 - `ssh` (Boolean)
 - `ssh_host` (String)
 - `ssh_port` (Number)
-- `ssh_private_key` (String, Sensitive)
+- `ssh_private_key` (String)
 - `ssh_user` (String)
+- `ssl` (Boolean)
 
 

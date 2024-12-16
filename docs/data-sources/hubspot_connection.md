@@ -3,12 +3,12 @@
 page_title: "polytomic_hubspot_connection Data Source - terraform-provider-polytomic"
 subcategory: "Connections"
 description: |-
-  Hubspot Connection
+  HubSpot Connection
 ---
 
 # polytomic_hubspot_connection (Data Source)
 
-Hubspot Connection
+HubSpot Connection
 
 ## Example Usage
 
@@ -37,7 +37,10 @@ data "polytomic_hubspot_connection" "hubspot" {
 
 Optional:
 
+- `client_id` (String)
+- `client_secret` (String)
 - `hub_domain` (String)
-- `hub_id` (Number)
+- `hub_user` (String)
+- `oauth_refresh_token` (String)
 
 

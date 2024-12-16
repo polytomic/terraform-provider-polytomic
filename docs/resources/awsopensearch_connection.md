@@ -16,9 +16,9 @@ AWS OpenSearch Connection
 resource "polytomic_awsopensearch_connection" "awsopensearch" {
   name = "example"
   configuration = {
-    endpoint              = "https://example-domain-123abcdefg.us-west-2.es.amazonaws.com"
-    aws_access_key_id     = "EXAMPLEACCESSKEYID"
-    aws_secret_access_key = "EXAMPLEACCESSKEYSECRET"
+    aws_access_key_id     = "AKIAIOSFODNN7EXAMPLE"
+    aws_secret_access_key = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+    endpoint              = "es.us-east-2.amazonaws.com"
     region                = "us-east-1"
   }
 }
@@ -46,9 +46,13 @@ resource "polytomic_awsopensearch_connection" "awsopensearch" {
 
 Required:
 
-- `aws_access_key_id` (String, Sensitive)
-- `aws_secret_access_key` (String, Sensitive)
+- `aws_access_key_id` (String)
+- `aws_secret_access_key` (String)
 - `endpoint` (String)
 - `region` (String)
+
+Optional:
+
+- `aws_user` (String)
 
 

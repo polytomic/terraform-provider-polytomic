@@ -6,7 +6,9 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
-	"github.com/polytomic/polytomic-go"
+	ptclient "github.com/polytomic/polytomic-go/client"
+	"github.com/polytomic/terraform-provider-polytomic/provider/internal/client"
+	"github.com/stretchr/testify/require"
 )
 
 // testAccProtoV6ProviderFactories are used to instantiate a provider during
@@ -31,23 +33,14 @@ func testAccPreCheck(t *testing.T) {
 	}
 }
 
-func testClient() *polytomic.Client {
-	deployURL := os.Getenv(PolytomicDeploymentURL)
-	deployKey := os.Getenv(PolytomicDeploymentKey)
-	apiKey := os.Getenv(PolytomicAPIKey)
-
-	var client *polytomic.Client
-	if deployKey != "" {
-		client = polytomic.NewClient(
-			deployURL,
-			polytomic.DeploymentKey(deployKey),
-		)
-	} else {
-		client = polytomic.NewClient(
-			deployURL,
-			polytomic.APIKey(apiKey),
-		)
-	}
-
-	return client
+func testClient(t *testing.T) *ptclient.Client {
+	provider, err := client.NewClientProvider(
+		client.WithDeploymentKey(os.Getenv(PolytomicDeploymentKey)),
+		client.WithDeploymentURL(os.Getenv(PolytomicDeploymentURL)),
+		client.WithAPIKey(os.Getenv(PolytomicAPIKey)),
+	)
+	require.NoError(t, err)
+	c, err := provider.Client("")
+	require.NoError(t, err)
+	return c
 }

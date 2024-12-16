@@ -37,18 +37,16 @@ data "polytomic_databricks_connection" "databricks" {
 
 Required:
 
+- `access_token` (String)
 - `http_path` (String)
 - `port` (Number)
 - `server_hostname` (String)
 
 Optional:
 
-- `aws_access_key_id` (String)
-- `s3_bucket_name` (String)
-- `s3_bucket_region` (String)
-
-Read-Only:
-
-- `aws_user` (String)
+- `cloud_provider` (String)
+- `enable_delta_uniform` (Boolean)
+- `enforce_query_limit` (Boolean)
+- `unity_catalog_enabled` (Boolean)
 
 

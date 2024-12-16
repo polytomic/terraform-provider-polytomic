@@ -3,12 +3,12 @@
 page_title: "polytomic_datalite_connection Data Source - terraform-provider-polytomic"
 subcategory: "Connections"
 description: |-
-  Datalite Connection
+  Polytomic Connection
 ---
 
 # polytomic_datalite_connection (Data Source)
 
-Datalite Connection
+Polytomic Connection
 
 ## Example Usage
 
@@ -34,5 +34,9 @@ data "polytomic_datalite_connection" "datalite" {
 
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
+
+Optional:
+
+- `schemas` (String)
 
 

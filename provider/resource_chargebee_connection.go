@@ -10,18 +10,19 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/google/uuid"
+	"github.com/AlekSi/pointer"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/polytomic-go"
+	ptcore "github.com/polytomic/polytomic-go/core"
+	"github.com/polytomic/terraform-provider-polytomic/provider/internal/client"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -42,27 +43,33 @@ func (t *ChargebeeConnectionResource) Schema(ctx context.Context, req resource.S
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
-					"site": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
 					"api_key": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
-						Sensitive:           true,
+						Sensitive:           false,
+					},
+					"product_catalog": schema.StringAttribute{
+						MarkdownDescription: "",
+						Required:            true,
+						Optional:            false,
+						Computed:            false,
+						Sensitive:           false,
 					},
 					"ratelimit_rpm": schema.Int64Attribute{
-						MarkdownDescription: "",
+						MarkdownDescription: "Default rate limits can be found at https://support.chargebee.com/support/solutions/articles/243576-what-are-the-chargebee-api-limits-",
 						Required:            false,
 						Optional:            true,
-						Computed:            true,
+						Computed:            false,
 						Sensitive:           false,
-						Default:             int64default.StaticInt64(0),
+					},
+					"site": schema.StringAttribute{
+						MarkdownDescription: "https://{site}.chargebee.com",
+						Required:            true,
+						Optional:            false,
+						Computed:            false,
+						Sensitive:           false,
 					},
 				},
 
@@ -83,12 +90,28 @@ func (t *ChargebeeConnectionResource) Schema(ctx context.Context, req resource.S
 	}
 }
 
-func (r *ChargebeeConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_chargebee_connection"
+type ChargebeeConf struct {
+	Api_key string `mapstructure:"api_key" tfsdk:"api_key"`
+
+	Product_catalog string `mapstructure:"product_catalog" tfsdk:"product_catalog"`
+
+	Ratelimit_rpm int64 `mapstructure:"ratelimit_rpm" tfsdk:"ratelimit_rpm"`
+
+	Site string `mapstructure:"site" tfsdk:"site"`
 }
 
 type ChargebeeConnectionResource struct {
-	client *polytomic.Client
+	provider *client.Provider
+}
+
+func (r *ChargebeeConnectionResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+	if provider := client.GetProvider(req.ProviderData, resp.Diagnostics); provider != nil {
+		r.provider = provider
+	}
+}
+
+func (r *ChargebeeConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_chargebee_connection"
 }
 
 func (r *ChargebeeConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -101,45 +124,49 @@ func (r *ChargebeeConnectionResource) Create(ctx context.Context, req resource.C
 		return
 	}
 
-	created, err := r.client.Connections().Create(ctx,
-		polytomic.CreateConnectionMutation{
-			Name:           data.Name.ValueString(),
-			Type:           polytomic.ChargebeeConnectionType,
-			OrganizationId: data.Organization.ValueString(),
-			Configuration: polytomic.ChargeBeeConnectionConfiguration{
-				Site:         data.Configuration.Attributes()["site"].(types.String).ValueString(),
-				APIKey:       data.Configuration.Attributes()["api_key"].(types.String).ValueString(),
-				RatelimitRPM: int(data.Configuration.Attributes()["ratelimit_rpm"].(types.Int64).ValueInt64()),
-			},
+	client, err := r.provider.Client(data.Organization.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting client", err.Error())
+		return
+	}
+	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
+		Name:           data.Name.ValueString(),
+		Type:           "chargebee",
+		OrganizationId: data.Organization.ValueStringPointer(),
+		Configuration: map[string]interface{}{
+			"api_key":         data.Configuration.Attributes()["api_key"].(types.String).ValueString(),
+			"product_catalog": data.Configuration.Attributes()["product_catalog"].(types.String).ValueString(),
+			"ratelimit_rpm":   int(data.Configuration.Attributes()["ratelimit_rpm"].(types.Int64).ValueInt64()),
+			"site":            data.Configuration.Attributes()["site"].(types.String).ValueString(),
 		},
-		polytomic.WithIdempotencyKey(uuid.NewString()),
-		polytomic.SkipConfigValidation(),
-	)
+		Validate: pointer.ToBool(false),
+	})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
 		return
 	}
-	data.Id = types.StringValue(created.ID)
-	data.Name = types.StringValue(created.Name)
-	data.Organization = types.StringValue(created.OrganizationId)
+	data.Id = types.StringPointerValue(created.Data.Id)
+	data.Name = types.StringPointerValue(created.Data.Name)
+	data.Organization = types.StringPointerValue(created.Data.OrganizationId)
 
-	var output polytomic.ChargeBeeConnectionConfiguration
-	cfg := &mapstructure.DecoderConfig{
-		Result: &output,
+	conf := ChargebeeConf{}
+	err = mapstructure.Decode(created.Data.Configuration, &conf)
+	if err != nil {
+		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error decoding connection configuration: %s", err))
 	}
-	decoder, _ := mapstructure.NewDecoder(cfg)
-	decoder.Decode(created.Configuration)
+
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"site":          types.StringType,
-		"api_key":       types.StringType,
-		"ratelimit_rpm": types.NumberType,
-	}, output)
+		"api_key":         types.StringType,
+		"product_catalog": types.StringType,
+		"ratelimit_rpm":   types.NumberType,
+		"site":            types.StringType,
+	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Chargebee", "id": created.ID})
+	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Chargebee", "id": created.Data.Id})
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -155,9 +182,14 @@ func (r *ChargebeeConnectionResource) Read(ctx context.Context, req resource.Rea
 		return
 	}
 
-	connection, err := r.client.Connections().Get(ctx, uuid.MustParse(data.Id.ValueString()))
+	client, err := r.provider.Client(data.Organization.ValueString())
 	if err != nil {
-		pErr := polytomic.ApiError{}
+		resp.Diagnostics.AddError("Error getting client", err.Error())
+		return
+	}
+	connection, err := client.Connections.Get(ctx, data.Id.ValueString())
+	if err != nil {
+		pErr := &ptcore.APIError{}
 		if errors.As(err, &pErr) {
 			if pErr.StatusCode == http.StatusNotFound {
 				resp.State.RemoveResource(ctx)
@@ -167,22 +199,22 @@ func (r *ChargebeeConnectionResource) Read(ctx context.Context, req resource.Rea
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error reading connection: %s", err))
 		return
 	}
+	data.Id = types.StringPointerValue(connection.Data.Id)
+	data.Name = types.StringPointerValue(connection.Data.Name)
+	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
 
-	data.Id = types.StringValue(connection.ID)
-	data.Name = types.StringValue(connection.Name)
-	data.Organization = types.StringValue(connection.OrganizationId)
-
-	var output polytomic.ChargeBeeConnectionConfiguration
-	cfg := &mapstructure.DecoderConfig{
-		Result: &output,
+	conf := ChargebeeConf{}
+	err = mapstructure.Decode(connection.Data.Configuration, &conf)
+	if err != nil {
+		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error decoding connection configuration: %s", err))
 	}
-	decoder, _ := mapstructure.NewDecoder(cfg)
-	decoder.Decode(connection.Configuration)
+
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"site":          types.StringType,
-		"api_key":       types.StringType,
-		"ratelimit_rpm": types.NumberType,
-	}, output)
+		"api_key":         types.StringType,
+		"product_catalog": types.StringType,
+		"ratelimit_rpm":   types.NumberType,
+		"site":            types.StringType,
+	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -202,45 +234,49 @@ func (r *ChargebeeConnectionResource) Update(ctx context.Context, req resource.U
 		return
 	}
 
-	updated, err := r.client.Connections().Update(ctx,
-		uuid.MustParse(data.Id.ValueString()),
-		polytomic.UpdateConnectionMutation{
+	client, err := r.provider.Client(data.Organization.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting client", err.Error())
+		return
+	}
+	updated, err := client.Connections.Update(ctx,
+		data.Id.ValueString(),
+		&polytomic.UpdateConnectionRequestSchema{
 			Name:           data.Name.ValueString(),
-			OrganizationId: data.Organization.ValueString(),
-			Configuration: polytomic.ChargeBeeConnectionConfiguration{
-				Site:         data.Configuration.Attributes()["site"].(types.String).ValueString(),
-				APIKey:       data.Configuration.Attributes()["api_key"].(types.String).ValueString(),
-				RatelimitRPM: int(data.Configuration.Attributes()["ratelimit_rpm"].(types.Int64).ValueInt64()),
+			OrganizationId: data.Organization.ValueStringPointer(),
+			Configuration: map[string]interface{}{
+				"api_key":         data.Configuration.Attributes()["api_key"].(types.String).ValueString(),
+				"product_catalog": data.Configuration.Attributes()["product_catalog"].(types.String).ValueString(),
+				"ratelimit_rpm":   int(data.Configuration.Attributes()["ratelimit_rpm"].(types.Int64).ValueInt64()),
+				"site":            data.Configuration.Attributes()["site"].(types.String).ValueString(),
 			},
-		},
-		polytomic.WithIdempotencyKey(uuid.NewString()),
-		polytomic.SkipConfigValidation(),
-	)
+			Validate: pointer.ToBool(false),
+		})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))
 		return
 	}
 
-	data.Id = types.StringValue(updated.ID)
-	data.Name = types.StringValue(updated.Name)
-	data.Organization = types.StringValue(updated.OrganizationId)
+	data.Id = types.StringPointerValue(updated.Data.Id)
+	data.Name = types.StringPointerValue(updated.Data.Name)
+	data.Organization = types.StringPointerValue(updated.Data.OrganizationId)
 
-	var output polytomic.ChargeBeeConnectionConfiguration
-	cfg := &mapstructure.DecoderConfig{
-		Result: &output,
+	conf := ChargebeeConf{}
+	err = mapstructure.Decode(updated.Data.Configuration, &conf)
+	if err != nil {
+		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error decoding connection configuration: %s", err))
 	}
-	decoder, _ := mapstructure.NewDecoder(cfg)
-	decoder.Decode(updated.Configuration)
+
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"site":          types.StringType,
-		"api_key":       types.StringType,
-		"ratelimit_rpm": types.NumberType,
-	}, output)
+		"api_key":         types.StringType,
+		"product_catalog": types.StringType,
+		"ratelimit_rpm":   types.NumberType,
+		"site":            types.StringType,
+	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
-
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
@@ -255,67 +291,52 @@ func (r *ChargebeeConnectionResource) Delete(ctx context.Context, req resource.D
 		return
 	}
 
+	client, err := r.provider.Client(data.Organization.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting client", err.Error())
+		return
+	}
 	if data.ForceDestroy.ValueBool() {
-		err := r.client.Connections().Delete(ctx, uuid.MustParse(data.Id.ValueString()), polytomic.WithForceDelete())
+		err := client.Connections.Remove(ctx, data.Id.ValueString(), &polytomic.ConnectionsRemoveRequest{
+			Force: pointer.ToBool(true),
+		})
 		if err != nil {
-			pErr := polytomic.ApiError{}
+			pErr := &polytomic.NotFoundError{}
 			if errors.As(err, &pErr) {
-				if pErr.StatusCode == http.StatusNotFound {
-					resp.State.RemoveResource(ctx)
-					return
-				}
+				resp.State.RemoveResource(ctx)
+				return
 			}
+
 			resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting connection: %s", err))
 		}
 		return
 	}
 
-	err := r.client.Connections().Delete(ctx, uuid.MustParse(data.Id.ValueString()))
+	err = client.Connections.Remove(ctx, data.Id.ValueString(), &polytomic.ConnectionsRemoveRequest{
+		Force: pointer.ToBool(false),
+	})
 	if err != nil {
-		pErr := polytomic.ApiError{}
+		pErr := &polytomic.NotFoundError{}
 		if errors.As(err, &pErr) {
-			if pErr.StatusCode == http.StatusNotFound {
-				resp.State.RemoveResource(ctx)
-				return
-			}
-			if strings.Contains(pErr.Message, "connection in use") {
-				for _, meta := range pErr.Metadata {
-					info := meta.(map[string]interface{})
-					resp.Diagnostics.AddError("Connection in use",
-						fmt.Sprintf("Connection is used by %s \"%s\" (%s). Please remove before deleting this connection.",
-							info["type"], info["name"], info["id"]),
-					)
-				}
-				return
-			}
+			resp.State.RemoveResource(ctx)
+			return
 		}
-
-		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting connection: %s", err))
-		return
 	}
+	pErr := &polytomic.UnprocessableEntityError{}
+	if errors.As(err, &pErr) {
+		if strings.Contains(*pErr.Body.Message, "connection in use") {
+			resp.Diagnostics.AddError("Connection in use",
+				fmt.Sprintf("Connection is used by %s \"%s\" (%s). Please remove before deleting this connection.",
+					pErr.Body.Metadata["type"], pErr.Body.Metadata["name"], pErr.Body.Metadata["id"]),
+			)
+			return
+		}
+	}
+
+	resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting connection: %s", err))
 
 }
 
 func (r *ChargebeeConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
-}
-
-func (r *ChargebeeConnectionResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
-	// Prevent panic if the provider has not been configured.
-	if req.ProviderData == nil {
-		return
-	}
-
-	client, ok := req.ProviderData.(*polytomic.Client)
-
-	if !ok {
-		resp.Diagnostics.AddError(
-			"Unexpected Resource Configure Type",
-			fmt.Sprintf("Expected *polytomic.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
-		)
-
-		return
-	}
-
-	r.client = client
 }

@@ -16,15 +16,10 @@ Databricks Connection
 resource "polytomic_databricks_connection" "databricks" {
   name = "example"
   configuration = {
-    server_hostname       = "https://my.databricks.com"
-    port                  = 443
-    access_token          = "my-access-token"
-    http_path             = "/sql"
-    aws_access_key_id     = "EXAMPLEKEY"
-    aws_secret_access_key = "EXAMPLESECRET"
-    s3_bucket_name        = "my-bucket"
-    s3_bucket_region      = "us-east-1"
-    aws_user              = "my-user"
+    access_token    = "isoz8af6zvp8067gu68gvrp0oftevn"
+    cloud_provider  = "aws"
+    http_path       = "/sql"
+    server_hostname = "dbc-1234dsafas-d0001.cloud.databricks.com"
   }
 }
 ```
@@ -51,20 +46,16 @@ resource "polytomic_databricks_connection" "databricks" {
 
 Required:
 
-- `access_token` (String, Sensitive)
+- `access_token` (String)
 - `http_path` (String)
 - `port` (Number)
 - `server_hostname` (String)
 
 Optional:
 
-- `aws_access_key_id` (String)
-- `aws_secret_access_key` (String, Sensitive)
-- `s3_bucket_name` (String)
-- `s3_bucket_region` (String)
-
-Read-Only:
-
-- `aws_user` (String)
+- `cloud_provider` (String)
+- `enable_delta_uniform` (Boolean)
+- `enforce_query_limit` (Boolean)
+- `unity_catalog_enabled` (Boolean)
 
 

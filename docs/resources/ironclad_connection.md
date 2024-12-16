@@ -16,7 +16,6 @@ Ironclad Connection
 resource "polytomic_ironclad_connection" "ironclad" {
   name = "example"
   configuration = {
-    api_key = "my-api-key"
   }
 }
 ```
@@ -43,6 +42,6 @@ resource "polytomic_ironclad_connection" "ironclad" {
 
 Required:
 
-- `api_key` (String, Sensitive)
+- `auth_method` (String)
 
 

@@ -35,4 +35,8 @@ data "polytomic_ironclad_connection" "ironclad" {
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
+Required:
+
+- `auth_method` (String)
+
 

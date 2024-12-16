@@ -16,8 +16,8 @@ Honeycomb Connection
 resource "polytomic_honeycomb_connection" "honeycomb" {
   name = "example"
   configuration = {
-    api_key = "my-api-key"
-    dataset = "events"
+    api_key = "secret"
+    dataset = "dataset"
   }
 }
 ```
@@ -44,7 +44,7 @@ resource "polytomic_honeycomb_connection" "honeycomb" {
 
 Required:
 
-- `api_key` (String, Sensitive)
+- `api_key` (String)
 - `dataset` (String)
 
 

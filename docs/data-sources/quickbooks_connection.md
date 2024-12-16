@@ -39,4 +39,11 @@ Required:
 
 - `realm_id` (String)
 
+Optional:
+
+- `client_id` (String)
+- `client_secret` (String)
+- `oauth_refresh_token` (String)
+- `oauth_token_expiry` (String)
+
 

@@ -37,13 +37,17 @@ data "polytomic_snowflake_connection" "snowflake" {
 
 Required:
 
-- `account` (String)
+- `account` (String) e.g. uc193736182, ja8382948.us-central-1.gcp
 - `dbname` (String)
 - `username` (String)
-- `warehouse` (String)
 
 Optional:
 
-- `params` (String)
+- `key_pair_auth` (Boolean)
+- `params` (String) Additional connection parameters, formatted as a query string
+- `password` (String)
+- `private_key` (String)
+- `private_key_passphrase` (String)
+- `warehouse` (String)
 
 

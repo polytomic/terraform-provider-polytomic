@@ -16,8 +16,8 @@ UserVoice Connection
 resource "polytomic_uservoice_connection" "uservoice" {
   name = "example"
   configuration = {
-    api_key = "my-api-key"
-    domain  = "example.com"
+    api_key = "secret"
+    domain  = "polytomic"
   }
 }
 ```
@@ -44,7 +44,7 @@ resource "polytomic_uservoice_connection" "uservoice" {
 
 Required:
 
-- `api_key` (String, Sensitive)
+- `api_key` (String)
 - `domain` (String)
 
 

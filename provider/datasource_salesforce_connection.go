@@ -5,16 +5,13 @@ package provider
 
 import (
 	"context"
-	"fmt"
 
-	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/mitchellh/mapstructure"
-	"github.com/polytomic/polytomic-go"
+	"github.com/polytomic/terraform-provider-polytomic/provider/internal/client"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -22,7 +19,13 @@ var _ datasource.DataSource = &SalesforceConnectionDataSource{}
 
 // ExampleDataSource defines the data source implementation.
 type SalesforceConnectionDataSource struct {
-	client *polytomic.Client
+	provider *client.Provider
+}
+
+func (d *SalesforceConnectionDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+	if provider := client.GetProvider(req.ProviderData, resp.Diagnostics); provider != nil {
+		d.provider = provider
+	}
 }
 
 func (d *SalesforceConnectionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
@@ -47,32 +50,74 @@ func (d *SalesforceConnectionDataSource) Schema(ctx context.Context, req datasou
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
+					"client_id": schema.StringAttribute{
+						MarkdownDescription: "",
+						Required:            true,
+						Optional:            false,
+						Computed:            false,
+						Sensitive:           false,
+					},
+					"client_secret": schema.StringAttribute{
+						MarkdownDescription: "",
+						Required:            true,
+						Optional:            false,
+						Computed:            false,
+						Sensitive:           false,
+					},
+					"connect_mode": schema.StringAttribute{
+						MarkdownDescription: "Default: browser (i.e. oauth through Polytomic). If 'code' is specified, the response will include an auth_code for the user to enter when completing authorization. NOTE: when supplying client_id and client_secret the connect mode must be 'api'.",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Sensitive:           false,
+					},
+					"daily_api_calls": schema.Int64Attribute{
+						MarkdownDescription: "The daily Salesforce API call cap that Polytomic should adhere to.",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Sensitive:           false,
+					},
+					"domain": schema.StringAttribute{
+						MarkdownDescription: "The Salesforce instance's login domain, e.g. acmecorp.my.salesforce.com",
+						Required:            true,
+						Optional:            false,
+						Computed:            false,
+						Sensitive:           false,
+					},
+					"enable_multicurrency_lookup": schema.BoolAttribute{
+						MarkdownDescription: "If incremenetal mode for bulk-syncing from Salesforce formula fields is enabled, setting this to true extends support to accurate currency conversions.",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Sensitive:           false,
+					},
+					"enable_tooling": schema.BoolAttribute{
+						MarkdownDescription: "If true, expose objects from the Salesforce Tooling API in the Polytomic bulk sync source object list.",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Sensitive:           false,
+					},
+					"enforce_api_limits": schema.BoolAttribute{
+						MarkdownDescription: "If true, Polytomic will restrict itself to a fixed daily cap of Salesforce API calls enforced by the number in daily_api_calls.",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Sensitive:           false,
+					},
+					"oauth_refresh_token": schema.StringAttribute{
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Sensitive:           false,
+					},
 					"username": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
-					},
-					"domain": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
-					},
-					"instance_url": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
-					},
-					"api_version": schema.Int64Attribute{
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
+						Computed:            false,
 						Sensitive:           false,
 					},
 				},
@@ -86,26 +131,6 @@ func (d *SalesforceConnectionDataSource) Schema(ctx context.Context, req datasou
 	}
 }
 
-func (d *SalesforceConnectionDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
-	// Prevent panic if the provider has not been configured.
-	if req.ProviderData == nil {
-		return
-	}
-
-	client, ok := req.ProviderData.(*polytomic.Client)
-
-	if !ok {
-		resp.Diagnostics.AddError(
-			"Unexpected Resource Configure Type",
-			fmt.Sprintf("Expected *polytomic.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
-		)
-
-		return
-	}
-
-	d.client = client
-}
-
 func (d *SalesforceConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionData
 
@@ -117,7 +142,12 @@ func (d *SalesforceConnectionDataSource) Read(ctx context.Context, req datasourc
 	}
 
 	// Get the connection
-	connection, err := d.client.Connections().Get(ctx, uuid.MustParse(data.Id.ValueString()))
+	client, err := d.provider.Client(data.Organization.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting client", err.Error())
+		return
+	}
+	connection, err := client.Connections.Get(ctx, data.Id.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection", err.Error())
 		return
@@ -125,31 +155,42 @@ func (d *SalesforceConnectionDataSource) Read(ctx context.Context, req datasourc
 
 	// For the purposes of this example code, hardcoding a response value to
 	// save into the Terraform state.
-	data.Id = types.StringValue(connection.ID)
-	data.Name = types.StringValue(connection.Name)
-	data.Organization = types.StringValue(connection.OrganizationId)
-	var conf polytomic.SalesforceConfiguration
-	err = mapstructure.Decode(connection.Configuration, &conf)
-	if err != nil {
-		resp.Diagnostics.AddError("Error decoding connection", err.Error())
-		return
-	}
-
+	data.Id = types.StringPointerValue(connection.Data.Id)
+	data.Name = types.StringPointerValue(connection.Data.Name)
+	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
 	var diags diag.Diagnostics
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttributeTypes(ctx),
 		map[string]attr.Value{
-			"username": types.StringValue(
-				conf.Username,
+			"client_id": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["client_id"], "string").(string),
+			),
+			"client_secret": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["client_secret"], "string").(string),
+			),
+			"connect_mode": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["connect_mode"], "string").(string),
+			),
+			"daily_api_calls": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["daily_api_calls"], "string").(string),
 			),
 			"domain": types.StringValue(
-				conf.Domain,
+				getValueOrEmpty(connection.Data.Configuration["domain"], "string").(string),
 			),
-			"instance_url": types.StringValue(
-				conf.InstanceURL,
+			"enable_multicurrency_lookup": types.BoolValue(
+				getValueOrEmpty(connection.Data.Configuration["enable_multicurrency_lookup"], "bool").(bool),
 			),
-			"api_version": types.Int64Value(
-				int64(conf.APIVersion),
+			"enable_tooling": types.BoolValue(
+				getValueOrEmpty(connection.Data.Configuration["enable_tooling"], "bool").(bool),
+			),
+			"enforce_api_limits": types.BoolValue(
+				getValueOrEmpty(connection.Data.Configuration["enforce_api_limits"], "bool").(bool),
+			),
+			"oauth_refresh_token": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["oauth_refresh_token"], "string").(string),
+			),
+			"username": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["username"], "string").(string),
 			),
 		},
 	)

@@ -3,12 +3,12 @@
 page_title: "polytomic_dittofeed_connection Resource - terraform-provider-polytomic"
 subcategory: "Connections"
 description: |-
-  DittoFeed Connection
+  Dittofeed Connection
 ---
 
 # polytomic_dittofeed_connection (Resource)
 
-DittoFeed Connection
+Dittofeed Connection
 
 ## Example Usage
 
@@ -16,8 +16,8 @@ DittoFeed Connection
 resource "polytomic_dittofeed_connection" "dittofeed" {
   name = "example"
   configuration = {
-    url       = "https://example.dittofeed.com"
-    write_key = "my-write-key"
+    url       = "https://demo.dittofeed.com/"
+    write_key = "YoegMt2eLlP0FWY9F3vxU3mM9ZG6TIQpzTeeH1uLEJWB81oEXq="
   }
 }
 ```
@@ -37,7 +37,7 @@ resource "polytomic_dittofeed_connection" "dittofeed" {
 
 ### Read-Only
 
-- `id` (String) DittoFeed Connection identifier
+- `id` (String) Dittofeed Connection identifier
 
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
@@ -45,6 +45,6 @@ resource "polytomic_dittofeed_connection" "dittofeed" {
 Required:
 
 - `url` (String)
-- `write_key` (String, Sensitive)
+- `write_key` (String)
 
 

@@ -38,6 +38,12 @@ data "polytomic_gcs_connection" "gcs" {
 Required:
 
 - `bucket` (String)
+- `service_account` (String)
+
+Optional:
+
+- `client_email` (String)
+- `is_single_table` (Boolean) Treat the files as a single table.
 - `project_id` (String)
 
 

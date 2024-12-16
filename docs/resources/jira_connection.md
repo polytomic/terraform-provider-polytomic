@@ -16,11 +16,9 @@ Jira Connection
 resource "polytomic_jira_connection" "jira" {
   name = "example"
   configuration = {
-    url          = "https://example.atlassian.net"
-    auth_method  = "apikey/pat"
-    username     = "user"
-    api_key      = "my-api-key"
-    access_token = "my-access-token"
+    access_token = "secret"
+    auth_method  = "pat"
+    url          = "https://jira.mycompany.com/"
   }
 }
 ```
@@ -48,12 +46,12 @@ resource "polytomic_jira_connection" "jira" {
 Required:
 
 - `auth_method` (String)
-- `url` (String, Sensitive)
+- `url` (String)
 
 Optional:
 
-- `access_token` (String, Sensitive)
-- `api_key` (String, Sensitive)
+- `access_token` (String)
+- `api_key` (String)
 - `username` (String)
 
 
