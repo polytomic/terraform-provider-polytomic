@@ -36,10 +36,6 @@ func (d *WebhookConnectionDataSource) Schema(ctx context.Context, req datasource
 	resp.Schema = schema.Schema{
 		MarkdownDescription: ":meta:subcategory:Connections: Webhook Connection",
 		Attributes: map[string]schema.Attribute{
-			"name": schema.StringAttribute{
-				MarkdownDescription: "",
-				Optional:            true,
-			},
 			"id": schema.StringAttribute{
 				MarkdownDescription: "",
 				Required:            true,
@@ -48,28 +44,22 @@ func (d *WebhookConnectionDataSource) Schema(ctx context.Context, req datasource
 				MarkdownDescription: "",
 				Optional:            true,
 			},
+			"name": schema.StringAttribute{
+				MarkdownDescription: "",
+				Computed:            true,
+			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"headers": schema.StringAttribute{
 						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Sensitive:           false,
+						Computed:            true,
 					},
 					"url": schema.StringAttribute{
 						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
+						Computed:            true,
 					},
 				},
 				Optional: true,
-			},
-			"force_destroy": schema.BoolAttribute{
-				MarkdownDescription: forceDestroyMessage,
-				Optional:            true,
 			},
 		},
 	}

@@ -36,10 +36,6 @@ func (d *SftpConnectionDataSource) Schema(ctx context.Context, req datasource.Sc
 	resp.Schema = schema.Schema{
 		MarkdownDescription: ":meta:subcategory:Connections: SFTP Connection",
 		Attributes: map[string]schema.Attribute{
-			"name": schema.StringAttribute{
-				MarkdownDescription: "",
-				Optional:            true,
-			},
 			"id": schema.StringAttribute{
 				MarkdownDescription: "",
 				Required:            true,
@@ -48,63 +44,42 @@ func (d *SftpConnectionDataSource) Schema(ctx context.Context, req datasource.Sc
 				MarkdownDescription: "",
 				Optional:            true,
 			},
+			"name": schema.StringAttribute{
+				MarkdownDescription: "",
+				Computed:            true,
+			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"is_single_table": schema.BoolAttribute{
 						MarkdownDescription: "Treat the files as a single table.",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Sensitive:           false,
+						Computed:            true,
 					},
 					"path": schema.StringAttribute{
 						MarkdownDescription: "The path to the directory on the SFTP server containing the files.",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Sensitive:           false,
+						Computed:            true,
 					},
 					"single_table_name": schema.StringAttribute{
 						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Sensitive:           false,
+						Computed:            true,
 					},
 					"skip_lines": schema.Int64Attribute{
 						MarkdownDescription: "Skip first N lines of each CSV file.",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Sensitive:           false,
+						Computed:            true,
 					},
 					"ssh_host": schema.StringAttribute{
 						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Sensitive:           false,
+						Computed:            true,
 					},
 					"ssh_port": schema.Int64Attribute{
 						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Sensitive:           false,
+						Computed:            true,
 					},
 					"ssh_user": schema.StringAttribute{
 						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Sensitive:           false,
+						Computed:            true,
 					},
 				},
 				Optional: true,
-			},
-			"force_destroy": schema.BoolAttribute{
-				MarkdownDescription: forceDestroyMessage,
-				Optional:            true,
 			},
 		},
 	}

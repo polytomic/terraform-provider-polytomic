@@ -36,10 +36,6 @@ func (d *CsvConnectionDataSource) Schema(ctx context.Context, req datasource.Sch
 	resp.Schema = schema.Schema{
 		MarkdownDescription: ":meta:subcategory:Connections: CSV URL Connection",
 		Attributes: map[string]schema.Attribute{
-			"name": schema.StringAttribute{
-				MarkdownDescription: "",
-				Optional:            true,
-			},
 			"id": schema.StringAttribute{
 				MarkdownDescription: "",
 				Required:            true,
@@ -48,42 +44,30 @@ func (d *CsvConnectionDataSource) Schema(ctx context.Context, req datasource.Sch
 				MarkdownDescription: "",
 				Optional:            true,
 			},
+			"name": schema.StringAttribute{
+				MarkdownDescription: "",
+				Computed:            true,
+			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"auth": schema.StringAttribute{
 						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Sensitive:           false,
+						Computed:            true,
 					},
 					"headers": schema.StringAttribute{
 						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Sensitive:           false,
+						Computed:            true,
 					},
 					"parameters": schema.StringAttribute{
 						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Sensitive:           false,
+						Computed:            true,
 					},
 					"url": schema.StringAttribute{
 						MarkdownDescription: "e.g. http://www.example.com",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
+						Computed:            true,
 					},
 				},
 				Optional: true,
-			},
-			"force_destroy": schema.BoolAttribute{
-				MarkdownDescription: forceDestroyMessage,
-				Optional:            true,
 			},
 		},
 	}

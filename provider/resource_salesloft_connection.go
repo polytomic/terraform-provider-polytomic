@@ -76,7 +76,7 @@ func (t *SalesloftConnectionResource) Schema(ctx context.Context, req resource.S
 					"connected_user": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            false,
-						Optional:            true,
+						Optional:            false,
 						Computed:            true,
 						Sensitive:           false,
 						Default:             stringdefault.StaticString(""),

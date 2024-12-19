@@ -55,7 +55,7 @@ func (t *RedshiftserverlessConnectionResource) Schema(ctx context.Context, req r
 					"external_id": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            false,
-						Optional:            true,
+						Optional:            false,
 						Computed:            true,
 						Sensitive:           false,
 						Default:             stringdefault.StaticString(""),

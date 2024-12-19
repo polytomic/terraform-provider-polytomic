@@ -36,10 +36,6 @@ func (d *HubspotConnectionDataSource) Schema(ctx context.Context, req datasource
 	resp.Schema = schema.Schema{
 		MarkdownDescription: ":meta:subcategory:Connections: HubSpot Connection",
 		Attributes: map[string]schema.Attribute{
-			"name": schema.StringAttribute{
-				MarkdownDescription: "",
-				Optional:            true,
-			},
 			"id": schema.StringAttribute{
 				MarkdownDescription: "",
 				Required:            true,
@@ -48,28 +44,22 @@ func (d *HubspotConnectionDataSource) Schema(ctx context.Context, req datasource
 				MarkdownDescription: "",
 				Optional:            true,
 			},
+			"name": schema.StringAttribute{
+				MarkdownDescription: "",
+				Computed:            true,
+			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"hub_domain": schema.StringAttribute{
 						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Sensitive:           false,
+						Computed:            true,
 					},
 					"hub_user": schema.StringAttribute{
 						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Sensitive:           false,
+						Computed:            true,
 					},
 				},
 				Optional: true,
-			},
-			"force_destroy": schema.BoolAttribute{
-				MarkdownDescription: forceDestroyMessage,
-				Optional:            true,
 			},
 		},
 	}

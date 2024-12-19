@@ -45,7 +45,7 @@ Required:
 - `customer_id` (String)
 - `service_account` (String, Sensitive)
 
-Optional:
+Read-Only:
 
 - `client_email` (String)
 

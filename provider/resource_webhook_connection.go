@@ -55,7 +55,7 @@ func (t *WebhookConnectionResource) Schema(ctx context.Context, req resource.Sch
 					"secret": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            false,
-						Optional:            true,
+						Optional:            false,
 						Computed:            true,
 						Sensitive:           true,
 						Default:             stringdefault.StaticString(""),

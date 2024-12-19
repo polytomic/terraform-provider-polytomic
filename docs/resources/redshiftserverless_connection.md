@@ -52,8 +52,11 @@ Required:
 
 Optional:
 
-- `external_id` (String)
 - `override_endpoint` (Boolean)
 - `region` (String)
+
+Read-Only:
+
+- `external_id` (String)
 
 

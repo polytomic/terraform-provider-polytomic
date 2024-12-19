@@ -50,6 +50,9 @@ Optional:
 - `client_secret` (String, Sensitive)
 - `oauth_refresh_token` (String, Sensitive)
 - `oauth_token_expiry` (String)
+
+Read-Only:
+
 - `username` (String)
 
 

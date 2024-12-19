@@ -55,7 +55,7 @@ func (t *SlackConnectionResource) Schema(ctx context.Context, req resource.Schem
 					"event_url": schema.StringAttribute{
 						MarkdownDescription: "Used if ingesting Slack events.",
 						Required:            false,
-						Optional:            true,
+						Optional:            false,
 						Computed:            true,
 						Sensitive:           false,
 						Default:             stringdefault.StaticString(""),

@@ -48,6 +48,9 @@ Required:
 Optional:
 
 - `headers` (String)
+
+Read-Only:
+
 - `secret` (String, Sensitive)
 
 

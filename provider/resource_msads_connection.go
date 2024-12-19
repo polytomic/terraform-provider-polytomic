@@ -83,7 +83,7 @@ func (t *MsadsConnectionResource) Schema(ctx context.Context, req resource.Schem
 					"username": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            false,
-						Optional:            true,
+						Optional:            false,
 						Computed:            true,
 						Sensitive:           false,
 						Default:             stringdefault.StaticString(""),

@@ -48,7 +48,7 @@ func (t *AirtableConnectionResource) Schema(ctx context.Context, req resource.Sc
 					"api_key": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            false,
-						Optional:            true,
+						Optional:            false,
 						Computed:            true,
 						Sensitive:           true,
 						Default:             stringdefault.StaticString(""),
@@ -70,7 +70,7 @@ func (t *AirtableConnectionResource) Schema(ctx context.Context, req resource.Sc
 					"connected_user": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            false,
-						Optional:            true,
+						Optional:            false,
 						Computed:            true,
 						Sensitive:           false,
 						Default:             stringdefault.StaticString(""),

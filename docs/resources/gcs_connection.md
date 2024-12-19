@@ -48,8 +48,11 @@ Required:
 
 Optional:
 
-- `client_email` (String)
 - `is_single_table` (Boolean) Treat the files as a single table.
+
+Read-Only:
+
+- `client_email` (String)
 - `project_id` (String)
 
 

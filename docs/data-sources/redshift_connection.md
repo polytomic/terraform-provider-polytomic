@@ -24,33 +24,29 @@ data "polytomic_redshift_connection" "redshift" {
 ### Optional
 
 - `configuration` (Attributes) (see [below for nested schema](#nestedatt--configuration))
-- `force_destroy` (Boolean) Indicates whether dependent models, syncs, and bulk syncs should be cascade deleted when this connection is destroy. This only deletes other resources when the connection is destroyed, not when setting this parameter to `true`. Once this parameter is set to `true`, there must be a successful `terraform apply` run before a destroy is required to update this value in the resource state. Without a successful `terraform apply` after this parameter is set, this flag will have no effect. If setting this field in the same operation that would require replacing the connection or destroying the connection, this flag will not work. Additionally when importing a connection, a successful `terraform apply` is required to set this value in state before it will take effect on a destroy operation.
-- `name` (String)
 - `organization` (String)
 
 ### Read-Only
 
 - `id` (String) The ID of this resource.
+- `name` (String)
 
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
-Required:
-
-- `database` (String)
-- `hostname` (String)
-- `port` (Number)
-- `username` (String)
-
-Optional:
+Read-Only:
 
 - `aws_access_key_id` (String) Access Key ID with read/write access to a bucket. More info: https://docs.polytomic.com/docs/redshift
 - `aws_user` (String)
+- `database` (String)
+- `hostname` (String)
+- `port` (Number)
 - `s3_bucket_name` (String) Name of bucket used for staging data load files
 - `s3_bucket_region` (String) Region of bucket. Note: must match region of redshift server
 - `ssh` (Boolean)
 - `ssh_host` (String)
 - `ssh_port` (Number)
 - `ssh_user` (String)
+- `username` (String)
 
 

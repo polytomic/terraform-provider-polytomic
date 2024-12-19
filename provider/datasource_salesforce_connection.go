@@ -36,10 +36,6 @@ func (d *SalesforceConnectionDataSource) Schema(ctx context.Context, req datasou
 	resp.Schema = schema.Schema{
 		MarkdownDescription: ":meta:subcategory:Connections: Salesforce Connection",
 		Attributes: map[string]schema.Attribute{
-			"name": schema.StringAttribute{
-				MarkdownDescription: "",
-				Optional:            true,
-			},
 			"id": schema.StringAttribute{
 				MarkdownDescription: "",
 				Required:            true,
@@ -48,63 +44,42 @@ func (d *SalesforceConnectionDataSource) Schema(ctx context.Context, req datasou
 				MarkdownDescription: "",
 				Optional:            true,
 			},
+			"name": schema.StringAttribute{
+				MarkdownDescription: "",
+				Computed:            true,
+			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"connect_mode": schema.StringAttribute{
 						MarkdownDescription: "Default: browser (i.e. oauth through Polytomic). If 'code' is specified, the response will include an auth_code for the user to enter when completing authorization. NOTE: when supplying client_id and client_secret the connect mode must be 'api'.",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Sensitive:           false,
+						Computed:            true,
 					},
 					"daily_api_calls": schema.Int64Attribute{
 						MarkdownDescription: "The daily Salesforce API call cap that Polytomic should adhere to.",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Sensitive:           false,
+						Computed:            true,
 					},
 					"domain": schema.StringAttribute{
 						MarkdownDescription: "The Salesforce instance's login domain, e.g. acmecorp.my.salesforce.com",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
+						Computed:            true,
 					},
 					"enable_multicurrency_lookup": schema.BoolAttribute{
 						MarkdownDescription: "If incremenetal mode for bulk-syncing from Salesforce formula fields is enabled, setting this to true extends support to accurate currency conversions.",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Sensitive:           false,
+						Computed:            true,
 					},
 					"enable_tooling": schema.BoolAttribute{
 						MarkdownDescription: "If true, expose objects from the Salesforce Tooling API in the Polytomic bulk sync source object list.",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Sensitive:           false,
+						Computed:            true,
 					},
 					"enforce_api_limits": schema.BoolAttribute{
 						MarkdownDescription: "If true, Polytomic will restrict itself to a fixed daily cap of Salesforce API calls enforced by the number in daily_api_calls.",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Sensitive:           false,
+						Computed:            true,
 					},
 					"username": schema.StringAttribute{
 						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Sensitive:           false,
+						Computed:            true,
 					},
 				},
 				Optional: true,
-			},
-			"force_destroy": schema.BoolAttribute{
-				MarkdownDescription: forceDestroyMessage,
-				Optional:            true,
 			},
 		},
 	}

@@ -45,7 +45,7 @@ Required:
 
 - `api_key` (String, Sensitive)
 
-Optional:
+Read-Only:
 
 - `event_url` (String) Used if ingesting Slack events.
 

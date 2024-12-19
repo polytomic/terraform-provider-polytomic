@@ -55,7 +55,7 @@ func (t *PosthogConnectionResource) Schema(ctx context.Context, req resource.Sch
 					"authenticated_as": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            false,
-						Optional:            true,
+						Optional:            false,
 						Computed:            true,
 						Sensitive:           false,
 						Default:             stringdefault.StaticString(""),

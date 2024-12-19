@@ -300,7 +300,7 @@ func GenerateConnections(ctx context.Context) error {
 			// }
 			attr.Computed = a.ReadOnly
 			attr.Required = slices.Contains(connSchema.Required, k)
-			attr.Optional = !attr.Required
+			attr.Optional = !attr.Required && !attr.Computed
 			if attr.Computed {
 				attr.Default = t.Default
 				if t.DefaultImport != "" {
