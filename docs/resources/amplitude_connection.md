@@ -45,6 +45,6 @@ resource "polytomic_amplitude_connection" "amplitude" {
 Required:
 
 - `api_key` (String)
-- `secret_key` (String)
+- `secret_key` (String, Sensitive)
 
 

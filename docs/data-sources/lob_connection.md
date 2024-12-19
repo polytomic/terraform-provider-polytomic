@@ -35,8 +35,4 @@ data "polytomic_lob_connection" "lob" {
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
-Required:
-
-- `apikey` (String)
-
 

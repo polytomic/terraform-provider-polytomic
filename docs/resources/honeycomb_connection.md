@@ -44,7 +44,7 @@ resource "polytomic_honeycomb_connection" "honeycomb" {
 
 Required:
 
-- `api_key` (String)
+- `api_key` (String, Sensitive)
 - `dataset` (String)
 
 

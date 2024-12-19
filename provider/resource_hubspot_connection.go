@@ -48,14 +48,14 @@ func (t *HubspotConnectionResource) Schema(ctx context.Context, req resource.Sch
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 					"client_secret": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 					"hub_domain": schema.StringAttribute{
 						MarkdownDescription: "",
@@ -76,7 +76,7 @@ func (t *HubspotConnectionResource) Schema(ctx context.Context, req resource.Sch
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 				},
 

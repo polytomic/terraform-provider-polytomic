@@ -48,7 +48,7 @@ func (t *IntellimizeConnectionResource) Schema(ctx context.Context, req resource
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 				},
 

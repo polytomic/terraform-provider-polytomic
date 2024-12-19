@@ -43,6 +43,6 @@ resource "polytomic_segment_connection" "segment" {
 
 Required:
 
-- `write_key` (String)
+- `write_key` (String, Sensitive)
 
 

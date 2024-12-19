@@ -38,6 +38,5 @@ data "polytomic_dittofeed_connection" "dittofeed" {
 Required:
 
 - `url` (String)
-- `write_key` (String)
 
 

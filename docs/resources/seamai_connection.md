@@ -44,8 +44,8 @@ resource "polytomic_seamai_connection" "seamai" {
 
 Required:
 
-- `apikey_id` (String)
-- `apikey_secret` (String)
+- `apikey_id` (String, Sensitive)
+- `apikey_secret` (String, Sensitive)
 
 Optional:
 

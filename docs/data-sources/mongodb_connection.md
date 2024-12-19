@@ -43,7 +43,6 @@ Optional:
 
 - `database` (String)
 - `params` (String) Additional connection parameters, formatted as a query string
-- `password` (String)
 - `srv` (Boolean)
 - `ssl` (Boolean)
 - `username` (String)

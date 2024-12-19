@@ -64,13 +64,6 @@ func (d *DynamodbConnectionDataSource) Schema(ctx context.Context, req datasourc
 						Computed:            false,
 						Sensitive:           false,
 					},
-					"secret_access_key": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
 				},
 				Optional: true,
 			},
@@ -118,9 +111,6 @@ func (d *DynamodbConnectionDataSource) Read(ctx context.Context, req datasource.
 			),
 			"region": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["region"], "string").(string),
-			),
-			"secret_access_key": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["secret_access_key"], "string").(string),
 			),
 		},
 	)

@@ -43,6 +43,6 @@ resource "polytomic_fullstory_connection" "fullstory" {
 
 Required:
 
-- `api_key` (String)
+- `api_key` (String, Sensitive)
 
 

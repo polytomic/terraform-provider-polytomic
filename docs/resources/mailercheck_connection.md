@@ -43,6 +43,6 @@ resource "polytomic_mailercheck_connection" "mailercheck" {
 
 Required:
 
-- `api_key` (String)
+- `api_key` (String, Sensitive)
 
 

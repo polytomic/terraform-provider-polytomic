@@ -38,7 +38,6 @@ data "polytomic_googleworkspace_connection" "googleworkspace" {
 Required:
 
 - `customer_id` (String)
-- `service_account` (String)
 
 Optional:
 

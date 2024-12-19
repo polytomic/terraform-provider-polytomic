@@ -42,10 +42,6 @@ Required:
 Optional:
 
 - `access_key` (String)
-- `access_secret` (String)
-- `client_id` (String)
-- `client_secret` (String)
-- `oauth_refresh_token` (String)
 - `oauth_token_expiry` (String)
 - `subdomain` (String) Gong subdomain i.e. company-17 if you access Gong via https://company-17.app.gong.io
 

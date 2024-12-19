@@ -37,7 +37,6 @@ data "polytomic_uservoice_connection" "uservoice" {
 
 Required:
 
-- `api_key` (String)
 - `domain` (String)
 
 

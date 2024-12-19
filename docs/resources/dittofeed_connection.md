@@ -45,6 +45,6 @@ resource "polytomic_dittofeed_connection" "dittofeed" {
 Required:
 
 - `url` (String)
-- `write_key` (String)
+- `write_key` (String, Sensitive)
 
 

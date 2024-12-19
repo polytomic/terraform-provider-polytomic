@@ -49,13 +49,13 @@ Required:
 
 Optional:
 
-- `client_id` (String)
-- `client_secret` (String)
+- `client_id` (String, Sensitive)
+- `client_secret` (String, Sensitive)
 - `connect_mode` (String) Default: browser
 - `has_headers` (Boolean)
-- `oauth_refresh_token` (String)
+- `oauth_refresh_token` (String, Sensitive)
 - `oauth_token_expiry` (String)
-- `service_account` (String)
+- `service_account` (String, Sensitive)
 - `user_email` (String)
 
 

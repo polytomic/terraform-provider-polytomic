@@ -80,7 +80,7 @@ func (t *GcsConnectionResource) Schema(ctx context.Context, req resource.SchemaR
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 				},
 

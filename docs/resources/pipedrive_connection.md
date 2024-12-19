@@ -44,7 +44,7 @@ resource "polytomic_pipedrive_connection" "pipedrive" {
 
 Required:
 
-- `api_key` (String)
+- `api_key` (String, Sensitive)
 - `domain` (String)
 
 

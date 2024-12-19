@@ -50,13 +50,6 @@ func (d *VanillaConnectionDataSource) Schema(ctx context.Context, req datasource
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
-					"api_key": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
 					"domain": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            true,
@@ -106,9 +99,6 @@ func (d *VanillaConnectionDataSource) Read(ctx context.Context, req datasource.R
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttributeTypes(ctx),
 		map[string]attr.Value{
-			"api_key": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["api_key"], "string").(string),
-			),
 			"domain": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["domain"], "string").(string),
 			),

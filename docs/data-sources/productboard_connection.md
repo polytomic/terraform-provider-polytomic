@@ -35,8 +35,4 @@ data "polytomic_productboard_connection" "productboard" {
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
-Optional:
-
-- `access_key` (String)
-
 

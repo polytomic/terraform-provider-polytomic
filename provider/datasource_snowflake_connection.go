@@ -78,27 +78,6 @@ func (d *SnowflakeConnectionDataSource) Schema(ctx context.Context, req datasour
 						Computed:            false,
 						Sensitive:           false,
 					},
-					"password": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Sensitive:           false,
-					},
-					"private_key": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Sensitive:           false,
-					},
-					"private_key_passphrase": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Sensitive:           false,
-					},
 					"username": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            true,
@@ -166,15 +145,6 @@ func (d *SnowflakeConnectionDataSource) Read(ctx context.Context, req datasource
 			),
 			"params": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["params"], "string").(string),
-			),
-			"password": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["password"], "string").(string),
-			),
-			"private_key": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["private_key"], "string").(string),
-			),
-			"private_key_passphrase": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["private_key_passphrase"], "string").(string),
 			),
 			"username": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["username"], "string").(string),

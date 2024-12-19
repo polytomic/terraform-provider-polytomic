@@ -46,10 +46,10 @@ resource "polytomic_googleads_connection" "googleads" {
 Optional:
 
 - `accounts` (String)
-- `client_id` (String)
-- `client_secret` (String)
+- `client_id` (String, Sensitive)
+- `client_secret` (String, Sensitive)
 - `connected_user` (String)
-- `oauth_refresh_token` (String)
+- `oauth_refresh_token` (String, Sensitive)
 - `oauth_token_expiry` (String)
 
 

@@ -44,7 +44,7 @@ resource "polytomic_cosmosdb_connection" "cosmosdb" {
 
 Required:
 
-- `key` (String)
+- `key` (String, Sensitive)
 - `uri` (String)
 
 

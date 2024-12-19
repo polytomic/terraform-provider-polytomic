@@ -47,13 +47,13 @@ resource "polytomic_googlecloudmysql_connection" "googlecloudmysql" {
 Required:
 
 - `connection_name` (String) Takes the form of project:region:instance
-- `credentials` (String)
+- `credentials` (String, Sensitive)
 - `database` (String)
 
 Optional:
 
 - `change_detection` (Boolean)
-- `password` (String) May be omitted when authenticating to Postgres using the service account key.
+- `password` (String, Sensitive) May be omitted when authenticating to Postgres using the service account key.
 - `username` (String)
 
 

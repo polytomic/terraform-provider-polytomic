@@ -43,7 +43,7 @@ resource "polytomic_scamalytics_connection" "scamalytics" {
 
 Required:
 
-- `apikey` (String)
+- `apikey` (String, Sensitive)
 - `endpoint` (String)
 
 

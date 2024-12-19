@@ -45,13 +45,13 @@ resource "polytomic_github_connection" "github" {
 
 Required:
 
-- `oauth_access_token` (String)
+- `oauth_access_token` (String, Sensitive)
 
 Optional:
 
 - `authenticated` (Boolean)
-- `client_id` (String)
-- `client_secret` (String)
+- `client_id` (String, Sensitive)
+- `client_secret` (String, Sensitive)
 - `repositories` (String)
 
 

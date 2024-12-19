@@ -38,7 +38,6 @@ data "polytomic_dynamodb_connection" "dynamodb" {
 Required:
 
 - `region` (String)
-- `secret_access_key` (String)
 
 Optional:
 

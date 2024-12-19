@@ -48,7 +48,7 @@ func (t *ScamalyticsConnectionResource) Schema(ctx context.Context, req resource
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 					"endpoint": schema.StringAttribute{
 						MarkdownDescription: "",

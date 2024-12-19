@@ -35,15 +35,9 @@ data "polytomic_github_connection" "github" {
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
-Required:
-
-- `oauth_access_token` (String)
-
 Optional:
 
 - `authenticated` (Boolean)
-- `client_id` (String)
-- `client_secret` (String)
 - `repositories` (String)
 
 

@@ -55,7 +55,7 @@ func (t *MarketoConnectionResource) Schema(ctx context.Context, req resource.Sch
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 					"concurrent_imports": schema.Int64Attribute{
 						MarkdownDescription: "",

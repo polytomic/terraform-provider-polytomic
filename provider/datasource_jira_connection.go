@@ -50,20 +50,6 @@ func (d *JiraConnectionDataSource) Schema(ctx context.Context, req datasource.Sc
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
-					"access_token": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Sensitive:           false,
-					},
-					"api_key": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Sensitive:           false,
-					},
 					"auth_method": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            true,
@@ -127,12 +113,6 @@ func (d *JiraConnectionDataSource) Read(ctx context.Context, req datasource.Read
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttributeTypes(ctx),
 		map[string]attr.Value{
-			"access_token": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["access_token"], "string").(string),
-			),
-			"api_key": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["api_key"], "string").(string),
-			),
 			"auth_method": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["auth_method"], "string").(string),
 			),

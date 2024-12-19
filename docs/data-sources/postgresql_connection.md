@@ -39,22 +39,17 @@ Required:
 
 - `database` (String)
 - `hostname` (String)
-- `password` (String)
 - `port` (Number)
 - `username` (String)
 
 Optional:
 
-- `ca_cert` (String)
 - `change_detection` (Boolean)
-- `client_certificate` (String)
 - `client_certs` (Boolean)
-- `client_key` (String)
 - `publication` (String)
 - `ssh` (Boolean)
 - `ssh_host` (String)
 - `ssh_port` (Number)
-- `ssh_private_key` (String)
 - `ssh_user` (String)
 - `ssl` (Boolean)
 

@@ -64,24 +64,10 @@ func (d *GooglecloudmysqlConnectionDataSource) Schema(ctx context.Context, req d
 						Computed:            false,
 						Sensitive:           false,
 					},
-					"credentials": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
 					"database": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            true,
 						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
-					"password": schema.StringAttribute{
-						MarkdownDescription: "May be omitted when authenticating to Postgres using the service account key.",
-						Required:            false,
-						Optional:            true,
 						Computed:            false,
 						Sensitive:           false,
 					},
@@ -140,14 +126,8 @@ func (d *GooglecloudmysqlConnectionDataSource) Read(ctx context.Context, req dat
 			"connection_name": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["connection_name"], "string").(string),
 			),
-			"credentials": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["credentials"], "string").(string),
-			),
 			"database": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["database"], "string").(string),
-			),
-			"password": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["password"], "string").(string),
 			),
 			"username": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["username"], "string").(string),

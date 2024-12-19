@@ -57,13 +57,6 @@ func (d *DittofeedConnectionDataSource) Schema(ctx context.Context, req datasour
 						Computed:            false,
 						Sensitive:           false,
 					},
-					"write_key": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
 				},
 				Optional: true,
 			},
@@ -108,9 +101,6 @@ func (d *DittofeedConnectionDataSource) Read(ctx context.Context, req datasource
 		map[string]attr.Value{
 			"url": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["url"], "string").(string),
-			),
-			"write_key": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["write_key"], "string").(string),
 			),
 		},
 	)

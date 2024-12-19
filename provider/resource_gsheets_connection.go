@@ -50,14 +50,14 @@ func (t *GsheetsConnectionResource) Schema(ctx context.Context, req resource.Sch
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 					"client_secret": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 					"connect_mode": schema.StringAttribute{
 						MarkdownDescription: "Default: browser",
@@ -78,7 +78,7 @@ func (t *GsheetsConnectionResource) Schema(ctx context.Context, req resource.Sch
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 					"oauth_token_expiry": schema.StringAttribute{
 						MarkdownDescription: "",
@@ -92,7 +92,7 @@ func (t *GsheetsConnectionResource) Schema(ctx context.Context, req resource.Sch
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 					"spreadsheet_id": schema.StringAttribute{
 						MarkdownDescription: "",

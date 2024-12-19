@@ -37,7 +37,6 @@ data "polytomic_glean_connection" "glean" {
 
 Required:
 
-- `api_key` (String)
 - `domain` (String) https://{domain}-be.glean.com
 
 

@@ -52,7 +52,7 @@ Optional:
 
 - `account_id` (String)
 - `accounts` (String)
-- `byo_app_token` (String)
+- `byo_app_token` (String, Sensitive)
 - `graph_api_version` (String)
 - `user_name` (String)
 

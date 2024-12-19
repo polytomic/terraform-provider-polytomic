@@ -43,6 +43,6 @@ resource "polytomic_survicate_connection" "survicate" {
 
 Required:
 
-- `api_key` (String)
+- `api_key` (String, Sensitive)
 
 

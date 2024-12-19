@@ -50,13 +50,6 @@ func (d *ChargebeeConnectionDataSource) Schema(ctx context.Context, req datasour
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
-					"api_key": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
 					"product_catalog": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            true,
@@ -120,9 +113,6 @@ func (d *ChargebeeConnectionDataSource) Read(ctx context.Context, req datasource
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttributeTypes(ctx),
 		map[string]attr.Value{
-			"api_key": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["api_key"], "string").(string),
-			),
 			"product_catalog": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["product_catalog"], "string").(string),
 			),

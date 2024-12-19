@@ -50,13 +50,6 @@ func (d *KustomerConnectionDataSource) Schema(ctx context.Context, req datasourc
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
-					"apikey": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
 					"domain": schema.StringAttribute{
 						MarkdownDescription: "e.g. 'polytomic' if your portal is 'https://polytomic.kustomerapp.com/app'",
 						Required:            true,
@@ -106,9 +99,6 @@ func (d *KustomerConnectionDataSource) Read(ctx context.Context, req datasource.
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttributeTypes(ctx),
 		map[string]attr.Value{
-			"apikey": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["apikey"], "string").(string),
-			),
 			"domain": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["domain"], "string").(string),
 			),

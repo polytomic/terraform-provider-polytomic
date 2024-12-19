@@ -44,7 +44,7 @@ resource "polytomic_shopify_connection" "shopify" {
 
 Required:
 
-- `admin_api_token` (String)
+- `admin_api_token` (String, Sensitive)
 - `store` (String) Enter your Shopify store name.
 
 

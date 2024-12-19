@@ -50,20 +50,6 @@ func (d *StrackrConnectionDataSource) Schema(ctx context.Context, req datasource
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
-					"api_id": schema.Int64Attribute{
-						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
-					"api_key": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
 					"currency_type": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            true,
@@ -120,12 +106,6 @@ func (d *StrackrConnectionDataSource) Read(ctx context.Context, req datasource.R
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttributeTypes(ctx),
 		map[string]attr.Value{
-			"api_id": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["api_id"], "string").(string),
-			),
-			"api_key": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["api_key"], "string").(string),
-			),
 			"currency_type": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["currency_type"], "string").(string),
 			),

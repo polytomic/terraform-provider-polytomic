@@ -50,13 +50,6 @@ func (d *FreshdeskConnectionDataSource) Schema(ctx context.Context, req datasour
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
-					"apikey": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
 					"subdomain": schema.StringAttribute{
 						MarkdownDescription: "e.g. 'polytomic' if your helpdesk is at https://polytomic.freshdesk.com",
 						Required:            true,
@@ -106,9 +99,6 @@ func (d *FreshdeskConnectionDataSource) Read(ctx context.Context, req datasource
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttributeTypes(ctx),
 		map[string]attr.Value{
-			"apikey": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["apikey"], "string").(string),
-			),
 			"subdomain": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["subdomain"], "string").(string),
 			),

@@ -64,13 +64,6 @@ func (d *AzuresqlConnectionDataSource) Schema(ctx context.Context, req datasourc
 						Computed:            false,
 						Sensitive:           false,
 					},
-					"password": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
 					"port": schema.Int64Attribute{
 						MarkdownDescription: "",
 						Required:            true,
@@ -139,9 +132,6 @@ func (d *AzuresqlConnectionDataSource) Read(ctx context.Context, req datasource.
 			),
 			"hostname": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["hostname"], "string").(string),
-			),
-			"password": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["password"], "string").(string),
 			),
 			"port": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["port"], "string").(string),

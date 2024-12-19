@@ -53,21 +53,21 @@ Required:
 
 - `database` (String)
 - `hostname` (String)
-- `password` (String)
+- `password` (String, Sensitive)
 - `port` (Number)
 - `username` (String)
 
 Optional:
 
 - `aws_access_key_id` (String) Access Key ID with read/write access to a bucket. More info: https://docs.polytomic.com/docs/redshift
-- `aws_secret_access_key` (String)
+- `aws_secret_access_key` (String, Sensitive)
 - `aws_user` (String)
 - `s3_bucket_name` (String) Name of bucket used for staging data load files
 - `s3_bucket_region` (String) Region of bucket. Note: must match region of redshift server
 - `ssh` (Boolean)
 - `ssh_host` (String)
 - `ssh_port` (Number)
-- `ssh_private_key` (String)
+- `ssh_private_key` (String, Sensitive)
 - `ssh_user` (String)
 
 

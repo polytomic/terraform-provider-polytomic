@@ -48,7 +48,7 @@ func (t *ProductboardConnectionResource) Schema(ctx context.Context, req resourc
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 				},
 

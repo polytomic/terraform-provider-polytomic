@@ -38,9 +38,6 @@ data "polytomic_msads_connection" "msads" {
 Optional:
 
 - `accounts` (String)
-- `client_id` (String)
-- `client_secret` (String)
-- `oauth_refresh_token` (String)
 - `oauth_token_expiry` (String)
 - `username` (String)
 

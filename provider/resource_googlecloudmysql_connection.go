@@ -62,7 +62,7 @@ func (t *GooglecloudmysqlConnectionResource) Schema(ctx context.Context, req res
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 					"database": schema.StringAttribute{
 						MarkdownDescription: "",
@@ -76,7 +76,7 @@ func (t *GooglecloudmysqlConnectionResource) Schema(ctx context.Context, req res
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 					"username": schema.StringAttribute{
 						MarkdownDescription: "",

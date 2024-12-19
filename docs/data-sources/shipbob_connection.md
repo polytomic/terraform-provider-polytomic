@@ -35,10 +35,4 @@ data "polytomic_shipbob_connection" "shipbob" {
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
-Optional:
-
-- `client_id` (String)
-- `client_secret` (String)
-- `oauth_refresh_token` (String)
-
 

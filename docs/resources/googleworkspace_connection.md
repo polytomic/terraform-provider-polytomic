@@ -43,7 +43,7 @@ resource "polytomic_googleworkspace_connection" "googleworkspace" {
 Required:
 
 - `customer_id` (String)
-- `service_account` (String)
+- `service_account` (String, Sensitive)
 
 Optional:
 

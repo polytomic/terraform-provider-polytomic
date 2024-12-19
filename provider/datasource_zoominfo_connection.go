@@ -57,13 +57,6 @@ func (d *ZoominfoConnectionDataSource) Schema(ctx context.Context, req datasourc
 						Computed:            false,
 						Sensitive:           false,
 					},
-					"private_key": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
 					"username": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            true,
@@ -115,9 +108,6 @@ func (d *ZoominfoConnectionDataSource) Read(ctx context.Context, req datasource.
 		map[string]attr.Value{
 			"client_id": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["client_id"], "string").(string),
-			),
-			"private_key": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["private_key"], "string").(string),
 			),
 			"username": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["username"], "string").(string),

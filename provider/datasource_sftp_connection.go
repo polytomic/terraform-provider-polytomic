@@ -92,13 +92,6 @@ func (d *SftpConnectionDataSource) Schema(ctx context.Context, req datasource.Sc
 						Computed:            false,
 						Sensitive:           false,
 					},
-					"ssh_private_key": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Sensitive:           false,
-					},
 					"ssh_user": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            false,
@@ -165,9 +158,6 @@ func (d *SftpConnectionDataSource) Read(ctx context.Context, req datasource.Read
 			),
 			"ssh_port": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["ssh_port"], "string").(string),
-			),
-			"ssh_private_key": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["ssh_private_key"], "string").(string),
 			),
 			"ssh_user": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["ssh_user"], "string").(string),

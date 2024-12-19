@@ -43,6 +43,6 @@ resource "polytomic_harmonic_connection" "harmonic" {
 
 Required:
 
-- `api_key` (String)
+- `api_key` (String, Sensitive)
 
 

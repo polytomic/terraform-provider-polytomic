@@ -48,14 +48,14 @@ func (t *SeamaiConnectionResource) Schema(ctx context.Context, req resource.Sche
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 					"apikey_secret": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 					"base_url": schema.StringAttribute{
 						MarkdownDescription: "Alternate environment API URL (including any necessary paths",

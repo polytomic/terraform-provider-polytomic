@@ -48,14 +48,14 @@ func (t *JiraConnectionResource) Schema(ctx context.Context, req resource.Schema
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 					"api_key": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 					"auth_method": schema.StringAttribute{
 						MarkdownDescription: "",

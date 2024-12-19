@@ -42,7 +42,6 @@ Required:
 
 Optional:
 
-- `api_token` (String)
 - `custom_api_limits` (Boolean)
 - `email` (String)
 - `ratelimit_rpm` (Number) Set a custom maximum request per minute limit.

@@ -64,13 +64,6 @@ func (d *DayforceConnectionDataSource) Schema(ctx context.Context, req datasourc
 						Computed:            false,
 						Sensitive:           false,
 					},
-					"password": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
 					"username": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            true,
@@ -125,9 +118,6 @@ func (d *DayforceConnectionDataSource) Read(ctx context.Context, req datasource.
 			),
 			"company_id": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["company_id"], "string").(string),
-			),
-			"password": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["password"], "string").(string),
 			),
 			"username": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["username"], "string").(string),

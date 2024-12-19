@@ -48,14 +48,14 @@ func (t *NetsuiteopenairConnectionResource) Schema(ctx context.Context, req reso
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 					"client_secret": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 					"company_id": schema.StringAttribute{
 						MarkdownDescription: "",

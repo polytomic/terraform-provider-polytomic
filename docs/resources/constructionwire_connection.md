@@ -45,6 +45,6 @@ resource "polytomic_constructionwire_connection" "constructionwire" {
 Required:
 
 - `email` (String)
-- `password` (String)
+- `password` (String, Sensitive)
 
 

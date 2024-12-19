@@ -57,13 +57,6 @@ func (d *AwsopensearchConnectionDataSource) Schema(ctx context.Context, req data
 						Computed:            false,
 						Sensitive:           false,
 					},
-					"aws_secret_access_key": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
 					"aws_user": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            false,
@@ -129,9 +122,6 @@ func (d *AwsopensearchConnectionDataSource) Read(ctx context.Context, req dataso
 		map[string]attr.Value{
 			"aws_access_key_id": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["aws_access_key_id"], "string").(string),
-			),
-			"aws_secret_access_key": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["aws_secret_access_key"], "string").(string),
 			),
 			"aws_user": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["aws_user"], "string").(string),

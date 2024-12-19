@@ -50,31 +50,10 @@ func (d *MsdynamicsConnectionDataSource) Schema(ctx context.Context, req datasou
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
-					"client_id": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Sensitive:           false,
-					},
-					"client_secret": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Sensitive:           false,
-					},
 					"dynamics_environment_id": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            true,
 						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
-					"oauth_refresh_token": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
 						Computed:            false,
 						Sensitive:           false,
 					},
@@ -127,17 +106,8 @@ func (d *MsdynamicsConnectionDataSource) Read(ctx context.Context, req datasourc
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttributeTypes(ctx),
 		map[string]attr.Value{
-			"client_id": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["client_id"], "string").(string),
-			),
-			"client_secret": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["client_secret"], "string").(string),
-			),
 			"dynamics_environment_id": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["dynamics_environment_id"], "string").(string),
-			),
-			"oauth_refresh_token": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["oauth_refresh_token"], "string").(string),
 			),
 			"oauth_token_expiry": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["oauth_token_expiry"], "string").(string),

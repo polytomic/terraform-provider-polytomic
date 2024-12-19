@@ -48,14 +48,14 @@ func (t *MsdynamicsConnectionResource) Schema(ctx context.Context, req resource.
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 					"client_secret": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 					"dynamics_environment_id": schema.StringAttribute{
 						MarkdownDescription: "",
@@ -69,7 +69,7 @@ func (t *MsdynamicsConnectionResource) Schema(ctx context.Context, req resource.
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 					"oauth_token_expiry": schema.StringAttribute{
 						MarkdownDescription: "",

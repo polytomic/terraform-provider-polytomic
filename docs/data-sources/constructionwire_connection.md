@@ -38,6 +38,5 @@ data "polytomic_constructionwire_connection" "constructionwire" {
 Required:
 
 - `email` (String)
-- `password` (String)
 
 

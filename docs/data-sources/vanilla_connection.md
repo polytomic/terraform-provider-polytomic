@@ -37,7 +37,6 @@ data "polytomic_vanilla_connection" "vanilla" {
 
 Required:
 
-- `api_key` (String)
 - `domain` (String)
 
 

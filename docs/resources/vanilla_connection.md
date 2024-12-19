@@ -44,7 +44,7 @@ resource "polytomic_vanilla_connection" "vanilla" {
 
 Required:
 
-- `api_key` (String)
+- `api_key` (String, Sensitive)
 - `domain` (String)
 
 

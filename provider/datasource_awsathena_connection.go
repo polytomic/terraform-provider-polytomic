@@ -71,13 +71,6 @@ func (d *AwsathenaConnectionDataSource) Schema(ctx context.Context, req datasour
 						Computed:            false,
 						Sensitive:           false,
 					},
-					"secret_access_key": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
 				},
 				Optional: true,
 			},
@@ -128,9 +121,6 @@ func (d *AwsathenaConnectionDataSource) Read(ctx context.Context, req datasource
 			),
 			"region": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["region"], "string").(string),
-			),
-			"secret_access_key": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["secret_access_key"], "string").(string),
 			),
 		},
 	)

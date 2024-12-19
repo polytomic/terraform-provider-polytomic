@@ -35,11 +35,6 @@ data "polytomic_seamai_connection" "seamai" {
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
-Required:
-
-- `apikey_id` (String)
-- `apikey_secret` (String)
-
 Optional:
 
 - `base_url` (String) Alternate environment API URL (including any necessary paths

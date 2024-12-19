@@ -57,13 +57,6 @@ func (d *AppstoreconnectConnectionDataSource) Schema(ctx context.Context, req da
 						Computed:            false,
 						Sensitive:           false,
 					},
-					"private_key": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
 					"private_key_id": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            true,
@@ -122,9 +115,6 @@ func (d *AppstoreconnectConnectionDataSource) Read(ctx context.Context, req data
 		map[string]attr.Value{
 			"issuer_id": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["issuer_id"], "string").(string),
-			),
-			"private_key": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["private_key"], "string").(string),
 			),
 			"private_key_id": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["private_key_id"], "string").(string),

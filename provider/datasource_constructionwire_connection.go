@@ -57,13 +57,6 @@ func (d *ConstructionwireConnectionDataSource) Schema(ctx context.Context, req d
 						Computed:            false,
 						Sensitive:           false,
 					},
-					"password": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
 				},
 				Optional: true,
 			},
@@ -108,9 +101,6 @@ func (d *ConstructionwireConnectionDataSource) Read(ctx context.Context, req dat
 		map[string]attr.Value{
 			"email": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["email"], "string").(string),
-			),
-			"password": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["password"], "string").(string),
 			),
 		},
 	)

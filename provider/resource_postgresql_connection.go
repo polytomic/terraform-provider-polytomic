@@ -48,7 +48,7 @@ func (t *PostgresqlConnectionResource) Schema(ctx context.Context, req resource.
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 					"change_detection": schema.BoolAttribute{
 						MarkdownDescription: "",
@@ -62,7 +62,7 @@ func (t *PostgresqlConnectionResource) Schema(ctx context.Context, req resource.
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 					"client_certs": schema.BoolAttribute{
 						MarkdownDescription: "",
@@ -76,7 +76,7 @@ func (t *PostgresqlConnectionResource) Schema(ctx context.Context, req resource.
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 					"database": schema.StringAttribute{
 						MarkdownDescription: "",
@@ -97,7 +97,7 @@ func (t *PostgresqlConnectionResource) Schema(ctx context.Context, req resource.
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 					"port": schema.Int64Attribute{
 						MarkdownDescription: "",
@@ -139,7 +139,7 @@ func (t *PostgresqlConnectionResource) Schema(ctx context.Context, req resource.
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 					"ssh_user": schema.StringAttribute{
 						MarkdownDescription: "",

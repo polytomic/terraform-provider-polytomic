@@ -50,10 +50,10 @@ Required:
 
 Optional:
 
-- `app_key` (String)
-- `app_secret` (String)
+- `app_key` (String, Sensitive)
+- `app_secret` (String, Sensitive)
 - `is_single_table` (Boolean) Treat the files as a single table.
-- `oauth_refresh_token` (String)
+- `oauth_refresh_token` (String, Sensitive)
 - `oauth_token_expiry` (String)
 
 

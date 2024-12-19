@@ -48,7 +48,7 @@ func (t *AzureblobConnectionResource) Schema(ctx context.Context, req resource.S
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 					"account_name": schema.StringAttribute{
 						MarkdownDescription: "",

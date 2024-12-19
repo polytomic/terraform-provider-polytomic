@@ -37,10 +37,7 @@ data "polytomic_hubspot_connection" "hubspot" {
 
 Optional:
 
-- `client_id` (String)
-- `client_secret` (String)
 - `hub_domain` (String)
 - `hub_user` (String)
-- `oauth_refresh_token` (String)
 
 

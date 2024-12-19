@@ -43,6 +43,6 @@ resource "polytomic_unbounce_connection" "unbounce" {
 
 Required:
 
-- `api_key` (String)
+- `api_key` (String, Sensitive)
 
 

@@ -47,7 +47,7 @@ Required:
 
 - `access_id` (String, Sensitive)
 - `region` (String)
-- `secret_access_key` (String)
+- `secret_access_key` (String, Sensitive)
 
 Optional:
 

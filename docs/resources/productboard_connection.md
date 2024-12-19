@@ -42,6 +42,6 @@ resource "polytomic_productboard_connection" "productboard" {
 
 Optional:
 
-- `access_key` (String)
+- `access_key` (String, Sensitive)
 
 

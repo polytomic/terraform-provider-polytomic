@@ -55,7 +55,7 @@ func (t *ConstructionwireConnectionResource) Schema(ctx context.Context, req res
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 				},
 

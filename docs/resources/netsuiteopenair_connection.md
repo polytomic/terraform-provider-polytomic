@@ -42,8 +42,8 @@ resource "polytomic_netsuiteopenair_connection" "netsuiteopenair" {
 
 Required:
 
-- `client_id` (String)
-- `client_secret` (String)
+- `client_id` (String, Sensitive)
+- `client_secret` (String, Sensitive)
 - `company_id` (String)
 
 

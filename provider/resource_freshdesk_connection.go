@@ -48,7 +48,7 @@ func (t *FreshdeskConnectionResource) Schema(ctx context.Context, req resource.S
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 					"subdomain": schema.StringAttribute{
 						MarkdownDescription: "e.g. 'polytomic' if your helpdesk is at https://polytomic.freshdesk.com",

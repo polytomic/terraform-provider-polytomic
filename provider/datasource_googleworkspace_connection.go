@@ -64,13 +64,6 @@ func (d *GoogleworkspaceConnectionDataSource) Schema(ctx context.Context, req da
 						Computed:            false,
 						Sensitive:           false,
 					},
-					"service_account": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
 				},
 				Optional: true,
 			},
@@ -118,9 +111,6 @@ func (d *GoogleworkspaceConnectionDataSource) Read(ctx context.Context, req data
 			),
 			"customer_id": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["customer_id"], "string").(string),
-			),
-			"service_account": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["service_account"], "string").(string),
 			),
 		},
 	)

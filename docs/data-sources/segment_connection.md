@@ -35,8 +35,4 @@ data "polytomic_segment_connection" "segment" {
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
-Required:
-
-- `write_key` (String)
-
 

@@ -50,31 +50,10 @@ func (d *SalesloftConnectionDataSource) Schema(ctx context.Context, req datasour
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
-					"api_key": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Sensitive:           false,
-					},
-					"application_id": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Sensitive:           false,
-					},
 					"auth_method": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            true,
 						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
-					"client_secret": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
 						Computed:            false,
 						Sensitive:           false,
 					},
@@ -83,13 +62,6 @@ func (d *SalesloftConnectionDataSource) Schema(ctx context.Context, req datasour
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
-						Sensitive:           false,
-					},
-					"oauth_refresh_token": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
 						Sensitive:           false,
 					},
 					"oauth_token_expiry": schema.StringAttribute{
@@ -141,23 +113,11 @@ func (d *SalesloftConnectionDataSource) Read(ctx context.Context, req datasource
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttributeTypes(ctx),
 		map[string]attr.Value{
-			"api_key": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["api_key"], "string").(string),
-			),
-			"application_id": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["application_id"], "string").(string),
-			),
 			"auth_method": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["auth_method"], "string").(string),
 			),
-			"client_secret": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["client_secret"], "string").(string),
-			),
 			"connected_user": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["connected_user"], "string").(string),
-			),
-			"oauth_refresh_token": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["oauth_refresh_token"], "string").(string),
 			),
 			"oauth_token_expiry": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["oauth_token_expiry"], "string").(string),

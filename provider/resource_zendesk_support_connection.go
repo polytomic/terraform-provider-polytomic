@@ -48,7 +48,7 @@ func (t *Zendesk_supportConnectionResource) Schema(ctx context.Context, req reso
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 					"auth_method": schema.StringAttribute{
 						MarkdownDescription: "",

@@ -55,7 +55,7 @@ func (t *AwsopensearchConnectionResource) Schema(ctx context.Context, req resour
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 					"aws_user": schema.StringAttribute{
 						MarkdownDescription: "",

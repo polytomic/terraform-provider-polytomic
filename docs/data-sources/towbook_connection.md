@@ -35,8 +35,4 @@ data "polytomic_towbook_connection" "towbook" {
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
-Required:
-
-- `api_token` (String)
-
 

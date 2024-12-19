@@ -39,7 +39,6 @@ Required:
 
 - `account` (String)
 - `hostname` (String)
-- `passwd` (String)
 - `port` (Number)
 
 Optional:
@@ -49,7 +48,6 @@ Optional:
 - `ssh` (Boolean)
 - `ssh_host` (String)
 - `ssh_port` (Number)
-- `ssh_private_key` (String)
 - `ssh_user` (String)
 - `ssl` (Boolean)
 

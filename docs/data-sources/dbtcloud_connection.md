@@ -37,7 +37,6 @@ data "polytomic_dbtcloud_connection" "dbtcloud" {
 
 Required:
 
-- `token` (String)
 - `url` (String) URL of dbt Cloud instance e.g. https://cloud.getdbt.com
 
 Optional:

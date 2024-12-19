@@ -44,7 +44,7 @@ resource "polytomic_posthog_connection" "posthog" {
 
 Required:
 
-- `api_key` (String)
+- `api_key` (String, Sensitive)
 - `location` (String)
 - `project` (String)
 

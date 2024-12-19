@@ -37,8 +37,6 @@ data "polytomic_netsuiteopenair_connection" "netsuiteopenair" {
 
 Required:
 
-- `client_id` (String)
-- `client_secret` (String)
 - `company_id` (String)
 
 

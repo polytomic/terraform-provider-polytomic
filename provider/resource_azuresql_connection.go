@@ -62,7 +62,7 @@ func (t *AzuresqlConnectionResource) Schema(ctx context.Context, req resource.Sc
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 					"port": schema.Int64Attribute{
 						MarkdownDescription: "",

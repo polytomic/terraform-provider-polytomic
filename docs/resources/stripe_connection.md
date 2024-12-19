@@ -43,6 +43,6 @@ resource "polytomic_stripe_connection" "stripe" {
 
 Required:
 
-- `api_key` (String)
+- `api_key` (String, Sensitive)
 
 

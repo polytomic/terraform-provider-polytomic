@@ -50,20 +50,6 @@ func (d *HubspotConnectionDataSource) Schema(ctx context.Context, req datasource
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
-					"client_id": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Sensitive:           false,
-					},
-					"client_secret": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Sensitive:           false,
-					},
 					"hub_domain": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            false,
@@ -72,13 +58,6 @@ func (d *HubspotConnectionDataSource) Schema(ctx context.Context, req datasource
 						Sensitive:           false,
 					},
 					"hub_user": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Sensitive:           false,
-					},
-					"oauth_refresh_token": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
@@ -127,20 +106,11 @@ func (d *HubspotConnectionDataSource) Read(ctx context.Context, req datasource.R
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttributeTypes(ctx),
 		map[string]attr.Value{
-			"client_id": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["client_id"], "string").(string),
-			),
-			"client_secret": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["client_secret"], "string").(string),
-			),
 			"hub_domain": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["hub_domain"], "string").(string),
 			),
 			"hub_user": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["hub_user"], "string").(string),
-			),
-			"oauth_refresh_token": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["oauth_refresh_token"], "string").(string),
 			),
 		},
 	)

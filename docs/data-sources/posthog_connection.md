@@ -37,7 +37,6 @@ data "polytomic_posthog_connection" "posthog" {
 
 Required:
 
-- `api_key` (String)
 - `location` (String)
 - `project` (String)
 

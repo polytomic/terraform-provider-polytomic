@@ -57,14 +57,14 @@ func (t *GoogleadsConnectionResource) Schema(ctx context.Context, req resource.S
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 					"client_secret": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 					"connected_user": schema.StringAttribute{
 						MarkdownDescription: "",
@@ -79,7 +79,7 @@ func (t *GoogleadsConnectionResource) Schema(ctx context.Context, req resource.S
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 					"oauth_token_expiry": schema.StringAttribute{
 						MarkdownDescription: "",

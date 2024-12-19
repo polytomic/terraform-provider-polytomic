@@ -43,6 +43,6 @@ resource "polytomic_delighted_connection" "delighted" {
 
 Required:
 
-- `api_key` (String)
+- `api_key` (String, Sensitive)
 
 

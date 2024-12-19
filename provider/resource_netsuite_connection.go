@@ -62,7 +62,7 @@ func (t *NetsuiteConnectionResource) Schema(ctx context.Context, req resource.Sc
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 					"token": schema.StringAttribute{
 						MarkdownDescription: "",
@@ -76,7 +76,7 @@ func (t *NetsuiteConnectionResource) Schema(ctx context.Context, req resource.Sc
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 				},
 

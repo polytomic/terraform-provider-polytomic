@@ -50,13 +50,6 @@ func (d *DatabricksConnectionDataSource) Schema(ctx context.Context, req datasou
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
-					"access_token": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
 					"cloud_provider": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            false,
@@ -148,9 +141,6 @@ func (d *DatabricksConnectionDataSource) Read(ctx context.Context, req datasourc
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttributeTypes(ctx),
 		map[string]attr.Value{
-			"access_token": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["access_token"], "string").(string),
-			),
 			"cloud_provider": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["cloud_provider"], "string").(string),
 			),

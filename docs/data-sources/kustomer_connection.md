@@ -37,7 +37,6 @@ data "polytomic_kustomer_connection" "kustomer" {
 
 Required:
 
-- `apikey` (String)
 - `domain` (String) e.g. 'polytomic' if your portal is 'https://polytomic.kustomerapp.com/app'
 
 

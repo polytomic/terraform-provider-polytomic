@@ -57,32 +57,11 @@ func (d *LinkedinadsConnectionDataSource) Schema(ctx context.Context, req dataso
 						Computed:            false,
 						Sensitive:           false,
 					},
-					"client_id": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Sensitive:           false,
-					},
-					"client_secret": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Sensitive:           false,
-					},
 					"connected_user": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
-						Sensitive:           false,
-					},
-					"oauth_refresh_token": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
 						Sensitive:           false,
 					},
 					"oauth_token_expiry": schema.StringAttribute{
@@ -137,17 +116,8 @@ func (d *LinkedinadsConnectionDataSource) Read(ctx context.Context, req datasour
 			"accounts": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["accounts"], "string").(string),
 			),
-			"client_id": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["client_id"], "string").(string),
-			),
-			"client_secret": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["client_secret"], "string").(string),
-			),
 			"connected_user": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["connected_user"], "string").(string),
-			),
-			"oauth_refresh_token": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["oauth_refresh_token"], "string").(string),
 			),
 			"oauth_token_expiry": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["oauth_token_expiry"], "string").(string),

@@ -50,13 +50,6 @@ func (d *Zendesk_supportConnectionDataSource) Schema(ctx context.Context, req da
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
-					"api_token": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Sensitive:           false,
-					},
 					"auth_method": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            true,
@@ -134,9 +127,6 @@ func (d *Zendesk_supportConnectionDataSource) Read(ctx context.Context, req data
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttributeTypes(ctx),
 		map[string]attr.Value{
-			"api_token": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["api_token"], "string").(string),
-			),
 			"auth_method": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["auth_method"], "string").(string),
 			),

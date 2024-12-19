@@ -38,7 +38,6 @@ data "polytomic_marketo_connection" "marketo" {
 Required:
 
 - `client_id` (String)
-- `client_secret` (String)
 - `rest_endpoint` (String)
 
 Optional:

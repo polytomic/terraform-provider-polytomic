@@ -50,20 +50,6 @@ func (d *GsheetsConnectionDataSource) Schema(ctx context.Context, req datasource
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
-					"client_id": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Sensitive:           false,
-					},
-					"client_secret": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Sensitive:           false,
-					},
 					"connect_mode": schema.StringAttribute{
 						MarkdownDescription: "Default: browser",
 						Required:            false,
@@ -78,21 +64,7 @@ func (d *GsheetsConnectionDataSource) Schema(ctx context.Context, req datasource
 						Computed:            false,
 						Sensitive:           false,
 					},
-					"oauth_refresh_token": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Sensitive:           false,
-					},
 					"oauth_token_expiry": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Sensitive:           false,
-					},
-					"service_account": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
@@ -155,26 +127,14 @@ func (d *GsheetsConnectionDataSource) Read(ctx context.Context, req datasource.R
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttributeTypes(ctx),
 		map[string]attr.Value{
-			"client_id": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["client_id"], "string").(string),
-			),
-			"client_secret": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["client_secret"], "string").(string),
-			),
 			"connect_mode": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["connect_mode"], "string").(string),
 			),
 			"has_headers": types.BoolValue(
 				getValueOrEmpty(connection.Data.Configuration["has_headers"], "bool").(bool),
 			),
-			"oauth_refresh_token": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["oauth_refresh_token"], "string").(string),
-			),
 			"oauth_token_expiry": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["oauth_token_expiry"], "string").(string),
-			),
-			"service_account": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["service_account"], "string").(string),
 			),
 			"spreadsheet_id": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["spreadsheet_id"], "string").(string),

@@ -43,8 +43,8 @@ resource "polytomic_strackr_connection" "strackr" {
 
 Required:
 
-- `api_id` (Number)
-- `api_key` (String)
+- `api_id` (Number, Sensitive)
+- `api_key` (String, Sensitive)
 - `currency_type` (String)
 
 Optional:

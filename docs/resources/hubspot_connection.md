@@ -45,10 +45,10 @@ resource "polytomic_hubspot_connection" "hubspot" {
 
 Optional:
 
-- `client_id` (String)
-- `client_secret` (String)
+- `client_id` (String, Sensitive)
+- `client_secret` (String, Sensitive)
 - `hub_domain` (String)
 - `hub_user` (String)
-- `oauth_refresh_token` (String)
+- `oauth_refresh_token` (String, Sensitive)
 
 

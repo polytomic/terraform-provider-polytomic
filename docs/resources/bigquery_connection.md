@@ -43,7 +43,7 @@ resource "polytomic_bigquery_connection" "bigquery" {
 
 Required:
 
-- `service_account` (String)
+- `service_account` (String, Sensitive)
 
 Optional:
 

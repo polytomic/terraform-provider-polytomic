@@ -39,7 +39,6 @@ Required:
 
 - `database` (String)
 - `hostname` (String)
-- `password` (String)
 - `port` (Number)
 - `username` (String)
 

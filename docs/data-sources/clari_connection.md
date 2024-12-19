@@ -35,9 +35,4 @@ data "polytomic_clari_connection" "clari" {
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
-Required:
-
-- `api_key` (String)
-- `api_password` (String)
-
 

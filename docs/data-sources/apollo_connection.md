@@ -35,8 +35,4 @@ data "polytomic_apollo_connection" "apollo" {
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
-Required:
-
-- `apikey` (String)
-
 

@@ -48,7 +48,7 @@ func (t *ChargebeeConnectionResource) Schema(ctx context.Context, req resource.S
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 					"product_catalog": schema.StringAttribute{
 						MarkdownDescription: "",

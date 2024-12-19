@@ -49,7 +49,7 @@ Required:
 - `access_id` (String, Sensitive)
 - `outputbucket` (String) A pre-existing bucket (folder optional) that AWS can use to store query results. ex: s3://polytomic-athena-results/customer-dataset
 - `region` (String)
-- `secret_access_key` (String)
+- `secret_access_key` (String, Sensitive)
 
 Optional:
 

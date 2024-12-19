@@ -44,7 +44,7 @@ resource "polytomic_glean_connection" "glean" {
 
 Required:
 
-- `api_key` (String)
+- `api_key` (String, Sensitive)
 - `domain` (String) https://{domain}-be.glean.com
 
 

@@ -64,21 +64,7 @@ func (d *NetsuiteConnectionDataSource) Schema(ctx context.Context, req datasourc
 						Computed:            false,
 						Sensitive:           false,
 					},
-					"consumer_secret": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
 					"token": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
-					"token_secret": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            true,
 						Optional:            false,
@@ -133,14 +119,8 @@ func (d *NetsuiteConnectionDataSource) Read(ctx context.Context, req datasource.
 			"consumer_key": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["consumer_key"], "string").(string),
 			),
-			"consumer_secret": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["consumer_secret"], "string").(string),
-			),
 			"token": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["token"], "string").(string),
-			),
-			"token_secret": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["token_secret"], "string").(string),
 			),
 		},
 	)

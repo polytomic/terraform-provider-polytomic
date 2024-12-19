@@ -50,13 +50,6 @@ func (d *ScamalyticsConnectionDataSource) Schema(ctx context.Context, req dataso
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
-					"apikey": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
 					"endpoint": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            true,
@@ -106,9 +99,6 @@ func (d *ScamalyticsConnectionDataSource) Read(ctx context.Context, req datasour
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttributeTypes(ctx),
 		map[string]attr.Value{
-			"apikey": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["apikey"], "string").(string),
-			),
 			"endpoint": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["endpoint"], "string").(string),
 			),

@@ -35,9 +35,4 @@ data "polytomic_klaviyo_connection" "klaviyo" {
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
-Required:
-
-- `apikey` (String)
-- `private_apikey` (String)
-
 

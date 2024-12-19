@@ -78,13 +78,6 @@ func (d *MysqlConnectionDataSource) Schema(ctx context.Context, req datasource.S
 						Computed:            false,
 						Sensitive:           false,
 					},
-					"passwd": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
 					"port": schema.Int64Attribute{
 						MarkdownDescription: "",
 						Required:            true,
@@ -107,13 +100,6 @@ func (d *MysqlConnectionDataSource) Schema(ctx context.Context, req datasource.S
 						Sensitive:           false,
 					},
 					"ssh_port": schema.Int64Attribute{
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Sensitive:           false,
-					},
-					"ssh_private_key": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
@@ -188,9 +174,6 @@ func (d *MysqlConnectionDataSource) Read(ctx context.Context, req datasource.Rea
 			"hostname": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["hostname"], "string").(string),
 			),
-			"passwd": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["passwd"], "string").(string),
-			),
 			"port": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["port"], "string").(string),
 			),
@@ -202,9 +185,6 @@ func (d *MysqlConnectionDataSource) Read(ctx context.Context, req datasource.Rea
 			),
 			"ssh_port": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["ssh_port"], "string").(string),
-			),
-			"ssh_private_key": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["ssh_private_key"], "string").(string),
 			),
 			"ssh_user": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["ssh_user"], "string").(string),

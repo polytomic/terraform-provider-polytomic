@@ -50,13 +50,6 @@ func (d *CosmosdbConnectionDataSource) Schema(ctx context.Context, req datasourc
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
-					"key": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
 					"uri": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            true,
@@ -106,9 +99,6 @@ func (d *CosmosdbConnectionDataSource) Read(ctx context.Context, req datasource.
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttributeTypes(ctx),
 		map[string]attr.Value{
-			"key": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["key"], "string").(string),
-			),
 			"uri": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["uri"], "string").(string),
 			),

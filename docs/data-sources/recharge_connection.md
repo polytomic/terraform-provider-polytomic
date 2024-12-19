@@ -35,8 +35,4 @@ data "polytomic_recharge_connection" "recharge" {
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
-Required:
-
-- `api_key` (String)
-
 

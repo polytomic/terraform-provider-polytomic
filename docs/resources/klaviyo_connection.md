@@ -44,7 +44,7 @@ resource "polytomic_klaviyo_connection" "klaviyo" {
 
 Required:
 
-- `apikey` (String)
-- `private_apikey` (String)
+- `apikey` (String, Sensitive)
+- `private_apikey` (String, Sensitive)
 
 

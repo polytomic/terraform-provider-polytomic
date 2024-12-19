@@ -38,7 +38,6 @@ data "polytomic_zoominfo_connection" "zoominfo" {
 Required:
 
 - `client_id` (String)
-- `private_key` (String)
 - `username` (String)
 
 

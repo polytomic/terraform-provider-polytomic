@@ -45,7 +45,7 @@ resource "polytomic_chargebee_connection" "chargebee" {
 
 Required:
 
-- `api_key` (String)
+- `api_key` (String, Sensitive)
 - `product_catalog` (String)
 - `site` (String) https://{site}.chargebee.com
 

@@ -48,7 +48,7 @@ func (t *DatabricksConnectionResource) Schema(ctx context.Context, req resource.
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 					"cloud_provider": schema.StringAttribute{
 						MarkdownDescription: "",

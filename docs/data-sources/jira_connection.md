@@ -42,8 +42,6 @@ Required:
 
 Optional:
 
-- `access_token` (String)
-- `api_key` (String)
 - `username` (String)
 
 

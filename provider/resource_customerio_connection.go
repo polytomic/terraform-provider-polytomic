@@ -48,7 +48,7 @@ func (t *CustomerioConnectionResource) Schema(ctx context.Context, req resource.
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 					"site_id": schema.StringAttribute{
 						MarkdownDescription: "",

@@ -50,22 +50,22 @@ Required:
 
 - `database` (String)
 - `hostname` (String)
-- `password` (String)
+- `password` (String, Sensitive)
 - `port` (Number)
 - `username` (String)
 
 Optional:
 
-- `ca_cert` (String)
+- `ca_cert` (String, Sensitive)
 - `change_detection` (Boolean)
-- `client_certificate` (String)
+- `client_certificate` (String, Sensitive)
 - `client_certs` (Boolean)
-- `client_key` (String)
+- `client_key` (String, Sensitive)
 - `publication` (String)
 - `ssh` (Boolean)
 - `ssh_host` (String)
 - `ssh_port` (Number)
-- `ssh_private_key` (String)
+- `ssh_private_key` (String, Sensitive)
 - `ssh_user` (String)
 - `ssl` (Boolean)
 

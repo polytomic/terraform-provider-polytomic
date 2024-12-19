@@ -48,7 +48,7 @@ func (t *YotpoConnectionResource) Schema(ctx context.Context, req resource.Schem
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 					"store_id": schema.StringAttribute{
 						MarkdownDescription: "Also known as Client ID or Store ID.",

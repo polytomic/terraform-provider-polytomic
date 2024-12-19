@@ -37,9 +37,6 @@ data "polytomic_outreach_connection" "outreach" {
 
 Optional:
 
-- `client_id` (String)
-- `client_secret` (String)
-- `oauth_refresh_token` (String)
 - `oauth_token_expiry` (String)
 
 

@@ -39,8 +39,6 @@ Required:
 
 - `account_id` (String)
 - `consumer_key` (String)
-- `consumer_secret` (String)
 - `token` (String)
-- `token_secret` (String)
 
 

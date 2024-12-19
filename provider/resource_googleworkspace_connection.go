@@ -65,7 +65,7 @@ func (t *GoogleworkspaceConnectionResource) Schema(ctx context.Context, req reso
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 				},
 

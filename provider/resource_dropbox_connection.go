@@ -48,14 +48,14 @@ func (t *DropboxConnectionResource) Schema(ctx context.Context, req resource.Sch
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 					"app_secret": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 					"bucket": schema.StringAttribute{
 						MarkdownDescription: "",
@@ -76,7 +76,7 @@ func (t *DropboxConnectionResource) Schema(ctx context.Context, req resource.Sch
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 					"oauth_token_expiry": schema.StringAttribute{
 						MarkdownDescription: "",

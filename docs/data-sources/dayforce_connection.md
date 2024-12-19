@@ -39,7 +39,6 @@ Required:
 
 - `client_name` (String)
 - `company_id` (String)
-- `password` (String)
 - `username` (String)
 
 

@@ -62,7 +62,7 @@ func (t *MssqlConnectionResource) Schema(ctx context.Context, req resource.Schem
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 					"port": schema.Int64Attribute{
 						MarkdownDescription: "",

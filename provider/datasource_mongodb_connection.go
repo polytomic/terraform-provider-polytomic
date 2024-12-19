@@ -71,13 +71,6 @@ func (d *MongodbConnectionDataSource) Schema(ctx context.Context, req datasource
 						Computed:            false,
 						Sensitive:           false,
 					},
-					"password": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Sensitive:           false,
-					},
 					"srv": schema.BoolAttribute{
 						MarkdownDescription: "",
 						Required:            false,
@@ -149,9 +142,6 @@ func (d *MongodbConnectionDataSource) Read(ctx context.Context, req datasource.R
 			),
 			"params": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["params"], "string").(string),
-			),
-			"password": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["password"], "string").(string),
 			),
 			"srv": types.BoolValue(
 				getValueOrEmpty(connection.Data.Configuration["srv"], "bool").(bool),

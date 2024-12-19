@@ -48,14 +48,14 @@ func (t *SalesforceConnectionResource) Schema(ctx context.Context, req resource.
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 					"client_secret": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 					"connect_mode": schema.StringAttribute{
 						MarkdownDescription: "Default: browser (i.e. oauth through Polytomic). If 'code' is specified, the response will include an auth_code for the user to enter when completing authorization. NOTE: when supplying client_id and client_secret the connect mode must be 'api'.",
@@ -104,7 +104,7 @@ func (t *SalesforceConnectionResource) Schema(ctx context.Context, req resource.
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 					"username": schema.StringAttribute{
 						MarkdownDescription: "",

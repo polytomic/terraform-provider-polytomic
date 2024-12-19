@@ -62,7 +62,7 @@ func (t *MixpanelConnectionResource) Schema(ctx context.Context, req resource.Sc
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 					"service_account_username": schema.StringAttribute{
 						MarkdownDescription: "",

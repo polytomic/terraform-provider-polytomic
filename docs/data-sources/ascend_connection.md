@@ -35,8 +35,4 @@ data "polytomic_ascend_connection" "ascend" {
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
-Required:
-
-- `api_key` (String)
-
 

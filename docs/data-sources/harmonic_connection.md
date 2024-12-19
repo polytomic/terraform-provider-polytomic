@@ -35,8 +35,4 @@ data "polytomic_harmonic_connection" "harmonic" {
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
-Required:
-
-- `api_key` (String)
-
 

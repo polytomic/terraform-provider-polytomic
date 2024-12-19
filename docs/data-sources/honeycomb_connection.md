@@ -37,7 +37,6 @@ data "polytomic_honeycomb_connection" "honeycomb" {
 
 Required:
 
-- `api_key` (String)
 - `dataset` (String)
 
 

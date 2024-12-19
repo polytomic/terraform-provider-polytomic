@@ -57,13 +57,6 @@ func (d *MarketoConnectionDataSource) Schema(ctx context.Context, req datasource
 						Computed:            false,
 						Sensitive:           false,
 					},
-					"client_secret": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
 					"concurrent_imports": schema.Int64Attribute{
 						MarkdownDescription: "",
 						Required:            false,
@@ -143,9 +136,6 @@ func (d *MarketoConnectionDataSource) Read(ctx context.Context, req datasource.R
 		map[string]attr.Value{
 			"client_id": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["client_id"], "string").(string),
-			),
-			"client_secret": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["client_secret"], "string").(string),
 			),
 			"concurrent_imports": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["concurrent_imports"], "string").(string),

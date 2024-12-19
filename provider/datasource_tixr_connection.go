@@ -57,13 +57,6 @@ func (d *TixrConnectionDataSource) Schema(ctx context.Context, req datasource.Sc
 						Computed:            false,
 						Sensitive:           false,
 					},
-					"client_secret": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
 				},
 				Optional: true,
 			},
@@ -108,9 +101,6 @@ func (d *TixrConnectionDataSource) Read(ctx context.Context, req datasource.Read
 		map[string]attr.Value{
 			"client_private_key": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["client_private_key"], "string").(string),
-			),
-			"client_secret": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["client_secret"], "string").(string),
 			),
 		},
 	)

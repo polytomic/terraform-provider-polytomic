@@ -37,7 +37,6 @@ data "polytomic_shopify_connection" "shopify" {
 
 Required:
 
-- `admin_api_token` (String)
 - `store` (String) Enter your Shopify store name.
 
 

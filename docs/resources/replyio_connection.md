@@ -43,6 +43,6 @@ resource "polytomic_replyio_connection" "replyio" {
 
 Required:
 
-- `api_key` (String)
+- `api_key` (String, Sensitive)
 
 

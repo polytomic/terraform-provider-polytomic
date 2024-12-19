@@ -57,13 +57,6 @@ func (d *RedshiftConnectionDataSource) Schema(ctx context.Context, req datasourc
 						Computed:            false,
 						Sensitive:           false,
 					},
-					"aws_secret_access_key": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Sensitive:           false,
-					},
 					"aws_user": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            false,
@@ -79,13 +72,6 @@ func (d *RedshiftConnectionDataSource) Schema(ctx context.Context, req datasourc
 						Sensitive:           false,
 					},
 					"hostname": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
-					"password": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            true,
 						Optional:            false,
@@ -128,13 +114,6 @@ func (d *RedshiftConnectionDataSource) Schema(ctx context.Context, req datasourc
 						Sensitive:           false,
 					},
 					"ssh_port": schema.Int64Attribute{
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Sensitive:           false,
-					},
-					"ssh_private_key": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
@@ -200,9 +179,6 @@ func (d *RedshiftConnectionDataSource) Read(ctx context.Context, req datasource.
 			"aws_access_key_id": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["aws_access_key_id"], "string").(string),
 			),
-			"aws_secret_access_key": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["aws_secret_access_key"], "string").(string),
-			),
 			"aws_user": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["aws_user"], "string").(string),
 			),
@@ -211,9 +187,6 @@ func (d *RedshiftConnectionDataSource) Read(ctx context.Context, req datasource.
 			),
 			"hostname": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["hostname"], "string").(string),
-			),
-			"password": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["password"], "string").(string),
 			),
 			"port": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["port"], "string").(string),
@@ -232,9 +205,6 @@ func (d *RedshiftConnectionDataSource) Read(ctx context.Context, req datasource.
 			),
 			"ssh_port": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["ssh_port"], "string").(string),
-			),
-			"ssh_private_key": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["ssh_private_key"], "string").(string),
 			),
 			"ssh_user": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["ssh_user"], "string").(string),

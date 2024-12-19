@@ -48,7 +48,7 @@ func (t *MondayConnectionResource) Schema(ctx context.Context, req resource.Sche
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 				},
 

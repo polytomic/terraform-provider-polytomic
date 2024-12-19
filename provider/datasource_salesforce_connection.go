@@ -50,20 +50,6 @@ func (d *SalesforceConnectionDataSource) Schema(ctx context.Context, req datasou
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
-					"client_id": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
-					"client_secret": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
 					"connect_mode": schema.StringAttribute{
 						MarkdownDescription: "Default: browser (i.e. oauth through Polytomic). If 'code' is specified, the response will include an auth_code for the user to enter when completing authorization. NOTE: when supplying client_id and client_secret the connect mode must be 'api'.",
 						Required:            false,
@@ -101,13 +87,6 @@ func (d *SalesforceConnectionDataSource) Schema(ctx context.Context, req datasou
 					},
 					"enforce_api_limits": schema.BoolAttribute{
 						MarkdownDescription: "If true, Polytomic will restrict itself to a fixed daily cap of Salesforce API calls enforced by the number in daily_api_calls.",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Sensitive:           false,
-					},
-					"oauth_refresh_token": schema.StringAttribute{
-						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -162,12 +141,6 @@ func (d *SalesforceConnectionDataSource) Read(ctx context.Context, req datasourc
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttributeTypes(ctx),
 		map[string]attr.Value{
-			"client_id": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["client_id"], "string").(string),
-			),
-			"client_secret": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["client_secret"], "string").(string),
-			),
 			"connect_mode": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["connect_mode"], "string").(string),
 			),
@@ -185,9 +158,6 @@ func (d *SalesforceConnectionDataSource) Read(ctx context.Context, req datasourc
 			),
 			"enforce_api_limits": types.BoolValue(
 				getValueOrEmpty(connection.Data.Configuration["enforce_api_limits"], "bool").(bool),
-			),
-			"oauth_refresh_token": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["oauth_refresh_token"], "string").(string),
 			),
 			"username": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["username"], "string").(string),

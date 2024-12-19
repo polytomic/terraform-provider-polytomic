@@ -37,7 +37,6 @@ data "polytomic_yotpo_connection" "yotpo" {
 
 Required:
 
-- `secret` (String)
 - `store_id` (String) Also known as Client ID or Store ID.
 
 

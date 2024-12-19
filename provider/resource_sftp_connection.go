@@ -90,7 +90,7 @@ func (t *SftpConnectionResource) Schema(ctx context.Context, req resource.Schema
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 					"ssh_user": schema.StringAttribute{
 						MarkdownDescription: "",

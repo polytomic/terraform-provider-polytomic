@@ -43,6 +43,6 @@ resource "polytomic_recharge_connection" "recharge" {
 
 Required:
 
-- `api_key` (String)
+- `api_key` (String, Sensitive)
 
 

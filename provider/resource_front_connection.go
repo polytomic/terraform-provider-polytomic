@@ -48,7 +48,7 @@ func (t *FrontConnectionResource) Schema(ctx context.Context, req resource.Schem
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 				},
 

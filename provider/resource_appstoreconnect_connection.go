@@ -55,7 +55,7 @@ func (t *AppstoreconnectConnectionResource) Schema(ctx context.Context, req reso
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 					"private_key_id": schema.StringAttribute{
 						MarkdownDescription: "",

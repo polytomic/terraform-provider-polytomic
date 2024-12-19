@@ -50,13 +50,6 @@ func (d *PosthogConnectionDataSource) Schema(ctx context.Context, req datasource
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
-					"api_key": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
 					"authenticated_as": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            false,
@@ -120,9 +113,6 @@ func (d *PosthogConnectionDataSource) Read(ctx context.Context, req datasource.R
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttributeTypes(ctx),
 		map[string]attr.Value{
-			"api_key": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["api_key"], "string").(string),
-			),
 			"authenticated_as": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["authenticated_as"], "string").(string),
 			),

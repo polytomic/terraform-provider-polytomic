@@ -57,27 +57,6 @@ func (d *GithubConnectionDataSource) Schema(ctx context.Context, req datasource.
 						Computed:            false,
 						Sensitive:           false,
 					},
-					"client_id": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Sensitive:           false,
-					},
-					"client_secret": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Sensitive:           false,
-					},
-					"oauth_access_token": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
 					"repositories": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            false,
@@ -129,15 +108,6 @@ func (d *GithubConnectionDataSource) Read(ctx context.Context, req datasource.Re
 		map[string]attr.Value{
 			"authenticated": types.BoolValue(
 				getValueOrEmpty(connection.Data.Configuration["authenticated"], "bool").(bool),
-			),
-			"client_id": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["client_id"], "string").(string),
-			),
-			"client_secret": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["client_secret"], "string").(string),
-			),
-			"oauth_access_token": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["oauth_access_token"], "string").(string),
 			),
 			"repositories": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["repositories"], "string").(string),

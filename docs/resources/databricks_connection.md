@@ -46,7 +46,7 @@ resource "polytomic_databricks_connection" "databricks" {
 
 Required:
 
-- `access_token` (String)
+- `access_token` (String, Sensitive)
 - `http_path` (String)
 - `port` (Number)
 - `server_hostname` (String)

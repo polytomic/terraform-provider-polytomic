@@ -57,38 +57,10 @@ func (d *GongConnectionDataSource) Schema(ctx context.Context, req datasource.Sc
 						Computed:            false,
 						Sensitive:           false,
 					},
-					"access_secret": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Sensitive:           false,
-					},
 					"auth_method": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            true,
 						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
-					"client_id": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Sensitive:           false,
-					},
-					"client_secret": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Sensitive:           false,
-					},
-					"oauth_refresh_token": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
 						Computed:            false,
 						Sensitive:           false,
 					},
@@ -151,20 +123,8 @@ func (d *GongConnectionDataSource) Read(ctx context.Context, req datasource.Read
 			"access_key": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["access_key"], "string").(string),
 			),
-			"access_secret": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["access_secret"], "string").(string),
-			),
 			"auth_method": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["auth_method"], "string").(string),
-			),
-			"client_id": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["client_id"], "string").(string),
-			),
-			"client_secret": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["client_secret"], "string").(string),
-			),
-			"oauth_refresh_token": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["oauth_refresh_token"], "string").(string),
 			),
 			"oauth_token_expiry": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["oauth_token_expiry"], "string").(string),

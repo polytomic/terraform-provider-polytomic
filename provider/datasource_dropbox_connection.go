@@ -50,20 +50,6 @@ func (d *DropboxConnectionDataSource) Schema(ctx context.Context, req datasource
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
-					"app_key": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Sensitive:           false,
-					},
-					"app_secret": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Sensitive:           false,
-					},
 					"bucket": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            true,
@@ -73,13 +59,6 @@ func (d *DropboxConnectionDataSource) Schema(ctx context.Context, req datasource
 					},
 					"is_single_table": schema.BoolAttribute{
 						MarkdownDescription: "Treat the files as a single table.",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Sensitive:           false,
-					},
-					"oauth_refresh_token": schema.StringAttribute{
-						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -134,20 +113,11 @@ func (d *DropboxConnectionDataSource) Read(ctx context.Context, req datasource.R
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttributeTypes(ctx),
 		map[string]attr.Value{
-			"app_key": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["app_key"], "string").(string),
-			),
-			"app_secret": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["app_secret"], "string").(string),
-			),
 			"bucket": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["bucket"], "string").(string),
 			),
 			"is_single_table": types.BoolValue(
 				getValueOrEmpty(connection.Data.Configuration["is_single_table"], "bool").(bool),
-			),
-			"oauth_refresh_token": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["oauth_refresh_token"], "string").(string),
 			),
 			"oauth_token_expiry": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["oauth_token_expiry"], "string").(string),

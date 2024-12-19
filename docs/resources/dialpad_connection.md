@@ -43,6 +43,6 @@ resource "polytomic_dialpad_connection" "dialpad" {
 
 Required:
 
-- `api_key` (String)
+- `api_key` (String, Sensitive)
 
 

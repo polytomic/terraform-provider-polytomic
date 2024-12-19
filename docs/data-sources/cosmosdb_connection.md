@@ -37,7 +37,6 @@ data "polytomic_cosmosdb_connection" "cosmosdb" {
 
 Required:
 
-- `key` (String)
 - `uri` (String)
 
 

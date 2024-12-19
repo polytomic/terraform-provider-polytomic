@@ -41,13 +41,9 @@ Required:
 
 Optional:
 
-- `client_id` (String)
-- `client_secret` (String)
 - `connect_mode` (String) Default: browser
 - `has_headers` (Boolean)
-- `oauth_refresh_token` (String)
 - `oauth_token_expiry` (String)
-- `service_account` (String)
 - `user_email` (String)
 
 

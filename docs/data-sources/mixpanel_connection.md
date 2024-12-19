@@ -39,7 +39,6 @@ Required:
 
 - `project_id` (Number)
 - `region` (String)
-- `service_account_secret` (String)
 - `service_account_username` (String)
 
 

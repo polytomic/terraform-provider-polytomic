@@ -6,10 +6,8 @@ package provider
 import (
 	"context"
 
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/polytomic/terraform-provider-polytomic/provider/internal/client"
 )
@@ -49,16 +47,8 @@ func (d *ProductboardConnectionDataSource) Schema(ctx context.Context, req datas
 				Optional:            true,
 			},
 			"configuration": schema.SingleNestedAttribute{
-				Attributes: map[string]schema.Attribute{
-					"access_key": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Sensitive:           false,
-					},
-				},
-				Optional: true,
+				Attributes: map[string]schema.Attribute{},
+				Optional:   true,
 			},
 			"force_destroy": schema.BoolAttribute{
 				MarkdownDescription: forceDestroyMessage,
@@ -95,20 +85,6 @@ func (d *ProductboardConnectionDataSource) Read(ctx context.Context, req datasou
 	data.Id = types.StringPointerValue(connection.Data.Id)
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
-	var diags diag.Diagnostics
-	data.Configuration, diags = types.ObjectValue(
-		data.Configuration.AttributeTypes(ctx),
-		map[string]attr.Value{
-			"access_key": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["access_key"], "string").(string),
-			),
-		},
-	)
-
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
 
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)

@@ -50,13 +50,6 @@ func (d *SlackConnectionDataSource) Schema(ctx context.Context, req datasource.S
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
-					"api_key": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
 					"event_url": schema.StringAttribute{
 						MarkdownDescription: "Used if ingesting Slack events.",
 						Required:            false,
@@ -106,9 +99,6 @@ func (d *SlackConnectionDataSource) Read(ctx context.Context, req datasource.Rea
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttributeTypes(ctx),
 		map[string]attr.Value{
-			"api_key": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["api_key"], "string").(string),
-			),
 			"event_url": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["event_url"], "string").(string),
 			),

@@ -44,7 +44,7 @@ resource "polytomic_dbtcloud_connection" "dbtcloud" {
 
 Required:
 
-- `token` (String)
+- `token` (String, Sensitive)
 - `url` (String) URL of dbt Cloud instance e.g. https://cloud.getdbt.com
 
 Optional:

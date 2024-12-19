@@ -43,7 +43,7 @@ resource "polytomic_affinity_connection" "affinity" {
 
 Required:
 
-- `api_key` (String)
+- `api_key` (String, Sensitive)
 
 Optional:
 

@@ -45,7 +45,7 @@ resource "polytomic_customerio_connection" "customerio" {
 
 Required:
 
-- `app_api_key` (String)
+- `app_api_key` (String, Sensitive)
 - `site_id` (String)
 - `tracking_api_key` (String)
 

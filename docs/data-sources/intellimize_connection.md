@@ -35,8 +35,4 @@ data "polytomic_intellimize_connection" "intellimize" {
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
-Required:
-
-- `apikey` (String)
-
 

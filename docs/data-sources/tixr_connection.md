@@ -38,6 +38,5 @@ data "polytomic_tixr_connection" "tixr" {
 Required:
 
 - `client_private_key` (String) e.g. MDAwMA==
-- `client_secret` (String)
 
 

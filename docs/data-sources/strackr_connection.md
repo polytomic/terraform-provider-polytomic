@@ -37,8 +37,6 @@ data "polytomic_strackr_connection" "strackr" {
 
 Required:
 
-- `api_id` (Number)
-- `api_key` (String)
 - `currency_type` (String)
 
 Optional:

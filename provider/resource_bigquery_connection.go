@@ -80,7 +80,7 @@ func (t *BigqueryConnectionResource) Schema(ctx context.Context, req resource.Sc
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 					"structured_values_as_json": schema.BoolAttribute{
 						MarkdownDescription: "",

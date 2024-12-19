@@ -41,11 +41,7 @@ Required:
 
 Optional:
 
-- `api_key` (String)
-- `application_id` (String)
-- `client_secret` (String)
 - `connected_user` (String)
-- `oauth_refresh_token` (String)
 - `oauth_token_expiry` (String)
 
 

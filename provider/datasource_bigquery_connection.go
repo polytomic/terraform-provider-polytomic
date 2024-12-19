@@ -78,13 +78,6 @@ func (d *BigqueryConnectionDataSource) Schema(ctx context.Context, req datasourc
 						Computed:            true,
 						Sensitive:           false,
 					},
-					"service_account": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
 					"structured_values_as_json": schema.BoolAttribute{
 						MarkdownDescription: "",
 						Required:            false,
@@ -145,9 +138,6 @@ func (d *BigqueryConnectionDataSource) Read(ctx context.Context, req datasource.
 			),
 			"project_id": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["project_id"], "string").(string),
-			),
-			"service_account": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["service_account"], "string").(string),
 			),
 			"structured_values_as_json": types.BoolValue(
 				getValueOrEmpty(connection.Data.Configuration["structured_values_as_json"], "bool").(bool),

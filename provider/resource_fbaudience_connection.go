@@ -69,7 +69,7 @@ func (t *FbaudienceConnectionResource) Schema(ctx context.Context, req resource.
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 					"graph_api_version": schema.StringAttribute{
 						MarkdownDescription: "",

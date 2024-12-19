@@ -51,7 +51,7 @@ Optional:
 - `skip_lines` (Number) Skip first N lines of each CSV file.
 - `ssh_host` (String)
 - `ssh_port` (Number)
-- `ssh_private_key` (String)
+- `ssh_private_key` (String, Sensitive)
 - `ssh_user` (String)
 
 

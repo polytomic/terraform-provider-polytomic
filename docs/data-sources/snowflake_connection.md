@@ -45,9 +45,6 @@ Optional:
 
 - `key_pair_auth` (Boolean)
 - `params` (String) Additional connection parameters, formatted as a query string
-- `password` (String)
-- `private_key` (String)
-- `private_key_passphrase` (String)
 - `warehouse` (String)
 
 

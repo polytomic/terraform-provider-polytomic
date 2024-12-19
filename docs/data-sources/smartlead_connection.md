@@ -35,8 +35,4 @@ data "polytomic_smartlead_connection" "smartlead" {
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
-Required:
-
-- `api_key` (String)
-
 

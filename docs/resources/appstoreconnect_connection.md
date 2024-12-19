@@ -43,7 +43,7 @@ resource "polytomic_appstoreconnect_connection" "appstoreconnect" {
 Required:
 
 - `issuer_id` (String)
-- `private_key` (String)
+- `private_key` (String, Sensitive)
 - `private_key_id` (String)
 - `vendor_number` (String)
 

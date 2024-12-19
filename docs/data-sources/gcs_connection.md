@@ -38,7 +38,6 @@ data "polytomic_gcs_connection" "gcs" {
 Required:
 
 - `bucket` (String)
-- `service_account` (String)
 
 Optional:
 

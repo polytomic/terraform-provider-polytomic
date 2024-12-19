@@ -57,13 +57,6 @@ func (d *AmplitudeConnectionDataSource) Schema(ctx context.Context, req datasour
 						Computed:            false,
 						Sensitive:           false,
 					},
-					"secret_key": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
 				},
 				Optional: true,
 			},
@@ -108,9 +101,6 @@ func (d *AmplitudeConnectionDataSource) Read(ctx context.Context, req datasource
 		map[string]attr.Value{
 			"api_key": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["api_key"], "string").(string),
-			),
-			"secret_key": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["secret_key"], "string").(string),
 			),
 		},
 	)

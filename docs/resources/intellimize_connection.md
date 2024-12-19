@@ -43,6 +43,6 @@ resource "polytomic_intellimize_connection" "intellimize" {
 
 Required:
 
-- `apikey` (String)
+- `apikey` (String, Sensitive)
 
 

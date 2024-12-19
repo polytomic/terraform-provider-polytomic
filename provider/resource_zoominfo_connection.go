@@ -55,7 +55,7 @@ func (t *ZoominfoConnectionResource) Schema(ctx context.Context, req resource.Sc
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 					"username": schema.StringAttribute{
 						MarkdownDescription: "",

@@ -50,8 +50,8 @@ Required:
 
 Optional:
 
-- `access_token` (String)
-- `api_key` (String)
+- `access_token` (String, Sensitive)
+- `api_key` (String, Sensitive)
 - `username` (String)
 
 

@@ -42,6 +42,6 @@ resource "polytomic_monday_connection" "monday" {
 
 Required:
 
-- `api_key` (String)
+- `api_key` (String, Sensitive)
 
 

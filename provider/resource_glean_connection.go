@@ -48,7 +48,7 @@ func (t *GleanConnectionResource) Schema(ctx context.Context, req resource.Schem
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 					"domain": schema.StringAttribute{
 						MarkdownDescription: "https://{domain}-be.glean.com",

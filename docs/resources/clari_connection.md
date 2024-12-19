@@ -42,7 +42,7 @@ resource "polytomic_clari_connection" "clari" {
 
 Required:
 
-- `api_key` (String)
-- `api_password` (String)
+- `api_key` (String, Sensitive)
+- `api_password` (String, Sensitive)
 
 

@@ -50,13 +50,6 @@ func (d *PostgresqlConnectionDataSource) Schema(ctx context.Context, req datasou
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
-					"ca_cert": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Sensitive:           false,
-					},
 					"change_detection": schema.BoolAttribute{
 						MarkdownDescription: "",
 						Required:            false,
@@ -64,21 +57,7 @@ func (d *PostgresqlConnectionDataSource) Schema(ctx context.Context, req datasou
 						Computed:            false,
 						Sensitive:           false,
 					},
-					"client_certificate": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Sensitive:           false,
-					},
 					"client_certs": schema.BoolAttribute{
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Sensitive:           false,
-					},
-					"client_key": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
@@ -93,13 +72,6 @@ func (d *PostgresqlConnectionDataSource) Schema(ctx context.Context, req datasou
 						Sensitive:           false,
 					},
 					"hostname": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
-					"password": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            true,
 						Optional:            false,
@@ -135,13 +107,6 @@ func (d *PostgresqlConnectionDataSource) Schema(ctx context.Context, req datasou
 						Sensitive:           false,
 					},
 					"ssh_port": schema.Int64Attribute{
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Sensitive:           false,
-					},
-					"ssh_private_key": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
@@ -211,29 +176,17 @@ func (d *PostgresqlConnectionDataSource) Read(ctx context.Context, req datasourc
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttributeTypes(ctx),
 		map[string]attr.Value{
-			"ca_cert": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["ca_cert"], "string").(string),
-			),
 			"change_detection": types.BoolValue(
 				getValueOrEmpty(connection.Data.Configuration["change_detection"], "bool").(bool),
 			),
-			"client_certificate": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["client_certificate"], "string").(string),
-			),
 			"client_certs": types.BoolValue(
 				getValueOrEmpty(connection.Data.Configuration["client_certs"], "bool").(bool),
-			),
-			"client_key": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["client_key"], "string").(string),
 			),
 			"database": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["database"], "string").(string),
 			),
 			"hostname": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["hostname"], "string").(string),
-			),
-			"password": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["password"], "string").(string),
 			),
 			"port": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["port"], "string").(string),
@@ -249,9 +202,6 @@ func (d *PostgresqlConnectionDataSource) Read(ctx context.Context, req datasourc
 			),
 			"ssh_port": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["ssh_port"], "string").(string),
-			),
-			"ssh_private_key": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["ssh_private_key"], "string").(string),
 			),
 			"ssh_user": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["ssh_user"], "string").(string),

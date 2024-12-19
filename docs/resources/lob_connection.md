@@ -43,6 +43,6 @@ resource "polytomic_lob_connection" "lob" {
 
 Required:
 
-- `apikey` (String)
+- `apikey` (String, Sensitive)
 
 

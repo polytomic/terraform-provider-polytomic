@@ -57,27 +57,6 @@ func (d *MsadsConnectionDataSource) Schema(ctx context.Context, req datasource.S
 						Computed:            false,
 						Sensitive:           false,
 					},
-					"client_id": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Sensitive:           false,
-					},
-					"client_secret": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Sensitive:           false,
-					},
-					"oauth_refresh_token": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Sensitive:           false,
-					},
 					"oauth_token_expiry": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            false,
@@ -136,15 +115,6 @@ func (d *MsadsConnectionDataSource) Read(ctx context.Context, req datasource.Rea
 		map[string]attr.Value{
 			"accounts": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["accounts"], "string").(string),
-			),
-			"client_id": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["client_id"], "string").(string),
-			),
-			"client_secret": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["client_secret"], "string").(string),
-			),
-			"oauth_refresh_token": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["oauth_refresh_token"], "string").(string),
 			),
 			"oauth_token_expiry": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["oauth_token_expiry"], "string").(string),

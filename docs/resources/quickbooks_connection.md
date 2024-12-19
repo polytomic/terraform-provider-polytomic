@@ -50,9 +50,9 @@ Required:
 
 Optional:
 
-- `client_id` (String)
-- `client_secret` (String)
-- `oauth_refresh_token` (String)
+- `client_id` (String, Sensitive)
+- `client_secret` (String, Sensitive)
+- `oauth_refresh_token` (String, Sensitive)
 - `oauth_token_expiry` (String)
 
 

@@ -48,7 +48,7 @@ func (t *KustomerConnectionResource) Schema(ctx context.Context, req resource.Sc
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 					"domain": schema.StringAttribute{
 						MarkdownDescription: "e.g. 'polytomic' if your portal is 'https://polytomic.kustomerapp.com/app'",

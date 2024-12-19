@@ -50,13 +50,6 @@ func (d *CustomerioConnectionDataSource) Schema(ctx context.Context, req datasou
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
-					"app_api_key": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
 					"site_id": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            true,
@@ -113,9 +106,6 @@ func (d *CustomerioConnectionDataSource) Read(ctx context.Context, req datasourc
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttributeTypes(ctx),
 		map[string]attr.Value{
-			"app_api_key": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["app_api_key"], "string").(string),
-			),
 			"site_id": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["site_id"], "string").(string),
 			),

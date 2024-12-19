@@ -44,7 +44,7 @@ Required:
 
 - `client_name` (String)
 - `company_id` (String)
-- `password` (String)
+- `password` (String, Sensitive)
 - `username` (String)
 
 

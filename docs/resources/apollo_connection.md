@@ -43,6 +43,6 @@ resource "polytomic_apollo_connection" "apollo" {
 
 Required:
 
-- `apikey` (String)
+- `apikey` (String, Sensitive)
 
 

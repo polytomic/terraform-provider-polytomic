@@ -44,7 +44,7 @@ resource "polytomic_predictleads_connection" "predictleads" {
 
 Required:
 
-- `api_key` (String)
-- `api_token` (String)
+- `api_key` (String, Sensitive)
+- `api_token` (String, Sensitive)
 
 

@@ -78,13 +78,6 @@ func (d *GcsConnectionDataSource) Schema(ctx context.Context, req datasource.Sch
 						Computed:            true,
 						Sensitive:           false,
 					},
-					"service_account": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
 				},
 				Optional: true,
 			},
@@ -138,9 +131,6 @@ func (d *GcsConnectionDataSource) Read(ctx context.Context, req datasource.ReadR
 			),
 			"project_id": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["project_id"], "string").(string),
-			),
-			"service_account": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["service_account"], "string").(string),
 			),
 		},
 	)

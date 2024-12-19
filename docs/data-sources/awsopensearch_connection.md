@@ -38,7 +38,6 @@ data "polytomic_awsopensearch_connection" "awsopensearch" {
 Required:
 
 - `aws_access_key_id` (String)
-- `aws_secret_access_key` (String)
 - `endpoint` (String)
 - `region` (String)
 

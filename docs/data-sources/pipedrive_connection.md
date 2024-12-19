@@ -37,7 +37,6 @@ data "polytomic_pipedrive_connection" "pipedrive" {
 
 Required:
 
-- `api_key` (String)
 - `domain` (String)
 
 

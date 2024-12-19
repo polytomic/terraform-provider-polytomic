@@ -48,14 +48,14 @@ func (t *StrackrConnectionResource) Schema(ctx context.Context, req resource.Sch
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 					"api_key": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 					"currency_type": schema.StringAttribute{
 						MarkdownDescription: "",

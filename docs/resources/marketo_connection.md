@@ -46,7 +46,7 @@ resource "polytomic_marketo_connection" "marketo" {
 Required:
 
 - `client_id` (String)
-- `client_secret` (String)
+- `client_secret` (String, Sensitive)
 - `rest_endpoint` (String)
 
 Optional:

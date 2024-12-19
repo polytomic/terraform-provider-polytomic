@@ -43,7 +43,7 @@ resource "polytomic_slack_connection" "slack" {
 
 Required:
 
-- `api_key` (String)
+- `api_key` (String, Sensitive)
 
 Optional:
 

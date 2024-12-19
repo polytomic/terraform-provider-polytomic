@@ -55,7 +55,7 @@ func (t *RedshiftConnectionResource) Schema(ctx context.Context, req resource.Sc
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 					"aws_user": schema.StringAttribute{
 						MarkdownDescription: "",
@@ -83,7 +83,7 @@ func (t *RedshiftConnectionResource) Schema(ctx context.Context, req resource.Sc
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 					"port": schema.Int64Attribute{
 						MarkdownDescription: "",
@@ -132,7 +132,7 @@ func (t *RedshiftConnectionResource) Schema(ctx context.Context, req resource.Sc
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 					"ssh_user": schema.StringAttribute{
 						MarkdownDescription: "",

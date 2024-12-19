@@ -57,13 +57,6 @@ func (d *DbtcloudConnectionDataSource) Schema(ctx context.Context, req datasourc
 						Computed:            false,
 						Sensitive:           false,
 					},
-					"token": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
 					"url": schema.StringAttribute{
 						MarkdownDescription: "URL of dbt Cloud instance e.g. https://cloud.getdbt.com",
 						Required:            true,
@@ -115,9 +108,6 @@ func (d *DbtcloudConnectionDataSource) Read(ctx context.Context, req datasource.
 		map[string]attr.Value{
 			"account": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["account"], "string").(string),
-			),
-			"token": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["token"], "string").(string),
 			),
 			"url": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["url"], "string").(string),

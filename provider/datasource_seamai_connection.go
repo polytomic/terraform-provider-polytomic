@@ -50,20 +50,6 @@ func (d *SeamaiConnectionDataSource) Schema(ctx context.Context, req datasource.
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
-					"apikey_id": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
-					"apikey_secret": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
 					"base_url": schema.StringAttribute{
 						MarkdownDescription: "Alternate environment API URL (including any necessary paths",
 						Required:            false,
@@ -113,12 +99,6 @@ func (d *SeamaiConnectionDataSource) Read(ctx context.Context, req datasource.Re
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttributeTypes(ctx),
 		map[string]attr.Value{
-			"apikey_id": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["apikey_id"], "string").(string),
-			),
-			"apikey_secret": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["apikey_secret"], "string").(string),
-			),
 			"base_url": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["base_url"], "string").(string),
 			),

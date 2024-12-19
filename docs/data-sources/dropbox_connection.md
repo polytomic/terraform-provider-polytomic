@@ -41,10 +41,7 @@ Required:
 
 Optional:
 
-- `app_key` (String)
-- `app_secret` (String)
 - `is_single_table` (Boolean) Treat the files as a single table.
-- `oauth_refresh_token` (String)
 - `oauth_token_expiry` (String)
 
 

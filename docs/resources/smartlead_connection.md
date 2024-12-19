@@ -42,6 +42,6 @@ resource "polytomic_smartlead_connection" "smartlead" {
 
 Required:
 
-- `api_key` (String)
+- `api_key` (String, Sensitive)
 
 

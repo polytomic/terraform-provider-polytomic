@@ -48,7 +48,7 @@ func (t *VanillaConnectionResource) Schema(ctx context.Context, req resource.Sch
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 					"domain": schema.StringAttribute{
 						MarkdownDescription: "",

@@ -50,20 +50,6 @@ func (d *NetsuiteopenairConnectionDataSource) Schema(ctx context.Context, req da
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
-					"client_id": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
-					"client_secret": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
 					"company_id": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            true,
@@ -113,12 +99,6 @@ func (d *NetsuiteopenairConnectionDataSource) Read(ctx context.Context, req data
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttributeTypes(ctx),
 		map[string]attr.Value{
-			"client_id": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["client_id"], "string").(string),
-			),
-			"client_secret": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["client_secret"], "string").(string),
-			),
 			"company_id": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["company_id"], "string").(string),
 			),

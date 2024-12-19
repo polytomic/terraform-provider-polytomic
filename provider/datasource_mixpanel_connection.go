@@ -64,13 +64,6 @@ func (d *MixpanelConnectionDataSource) Schema(ctx context.Context, req datasourc
 						Computed:            false,
 						Sensitive:           false,
 					},
-					"service_account_secret": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
 					"service_account_username": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            true,
@@ -125,9 +118,6 @@ func (d *MixpanelConnectionDataSource) Read(ctx context.Context, req datasource.
 			),
 			"region": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["region"], "string").(string),
-			),
-			"service_account_secret": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["service_account_secret"], "string").(string),
 			),
 			"service_account_username": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["service_account_username"], "string").(string),

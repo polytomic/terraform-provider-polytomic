@@ -55,7 +55,7 @@ func (t *DittofeedConnectionResource) Schema(ctx context.Context, req resource.S
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 				},
 

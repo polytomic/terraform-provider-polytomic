@@ -49,11 +49,11 @@ Required:
 
 Optional:
 
-- `api_key` (String)
-- `application_id` (String)
-- `client_secret` (String)
+- `api_key` (String, Sensitive)
+- `application_id` (String, Sensitive)
+- `client_secret` (String, Sensitive)
 - `connected_user` (String)
-- `oauth_refresh_token` (String)
+- `oauth_refresh_token` (String, Sensitive)
 - `oauth_token_expiry` (String)
 
 

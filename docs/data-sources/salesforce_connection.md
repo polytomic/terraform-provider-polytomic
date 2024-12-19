@@ -37,8 +37,6 @@ data "polytomic_salesforce_connection" "salesforce" {
 
 Required:
 
-- `client_id` (String)
-- `client_secret` (String)
 - `domain` (String) The Salesforce instance's login domain, e.g. acmecorp.my.salesforce.com
 
 Optional:
@@ -48,7 +46,6 @@ Optional:
 - `enable_multicurrency_lookup` (Boolean) If incremenetal mode for bulk-syncing from Salesforce formula fields is enabled, setting this to true extends support to accurate currency conversions.
 - `enable_tooling` (Boolean) If true, expose objects from the Salesforce Tooling API in the Polytomic bulk sync source object list.
 - `enforce_api_limits` (Boolean) If true, Polytomic will restrict itself to a fixed daily cap of Salesforce API calls enforced by the number in daily_api_calls.
-- `oauth_refresh_token` (String)
 - `username` (String)
 
 

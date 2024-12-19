@@ -50,13 +50,6 @@ func (d *AzureblobConnectionDataSource) Schema(ctx context.Context, req datasour
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
-					"access_key": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
 					"account_name": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            true,
@@ -120,9 +113,6 @@ func (d *AzureblobConnectionDataSource) Read(ctx context.Context, req datasource
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttributeTypes(ctx),
 		map[string]attr.Value{
-			"access_key": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["access_key"], "string").(string),
-			),
 			"account_name": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["account_name"], "string").(string),
 			),

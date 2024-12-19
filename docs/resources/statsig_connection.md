@@ -43,6 +43,6 @@ resource "polytomic_statsig_connection" "statsig" {
 
 Required:
 
-- `api_key` (String)
+- `api_key` (String, Sensitive)
 
 

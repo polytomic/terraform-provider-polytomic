@@ -50,13 +50,6 @@ func (d *AffinityConnectionDataSource) Schema(ctx context.Context, req datasourc
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
-					"api_key": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
 					"user": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            false,
@@ -106,9 +99,6 @@ func (d *AffinityConnectionDataSource) Read(ctx context.Context, req datasource.
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttributeTypes(ctx),
 		map[string]attr.Value{
-			"api_key": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["api_key"], "string").(string),
-			),
 			"user": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["user"], "string").(string),
 			),

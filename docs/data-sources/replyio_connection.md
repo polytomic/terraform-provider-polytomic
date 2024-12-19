@@ -35,8 +35,4 @@ data "polytomic_replyio_connection" "replyio" {
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
-Required:
-
-- `api_key` (String)
-
 

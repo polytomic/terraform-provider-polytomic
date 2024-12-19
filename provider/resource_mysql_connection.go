@@ -76,7 +76,7 @@ func (t *MysqlConnectionResource) Schema(ctx context.Context, req resource.Schem
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 					"port": schema.Int64Attribute{
 						MarkdownDescription: "",
@@ -111,7 +111,7 @@ func (t *MysqlConnectionResource) Schema(ctx context.Context, req resource.Schem
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 					"ssh_user": schema.StringAttribute{
 						MarkdownDescription: "",

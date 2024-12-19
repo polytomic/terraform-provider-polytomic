@@ -50,13 +50,6 @@ func (d *ShopifyConnectionDataSource) Schema(ctx context.Context, req datasource
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
-					"admin_api_token": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
 					"store": schema.StringAttribute{
 						MarkdownDescription: "Enter your Shopify store name.",
 						Required:            true,
@@ -106,9 +99,6 @@ func (d *ShopifyConnectionDataSource) Read(ctx context.Context, req datasource.R
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttributeTypes(ctx),
 		map[string]attr.Value{
-			"admin_api_token": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["admin_api_token"], "string").(string),
-			),
 			"store": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["store"], "string").(string),
 			),

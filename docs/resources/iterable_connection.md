@@ -43,6 +43,6 @@ resource "polytomic_iterable_connection" "iterable" {
 
 Required:
 
-- `api_key` (String)
+- `api_key` (String, Sensitive)
 
 

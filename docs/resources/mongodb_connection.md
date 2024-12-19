@@ -51,7 +51,7 @@ Optional:
 
 - `database` (String)
 - `params` (String) Additional connection parameters, formatted as a query string
-- `password` (String)
+- `password` (String, Sensitive)
 - `srv` (Boolean)
 - `ssl` (Boolean)
 - `username` (String)

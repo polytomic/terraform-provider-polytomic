@@ -50,13 +50,6 @@ func (d *YotpoConnectionDataSource) Schema(ctx context.Context, req datasource.S
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
-					"secret": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
 					"store_id": schema.StringAttribute{
 						MarkdownDescription: "Also known as Client ID or Store ID.",
 						Required:            true,
@@ -106,9 +99,6 @@ func (d *YotpoConnectionDataSource) Read(ctx context.Context, req datasource.Rea
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttributeTypes(ctx),
 		map[string]attr.Value{
-			"secret": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["secret"], "string").(string),
-			),
 			"store_id": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["store_id"], "string").(string),
 			),

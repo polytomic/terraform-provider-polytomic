@@ -71,13 +71,6 @@ func (d *FbaudienceConnectionDataSource) Schema(ctx context.Context, req datasou
 						Computed:            false,
 						Sensitive:           false,
 					},
-					"byo_app_token": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Sensitive:           false,
-					},
 					"graph_api_version": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            false,
@@ -142,9 +135,6 @@ func (d *FbaudienceConnectionDataSource) Read(ctx context.Context, req datasourc
 			),
 			"auth_method": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["auth_method"], "string").(string),
-			),
-			"byo_app_token": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["byo_app_token"], "string").(string),
 			),
 			"graph_api_version": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["graph_api_version"], "string").(string),

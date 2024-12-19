@@ -37,7 +37,6 @@ data "polytomic_scamalytics_connection" "scamalytics" {
 
 Required:
 
-- `apikey` (String)
 - `endpoint` (String)
 
 

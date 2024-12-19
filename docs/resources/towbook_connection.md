@@ -42,6 +42,6 @@ resource "polytomic_towbook_connection" "towbook" {
 
 Required:
 
-- `api_token` (String)
+- `api_token` (String, Sensitive)
 
 

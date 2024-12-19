@@ -69,7 +69,7 @@ func (t *MongodbConnectionResource) Schema(ctx context.Context, req resource.Sch
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 					"srv": schema.BoolAttribute{
 						MarkdownDescription: "",

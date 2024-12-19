@@ -50,7 +50,7 @@ func (t *AirtableConnectionResource) Schema(ctx context.Context, req resource.Sc
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
-						Sensitive:           false,
+						Sensitive:           true,
 						Default:             stringdefault.StaticString(""),
 					},
 					"client_id": schema.StringAttribute{
@@ -58,14 +58,14 @@ func (t *AirtableConnectionResource) Schema(ctx context.Context, req resource.Sc
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 					"client_secret": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 					"connected_user": schema.StringAttribute{
 						MarkdownDescription: "",
@@ -80,14 +80,14 @@ func (t *AirtableConnectionResource) Schema(ctx context.Context, req resource.Sc
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 					"oauth_refresh_token": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
-						Sensitive:           false,
+						Sensitive:           true,
 					},
 					"oauth_token_expiry": schema.StringAttribute{
 						MarkdownDescription: "",

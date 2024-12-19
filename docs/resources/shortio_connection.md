@@ -43,6 +43,6 @@ resource "polytomic_shortio_connection" "shortio" {
 
 Required:
 
-- `api_key` (String)
+- `api_key` (String, Sensitive)
 
 
