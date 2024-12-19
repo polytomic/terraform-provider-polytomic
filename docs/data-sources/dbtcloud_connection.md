@@ -36,7 +36,15 @@ data "polytomic_dbtcloud_connection" "dbtcloud" {
 
 Read-Only:
 
-- `account` (String)
+- `account` (Attributes) (see [below for nested schema](#nestedatt--configuration--account))
 - `url` (String) URL of dbt Cloud instance e.g. https://cloud.getdbt.com
+
+<a id="nestedatt--configuration--account"></a>
+### Nested Schema for `configuration.account`
+
+Read-Only:
+
+- `id` (Number)
+- `name` (String)
 
 

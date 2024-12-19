@@ -50,9 +50,69 @@ func (d *CsvConnectionDataSource) Schema(ctx context.Context, req datasource.Sch
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
-					"auth": schema.StringAttribute{
+					"auth": schema.SingleNestedAttribute{
 						MarkdownDescription: "",
 						Computed:            true,
+						Attributes: map[string]schema.Attribute{
+							"basic": schema.SingleNestedAttribute{
+								MarkdownDescription: "",
+								Computed:            true,
+								Attributes: map[string]schema.Attribute{
+									"password": schema.StringAttribute{
+										MarkdownDescription: "",
+										Computed:            true,
+									},
+									"username": schema.StringAttribute{
+										MarkdownDescription: "",
+										Computed:            true,
+									},
+								},
+							},
+							"header": schema.SingleNestedAttribute{
+								MarkdownDescription: "",
+								Computed:            true,
+								Attributes: map[string]schema.Attribute{
+									"name": schema.StringAttribute{
+										MarkdownDescription: "",
+										Computed:            true,
+									},
+									"value": schema.SingleNestedAttribute{
+										MarkdownDescription: "",
+										Computed:            true,
+									},
+								},
+							},
+							"oauth": schema.SingleNestedAttribute{
+								MarkdownDescription: "",
+								Computed:            true,
+								Attributes: map[string]schema.Attribute{
+									"auth_style": schema.Int64Attribute{
+										MarkdownDescription: "",
+										Computed:            true,
+									},
+									"client_id": schema.StringAttribute{
+										MarkdownDescription: "",
+										Computed:            true,
+									},
+									"client_secret": schema.StringAttribute{
+										MarkdownDescription: "",
+										Computed:            true,
+									},
+									"extra_form_data": schema.StringAttribute{
+										MarkdownDescription: "",
+										Computed:            true,
+									},
+									"scopes": schema.StringAttribute{
+										MarkdownDescription: "",
+										Computed:            true,
+									},
+									"token_endpoint": schema.StringAttribute{
+										MarkdownDescription: "",
+										Computed:            true,
+									},
+								},
+							},
+						},
 					},
 					"headers": schema.StringAttribute{
 						MarkdownDescription: "",

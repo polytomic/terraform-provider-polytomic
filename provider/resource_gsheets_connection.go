@@ -94,12 +94,28 @@ func (t *GsheetsConnectionResource) Schema(ctx context.Context, req resource.Sch
 						Computed:            false,
 						Sensitive:           true,
 					},
-					"spreadsheet_id": schema.StringAttribute{
+					"spreadsheet_id": schema.SingleNestedAttribute{
 						MarkdownDescription: "",
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
 						Sensitive:           false,
+						Attributes: map[string]schema.Attribute{
+							"label": schema.StringAttribute{
+								MarkdownDescription: "",
+								Required:            false,
+								Optional:            true,
+								Computed:            false,
+								Sensitive:           false,
+							},
+							"value": schema.StringAttribute{
+								MarkdownDescription: "",
+								Required:            false,
+								Optional:            true,
+								Computed:            false,
+								Sensitive:           false,
+							},
+						},
 					},
 					"user_email": schema.StringAttribute{
 						MarkdownDescription: "",

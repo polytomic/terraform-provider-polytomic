@@ -43,12 +43,111 @@ func (t *ApiConnectionResource) Schema(ctx context.Context, req resource.SchemaR
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
-					"auth": schema.StringAttribute{
+					"auth": schema.SingleNestedAttribute{
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
 						Sensitive:           false,
+						Attributes: map[string]schema.Attribute{
+							"basic": schema.SingleNestedAttribute{
+								MarkdownDescription: "",
+								Required:            false,
+								Optional:            true,
+								Computed:            false,
+								Sensitive:           false,
+								Attributes: map[string]schema.Attribute{
+									"password": schema.StringAttribute{
+										MarkdownDescription: "",
+										Required:            false,
+										Optional:            true,
+										Computed:            false,
+										Sensitive:           false,
+									},
+									"username": schema.StringAttribute{
+										MarkdownDescription: "",
+										Required:            false,
+										Optional:            true,
+										Computed:            false,
+										Sensitive:           false,
+									},
+								},
+							},
+							"header": schema.SingleNestedAttribute{
+								MarkdownDescription: "",
+								Required:            false,
+								Optional:            true,
+								Computed:            false,
+								Sensitive:           false,
+								Attributes: map[string]schema.Attribute{
+									"name": schema.StringAttribute{
+										MarkdownDescription: "",
+										Required:            false,
+										Optional:            true,
+										Computed:            false,
+										Sensitive:           false,
+									},
+									"value": schema.SingleNestedAttribute{
+										MarkdownDescription: "",
+										Required:            false,
+										Optional:            true,
+										Computed:            false,
+										Sensitive:           false,
+									},
+								},
+							},
+							"oauth": schema.SingleNestedAttribute{
+								MarkdownDescription: "",
+								Required:            false,
+								Optional:            true,
+								Computed:            false,
+								Sensitive:           false,
+								Attributes: map[string]schema.Attribute{
+									"auth_style": schema.Int64Attribute{
+										MarkdownDescription: "",
+										Required:            false,
+										Optional:            true,
+										Computed:            false,
+										Sensitive:           false,
+									},
+									"client_id": schema.StringAttribute{
+										MarkdownDescription: "",
+										Required:            false,
+										Optional:            true,
+										Computed:            false,
+										Sensitive:           false,
+									},
+									"client_secret": schema.StringAttribute{
+										MarkdownDescription: "",
+										Required:            false,
+										Optional:            true,
+										Computed:            false,
+										Sensitive:           false,
+									},
+									"extra_form_data": schema.StringAttribute{
+										MarkdownDescription: "",
+										Required:            false,
+										Optional:            true,
+										Computed:            false,
+										Sensitive:           false,
+									},
+									"scopes": schema.StringAttribute{
+										MarkdownDescription: "",
+										Required:            false,
+										Optional:            true,
+										Computed:            false,
+										Sensitive:           false,
+									},
+									"token_endpoint": schema.StringAttribute{
+										MarkdownDescription: "",
+										Required:            false,
+										Optional:            true,
+										Computed:            false,
+										Sensitive:           false,
+									},
+								},
+							},
+						},
 					},
 					"body": schema.StringAttribute{
 						MarkdownDescription: "",

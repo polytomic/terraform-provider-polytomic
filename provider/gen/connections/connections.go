@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"go/format"
 	"log"
-	"maps"
 	"os"
 	"path/filepath"
 	"slices"
@@ -44,37 +43,54 @@ const (
 var (
 	TypeMap = map[string]Typer{
 		"array": {
-			AttrType:      "schema.StringAttribute",
-			TfType:        "types.String",
-			NewAttrType:   "types.StringType",
-			Default:       "stringdefault.StaticString(\"\")",
-			DefaultImport: "github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault",
-			GoType:        "string",
+			AttrType:    "schema.StringAttribute",
+			TfType:      "types.String",
+			NewAttrType: "types.StringType",
+			Default: DefaultValue{
+				Value:  "stringdefault.StaticString(\"\")",
+				Import: "github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault",
+			},
+			GoType: "string",
 		},
 		"object": {
-			AttrType:      "schema.StringAttribute",
-			TfType:        "types.String",
-			NewAttrType:   "types.StringType",
-			Default:       "stringdefault.StaticString(\"\")",
-			DefaultImport: "github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault",
-			GoType:        "string",
+			AttrType:    "schema.SingleNestedAttribute",
+			TfType:      "types.String",
+			NewAttrType: "types.StringType",
+			// Default: DefaultValue{
+			// 	Value:  "stringdefault.StaticString(\"\")",
+			// 	Import: "github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault",
+			// },
+			GoType: "string",
 		},
-
+		"": {
+			AttrType:    "schema.SingleNestedAttribute",
+			TfType:      "types.String",
+			NewAttrType: "types.StringType",
+			Default: DefaultValue{
+				Value:  "stringdefault.StaticString(\"\")",
+				Import: "github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault",
+			},
+			GoType: "string",
+		},
 		"string": {
-			AttrType:      "schema.StringAttribute",
-			TfType:        "types.String",
-			NewAttrType:   "types.StringType",
-			Default:       "stringdefault.StaticString(\"\")",
-			DefaultImport: "github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault",
-			GoType:        "string",
+			AttrType:    "schema.StringAttribute",
+			TfType:      "types.String",
+			NewAttrType: "types.StringType",
+			Default: DefaultValue{
+				Value:  "stringdefault.StaticString(\"\")",
+				Import: "github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault",
+			},
+			GoType: "string",
 		},
 		"number": {
-			AttrType:      "schema.NumberAttribute",
-			TfType:        "types.Number",
-			NewAttrType:   "types.NumberType",
-			Default:       "int64default.StaticInt64(0)",
-			DefaultImport: "github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default",
-			GoType:        "int64",
+			AttrType:    "schema.NumberAttribute",
+			TfType:      "types.Number",
+			NewAttrType: "types.NumberType",
+			Default: DefaultValue{
+				Value:  "int64default.StaticInt64(0)",
+				Import: "github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default",
+			},
+			GoType: "int64",
 		},
 		"bool": {
 			AttrType:    "schema.BoolAttribute",
@@ -89,39 +105,49 @@ var (
 			GoType:      "bool",
 		},
 		"int": {
-			AttrType:      "schema.Int64Attribute",
-			TfType:        "types.Int64",
-			NewAttrType:   "types.NumberType",
-			Default:       "int64default.StaticInt64(0)",
-			DefaultImport: "github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default",
-			GoType:        "int64",
+			AttrType:    "schema.Int64Attribute",
+			TfType:      "types.Int64",
+			NewAttrType: "types.NumberType",
+			Default: DefaultValue{
+				Value:  "int64default.StaticInt64(0)",
+				Import: "github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default",
+			},
+			GoType: "int64",
 		},
 		"int64": {
-			AttrType:      "schema.Int64Attribute",
-			TfType:        "types.Int64",
-			NewAttrType:   "types.NumberType",
-			Default:       "int64default.StaticInt64(0)",
-			DefaultImport: "github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default",
-			GoType:        "int64",
+			AttrType:    "schema.Int64Attribute",
+			TfType:      "types.Int64",
+			NewAttrType: "types.NumberType",
+			Default: DefaultValue{
+				Value:  "int64default.StaticInt64(0)",
+				Import: "github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default",
+			},
+			GoType: "int64",
 		},
 		"integer": {
-			AttrType:      "schema.Int64Attribute",
-			TfType:        "types.Int64",
-			NewAttrType:   "types.NumberType",
-			Default:       "int64default.StaticInt64(0)",
-			DefaultImport: "github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default",
-			GoType:        "int64",
+			AttrType:    "schema.Int64Attribute",
+			TfType:      "types.Int64",
+			NewAttrType: "types.NumberType",
+			Default: DefaultValue{
+				Value:  "int64default.StaticInt64(0)",
+				Import: "github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default",
+			},
+			GoType: "int64",
 		},
 	}
 )
 
+type DefaultValue struct {
+	Value  string
+	Import string
+}
+
 type Typer struct {
-	AttrType      string
-	TfType        string
-	NewAttrType   string
-	Default       string
-	DefaultImport string
-	GoType        string
+	AttrType    string
+	TfType      string
+	NewAttrType string
+	Default     DefaultValue
+	GoType      string
 }
 
 type Connections struct {
@@ -153,8 +179,6 @@ type Connection struct {
 type Attribute struct {
 	Name                string `yaml:"name"`
 	CapName             string `yaml:"-"`
-	NameOverride        string `yaml:"name_override"`
-	Alias               string `yaml:"alias"`
 	Sensitive           bool   `yaml:"sensitive"`
 	Required            bool   `yaml:"required"`
 	Optional            bool   `yaml:"optional"`
@@ -164,11 +188,13 @@ type Attribute struct {
 	Example             string `yaml:"example"`
 	ExampleTypeOverride string `yaml:"example_type_override"`
 
-	TfType      string `yaml:"-"`
-	AttrType    string `yaml:"-"`
-	NewAttrType string `yaml:"-"`
-	AttrName    string `yaml:"-"`
-	Default     string `yaml:"-"`
+	TfType string `yaml:"-"`
+	// AttrType is the Terraform schema.* type for the attribute.
+	AttrType    string       `yaml:"-"`
+	NewAttrType string       `yaml:"-"`
+	AttrName    string       `yaml:"-"`
+	Default     DefaultValue `yaml:"-"`
+	Attributes  []Attribute
 }
 
 var defaultImports = `
@@ -261,54 +287,20 @@ func GenerateConnections(ctx context.Context) error {
 		}
 
 		r.ExtraImports = make(map[string]bool)
-		for _, k := range slices.Sorted(maps.Keys(*connSchema.Properties)) {
-			p := (*connSchema.Properties)[k]
-			a := jsonschema.Schema{}
-			propJSON, _ := json.Marshal(p)
-			err := json.Unmarshal(propJSON, &a)
-			if err != nil {
-				return err
-			}
-			t, ok := TypeMap[a.Type]
-			if !ok {
-				return fmt.Errorf("type %s not found for %s", a.Type, r.Name)
-			}
-			var ex string
-			if len(a.Examples) > 0 {
-				if exstr, ok := a.Examples[0].(string); ok {
-					ex = exstr
-				}
-			}
-			attr := Attribute{
-				TfType:      t.TfType,
-				AttrType:    t.AttrType,
-				NewAttrType: t.NewAttrType,
-				AttrName:    ValidName(k), // key in the tf schema?
-				CapName:     strings.Title(k),
-				Name:        k, // key in the payload
-				Type:        t.GoType,
-				Description: a.Description,
-				Example:     ex,
-				Sensitive:   p.(map[string]interface{})["sensitive"] == true,
-			}
-			if a.Format == "json" && attr.Example != "" {
-				attr.Example = fmt.Sprintf("jsonencode(%s)", attr.Example)
-				attr.ExampleTypeOverride = "json"
-			}
-			// if a.NameOverride != "" {
-			// 	r.Attributes[i].AttrName = a.NameOverride
-			// }
-			attr.Computed = a.ReadOnly
-			attr.Required = slices.Contains(connSchema.Required, k)
-			attr.Optional = !attr.Required && !attr.Computed
-			if attr.Computed {
-				attr.Default = t.Default
-				if t.DefaultImport != "" {
-					r.ExtraImports[t.DefaultImport] = true
-				}
-			}
-			r.Attributes = append(r.Attributes, attr)
+		js, err := getJSONSchema(connSchema)
+		if err != nil {
+			return fmt.Errorf("error converting API response to jsonschema: %w", err)
 		}
+		attrs, err := attributesForJSONSchema(js)
+		if err != nil {
+			return fmt.Errorf("error inspecting attributes for %s: %w", r.Connection, err)
+		}
+		for _, a := range attrs {
+			if a.Default.Import != "" {
+				r.ExtraImports[a.Default.Import] = true
+			}
+		}
+		r.Attributes = append(r.Attributes, attrs...)
 		r.Resource = len(r.Attributes) > 0
 		if r.Name == "" {
 			r.Name = strings.Title(r.Connection)
@@ -351,6 +343,55 @@ func GenerateConnections(ctx context.Context) error {
 	}
 
 	return nil
+}
+
+func attributesForJSONSchema(connSchema *jsonschema.Schema) ([]Attribute, error) {
+	attrs := []Attribute{}
+	for pair := connSchema.Properties.Oldest(); pair != nil; pair = pair.Next() {
+		k := pair.Key
+		a := pair.Value
+		t, ok := TypeMap[a.Type]
+		if !ok {
+			return nil, fmt.Errorf("type %s not found for %s", a.Type, k)
+		}
+		var ex string
+		if len(a.Examples) > 0 {
+			if exstr, ok := a.Examples[0].(string); ok {
+				ex = exstr
+			}
+		}
+		attr := Attribute{
+			TfType:      t.TfType,
+			AttrType:    t.AttrType,
+			NewAttrType: t.NewAttrType,
+			AttrName:    ValidName(k), // key in the tf schema
+			CapName:     strings.Title(k),
+			Name:        k, // key in the payload
+			Type:        t.GoType,
+			Description: a.Description,
+			Example:     ex,
+			Sensitive:   a.Extras["sensitive"] == true,
+		}
+		if a.Format == "json" && attr.Example != "" {
+			attr.Example = fmt.Sprintf("jsonencode(%s)", attr.Example)
+			attr.ExampleTypeOverride = "json"
+		}
+		if a.Type == "object" {
+			sa, err := attributesForJSONSchema(a)
+			if err != nil {
+				return nil, fmt.Errorf("error inspecting attributes for %s: %w", k, err)
+			}
+			attr.Attributes = sa
+		}
+		attr.Computed = a.ReadOnly
+		attr.Required = slices.Contains(connSchema.Required, k)
+		attr.Optional = !attr.Required && !attr.Computed
+		if attr.Computed {
+			attr.Default = t.Default
+		}
+		attrs = append(attrs, attr)
+	}
+	return attrs, nil
 }
 
 func writeConnectionExamples(r Connection) error {

@@ -34,6 +34,20 @@ func (d *{{ .Connection }}ConnectionDataSource) Metadata(ctx context.Context, re
 	resp.TypeName = req.ProviderTypeName + "_{{ .ResourceName }}_connection"
 }
 
+{{ define "attribute" -}}
+	{{- if not .Sensitive -}}
+	"{{ .AttrName }}": {{ .AttrType }} {
+		MarkdownDescription: "{{ .Description }}",
+		Computed: true,
+		{{ if .Attributes -}}
+			Attributes: map[string]schema.Attribute{
+				{{ range .Attributes }}{{ template "attribute" . }}{{ end }}
+			},
+		{{ end }}
+	},
+	{{- end }}
+{{ end -}}
+
 func (d *{{ .Connection }}ConnectionDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		MarkdownDescription: ":meta:subcategory:Connections: {{ .Name }} Connection",
@@ -52,14 +66,7 @@ func (d *{{ .Connection }}ConnectionDataSource) Schema(ctx context.Context, req 
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
-					{{- range .Attributes }}
-					{{- if not .Sensitive }}
-					"{{ .AttrName }}": {{ .AttrType }}{
-						MarkdownDescription: "{{ .Description }}",
-						Computed:  true,
-					},
-					{{- end }}
-					{{- end }}
+					{{ range .Attributes }}{{- template "attribute" . }}{{ end }}
 				},
 				Optional: true,
 			},

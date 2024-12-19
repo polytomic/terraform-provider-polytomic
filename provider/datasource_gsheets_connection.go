@@ -62,9 +62,19 @@ func (d *GsheetsConnectionDataSource) Schema(ctx context.Context, req datasource
 						MarkdownDescription: "",
 						Computed:            true,
 					},
-					"spreadsheet_id": schema.StringAttribute{
+					"spreadsheet_id": schema.SingleNestedAttribute{
 						MarkdownDescription: "",
 						Computed:            true,
+						Attributes: map[string]schema.Attribute{
+							"label": schema.StringAttribute{
+								MarkdownDescription: "",
+								Computed:            true,
+							},
+							"value": schema.StringAttribute{
+								MarkdownDescription: "",
+								Computed:            true,
+							},
+						},
 					},
 					"user_email": schema.StringAttribute{
 						MarkdownDescription: "",

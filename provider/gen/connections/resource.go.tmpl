@@ -11,6 +11,24 @@ import (
 var _ resource.Resource = &{{ .Connection }}ConnectionResource{}
 var _ resource.ResourceWithImportState = &{{ .Connection }}ConnectionResource{}
 
+{{ define "attribute" -}}
+	"{{ .AttrName }}": {{ .AttrType }} {
+		MarkdownDescription: "{{ .Description }}",
+		Required:  {{ .Required }},
+		Optional:  {{ .Optional }},
+		Computed:  {{ .Computed }},
+		Sensitive: {{ .Sensitive }},
+		{{ if .Default.Value -}}
+		Default: {{ .Default.Value }},
+		{{- end -}}
+		{{ if .Attributes -}}
+			Attributes: map[string]schema.Attribute{
+				{{ range .Attributes }}{{ template "attribute" . }}{{ end }}
+			},
+		{{ end }}
+	},
+{{ end -}}
+
 func (t *{{ .Connection }}ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		MarkdownDescription: ":meta:subcategory:Connections: {{ .Name }} Connection",
@@ -25,17 +43,7 @@ func (t *{{ .Connection }}ConnectionResource) Schema(ctx context.Context, req re
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
-					{{ range .Attributes }}"{{ .AttrName }}": {{ .AttrType }} {
-						MarkdownDescription: "{{ .Description }}",
-						Required:  {{ .Required }},
-						Optional:  {{ .Optional }},
-						Computed:  {{ .Computed }},
-						Sensitive: {{ .Sensitive }},
-						{{ if .Default -}}
-						Default: {{ .Default }},
-						{{ end }}
-					},
-					{{ end }}
+					{{ range .Attributes }}{{- template "attribute" . }}{{ end }}
 				},
 				{{ if .Attributes}}
 				Required: true,

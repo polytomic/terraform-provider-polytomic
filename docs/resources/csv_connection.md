@@ -46,8 +46,51 @@ Required:
 
 Optional:
 
-- `auth` (String)
+- `auth` (Attributes) (see [below for nested schema](#nestedatt--configuration--auth))
 - `headers` (String)
 - `parameters` (String)
+
+<a id="nestedatt--configuration--auth"></a>
+### Nested Schema for `configuration.auth`
+
+Optional:
+
+- `basic` (Attributes) (see [below for nested schema](#nestedatt--configuration--auth--basic))
+- `header` (Attributes) (see [below for nested schema](#nestedatt--configuration--auth--header))
+- `oauth` (Attributes) (see [below for nested schema](#nestedatt--configuration--auth--oauth))
+
+<a id="nestedatt--configuration--auth--basic"></a>
+### Nested Schema for `configuration.auth.basic`
+
+Optional:
+
+- `password` (String)
+- `username` (String)
+
+
+<a id="nestedatt--configuration--auth--header"></a>
+### Nested Schema for `configuration.auth.header`
+
+Optional:
+
+- `name` (String)
+- `value` (Attributes) (see [below for nested schema](#nestedatt--configuration--auth--header--value))
+
+<a id="nestedatt--configuration--auth--header--value"></a>
+### Nested Schema for `configuration.auth.header.value`
+
+
+
+<a id="nestedatt--configuration--auth--oauth"></a>
+### Nested Schema for `configuration.auth.oauth`
+
+Optional:
+
+- `auth_style` (Number)
+- `client_id` (String)
+- `client_secret` (String)
+- `extra_form_data` (String)
+- `scopes` (String)
+- `token_endpoint` (String)
 
 

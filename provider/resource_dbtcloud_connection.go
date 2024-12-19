@@ -43,12 +43,28 @@ func (t *DbtcloudConnectionResource) Schema(ctx context.Context, req resource.Sc
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
-					"account": schema.StringAttribute{
+					"account": schema.SingleNestedAttribute{
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
 						Sensitive:           false,
+						Attributes: map[string]schema.Attribute{
+							"id": schema.Int64Attribute{
+								MarkdownDescription: "",
+								Required:            false,
+								Optional:            true,
+								Computed:            false,
+								Sensitive:           false,
+							},
+							"name": schema.StringAttribute{
+								MarkdownDescription: "",
+								Required:            false,
+								Optional:            true,
+								Computed:            false,
+								Sensitive:           false,
+							},
+						},
 					},
 					"token": schema.StringAttribute{
 						MarkdownDescription: "",

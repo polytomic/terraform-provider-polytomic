@@ -45,7 +45,7 @@ resource "polytomic_gsheets_connection" "gsheets" {
 
 Required:
 
-- `spreadsheet_id` (String)
+- `spreadsheet_id` (Attributes) (see [below for nested schema](#nestedatt--configuration--spreadsheet_id))
 
 Optional:
 
@@ -60,5 +60,13 @@ Optional:
 Read-Only:
 
 - `user_email` (String)
+
+<a id="nestedatt--configuration--spreadsheet_id"></a>
+### Nested Schema for `configuration.spreadsheet_id`
+
+Optional:
+
+- `label` (String)
+- `value` (String)
 
 
