@@ -63,13 +63,10 @@ var (
 			GoType: "map[string]interface{}",
 		},
 		"": {
-			AttrType:     "schema.SingleNestedAttribute",
+			AttrType:     "schema.StringAttribute",
 			TfType:       "String",
 			ReadAttrType: "types.StringType",
-			Default: DefaultValue{
-				Value:  "stringdefault.StaticString(\"\")",
-				Import: "github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault",
-			},
+
 			GoType: "string",
 		},
 		"string": {
@@ -383,9 +380,9 @@ func attributesForJSONSchema(connSchema *jsonschema.Schema) ([]Attribute, error)
 			}
 			attr.Attributes = sa
 		}
-		attr.Computed = a.ReadOnly
 		attr.Required = slices.Contains(connSchema.Required, k)
-		attr.Optional = !attr.Required && !attr.Computed
+		attr.Optional = !attr.Required
+		attr.Computed = a.ReadOnly || attr.Optional
 		if attr.Computed {
 			attr.Default = t.Default
 		}

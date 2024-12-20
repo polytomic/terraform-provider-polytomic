@@ -14,6 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/polytomic/polytomic-go"
@@ -112,6 +113,7 @@ func (r *modelResource) Schema(ctx context.Context, req resource.SchemaRequest, 
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
+				Default: stringdefault.StaticString(""),
 			},
 			"tracking_columns": schema.SetAttribute{
 				MarkdownDescription: "",
@@ -353,7 +355,7 @@ func (r *modelResource) Create(ctx context.Context, req resource.CreateRequest, 
 	data.Configuration = types.StringValue(string(enc))
 	data.Fields = fields
 	data.Relations = relations
-	data.Identifier = types.StringPointerValue(model.Data.Identifier)
+	data.Identifier = types.StringValue(pointer.Get(model.Data.Identifier))
 	data.TrackingColumns = trackingColumns
 	data.AdditionalFields = additionalFields
 
@@ -515,7 +517,7 @@ func (r *modelResource) Read(ctx context.Context, req resource.ReadRequest, resp
 	data.Configuration = types.StringValue(string(enc))
 	data.Fields = fields
 	data.Relations = relations
-	data.Identifier = types.StringPointerValue(model.Data.Identifier)
+	data.Identifier = types.StringValue(pointer.Get(model.Data.Identifier))
 	data.TrackingColumns = trackingColumns
 	data.AdditionalFields = additionalFields
 
@@ -724,7 +726,7 @@ func (r *modelResource) Update(ctx context.Context, req resource.UpdateRequest, 
 	data.Configuration = types.StringValue(string(enc))
 	data.Fields = fields
 	data.Relations = relations
-	data.Identifier = types.StringPointerValue(model.Data.Identifier)
+	data.Identifier = types.StringValue(pointer.Get(model.Data.Identifier))
 	data.TrackingColumns = trackingColumns
 	data.AdditionalFields = additionalFields
 

@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -296,6 +297,9 @@ func (r *syncResource) Schema(ctx context.Context, req resource.SchemaRequest, r
 							objectplanmodifier.UseStateForUnknown(),
 						},
 					},
+					"run_after_success_only": schema.BoolAttribute{
+						Optional: true,
+					},
 				},
 				Required: true,
 			},
@@ -326,13 +330,18 @@ func (r *syncResource) Schema(ctx context.Context, req resource.SchemaRequest, r
 					},
 					"remote_field_type_id": schema.StringAttribute{
 						MarkdownDescription: "",
-						Optional:            true,
 						Computed:            true,
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.UseStateForUnknown(),
+						},
 					},
 					"new_field": schema.BoolAttribute{
 						MarkdownDescription: "",
 						Optional:            true,
 						Computed:            true,
+						PlanModifiers: []planmodifier.Bool{
+							boolplanmodifier.UseStateForUnknown(),
+						},
 					},
 				},
 				Optional: true,
@@ -768,6 +777,7 @@ func (r *syncResource) Create(ctx context.Context, req resource.CreateRequest, r
 				"bulk_sync_ids": types.SetType{ElemType: types.StringType},
 			},
 		},
+		"run_after_success_only": types.BoolType,
 	}, sync.Data.Schedule)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -1006,6 +1016,7 @@ func (r *syncResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 				"bulk_sync_ids": types.SetType{ElemType: types.StringType},
 			},
 		},
+		"run_after_success_only": types.BoolType,
 	}, sync.Data.Schedule)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -1410,6 +1421,7 @@ func (r *syncResource) Update(ctx context.Context, req resource.UpdateRequest, r
 				"bulk_sync_ids": types.SetType{ElemType: types.StringType},
 			},
 		},
+		"run_after_success_only": types.BoolType,
 	}, sync.Data.Schedule)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

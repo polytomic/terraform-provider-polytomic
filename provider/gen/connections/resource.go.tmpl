@@ -22,10 +22,10 @@ var _ resource.ResourceWithImportState = &{{ .Connection }}ConnectionResource{}
 		PlanModifiers: []planmodifier.{{ .TfType }}{
 			{{ .TfType | lower }}planmodifier.UseStateForUnknown(),
     	},
-		{{- end -}}
+		{{ end -}}
 		{{ if .Default.Value -}}
 		Default: {{ .Default.Value }},
-		{{- end -}}
+		{{ end -}}
 		{{ if .Attributes -}}
 			Attributes: map[string]schema.Attribute{
 				{{ range .Attributes }}{{ template "attribute" . }}{{ end }}
