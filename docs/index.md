@@ -7,22 +7,38 @@ description: |-
 
 # Polytomic Provider
 
-The Polytomic provider is used to interact with the resources supported by Polytomic. The provider needs to be configured with the proper credentials before it can be used.
-
-Use the navigation to the left to read about the available resources and datasources.
+Use the navigation to the left to read about the available resources and
+datasources.
 
 
 
 ## Example Usage
 
-### API Key 
+### API Key
+
 ```terraform
 provider "polytomic" {
   api_key     = "<value from settings page>"
 }
 ```
 
+### Partner Key
+
+[Partner keys](https://apidocs.polytomic.com/guides/obtaining-api-keys#partner-keys) allow access to user and organization resources.
+
+```terraform
+provider "polytomic" {
+  partner_key = "<value from settings page>"
+  organization_user = "terraform@polytomic.com"
+}
+```
+
+The `organization_user` may be any valid email address. When using a partner key
+to access resources in an organization the user with this email address will be
+used. The user will be created in the organization if it does not exist.
+
 ### Deployment API Key (On-Premises only)
+
 ```terraform
 provider "polytomic" {
   deployment_url     = "polytomic.acmeinc.com"
@@ -36,14 +52,20 @@ provider "polytomic" {
 ### Optional
 
 - `api_key` (String, Sensitive) Polytomic API key
-- `deployment_api_key` (String, Sensitive) Polytomic deployment key (required if `api_key` is not set)
+- `deployment_api_key` (String, Sensitive) Polytomic deployment key
 - `deployment_url` (String) Polytomic deployment URL (defaults to app.polytomic.com)
+- `organization_user` (String) Polytomic organization user; required if `partner_key` is set.
+- `partner_key` (String, Sensitive) Polytomic partner key
 
 
 ## Importing existing resources
-Polytomic offers the ability to import existing resources from your Polytomic account into your Terraform state. This allows you to manage existing resources via Terraform. 
+
+Polytomic offers the ability to import existing resources from your Polytomic
+account into your Terraform state. This allows you to manage existing resources
+via Terraform.
 
 ### Running the importer
+
 The importer is a separate binary that can be downloaded from the [releases page](https://github.com/polytomic/terraform-provider-polytomic/releases). The following command will run the importer and import all resources into the specified directory.
 
 ```bash

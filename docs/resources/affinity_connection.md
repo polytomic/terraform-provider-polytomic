@@ -16,7 +16,7 @@ Affinity Connection
 resource "polytomic_affinity_connection" "affinity" {
   name = "example"
   configuration = {
-    api_key = "my-api-key"
+    api_key = "******"
   }
 }
 ```
@@ -44,5 +44,9 @@ resource "polytomic_affinity_connection" "affinity" {
 Required:
 
 - `api_key` (String, Sensitive)
+
+Optional:
+
+- `user` (String)
 
 
