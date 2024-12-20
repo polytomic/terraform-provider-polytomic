@@ -36,12 +36,26 @@ data "polytomic_databricks_connection" "databricks" {
 
 Read-Only:
 
+- `auth_mode` (String) How to authenticate with AWS. Defaults to Access Key and Secret
+- `aws_access_key_id` (String) See https://docs.polytomic.com/docs/databricks-connections#writing-to-databricks
+- `aws_user` (String)
+- `azure_account_name` (String) The account name of the storage account
 - `cloud_provider` (String)
+- `concurrent_queries` (Number)
+- `container_name` (String) The container which we will stage files in
+- `deleted_file_retention_days` (Number)
 - `enable_delta_uniform` (Boolean)
 - `enforce_query_limit` (Boolean)
+- `external_id` (String) External ID for the IAM role
 - `http_path` (String)
+- `iam_role_arn` (String)
+- `log_file_retention_days` (Number)
 - `port` (Number)
+- `s3_bucket_name` (String) Name of bucket used for staging data load files
+- `s3_bucket_region` (String) Region of bucket.example=us-east-1
 - `server_hostname` (String)
+- `set_retention_properties` (Boolean)
+- `storage_credential_name` (String)
 - `unity_catalog_enabled` (Boolean)
 
 

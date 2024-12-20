@@ -24,6 +24,8 @@ import (
 	"github.com/polytomic/polytomic-go"
 	ptcore "github.com/polytomic/polytomic-go/core"
 	"github.com/polytomic/terraform-provider-polytomic/provider/internal/client"
+
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -44,12 +46,50 @@ func (t *IroncladConnectionResource) Schema(ctx context.Context, req resource.Sc
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
+					"api_key": schema.StringAttribute{
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+						Sensitive:           true,
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.UseStateForUnknown(),
+						},
+						Default: stringdefault.StaticString(""),
+					},
 					"auth_method": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
 						Sensitive:           false,
+					},
+					"client_id": schema.StringAttribute{
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+						Sensitive:           false,
+						Default:             stringdefault.StaticString(""),
+					},
+					"client_secret": schema.StringAttribute{
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+						Sensitive:           true,
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.UseStateForUnknown(),
+						},
+						Default: stringdefault.StaticString(""),
+					},
+					"user_as_email": schema.StringAttribute{
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+						Sensitive:           false,
+						Default:             stringdefault.StaticString(""),
 					},
 				},
 
@@ -75,7 +115,15 @@ func (t *IroncladConnectionResource) Schema(ctx context.Context, req resource.Sc
 }
 
 type IroncladConf struct {
+	Api_key string `mapstructure:"api_key" tfsdk:"api_key"`
+
 	Auth_method string `mapstructure:"auth_method" tfsdk:"auth_method"`
+
+	Client_id string `mapstructure:"client_id" tfsdk:"client_id"`
+
+	Client_secret string `mapstructure:"client_secret" tfsdk:"client_secret"`
+
+	User_as_email string `mapstructure:"user_as_email" tfsdk:"user_as_email"`
 }
 
 type IroncladConnectionResource struct {
@@ -112,7 +160,11 @@ func (r *IroncladConnectionResource) Create(ctx context.Context, req resource.Cr
 		Type:           "ironclad",
 		OrganizationId: data.Organization.ValueStringPointer(),
 		Configuration: map[string]interface{}{
-			"auth_method": data.Configuration.Attributes()["auth_method"].(types.String).ValueString(),
+			"api_key":       data.Configuration.Attributes()["api_key"].(types.String).ValueString(),
+			"auth_method":   data.Configuration.Attributes()["auth_method"].(types.String).ValueString(),
+			"client_id":     data.Configuration.Attributes()["client_id"].(types.String).ValueString(),
+			"client_secret": data.Configuration.Attributes()["client_secret"].(types.String).ValueString(),
+			"user_as_email": data.Configuration.Attributes()["user_as_email"].(types.String).ValueString(),
 		},
 		Validate: pointer.ToBool(false),
 	})
@@ -131,7 +183,11 @@ func (r *IroncladConnectionResource) Create(ctx context.Context, req resource.Cr
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"auth_method": types.StringType,
+		"api_key":       types.StringType,
+		"auth_method":   types.StringType,
+		"client_id":     types.StringType,
+		"client_secret": types.StringType,
+		"user_as_email": types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -182,7 +238,11 @@ func (r *IroncladConnectionResource) Read(ctx context.Context, req resource.Read
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"auth_method": types.StringType,
+		"api_key":       types.StringType,
+		"auth_method":   types.StringType,
+		"client_id":     types.StringType,
+		"client_secret": types.StringType,
+		"user_as_email": types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -214,7 +274,11 @@ func (r *IroncladConnectionResource) Update(ctx context.Context, req resource.Up
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueStringPointer(),
 			Configuration: map[string]interface{}{
-				"auth_method": data.Configuration.Attributes()["auth_method"].(types.String).ValueString(),
+				"api_key":       data.Configuration.Attributes()["api_key"].(types.String).ValueString(),
+				"auth_method":   data.Configuration.Attributes()["auth_method"].(types.String).ValueString(),
+				"client_id":     data.Configuration.Attributes()["client_id"].(types.String).ValueString(),
+				"client_secret": data.Configuration.Attributes()["client_secret"].(types.String).ValueString(),
+				"user_as_email": data.Configuration.Attributes()["user_as_email"].(types.String).ValueString(),
 			},
 			Validate: pointer.ToBool(false),
 		})
@@ -234,7 +298,11 @@ func (r *IroncladConnectionResource) Update(ctx context.Context, req resource.Up
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"auth_method": types.StringType,
+		"api_key":       types.StringType,
+		"auth_method":   types.StringType,
+		"client_id":     types.StringType,
+		"client_secret": types.StringType,
+		"user_as_email": types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -288,11 +356,17 @@ func (r *IroncladConnectionResource) Delete(ctx context.Context, req resource.De
 	pErr := &polytomic.UnprocessableEntityError{}
 	if errors.As(err, &pErr) {
 		if strings.Contains(*pErr.Body.Message, "connection in use") {
-			resp.Diagnostics.AddError("Connection in use",
-				fmt.Sprintf("Connection is used by %s \"%s\" (%s). Please remove before deleting this connection.",
-					pErr.Body.Metadata["type"], pErr.Body.Metadata["name"], pErr.Body.Metadata["id"]),
-			)
-			return
+			if used_by, ok := pErr.Body.Metadata["used_by"].([]interface{}); ok {
+				for _, us := range used_by {
+					if user, ok := us.(map[string]interface{}); ok {
+						resp.Diagnostics.AddError("Connection in use",
+							fmt.Sprintf("Connection is used by %s \"%s\" (%s). Please remove before deleting this connection.",
+								user["type"], user["name"], user["id"]),
+						)
+					}
+				}
+				return
+			}
 		}
 	}
 

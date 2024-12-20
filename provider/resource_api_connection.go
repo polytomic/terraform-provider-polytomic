@@ -573,11 +573,17 @@ func (r *ApiConnectionResource) Delete(ctx context.Context, req resource.DeleteR
 	pErr := &polytomic.UnprocessableEntityError{}
 	if errors.As(err, &pErr) {
 		if strings.Contains(*pErr.Body.Message, "connection in use") {
-			resp.Diagnostics.AddError("Connection in use",
-				fmt.Sprintf("Connection is used by %s \"%s\" (%s). Please remove before deleting this connection.",
-					pErr.Body.Metadata["type"], pErr.Body.Metadata["name"], pErr.Body.Metadata["id"]),
-			)
-			return
+			if used_by, ok := pErr.Body.Metadata["used_by"].([]interface{}); ok {
+				for _, us := range used_by {
+					if user, ok := us.(map[string]interface{}); ok {
+						resp.Diagnostics.AddError("Connection in use",
+							fmt.Sprintf("Connection is used by %s \"%s\" (%s). Please remove before deleting this connection.",
+								user["type"], user["name"], user["id"]),
+						)
+					}
+				}
+				return
+			}
 		}
 	}
 

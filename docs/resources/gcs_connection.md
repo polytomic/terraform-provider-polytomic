@@ -16,7 +16,8 @@ Google Cloud Storage Connection
 resource "polytomic_gcs_connection" "gcs" {
   name = "example"
   configuration = {
-    bucket = "my-bucket"
+    bucket            = "my-bucket"
+    single_table_name = "collection"
   }
 }
 ```
@@ -51,5 +52,8 @@ Optional:
 - `client_email` (String)
 - `is_single_table` (Boolean) Treat the files as a single table.
 - `project_id` (String)
+- `single_table_file_format` (String)
+- `single_table_name` (String)
+- `skip_lines` (Number) Skip first N lines of each CSV file.
 
 

@@ -66,6 +66,18 @@ func (d *GcsConnectionDataSource) Schema(ctx context.Context, req datasource.Sch
 						MarkdownDescription: "",
 						Computed:            true,
 					},
+					"single_table_file_format": schema.StringAttribute{
+						MarkdownDescription: "",
+						Computed:            true,
+					},
+					"single_table_name": schema.StringAttribute{
+						MarkdownDescription: "",
+						Computed:            true,
+					},
+					"skip_lines": schema.Int64Attribute{
+						MarkdownDescription: "Skip first N lines of each CSV file.",
+						Computed:            true,
+					},
 				},
 				Optional: true,
 			},
@@ -115,6 +127,15 @@ func (d *GcsConnectionDataSource) Read(ctx context.Context, req datasource.ReadR
 			),
 			"project_id": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["project_id"], "string").(string),
+			),
+			"single_table_file_format": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["single_table_file_format"], "string").(string),
+			),
+			"single_table_name": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["single_table_name"], "string").(string),
+			),
+			"skip_lines": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["skip_lines"], "string").(string),
 			),
 		},
 	)

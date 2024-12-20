@@ -40,5 +40,8 @@ Read-Only:
 - `client_email` (String)
 - `is_single_table` (Boolean) Treat the files as a single table.
 - `project_id` (String)
+- `single_table_file_format` (String)
+- `single_table_name` (String)
+- `skip_lines` (Number) Skip first N lines of each CSV file.
 
 

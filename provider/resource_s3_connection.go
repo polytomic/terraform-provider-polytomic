@@ -24,6 +24,9 @@ import (
 	"github.com/polytomic/polytomic-go"
 	ptcore "github.com/polytomic/polytomic-go/core"
 	"github.com/polytomic/terraform-provider-polytomic/provider/internal/client"
+
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -51,6 +54,49 @@ func (t *S3ConnectionResource) Schema(ctx context.Context, req resource.SchemaRe
 						Computed:            false,
 						Sensitive:           false,
 					},
+					"aws_access_key_id": schema.StringAttribute{
+						MarkdownDescription: "Access Key ID with read/write access to a bucket.",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+						Sensitive:           false,
+						Default:             stringdefault.StaticString(""),
+					},
+					"aws_secret_access_key": schema.StringAttribute{
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+						Sensitive:           true,
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.UseStateForUnknown(),
+						},
+						Default: stringdefault.StaticString(""),
+					},
+					"aws_user": schema.StringAttribute{
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+						Sensitive:           false,
+						Default:             stringdefault.StaticString(""),
+					},
+					"external_id": schema.StringAttribute{
+						MarkdownDescription: "External ID for the IAM role",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+						Sensitive:           false,
+						Default:             stringdefault.StaticString(""),
+					},
+					"iam_role_arn": schema.StringAttribute{
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+						Sensitive:           false,
+						Default:             stringdefault.StaticString(""),
+					},
 					"is_single_table": schema.BoolAttribute{
 						MarkdownDescription: "Treat the files as a single table.",
 						Required:            false,
@@ -71,6 +117,30 @@ func (t *S3ConnectionResource) Schema(ctx context.Context, req resource.SchemaRe
 						Optional:            false,
 						Computed:            false,
 						Sensitive:           false,
+					},
+					"single_table_file_format": schema.StringAttribute{
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+						Sensitive:           false,
+						Default:             stringdefault.StaticString(""),
+					},
+					"single_table_name": schema.StringAttribute{
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+						Sensitive:           false,
+						Default:             stringdefault.StaticString(""),
+					},
+					"skip_lines": schema.Int64Attribute{
+						MarkdownDescription: "Skip first N lines of each CSV file.",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+						Sensitive:           false,
+						Default:             int64default.StaticInt64(0),
 					},
 				},
 
@@ -98,11 +168,27 @@ func (t *S3ConnectionResource) Schema(ctx context.Context, req resource.SchemaRe
 type S3Conf struct {
 	Auth_mode string `mapstructure:"auth_mode" tfsdk:"auth_mode"`
 
+	Aws_access_key_id string `mapstructure:"aws_access_key_id" tfsdk:"aws_access_key_id"`
+
+	Aws_secret_access_key string `mapstructure:"aws_secret_access_key" tfsdk:"aws_secret_access_key"`
+
+	Aws_user string `mapstructure:"aws_user" tfsdk:"aws_user"`
+
+	External_id string `mapstructure:"external_id" tfsdk:"external_id"`
+
+	Iam_role_arn string `mapstructure:"iam_role_arn" tfsdk:"iam_role_arn"`
+
 	Is_single_table bool `mapstructure:"is_single_table" tfsdk:"is_single_table"`
 
 	S3_bucket_name string `mapstructure:"s3_bucket_name" tfsdk:"s3_bucket_name"`
 
 	S3_bucket_region string `mapstructure:"s3_bucket_region" tfsdk:"s3_bucket_region"`
+
+	Single_table_file_format string `mapstructure:"single_table_file_format" tfsdk:"single_table_file_format"`
+
+	Single_table_name string `mapstructure:"single_table_name" tfsdk:"single_table_name"`
+
+	Skip_lines int64 `mapstructure:"skip_lines" tfsdk:"skip_lines"`
 }
 
 type S3ConnectionResource struct {
@@ -139,10 +225,18 @@ func (r *S3ConnectionResource) Create(ctx context.Context, req resource.CreateRe
 		Type:           "s3",
 		OrganizationId: data.Organization.ValueStringPointer(),
 		Configuration: map[string]interface{}{
-			"auth_mode":        data.Configuration.Attributes()["auth_mode"].(types.String).ValueString(),
-			"is_single_table":  data.Configuration.Attributes()["is_single_table"].(types.Bool).ValueBool(),
-			"s3_bucket_name":   data.Configuration.Attributes()["s3_bucket_name"].(types.String).ValueString(),
-			"s3_bucket_region": data.Configuration.Attributes()["s3_bucket_region"].(types.String).ValueString(),
+			"auth_mode":                data.Configuration.Attributes()["auth_mode"].(types.String).ValueString(),
+			"aws_access_key_id":        data.Configuration.Attributes()["aws_access_key_id"].(types.String).ValueString(),
+			"aws_secret_access_key":    data.Configuration.Attributes()["aws_secret_access_key"].(types.String).ValueString(),
+			"aws_user":                 data.Configuration.Attributes()["aws_user"].(types.String).ValueString(),
+			"external_id":              data.Configuration.Attributes()["external_id"].(types.String).ValueString(),
+			"iam_role_arn":             data.Configuration.Attributes()["iam_role_arn"].(types.String).ValueString(),
+			"is_single_table":          data.Configuration.Attributes()["is_single_table"].(types.Bool).ValueBool(),
+			"s3_bucket_name":           data.Configuration.Attributes()["s3_bucket_name"].(types.String).ValueString(),
+			"s3_bucket_region":         data.Configuration.Attributes()["s3_bucket_region"].(types.String).ValueString(),
+			"single_table_file_format": data.Configuration.Attributes()["single_table_file_format"].(types.String).ValueString(),
+			"single_table_name":        data.Configuration.Attributes()["single_table_name"].(types.String).ValueString(),
+			"skip_lines":               int(data.Configuration.Attributes()["skip_lines"].(types.Int64).ValueInt64()),
 		},
 		Validate: pointer.ToBool(false),
 	})
@@ -161,10 +255,18 @@ func (r *S3ConnectionResource) Create(ctx context.Context, req resource.CreateRe
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"auth_mode":        types.StringType,
-		"is_single_table":  types.BoolType,
-		"s3_bucket_name":   types.StringType,
-		"s3_bucket_region": types.StringType,
+		"auth_mode":                types.StringType,
+		"aws_access_key_id":        types.StringType,
+		"aws_secret_access_key":    types.StringType,
+		"aws_user":                 types.StringType,
+		"external_id":              types.StringType,
+		"iam_role_arn":             types.StringType,
+		"is_single_table":          types.BoolType,
+		"s3_bucket_name":           types.StringType,
+		"s3_bucket_region":         types.StringType,
+		"single_table_file_format": types.StringType,
+		"single_table_name":        types.StringType,
+		"skip_lines":               types.NumberType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -215,10 +317,18 @@ func (r *S3ConnectionResource) Read(ctx context.Context, req resource.ReadReques
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"auth_mode":        types.StringType,
-		"is_single_table":  types.BoolType,
-		"s3_bucket_name":   types.StringType,
-		"s3_bucket_region": types.StringType,
+		"auth_mode":                types.StringType,
+		"aws_access_key_id":        types.StringType,
+		"aws_secret_access_key":    types.StringType,
+		"aws_user":                 types.StringType,
+		"external_id":              types.StringType,
+		"iam_role_arn":             types.StringType,
+		"is_single_table":          types.BoolType,
+		"s3_bucket_name":           types.StringType,
+		"s3_bucket_region":         types.StringType,
+		"single_table_file_format": types.StringType,
+		"single_table_name":        types.StringType,
+		"skip_lines":               types.NumberType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -250,10 +360,18 @@ func (r *S3ConnectionResource) Update(ctx context.Context, req resource.UpdateRe
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueStringPointer(),
 			Configuration: map[string]interface{}{
-				"auth_mode":        data.Configuration.Attributes()["auth_mode"].(types.String).ValueString(),
-				"is_single_table":  data.Configuration.Attributes()["is_single_table"].(types.Bool).ValueBool(),
-				"s3_bucket_name":   data.Configuration.Attributes()["s3_bucket_name"].(types.String).ValueString(),
-				"s3_bucket_region": data.Configuration.Attributes()["s3_bucket_region"].(types.String).ValueString(),
+				"auth_mode":                data.Configuration.Attributes()["auth_mode"].(types.String).ValueString(),
+				"aws_access_key_id":        data.Configuration.Attributes()["aws_access_key_id"].(types.String).ValueString(),
+				"aws_secret_access_key":    data.Configuration.Attributes()["aws_secret_access_key"].(types.String).ValueString(),
+				"aws_user":                 data.Configuration.Attributes()["aws_user"].(types.String).ValueString(),
+				"external_id":              data.Configuration.Attributes()["external_id"].(types.String).ValueString(),
+				"iam_role_arn":             data.Configuration.Attributes()["iam_role_arn"].(types.String).ValueString(),
+				"is_single_table":          data.Configuration.Attributes()["is_single_table"].(types.Bool).ValueBool(),
+				"s3_bucket_name":           data.Configuration.Attributes()["s3_bucket_name"].(types.String).ValueString(),
+				"s3_bucket_region":         data.Configuration.Attributes()["s3_bucket_region"].(types.String).ValueString(),
+				"single_table_file_format": data.Configuration.Attributes()["single_table_file_format"].(types.String).ValueString(),
+				"single_table_name":        data.Configuration.Attributes()["single_table_name"].(types.String).ValueString(),
+				"skip_lines":               int(data.Configuration.Attributes()["skip_lines"].(types.Int64).ValueInt64()),
 			},
 			Validate: pointer.ToBool(false),
 		})
@@ -273,10 +391,18 @@ func (r *S3ConnectionResource) Update(ctx context.Context, req resource.UpdateRe
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"auth_mode":        types.StringType,
-		"is_single_table":  types.BoolType,
-		"s3_bucket_name":   types.StringType,
-		"s3_bucket_region": types.StringType,
+		"auth_mode":                types.StringType,
+		"aws_access_key_id":        types.StringType,
+		"aws_secret_access_key":    types.StringType,
+		"aws_user":                 types.StringType,
+		"external_id":              types.StringType,
+		"iam_role_arn":             types.StringType,
+		"is_single_table":          types.BoolType,
+		"s3_bucket_name":           types.StringType,
+		"s3_bucket_region":         types.StringType,
+		"single_table_file_format": types.StringType,
+		"single_table_name":        types.StringType,
+		"skip_lines":               types.NumberType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -330,11 +456,17 @@ func (r *S3ConnectionResource) Delete(ctx context.Context, req resource.DeleteRe
 	pErr := &polytomic.UnprocessableEntityError{}
 	if errors.As(err, &pErr) {
 		if strings.Contains(*pErr.Body.Message, "connection in use") {
-			resp.Diagnostics.AddError("Connection in use",
-				fmt.Sprintf("Connection is used by %s \"%s\" (%s). Please remove before deleting this connection.",
-					pErr.Body.Metadata["type"], pErr.Body.Metadata["name"], pErr.Body.Metadata["id"]),
-			)
-			return
+			if used_by, ok := pErr.Body.Metadata["used_by"].([]interface{}); ok {
+				for _, us := range used_by {
+					if user, ok := us.(map[string]interface{}); ok {
+						resp.Diagnostics.AddError("Connection in use",
+							fmt.Sprintf("Connection is used by %s \"%s\" (%s). Please remove before deleting this connection.",
+								user["type"], user["name"], user["id"]),
+						)
+					}
+				}
+				return
+			}
 		}
 	}
 

@@ -50,7 +50,35 @@ func (d *DatabricksConnectionDataSource) Schema(ctx context.Context, req datasou
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
+					"auth_mode": schema.StringAttribute{
+						MarkdownDescription: "How to authenticate with AWS. Defaults to Access Key and Secret",
+						Computed:            true,
+					},
+					"aws_access_key_id": schema.StringAttribute{
+						MarkdownDescription: "See https://docs.polytomic.com/docs/databricks-connections#writing-to-databricks",
+						Computed:            true,
+					},
+					"aws_user": schema.StringAttribute{
+						MarkdownDescription: "",
+						Computed:            true,
+					},
+					"azure_account_name": schema.StringAttribute{
+						MarkdownDescription: "The account name of the storage account",
+						Computed:            true,
+					},
 					"cloud_provider": schema.StringAttribute{
+						MarkdownDescription: "",
+						Computed:            true,
+					},
+					"concurrent_queries": schema.Int64Attribute{
+						MarkdownDescription: "",
+						Computed:            true,
+					},
+					"container_name": schema.StringAttribute{
+						MarkdownDescription: "The container which we will stage files in",
+						Computed:            true,
+					},
+					"deleted_file_retention_days": schema.Int64Attribute{
 						MarkdownDescription: "",
 						Computed:            true,
 					},
@@ -62,7 +90,19 @@ func (d *DatabricksConnectionDataSource) Schema(ctx context.Context, req datasou
 						MarkdownDescription: "",
 						Computed:            true,
 					},
+					"external_id": schema.StringAttribute{
+						MarkdownDescription: "External ID for the IAM role",
+						Computed:            true,
+					},
 					"http_path": schema.StringAttribute{
+						MarkdownDescription: "",
+						Computed:            true,
+					},
+					"iam_role_arn": schema.StringAttribute{
+						MarkdownDescription: "",
+						Computed:            true,
+					},
+					"log_file_retention_days": schema.Int64Attribute{
 						MarkdownDescription: "",
 						Computed:            true,
 					},
@@ -70,7 +110,23 @@ func (d *DatabricksConnectionDataSource) Schema(ctx context.Context, req datasou
 						MarkdownDescription: "",
 						Computed:            true,
 					},
+					"s3_bucket_name": schema.StringAttribute{
+						MarkdownDescription: "Name of bucket used for staging data load files",
+						Computed:            true,
+					},
+					"s3_bucket_region": schema.StringAttribute{
+						MarkdownDescription: "Region of bucket.example=us-east-1",
+						Computed:            true,
+					},
 					"server_hostname": schema.StringAttribute{
+						MarkdownDescription: "",
+						Computed:            true,
+					},
+					"set_retention_properties": schema.BoolAttribute{
+						MarkdownDescription: "",
+						Computed:            true,
+					},
+					"storage_credential_name": schema.StringAttribute{
 						MarkdownDescription: "",
 						Computed:            true,
 					},
@@ -116,8 +172,29 @@ func (d *DatabricksConnectionDataSource) Read(ctx context.Context, req datasourc
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttributeTypes(ctx),
 		map[string]attr.Value{
+			"auth_mode": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["auth_mode"], "string").(string),
+			),
+			"aws_access_key_id": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["aws_access_key_id"], "string").(string),
+			),
+			"aws_user": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["aws_user"], "string").(string),
+			),
+			"azure_account_name": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["azure_account_name"], "string").(string),
+			),
 			"cloud_provider": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["cloud_provider"], "string").(string),
+			),
+			"concurrent_queries": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["concurrent_queries"], "string").(string),
+			),
+			"container_name": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["container_name"], "string").(string),
+			),
+			"deleted_file_retention_days": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["deleted_file_retention_days"], "string").(string),
 			),
 			"enable_delta_uniform": types.BoolValue(
 				getValueOrEmpty(connection.Data.Configuration["enable_delta_uniform"], "bool").(bool),
@@ -125,14 +202,35 @@ func (d *DatabricksConnectionDataSource) Read(ctx context.Context, req datasourc
 			"enforce_query_limit": types.BoolValue(
 				getValueOrEmpty(connection.Data.Configuration["enforce_query_limit"], "bool").(bool),
 			),
+			"external_id": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["external_id"], "string").(string),
+			),
 			"http_path": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["http_path"], "string").(string),
+			),
+			"iam_role_arn": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["iam_role_arn"], "string").(string),
+			),
+			"log_file_retention_days": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["log_file_retention_days"], "string").(string),
 			),
 			"port": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["port"], "string").(string),
 			),
+			"s3_bucket_name": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["s3_bucket_name"], "string").(string),
+			),
+			"s3_bucket_region": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["s3_bucket_region"], "string").(string),
+			),
 			"server_hostname": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["server_hostname"], "string").(string),
+			),
+			"set_retention_properties": types.BoolValue(
+				getValueOrEmpty(connection.Data.Configuration["set_retention_properties"], "bool").(bool),
+			),
+			"storage_credential_name": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["storage_credential_name"], "string").(string),
 			),
 			"unity_catalog_enabled": types.BoolValue(
 				getValueOrEmpty(connection.Data.Configuration["unity_catalog_enabled"], "bool").(bool),

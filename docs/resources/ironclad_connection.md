@@ -16,6 +16,10 @@ Ironclad Connection
 resource "polytomic_ironclad_connection" "ironclad" {
   name = "example"
   configuration = {
+    api_key       = "secret"
+    client_id     = "ironclad"
+    client_secret = "secret"
+    user_as_email = "email@domain.com"
   }
 }
 ```
@@ -43,5 +47,12 @@ resource "polytomic_ironclad_connection" "ironclad" {
 Required:
 
 - `auth_method` (String)
+
+Optional:
+
+- `api_key` (String, Sensitive)
+- `client_id` (String)
+- `client_secret` (String, Sensitive)
+- `user_as_email` (String)
 
 

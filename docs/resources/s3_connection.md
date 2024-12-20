@@ -16,9 +16,12 @@ S3 Connection
 resource "polytomic_s3_connection" "s3" {
   name = "example"
   configuration = {
-    auth_mode        = "access_key_and_secret"
-    s3_bucket_name   = "s3://polytomic/dataset"
-    s3_bucket_region = "us-east-1"
+    auth_mode             = "access_key_and_secret"
+    aws_access_key_id     = "AKIAIOSFODNN7EXAMPLE"
+    aws_secret_access_key = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+    s3_bucket_name        = "s3://polytomic/dataset"
+    s3_bucket_region      = "us-east-1"
+    single_table_name     = "collection"
   }
 }
 ```
@@ -51,6 +54,14 @@ Required:
 
 Optional:
 
+- `aws_access_key_id` (String) Access Key ID with read/write access to a bucket.
+- `aws_secret_access_key` (String, Sensitive)
+- `aws_user` (String)
+- `external_id` (String) External ID for the IAM role
+- `iam_role_arn` (String)
 - `is_single_table` (Boolean) Treat the files as a single table.
+- `single_table_file_format` (String)
+- `single_table_name` (String)
+- `skip_lines` (Number) Skip first N lines of each CSV file.
 
 

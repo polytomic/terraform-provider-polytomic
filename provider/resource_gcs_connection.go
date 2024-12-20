@@ -25,6 +25,7 @@ import (
 	ptcore "github.com/polytomic/polytomic-go/core"
 	"github.com/polytomic/terraform-provider-polytomic/provider/internal/client"
 
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 )
 
@@ -86,6 +87,30 @@ func (t *GcsConnectionResource) Schema(ctx context.Context, req resource.SchemaR
 							stringplanmodifier.UseStateForUnknown(),
 						},
 					},
+					"single_table_file_format": schema.StringAttribute{
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+						Sensitive:           false,
+						Default:             stringdefault.StaticString(""),
+					},
+					"single_table_name": schema.StringAttribute{
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+						Sensitive:           false,
+						Default:             stringdefault.StaticString(""),
+					},
+					"skip_lines": schema.Int64Attribute{
+						MarkdownDescription: "Skip first N lines of each CSV file.",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+						Sensitive:           false,
+						Default:             int64default.StaticInt64(0),
+					},
 				},
 
 				Required: true,
@@ -119,6 +144,12 @@ type GcsConf struct {
 	Project_id string `mapstructure:"project_id" tfsdk:"project_id"`
 
 	Service_account string `mapstructure:"service_account" tfsdk:"service_account"`
+
+	Single_table_file_format string `mapstructure:"single_table_file_format" tfsdk:"single_table_file_format"`
+
+	Single_table_name string `mapstructure:"single_table_name" tfsdk:"single_table_name"`
+
+	Skip_lines int64 `mapstructure:"skip_lines" tfsdk:"skip_lines"`
 }
 
 type GcsConnectionResource struct {
@@ -155,11 +186,14 @@ func (r *GcsConnectionResource) Create(ctx context.Context, req resource.CreateR
 		Type:           "gcs",
 		OrganizationId: data.Organization.ValueStringPointer(),
 		Configuration: map[string]interface{}{
-			"bucket":          data.Configuration.Attributes()["bucket"].(types.String).ValueString(),
-			"client_email":    data.Configuration.Attributes()["client_email"].(types.String).ValueString(),
-			"is_single_table": data.Configuration.Attributes()["is_single_table"].(types.Bool).ValueBool(),
-			"project_id":      data.Configuration.Attributes()["project_id"].(types.String).ValueString(),
-			"service_account": data.Configuration.Attributes()["service_account"].(types.String).ValueString(),
+			"bucket":                   data.Configuration.Attributes()["bucket"].(types.String).ValueString(),
+			"client_email":             data.Configuration.Attributes()["client_email"].(types.String).ValueString(),
+			"is_single_table":          data.Configuration.Attributes()["is_single_table"].(types.Bool).ValueBool(),
+			"project_id":               data.Configuration.Attributes()["project_id"].(types.String).ValueString(),
+			"service_account":          data.Configuration.Attributes()["service_account"].(types.String).ValueString(),
+			"single_table_file_format": data.Configuration.Attributes()["single_table_file_format"].(types.String).ValueString(),
+			"single_table_name":        data.Configuration.Attributes()["single_table_name"].(types.String).ValueString(),
+			"skip_lines":               int(data.Configuration.Attributes()["skip_lines"].(types.Int64).ValueInt64()),
 		},
 		Validate: pointer.ToBool(false),
 	})
@@ -178,11 +212,14 @@ func (r *GcsConnectionResource) Create(ctx context.Context, req resource.CreateR
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"bucket":          types.StringType,
-		"client_email":    types.StringType,
-		"is_single_table": types.BoolType,
-		"project_id":      types.StringType,
-		"service_account": types.StringType,
+		"bucket":                   types.StringType,
+		"client_email":             types.StringType,
+		"is_single_table":          types.BoolType,
+		"project_id":               types.StringType,
+		"service_account":          types.StringType,
+		"single_table_file_format": types.StringType,
+		"single_table_name":        types.StringType,
+		"skip_lines":               types.NumberType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -233,11 +270,14 @@ func (r *GcsConnectionResource) Read(ctx context.Context, req resource.ReadReque
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"bucket":          types.StringType,
-		"client_email":    types.StringType,
-		"is_single_table": types.BoolType,
-		"project_id":      types.StringType,
-		"service_account": types.StringType,
+		"bucket":                   types.StringType,
+		"client_email":             types.StringType,
+		"is_single_table":          types.BoolType,
+		"project_id":               types.StringType,
+		"service_account":          types.StringType,
+		"single_table_file_format": types.StringType,
+		"single_table_name":        types.StringType,
+		"skip_lines":               types.NumberType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -269,11 +309,14 @@ func (r *GcsConnectionResource) Update(ctx context.Context, req resource.UpdateR
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueStringPointer(),
 			Configuration: map[string]interface{}{
-				"bucket":          data.Configuration.Attributes()["bucket"].(types.String).ValueString(),
-				"client_email":    data.Configuration.Attributes()["client_email"].(types.String).ValueString(),
-				"is_single_table": data.Configuration.Attributes()["is_single_table"].(types.Bool).ValueBool(),
-				"project_id":      data.Configuration.Attributes()["project_id"].(types.String).ValueString(),
-				"service_account": data.Configuration.Attributes()["service_account"].(types.String).ValueString(),
+				"bucket":                   data.Configuration.Attributes()["bucket"].(types.String).ValueString(),
+				"client_email":             data.Configuration.Attributes()["client_email"].(types.String).ValueString(),
+				"is_single_table":          data.Configuration.Attributes()["is_single_table"].(types.Bool).ValueBool(),
+				"project_id":               data.Configuration.Attributes()["project_id"].(types.String).ValueString(),
+				"service_account":          data.Configuration.Attributes()["service_account"].(types.String).ValueString(),
+				"single_table_file_format": data.Configuration.Attributes()["single_table_file_format"].(types.String).ValueString(),
+				"single_table_name":        data.Configuration.Attributes()["single_table_name"].(types.String).ValueString(),
+				"skip_lines":               int(data.Configuration.Attributes()["skip_lines"].(types.Int64).ValueInt64()),
 			},
 			Validate: pointer.ToBool(false),
 		})
@@ -293,11 +336,14 @@ func (r *GcsConnectionResource) Update(ctx context.Context, req resource.UpdateR
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"bucket":          types.StringType,
-		"client_email":    types.StringType,
-		"is_single_table": types.BoolType,
-		"project_id":      types.StringType,
-		"service_account": types.StringType,
+		"bucket":                   types.StringType,
+		"client_email":             types.StringType,
+		"is_single_table":          types.BoolType,
+		"project_id":               types.StringType,
+		"service_account":          types.StringType,
+		"single_table_file_format": types.StringType,
+		"single_table_name":        types.StringType,
+		"skip_lines":               types.NumberType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -351,11 +397,17 @@ func (r *GcsConnectionResource) Delete(ctx context.Context, req resource.DeleteR
 	pErr := &polytomic.UnprocessableEntityError{}
 	if errors.As(err, &pErr) {
 		if strings.Contains(*pErr.Body.Message, "connection in use") {
-			resp.Diagnostics.AddError("Connection in use",
-				fmt.Sprintf("Connection is used by %s \"%s\" (%s). Please remove before deleting this connection.",
-					pErr.Body.Metadata["type"], pErr.Body.Metadata["name"], pErr.Body.Metadata["id"]),
-			)
-			return
+			if used_by, ok := pErr.Body.Metadata["used_by"].([]interface{}); ok {
+				for _, us := range used_by {
+					if user, ok := us.(map[string]interface{}); ok {
+						resp.Diagnostics.AddError("Connection in use",
+							fmt.Sprintf("Connection is used by %s \"%s\" (%s). Please remove before deleting this connection.",
+								user["type"], user["name"], user["id"]),
+						)
+					}
+				}
+				return
+			}
 		}
 	}
 

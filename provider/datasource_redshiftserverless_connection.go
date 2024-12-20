@@ -50,6 +50,10 @@ func (d *RedshiftserverlessConnectionDataSource) Schema(ctx context.Context, req
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
+					"data_api_endpoint": schema.StringAttribute{
+						MarkdownDescription: "Example: https://redshift-data.us-west-2.amazonaws.com",
+						Computed:            true,
+					},
 					"database": schema.StringAttribute{
 						MarkdownDescription: "",
 						Computed:            true,
@@ -112,6 +116,9 @@ func (d *RedshiftserverlessConnectionDataSource) Read(ctx context.Context, req d
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttributeTypes(ctx),
 		map[string]attr.Value{
+			"data_api_endpoint": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["data_api_endpoint"], "string").(string),
+			),
 			"database": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["database"], "string").(string),
 			),

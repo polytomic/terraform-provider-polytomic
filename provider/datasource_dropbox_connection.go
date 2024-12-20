@@ -62,6 +62,18 @@ func (d *DropboxConnectionDataSource) Schema(ctx context.Context, req datasource
 						MarkdownDescription: "",
 						Computed:            true,
 					},
+					"single_table_file_format": schema.StringAttribute{
+						MarkdownDescription: "",
+						Computed:            true,
+					},
+					"single_table_name": schema.StringAttribute{
+						MarkdownDescription: "",
+						Computed:            true,
+					},
+					"skip_lines": schema.Int64Attribute{
+						MarkdownDescription: "Skip first N lines of each CSV file.",
+						Computed:            true,
+					},
 				},
 				Optional: true,
 			},
@@ -108,6 +120,15 @@ func (d *DropboxConnectionDataSource) Read(ctx context.Context, req datasource.R
 			),
 			"oauth_token_expiry": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["oauth_token_expiry"], "string").(string),
+			),
+			"single_table_file_format": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["single_table_file_format"], "string").(string),
+			),
+			"single_table_name": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["single_table_name"], "string").(string),
+			),
+			"skip_lines": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["skip_lines"], "string").(string),
 			),
 		},
 	)

@@ -37,5 +37,7 @@ data "polytomic_ironclad_connection" "ironclad" {
 Read-Only:
 
 - `auth_method` (String)
+- `client_id` (String)
+- `user_as_email` (String)
 
 

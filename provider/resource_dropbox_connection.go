@@ -25,6 +25,7 @@ import (
 	ptcore "github.com/polytomic/polytomic-go/core"
 	"github.com/polytomic/terraform-provider-polytomic/provider/internal/client"
 
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 )
 
@@ -101,6 +102,30 @@ func (t *DropboxConnectionResource) Schema(ctx context.Context, req resource.Sch
 						Sensitive:           false,
 						Default:             stringdefault.StaticString(""),
 					},
+					"single_table_file_format": schema.StringAttribute{
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+						Sensitive:           false,
+						Default:             stringdefault.StaticString(""),
+					},
+					"single_table_name": schema.StringAttribute{
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+						Sensitive:           false,
+						Default:             stringdefault.StaticString(""),
+					},
+					"skip_lines": schema.Int64Attribute{
+						MarkdownDescription: "Skip first N lines of each CSV file.",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+						Sensitive:           false,
+						Default:             int64default.StaticInt64(0),
+					},
 				},
 
 				Required: true,
@@ -136,6 +161,12 @@ type DropboxConf struct {
 	Oauth_refresh_token string `mapstructure:"oauth_refresh_token" tfsdk:"oauth_refresh_token"`
 
 	Oauth_token_expiry string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
+
+	Single_table_file_format string `mapstructure:"single_table_file_format" tfsdk:"single_table_file_format"`
+
+	Single_table_name string `mapstructure:"single_table_name" tfsdk:"single_table_name"`
+
+	Skip_lines int64 `mapstructure:"skip_lines" tfsdk:"skip_lines"`
 }
 
 type DropboxConnectionResource struct {
@@ -172,12 +203,15 @@ func (r *DropboxConnectionResource) Create(ctx context.Context, req resource.Cre
 		Type:           "dropbox",
 		OrganizationId: data.Organization.ValueStringPointer(),
 		Configuration: map[string]interface{}{
-			"app_key":             data.Configuration.Attributes()["app_key"].(types.String).ValueString(),
-			"app_secret":          data.Configuration.Attributes()["app_secret"].(types.String).ValueString(),
-			"bucket":              data.Configuration.Attributes()["bucket"].(types.String).ValueString(),
-			"is_single_table":     data.Configuration.Attributes()["is_single_table"].(types.Bool).ValueBool(),
-			"oauth_refresh_token": data.Configuration.Attributes()["oauth_refresh_token"].(types.String).ValueString(),
-			"oauth_token_expiry":  data.Configuration.Attributes()["oauth_token_expiry"].(types.String).ValueString(),
+			"app_key":                  data.Configuration.Attributes()["app_key"].(types.String).ValueString(),
+			"app_secret":               data.Configuration.Attributes()["app_secret"].(types.String).ValueString(),
+			"bucket":                   data.Configuration.Attributes()["bucket"].(types.String).ValueString(),
+			"is_single_table":          data.Configuration.Attributes()["is_single_table"].(types.Bool).ValueBool(),
+			"oauth_refresh_token":      data.Configuration.Attributes()["oauth_refresh_token"].(types.String).ValueString(),
+			"oauth_token_expiry":       data.Configuration.Attributes()["oauth_token_expiry"].(types.String).ValueString(),
+			"single_table_file_format": data.Configuration.Attributes()["single_table_file_format"].(types.String).ValueString(),
+			"single_table_name":        data.Configuration.Attributes()["single_table_name"].(types.String).ValueString(),
+			"skip_lines":               int(data.Configuration.Attributes()["skip_lines"].(types.Int64).ValueInt64()),
 		},
 		Validate: pointer.ToBool(false),
 	})
@@ -196,12 +230,15 @@ func (r *DropboxConnectionResource) Create(ctx context.Context, req resource.Cre
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"app_key":             types.StringType,
-		"app_secret":          types.StringType,
-		"bucket":              types.StringType,
-		"is_single_table":     types.BoolType,
-		"oauth_refresh_token": types.StringType,
-		"oauth_token_expiry":  types.StringType,
+		"app_key":                  types.StringType,
+		"app_secret":               types.StringType,
+		"bucket":                   types.StringType,
+		"is_single_table":          types.BoolType,
+		"oauth_refresh_token":      types.StringType,
+		"oauth_token_expiry":       types.StringType,
+		"single_table_file_format": types.StringType,
+		"single_table_name":        types.StringType,
+		"skip_lines":               types.NumberType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -252,12 +289,15 @@ func (r *DropboxConnectionResource) Read(ctx context.Context, req resource.ReadR
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"app_key":             types.StringType,
-		"app_secret":          types.StringType,
-		"bucket":              types.StringType,
-		"is_single_table":     types.BoolType,
-		"oauth_refresh_token": types.StringType,
-		"oauth_token_expiry":  types.StringType,
+		"app_key":                  types.StringType,
+		"app_secret":               types.StringType,
+		"bucket":                   types.StringType,
+		"is_single_table":          types.BoolType,
+		"oauth_refresh_token":      types.StringType,
+		"oauth_token_expiry":       types.StringType,
+		"single_table_file_format": types.StringType,
+		"single_table_name":        types.StringType,
+		"skip_lines":               types.NumberType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -289,12 +329,15 @@ func (r *DropboxConnectionResource) Update(ctx context.Context, req resource.Upd
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueStringPointer(),
 			Configuration: map[string]interface{}{
-				"app_key":             data.Configuration.Attributes()["app_key"].(types.String).ValueString(),
-				"app_secret":          data.Configuration.Attributes()["app_secret"].(types.String).ValueString(),
-				"bucket":              data.Configuration.Attributes()["bucket"].(types.String).ValueString(),
-				"is_single_table":     data.Configuration.Attributes()["is_single_table"].(types.Bool).ValueBool(),
-				"oauth_refresh_token": data.Configuration.Attributes()["oauth_refresh_token"].(types.String).ValueString(),
-				"oauth_token_expiry":  data.Configuration.Attributes()["oauth_token_expiry"].(types.String).ValueString(),
+				"app_key":                  data.Configuration.Attributes()["app_key"].(types.String).ValueString(),
+				"app_secret":               data.Configuration.Attributes()["app_secret"].(types.String).ValueString(),
+				"bucket":                   data.Configuration.Attributes()["bucket"].(types.String).ValueString(),
+				"is_single_table":          data.Configuration.Attributes()["is_single_table"].(types.Bool).ValueBool(),
+				"oauth_refresh_token":      data.Configuration.Attributes()["oauth_refresh_token"].(types.String).ValueString(),
+				"oauth_token_expiry":       data.Configuration.Attributes()["oauth_token_expiry"].(types.String).ValueString(),
+				"single_table_file_format": data.Configuration.Attributes()["single_table_file_format"].(types.String).ValueString(),
+				"single_table_name":        data.Configuration.Attributes()["single_table_name"].(types.String).ValueString(),
+				"skip_lines":               int(data.Configuration.Attributes()["skip_lines"].(types.Int64).ValueInt64()),
 			},
 			Validate: pointer.ToBool(false),
 		})
@@ -314,12 +357,15 @@ func (r *DropboxConnectionResource) Update(ctx context.Context, req resource.Upd
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"app_key":             types.StringType,
-		"app_secret":          types.StringType,
-		"bucket":              types.StringType,
-		"is_single_table":     types.BoolType,
-		"oauth_refresh_token": types.StringType,
-		"oauth_token_expiry":  types.StringType,
+		"app_key":                  types.StringType,
+		"app_secret":               types.StringType,
+		"bucket":                   types.StringType,
+		"is_single_table":          types.BoolType,
+		"oauth_refresh_token":      types.StringType,
+		"oauth_token_expiry":       types.StringType,
+		"single_table_file_format": types.StringType,
+		"single_table_name":        types.StringType,
+		"skip_lines":               types.NumberType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -373,11 +419,17 @@ func (r *DropboxConnectionResource) Delete(ctx context.Context, req resource.Del
 	pErr := &polytomic.UnprocessableEntityError{}
 	if errors.As(err, &pErr) {
 		if strings.Contains(*pErr.Body.Message, "connection in use") {
-			resp.Diagnostics.AddError("Connection in use",
-				fmt.Sprintf("Connection is used by %s \"%s\" (%s). Please remove before deleting this connection.",
-					pErr.Body.Metadata["type"], pErr.Body.Metadata["name"], pErr.Body.Metadata["id"]),
-			)
-			return
+			if used_by, ok := pErr.Body.Metadata["used_by"].([]interface{}); ok {
+				for _, us := range used_by {
+					if user, ok := us.(map[string]interface{}); ok {
+						resp.Diagnostics.AddError("Connection in use",
+							fmt.Sprintf("Connection is used by %s \"%s\" (%s). Please remove before deleting this connection.",
+								user["type"], user["name"], user["id"]),
+						)
+					}
+				}
+				return
+			}
 		}
 	}
 

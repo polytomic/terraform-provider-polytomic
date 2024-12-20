@@ -46,6 +46,14 @@ func (t *RedshiftserverlessConnectionResource) Schema(ctx context.Context, req r
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
+					"data_api_endpoint": schema.StringAttribute{
+						MarkdownDescription: "Example: https://redshift-data.us-west-2.amazonaws.com",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+						Sensitive:           false,
+						Default:             stringdefault.StaticString(""),
+					},
 					"database": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            true,
@@ -114,6 +122,8 @@ func (t *RedshiftserverlessConnectionResource) Schema(ctx context.Context, req r
 }
 
 type RedshiftserverlessConf struct {
+	Data_api_endpoint string `mapstructure:"data_api_endpoint" tfsdk:"data_api_endpoint"`
+
 	Database string `mapstructure:"database" tfsdk:"database"`
 
 	External_id string `mapstructure:"external_id" tfsdk:"external_id"`
@@ -161,6 +171,7 @@ func (r *RedshiftserverlessConnectionResource) Create(ctx context.Context, req r
 		Type:           "redshiftserverless",
 		OrganizationId: data.Organization.ValueStringPointer(),
 		Configuration: map[string]interface{}{
+			"data_api_endpoint": data.Configuration.Attributes()["data_api_endpoint"].(types.String).ValueString(),
 			"database":          data.Configuration.Attributes()["database"].(types.String).ValueString(),
 			"external_id":       data.Configuration.Attributes()["external_id"].(types.String).ValueString(),
 			"iam_role_arn":      data.Configuration.Attributes()["iam_role_arn"].(types.String).ValueString(),
@@ -185,6 +196,7 @@ func (r *RedshiftserverlessConnectionResource) Create(ctx context.Context, req r
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"data_api_endpoint": types.StringType,
 		"database":          types.StringType,
 		"external_id":       types.StringType,
 		"iam_role_arn":      types.StringType,
@@ -241,6 +253,7 @@ func (r *RedshiftserverlessConnectionResource) Read(ctx context.Context, req res
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"data_api_endpoint": types.StringType,
 		"database":          types.StringType,
 		"external_id":       types.StringType,
 		"iam_role_arn":      types.StringType,
@@ -278,6 +291,7 @@ func (r *RedshiftserverlessConnectionResource) Update(ctx context.Context, req r
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueStringPointer(),
 			Configuration: map[string]interface{}{
+				"data_api_endpoint": data.Configuration.Attributes()["data_api_endpoint"].(types.String).ValueString(),
 				"database":          data.Configuration.Attributes()["database"].(types.String).ValueString(),
 				"external_id":       data.Configuration.Attributes()["external_id"].(types.String).ValueString(),
 				"iam_role_arn":      data.Configuration.Attributes()["iam_role_arn"].(types.String).ValueString(),
@@ -303,6 +317,7 @@ func (r *RedshiftserverlessConnectionResource) Update(ctx context.Context, req r
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"data_api_endpoint": types.StringType,
 		"database":          types.StringType,
 		"external_id":       types.StringType,
 		"iam_role_arn":      types.StringType,
@@ -362,11 +377,17 @@ func (r *RedshiftserverlessConnectionResource) Delete(ctx context.Context, req r
 	pErr := &polytomic.UnprocessableEntityError{}
 	if errors.As(err, &pErr) {
 		if strings.Contains(*pErr.Body.Message, "connection in use") {
-			resp.Diagnostics.AddError("Connection in use",
-				fmt.Sprintf("Connection is used by %s \"%s\" (%s). Please remove before deleting this connection.",
-					pErr.Body.Metadata["type"], pErr.Body.Metadata["name"], pErr.Body.Metadata["id"]),
-			)
-			return
+			if used_by, ok := pErr.Body.Metadata["used_by"].([]interface{}); ok {
+				for _, us := range used_by {
+					if user, ok := us.(map[string]interface{}); ok {
+						resp.Diagnostics.AddError("Connection in use",
+							fmt.Sprintf("Connection is used by %s \"%s\" (%s). Please remove before deleting this connection.",
+								user["type"], user["name"], user["id"]),
+						)
+					}
+				}
+				return
+			}
 		}
 	}
 

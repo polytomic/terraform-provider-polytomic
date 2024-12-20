@@ -52,6 +52,7 @@ Required:
 
 Optional:
 
+- `data_api_endpoint` (String) Example: https://redshift-data.us-west-2.amazonaws.com
 - `external_id` (String)
 - `override_endpoint` (Boolean)
 - `region` (String)

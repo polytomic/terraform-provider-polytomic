@@ -39,5 +39,8 @@ Read-Only:
 - `account_name` (String)
 - `container_name` (String)
 - `is_single_table` (Boolean) Treat the files as a single table.
+- `single_table_file_format` (String)
+- `single_table_name` (String)
+- `skip_lines` (Number) Skip first N lines of each CSV file.
 
 

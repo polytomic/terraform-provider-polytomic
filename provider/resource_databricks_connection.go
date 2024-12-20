@@ -25,6 +25,7 @@ import (
 	ptcore "github.com/polytomic/polytomic-go/core"
 	"github.com/polytomic/terraform-provider-polytomic/provider/internal/client"
 
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 )
 
@@ -56,6 +57,59 @@ func (t *DatabricksConnectionResource) Schema(ctx context.Context, req resource.
 							stringplanmodifier.UseStateForUnknown(),
 						},
 					},
+					"auth_mode": schema.StringAttribute{
+						MarkdownDescription: "How to authenticate with AWS. Defaults to Access Key and Secret",
+						Required:            true,
+						Optional:            false,
+						Computed:            false,
+						Sensitive:           false,
+					},
+					"aws_access_key_id": schema.StringAttribute{
+						MarkdownDescription: "See https://docs.polytomic.com/docs/databricks-connections#writing-to-databricks",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+						Sensitive:           false,
+						Default:             stringdefault.StaticString(""),
+					},
+					"aws_secret_access_key": schema.StringAttribute{
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+						Sensitive:           true,
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.UseStateForUnknown(),
+						},
+						Default: stringdefault.StaticString(""),
+					},
+					"aws_user": schema.StringAttribute{
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+						Sensitive:           false,
+						Default:             stringdefault.StaticString(""),
+					},
+					"azure_access_key": schema.StringAttribute{
+						MarkdownDescription: "The access key associated with this storage account",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+						Sensitive:           true,
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.UseStateForUnknown(),
+						},
+						Default: stringdefault.StaticString(""),
+					},
+					"azure_account_name": schema.StringAttribute{
+						MarkdownDescription: "The account name of the storage account",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+						Sensitive:           false,
+						Default:             stringdefault.StaticString(""),
+					},
 					"cloud_provider": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            false,
@@ -63,6 +117,30 @@ func (t *DatabricksConnectionResource) Schema(ctx context.Context, req resource.
 						Computed:            true,
 						Sensitive:           false,
 						Default:             stringdefault.StaticString(""),
+					},
+					"concurrent_queries": schema.Int64Attribute{
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+						Sensitive:           false,
+						Default:             int64default.StaticInt64(0),
+					},
+					"container_name": schema.StringAttribute{
+						MarkdownDescription: "The container which we will stage files in",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+						Sensitive:           false,
+						Default:             stringdefault.StaticString(""),
+					},
+					"deleted_file_retention_days": schema.Int64Attribute{
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+						Sensitive:           false,
+						Default:             int64default.StaticInt64(0),
 					},
 					"enable_delta_uniform": schema.BoolAttribute{
 						MarkdownDescription: "",
@@ -78,12 +156,36 @@ func (t *DatabricksConnectionResource) Schema(ctx context.Context, req resource.
 						Computed:            true,
 						Sensitive:           false,
 					},
+					"external_id": schema.StringAttribute{
+						MarkdownDescription: "External ID for the IAM role",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+						Sensitive:           false,
+						Default:             stringdefault.StaticString(""),
+					},
 					"http_path": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
 						Sensitive:           false,
+					},
+					"iam_role_arn": schema.StringAttribute{
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+						Sensitive:           false,
+						Default:             stringdefault.StaticString(""),
+					},
+					"log_file_retention_days": schema.Int64Attribute{
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+						Sensitive:           false,
+						Default:             int64default.StaticInt64(0),
 					},
 					"port": schema.Int64Attribute{
 						MarkdownDescription: "",
@@ -92,12 +194,43 @@ func (t *DatabricksConnectionResource) Schema(ctx context.Context, req resource.
 						Computed:            false,
 						Sensitive:           false,
 					},
+					"s3_bucket_name": schema.StringAttribute{
+						MarkdownDescription: "Name of bucket used for staging data load files",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+						Sensitive:           false,
+						Default:             stringdefault.StaticString(""),
+					},
+					"s3_bucket_region": schema.StringAttribute{
+						MarkdownDescription: "Region of bucket.example=us-east-1",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+						Sensitive:           false,
+						Default:             stringdefault.StaticString(""),
+					},
 					"server_hostname": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
 						Sensitive:           false,
+					},
+					"set_retention_properties": schema.BoolAttribute{
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+						Sensitive:           false,
+					},
+					"storage_credential_name": schema.StringAttribute{
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+						Sensitive:           false,
+						Default:             stringdefault.StaticString(""),
 					},
 					"unity_catalog_enabled": schema.BoolAttribute{
 						MarkdownDescription: "",
@@ -132,17 +265,49 @@ func (t *DatabricksConnectionResource) Schema(ctx context.Context, req resource.
 type DatabricksConf struct {
 	Access_token string `mapstructure:"access_token" tfsdk:"access_token"`
 
+	Auth_mode string `mapstructure:"auth_mode" tfsdk:"auth_mode"`
+
+	Aws_access_key_id string `mapstructure:"aws_access_key_id" tfsdk:"aws_access_key_id"`
+
+	Aws_secret_access_key string `mapstructure:"aws_secret_access_key" tfsdk:"aws_secret_access_key"`
+
+	Aws_user string `mapstructure:"aws_user" tfsdk:"aws_user"`
+
+	Azure_access_key string `mapstructure:"azure_access_key" tfsdk:"azure_access_key"`
+
+	Azure_account_name string `mapstructure:"azure_account_name" tfsdk:"azure_account_name"`
+
 	Cloud_provider string `mapstructure:"cloud_provider" tfsdk:"cloud_provider"`
+
+	Concurrent_queries int64 `mapstructure:"concurrent_queries" tfsdk:"concurrent_queries"`
+
+	Container_name string `mapstructure:"container_name" tfsdk:"container_name"`
+
+	Deleted_file_retention_days int64 `mapstructure:"deleted_file_retention_days" tfsdk:"deleted_file_retention_days"`
 
 	Enable_delta_uniform bool `mapstructure:"enable_delta_uniform" tfsdk:"enable_delta_uniform"`
 
 	Enforce_query_limit bool `mapstructure:"enforce_query_limit" tfsdk:"enforce_query_limit"`
 
+	External_id string `mapstructure:"external_id" tfsdk:"external_id"`
+
 	Http_path string `mapstructure:"http_path" tfsdk:"http_path"`
+
+	Iam_role_arn string `mapstructure:"iam_role_arn" tfsdk:"iam_role_arn"`
+
+	Log_file_retention_days int64 `mapstructure:"log_file_retention_days" tfsdk:"log_file_retention_days"`
 
 	Port int64 `mapstructure:"port" tfsdk:"port"`
 
+	S3_bucket_name string `mapstructure:"s3_bucket_name" tfsdk:"s3_bucket_name"`
+
+	S3_bucket_region string `mapstructure:"s3_bucket_region" tfsdk:"s3_bucket_region"`
+
 	Server_hostname string `mapstructure:"server_hostname" tfsdk:"server_hostname"`
+
+	Set_retention_properties bool `mapstructure:"set_retention_properties" tfsdk:"set_retention_properties"`
+
+	Storage_credential_name string `mapstructure:"storage_credential_name" tfsdk:"storage_credential_name"`
 
 	Unity_catalog_enabled bool `mapstructure:"unity_catalog_enabled" tfsdk:"unity_catalog_enabled"`
 }
@@ -181,14 +346,30 @@ func (r *DatabricksConnectionResource) Create(ctx context.Context, req resource.
 		Type:           "databricks",
 		OrganizationId: data.Organization.ValueStringPointer(),
 		Configuration: map[string]interface{}{
-			"access_token":          data.Configuration.Attributes()["access_token"].(types.String).ValueString(),
-			"cloud_provider":        data.Configuration.Attributes()["cloud_provider"].(types.String).ValueString(),
-			"enable_delta_uniform":  data.Configuration.Attributes()["enable_delta_uniform"].(types.Bool).ValueBool(),
-			"enforce_query_limit":   data.Configuration.Attributes()["enforce_query_limit"].(types.Bool).ValueBool(),
-			"http_path":             data.Configuration.Attributes()["http_path"].(types.String).ValueString(),
-			"port":                  int(data.Configuration.Attributes()["port"].(types.Int64).ValueInt64()),
-			"server_hostname":       data.Configuration.Attributes()["server_hostname"].(types.String).ValueString(),
-			"unity_catalog_enabled": data.Configuration.Attributes()["unity_catalog_enabled"].(types.Bool).ValueBool(),
+			"access_token":                data.Configuration.Attributes()["access_token"].(types.String).ValueString(),
+			"auth_mode":                   data.Configuration.Attributes()["auth_mode"].(types.String).ValueString(),
+			"aws_access_key_id":           data.Configuration.Attributes()["aws_access_key_id"].(types.String).ValueString(),
+			"aws_secret_access_key":       data.Configuration.Attributes()["aws_secret_access_key"].(types.String).ValueString(),
+			"aws_user":                    data.Configuration.Attributes()["aws_user"].(types.String).ValueString(),
+			"azure_access_key":            data.Configuration.Attributes()["azure_access_key"].(types.String).ValueString(),
+			"azure_account_name":          data.Configuration.Attributes()["azure_account_name"].(types.String).ValueString(),
+			"cloud_provider":              data.Configuration.Attributes()["cloud_provider"].(types.String).ValueString(),
+			"concurrent_queries":          int(data.Configuration.Attributes()["concurrent_queries"].(types.Int64).ValueInt64()),
+			"container_name":              data.Configuration.Attributes()["container_name"].(types.String).ValueString(),
+			"deleted_file_retention_days": int(data.Configuration.Attributes()["deleted_file_retention_days"].(types.Int64).ValueInt64()),
+			"enable_delta_uniform":        data.Configuration.Attributes()["enable_delta_uniform"].(types.Bool).ValueBool(),
+			"enforce_query_limit":         data.Configuration.Attributes()["enforce_query_limit"].(types.Bool).ValueBool(),
+			"external_id":                 data.Configuration.Attributes()["external_id"].(types.String).ValueString(),
+			"http_path":                   data.Configuration.Attributes()["http_path"].(types.String).ValueString(),
+			"iam_role_arn":                data.Configuration.Attributes()["iam_role_arn"].(types.String).ValueString(),
+			"log_file_retention_days":     int(data.Configuration.Attributes()["log_file_retention_days"].(types.Int64).ValueInt64()),
+			"port":                        int(data.Configuration.Attributes()["port"].(types.Int64).ValueInt64()),
+			"s3_bucket_name":              data.Configuration.Attributes()["s3_bucket_name"].(types.String).ValueString(),
+			"s3_bucket_region":            data.Configuration.Attributes()["s3_bucket_region"].(types.String).ValueString(),
+			"server_hostname":             data.Configuration.Attributes()["server_hostname"].(types.String).ValueString(),
+			"set_retention_properties":    data.Configuration.Attributes()["set_retention_properties"].(types.Bool).ValueBool(),
+			"storage_credential_name":     data.Configuration.Attributes()["storage_credential_name"].(types.String).ValueString(),
+			"unity_catalog_enabled":       data.Configuration.Attributes()["unity_catalog_enabled"].(types.Bool).ValueBool(),
 		},
 		Validate: pointer.ToBool(false),
 	})
@@ -207,14 +388,30 @@ func (r *DatabricksConnectionResource) Create(ctx context.Context, req resource.
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"access_token":          types.StringType,
-		"cloud_provider":        types.StringType,
-		"enable_delta_uniform":  types.BoolType,
-		"enforce_query_limit":   types.BoolType,
-		"http_path":             types.StringType,
-		"port":                  types.NumberType,
-		"server_hostname":       types.StringType,
-		"unity_catalog_enabled": types.BoolType,
+		"access_token":                types.StringType,
+		"auth_mode":                   types.StringType,
+		"aws_access_key_id":           types.StringType,
+		"aws_secret_access_key":       types.StringType,
+		"aws_user":                    types.StringType,
+		"azure_access_key":            types.StringType,
+		"azure_account_name":          types.StringType,
+		"cloud_provider":              types.StringType,
+		"concurrent_queries":          types.NumberType,
+		"container_name":              types.StringType,
+		"deleted_file_retention_days": types.NumberType,
+		"enable_delta_uniform":        types.BoolType,
+		"enforce_query_limit":         types.BoolType,
+		"external_id":                 types.StringType,
+		"http_path":                   types.StringType,
+		"iam_role_arn":                types.StringType,
+		"log_file_retention_days":     types.NumberType,
+		"port":                        types.NumberType,
+		"s3_bucket_name":              types.StringType,
+		"s3_bucket_region":            types.StringType,
+		"server_hostname":             types.StringType,
+		"set_retention_properties":    types.BoolType,
+		"storage_credential_name":     types.StringType,
+		"unity_catalog_enabled":       types.BoolType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -265,14 +462,30 @@ func (r *DatabricksConnectionResource) Read(ctx context.Context, req resource.Re
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"access_token":          types.StringType,
-		"cloud_provider":        types.StringType,
-		"enable_delta_uniform":  types.BoolType,
-		"enforce_query_limit":   types.BoolType,
-		"http_path":             types.StringType,
-		"port":                  types.NumberType,
-		"server_hostname":       types.StringType,
-		"unity_catalog_enabled": types.BoolType,
+		"access_token":                types.StringType,
+		"auth_mode":                   types.StringType,
+		"aws_access_key_id":           types.StringType,
+		"aws_secret_access_key":       types.StringType,
+		"aws_user":                    types.StringType,
+		"azure_access_key":            types.StringType,
+		"azure_account_name":          types.StringType,
+		"cloud_provider":              types.StringType,
+		"concurrent_queries":          types.NumberType,
+		"container_name":              types.StringType,
+		"deleted_file_retention_days": types.NumberType,
+		"enable_delta_uniform":        types.BoolType,
+		"enforce_query_limit":         types.BoolType,
+		"external_id":                 types.StringType,
+		"http_path":                   types.StringType,
+		"iam_role_arn":                types.StringType,
+		"log_file_retention_days":     types.NumberType,
+		"port":                        types.NumberType,
+		"s3_bucket_name":              types.StringType,
+		"s3_bucket_region":            types.StringType,
+		"server_hostname":             types.StringType,
+		"set_retention_properties":    types.BoolType,
+		"storage_credential_name":     types.StringType,
+		"unity_catalog_enabled":       types.BoolType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -304,14 +517,30 @@ func (r *DatabricksConnectionResource) Update(ctx context.Context, req resource.
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueStringPointer(),
 			Configuration: map[string]interface{}{
-				"access_token":          data.Configuration.Attributes()["access_token"].(types.String).ValueString(),
-				"cloud_provider":        data.Configuration.Attributes()["cloud_provider"].(types.String).ValueString(),
-				"enable_delta_uniform":  data.Configuration.Attributes()["enable_delta_uniform"].(types.Bool).ValueBool(),
-				"enforce_query_limit":   data.Configuration.Attributes()["enforce_query_limit"].(types.Bool).ValueBool(),
-				"http_path":             data.Configuration.Attributes()["http_path"].(types.String).ValueString(),
-				"port":                  int(data.Configuration.Attributes()["port"].(types.Int64).ValueInt64()),
-				"server_hostname":       data.Configuration.Attributes()["server_hostname"].(types.String).ValueString(),
-				"unity_catalog_enabled": data.Configuration.Attributes()["unity_catalog_enabled"].(types.Bool).ValueBool(),
+				"access_token":                data.Configuration.Attributes()["access_token"].(types.String).ValueString(),
+				"auth_mode":                   data.Configuration.Attributes()["auth_mode"].(types.String).ValueString(),
+				"aws_access_key_id":           data.Configuration.Attributes()["aws_access_key_id"].(types.String).ValueString(),
+				"aws_secret_access_key":       data.Configuration.Attributes()["aws_secret_access_key"].(types.String).ValueString(),
+				"aws_user":                    data.Configuration.Attributes()["aws_user"].(types.String).ValueString(),
+				"azure_access_key":            data.Configuration.Attributes()["azure_access_key"].(types.String).ValueString(),
+				"azure_account_name":          data.Configuration.Attributes()["azure_account_name"].(types.String).ValueString(),
+				"cloud_provider":              data.Configuration.Attributes()["cloud_provider"].(types.String).ValueString(),
+				"concurrent_queries":          int(data.Configuration.Attributes()["concurrent_queries"].(types.Int64).ValueInt64()),
+				"container_name":              data.Configuration.Attributes()["container_name"].(types.String).ValueString(),
+				"deleted_file_retention_days": int(data.Configuration.Attributes()["deleted_file_retention_days"].(types.Int64).ValueInt64()),
+				"enable_delta_uniform":        data.Configuration.Attributes()["enable_delta_uniform"].(types.Bool).ValueBool(),
+				"enforce_query_limit":         data.Configuration.Attributes()["enforce_query_limit"].(types.Bool).ValueBool(),
+				"external_id":                 data.Configuration.Attributes()["external_id"].(types.String).ValueString(),
+				"http_path":                   data.Configuration.Attributes()["http_path"].(types.String).ValueString(),
+				"iam_role_arn":                data.Configuration.Attributes()["iam_role_arn"].(types.String).ValueString(),
+				"log_file_retention_days":     int(data.Configuration.Attributes()["log_file_retention_days"].(types.Int64).ValueInt64()),
+				"port":                        int(data.Configuration.Attributes()["port"].(types.Int64).ValueInt64()),
+				"s3_bucket_name":              data.Configuration.Attributes()["s3_bucket_name"].(types.String).ValueString(),
+				"s3_bucket_region":            data.Configuration.Attributes()["s3_bucket_region"].(types.String).ValueString(),
+				"server_hostname":             data.Configuration.Attributes()["server_hostname"].(types.String).ValueString(),
+				"set_retention_properties":    data.Configuration.Attributes()["set_retention_properties"].(types.Bool).ValueBool(),
+				"storage_credential_name":     data.Configuration.Attributes()["storage_credential_name"].(types.String).ValueString(),
+				"unity_catalog_enabled":       data.Configuration.Attributes()["unity_catalog_enabled"].(types.Bool).ValueBool(),
 			},
 			Validate: pointer.ToBool(false),
 		})
@@ -331,14 +560,30 @@ func (r *DatabricksConnectionResource) Update(ctx context.Context, req resource.
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"access_token":          types.StringType,
-		"cloud_provider":        types.StringType,
-		"enable_delta_uniform":  types.BoolType,
-		"enforce_query_limit":   types.BoolType,
-		"http_path":             types.StringType,
-		"port":                  types.NumberType,
-		"server_hostname":       types.StringType,
-		"unity_catalog_enabled": types.BoolType,
+		"access_token":                types.StringType,
+		"auth_mode":                   types.StringType,
+		"aws_access_key_id":           types.StringType,
+		"aws_secret_access_key":       types.StringType,
+		"aws_user":                    types.StringType,
+		"azure_access_key":            types.StringType,
+		"azure_account_name":          types.StringType,
+		"cloud_provider":              types.StringType,
+		"concurrent_queries":          types.NumberType,
+		"container_name":              types.StringType,
+		"deleted_file_retention_days": types.NumberType,
+		"enable_delta_uniform":        types.BoolType,
+		"enforce_query_limit":         types.BoolType,
+		"external_id":                 types.StringType,
+		"http_path":                   types.StringType,
+		"iam_role_arn":                types.StringType,
+		"log_file_retention_days":     types.NumberType,
+		"port":                        types.NumberType,
+		"s3_bucket_name":              types.StringType,
+		"s3_bucket_region":            types.StringType,
+		"server_hostname":             types.StringType,
+		"set_retention_properties":    types.BoolType,
+		"storage_credential_name":     types.StringType,
+		"unity_catalog_enabled":       types.BoolType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -392,11 +637,17 @@ func (r *DatabricksConnectionResource) Delete(ctx context.Context, req resource.
 	pErr := &polytomic.UnprocessableEntityError{}
 	if errors.As(err, &pErr) {
 		if strings.Contains(*pErr.Body.Message, "connection in use") {
-			resp.Diagnostics.AddError("Connection in use",
-				fmt.Sprintf("Connection is used by %s \"%s\" (%s). Please remove before deleting this connection.",
-					pErr.Body.Metadata["type"], pErr.Body.Metadata["name"], pErr.Body.Metadata["id"]),
-			)
-			return
+			if used_by, ok := pErr.Body.Metadata["used_by"].([]interface{}); ok {
+				for _, us := range used_by {
+					if user, ok := us.(map[string]interface{}); ok {
+						resp.Diagnostics.AddError("Connection in use",
+							fmt.Sprintf("Connection is used by %s \"%s\" (%s). Please remove before deleting this connection.",
+								user["type"], user["name"], user["id"]),
+						)
+					}
+				}
+				return
+			}
 		}
 	}
 

@@ -135,7 +135,7 @@ func (r *policyResource) Create(ctx context.Context, req resource.CreateRequest,
 			continue
 		}
 
-		if action.RoleIds != nil && len(action.RoleIds) > 0 {
+		if len(action.RoleIds) > 0 {
 			resp.Diagnostics.AddWarning(
 				"Policy has actions not tracked by Terraform",
 				fmt.Sprintf("Policy action %s has roles set but is not tracked in the state. This may cause data to be overwritten",
@@ -212,7 +212,7 @@ func (r *policyResource) Read(ctx context.Context, req resource.ReadRequest, res
 			continue
 		}
 
-		if action.RoleIds != nil && len(action.RoleIds) > 0 {
+		if len(action.RoleIds) > 0 {
 			resp.Diagnostics.AddWarning(
 				"Policy has actions not tracked by Terraform",
 				fmt.Sprintf("Policy action %s has roles set but is not tracked in the state. This may cause data to be overwritten",
@@ -290,7 +290,7 @@ func (r *policyResource) Update(ctx context.Context, req resource.UpdateRequest,
 			continue
 		}
 
-		if action.RoleIds != nil && len(action.RoleIds) > 0 {
+		if len(action.RoleIds) > 0 {
 			resp.Diagnostics.AddWarning(
 				"Policy has actions not tracked by Terraform",
 				fmt.Sprintf("Policy action %s has roles set but is not tracked in the state. This may cause data to be overwritten",

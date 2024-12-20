@@ -24,6 +24,9 @@ import (
 	"github.com/polytomic/polytomic-go"
 	ptcore "github.com/polytomic/polytomic-go/core"
 	"github.com/polytomic/terraform-provider-polytomic/provider/internal/client"
+
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -75,6 +78,30 @@ func (t *AzureblobConnectionResource) Schema(ctx context.Context, req resource.S
 						Computed:            true,
 						Sensitive:           false,
 					},
+					"single_table_file_format": schema.StringAttribute{
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+						Sensitive:           false,
+						Default:             stringdefault.StaticString(""),
+					},
+					"single_table_name": schema.StringAttribute{
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+						Sensitive:           false,
+						Default:             stringdefault.StaticString(""),
+					},
+					"skip_lines": schema.Int64Attribute{
+						MarkdownDescription: "Skip first N lines of each CSV file.",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+						Sensitive:           false,
+						Default:             int64default.StaticInt64(0),
+					},
 				},
 
 				Required: true,
@@ -106,6 +133,12 @@ type AzureblobConf struct {
 	Container_name string `mapstructure:"container_name" tfsdk:"container_name"`
 
 	Is_single_table bool `mapstructure:"is_single_table" tfsdk:"is_single_table"`
+
+	Single_table_file_format string `mapstructure:"single_table_file_format" tfsdk:"single_table_file_format"`
+
+	Single_table_name string `mapstructure:"single_table_name" tfsdk:"single_table_name"`
+
+	Skip_lines int64 `mapstructure:"skip_lines" tfsdk:"skip_lines"`
 }
 
 type AzureblobConnectionResource struct {
@@ -142,10 +175,13 @@ func (r *AzureblobConnectionResource) Create(ctx context.Context, req resource.C
 		Type:           "azureblob",
 		OrganizationId: data.Organization.ValueStringPointer(),
 		Configuration: map[string]interface{}{
-			"access_key":      data.Configuration.Attributes()["access_key"].(types.String).ValueString(),
-			"account_name":    data.Configuration.Attributes()["account_name"].(types.String).ValueString(),
-			"container_name":  data.Configuration.Attributes()["container_name"].(types.String).ValueString(),
-			"is_single_table": data.Configuration.Attributes()["is_single_table"].(types.Bool).ValueBool(),
+			"access_key":               data.Configuration.Attributes()["access_key"].(types.String).ValueString(),
+			"account_name":             data.Configuration.Attributes()["account_name"].(types.String).ValueString(),
+			"container_name":           data.Configuration.Attributes()["container_name"].(types.String).ValueString(),
+			"is_single_table":          data.Configuration.Attributes()["is_single_table"].(types.Bool).ValueBool(),
+			"single_table_file_format": data.Configuration.Attributes()["single_table_file_format"].(types.String).ValueString(),
+			"single_table_name":        data.Configuration.Attributes()["single_table_name"].(types.String).ValueString(),
+			"skip_lines":               int(data.Configuration.Attributes()["skip_lines"].(types.Int64).ValueInt64()),
 		},
 		Validate: pointer.ToBool(false),
 	})
@@ -164,10 +200,13 @@ func (r *AzureblobConnectionResource) Create(ctx context.Context, req resource.C
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"access_key":      types.StringType,
-		"account_name":    types.StringType,
-		"container_name":  types.StringType,
-		"is_single_table": types.BoolType,
+		"access_key":               types.StringType,
+		"account_name":             types.StringType,
+		"container_name":           types.StringType,
+		"is_single_table":          types.BoolType,
+		"single_table_file_format": types.StringType,
+		"single_table_name":        types.StringType,
+		"skip_lines":               types.NumberType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -218,10 +257,13 @@ func (r *AzureblobConnectionResource) Read(ctx context.Context, req resource.Rea
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"access_key":      types.StringType,
-		"account_name":    types.StringType,
-		"container_name":  types.StringType,
-		"is_single_table": types.BoolType,
+		"access_key":               types.StringType,
+		"account_name":             types.StringType,
+		"container_name":           types.StringType,
+		"is_single_table":          types.BoolType,
+		"single_table_file_format": types.StringType,
+		"single_table_name":        types.StringType,
+		"skip_lines":               types.NumberType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -253,10 +295,13 @@ func (r *AzureblobConnectionResource) Update(ctx context.Context, req resource.U
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueStringPointer(),
 			Configuration: map[string]interface{}{
-				"access_key":      data.Configuration.Attributes()["access_key"].(types.String).ValueString(),
-				"account_name":    data.Configuration.Attributes()["account_name"].(types.String).ValueString(),
-				"container_name":  data.Configuration.Attributes()["container_name"].(types.String).ValueString(),
-				"is_single_table": data.Configuration.Attributes()["is_single_table"].(types.Bool).ValueBool(),
+				"access_key":               data.Configuration.Attributes()["access_key"].(types.String).ValueString(),
+				"account_name":             data.Configuration.Attributes()["account_name"].(types.String).ValueString(),
+				"container_name":           data.Configuration.Attributes()["container_name"].(types.String).ValueString(),
+				"is_single_table":          data.Configuration.Attributes()["is_single_table"].(types.Bool).ValueBool(),
+				"single_table_file_format": data.Configuration.Attributes()["single_table_file_format"].(types.String).ValueString(),
+				"single_table_name":        data.Configuration.Attributes()["single_table_name"].(types.String).ValueString(),
+				"skip_lines":               int(data.Configuration.Attributes()["skip_lines"].(types.Int64).ValueInt64()),
 			},
 			Validate: pointer.ToBool(false),
 		})
@@ -276,10 +321,13 @@ func (r *AzureblobConnectionResource) Update(ctx context.Context, req resource.U
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"access_key":      types.StringType,
-		"account_name":    types.StringType,
-		"container_name":  types.StringType,
-		"is_single_table": types.BoolType,
+		"access_key":               types.StringType,
+		"account_name":             types.StringType,
+		"container_name":           types.StringType,
+		"is_single_table":          types.BoolType,
+		"single_table_file_format": types.StringType,
+		"single_table_name":        types.StringType,
+		"skip_lines":               types.NumberType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -333,11 +381,17 @@ func (r *AzureblobConnectionResource) Delete(ctx context.Context, req resource.D
 	pErr := &polytomic.UnprocessableEntityError{}
 	if errors.As(err, &pErr) {
 		if strings.Contains(*pErr.Body.Message, "connection in use") {
-			resp.Diagnostics.AddError("Connection in use",
-				fmt.Sprintf("Connection is used by %s \"%s\" (%s). Please remove before deleting this connection.",
-					pErr.Body.Metadata["type"], pErr.Body.Metadata["name"], pErr.Body.Metadata["id"]),
-			)
-			return
+			if used_by, ok := pErr.Body.Metadata["used_by"].([]interface{}); ok {
+				for _, us := range used_by {
+					if user, ok := us.(map[string]interface{}); ok {
+						resp.Diagnostics.AddError("Connection in use",
+							fmt.Sprintf("Connection is used by %s \"%s\" (%s). Please remove before deleting this connection.",
+								user["type"], user["name"], user["id"]),
+						)
+					}
+				}
+				return
+			}
 		}
 	}
 

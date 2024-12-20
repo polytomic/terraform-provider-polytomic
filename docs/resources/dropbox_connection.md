@@ -20,6 +20,7 @@ resource "polytomic_dropbox_connection" "dropbox" {
     app_secret          = "ay8d5hdepz62px8lqeoakuea2ccl4rxm13i6tbyorxhu1i20kc8ruvksmzxq"
     bucket              = "my-folder"
     oauth_refresh_token = "dasfdasz62px8lqeoakuea2ccl4rxm13i6tbyorxhu1i20kc8ruvksmzxq"
+    single_table_name   = "collection"
   }
 }
 ```
@@ -55,5 +56,8 @@ Optional:
 - `is_single_table` (Boolean) Treat the files as a single table.
 - `oauth_refresh_token` (String, Sensitive)
 - `oauth_token_expiry` (String)
+- `single_table_file_format` (String)
+- `single_table_name` (String)
+- `skip_lines` (Number) Skip first N lines of each CSV file.
 
 

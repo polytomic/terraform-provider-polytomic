@@ -54,6 +54,22 @@ func (d *S3ConnectionDataSource) Schema(ctx context.Context, req datasource.Sche
 						MarkdownDescription: "How to authenticate with AWS. Defaults to Access Key and Secret",
 						Computed:            true,
 					},
+					"aws_access_key_id": schema.StringAttribute{
+						MarkdownDescription: "Access Key ID with read/write access to a bucket.",
+						Computed:            true,
+					},
+					"aws_user": schema.StringAttribute{
+						MarkdownDescription: "",
+						Computed:            true,
+					},
+					"external_id": schema.StringAttribute{
+						MarkdownDescription: "External ID for the IAM role",
+						Computed:            true,
+					},
+					"iam_role_arn": schema.StringAttribute{
+						MarkdownDescription: "",
+						Computed:            true,
+					},
 					"is_single_table": schema.BoolAttribute{
 						MarkdownDescription: "Treat the files as a single table.",
 						Computed:            true,
@@ -64,6 +80,18 @@ func (d *S3ConnectionDataSource) Schema(ctx context.Context, req datasource.Sche
 					},
 					"s3_bucket_region": schema.StringAttribute{
 						MarkdownDescription: "",
+						Computed:            true,
+					},
+					"single_table_file_format": schema.StringAttribute{
+						MarkdownDescription: "",
+						Computed:            true,
+					},
+					"single_table_name": schema.StringAttribute{
+						MarkdownDescription: "",
+						Computed:            true,
+					},
+					"skip_lines": schema.Int64Attribute{
+						MarkdownDescription: "Skip first N lines of each CSV file.",
 						Computed:            true,
 					},
 				},
@@ -107,6 +135,18 @@ func (d *S3ConnectionDataSource) Read(ctx context.Context, req datasource.ReadRe
 			"auth_mode": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["auth_mode"], "string").(string),
 			),
+			"aws_access_key_id": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["aws_access_key_id"], "string").(string),
+			),
+			"aws_user": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["aws_user"], "string").(string),
+			),
+			"external_id": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["external_id"], "string").(string),
+			),
+			"iam_role_arn": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["iam_role_arn"], "string").(string),
+			),
 			"is_single_table": types.BoolValue(
 				getValueOrEmpty(connection.Data.Configuration["is_single_table"], "bool").(bool),
 			),
@@ -115,6 +155,15 @@ func (d *S3ConnectionDataSource) Read(ctx context.Context, req datasource.ReadRe
 			),
 			"s3_bucket_region": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["s3_bucket_region"], "string").(string),
+			),
+			"single_table_file_format": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["single_table_file_format"], "string").(string),
+			),
+			"single_table_name": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["single_table_name"], "string").(string),
+			),
+			"skip_lines": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["skip_lines"], "string").(string),
 			),
 		},
 	)
