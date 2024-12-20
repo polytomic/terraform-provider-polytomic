@@ -16,15 +16,15 @@ Redshift Connection
 resource "polytomic_redshift_connection" "redshift" {
   name = "example"
   configuration = {
-    hostname              = "redshift.example.com"
-    username              = "acme"
-    password              = "super-secret-password"
-    database              = "db"
-    port                  = 5439
-    aws_access_key_id     = "EXAMPLEKEY"
-    aws_secret_access_key = "EXAMPLESECRET"
+    aws_access_key_id     = "AKIAIOSFODNN7EXAMPLE"
+    aws_secret_access_key = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+    database              = "mydb"
+    hostname              = "mycluster.us-west-2.redshift.amazonaws.com"
+    password              = "password"
     s3_bucket_name        = "my-bucket"
-    s3_bucket_region      = "us-east-1"
+    s3_bucket_region      = "us-west-2"
+    ssh_host              = "bastion.example.com"
+    username              = "redshift_user"
   }
 }
 ```
@@ -54,15 +54,16 @@ Required:
 - `database` (String)
 - `hostname` (String)
 - `password` (String, Sensitive)
+- `port` (Number)
 - `username` (String)
 
 Optional:
 
-- `aws_access_key_id` (String)
+- `aws_access_key_id` (String) Access Key ID with read/write access to a bucket. More info: https://docs.polytomic.com/docs/redshift
 - `aws_secret_access_key` (String, Sensitive)
-- `port` (Number)
-- `s3_bucket_name` (String)
-- `s3_bucket_region` (String)
+- `aws_user` (String)
+- `s3_bucket_name` (String) Name of bucket used for staging data load files
+- `s3_bucket_region` (String) Region of bucket. Note: must match region of redshift server
 - `ssh` (Boolean)
 - `ssh_host` (String)
 - `ssh_port` (Number)

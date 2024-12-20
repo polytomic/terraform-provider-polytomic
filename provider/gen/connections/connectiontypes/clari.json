@@ -1,0 +1,1 @@
+{"$id":"https://github.com/polytomic/app/services/polytomic/backend/clari/connection-conf","$schema":"https://json-schema.org/draft/2020-12/schema","properties":{"api_key":{"sensitive":true,"title":"API key","type":"string"},"api_password":{"sensitive":true,"title":"API password","type":"string"}},"required":["api_key","api_password"],"type":"object"}

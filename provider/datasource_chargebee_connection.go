@@ -5,16 +5,13 @@ package provider
 
 import (
 	"context"
-	"fmt"
 
-	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/mitchellh/mapstructure"
-	"github.com/polytomic/polytomic-go"
+	"github.com/polytomic/terraform-provider-polytomic/provider/internal/client"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -22,7 +19,13 @@ var _ datasource.DataSource = &ChargebeeConnectionDataSource{}
 
 // ExampleDataSource defines the data source implementation.
 type ChargebeeConnectionDataSource struct {
-	client *polytomic.Client
+	provider *client.Provider
+}
+
+func (d *ChargebeeConnectionDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+	if provider := client.GetProvider(req.ProviderData, resp.Diagnostics); provider != nil {
+		d.provider = provider
+	}
 }
 
 func (d *ChargebeeConnectionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
@@ -33,10 +36,6 @@ func (d *ChargebeeConnectionDataSource) Schema(ctx context.Context, req datasour
 	resp.Schema = schema.Schema{
 		MarkdownDescription: ":meta:subcategory:Connections: Chargebee Connection",
 		Attributes: map[string]schema.Attribute{
-			"name": schema.StringAttribute{
-				MarkdownDescription: "",
-				Optional:            true,
-			},
 			"id": schema.StringAttribute{
 				MarkdownDescription: "",
 				Required:            true,
@@ -45,51 +44,29 @@ func (d *ChargebeeConnectionDataSource) Schema(ctx context.Context, req datasour
 				MarkdownDescription: "",
 				Optional:            true,
 			},
+			"name": schema.StringAttribute{
+				MarkdownDescription: "",
+				Computed:            true,
+			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
-					"site": schema.StringAttribute{
+					"product_catalog": schema.StringAttribute{
 						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
+						Computed:            true,
 					},
 					"ratelimit_rpm": schema.Int64Attribute{
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
+						MarkdownDescription: "Default rate limits can be found at https://support.chargebee.com/support/solutions/articles/243576-what-are-the-chargebee-api-limits-",
 						Computed:            true,
-						Sensitive:           false,
+					},
+					"site": schema.StringAttribute{
+						MarkdownDescription: "https://{site}.chargebee.com",
+						Computed:            true,
 					},
 				},
 				Optional: true,
 			},
-			"force_destroy": schema.BoolAttribute{
-				MarkdownDescription: forceDestroyMessage,
-				Optional:            true,
-			},
 		},
 	}
-}
-
-func (d *ChargebeeConnectionDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
-	// Prevent panic if the provider has not been configured.
-	if req.ProviderData == nil {
-		return
-	}
-
-	client, ok := req.ProviderData.(*polytomic.Client)
-
-	if !ok {
-		resp.Diagnostics.AddError(
-			"Unexpected Resource Configure Type",
-			fmt.Sprintf("Expected *polytomic.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
-		)
-
-		return
-	}
-
-	d.client = client
 }
 
 func (d *ChargebeeConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
@@ -103,7 +80,12 @@ func (d *ChargebeeConnectionDataSource) Read(ctx context.Context, req datasource
 	}
 
 	// Get the connection
-	connection, err := d.client.Connections().Get(ctx, uuid.MustParse(data.Id.ValueString()))
+	client, err := d.provider.Client(data.Organization.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting client", err.Error())
+		return
+	}
+	connection, err := client.Connections.Get(ctx, data.Id.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection", err.Error())
 		return
@@ -111,25 +93,21 @@ func (d *ChargebeeConnectionDataSource) Read(ctx context.Context, req datasource
 
 	// For the purposes of this example code, hardcoding a response value to
 	// save into the Terraform state.
-	data.Id = types.StringValue(connection.ID)
-	data.Name = types.StringValue(connection.Name)
-	data.Organization = types.StringValue(connection.OrganizationId)
-	var conf polytomic.ChargeBeeConnectionConfiguration
-	err = mapstructure.Decode(connection.Configuration, &conf)
-	if err != nil {
-		resp.Diagnostics.AddError("Error decoding connection", err.Error())
-		return
-	}
-
+	data.Id = types.StringPointerValue(connection.Data.Id)
+	data.Name = types.StringPointerValue(connection.Data.Name)
+	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
 	var diags diag.Diagnostics
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttributeTypes(ctx),
 		map[string]attr.Value{
-			"site": types.StringValue(
-				conf.Site,
+			"product_catalog": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["product_catalog"], "string").(string),
 			),
-			"ratelimit_rpm": types.Int64Value(
-				int64(conf.RatelimitRPM),
+			"ratelimit_rpm": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["ratelimit_rpm"], "string").(string),
+			),
+			"site": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["site"], "string").(string),
 			),
 		},
 	)

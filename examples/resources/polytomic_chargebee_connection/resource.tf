@@ -1,8 +1,9 @@
 resource "polytomic_chargebee_connection" "chargebee" {
   name = "example"
   configuration = {
-    site    = "site.example.com"
-    api_key = "my-api-key"
+    api_key         = "secret"
+    product_catalog = "2.0"
+    site            = "https://example.chargebee.com"
   }
 }
 

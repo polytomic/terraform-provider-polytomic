@@ -2,7 +2,6 @@ package provider
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -10,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/polytomic/polytomic-go"
+	"github.com/polytomic/terraform-provider-polytomic/provider/internal/client"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -17,7 +17,13 @@ var _ datasource.DataSource = &bulkSourceDatasource{}
 
 // ExampleDataSource defines the data source implementation.
 type bulkSourceDatasource struct {
-	client *polytomic.Client
+	provider *client.Provider
+}
+
+func (d *bulkSourceDatasource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+	if provider := client.GetProvider(req.ProviderData, resp.Diagnostics); provider != nil {
+		d.provider = provider
+	}
 }
 
 func (d *bulkSourceDatasource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
@@ -31,6 +37,10 @@ func (d *bulkSourceDatasource) Schema(ctx context.Context, req datasource.Schema
 			"connection_id": schema.StringAttribute{
 				MarkdownDescription: "",
 				Required:            true,
+			},
+			"organization": schema.StringAttribute{
+				MarkdownDescription: "",
+				Computed:            true,
 			},
 			"schemas": schema.SetAttribute{
 				MarkdownDescription: "",
@@ -55,26 +65,6 @@ func (d *bulkSourceDatasource) Schema(ctx context.Context, req datasource.Schema
 	}
 }
 
-func (d *bulkSourceDatasource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
-	// Prevent panic if the provider has not been configured.
-	if req.ProviderData == nil {
-		return
-	}
-
-	client, ok := req.ProviderData.(*polytomic.Client)
-
-	if !ok {
-		resp.Diagnostics.AddError(
-			"Unexpected Resource Configure Type",
-			fmt.Sprintf("Expected *polytomic.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
-		)
-
-		return
-	}
-
-	d.client = client
-}
-
 func (d *bulkSourceDatasource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data bulkSourceDatasourceData
 
@@ -86,7 +76,12 @@ func (d *bulkSourceDatasource) Read(ctx context.Context, req datasource.ReadRequ
 	}
 
 	// Get the schemas
-	source, err := d.client.Bulk().GetSource(ctx, data.ConnectionID.ValueString())
+	client, err := d.provider.Client(data.Organization.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting client", err.Error())
+		return
+	}
+	source, err := client.BulkSync.GetSource(ctx, data.ConnectionID.ValueString(), &polytomic.BulkSyncGetSourceRequest{})
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection", err.Error())
 		return
@@ -106,7 +101,7 @@ func (d *bulkSourceDatasource) Read(ctx context.Context, req datasource.ReadRequ
 					},
 				},
 			},
-		}}, source.Schemas)
+		}}, source.Data.Schemas)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return

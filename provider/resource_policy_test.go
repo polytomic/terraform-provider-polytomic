@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/AlekSi/pointer"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestAccPolicy(t *testing.T) {
@@ -19,7 +20,7 @@ func TestAccPolicy(t *testing.T) {
 				Config: testAccPolicyResource(name),
 				Check: resource.ComposeTestCheckFunc(
 					// Check if the resource exists
-					testAccPolicyExists(name),
+					testAccPolicyExists(t, name),
 					// Check the name
 					resource.TestCheckResourceAttr("polytomic_policy.test", "name", name),
 					// Number of policy actions
@@ -32,28 +33,28 @@ func TestAccPolicy(t *testing.T) {
 	})
 }
 
-func testAccPolicyExists(name string) resource.TestCheckFunc {
+func testAccPolicyExists(t *testing.T, name string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		_, ok := s.RootModule().Resources["polytomic_policy.test"]
 		if !ok {
 			return fmt.Errorf("not found: %s", "polytomic_policy.test")
 		}
 
-		client := testClient()
-		policies, err := client.Permissions().ListPolicies(context.TODO())
+		client := testClient(t)
+		policies, err := client.Permissions.Policies.List(context.TODO())
 		if err != nil {
 			return err
 		}
 		var found bool
-		for _, policy := range policies {
-			if policy.Name == name {
+		for _, policy := range policies.Data {
+			if pointer.Get(policy.Name) == name {
 				found = true
 				break
 			}
 		}
 
 		if !found {
-			return fmt.Errorf("policy %s not found", name)
+			return fmt.Errorf("policy %s not found in API response", name)
 		}
 
 		return nil

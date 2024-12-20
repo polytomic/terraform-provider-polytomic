@@ -10,17 +10,20 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/google/uuid"
+	"github.com/AlekSi/pointer"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/polytomic-go"
+	ptcore "github.com/polytomic/polytomic-go/core"
+	"github.com/polytomic/terraform-provider-polytomic/provider/internal/client"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -43,14 +46,52 @@ func (t *IroncladConnectionResource) Schema(ctx context.Context, req resource.Sc
 				Attributes: map[string]schema.Attribute{
 					"api_key": schema.StringAttribute{
 						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+						Sensitive:           true,
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.UseStateForUnknown(),
+						},
+					},
+					"auth_method": schema.StringAttribute{
+						MarkdownDescription: "",
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
+						Sensitive:           false,
+					},
+					"client_id": schema.StringAttribute{
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+						Sensitive:           false,
+					},
+					"client_secret": schema.StringAttribute{
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
 						Sensitive:           true,
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.UseStateForUnknown(),
+						},
+					},
+					"user_as_email": schema.StringAttribute{
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+						Sensitive:           false,
 					},
 				},
 
 				Required: true,
+
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"force_destroy": schema.BoolAttribute{
 				MarkdownDescription: forceDestroyMessage,
@@ -67,12 +108,30 @@ func (t *IroncladConnectionResource) Schema(ctx context.Context, req resource.Sc
 	}
 }
 
-func (r *IroncladConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_ironclad_connection"
+type IroncladConf struct {
+	Api_key string `mapstructure:"api_key" tfsdk:"api_key"`
+
+	Auth_method string `mapstructure:"auth_method" tfsdk:"auth_method"`
+
+	Client_id string `mapstructure:"client_id" tfsdk:"client_id"`
+
+	Client_secret string `mapstructure:"client_secret" tfsdk:"client_secret"`
+
+	User_as_email string `mapstructure:"user_as_email" tfsdk:"user_as_email"`
 }
 
 type IroncladConnectionResource struct {
-	client *polytomic.Client
+	provider *client.Provider
+}
+
+func (r *IroncladConnectionResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+	if provider := client.GetProvider(req.ProviderData, resp.Diagnostics); provider != nil {
+		r.provider = provider
+	}
+}
+
+func (r *IroncladConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_ironclad_connection"
 }
 
 func (r *IroncladConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -85,41 +144,51 @@ func (r *IroncladConnectionResource) Create(ctx context.Context, req resource.Cr
 		return
 	}
 
-	created, err := r.client.Connections().Create(ctx,
-		polytomic.CreateConnectionMutation{
-			Name:           data.Name.ValueString(),
-			Type:           polytomic.IronCladConnectionType,
-			OrganizationId: data.Organization.ValueString(),
-			Configuration: polytomic.IronCladConnectionConfiguration{
-				APIKey: data.Configuration.Attributes()["api_key"].(types.String).ValueString(),
-			},
+	client, err := r.provider.Client(data.Organization.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting client", err.Error())
+		return
+	}
+	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
+		Name:           data.Name.ValueString(),
+		Type:           "ironclad",
+		OrganizationId: data.Organization.ValueStringPointer(),
+		Configuration: map[string]interface{}{
+			"api_key":       data.Configuration.Attributes()["api_key"].(types.String).ValueString(),
+			"auth_method":   data.Configuration.Attributes()["auth_method"].(types.String).ValueString(),
+			"client_id":     data.Configuration.Attributes()["client_id"].(types.String).ValueString(),
+			"client_secret": data.Configuration.Attributes()["client_secret"].(types.String).ValueString(),
+			"user_as_email": data.Configuration.Attributes()["user_as_email"].(types.String).ValueString(),
 		},
-		polytomic.WithIdempotencyKey(uuid.NewString()),
-		polytomic.SkipConfigValidation(),
-	)
+		Validate: pointer.ToBool(false),
+	})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
 		return
 	}
-	data.Id = types.StringValue(created.ID)
-	data.Name = types.StringValue(created.Name)
-	data.Organization = types.StringValue(created.OrganizationId)
+	data.Id = types.StringPointerValue(created.Data.Id)
+	data.Name = types.StringPointerValue(created.Data.Name)
+	data.Organization = types.StringPointerValue(created.Data.OrganizationId)
 
-	var output polytomic.IronCladConnectionConfiguration
-	cfg := &mapstructure.DecoderConfig{
-		Result: &output,
+	conf := IroncladConf{}
+	err = mapstructure.Decode(created.Data.Configuration, &conf)
+	if err != nil {
+		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error decoding connection configuration: %s", err))
 	}
-	decoder, _ := mapstructure.NewDecoder(cfg)
-	decoder.Decode(created.Configuration)
+
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"api_key": types.StringType,
-	}, output)
+		"api_key":       types.StringType,
+		"auth_method":   types.StringType,
+		"client_id":     types.StringType,
+		"client_secret": types.StringType,
+		"user_as_email": types.StringType,
+	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Ironclad", "id": created.ID})
+	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Ironclad", "id": created.Data.Id})
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -135,9 +204,14 @@ func (r *IroncladConnectionResource) Read(ctx context.Context, req resource.Read
 		return
 	}
 
-	connection, err := r.client.Connections().Get(ctx, uuid.MustParse(data.Id.ValueString()))
+	client, err := r.provider.Client(data.Organization.ValueString())
 	if err != nil {
-		pErr := polytomic.ApiError{}
+		resp.Diagnostics.AddError("Error getting client", err.Error())
+		return
+	}
+	connection, err := client.Connections.Get(ctx, data.Id.ValueString())
+	if err != nil {
+		pErr := &ptcore.APIError{}
 		if errors.As(err, &pErr) {
 			if pErr.StatusCode == http.StatusNotFound {
 				resp.State.RemoveResource(ctx)
@@ -147,20 +221,23 @@ func (r *IroncladConnectionResource) Read(ctx context.Context, req resource.Read
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error reading connection: %s", err))
 		return
 	}
+	data.Id = types.StringPointerValue(connection.Data.Id)
+	data.Name = types.StringPointerValue(connection.Data.Name)
+	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
 
-	data.Id = types.StringValue(connection.ID)
-	data.Name = types.StringValue(connection.Name)
-	data.Organization = types.StringValue(connection.OrganizationId)
-
-	var output polytomic.IronCladConnectionConfiguration
-	cfg := &mapstructure.DecoderConfig{
-		Result: &output,
+	conf := IroncladConf{}
+	err = mapstructure.Decode(connection.Data.Configuration, &conf)
+	if err != nil {
+		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error decoding connection configuration: %s", err))
 	}
-	decoder, _ := mapstructure.NewDecoder(cfg)
-	decoder.Decode(connection.Configuration)
+
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"api_key": types.StringType,
-	}, output)
+		"api_key":       types.StringType,
+		"auth_method":   types.StringType,
+		"client_id":     types.StringType,
+		"client_secret": types.StringType,
+		"user_as_email": types.StringType,
+	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -180,41 +257,51 @@ func (r *IroncladConnectionResource) Update(ctx context.Context, req resource.Up
 		return
 	}
 
-	updated, err := r.client.Connections().Update(ctx,
-		uuid.MustParse(data.Id.ValueString()),
-		polytomic.UpdateConnectionMutation{
+	client, err := r.provider.Client(data.Organization.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting client", err.Error())
+		return
+	}
+	updated, err := client.Connections.Update(ctx,
+		data.Id.ValueString(),
+		&polytomic.UpdateConnectionRequestSchema{
 			Name:           data.Name.ValueString(),
-			OrganizationId: data.Organization.ValueString(),
-			Configuration: polytomic.IronCladConnectionConfiguration{
-				APIKey: data.Configuration.Attributes()["api_key"].(types.String).ValueString(),
+			OrganizationId: data.Organization.ValueStringPointer(),
+			Configuration: map[string]interface{}{
+				"api_key":       data.Configuration.Attributes()["api_key"].(types.String).ValueString(),
+				"auth_method":   data.Configuration.Attributes()["auth_method"].(types.String).ValueString(),
+				"client_id":     data.Configuration.Attributes()["client_id"].(types.String).ValueString(),
+				"client_secret": data.Configuration.Attributes()["client_secret"].(types.String).ValueString(),
+				"user_as_email": data.Configuration.Attributes()["user_as_email"].(types.String).ValueString(),
 			},
-		},
-		polytomic.WithIdempotencyKey(uuid.NewString()),
-		polytomic.SkipConfigValidation(),
-	)
+			Validate: pointer.ToBool(false),
+		})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))
 		return
 	}
 
-	data.Id = types.StringValue(updated.ID)
-	data.Name = types.StringValue(updated.Name)
-	data.Organization = types.StringValue(updated.OrganizationId)
+	data.Id = types.StringPointerValue(updated.Data.Id)
+	data.Name = types.StringPointerValue(updated.Data.Name)
+	data.Organization = types.StringPointerValue(updated.Data.OrganizationId)
 
-	var output polytomic.IronCladConnectionConfiguration
-	cfg := &mapstructure.DecoderConfig{
-		Result: &output,
+	conf := IroncladConf{}
+	err = mapstructure.Decode(updated.Data.Configuration, &conf)
+	if err != nil {
+		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error decoding connection configuration: %s", err))
 	}
-	decoder, _ := mapstructure.NewDecoder(cfg)
-	decoder.Decode(updated.Configuration)
+
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"api_key": types.StringType,
-	}, output)
+		"api_key":       types.StringType,
+		"auth_method":   types.StringType,
+		"client_id":     types.StringType,
+		"client_secret": types.StringType,
+		"user_as_email": types.StringType,
+	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
-
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
@@ -229,67 +316,59 @@ func (r *IroncladConnectionResource) Delete(ctx context.Context, req resource.De
 		return
 	}
 
+	client, err := r.provider.Client(data.Organization.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting client", err.Error())
+		return
+	}
 	if data.ForceDestroy.ValueBool() {
-		err := r.client.Connections().Delete(ctx, uuid.MustParse(data.Id.ValueString()), polytomic.WithForceDelete())
+		err := client.Connections.Remove(ctx, data.Id.ValueString(), &polytomic.ConnectionsRemoveRequest{
+			Force: pointer.ToBool(true),
+		})
 		if err != nil {
-			pErr := polytomic.ApiError{}
+			pErr := &polytomic.NotFoundError{}
 			if errors.As(err, &pErr) {
-				if pErr.StatusCode == http.StatusNotFound {
-					resp.State.RemoveResource(ctx)
-					return
-				}
+				resp.State.RemoveResource(ctx)
+				return
 			}
+
 			resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting connection: %s", err))
 		}
 		return
 	}
 
-	err := r.client.Connections().Delete(ctx, uuid.MustParse(data.Id.ValueString()))
+	err = client.Connections.Remove(ctx, data.Id.ValueString(), &polytomic.ConnectionsRemoveRequest{
+		Force: pointer.ToBool(false),
+	})
 	if err != nil {
-		pErr := polytomic.ApiError{}
+		pErr := &polytomic.NotFoundError{}
 		if errors.As(err, &pErr) {
-			if pErr.StatusCode == http.StatusNotFound {
-				resp.State.RemoveResource(ctx)
-				return
-			}
-			if strings.Contains(pErr.Message, "connection in use") {
-				for _, meta := range pErr.Metadata {
-					info := meta.(map[string]interface{})
-					resp.Diagnostics.AddError("Connection in use",
-						fmt.Sprintf("Connection is used by %s \"%s\" (%s). Please remove before deleting this connection.",
-							info["type"], info["name"], info["id"]),
-					)
+			resp.State.RemoveResource(ctx)
+			return
+		}
+	}
+	pErr := &polytomic.UnprocessableEntityError{}
+	if errors.As(err, &pErr) {
+		if strings.Contains(*pErr.Body.Message, "connection in use") {
+			if used_by, ok := pErr.Body.Metadata["used_by"].([]interface{}); ok {
+				for _, us := range used_by {
+					if user, ok := us.(map[string]interface{}); ok {
+						resp.Diagnostics.AddError("Connection in use",
+							fmt.Sprintf("Connection is used by %s \"%s\" (%s). Please remove before deleting this connection.",
+								user["type"], user["name"], user["id"]),
+						)
+					}
 				}
 				return
 			}
 		}
-
-		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting connection: %s", err))
-		return
 	}
 
+	if err != nil {
+		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting connection: %s", err))
+	}
 }
 
 func (r *IroncladConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
-}
-
-func (r *IroncladConnectionResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
-	// Prevent panic if the provider has not been configured.
-	if req.ProviderData == nil {
-		return
-	}
-
-	client, ok := req.ProviderData.(*polytomic.Client)
-
-	if !ok {
-		resp.Diagnostics.AddError(
-			"Unexpected Resource Configure Type",
-			fmt.Sprintf("Expected *polytomic.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
-		)
-
-		return
-	}
-
-	r.client = client
 }

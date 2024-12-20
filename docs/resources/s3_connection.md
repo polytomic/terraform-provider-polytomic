@@ -16,10 +16,12 @@ S3 Connection
 resource "polytomic_s3_connection" "s3" {
   name = "example"
   configuration = {
-    aws_access_key_id     = "EXAMPLEACCESSKEYID"
-    aws_secret_access_key = "EXAMPLEACCESSKEYSECRET"
+    auth_mode             = "access_key_and_secret"
+    aws_access_key_id     = "AKIAIOSFODNN7EXAMPLE"
+    aws_secret_access_key = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+    s3_bucket_name        = "s3://polytomic/dataset"
     s3_bucket_region      = "us-east-1"
-    s3_bucket_name        = "my-bucket"
+    single_table_name     = "collection"
   }
 }
 ```
@@ -46,9 +48,20 @@ resource "polytomic_s3_connection" "s3" {
 
 Required:
 
-- `aws_access_key_id` (String, Sensitive)
-- `aws_secret_access_key` (String, Sensitive)
-- `s3_bucket_name` (String)
+- `auth_mode` (String) How to authenticate with AWS. Defaults to Access Key and Secret
+- `s3_bucket_name` (String) Bucket name (folder optional); ex: s3://polytomic/dataset
 - `s3_bucket_region` (String)
+
+Optional:
+
+- `aws_access_key_id` (String) Access Key ID with read/write access to a bucket.
+- `aws_secret_access_key` (String, Sensitive)
+- `aws_user` (String)
+- `external_id` (String) External ID for the IAM role
+- `iam_role_arn` (String)
+- `is_single_table` (Boolean) Treat the files as a single table.
+- `single_table_file_format` (String)
+- `single_table_name` (String)
+- `skip_lines` (Number) Skip first N lines of each CSV file.
 
 

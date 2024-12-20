@@ -2,19 +2,19 @@ package provider
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/polytomic/polytomic-go"
+	ptclient "github.com/polytomic/polytomic-go/client"
+	"github.com/polytomic/terraform-provider-polytomic/provider/internal/client"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
 var _ datasource.DataSource = &identityDatasource{}
 
 type identityDatasource struct {
-	client *polytomic.Client
+	provider *client.Provider
 }
 
 type identityDatasourceData struct {
@@ -27,6 +27,12 @@ type identityDatasourceData struct {
 	IsOrganization   types.Bool   `tfsdk:"is_organization"`
 	IsPartner        types.Bool   `tfsdk:"is_partner"`
 	IsSystem         types.Bool   `tfsdk:"is_system"`
+}
+
+func (id *identityDatasource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+	if provider := client.GetProvider(req.ProviderData, resp.Diagnostics); provider != nil {
+		id.provider = provider
+	}
 }
 
 func (id *identityDatasource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
@@ -51,6 +57,7 @@ func (id *identityDatasource) Schema(ctx context.Context, req datasource.SchemaR
 			},
 			"organization_id": schema.StringAttribute{
 				MarkdownDescription: "",
+				Optional:            true,
 				Computed:            true,
 			},
 			"organization_name": schema.StringAttribute{
@@ -77,52 +84,43 @@ func (id *identityDatasource) Schema(ctx context.Context, req datasource.SchemaR
 	}
 }
 
-func (id *identityDatasource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
-	// Prevent panic if the provider has not been configured.
-	if req.ProviderData == nil {
-		return
-	}
-
-	client, ok := req.ProviderData.(*polytomic.Client)
-
-	if !ok {
-		resp.Diagnostics.AddError(
-			"Unexpected Resource Configure Type",
-			fmt.Sprintf("Expected *polytomic.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
-		)
-
-		return
-	}
-
-	id.client = client
-}
-
 func (id *identityDatasource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data identityDatasourceData
 
 	// Read Terraform configuration data into the model
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
-
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	// Get the schemas
-	identity, err := id.client.Identity().Get(ctx)
+	var client *ptclient.Client
+	var err error
+	if data.OrganizationID.ValueString() != "" {
+		client, err = id.provider.Client(data.OrganizationID.ValueString())
+	} else {
+		client, err = id.provider.PartnerClient()
+	}
+	if err != nil {
+		resp.Diagnostics.AddError("error getting partner client", err.Error())
+		return
+	}
+
+	identity, err := client.Identity.Get(ctx)
 	if err != nil {
 		resp.Diagnostics.AddError("error getting identity", err.Error())
 		return
 	}
 
-	data.ID = types.StringValue(identity.ID.String())
-	data.Email = types.StringValue(identity.Email)
-	data.Role = types.StringValue(identity.Role)
-	data.OrganizationID = types.StringValue(identity.OrganizationID.String())
-	data.OrganizationName = types.StringValue(identity.Organization)
-	data.IsUser = types.BoolValue(identity.IsUser)
-	data.IsOrganization = types.BoolValue(identity.IsOrganization)
-	data.IsPartner = types.BoolValue(identity.IsPartner)
-	data.IsSystem = types.BoolValue(identity.IsSystem)
+	data.ID = types.StringPointerValue(identity.Data.Id)
+	data.Email = types.StringPointerValue(identity.Data.Email)
+	data.Role = types.StringPointerValue(identity.Data.Role)
+	data.OrganizationID = types.StringPointerValue(identity.Data.OrganizationId)
+	data.OrganizationName = types.StringPointerValue(identity.Data.OrganizationName)
+	data.IsUser = types.BoolPointerValue(identity.Data.IsUser)
+	data.IsOrganization = types.BoolPointerValue(identity.Data.IsOrganization)
+	data.IsPartner = types.BoolPointerValue(identity.Data.IsPartner)
+	data.IsSystem = types.BoolPointerValue(identity.Data.IsSystem)
 
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)

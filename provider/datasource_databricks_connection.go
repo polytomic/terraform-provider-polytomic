@@ -5,16 +5,13 @@ package provider
 
 import (
 	"context"
-	"fmt"
 
-	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/mitchellh/mapstructure"
-	"github.com/polytomic/polytomic-go"
+	"github.com/polytomic/terraform-provider-polytomic/provider/internal/client"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -22,7 +19,13 @@ var _ datasource.DataSource = &DatabricksConnectionDataSource{}
 
 // ExampleDataSource defines the data source implementation.
 type DatabricksConnectionDataSource struct {
-	client *polytomic.Client
+	provider *client.Provider
+}
+
+func (d *DatabricksConnectionDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+	if provider := client.GetProvider(req.ProviderData, resp.Diagnostics); provider != nil {
+		d.provider = provider
+	}
 }
 
 func (d *DatabricksConnectionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
@@ -33,10 +36,6 @@ func (d *DatabricksConnectionDataSource) Schema(ctx context.Context, req datasou
 	resp.Schema = schema.Schema{
 		MarkdownDescription: ":meta:subcategory:Connections: Databricks Connection",
 		Attributes: map[string]schema.Attribute{
-			"name": schema.StringAttribute{
-				MarkdownDescription: "",
-				Optional:            true,
-			},
 			"id": schema.StringAttribute{
 				MarkdownDescription: "",
 				Required:            true,
@@ -45,86 +44,101 @@ func (d *DatabricksConnectionDataSource) Schema(ctx context.Context, req datasou
 				MarkdownDescription: "",
 				Optional:            true,
 			},
+			"name": schema.StringAttribute{
+				MarkdownDescription: "",
+				Computed:            true,
+			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
-					"server_hostname": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
-					"port": schema.Int64Attribute{
-						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
-					"http_path": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
+					"auth_mode": schema.StringAttribute{
+						MarkdownDescription: "How to authenticate with AWS. Defaults to Access Key and Secret",
+						Computed:            true,
 					},
 					"aws_access_key_id": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
+						MarkdownDescription: "See https://docs.polytomic.com/docs/databricks-connections#writing-to-databricks",
 						Computed:            true,
-						Sensitive:           false,
-					},
-					"s3_bucket_name": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
-					},
-					"s3_bucket_region": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
 					},
 					"aws_user": schema.StringAttribute{
 						MarkdownDescription: "",
-						Required:            false,
-						Optional:            false,
 						Computed:            true,
-						Sensitive:           false,
+					},
+					"azure_account_name": schema.StringAttribute{
+						MarkdownDescription: "The account name of the storage account",
+						Computed:            true,
+					},
+					"cloud_provider": schema.StringAttribute{
+						MarkdownDescription: "",
+						Computed:            true,
+					},
+					"concurrent_queries": schema.Int64Attribute{
+						MarkdownDescription: "",
+						Computed:            true,
+					},
+					"container_name": schema.StringAttribute{
+						MarkdownDescription: "The container which we will stage files in",
+						Computed:            true,
+					},
+					"deleted_file_retention_days": schema.Int64Attribute{
+						MarkdownDescription: "",
+						Computed:            true,
+					},
+					"enable_delta_uniform": schema.BoolAttribute{
+						MarkdownDescription: "",
+						Computed:            true,
+					},
+					"enforce_query_limit": schema.BoolAttribute{
+						MarkdownDescription: "",
+						Computed:            true,
+					},
+					"external_id": schema.StringAttribute{
+						MarkdownDescription: "External ID for the IAM role",
+						Computed:            true,
+					},
+					"http_path": schema.StringAttribute{
+						MarkdownDescription: "",
+						Computed:            true,
+					},
+					"iam_role_arn": schema.StringAttribute{
+						MarkdownDescription: "",
+						Computed:            true,
+					},
+					"log_file_retention_days": schema.Int64Attribute{
+						MarkdownDescription: "",
+						Computed:            true,
+					},
+					"port": schema.Int64Attribute{
+						MarkdownDescription: "",
+						Computed:            true,
+					},
+					"s3_bucket_name": schema.StringAttribute{
+						MarkdownDescription: "Name of bucket used for staging data load files",
+						Computed:            true,
+					},
+					"s3_bucket_region": schema.StringAttribute{
+						MarkdownDescription: "Region of bucket.example=us-east-1",
+						Computed:            true,
+					},
+					"server_hostname": schema.StringAttribute{
+						MarkdownDescription: "",
+						Computed:            true,
+					},
+					"set_retention_properties": schema.BoolAttribute{
+						MarkdownDescription: "",
+						Computed:            true,
+					},
+					"storage_credential_name": schema.StringAttribute{
+						MarkdownDescription: "",
+						Computed:            true,
+					},
+					"unity_catalog_enabled": schema.BoolAttribute{
+						MarkdownDescription: "",
+						Computed:            true,
 					},
 				},
 				Optional: true,
 			},
-			"force_destroy": schema.BoolAttribute{
-				MarkdownDescription: forceDestroyMessage,
-				Optional:            true,
-			},
 		},
 	}
-}
-
-func (d *DatabricksConnectionDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
-	// Prevent panic if the provider has not been configured.
-	if req.ProviderData == nil {
-		return
-	}
-
-	client, ok := req.ProviderData.(*polytomic.Client)
-
-	if !ok {
-		resp.Diagnostics.AddError(
-			"Unexpected Resource Configure Type",
-			fmt.Sprintf("Expected *polytomic.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
-		)
-
-		return
-	}
-
-	d.client = client
 }
 
 func (d *DatabricksConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
@@ -138,7 +152,12 @@ func (d *DatabricksConnectionDataSource) Read(ctx context.Context, req datasourc
 	}
 
 	// Get the connection
-	connection, err := d.client.Connections().Get(ctx, uuid.MustParse(data.Id.ValueString()))
+	client, err := d.provider.Client(data.Organization.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting client", err.Error())
+		return
+	}
+	connection, err := client.Connections.Get(ctx, data.Id.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection", err.Error())
 		return
@@ -146,40 +165,75 @@ func (d *DatabricksConnectionDataSource) Read(ctx context.Context, req datasourc
 
 	// For the purposes of this example code, hardcoding a response value to
 	// save into the Terraform state.
-	data.Id = types.StringValue(connection.ID)
-	data.Name = types.StringValue(connection.Name)
-	data.Organization = types.StringValue(connection.OrganizationId)
-	var conf polytomic.DatabricksConnectionConfiguration
-	err = mapstructure.Decode(connection.Configuration, &conf)
-	if err != nil {
-		resp.Diagnostics.AddError("Error decoding connection", err.Error())
-		return
-	}
-
+	data.Id = types.StringPointerValue(connection.Data.Id)
+	data.Name = types.StringPointerValue(connection.Data.Name)
+	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
 	var diags diag.Diagnostics
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttributeTypes(ctx),
 		map[string]attr.Value{
-			"server_hostname": types.StringValue(
-				conf.ServerHostname,
-			),
-			"port": types.Int64Value(
-				int64(conf.Port),
-			),
-			"http_path": types.StringValue(
-				conf.HTTPPath,
+			"auth_mode": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["auth_mode"], "string").(string),
 			),
 			"aws_access_key_id": types.StringValue(
-				conf.AwsAccessKeyID,
-			),
-			"s3_bucket_name": types.StringValue(
-				conf.S3BucketName,
-			),
-			"s3_bucket_region": types.StringValue(
-				conf.S3BucketRegion,
+				getValueOrEmpty(connection.Data.Configuration["aws_access_key_id"], "string").(string),
 			),
 			"aws_user": types.StringValue(
-				conf.AwsUser,
+				getValueOrEmpty(connection.Data.Configuration["aws_user"], "string").(string),
+			),
+			"azure_account_name": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["azure_account_name"], "string").(string),
+			),
+			"cloud_provider": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["cloud_provider"], "string").(string),
+			),
+			"concurrent_queries": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["concurrent_queries"], "string").(string),
+			),
+			"container_name": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["container_name"], "string").(string),
+			),
+			"deleted_file_retention_days": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["deleted_file_retention_days"], "string").(string),
+			),
+			"enable_delta_uniform": types.BoolValue(
+				getValueOrEmpty(connection.Data.Configuration["enable_delta_uniform"], "bool").(bool),
+			),
+			"enforce_query_limit": types.BoolValue(
+				getValueOrEmpty(connection.Data.Configuration["enforce_query_limit"], "bool").(bool),
+			),
+			"external_id": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["external_id"], "string").(string),
+			),
+			"http_path": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["http_path"], "string").(string),
+			),
+			"iam_role_arn": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["iam_role_arn"], "string").(string),
+			),
+			"log_file_retention_days": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["log_file_retention_days"], "string").(string),
+			),
+			"port": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["port"], "string").(string),
+			),
+			"s3_bucket_name": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["s3_bucket_name"], "string").(string),
+			),
+			"s3_bucket_region": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["s3_bucket_region"], "string").(string),
+			),
+			"server_hostname": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["server_hostname"], "string").(string),
+			),
+			"set_retention_properties": types.BoolValue(
+				getValueOrEmpty(connection.Data.Configuration["set_retention_properties"], "bool").(bool),
+			),
+			"storage_credential_name": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["storage_credential_name"], "string").(string),
+			),
+			"unity_catalog_enabled": types.BoolValue(
+				getValueOrEmpty(connection.Data.Configuration["unity_catalog_enabled"], "bool").(bool),
 			),
 		},
 	)

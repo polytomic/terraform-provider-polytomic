@@ -16,8 +16,8 @@ Kustomer Connection
 resource "polytomic_kustomer_connection" "kustomer" {
   name = "example"
   configuration = {
-    apikey = "my-api-key"
-    domain = "my-domain.example.com"
+    apikey = "secret"
+    domain = "polytomic"
   }
 }
 ```
@@ -45,6 +45,6 @@ resource "polytomic_kustomer_connection" "kustomer" {
 Required:
 
 - `apikey` (String, Sensitive)
-- `domain` (String)
+- `domain` (String) e.g. 'polytomic' if your portal is 'https://polytomic.kustomerapp.com/app'
 
 

@@ -1,9 +1,13 @@
 package provider
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"unicode"
+
+	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
 
 const (
@@ -27,6 +31,9 @@ func ValidName(s string) string {
 	for i, v := range []byte(s) {
 		if !strings.Contains(legalCharacters, string(v)) {
 			s = s[:i] + "_" + s[i+1:]
+		}
+		if unicode.IsLower(rune(v)) && i < len(s)-1 && unicode.IsUpper(rune(s[i+1])) {
+			s = s[:i+1] + "_" + strings.ToLower(s[i+1:])
 		}
 	}
 
@@ -88,4 +95,66 @@ func stringy(v any) string {
 	default:
 		panic(fmt.Sprintf("unsupported type %T", t))
 	}
+}
+
+func getValueOrEmpty(v any, typ string) any {
+	switch typ {
+	case "string":
+		if v == nil {
+			return ""
+		}
+		return v.(string)
+	case "bool":
+		if v == nil {
+			return false
+		}
+		return v.(bool)
+	case "int":
+		if v == nil {
+			return 0
+		}
+		return v.(int)
+	case "float64":
+		if v == nil {
+			return 0.0
+		}
+		return v.(float64)
+	case "int64":
+		if v == nil {
+			return int64(0)
+		}
+		return v.(int64)
+	default:
+		panic(fmt.Sprintf("unsupported type %s", typ))
+	}
+}
+
+func attrValueString(v any) string {
+	if s, ok := v.(types.String); ok {
+		return s.ValueString()
+	}
+	return ""
+}
+
+func attrValueInt(v any) int {
+	if s, ok := v.(types.Int64); ok {
+		return int(s.ValueInt64())
+	}
+	return 0
+}
+
+func objectMapValue(ctx context.Context, value types.Object) map[string]interface{} {
+	out := make(map[string]interface{})
+	d := value.As(ctx, &out, basetypes.ObjectAsOptions{
+		UnhandledNullAsEmpty:    true,
+		UnhandledUnknownAsEmpty: true,
+	})
+	if d.HasError() {
+		summary := ""
+		for _, dd := range d {
+			summary += dd.Summary() + ":\n" + dd.Detail() + "\n"
+		}
+		panic(summary)
+	}
+	return out
 }

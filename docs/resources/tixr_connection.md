@@ -16,8 +16,6 @@ Tixr Connection
 resource "polytomic_tixr_connection" "tixr" {
   name = "example"
   configuration = {
-    client_private_key = "my-client-private-key"
-    client_secret      = "super-secret"
   }
 }
 ```
@@ -44,7 +42,7 @@ resource "polytomic_tixr_connection" "tixr" {
 
 Required:
 
-- `client_private_key` (String, Sensitive)
+- `client_private_key` (String) e.g. MDAwMA==
 - `client_secret` (String, Sensitive)
 
 

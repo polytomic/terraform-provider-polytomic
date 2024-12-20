@@ -16,9 +16,11 @@ Azure Blob Storage Connection
 resource "polytomic_azureblob_connection" "azureblob" {
   name = "example"
   configuration = {
-    account_name   = "my-account"
-    access_key     = "abcdefghijklmnopqrstuvwxyz0123456789=="
-    container_name = "my-container"
+    access_key               = "abcdefghijklmnopqrstuvwxyz0123456789/+ABCDEabcdefghijklmnopqrstuvwxyz0123456789/+ABCDE=="
+    account_name             = "account"
+    container_name           = "container"
+    single_table_file_format = "csv"
+    single_table_name        = "collection"
   }
 }
 ```
@@ -48,5 +50,12 @@ Required:
 - `access_key` (String, Sensitive)
 - `account_name` (String)
 - `container_name` (String)
+
+Optional:
+
+- `is_single_table` (Boolean) Treat the files as a single table.
+- `single_table_file_format` (String)
+- `single_table_name` (String)
+- `skip_lines` (Number) Skip first N lines of each CSV file.
 
 

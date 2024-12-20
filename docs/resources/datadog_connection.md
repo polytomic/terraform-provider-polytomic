@@ -16,7 +16,7 @@ Datadog Connection
 resource "polytomic_datadog_connection" "datadog" {
   name = "example"
   configuration = {
-    api_key = "my-api-key"
+    api_key = "secret"
   }
 }
 ```
