@@ -24,8 +24,6 @@ import (
 	"github.com/polytomic/polytomic-go"
 	ptcore "github.com/polytomic/polytomic-go/core"
 	"github.com/polytomic/terraform-provider-polytomic/provider/internal/client"
-
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -69,7 +67,6 @@ func (t *ChargebeeConnectionResource) Schema(ctx context.Context, req resource.S
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             int64default.StaticInt64(0),
 					},
 					"site": schema.StringAttribute{
 						MarkdownDescription: "https://{site}.chargebee.com",

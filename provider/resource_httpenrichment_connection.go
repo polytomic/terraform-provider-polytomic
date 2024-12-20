@@ -15,7 +15,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -25,8 +24,6 @@ import (
 	"github.com/polytomic/polytomic-go"
 	ptcore "github.com/polytomic/polytomic-go/core"
 	"github.com/polytomic/terraform-provider-polytomic/provider/internal/client"
-
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -67,7 +64,6 @@ func (t *HttpenrichmentConnectionResource) Schema(ctx context.Context, req resou
 										Optional:            true,
 										Computed:            true,
 										Sensitive:           false,
-										Default:             stringdefault.StaticString(""),
 									},
 									"username": schema.StringAttribute{
 										MarkdownDescription: "",
@@ -75,7 +71,6 @@ func (t *HttpenrichmentConnectionResource) Schema(ctx context.Context, req resou
 										Optional:            true,
 										Computed:            true,
 										Sensitive:           false,
-										Default:             stringdefault.StaticString(""),
 									},
 								},
 							},
@@ -92,7 +87,6 @@ func (t *HttpenrichmentConnectionResource) Schema(ctx context.Context, req resou
 										Optional:            true,
 										Computed:            true,
 										Sensitive:           false,
-										Default:             stringdefault.StaticString(""),
 									},
 									"value": schema.StringAttribute{
 										MarkdownDescription: "",
@@ -116,7 +110,6 @@ func (t *HttpenrichmentConnectionResource) Schema(ctx context.Context, req resou
 										Optional:            true,
 										Computed:            true,
 										Sensitive:           false,
-										Default:             int64default.StaticInt64(0),
 									},
 									"client_id": schema.StringAttribute{
 										MarkdownDescription: "",
@@ -124,7 +117,6 @@ func (t *HttpenrichmentConnectionResource) Schema(ctx context.Context, req resou
 										Optional:            true,
 										Computed:            true,
 										Sensitive:           false,
-										Default:             stringdefault.StaticString(""),
 									},
 									"client_secret": schema.StringAttribute{
 										MarkdownDescription: "",
@@ -132,7 +124,6 @@ func (t *HttpenrichmentConnectionResource) Schema(ctx context.Context, req resou
 										Optional:            true,
 										Computed:            true,
 										Sensitive:           false,
-										Default:             stringdefault.StaticString(""),
 									},
 									"extra_form_data": schema.StringAttribute{
 										MarkdownDescription: "",
@@ -140,7 +131,6 @@ func (t *HttpenrichmentConnectionResource) Schema(ctx context.Context, req resou
 										Optional:            true,
 										Computed:            true,
 										Sensitive:           false,
-										Default:             stringdefault.StaticString(""),
 									},
 									"scopes": schema.StringAttribute{
 										MarkdownDescription: "",
@@ -148,7 +138,6 @@ func (t *HttpenrichmentConnectionResource) Schema(ctx context.Context, req resou
 										Optional:            true,
 										Computed:            true,
 										Sensitive:           false,
-										Default:             stringdefault.StaticString(""),
 									},
 									"token_endpoint": schema.StringAttribute{
 										MarkdownDescription: "",
@@ -156,7 +145,6 @@ func (t *HttpenrichmentConnectionResource) Schema(ctx context.Context, req resou
 										Optional:            true,
 										Computed:            true,
 										Sensitive:           false,
-										Default:             stringdefault.StaticString(""),
 									},
 								},
 							},
@@ -168,7 +156,6 @@ func (t *HttpenrichmentConnectionResource) Schema(ctx context.Context, req resou
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             stringdefault.StaticString(""),
 					},
 					"fields": schema.StringAttribute{
 						MarkdownDescription: "List of fields to be returned by the enrichment",
@@ -176,7 +163,6 @@ func (t *HttpenrichmentConnectionResource) Schema(ctx context.Context, req resou
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             stringdefault.StaticString(""),
 					},
 					"headers": schema.StringAttribute{
 						MarkdownDescription: "",
@@ -184,7 +170,6 @@ func (t *HttpenrichmentConnectionResource) Schema(ctx context.Context, req resou
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             stringdefault.StaticString(""),
 					},
 					"healthcheck": schema.StringAttribute{
 						MarkdownDescription: "Path to request when checking the health of this connection. No health check will be performed if left empty.",
@@ -192,7 +177,6 @@ func (t *HttpenrichmentConnectionResource) Schema(ctx context.Context, req resou
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             stringdefault.StaticString(""),
 					},
 					"input_mappings": schema.StringAttribute{
 						MarkdownDescription: "List of input mappings to be used in the query. Each mapping should be a valid JSONPath expression.",
@@ -200,7 +184,6 @@ func (t *HttpenrichmentConnectionResource) Schema(ctx context.Context, req resou
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             stringdefault.StaticString(""),
 					},
 					"method": schema.StringAttribute{
 						MarkdownDescription: "",
@@ -208,7 +191,6 @@ func (t *HttpenrichmentConnectionResource) Schema(ctx context.Context, req resou
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             stringdefault.StaticString(""),
 					},
 					"parameters": schema.StringAttribute{
 						MarkdownDescription: "",
@@ -216,7 +198,6 @@ func (t *HttpenrichmentConnectionResource) Schema(ctx context.Context, req resou
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             stringdefault.StaticString(""),
 					},
 					"url": schema.StringAttribute{
 						MarkdownDescription: "",

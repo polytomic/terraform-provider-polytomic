@@ -15,10 +15,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -59,7 +57,6 @@ func (t *DbtcloudConnectionResource) Schema(ctx context.Context, req resource.Sc
 								Optional:            true,
 								Computed:            true,
 								Sensitive:           false,
-								Default:             int64default.StaticInt64(0),
 							},
 							"name": schema.StringAttribute{
 								MarkdownDescription: "",
@@ -67,7 +64,6 @@ func (t *DbtcloudConnectionResource) Schema(ctx context.Context, req resource.Sc
 								Optional:            true,
 								Computed:            true,
 								Sensitive:           false,
-								Default:             stringdefault.StaticString(""),
 							},
 						},
 					},

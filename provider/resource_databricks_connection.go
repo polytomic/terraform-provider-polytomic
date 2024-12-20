@@ -24,9 +24,6 @@ import (
 	"github.com/polytomic/polytomic-go"
 	ptcore "github.com/polytomic/polytomic-go/core"
 	"github.com/polytomic/terraform-provider-polytomic/provider/internal/client"
-
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -70,7 +67,6 @@ func (t *DatabricksConnectionResource) Schema(ctx context.Context, req resource.
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             stringdefault.StaticString(""),
 					},
 					"aws_secret_access_key": schema.StringAttribute{
 						MarkdownDescription: "",
@@ -81,7 +77,6 @@ func (t *DatabricksConnectionResource) Schema(ctx context.Context, req resource.
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
-						Default: stringdefault.StaticString(""),
 					},
 					"aws_user": schema.StringAttribute{
 						MarkdownDescription: "",
@@ -89,7 +84,6 @@ func (t *DatabricksConnectionResource) Schema(ctx context.Context, req resource.
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             stringdefault.StaticString(""),
 					},
 					"azure_access_key": schema.StringAttribute{
 						MarkdownDescription: "The access key associated with this storage account",
@@ -100,7 +94,6 @@ func (t *DatabricksConnectionResource) Schema(ctx context.Context, req resource.
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
-						Default: stringdefault.StaticString(""),
 					},
 					"azure_account_name": schema.StringAttribute{
 						MarkdownDescription: "The account name of the storage account",
@@ -108,7 +101,6 @@ func (t *DatabricksConnectionResource) Schema(ctx context.Context, req resource.
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             stringdefault.StaticString(""),
 					},
 					"cloud_provider": schema.StringAttribute{
 						MarkdownDescription: "",
@@ -116,7 +108,6 @@ func (t *DatabricksConnectionResource) Schema(ctx context.Context, req resource.
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             stringdefault.StaticString(""),
 					},
 					"concurrent_queries": schema.Int64Attribute{
 						MarkdownDescription: "",
@@ -124,7 +115,6 @@ func (t *DatabricksConnectionResource) Schema(ctx context.Context, req resource.
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             int64default.StaticInt64(0),
 					},
 					"container_name": schema.StringAttribute{
 						MarkdownDescription: "The container which we will stage files in",
@@ -132,7 +122,6 @@ func (t *DatabricksConnectionResource) Schema(ctx context.Context, req resource.
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             stringdefault.StaticString(""),
 					},
 					"deleted_file_retention_days": schema.Int64Attribute{
 						MarkdownDescription: "",
@@ -140,7 +129,6 @@ func (t *DatabricksConnectionResource) Schema(ctx context.Context, req resource.
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             int64default.StaticInt64(0),
 					},
 					"enable_delta_uniform": schema.BoolAttribute{
 						MarkdownDescription: "",
@@ -162,7 +150,6 @@ func (t *DatabricksConnectionResource) Schema(ctx context.Context, req resource.
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             stringdefault.StaticString(""),
 					},
 					"http_path": schema.StringAttribute{
 						MarkdownDescription: "",
@@ -177,7 +164,6 @@ func (t *DatabricksConnectionResource) Schema(ctx context.Context, req resource.
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             stringdefault.StaticString(""),
 					},
 					"log_file_retention_days": schema.Int64Attribute{
 						MarkdownDescription: "",
@@ -185,7 +171,6 @@ func (t *DatabricksConnectionResource) Schema(ctx context.Context, req resource.
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             int64default.StaticInt64(0),
 					},
 					"port": schema.Int64Attribute{
 						MarkdownDescription: "",
@@ -200,7 +185,6 @@ func (t *DatabricksConnectionResource) Schema(ctx context.Context, req resource.
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             stringdefault.StaticString(""),
 					},
 					"s3_bucket_region": schema.StringAttribute{
 						MarkdownDescription: "Region of bucket.example=us-east-1",
@@ -208,7 +192,6 @@ func (t *DatabricksConnectionResource) Schema(ctx context.Context, req resource.
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             stringdefault.StaticString(""),
 					},
 					"server_hostname": schema.StringAttribute{
 						MarkdownDescription: "",
@@ -230,7 +213,6 @@ func (t *DatabricksConnectionResource) Schema(ctx context.Context, req resource.
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             stringdefault.StaticString(""),
 					},
 					"unity_catalog_enabled": schema.BoolAttribute{
 						MarkdownDescription: "",

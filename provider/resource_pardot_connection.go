@@ -24,9 +24,6 @@ import (
 	"github.com/polytomic/polytomic-go"
 	ptcore "github.com/polytomic/polytomic-go/core"
 	"github.com/polytomic/terraform-provider-polytomic/provider/internal/client"
-
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -53,7 +50,6 @@ func (t *PardotConnectionResource) Schema(ctx context.Context, req resource.Sche
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             stringdefault.StaticString(""),
 					},
 					"business_unit_id": schema.StringAttribute{
 						MarkdownDescription: "",
@@ -61,7 +57,6 @@ func (t *PardotConnectionResource) Schema(ctx context.Context, req resource.Sche
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             stringdefault.StaticString(""),
 					},
 					"daily_api_calls": schema.Int64Attribute{
 						MarkdownDescription: "",
@@ -69,7 +64,6 @@ func (t *PardotConnectionResource) Schema(ctx context.Context, req resource.Sche
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             int64default.StaticInt64(0),
 					},
 					"enforce_api_limits": schema.BoolAttribute{
 						MarkdownDescription: "",
@@ -84,7 +78,6 @@ func (t *PardotConnectionResource) Schema(ctx context.Context, req resource.Sche
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             stringdefault.StaticString(""),
 					},
 				},
 

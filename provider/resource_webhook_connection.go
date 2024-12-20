@@ -24,8 +24,6 @@ import (
 	"github.com/polytomic/polytomic-go"
 	ptcore "github.com/polytomic/polytomic-go/core"
 	"github.com/polytomic/terraform-provider-polytomic/provider/internal/client"
-
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -52,7 +50,6 @@ func (t *WebhookConnectionResource) Schema(ctx context.Context, req resource.Sch
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             stringdefault.StaticString(""),
 					},
 					"secret": schema.StringAttribute{
 						MarkdownDescription: "",
@@ -63,7 +60,6 @@ func (t *WebhookConnectionResource) Schema(ctx context.Context, req resource.Sch
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
-						Default: stringdefault.StaticString(""),
 					},
 					"url": schema.StringAttribute{
 						MarkdownDescription: "",

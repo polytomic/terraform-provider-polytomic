@@ -15,7 +15,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -25,8 +24,6 @@ import (
 	"github.com/polytomic/polytomic-go"
 	ptcore "github.com/polytomic/polytomic-go/core"
 	"github.com/polytomic/terraform-provider-polytomic/provider/internal/client"
-
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -67,7 +64,6 @@ func (t *CsvConnectionResource) Schema(ctx context.Context, req resource.SchemaR
 										Optional:            true,
 										Computed:            true,
 										Sensitive:           false,
-										Default:             stringdefault.StaticString(""),
 									},
 									"username": schema.StringAttribute{
 										MarkdownDescription: "",
@@ -75,7 +71,6 @@ func (t *CsvConnectionResource) Schema(ctx context.Context, req resource.SchemaR
 										Optional:            true,
 										Computed:            true,
 										Sensitive:           false,
-										Default:             stringdefault.StaticString(""),
 									},
 								},
 							},
@@ -92,7 +87,6 @@ func (t *CsvConnectionResource) Schema(ctx context.Context, req resource.SchemaR
 										Optional:            true,
 										Computed:            true,
 										Sensitive:           false,
-										Default:             stringdefault.StaticString(""),
 									},
 									"value": schema.StringAttribute{
 										MarkdownDescription: "",
@@ -116,7 +110,6 @@ func (t *CsvConnectionResource) Schema(ctx context.Context, req resource.SchemaR
 										Optional:            true,
 										Computed:            true,
 										Sensitive:           false,
-										Default:             int64default.StaticInt64(0),
 									},
 									"client_id": schema.StringAttribute{
 										MarkdownDescription: "",
@@ -124,7 +117,6 @@ func (t *CsvConnectionResource) Schema(ctx context.Context, req resource.SchemaR
 										Optional:            true,
 										Computed:            true,
 										Sensitive:           false,
-										Default:             stringdefault.StaticString(""),
 									},
 									"client_secret": schema.StringAttribute{
 										MarkdownDescription: "",
@@ -132,7 +124,6 @@ func (t *CsvConnectionResource) Schema(ctx context.Context, req resource.SchemaR
 										Optional:            true,
 										Computed:            true,
 										Sensitive:           false,
-										Default:             stringdefault.StaticString(""),
 									},
 									"extra_form_data": schema.StringAttribute{
 										MarkdownDescription: "",
@@ -140,7 +131,6 @@ func (t *CsvConnectionResource) Schema(ctx context.Context, req resource.SchemaR
 										Optional:            true,
 										Computed:            true,
 										Sensitive:           false,
-										Default:             stringdefault.StaticString(""),
 									},
 									"scopes": schema.StringAttribute{
 										MarkdownDescription: "",
@@ -148,7 +138,6 @@ func (t *CsvConnectionResource) Schema(ctx context.Context, req resource.SchemaR
 										Optional:            true,
 										Computed:            true,
 										Sensitive:           false,
-										Default:             stringdefault.StaticString(""),
 									},
 									"token_endpoint": schema.StringAttribute{
 										MarkdownDescription: "",
@@ -156,7 +145,6 @@ func (t *CsvConnectionResource) Schema(ctx context.Context, req resource.SchemaR
 										Optional:            true,
 										Computed:            true,
 										Sensitive:           false,
-										Default:             stringdefault.StaticString(""),
 									},
 								},
 							},
@@ -168,7 +156,6 @@ func (t *CsvConnectionResource) Schema(ctx context.Context, req resource.SchemaR
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             stringdefault.StaticString(""),
 					},
 					"parameters": schema.StringAttribute{
 						MarkdownDescription: "",
@@ -176,7 +163,6 @@ func (t *CsvConnectionResource) Schema(ctx context.Context, req resource.SchemaR
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             stringdefault.StaticString(""),
 					},
 					"url": schema.StringAttribute{
 						MarkdownDescription: "e.g. http://www.example.com",

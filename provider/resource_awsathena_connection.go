@@ -24,8 +24,6 @@ import (
 	"github.com/polytomic/polytomic-go"
 	ptcore "github.com/polytomic/polytomic-go/core"
 	"github.com/polytomic/terraform-provider-polytomic/provider/internal/client"
-
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -62,7 +60,6 @@ func (t *AwsathenaConnectionResource) Schema(ctx context.Context, req resource.S
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             stringdefault.StaticString(""),
 					},
 					"outputbucket": schema.StringAttribute{
 						MarkdownDescription: "A pre-existing bucket (folder optional) that AWS can use to store query results. ex: s3://polytomic-athena-results/customer-dataset",

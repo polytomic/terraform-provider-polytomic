@@ -24,8 +24,6 @@ import (
 	"github.com/polytomic/polytomic-go"
 	ptcore "github.com/polytomic/polytomic-go/core"
 	"github.com/polytomic/terraform-provider-polytomic/provider/internal/client"
-
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -52,7 +50,6 @@ func (t *BigqueryConnectionResource) Schema(ctx context.Context, req resource.Sc
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             stringdefault.StaticString(""),
 					},
 					"location": schema.StringAttribute{
 						MarkdownDescription: "Region or multi-region for query operations",
@@ -60,7 +57,6 @@ func (t *BigqueryConnectionResource) Schema(ctx context.Context, req resource.Sc
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             stringdefault.StaticString(""),
 					},
 					"override_project_id": schema.StringAttribute{
 						MarkdownDescription: "Override service key's project ID for cross-account access",
@@ -68,7 +64,6 @@ func (t *BigqueryConnectionResource) Schema(ctx context.Context, req resource.Sc
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             stringdefault.StaticString(""),
 					},
 					"project_id": schema.StringAttribute{
 						MarkdownDescription: "",
@@ -76,7 +71,6 @@ func (t *BigqueryConnectionResource) Schema(ctx context.Context, req resource.Sc
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             stringdefault.StaticString(""),
 					},
 					"service_account": schema.StringAttribute{
 						MarkdownDescription: "",

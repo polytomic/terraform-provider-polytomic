@@ -24,8 +24,6 @@ import (
 	"github.com/polytomic/polytomic-go"
 	ptcore "github.com/polytomic/polytomic-go/core"
 	"github.com/polytomic/terraform-provider-polytomic/provider/internal/client"
-
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -55,7 +53,6 @@ func (t *GsheetsConnectionResource) Schema(ctx context.Context, req resource.Sch
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
-						Default: stringdefault.StaticString(""),
 					},
 					"client_secret": schema.StringAttribute{
 						MarkdownDescription: "",
@@ -66,7 +63,6 @@ func (t *GsheetsConnectionResource) Schema(ctx context.Context, req resource.Sch
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
-						Default: stringdefault.StaticString(""),
 					},
 					"connect_mode": schema.StringAttribute{
 						MarkdownDescription: "Default: browser",
@@ -74,7 +70,6 @@ func (t *GsheetsConnectionResource) Schema(ctx context.Context, req resource.Sch
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             stringdefault.StaticString(""),
 					},
 					"has_headers": schema.BoolAttribute{
 						MarkdownDescription: "",
@@ -92,7 +87,6 @@ func (t *GsheetsConnectionResource) Schema(ctx context.Context, req resource.Sch
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
-						Default: stringdefault.StaticString(""),
 					},
 					"oauth_token_expiry": schema.StringAttribute{
 						MarkdownDescription: "",
@@ -100,7 +94,6 @@ func (t *GsheetsConnectionResource) Schema(ctx context.Context, req resource.Sch
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             stringdefault.StaticString(""),
 					},
 					"service_account": schema.StringAttribute{
 						MarkdownDescription: "",
@@ -111,7 +104,6 @@ func (t *GsheetsConnectionResource) Schema(ctx context.Context, req resource.Sch
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
-						Default: stringdefault.StaticString(""),
 					},
 					"spreadsheet_id": schema.SingleNestedAttribute{
 						MarkdownDescription: "",
@@ -126,7 +118,6 @@ func (t *GsheetsConnectionResource) Schema(ctx context.Context, req resource.Sch
 								Optional:            true,
 								Computed:            true,
 								Sensitive:           false,
-								Default:             stringdefault.StaticString(""),
 							},
 							"value": schema.StringAttribute{
 								MarkdownDescription: "",
@@ -134,7 +125,6 @@ func (t *GsheetsConnectionResource) Schema(ctx context.Context, req resource.Sch
 								Optional:            true,
 								Computed:            true,
 								Sensitive:           false,
-								Default:             stringdefault.StaticString(""),
 							},
 						},
 					},
@@ -144,7 +134,6 @@ func (t *GsheetsConnectionResource) Schema(ctx context.Context, req resource.Sch
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             stringdefault.StaticString(""),
 					},
 				},
 

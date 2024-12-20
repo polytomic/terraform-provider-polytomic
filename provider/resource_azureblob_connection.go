@@ -24,9 +24,6 @@ import (
 	"github.com/polytomic/polytomic-go"
 	ptcore "github.com/polytomic/polytomic-go/core"
 	"github.com/polytomic/terraform-provider-polytomic/provider/internal/client"
-
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -84,7 +81,6 @@ func (t *AzureblobConnectionResource) Schema(ctx context.Context, req resource.S
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             stringdefault.StaticString(""),
 					},
 					"single_table_name": schema.StringAttribute{
 						MarkdownDescription: "",
@@ -92,7 +88,6 @@ func (t *AzureblobConnectionResource) Schema(ctx context.Context, req resource.S
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             stringdefault.StaticString(""),
 					},
 					"skip_lines": schema.Int64Attribute{
 						MarkdownDescription: "Skip first N lines of each CSV file.",
@@ -100,7 +95,6 @@ func (t *AzureblobConnectionResource) Schema(ctx context.Context, req resource.S
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             int64default.StaticInt64(0),
 					},
 				},
 

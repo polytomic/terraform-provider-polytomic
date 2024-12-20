@@ -24,9 +24,6 @@ import (
 	"github.com/polytomic/polytomic-go"
 	ptcore "github.com/polytomic/polytomic-go/core"
 	"github.com/polytomic/terraform-provider-polytomic/provider/internal/client"
-
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -56,7 +53,6 @@ func (t *DropboxConnectionResource) Schema(ctx context.Context, req resource.Sch
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
-						Default: stringdefault.StaticString(""),
 					},
 					"app_secret": schema.StringAttribute{
 						MarkdownDescription: "",
@@ -67,7 +63,6 @@ func (t *DropboxConnectionResource) Schema(ctx context.Context, req resource.Sch
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
-						Default: stringdefault.StaticString(""),
 					},
 					"bucket": schema.StringAttribute{
 						MarkdownDescription: "",
@@ -92,7 +87,6 @@ func (t *DropboxConnectionResource) Schema(ctx context.Context, req resource.Sch
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
-						Default: stringdefault.StaticString(""),
 					},
 					"oauth_token_expiry": schema.StringAttribute{
 						MarkdownDescription: "",
@@ -100,7 +94,6 @@ func (t *DropboxConnectionResource) Schema(ctx context.Context, req resource.Sch
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             stringdefault.StaticString(""),
 					},
 					"single_table_file_format": schema.StringAttribute{
 						MarkdownDescription: "",
@@ -108,7 +101,6 @@ func (t *DropboxConnectionResource) Schema(ctx context.Context, req resource.Sch
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             stringdefault.StaticString(""),
 					},
 					"single_table_name": schema.StringAttribute{
 						MarkdownDescription: "",
@@ -116,7 +108,6 @@ func (t *DropboxConnectionResource) Schema(ctx context.Context, req resource.Sch
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             stringdefault.StaticString(""),
 					},
 					"skip_lines": schema.Int64Attribute{
 						MarkdownDescription: "Skip first N lines of each CSV file.",
@@ -124,7 +115,6 @@ func (t *DropboxConnectionResource) Schema(ctx context.Context, req resource.Sch
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             int64default.StaticInt64(0),
 					},
 				},
 

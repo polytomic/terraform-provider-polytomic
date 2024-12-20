@@ -24,9 +24,6 @@ import (
 	"github.com/polytomic/polytomic-go"
 	ptcore "github.com/polytomic/polytomic-go/core"
 	"github.com/polytomic/terraform-provider-polytomic/provider/internal/client"
-
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -60,7 +57,6 @@ func (t *S3ConnectionResource) Schema(ctx context.Context, req resource.SchemaRe
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             stringdefault.StaticString(""),
 					},
 					"aws_secret_access_key": schema.StringAttribute{
 						MarkdownDescription: "",
@@ -71,7 +67,6 @@ func (t *S3ConnectionResource) Schema(ctx context.Context, req resource.SchemaRe
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
-						Default: stringdefault.StaticString(""),
 					},
 					"aws_user": schema.StringAttribute{
 						MarkdownDescription: "",
@@ -79,7 +74,6 @@ func (t *S3ConnectionResource) Schema(ctx context.Context, req resource.SchemaRe
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             stringdefault.StaticString(""),
 					},
 					"external_id": schema.StringAttribute{
 						MarkdownDescription: "External ID for the IAM role",
@@ -87,7 +81,6 @@ func (t *S3ConnectionResource) Schema(ctx context.Context, req resource.SchemaRe
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             stringdefault.StaticString(""),
 					},
 					"iam_role_arn": schema.StringAttribute{
 						MarkdownDescription: "",
@@ -95,7 +88,6 @@ func (t *S3ConnectionResource) Schema(ctx context.Context, req resource.SchemaRe
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             stringdefault.StaticString(""),
 					},
 					"is_single_table": schema.BoolAttribute{
 						MarkdownDescription: "Treat the files as a single table.",
@@ -124,7 +116,6 @@ func (t *S3ConnectionResource) Schema(ctx context.Context, req resource.SchemaRe
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             stringdefault.StaticString(""),
 					},
 					"single_table_name": schema.StringAttribute{
 						MarkdownDescription: "",
@@ -132,7 +123,6 @@ func (t *S3ConnectionResource) Schema(ctx context.Context, req resource.SchemaRe
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             stringdefault.StaticString(""),
 					},
 					"skip_lines": schema.Int64Attribute{
 						MarkdownDescription: "Skip first N lines of each CSV file.",
@@ -140,7 +130,6 @@ func (t *S3ConnectionResource) Schema(ctx context.Context, req resource.SchemaRe
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             int64default.StaticInt64(0),
 					},
 				},
 

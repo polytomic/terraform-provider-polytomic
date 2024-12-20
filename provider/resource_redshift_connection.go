@@ -24,9 +24,6 @@ import (
 	"github.com/polytomic/polytomic-go"
 	ptcore "github.com/polytomic/polytomic-go/core"
 	"github.com/polytomic/terraform-provider-polytomic/provider/internal/client"
-
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -53,7 +50,6 @@ func (t *RedshiftConnectionResource) Schema(ctx context.Context, req resource.Sc
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             stringdefault.StaticString(""),
 					},
 					"aws_secret_access_key": schema.StringAttribute{
 						MarkdownDescription: "",
@@ -64,7 +60,6 @@ func (t *RedshiftConnectionResource) Schema(ctx context.Context, req resource.Sc
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
-						Default: stringdefault.StaticString(""),
 					},
 					"aws_user": schema.StringAttribute{
 						MarkdownDescription: "",
@@ -72,7 +67,6 @@ func (t *RedshiftConnectionResource) Schema(ctx context.Context, req resource.Sc
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             stringdefault.StaticString(""),
 					},
 					"database": schema.StringAttribute{
 						MarkdownDescription: "",
@@ -111,7 +105,6 @@ func (t *RedshiftConnectionResource) Schema(ctx context.Context, req resource.Sc
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             stringdefault.StaticString(""),
 					},
 					"s3_bucket_region": schema.StringAttribute{
 						MarkdownDescription: "Region of bucket. Note: must match region of redshift server",
@@ -119,7 +112,6 @@ func (t *RedshiftConnectionResource) Schema(ctx context.Context, req resource.Sc
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             stringdefault.StaticString(""),
 					},
 					"ssh": schema.BoolAttribute{
 						MarkdownDescription: "",
@@ -134,7 +126,6 @@ func (t *RedshiftConnectionResource) Schema(ctx context.Context, req resource.Sc
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             stringdefault.StaticString(""),
 					},
 					"ssh_port": schema.Int64Attribute{
 						MarkdownDescription: "",
@@ -142,7 +133,6 @@ func (t *RedshiftConnectionResource) Schema(ctx context.Context, req resource.Sc
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             int64default.StaticInt64(0),
 					},
 					"ssh_private_key": schema.StringAttribute{
 						MarkdownDescription: "",
@@ -153,7 +143,6 @@ func (t *RedshiftConnectionResource) Schema(ctx context.Context, req resource.Sc
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
-						Default: stringdefault.StaticString(""),
 					},
 					"ssh_user": schema.StringAttribute{
 						MarkdownDescription: "",
@@ -161,7 +150,6 @@ func (t *RedshiftConnectionResource) Schema(ctx context.Context, req resource.Sc
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             stringdefault.StaticString(""),
 					},
 					"username": schema.StringAttribute{
 						MarkdownDescription: "",

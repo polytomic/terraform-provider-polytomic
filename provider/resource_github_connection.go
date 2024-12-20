@@ -24,8 +24,6 @@ import (
 	"github.com/polytomic/polytomic-go"
 	ptcore "github.com/polytomic/polytomic-go/core"
 	"github.com/polytomic/terraform-provider-polytomic/provider/internal/client"
-
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -62,7 +60,6 @@ func (t *GithubConnectionResource) Schema(ctx context.Context, req resource.Sche
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
-						Default: stringdefault.StaticString(""),
 					},
 					"client_secret": schema.StringAttribute{
 						MarkdownDescription: "",
@@ -73,7 +70,6 @@ func (t *GithubConnectionResource) Schema(ctx context.Context, req resource.Sche
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
-						Default: stringdefault.StaticString(""),
 					},
 					"oauth_access_token": schema.StringAttribute{
 						MarkdownDescription: "",
@@ -91,7 +87,6 @@ func (t *GithubConnectionResource) Schema(ctx context.Context, req resource.Sche
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             stringdefault.StaticString(""),
 					},
 				},
 

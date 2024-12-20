@@ -24,8 +24,6 @@ import (
 	"github.com/polytomic/polytomic-go"
 	ptcore "github.com/polytomic/polytomic-go/core"
 	"github.com/polytomic/terraform-provider-polytomic/provider/internal/client"
-
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -52,7 +50,6 @@ func (t *MongodbConnectionResource) Schema(ctx context.Context, req resource.Sch
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             stringdefault.StaticString(""),
 					},
 					"hosts": schema.StringAttribute{
 						MarkdownDescription: "",
@@ -67,7 +64,6 @@ func (t *MongodbConnectionResource) Schema(ctx context.Context, req resource.Sch
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             stringdefault.StaticString(""),
 					},
 					"password": schema.StringAttribute{
 						MarkdownDescription: "",
@@ -78,7 +74,6 @@ func (t *MongodbConnectionResource) Schema(ctx context.Context, req resource.Sch
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
-						Default: stringdefault.StaticString(""),
 					},
 					"srv": schema.BoolAttribute{
 						MarkdownDescription: "",
@@ -100,7 +95,6 @@ func (t *MongodbConnectionResource) Schema(ctx context.Context, req resource.Sch
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             stringdefault.StaticString(""),
 					},
 				},
 

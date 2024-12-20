@@ -24,9 +24,6 @@ import (
 	"github.com/polytomic/polytomic-go"
 	ptcore "github.com/polytomic/polytomic-go/core"
 	"github.com/polytomic/terraform-provider-polytomic/provider/internal/client"
-
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -73,7 +70,6 @@ func (t *SalesforceConnectionResource) Schema(ctx context.Context, req resource.
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             stringdefault.StaticString(""),
 					},
 					"daily_api_calls": schema.Int64Attribute{
 						MarkdownDescription: "The daily Salesforce API call cap that Polytomic should adhere to.",
@@ -81,7 +77,6 @@ func (t *SalesforceConnectionResource) Schema(ctx context.Context, req resource.
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             int64default.StaticInt64(0),
 					},
 					"domain": schema.StringAttribute{
 						MarkdownDescription: "The Salesforce instance's login domain, e.g. acmecorp.my.salesforce.com",
@@ -120,7 +115,6 @@ func (t *SalesforceConnectionResource) Schema(ctx context.Context, req resource.
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
-						Default: stringdefault.StaticString(""),
 					},
 					"username": schema.StringAttribute{
 						MarkdownDescription: "",
@@ -128,7 +122,6 @@ func (t *SalesforceConnectionResource) Schema(ctx context.Context, req resource.
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             stringdefault.StaticString(""),
 					},
 				},
 

@@ -24,8 +24,6 @@ import (
 	"github.com/polytomic/polytomic-go"
 	ptcore "github.com/polytomic/polytomic-go/core"
 	"github.com/polytomic/terraform-provider-polytomic/provider/internal/client"
-
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -52,7 +50,6 @@ func (t *GongConnectionResource) Schema(ctx context.Context, req resource.Schema
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             stringdefault.StaticString(""),
 					},
 					"access_secret": schema.StringAttribute{
 						MarkdownDescription: "",
@@ -63,7 +60,6 @@ func (t *GongConnectionResource) Schema(ctx context.Context, req resource.Schema
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
-						Default: stringdefault.StaticString(""),
 					},
 					"auth_method": schema.StringAttribute{
 						MarkdownDescription: "",
@@ -81,7 +77,6 @@ func (t *GongConnectionResource) Schema(ctx context.Context, req resource.Schema
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
-						Default: stringdefault.StaticString(""),
 					},
 					"client_secret": schema.StringAttribute{
 						MarkdownDescription: "",
@@ -92,7 +87,6 @@ func (t *GongConnectionResource) Schema(ctx context.Context, req resource.Schema
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
-						Default: stringdefault.StaticString(""),
 					},
 					"oauth_refresh_token": schema.StringAttribute{
 						MarkdownDescription: "",
@@ -103,7 +97,6 @@ func (t *GongConnectionResource) Schema(ctx context.Context, req resource.Schema
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
-						Default: stringdefault.StaticString(""),
 					},
 					"oauth_token_expiry": schema.StringAttribute{
 						MarkdownDescription: "",
@@ -111,7 +104,6 @@ func (t *GongConnectionResource) Schema(ctx context.Context, req resource.Schema
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             stringdefault.StaticString(""),
 					},
 					"subdomain": schema.StringAttribute{
 						MarkdownDescription: "Gong subdomain i.e. company-17 if you access Gong via https://company-17.app.gong.io",
@@ -119,7 +111,6 @@ func (t *GongConnectionResource) Schema(ctx context.Context, req resource.Schema
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             stringdefault.StaticString(""),
 					},
 				},
 

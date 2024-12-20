@@ -24,9 +24,6 @@ import (
 	"github.com/polytomic/polytomic-go"
 	ptcore "github.com/polytomic/polytomic-go/core"
 	"github.com/polytomic/terraform-provider-polytomic/provider/internal/client"
-
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -60,7 +57,6 @@ func (t *Zendesk_chatConnectionResource) Schema(ctx context.Context, req resourc
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             stringdefault.StaticString(""),
 					},
 					"ratelimit_rpm": schema.Int64Attribute{
 						MarkdownDescription: "Set a custom maximum request per minute limit.",
@@ -68,7 +64,6 @@ func (t *Zendesk_chatConnectionResource) Schema(ctx context.Context, req resourc
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             int64default.StaticInt64(0),
 					},
 				},
 

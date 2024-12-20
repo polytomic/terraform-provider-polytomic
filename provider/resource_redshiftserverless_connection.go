@@ -24,8 +24,6 @@ import (
 	"github.com/polytomic/polytomic-go"
 	ptcore "github.com/polytomic/polytomic-go/core"
 	"github.com/polytomic/terraform-provider-polytomic/provider/internal/client"
-
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -52,7 +50,6 @@ func (t *RedshiftserverlessConnectionResource) Schema(ctx context.Context, req r
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             stringdefault.StaticString(""),
 					},
 					"database": schema.StringAttribute{
 						MarkdownDescription: "",
@@ -67,7 +64,6 @@ func (t *RedshiftserverlessConnectionResource) Schema(ctx context.Context, req r
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             stringdefault.StaticString(""),
 					},
 					"iam_role_arn": schema.StringAttribute{
 						MarkdownDescription: "",
@@ -89,7 +85,6 @@ func (t *RedshiftserverlessConnectionResource) Schema(ctx context.Context, req r
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
-						Default:             stringdefault.StaticString(""),
 					},
 					"workgroup": schema.StringAttribute{
 						MarkdownDescription: "",
