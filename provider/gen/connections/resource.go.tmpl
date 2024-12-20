@@ -18,6 +18,11 @@ var _ resource.ResourceWithImportState = &{{ .Connection }}ConnectionResource{}
 		Optional:  {{ .Optional }},
 		Computed:  {{ .Computed }},
 		Sensitive: {{ .Sensitive }},
+		{{ if .Sensitive -}}
+		PlanModifiers: []planmodifier.{{ .TfType }}{
+			{{ .TfType | lower }}planmodifier.UseStateForUnknown(),
+    	},
+		{{- end -}}
 		{{ if .Default.Value -}}
 		Default: {{ .Default.Value }},
 		{{- end -}}
@@ -28,6 +33,19 @@ var _ resource.ResourceWithImportState = &{{ .Connection }}ConnectionResource{}
 		{{ end }}
 	},
 {{ end -}}
+
+{{ define "readAttribute" -}}
+	{{ if eq .TfType "Object" -}}
+	"{{ .AttrName }}": types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			{{ range .Attributes }}{{ template "readAttribute" . }}{{ end }}
+		},
+	},
+	{{- else -}}
+	"{{ .AttrName }}": {{ .AttrReadType }},
+	{{ end -}}
+{{ end -}}
+
 
 func (t *{{ .Connection }}ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
@@ -51,6 +69,9 @@ func (t *{{ .Connection }}ConnectionResource) Schema(ctx context.Context, req re
 				Optional: true,
 				Type: types.ObjectType{},
 				{{ end }}
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"force_destroy": schema.BoolAttribute{
 				MarkdownDescription: forceDestroyMessage,
@@ -113,17 +134,8 @@ func (r *{{ .Connection }}ConnectionResource) Create(ctx context.Context, req re
 		OrganizationId: data.Organization.ValueStringPointer(),
 		{{- if .Attributes }}
 		Configuration: map[string]interface{}{
-				{{ range .Attributes }}"{{ .Name -}}":
-				{{ if eq .Type "int" }}int(data.Configuration.Attributes()["{{ .AttrName }}"].({{ .TfType }}).ValueInt64()),
-				{{ else if eq .Type "integer" }}int(data.Configuration.Attributes()["{{ .AttrName }}"].({{ .TfType }}).ValueInt64()),
-				{{ else if eq .Type "number" }}int(data.Configuration.Attributes()["{{ .AttrName }}"].({{ .TfType }}).ValueInt64()),
-				{{ else if eq .Type "int64" }}int(data.Configuration.Attributes()["{{ .AttrName }}"].({{ .TfType }}).ValueInt64()),
-				{{ else if eq .Type "bool" }}data.Configuration.Attributes()["{{ .AttrName }}"].({{ .TfType }}).ValueBool(),
-				{{ else }}
-				data.Configuration.Attributes()["{{ .AttrName }}"].({{ .TfType }}).ValueString(),
-				{{ end }}
-				{{- end }}
-			},
+			{{ range .Attributes }}{{ valueAttr . }}{{ end }}
+		},
 		{{- end }}
 		Validate: pointer.ToBool(false),
 	})
@@ -143,9 +155,7 @@ func (r *{{ .Connection }}ConnectionResource) Create(ctx context.Context, req re
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		{{- range .Attributes }}
-		"{{ .AttrName }}": {{ .NewAttrType }},
-		{{- end }}
+		{{ range .Attributes }}{{ template "readAttribute" . }}{{ end }}
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -196,9 +206,7 @@ func (r *{{ .Connection }}ConnectionResource) Read(ctx context.Context, req reso
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		{{- range .Attributes }}
-		"{{ .AttrName }}": {{ .NewAttrType }},
-		{{- end }}
+		{{ range .Attributes }}{{ template "readAttribute" . }}{{ end }}
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -231,16 +239,7 @@ func (r *{{ .Connection }}ConnectionResource) Update(ctx context.Context, req re
 			OrganizationId: data.Organization.ValueStringPointer(),
 			{{- if .Attributes }}
 			Configuration: map[string]interface{}{
-				{{ range .Attributes }}"{{ .Name }}":
-				{{ if eq .Type "int" }}int(data.Configuration.Attributes()["{{ .AttrName }}"].({{ .TfType }}).ValueInt64()),
-				{{ else if eq .Type "integer" }}int(data.Configuration.Attributes()["{{ .AttrName }}"].({{ .TfType }}).ValueInt64()),
-				{{ else if eq .Type "number" }}int(data.Configuration.Attributes()["{{ .AttrName }}"].({{ .TfType }}).ValueInt64()),
-				{{ else if eq .Type "int64" }}int(data.Configuration.Attributes()["{{ .AttrName }}"].({{ .TfType }}).ValueInt64()),
-				{{ else if eq .Type "bool" }}data.Configuration.Attributes()["{{ .AttrName }}"].({{ .TfType }}).ValueBool(),
-				{{ else }}
-				data.Configuration.Attributes()["{{ .AttrName }}"].({{ .TfType }}).ValueString(),
-				{{ end }}
-				{{- end }}
+				{{ range .Attributes }}{{ valueAttr . }}{{ end }}
 			},
 			{{- end }}
 			Validate: pointer.ToBool(false),
@@ -261,9 +260,7 @@ func (r *{{ .Connection }}ConnectionResource) Update(ctx context.Context, req re
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		{{- range .Attributes }}
-		"{{ .AttrName }}": {{ .NewAttrType }},
-		{{- end }}
+		{{ range .Attributes }}{{ template "readAttribute" . }}{{ end }}
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -325,8 +322,9 @@ func (r *{{ .Connection }}ConnectionResource) Delete(ctx context.Context, req re
 		}
 	}
 
-	resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting connection: %s", err))
-
+	if err != nil {
+		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting connection: %s", err))
+	}
 }
 
 func (r *{{ .Connection }}ConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
