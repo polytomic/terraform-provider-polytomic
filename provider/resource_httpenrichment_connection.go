@@ -15,6 +15,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -23,6 +25,8 @@ import (
 	"github.com/polytomic/polytomic-go"
 	ptcore "github.com/polytomic/polytomic-go/core"
 	"github.com/polytomic/terraform-provider-polytomic/provider/internal/client"
+
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -47,29 +51,31 @@ func (t *HttpenrichmentConnectionResource) Schema(ctx context.Context, req resou
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
-						Computed:            false,
+						Computed:            true,
 						Sensitive:           false,
 						Attributes: map[string]schema.Attribute{
 							"basic": schema.SingleNestedAttribute{
 								MarkdownDescription: "",
 								Required:            false,
 								Optional:            true,
-								Computed:            false,
+								Computed:            true,
 								Sensitive:           false,
 								Attributes: map[string]schema.Attribute{
 									"password": schema.StringAttribute{
 										MarkdownDescription: "",
 										Required:            false,
 										Optional:            true,
-										Computed:            false,
+										Computed:            true,
 										Sensitive:           false,
+										Default:             stringdefault.StaticString(""),
 									},
 									"username": schema.StringAttribute{
 										MarkdownDescription: "",
 										Required:            false,
 										Optional:            true,
-										Computed:            false,
+										Computed:            true,
 										Sensitive:           false,
+										Default:             stringdefault.StaticString(""),
 									},
 								},
 							},
@@ -77,21 +83,22 @@ func (t *HttpenrichmentConnectionResource) Schema(ctx context.Context, req resou
 								MarkdownDescription: "",
 								Required:            false,
 								Optional:            true,
-								Computed:            false,
+								Computed:            true,
 								Sensitive:           false,
 								Attributes: map[string]schema.Attribute{
 									"name": schema.StringAttribute{
 										MarkdownDescription: "",
 										Required:            false,
 										Optional:            true,
-										Computed:            false,
+										Computed:            true,
 										Sensitive:           false,
+										Default:             stringdefault.StaticString(""),
 									},
-									"value": schema.SingleNestedAttribute{
+									"value": schema.StringAttribute{
 										MarkdownDescription: "",
 										Required:            false,
 										Optional:            true,
-										Computed:            false,
+										Computed:            true,
 										Sensitive:           false,
 									},
 								},
@@ -100,50 +107,56 @@ func (t *HttpenrichmentConnectionResource) Schema(ctx context.Context, req resou
 								MarkdownDescription: "",
 								Required:            false,
 								Optional:            true,
-								Computed:            false,
+								Computed:            true,
 								Sensitive:           false,
 								Attributes: map[string]schema.Attribute{
 									"auth_style": schema.Int64Attribute{
 										MarkdownDescription: "",
 										Required:            false,
 										Optional:            true,
-										Computed:            false,
+										Computed:            true,
 										Sensitive:           false,
+										Default:             int64default.StaticInt64(0),
 									},
 									"client_id": schema.StringAttribute{
 										MarkdownDescription: "",
 										Required:            false,
 										Optional:            true,
-										Computed:            false,
+										Computed:            true,
 										Sensitive:           false,
+										Default:             stringdefault.StaticString(""),
 									},
 									"client_secret": schema.StringAttribute{
 										MarkdownDescription: "",
 										Required:            false,
 										Optional:            true,
-										Computed:            false,
+										Computed:            true,
 										Sensitive:           false,
+										Default:             stringdefault.StaticString(""),
 									},
 									"extra_form_data": schema.StringAttribute{
 										MarkdownDescription: "",
 										Required:            false,
 										Optional:            true,
-										Computed:            false,
+										Computed:            true,
 										Sensitive:           false,
+										Default:             stringdefault.StaticString(""),
 									},
 									"scopes": schema.StringAttribute{
 										MarkdownDescription: "",
 										Required:            false,
 										Optional:            true,
-										Computed:            false,
+										Computed:            true,
 										Sensitive:           false,
+										Default:             stringdefault.StaticString(""),
 									},
 									"token_endpoint": schema.StringAttribute{
 										MarkdownDescription: "",
 										Required:            false,
 										Optional:            true,
-										Computed:            false,
+										Computed:            true,
 										Sensitive:           false,
+										Default:             stringdefault.StaticString(""),
 									},
 								},
 							},
@@ -153,50 +166,57 @@ func (t *HttpenrichmentConnectionResource) Schema(ctx context.Context, req resou
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
-						Computed:            false,
+						Computed:            true,
 						Sensitive:           false,
+						Default:             stringdefault.StaticString(""),
 					},
 					"fields": schema.StringAttribute{
 						MarkdownDescription: "List of fields to be returned by the enrichment",
 						Required:            false,
 						Optional:            true,
-						Computed:            false,
+						Computed:            true,
 						Sensitive:           false,
+						Default:             stringdefault.StaticString(""),
 					},
 					"headers": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
-						Computed:            false,
+						Computed:            true,
 						Sensitive:           false,
+						Default:             stringdefault.StaticString(""),
 					},
 					"healthcheck": schema.StringAttribute{
 						MarkdownDescription: "Path to request when checking the health of this connection. No health check will be performed if left empty.",
 						Required:            false,
 						Optional:            true,
-						Computed:            false,
+						Computed:            true,
 						Sensitive:           false,
+						Default:             stringdefault.StaticString(""),
 					},
 					"input_mappings": schema.StringAttribute{
 						MarkdownDescription: "List of input mappings to be used in the query. Each mapping should be a valid JSONPath expression.",
 						Required:            false,
 						Optional:            true,
-						Computed:            false,
+						Computed:            true,
 						Sensitive:           false,
+						Default:             stringdefault.StaticString(""),
 					},
 					"method": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
-						Computed:            false,
+						Computed:            true,
 						Sensitive:           false,
+						Default:             stringdefault.StaticString(""),
 					},
 					"parameters": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
-						Computed:            false,
+						Computed:            true,
 						Sensitive:           false,
+						Default:             stringdefault.StaticString(""),
 					},
 					"url": schema.StringAttribute{
 						MarkdownDescription: "",
@@ -208,6 +228,10 @@ func (t *HttpenrichmentConnectionResource) Schema(ctx context.Context, req resou
 				},
 
 				Required: true,
+
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"force_destroy": schema.BoolAttribute{
 				MarkdownDescription: forceDestroyMessage,
@@ -225,7 +249,7 @@ func (t *HttpenrichmentConnectionResource) Schema(ctx context.Context, req resou
 }
 
 type HttpenrichmentConf struct {
-	Auth string `mapstructure:"auth" tfsdk:"auth"`
+	Auth map[string]interface{} `mapstructure:"auth" tfsdk:"auth"`
 
 	Body string `mapstructure:"body" tfsdk:"body"`
 
@@ -278,12 +302,29 @@ func (r *HttpenrichmentConnectionResource) Create(ctx context.Context, req resou
 		Type:           "httpenrichment",
 		OrganizationId: data.Organization.ValueStringPointer(),
 		Configuration: map[string]interface{}{
-			"auth":          data.Configuration.Attributes()["auth"].(types.String).ValueString(),
+			"auth": map[string]interface{}{
+				"basic": map[string]interface{}{
+					"password": data.Configuration.Attributes()["auth"].(types.Object).Attributes()["basic"].(types.Object).Attributes()["password"].(types.String).ValueString(),
+					"username": data.Configuration.Attributes()["auth"].(types.Object).Attributes()["basic"].(types.Object).Attributes()["username"].(types.String).ValueString(),
+				},
+				"header": map[string]interface{}{
+					"name":  data.Configuration.Attributes()["auth"].(types.Object).Attributes()["header"].(types.Object).Attributes()["name"].(types.String).ValueString(),
+					"value": data.Configuration.Attributes()["auth"].(types.Object).Attributes()["header"].(types.Object).Attributes()["value"].(types.String).ValueString(),
+				},
+				"oauth": map[string]interface{}{
+					"auth_style":      int(data.Configuration.Attributes()["auth"].(types.Object).Attributes()["oauth"].(types.Object).Attributes()["auth_style"].(types.Int64).ValueInt64()),
+					"client_id":       data.Configuration.Attributes()["auth"].(types.Object).Attributes()["oauth"].(types.Object).Attributes()["client_id"].(types.String).ValueString(),
+					"client_secret":   data.Configuration.Attributes()["auth"].(types.Object).Attributes()["oauth"].(types.Object).Attributes()["client_secret"].(types.String).ValueString(),
+					"extra_form_data": data.Configuration.Attributes()["auth"].(types.Object).Attributes()["oauth"].(types.Object).Attributes()["extra_form_data"].(types.String).ValueString(),
+					"scopes":          data.Configuration.Attributes()["auth"].(types.Object).Attributes()["oauth"].(types.Object).Attributes()["scopes"].(types.String).ValueString(),
+					"token_endpoint":  data.Configuration.Attributes()["auth"].(types.Object).Attributes()["oauth"].(types.Object).Attributes()["token_endpoint"].(types.String).ValueString(),
+				},
+			},
 			"body":          data.Configuration.Attributes()["body"].(types.String).ValueString(),
 			"fields":        data.Configuration.Attributes()["fields"].(types.String).ValueString(),
 			"headers":       data.Configuration.Attributes()["headers"].(types.String).ValueString(),
 			"healthcheck":   data.Configuration.Attributes()["healthcheck"].(types.String).ValueString(),
-			"inputMappings": data.Configuration.Attributes()["input_mappings"].(types.String).ValueString(),
+			"inputMappings": data.Configuration.Attributes()["inputMappings"].(types.String).ValueString(),
 			"method":        data.Configuration.Attributes()["method"].(types.String).ValueString(),
 			"parameters":    data.Configuration.Attributes()["parameters"].(types.String).ValueString(),
 			"url":           data.Configuration.Attributes()["url"].(types.String).ValueString(),
@@ -305,8 +346,30 @@ func (r *HttpenrichmentConnectionResource) Create(ctx context.Context, req resou
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"auth":           types.StringType,
-		"body":           types.StringType,
+		"auth": types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				"basic": types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						"password": types.StringType,
+						"username": types.StringType,
+					},
+				}, "header": types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						"name":  types.StringType,
+						"value": types.StringType,
+					},
+				}, "oauth": types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						"auth_style":      types.NumberType,
+						"client_id":       types.StringType,
+						"client_secret":   types.StringType,
+						"extra_form_data": types.StringType,
+						"scopes":          types.StringType,
+						"token_endpoint":  types.StringType,
+					},
+				},
+			},
+		}, "body": types.StringType,
 		"fields":         types.StringType,
 		"headers":        types.StringType,
 		"healthcheck":    types.StringType,
@@ -364,8 +427,30 @@ func (r *HttpenrichmentConnectionResource) Read(ctx context.Context, req resourc
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"auth":           types.StringType,
-		"body":           types.StringType,
+		"auth": types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				"basic": types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						"password": types.StringType,
+						"username": types.StringType,
+					},
+				}, "header": types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						"name":  types.StringType,
+						"value": types.StringType,
+					},
+				}, "oauth": types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						"auth_style":      types.NumberType,
+						"client_id":       types.StringType,
+						"client_secret":   types.StringType,
+						"extra_form_data": types.StringType,
+						"scopes":          types.StringType,
+						"token_endpoint":  types.StringType,
+					},
+				},
+			},
+		}, "body": types.StringType,
 		"fields":         types.StringType,
 		"headers":        types.StringType,
 		"healthcheck":    types.StringType,
@@ -404,12 +489,29 @@ func (r *HttpenrichmentConnectionResource) Update(ctx context.Context, req resou
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueStringPointer(),
 			Configuration: map[string]interface{}{
-				"auth":          data.Configuration.Attributes()["auth"].(types.String).ValueString(),
+				"auth": map[string]interface{}{
+					"basic": map[string]interface{}{
+						"password": data.Configuration.Attributes()["auth"].(types.Object).Attributes()["basic"].(types.Object).Attributes()["password"].(types.String).ValueString(),
+						"username": data.Configuration.Attributes()["auth"].(types.Object).Attributes()["basic"].(types.Object).Attributes()["username"].(types.String).ValueString(),
+					},
+					"header": map[string]interface{}{
+						"name":  data.Configuration.Attributes()["auth"].(types.Object).Attributes()["header"].(types.Object).Attributes()["name"].(types.String).ValueString(),
+						"value": data.Configuration.Attributes()["auth"].(types.Object).Attributes()["header"].(types.Object).Attributes()["value"].(types.String).ValueString(),
+					},
+					"oauth": map[string]interface{}{
+						"auth_style":      int(data.Configuration.Attributes()["auth"].(types.Object).Attributes()["oauth"].(types.Object).Attributes()["auth_style"].(types.Int64).ValueInt64()),
+						"client_id":       data.Configuration.Attributes()["auth"].(types.Object).Attributes()["oauth"].(types.Object).Attributes()["client_id"].(types.String).ValueString(),
+						"client_secret":   data.Configuration.Attributes()["auth"].(types.Object).Attributes()["oauth"].(types.Object).Attributes()["client_secret"].(types.String).ValueString(),
+						"extra_form_data": data.Configuration.Attributes()["auth"].(types.Object).Attributes()["oauth"].(types.Object).Attributes()["extra_form_data"].(types.String).ValueString(),
+						"scopes":          data.Configuration.Attributes()["auth"].(types.Object).Attributes()["oauth"].(types.Object).Attributes()["scopes"].(types.String).ValueString(),
+						"token_endpoint":  data.Configuration.Attributes()["auth"].(types.Object).Attributes()["oauth"].(types.Object).Attributes()["token_endpoint"].(types.String).ValueString(),
+					},
+				},
 				"body":          data.Configuration.Attributes()["body"].(types.String).ValueString(),
 				"fields":        data.Configuration.Attributes()["fields"].(types.String).ValueString(),
 				"headers":       data.Configuration.Attributes()["headers"].(types.String).ValueString(),
 				"healthcheck":   data.Configuration.Attributes()["healthcheck"].(types.String).ValueString(),
-				"inputMappings": data.Configuration.Attributes()["input_mappings"].(types.String).ValueString(),
+				"inputMappings": data.Configuration.Attributes()["inputMappings"].(types.String).ValueString(),
 				"method":        data.Configuration.Attributes()["method"].(types.String).ValueString(),
 				"parameters":    data.Configuration.Attributes()["parameters"].(types.String).ValueString(),
 				"url":           data.Configuration.Attributes()["url"].(types.String).ValueString(),
@@ -432,8 +534,30 @@ func (r *HttpenrichmentConnectionResource) Update(ctx context.Context, req resou
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"auth":           types.StringType,
-		"body":           types.StringType,
+		"auth": types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				"basic": types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						"password": types.StringType,
+						"username": types.StringType,
+					},
+				}, "header": types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						"name":  types.StringType,
+						"value": types.StringType,
+					},
+				}, "oauth": types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						"auth_style":      types.NumberType,
+						"client_id":       types.StringType,
+						"client_secret":   types.StringType,
+						"extra_form_data": types.StringType,
+						"scopes":          types.StringType,
+						"token_endpoint":  types.StringType,
+					},
+				},
+			},
+		}, "body": types.StringType,
 		"fields":         types.StringType,
 		"headers":        types.StringType,
 		"healthcheck":    types.StringType,
@@ -502,8 +626,9 @@ func (r *HttpenrichmentConnectionResource) Delete(ctx context.Context, req resou
 		}
 	}
 
-	resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting connection: %s", err))
-
+	if err != nil {
+		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting connection: %s", err))
+	}
 }
 
 func (r *HttpenrichmentConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {

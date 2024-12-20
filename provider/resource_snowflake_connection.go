@@ -15,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -23,6 +24,8 @@ import (
 	"github.com/polytomic/polytomic-go"
 	ptcore "github.com/polytomic/polytomic-go/core"
 	"github.com/polytomic/terraform-provider-polytomic/provider/internal/client"
+
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -61,36 +64,49 @@ func (t *SnowflakeConnectionResource) Schema(ctx context.Context, req resource.S
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
-						Computed:            false,
+						Computed:            true,
 						Sensitive:           false,
 					},
 					"params": schema.StringAttribute{
 						MarkdownDescription: "Additional connection parameters, formatted as a query string",
 						Required:            false,
 						Optional:            true,
-						Computed:            false,
+						Computed:            true,
 						Sensitive:           false,
+						Default:             stringdefault.StaticString(""),
 					},
 					"password": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
-						Computed:            false,
+						Computed:            true,
 						Sensitive:           true,
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.UseStateForUnknown(),
+						},
+						Default: stringdefault.StaticString(""),
 					},
 					"private_key": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
-						Computed:            false,
+						Computed:            true,
 						Sensitive:           true,
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.UseStateForUnknown(),
+						},
+						Default: stringdefault.StaticString(""),
 					},
 					"private_key_passphrase": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
-						Computed:            false,
+						Computed:            true,
 						Sensitive:           true,
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.UseStateForUnknown(),
+						},
+						Default: stringdefault.StaticString(""),
 					},
 					"username": schema.StringAttribute{
 						MarkdownDescription: "",
@@ -103,12 +119,17 @@ func (t *SnowflakeConnectionResource) Schema(ctx context.Context, req resource.S
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
-						Computed:            false,
+						Computed:            true,
 						Sensitive:           false,
+						Default:             stringdefault.StaticString(""),
 					},
 				},
 
 				Required: true,
+
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"force_destroy": schema.BoolAttribute{
 				MarkdownDescription: forceDestroyMessage,
@@ -403,8 +424,9 @@ func (r *SnowflakeConnectionResource) Delete(ctx context.Context, req resource.D
 		}
 	}
 
-	resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting connection: %s", err))
-
+	if err != nil {
+		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting connection: %s", err))
+	}
 }
 
 func (r *SnowflakeConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {

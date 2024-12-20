@@ -106,6 +106,7 @@ Optional:
 - `minute` (String)
 - `month` (String)
 - `run_after` (Attributes) (see [below for nested schema](#nestedatt--schedule--run_after))
+- `run_after_success_only` (Boolean)
 
 <a id="nestedatt--schedule--run_after"></a>
 ### Nested Schema for `schedule.run_after`
@@ -160,6 +161,9 @@ Required:
 Optional:
 
 - `new_field` (Boolean)
+
+Read-Only:
+
 - `remote_field_type_id` (String)
 
 <a id="nestedatt--identity--source"></a>

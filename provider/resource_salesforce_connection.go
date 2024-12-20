@@ -15,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -23,6 +24,9 @@ import (
 	"github.com/polytomic/polytomic-go"
 	ptcore "github.com/polytomic/polytomic-go/core"
 	"github.com/polytomic/terraform-provider-polytomic/provider/internal/client"
+
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -49,6 +53,9 @@ func (t *SalesforceConnectionResource) Schema(ctx context.Context, req resource.
 						Optional:            false,
 						Computed:            false,
 						Sensitive:           true,
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.UseStateForUnknown(),
+						},
 					},
 					"client_secret": schema.StringAttribute{
 						MarkdownDescription: "",
@@ -56,20 +63,25 @@ func (t *SalesforceConnectionResource) Schema(ctx context.Context, req resource.
 						Optional:            false,
 						Computed:            false,
 						Sensitive:           true,
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.UseStateForUnknown(),
+						},
 					},
 					"connect_mode": schema.StringAttribute{
 						MarkdownDescription: "Default: browser (i.e. oauth through Polytomic). If 'code' is specified, the response will include an auth_code for the user to enter when completing authorization. NOTE: when supplying client_id and client_secret the connect mode must be 'api'.",
 						Required:            false,
 						Optional:            true,
-						Computed:            false,
+						Computed:            true,
 						Sensitive:           false,
+						Default:             stringdefault.StaticString(""),
 					},
 					"daily_api_calls": schema.Int64Attribute{
 						MarkdownDescription: "The daily Salesforce API call cap that Polytomic should adhere to.",
 						Required:            false,
 						Optional:            true,
-						Computed:            false,
+						Computed:            true,
 						Sensitive:           false,
+						Default:             int64default.StaticInt64(0),
 					},
 					"domain": schema.StringAttribute{
 						MarkdownDescription: "The Salesforce instance's login domain, e.g. acmecorp.my.salesforce.com",
@@ -82,40 +94,49 @@ func (t *SalesforceConnectionResource) Schema(ctx context.Context, req resource.
 						MarkdownDescription: "If incremenetal mode for bulk-syncing from Salesforce formula fields is enabled, setting this to true extends support to accurate currency conversions.",
 						Required:            false,
 						Optional:            true,
-						Computed:            false,
+						Computed:            true,
 						Sensitive:           false,
 					},
 					"enable_tooling": schema.BoolAttribute{
 						MarkdownDescription: "If true, expose objects from the Salesforce Tooling API in the Polytomic bulk sync source object list.",
 						Required:            false,
 						Optional:            true,
-						Computed:            false,
+						Computed:            true,
 						Sensitive:           false,
 					},
 					"enforce_api_limits": schema.BoolAttribute{
 						MarkdownDescription: "If true, Polytomic will restrict itself to a fixed daily cap of Salesforce API calls enforced by the number in daily_api_calls.",
 						Required:            false,
 						Optional:            true,
-						Computed:            false,
+						Computed:            true,
 						Sensitive:           false,
 					},
 					"oauth_refresh_token": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
-						Computed:            false,
+						Computed:            true,
 						Sensitive:           true,
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.UseStateForUnknown(),
+						},
+						Default: stringdefault.StaticString(""),
 					},
 					"username": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
-						Computed:            false,
+						Computed:            true,
 						Sensitive:           false,
+						Default:             stringdefault.StaticString(""),
 					},
 				},
 
 				Required: true,
+
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"force_destroy": schema.BoolAttribute{
 				MarkdownDescription: forceDestroyMessage,
@@ -417,8 +438,9 @@ func (r *SalesforceConnectionResource) Delete(ctx context.Context, req resource.
 		}
 	}
 
-	resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting connection: %s", err))
-
+	if err != nil {
+		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting connection: %s", err))
+	}
 }
 
 func (r *SalesforceConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {

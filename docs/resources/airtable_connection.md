@@ -48,15 +48,12 @@ resource "polytomic_airtable_connection" "airtable" {
 
 Optional:
 
+- `api_key` (String, Sensitive)
 - `client_id` (String, Sensitive)
 - `client_secret` (String, Sensitive)
+- `connected_user` (String)
 - `oauth_access_token` (String, Sensitive)
 - `oauth_refresh_token` (String, Sensitive)
 - `oauth_token_expiry` (String)
-
-Read-Only:
-
-- `api_key` (String, Sensitive)
-- `connected_user` (String)
 
 

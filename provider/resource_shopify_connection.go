@@ -15,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -49,6 +50,9 @@ func (t *ShopifyConnectionResource) Schema(ctx context.Context, req resource.Sch
 						Optional:            false,
 						Computed:            false,
 						Sensitive:           true,
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.UseStateForUnknown(),
+						},
 					},
 					"store": schema.StringAttribute{
 						MarkdownDescription: "Enter your Shopify store name.",
@@ -60,6 +64,10 @@ func (t *ShopifyConnectionResource) Schema(ctx context.Context, req resource.Sch
 				},
 
 				Required: true,
+
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"force_destroy": schema.BoolAttribute{
 				MarkdownDescription: forceDestroyMessage,
@@ -305,8 +313,9 @@ func (r *ShopifyConnectionResource) Delete(ctx context.Context, req resource.Del
 		}
 	}
 
-	resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting connection: %s", err))
-
+	if err != nil {
+		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting connection: %s", err))
+	}
 }
 
 func (r *ShopifyConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {

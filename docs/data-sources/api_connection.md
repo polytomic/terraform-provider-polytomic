@@ -67,11 +67,7 @@ Read-Only:
 Read-Only:
 
 - `name` (String)
-- `value` (Attributes) (see [below for nested schema](#nestedatt--configuration--auth--header--value))
-
-<a id="nestedatt--configuration--auth--header--value"></a>
-### Nested Schema for `configuration.auth.header.value`
-
+- `value` (String)
 
 
 <a id="nestedatt--configuration--auth--oauth"></a>

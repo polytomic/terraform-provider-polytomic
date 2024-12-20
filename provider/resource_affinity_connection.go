@@ -15,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -23,6 +24,8 @@ import (
 	"github.com/polytomic/polytomic-go"
 	ptcore "github.com/polytomic/polytomic-go/core"
 	"github.com/polytomic/terraform-provider-polytomic/provider/internal/client"
+
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -49,17 +52,25 @@ func (t *AffinityConnectionResource) Schema(ctx context.Context, req resource.Sc
 						Optional:            false,
 						Computed:            false,
 						Sensitive:           true,
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.UseStateForUnknown(),
+						},
 					},
 					"user": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
-						Computed:            false,
+						Computed:            true,
 						Sensitive:           false,
+						Default:             stringdefault.StaticString(""),
 					},
 				},
 
 				Required: true,
+
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"force_destroy": schema.BoolAttribute{
 				MarkdownDescription: forceDestroyMessage,
@@ -305,8 +316,9 @@ func (r *AffinityConnectionResource) Delete(ctx context.Context, req resource.De
 		}
 	}
 
-	resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting connection: %s", err))
-
+	if err != nil {
+		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting connection: %s", err))
+	}
 }
 
 func (r *AffinityConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {

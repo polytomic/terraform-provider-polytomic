@@ -15,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -49,50 +50,68 @@ func (t *GsheetsConnectionResource) Schema(ctx context.Context, req resource.Sch
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
-						Computed:            false,
+						Computed:            true,
 						Sensitive:           true,
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.UseStateForUnknown(),
+						},
+						Default: stringdefault.StaticString(""),
 					},
 					"client_secret": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
-						Computed:            false,
+						Computed:            true,
 						Sensitive:           true,
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.UseStateForUnknown(),
+						},
+						Default: stringdefault.StaticString(""),
 					},
 					"connect_mode": schema.StringAttribute{
 						MarkdownDescription: "Default: browser",
 						Required:            false,
 						Optional:            true,
-						Computed:            false,
+						Computed:            true,
 						Sensitive:           false,
+						Default:             stringdefault.StaticString(""),
 					},
 					"has_headers": schema.BoolAttribute{
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
-						Computed:            false,
+						Computed:            true,
 						Sensitive:           false,
 					},
 					"oauth_refresh_token": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
-						Computed:            false,
+						Computed:            true,
 						Sensitive:           true,
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.UseStateForUnknown(),
+						},
+						Default: stringdefault.StaticString(""),
 					},
 					"oauth_token_expiry": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
-						Computed:            false,
+						Computed:            true,
 						Sensitive:           false,
+						Default:             stringdefault.StaticString(""),
 					},
 					"service_account": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
-						Computed:            false,
+						Computed:            true,
 						Sensitive:           true,
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.UseStateForUnknown(),
+						},
+						Default: stringdefault.StaticString(""),
 					},
 					"spreadsheet_id": schema.SingleNestedAttribute{
 						MarkdownDescription: "",
@@ -105,22 +124,24 @@ func (t *GsheetsConnectionResource) Schema(ctx context.Context, req resource.Sch
 								MarkdownDescription: "",
 								Required:            false,
 								Optional:            true,
-								Computed:            false,
+								Computed:            true,
 								Sensitive:           false,
+								Default:             stringdefault.StaticString(""),
 							},
 							"value": schema.StringAttribute{
 								MarkdownDescription: "",
 								Required:            false,
 								Optional:            true,
-								Computed:            false,
+								Computed:            true,
 								Sensitive:           false,
+								Default:             stringdefault.StaticString(""),
 							},
 						},
 					},
 					"user_email": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            false,
-						Optional:            false,
+						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
 						Default:             stringdefault.StaticString(""),
@@ -128,6 +149,10 @@ func (t *GsheetsConnectionResource) Schema(ctx context.Context, req resource.Sch
 				},
 
 				Required: true,
+
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"force_destroy": schema.BoolAttribute{
 				MarkdownDescription: forceDestroyMessage,
@@ -159,7 +184,7 @@ type GsheetsConf struct {
 
 	Service_account string `mapstructure:"service_account" tfsdk:"service_account"`
 
-	Spreadsheet_id string `mapstructure:"spreadsheet_id" tfsdk:"spreadsheet_id"`
+	Spreadsheet_id map[string]interface{} `mapstructure:"spreadsheet_id" tfsdk:"spreadsheet_id"`
 
 	User_email string `mapstructure:"user_email" tfsdk:"user_email"`
 }
@@ -205,8 +230,11 @@ func (r *GsheetsConnectionResource) Create(ctx context.Context, req resource.Cre
 			"oauth_refresh_token": data.Configuration.Attributes()["oauth_refresh_token"].(types.String).ValueString(),
 			"oauth_token_expiry":  data.Configuration.Attributes()["oauth_token_expiry"].(types.String).ValueString(),
 			"service_account":     data.Configuration.Attributes()["service_account"].(types.String).ValueString(),
-			"spreadsheet_id":      data.Configuration.Attributes()["spreadsheet_id"].(types.String).ValueString(),
-			"user_email":          data.Configuration.Attributes()["user_email"].(types.String).ValueString(),
+			"spreadsheet_id": map[string]interface{}{
+				"label": data.Configuration.Attributes()["spreadsheet_id"].(types.Object).Attributes()["label"].(types.String).ValueString(),
+				"value": data.Configuration.Attributes()["spreadsheet_id"].(types.Object).Attributes()["value"].(types.String).ValueString(),
+			},
+			"user_email": data.Configuration.Attributes()["user_email"].(types.String).ValueString(),
 		},
 		Validate: pointer.ToBool(false),
 	})
@@ -232,8 +260,12 @@ func (r *GsheetsConnectionResource) Create(ctx context.Context, req resource.Cre
 		"oauth_refresh_token": types.StringType,
 		"oauth_token_expiry":  types.StringType,
 		"service_account":     types.StringType,
-		"spreadsheet_id":      types.StringType,
-		"user_email":          types.StringType,
+		"spreadsheet_id": types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				"label": types.StringType,
+				"value": types.StringType,
+			},
+		}, "user_email": types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -291,8 +323,12 @@ func (r *GsheetsConnectionResource) Read(ctx context.Context, req resource.ReadR
 		"oauth_refresh_token": types.StringType,
 		"oauth_token_expiry":  types.StringType,
 		"service_account":     types.StringType,
-		"spreadsheet_id":      types.StringType,
-		"user_email":          types.StringType,
+		"spreadsheet_id": types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				"label": types.StringType,
+				"value": types.StringType,
+			},
+		}, "user_email": types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -331,8 +367,11 @@ func (r *GsheetsConnectionResource) Update(ctx context.Context, req resource.Upd
 				"oauth_refresh_token": data.Configuration.Attributes()["oauth_refresh_token"].(types.String).ValueString(),
 				"oauth_token_expiry":  data.Configuration.Attributes()["oauth_token_expiry"].(types.String).ValueString(),
 				"service_account":     data.Configuration.Attributes()["service_account"].(types.String).ValueString(),
-				"spreadsheet_id":      data.Configuration.Attributes()["spreadsheet_id"].(types.String).ValueString(),
-				"user_email":          data.Configuration.Attributes()["user_email"].(types.String).ValueString(),
+				"spreadsheet_id": map[string]interface{}{
+					"label": data.Configuration.Attributes()["spreadsheet_id"].(types.Object).Attributes()["label"].(types.String).ValueString(),
+					"value": data.Configuration.Attributes()["spreadsheet_id"].(types.Object).Attributes()["value"].(types.String).ValueString(),
+				},
+				"user_email": data.Configuration.Attributes()["user_email"].(types.String).ValueString(),
 			},
 			Validate: pointer.ToBool(false),
 		})
@@ -359,8 +398,12 @@ func (r *GsheetsConnectionResource) Update(ctx context.Context, req resource.Upd
 		"oauth_refresh_token": types.StringType,
 		"oauth_token_expiry":  types.StringType,
 		"service_account":     types.StringType,
-		"spreadsheet_id":      types.StringType,
-		"user_email":          types.StringType,
+		"spreadsheet_id": types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				"label": types.StringType,
+				"value": types.StringType,
+			},
+		}, "user_email": types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -422,8 +465,9 @@ func (r *GsheetsConnectionResource) Delete(ctx context.Context, req resource.Del
 		}
 	}
 
-	resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting connection: %s", err))
-
+	if err != nil {
+		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting connection: %s", err))
+	}
 }
 
 func (r *GsheetsConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {

@@ -56,9 +56,6 @@ Optional:
 - `oauth_refresh_token` (String, Sensitive)
 - `oauth_token_expiry` (String)
 - `service_account` (String, Sensitive)
-
-Read-Only:
-
 - `user_email` (String)
 
 <a id="nestedatt--configuration--spreadsheet_id"></a>

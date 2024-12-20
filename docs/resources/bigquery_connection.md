@@ -47,13 +47,10 @@ Required:
 
 Optional:
 
+- `client_email` (String)
 - `location` (String) Region or multi-region for query operations
 - `override_project_id` (String) Override service key's project ID for cross-account access
-- `structured_values_as_json` (Boolean)
-
-Read-Only:
-
-- `client_email` (String)
 - `project_id` (String)
+- `structured_values_as_json` (Boolean)
 
 

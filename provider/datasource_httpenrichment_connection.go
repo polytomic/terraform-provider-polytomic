@@ -76,7 +76,7 @@ func (d *HttpenrichmentConnectionDataSource) Schema(ctx context.Context, req dat
 										MarkdownDescription: "",
 										Computed:            true,
 									},
-									"value": schema.SingleNestedAttribute{
+									"value": schema.StringAttribute{
 										MarkdownDescription: "",
 										Computed:            true,
 									},

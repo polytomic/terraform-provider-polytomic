@@ -15,7 +15,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -47,22 +50,24 @@ func (t *DbtcloudConnectionResource) Schema(ctx context.Context, req resource.Sc
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
-						Computed:            false,
+						Computed:            true,
 						Sensitive:           false,
 						Attributes: map[string]schema.Attribute{
 							"id": schema.Int64Attribute{
 								MarkdownDescription: "",
 								Required:            false,
 								Optional:            true,
-								Computed:            false,
+								Computed:            true,
 								Sensitive:           false,
+								Default:             int64default.StaticInt64(0),
 							},
 							"name": schema.StringAttribute{
 								MarkdownDescription: "",
 								Required:            false,
 								Optional:            true,
-								Computed:            false,
+								Computed:            true,
 								Sensitive:           false,
+								Default:             stringdefault.StaticString(""),
 							},
 						},
 					},
@@ -72,6 +77,9 @@ func (t *DbtcloudConnectionResource) Schema(ctx context.Context, req resource.Sc
 						Optional:            false,
 						Computed:            false,
 						Sensitive:           true,
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.UseStateForUnknown(),
+						},
 					},
 					"url": schema.StringAttribute{
 						MarkdownDescription: "URL of dbt Cloud instance e.g. https://cloud.getdbt.com",
@@ -83,6 +91,10 @@ func (t *DbtcloudConnectionResource) Schema(ctx context.Context, req resource.Sc
 				},
 
 				Required: true,
+
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"force_destroy": schema.BoolAttribute{
 				MarkdownDescription: forceDestroyMessage,
@@ -100,7 +112,7 @@ func (t *DbtcloudConnectionResource) Schema(ctx context.Context, req resource.Sc
 }
 
 type DbtcloudConf struct {
-	Account string `mapstructure:"account" tfsdk:"account"`
+	Account map[string]interface{} `mapstructure:"account" tfsdk:"account"`
 
 	Token string `mapstructure:"token" tfsdk:"token"`
 
@@ -141,9 +153,12 @@ func (r *DbtcloudConnectionResource) Create(ctx context.Context, req resource.Cr
 		Type:           "dbtcloud",
 		OrganizationId: data.Organization.ValueStringPointer(),
 		Configuration: map[string]interface{}{
-			"account": data.Configuration.Attributes()["account"].(types.String).ValueString(),
-			"token":   data.Configuration.Attributes()["token"].(types.String).ValueString(),
-			"url":     data.Configuration.Attributes()["url"].(types.String).ValueString(),
+			"account": map[string]interface{}{
+				"id":   int(data.Configuration.Attributes()["account"].(types.Object).Attributes()["id"].(types.Int64).ValueInt64()),
+				"name": data.Configuration.Attributes()["account"].(types.Object).Attributes()["name"].(types.String).ValueString(),
+			},
+			"token": data.Configuration.Attributes()["token"].(types.String).ValueString(),
+			"url":   data.Configuration.Attributes()["url"].(types.String).ValueString(),
 		},
 		Validate: pointer.ToBool(false),
 	})
@@ -162,9 +177,13 @@ func (r *DbtcloudConnectionResource) Create(ctx context.Context, req resource.Cr
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"account": types.StringType,
-		"token":   types.StringType,
-		"url":     types.StringType,
+		"account": types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				"id":   types.NumberType,
+				"name": types.StringType,
+			},
+		}, "token": types.StringType,
+		"url": types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -215,9 +234,13 @@ func (r *DbtcloudConnectionResource) Read(ctx context.Context, req resource.Read
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"account": types.StringType,
-		"token":   types.StringType,
-		"url":     types.StringType,
+		"account": types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				"id":   types.NumberType,
+				"name": types.StringType,
+			},
+		}, "token": types.StringType,
+		"url": types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -249,9 +272,12 @@ func (r *DbtcloudConnectionResource) Update(ctx context.Context, req resource.Up
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueStringPointer(),
 			Configuration: map[string]interface{}{
-				"account": data.Configuration.Attributes()["account"].(types.String).ValueString(),
-				"token":   data.Configuration.Attributes()["token"].(types.String).ValueString(),
-				"url":     data.Configuration.Attributes()["url"].(types.String).ValueString(),
+				"account": map[string]interface{}{
+					"id":   int(data.Configuration.Attributes()["account"].(types.Object).Attributes()["id"].(types.Int64).ValueInt64()),
+					"name": data.Configuration.Attributes()["account"].(types.Object).Attributes()["name"].(types.String).ValueString(),
+				},
+				"token": data.Configuration.Attributes()["token"].(types.String).ValueString(),
+				"url":   data.Configuration.Attributes()["url"].(types.String).ValueString(),
 			},
 			Validate: pointer.ToBool(false),
 		})
@@ -271,9 +297,13 @@ func (r *DbtcloudConnectionResource) Update(ctx context.Context, req resource.Up
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"account": types.StringType,
-		"token":   types.StringType,
-		"url":     types.StringType,
+		"account": types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				"id":   types.NumberType,
+				"name": types.StringType,
+			},
+		}, "token": types.StringType,
+		"url": types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -335,8 +365,9 @@ func (r *DbtcloudConnectionResource) Delete(ctx context.Context, req resource.De
 		}
 	}
 
-	resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting connection: %s", err))
-
+	if err != nil {
+		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting connection: %s", err))
+	}
 }
 
 func (r *DbtcloudConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {

@@ -15,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -55,7 +56,7 @@ func (t *GcsConnectionResource) Schema(ctx context.Context, req resource.SchemaR
 					"client_email": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            false,
-						Optional:            false,
+						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
 						Default:             stringdefault.StaticString(""),
@@ -64,13 +65,13 @@ func (t *GcsConnectionResource) Schema(ctx context.Context, req resource.SchemaR
 						MarkdownDescription: "Treat the files as a single table.",
 						Required:            false,
 						Optional:            true,
-						Computed:            false,
+						Computed:            true,
 						Sensitive:           false,
 					},
 					"project_id": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            false,
-						Optional:            false,
+						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
 						Default:             stringdefault.StaticString(""),
@@ -81,10 +82,17 @@ func (t *GcsConnectionResource) Schema(ctx context.Context, req resource.SchemaR
 						Optional:            false,
 						Computed:            false,
 						Sensitive:           true,
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.UseStateForUnknown(),
+						},
 					},
 				},
 
 				Required: true,
+
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"force_destroy": schema.BoolAttribute{
 				MarkdownDescription: forceDestroyMessage,
@@ -351,8 +359,9 @@ func (r *GcsConnectionResource) Delete(ctx context.Context, req resource.DeleteR
 		}
 	}
 
-	resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting connection: %s", err))
-
+	if err != nil {
+		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting connection: %s", err))
+	}
 }
 
 func (r *GcsConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {

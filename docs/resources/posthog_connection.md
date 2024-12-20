@@ -48,7 +48,7 @@ Required:
 - `location` (String)
 - `project` (String)
 
-Read-Only:
+Optional:
 
 - `authenticated_as` (String)
 

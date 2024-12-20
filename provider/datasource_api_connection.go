@@ -76,7 +76,7 @@ func (d *ApiConnectionDataSource) Schema(ctx context.Context, req datasource.Sch
 										MarkdownDescription: "",
 										Computed:            true,
 									},
-									"value": schema.SingleNestedAttribute{
+									"value": schema.StringAttribute{
 										MarkdownDescription: "",
 										Computed:            true,
 									},

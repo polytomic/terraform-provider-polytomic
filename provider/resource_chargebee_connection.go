@@ -15,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -23,6 +24,8 @@ import (
 	"github.com/polytomic/polytomic-go"
 	ptcore "github.com/polytomic/polytomic-go/core"
 	"github.com/polytomic/terraform-provider-polytomic/provider/internal/client"
+
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -49,6 +52,9 @@ func (t *ChargebeeConnectionResource) Schema(ctx context.Context, req resource.S
 						Optional:            false,
 						Computed:            false,
 						Sensitive:           true,
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.UseStateForUnknown(),
+						},
 					},
 					"product_catalog": schema.StringAttribute{
 						MarkdownDescription: "",
@@ -61,8 +67,9 @@ func (t *ChargebeeConnectionResource) Schema(ctx context.Context, req resource.S
 						MarkdownDescription: "Default rate limits can be found at https://support.chargebee.com/support/solutions/articles/243576-what-are-the-chargebee-api-limits-",
 						Required:            false,
 						Optional:            true,
-						Computed:            false,
+						Computed:            true,
 						Sensitive:           false,
+						Default:             int64default.StaticInt64(0),
 					},
 					"site": schema.StringAttribute{
 						MarkdownDescription: "https://{site}.chargebee.com",
@@ -74,6 +81,10 @@ func (t *ChargebeeConnectionResource) Schema(ctx context.Context, req resource.S
 				},
 
 				Required: true,
+
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"force_destroy": schema.BoolAttribute{
 				MarkdownDescription: forceDestroyMessage,
@@ -333,8 +344,9 @@ func (r *ChargebeeConnectionResource) Delete(ctx context.Context, req resource.D
 		}
 	}
 
-	resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting connection: %s", err))
-
+	if err != nil {
+		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting connection: %s", err))
+	}
 }
 
 func (r *ChargebeeConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {

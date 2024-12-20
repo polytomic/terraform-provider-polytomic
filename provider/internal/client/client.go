@@ -11,7 +11,6 @@ import (
 
 	"github.com/AlekSi/pointer"
 	"github.com/google/uuid"
-	"github.com/hashicorp/go-retryablehttp"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/polytomic/polytomic-go"
 	ptclient "github.com/polytomic/polytomic-go/client"
@@ -86,8 +85,8 @@ func (p *Provider) Validate() error {
 }
 
 func client(deploymentURL string, opts ...ptoption.RequestOption) *ptclient.Client {
-	rc := retryablehttp.NewClient()
-	rc.RetryMax = 6
+	// rc := retryablehttp.NewClient()
+	// rc.RetryMax = 6
 
 	return ptclient.NewClient(
 		append([]ptoption.RequestOption{
@@ -95,7 +94,7 @@ func client(deploymentURL string, opts ...ptoption.RequestOption) *ptclient.Clie
 			ptoption.WithHTTPHeader(http.Header{
 				"User-Agent": []string{UserAgent},
 			}),
-			ptoption.WithHTTPClient(rc.StandardClient()),
+			// ptoption.WithHTTPClient(rc.StandardClient()),
 		}, opts...)...,
 	)
 }
