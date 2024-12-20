@@ -16,7 +16,8 @@ Klaviyo Connection
 resource "polytomic_klaviyo_connection" "klaviyo" {
   name = "example"
   configuration = {
-    api_key = "my-api-key"
+    apikey         = "fsgsfdjswabfhkkocpbm3"
+    private_apikey = "pk_escdc06jswabfhkkocpbm3uyrwxzam"
   }
 }
 ```
@@ -43,6 +44,7 @@ resource "polytomic_klaviyo_connection" "klaviyo" {
 
 Required:
 
-- `api_key` (String, Sensitive)
+- `apikey` (String, Sensitive)
+- `private_apikey` (String, Sensitive)
 
 

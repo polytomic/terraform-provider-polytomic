@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/AlekSi/pointer"
 	"github.com/hashicorp/hcl/v2/hclwrite"
 	"github.com/polytomic/polytomic-go"
+	ptclient "github.com/polytomic/polytomic-go/client"
 	"github.com/polytomic/terraform-provider-polytomic/provider"
 	"github.com/zclconf/go-cty/cty"
 )
@@ -21,30 +23,30 @@ var (
 )
 
 type Roles struct {
-	c *polytomic.Client
+	c *ptclient.Client
 
-	Resources map[string]polytomic.Role
+	Resources map[string]*polytomic.RoleResponse
 }
 
-func NewRoles(c *polytomic.Client) *Roles {
+func NewRoles(c *ptclient.Client) *Roles {
 	return &Roles{
 		c:         c,
-		Resources: make(map[string]polytomic.Role),
+		Resources: make(map[string]*polytomic.RoleResponse),
 	}
 }
 
 func (r *Roles) Init(ctx context.Context) error {
-	roles, err := r.c.Permissions().ListRoles(ctx)
+	roles, err := r.c.Permissions.Roles.List(ctx)
 	if err != nil {
 		return err
 	}
 
-	for _, role := range roles {
+	for _, role := range roles.Data {
 		// Skip system roles, they are not editable
-		if role.System {
+		if pointer.GetBool(role.System) {
 			continue
 		}
-		name := provider.ValidName(provider.ToSnakeCase(role.Name))
+		name := provider.ValidName(provider.ToSnakeCase(pointer.GetString(role.Name)))
 		r.Resources[name] = role
 	}
 
@@ -58,9 +60,9 @@ func (r *Roles) GenerateTerraformFiles(ctx context.Context, writer io.Writer, re
 		hclFile := hclwrite.NewEmptyFile()
 		body := hclFile.Body()
 		resourceBlock := body.AppendNewBlock("resource", []string{RoleResource, name})
-		resourceBlock.Body().SetAttributeValue("name", cty.StringVal(role.Name))
-		if role.OrganizationID != "" {
-			resourceBlock.Body().SetAttributeValue("organization", cty.StringVal(role.OrganizationID))
+		resourceBlock.Body().SetAttributeValue("name", cty.StringVal(pointer.GetString(role.Name)))
+		if role.OrganizationId != nil {
+			resourceBlock.Body().SetAttributeValue("organization", cty.StringVal(pointer.GetString(role.OrganizationId)))
 		}
 
 		writer.Write(ReplaceRefs(hclFile.Bytes(), refs))
@@ -74,8 +76,8 @@ func (r *Roles) GenerateImports(ctx context.Context, writer io.Writer) error {
 		writer.Write([]byte(fmt.Sprintf("terraform import %s.%s %s",
 			RoleResource,
 			name,
-			role.ID)))
-		writer.Write([]byte(fmt.Sprintf(" # %s\n", role.Name)))
+			pointer.GetString(role.Id))))
+		writer.Write([]byte(fmt.Sprintf(" # %s\n", pointer.GetString(role.Name))))
 	}
 	return nil
 }
@@ -87,7 +89,7 @@ func (r *Roles) Filename() string {
 func (r *Roles) ResourceRefs() map[string]string {
 	result := make(map[string]string)
 	for name, role := range r.Resources {
-		result[role.ID] = name
+		result[pointer.GetString(role.Id)] = name
 	}
 	return result
 }

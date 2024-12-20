@@ -3,12 +3,12 @@
 page_title: "polytomic_bigquery_connection Data Source - terraform-provider-polytomic"
 subcategory: "Connections"
 description: |-
-  BigQuery Connection
+  Google BigQuery Connection
 ---
 
 # polytomic_bigquery_connection (Data Source)
 
-BigQuery Connection
+Google BigQuery Connection
 
 ## Example Usage
 
@@ -24,20 +24,22 @@ data "polytomic_bigquery_connection" "bigquery" {
 ### Optional
 
 - `configuration` (Attributes) (see [below for nested schema](#nestedatt--configuration))
-- `force_destroy` (Boolean) Indicates whether dependent models, syncs, and bulk syncs should be cascade deleted when this connection is destroy. This only deletes other resources when the connection is destroyed, not when setting this parameter to `true`. Once this parameter is set to `true`, there must be a successful `terraform apply` run before a destroy is required to update this value in the resource state. Without a successful `terraform apply` after this parameter is set, this flag will have no effect. If setting this field in the same operation that would require replacing the connection or destroying the connection, this flag will not work. Additionally when importing a connection, a successful `terraform apply` is required to set this value in state before it will take effect on a destroy operation.
-- `name` (String)
 - `organization` (String)
 
 ### Read-Only
 
 - `id` (String) The ID of this resource.
+- `name` (String)
 
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
-Optional:
+Read-Only:
 
-- `location` (String)
+- `client_email` (String)
+- `location` (String) Region or multi-region for query operations
+- `override_project_id` (String) Override service key's project ID for cross-account access
 - `project_id` (String)
+- `structured_values_as_json` (Boolean)
 
 

@@ -3,40 +3,19 @@
 page_title: "polytomic_csv_connection Resource - terraform-provider-polytomic"
 subcategory: "Connections"
 description: |-
-  CSV Connection
+  CSV URL Connection
 ---
 
 # polytomic_csv_connection (Resource)
 
-CSV Connection
+CSV URL Connection
 
 ## Example Usage
 
 ```terraform
-resource "polytomic_csv_connection" "example" {
-  name = "Example"
+resource "polytomic_csv_connection" "csv" {
+  name = "example"
   configuration = {
-    auth = {
-      "oauth" : {
-        "client_id" : "client_id",
-        "client_secret" : "client_secret",
-        "extra_form_data" : [],
-        "token_endpoint" : "https://example.com/oauth/token"
-      }
-    }
-    headers = [
-      {
-        "name"  = "foo"
-        "value" = "bar"
-      }
-    ]
-    parameters = [
-      {
-        "name"  = "foo"
-        "value" = "bar"
-      }
-    ]
-    url = "https://example.com/csv"
   }
 }
 ```
@@ -56,20 +35,20 @@ resource "polytomic_csv_connection" "example" {
 
 ### Read-Only
 
-- `id` (String) CSV Connection identifier
+- `id` (String) CSV URL Connection identifier
 
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
 Required:
 
-- `url` (String)
+- `url` (String) e.g. http://www.example.com
 
 Optional:
 
 - `auth` (Attributes) (see [below for nested schema](#nestedatt--configuration--auth))
-- `headers` (Set of Object) (see [below for nested schema](#nestedatt--configuration--headers))
-- `parameters` (Set of Object) (see [below for nested schema](#nestedatt--configuration--parameters))
+- `headers` (String)
+- `parameters` (String)
 
 <a id="nestedatt--configuration--auth"></a>
 ### Nested Schema for `configuration.auth`
@@ -77,7 +56,7 @@ Optional:
 Optional:
 
 - `basic` (Attributes) (see [below for nested schema](#nestedatt--configuration--auth--basic))
-- `header` (Object) (see [below for nested schema](#nestedatt--configuration--auth--header))
+- `header` (Attributes) (see [below for nested schema](#nestedatt--configuration--auth--header))
 - `oauth` (Attributes) (see [below for nested schema](#nestedatt--configuration--auth--oauth))
 
 <a id="nestedatt--configuration--auth--basic"></a>
@@ -85,14 +64,14 @@ Optional:
 
 Optional:
 
-- `password` (String, Sensitive)
+- `password` (String)
 - `username` (String)
 
 
 <a id="nestedatt--configuration--auth--header"></a>
 ### Nested Schema for `configuration.auth.header`
 
-Required:
+Optional:
 
 - `name` (String)
 - `value` (String)
@@ -103,37 +82,11 @@ Required:
 
 Optional:
 
+- `auth_style` (Number)
 - `client_id` (String)
-- `client_secret` (String, Sensitive)
-- `extra_form_data` (Set of Object) (see [below for nested schema](#nestedatt--configuration--auth--oauth--extra_form_data))
+- `client_secret` (String)
+- `extra_form_data` (String)
+- `scopes` (String)
 - `token_endpoint` (String)
-
-<a id="nestedatt--configuration--auth--oauth--extra_form_data"></a>
-### Nested Schema for `configuration.auth.oauth.token_endpoint`
-
-Required:
-
-- `name` (String)
-- `value` (String)
-
-
-
-
-<a id="nestedatt--configuration--headers"></a>
-### Nested Schema for `configuration.headers`
-
-Required:
-
-- `name` (String)
-- `value` (String)
-
-
-<a id="nestedatt--configuration--parameters"></a>
-### Nested Schema for `configuration.parameters`
-
-Required:
-
-- `name` (String)
-- `value` (String)
 
 

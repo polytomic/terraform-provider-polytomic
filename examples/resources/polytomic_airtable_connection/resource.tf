@@ -1,7 +1,12 @@
 resource "polytomic_airtable_connection" "airtable" {
   name = "example"
   configuration = {
-    api_key = "my-api-key"
+    api_key             = "******"
+    client_id           = "eb669428-1854-4cb1-a560-403e05b8acbf"
+    client_secret       = "ay8d5hdepz62px8lqeoakuea2ccl4rxm13i6tbyorxhu1i20kc8ruvksmzxq"
+    oauth_access_token  = "{access token}"
+    oauth_refresh_token = "{refresh token}"
+    oauth_token_expiry  = "2023-11-21T21:48:51Z"
   }
 }
 
