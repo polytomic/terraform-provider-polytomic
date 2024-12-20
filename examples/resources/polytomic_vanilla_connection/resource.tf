@@ -1,8 +1,8 @@
 resource "polytomic_vanilla_connection" "vanilla" {
   name = "example"
   configuration = {
-    api_key = "my-api-key"
-    domain  = "example.com"
+    api_key = "secret"
+    domain  = "yourcompany.vanillacommunities.com"
   }
 }
 

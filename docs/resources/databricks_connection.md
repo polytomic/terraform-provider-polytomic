@@ -16,15 +16,17 @@ Databricks Connection
 resource "polytomic_databricks_connection" "databricks" {
   name = "example"
   configuration = {
-    server_hostname       = "https://my.databricks.com"
-    port                  = 443
-    access_token          = "my-access-token"
+    access_token          = "isoz8af6zvp8067gu68gvrp0oftevn"
+    auth_mode             = "access_key_and_secret"
+    aws_access_key_id     = "AKIAIOSFODNN7EXAMPLE"
+    aws_secret_access_key = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+    azure_access_key      = "abcdefghijklmnopqrstuvwxyz0123456789/+ABCDEabcdefghijklmnopqrstuvwxyz0123456789/+ABCDE=="
+    azure_account_name    = "account"
+    cloud_provider        = "aws"
+    container_name        = "container"
     http_path             = "/sql"
-    aws_access_key_id     = "EXAMPLEKEY"
-    aws_secret_access_key = "EXAMPLESECRET"
-    s3_bucket_name        = "my-bucket"
-    s3_bucket_region      = "us-east-1"
-    aws_user              = "my-user"
+    s3_bucket_name        = "s3://polytomic-databricks-results/customer-dataset"
+    server_hostname       = "dbc-1234dsafas-d0001.cloud.databricks.com"
   }
 }
 ```
@@ -52,19 +54,31 @@ resource "polytomic_databricks_connection" "databricks" {
 Required:
 
 - `access_token` (String, Sensitive)
+- `auth_mode` (String) How to authenticate with AWS. Defaults to Access Key and Secret
 - `http_path` (String)
 - `port` (Number)
 - `server_hostname` (String)
 
 Optional:
 
-- `aws_access_key_id` (String)
+- `aws_access_key_id` (String) See https://docs.polytomic.com/docs/databricks-connections#writing-to-databricks
 - `aws_secret_access_key` (String, Sensitive)
-- `s3_bucket_name` (String)
-- `s3_bucket_region` (String)
-
-Read-Only:
-
 - `aws_user` (String)
+- `azure_access_key` (String, Sensitive) The access key associated with this storage account
+- `azure_account_name` (String) The account name of the storage account
+- `cloud_provider` (String)
+- `concurrent_queries` (Number)
+- `container_name` (String) The container which we will stage files in
+- `deleted_file_retention_days` (Number)
+- `enable_delta_uniform` (Boolean)
+- `enforce_query_limit` (Boolean)
+- `external_id` (String) External ID for the IAM role
+- `iam_role_arn` (String)
+- `log_file_retention_days` (Number)
+- `s3_bucket_name` (String) Name of bucket used for staging data load files
+- `s3_bucket_region` (String) Region of bucket.example=us-east-1
+- `set_retention_properties` (Boolean)
+- `storage_credential_name` (String)
+- `unity_catalog_enabled` (Boolean)
 
 

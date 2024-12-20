@@ -13,8 +13,8 @@ Webhook Connection
 ## Example Usage
 
 ```terraform
-resource "polytomic_webhook_connection" "example" {
-  name = "Example"
+resource "polytomic_webhook_connection" "webhook" {
+  name = "example"
   configuration = {
     url = "https://example.com/webhook"
   }
@@ -47,18 +47,7 @@ Required:
 
 Optional:
 
-- `headers` (Set of Object) (see [below for nested schema](#nestedatt--configuration--headers))
-
-Read-Only:
-
+- `headers` (String)
 - `secret` (String, Sensitive)
-
-<a id="nestedatt--configuration--headers"></a>
-### Nested Schema for `configuration.headers`
-
-Required:
-
-- `name` (String)
-- `value` (String)
 
 

@@ -1,0 +1,1 @@
+{"$id":"https://github.com/polytomic/app/services/polytomic/backend/segment/connection-conf","$schema":"https://json-schema.org/draft/2020-12/schema","properties":{"write_key":{"examples":["write-key"],"sensitive":true,"title":"Write Key","type":"string"}},"required":["write_key"],"type":"object"}

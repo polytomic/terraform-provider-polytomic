@@ -1,12 +1,9 @@
-resource "polytomic_api_connection" "example" {
-  name = "Example"
+resource "polytomic_api_connection" "api" {
+  name = "example"
   configuration = {
-    auth = {
-      "header" : {
-        "name" : "foo",
-        "value" : "bar"
-      },
-    }
-    url = "https://example.com"
+    body        = jsonencode({ "key" : "value" })
+    healthcheck = "https://example.com/healthz"
+    url         = "https://example.com"
   }
 }
+

@@ -24,31 +24,38 @@ data "polytomic_databricks_connection" "databricks" {
 ### Optional
 
 - `configuration` (Attributes) (see [below for nested schema](#nestedatt--configuration))
-- `force_destroy` (Boolean) Indicates whether dependent models, syncs, and bulk syncs should be cascade deleted when this connection is destroy. This only deletes other resources when the connection is destroyed, not when setting this parameter to `true`. Once this parameter is set to `true`, there must be a successful `terraform apply` run before a destroy is required to update this value in the resource state. Without a successful `terraform apply` after this parameter is set, this flag will have no effect. If setting this field in the same operation that would require replacing the connection or destroying the connection, this flag will not work. Additionally when importing a connection, a successful `terraform apply` is required to set this value in state before it will take effect on a destroy operation.
-- `name` (String)
 - `organization` (String)
 
 ### Read-Only
 
 - `id` (String) The ID of this resource.
+- `name` (String)
 
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
-Required:
-
-- `http_path` (String)
-- `port` (Number)
-- `server_hostname` (String)
-
-Optional:
-
-- `aws_access_key_id` (String)
-- `s3_bucket_name` (String)
-- `s3_bucket_region` (String)
-
 Read-Only:
 
+- `auth_mode` (String) How to authenticate with AWS. Defaults to Access Key and Secret
+- `aws_access_key_id` (String) See https://docs.polytomic.com/docs/databricks-connections#writing-to-databricks
 - `aws_user` (String)
+- `azure_account_name` (String) The account name of the storage account
+- `cloud_provider` (String)
+- `concurrent_queries` (Number)
+- `container_name` (String) The container which we will stage files in
+- `deleted_file_retention_days` (Number)
+- `enable_delta_uniform` (Boolean)
+- `enforce_query_limit` (Boolean)
+- `external_id` (String) External ID for the IAM role
+- `http_path` (String)
+- `iam_role_arn` (String)
+- `log_file_retention_days` (Number)
+- `port` (Number)
+- `s3_bucket_name` (String) Name of bucket used for staging data load files
+- `s3_bucket_region` (String) Region of bucket.example=us-east-1
+- `server_hostname` (String)
+- `set_retention_properties` (Boolean)
+- `storage_credential_name` (String)
+- `unity_catalog_enabled` (Boolean)
 
 

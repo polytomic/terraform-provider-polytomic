@@ -1,0 +1,1 @@
+{"$id":"https://github.com/polytomic/app/services/polytomic/backend/heap/connection-conf","$schema":"https://json-schema.org/draft/2020-12/schema","properties":{"application_id":{"examples":["1234567890"],"title":"Application ID","type":"string"}},"required":["application_id"],"type":"object"}

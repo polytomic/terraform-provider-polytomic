@@ -1,8 +1,8 @@
 resource "polytomic_honeycomb_connection" "honeycomb" {
   name = "example"
   configuration = {
-    api_key = "my-api-key"
-    dataset = "events"
+    api_key = "secret"
+    dataset = "dataset"
   }
 }
 

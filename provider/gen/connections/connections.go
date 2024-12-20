@@ -2,24 +2,32 @@ package connections
 
 import (
 	"bytes"
+	"cmp"
+	"context"
+	"encoding/json"
 	"fmt"
 	"go/format"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"text/template"
+	"unicode"
 
-	"github.com/polytomic/terraform-provider-polytomic/provider"
-	"gopkg.in/yaml.v2"
+	"github.com/AlekSi/pointer"
+	"github.com/invopop/jsonschema"
+	"github.com/polytomic/polytomic-go"
+	ptclient "github.com/polytomic/polytomic-go/client"
+	"github.com/polytomic/polytomic-go/option"
 )
 
 const (
 	// General
-	ConnectionsFile = "./provider/gen/connections/connections.yaml"
 	outputPath      = "./provider"
 	exportTemplate  = "./provider/gen/connections/connections.go.tmpl"
+	connectionTypes = "./provider/gen/connections/connectiontypes.json"
+	jsonschemaPath  = "./provider/gen/connections/connectiontypes"
 
 	// Resources
 	connectionResourceTemplate = "./provider/gen/connections/resource.go.tmpl"
@@ -34,43 +42,109 @@ const (
 
 var (
 	TypeMap = map[string]Typer{
+		"array": {
+			AttrType:     "schema.StringAttribute",
+			TfType:       "String",
+			ReadAttrType: "types.StringType",
+			Default: DefaultValue{
+				Value:  "stringdefault.StaticString(\"\")",
+				Import: "github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault",
+			},
+			GoType: "string",
+		},
+		"object": {
+			AttrType:     "schema.SingleNestedAttribute",
+			TfType:       "Object",
+			ReadAttrType: "types.ObjectType",
+			// Default: DefaultValue{
+			// 	Value:  "stringdefault.StaticString(\"\")",
+			// 	Import: "github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault",
+			// },
+			GoType: "map[string]interface{}",
+		},
+		"": {
+			AttrType:     "schema.StringAttribute",
+			TfType:       "String",
+			ReadAttrType: "types.StringType",
+
+			GoType: "string",
+		},
 		"string": {
-			AttrType:    "schema.StringAttribute",
-			TfType:      "types.String",
-			NewAttrType: "types.StringType",
-			Default:     "stringdefault.StaticString(\"\")",
+			AttrType:     "schema.StringAttribute",
+			TfType:       "String",
+			ReadAttrType: "types.StringType",
+			Default: DefaultValue{
+				Value:  "stringdefault.StaticString(\"\")",
+				Import: "github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault",
+			},
+			GoType: "string",
 		},
 		"number": {
-			AttrType:    "schema.NumberAttribute",
-			TfType:      "types.Number",
-			NewAttrType: "types.NumberType",
-			Default:     "int64default.StaticInt64(0)",
+			AttrType:     "schema.NumberAttribute",
+			TfType:       "Number",
+			ReadAttrType: "types.NumberType",
+			Default: DefaultValue{
+				Value:  "int64default.StaticInt64(0)",
+				Import: "github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default",
+			},
+			GoType: "int64",
 		},
 		"bool": {
-			AttrType:    "schema.BoolAttribute",
-			TfType:      "types.Bool",
-			NewAttrType: "types.BoolType",
+			AttrType:     "schema.BoolAttribute",
+			TfType:       "Bool",
+			ReadAttrType: "types.BoolType",
+			GoType:       "bool",
+		},
+		"boolean": {
+			AttrType:     "schema.BoolAttribute",
+			TfType:       "Bool",
+			ReadAttrType: "types.BoolType",
+			GoType:       "bool",
 		},
 		"int": {
-			AttrType:    "schema.Int64Attribute",
-			TfType:      "types.Int64",
-			NewAttrType: "types.NumberType",
-			Default:     "int64default.StaticInt64(0)",
+			AttrType:     "schema.Int64Attribute",
+			TfType:       "Int64",
+			ReadAttrType: "types.NumberType",
+			Default: DefaultValue{
+				Value:  "int64default.StaticInt64(0)",
+				Import: "github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default",
+			},
+			GoType: "int64",
 		},
 		"int64": {
-			AttrType:    "schema.Int64Attribute",
-			TfType:      "types.Int64",
-			NewAttrType: "types.NumberType",
-			Default:     "int64default.StaticInt64(0)",
+			AttrType:     "schema.Int64Attribute",
+			TfType:       "Int64",
+			ReadAttrType: "types.NumberType",
+			Default: DefaultValue{
+				Value:  "int64default.StaticInt64(0)",
+				Import: "github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default",
+			},
+			GoType: "int64",
+		},
+		"integer": {
+			AttrType:     "schema.Int64Attribute",
+			TfType:       "Int64",
+			ReadAttrType: "types.NumberType",
+			Default: DefaultValue{
+				Value:  "int64default.StaticInt64(0)",
+				Import: "github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default",
+			},
+			GoType: "int64",
 		},
 	}
 )
 
+type DefaultValue struct {
+	Value  string
+	Import string
+}
+
 type Typer struct {
-	AttrType    string
-	TfType      string
-	NewAttrType string
-	Default     string
+	AttrType     string
+	TfType       string
+	ReadAttrType string
+	Default      DefaultValue
+	GoType       string
 }
 
 type Connections struct {
@@ -78,20 +152,30 @@ type Connections struct {
 }
 
 type Connection struct {
-	Name         string `yaml:"name"`
-	Connection   string `yaml:"connection"`
+	// Name is the human readable name for the connection type
+	Name string `yaml:"name"`
+	// Conn is the connection type name formatted for use in the Terraform
+	// resource.
+	Conn string `yaml:"-"`
+	// Connection is the connection type name formatted for use in the Terraform
+	// resource.
+	Connection string `yaml:"connection"`
+	// ResourceName overrides the name of the resource; if not present the
+	// connection type is used.
 	ResourceName string
-	Type         string      `yaml:"type"`
-	Attributes   []Attribute `yaml:"attributes"`
-	Config       string      `yaml:"config"`
-	Datasource   bool        `yaml:"datasource"`
-	Resource     bool        `yaml:"resource"`
+	// Type is the Polytomic connection type.
+	Type         string          `yaml:"type"`
+	Attributes   []Attribute     `yaml:"attributes"`
+	Config       string          `yaml:"config"`
+	Datasource   bool            `yaml:"datasource"`
+	Resource     bool            `yaml:"resource"`
+	ExtraImports map[string]bool `yaml:"-"`
+	Imports      string          `yaml:"-"`
 }
 
 type Attribute struct {
 	Name                string `yaml:"name"`
-	NameOverride        string `yaml:"name_override"`
-	Alias               string `yaml:"alias"`
+	CapName             string `yaml:"-"`
 	Sensitive           bool   `yaml:"sensitive"`
 	Required            bool   `yaml:"required"`
 	Optional            bool   `yaml:"optional"`
@@ -101,50 +185,120 @@ type Attribute struct {
 	Example             string `yaml:"example"`
 	ExampleTypeOverride string `yaml:"example_type_override"`
 
-	TfType      string `yaml:"-"`
-	AttrType    string `yaml:"-"`
-	NewAttrType string `yaml:"-"`
-	AttrName    string `yaml:"-"`
-	Default     string `yaml:"-"`
+	TfType string `yaml:"-"`
+	// AttrType is the Terraform schema.* type for the attribute.
+	AttrType     string       `yaml:"-"`
+	AttrReadType string       `yaml:"-"`
+	AttrName     string       `yaml:"-"`
+	Default      DefaultValue `yaml:"-"`
+	Attributes   []Attribute
 }
+
+var defaultImports = `
+"context"
+"errors"
+"fmt"
+"net/http"
+"strings"
+
+"github.com/mitchellh/mapstructure"
+"github.com/AlekSi/pointer"
+"github.com/mitchellh/mapstructure"
+"github.com/hashicorp/terraform-plugin-framework/attr"
+"github.com/hashicorp/terraform-plugin-framework/path"
+"github.com/hashicorp/terraform-plugin-framework/resource"
+"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+"github.com/hashicorp/terraform-plugin-framework/types"
+"github.com/hashicorp/terraform-plugin-log/tflog"
+"github.com/polytomic/polytomic-go"
+ptcore "github.com/polytomic/polytomic-go/core"
+"github.com/polytomic/terraform-provider-polytomic/provider/internal/client"
+`
 
 type Importable struct {
 	Name         string
 	ResourceName string
 }
 
-func GenerateConnections() error {
-	config, err := ioutil.ReadFile(ConnectionsFile)
+func fetchOrRead[T any, PT *T](ctx context.Context, path string, fetch func(context.Context) (PT, error)) (PT, error) {
+	data, err := fetch(ctx)
 	if err != nil {
-		return err
+		if ct, err := os.Open(path); err == nil {
+			err = json.NewDecoder(ct).Decode(&data)
+			if err != nil {
+				return nil, fmt.Errorf("error reading %s: %w", path, err)
+			}
+		}
+		if data == nil {
+			// couldn't fetch or read
+			return nil, err
+		}
+	} else {
+		// write the fetched data to path
+		f, err := os.Create(path)
+		if err != nil {
+			return nil, fmt.Errorf("error creating %s: %w", path, err)
+		}
+		defer f.Close()
+		err = json.NewEncoder(f).Encode(data)
+		if err != nil {
+			return nil, fmt.Errorf("error encoding %s: %w", path, err)
+		}
 	}
-	data := Connections{}
-	err = yaml.Unmarshal(config, &data)
-	if err != nil {
-		return err
-	}
+	return data, nil
+}
+
+func GenerateConnections(ctx context.Context) error {
+	client := ptclient.NewClient(
+		option.WithBaseURL(os.Getenv("POLYTOMIC_DEPLOYMENT_URL")),
+		option.WithToken(os.Getenv("POLYTOMIC_API_KEY")),
+	)
+	data, err := fetchOrRead(ctx,
+		connectionTypes,
+		func(ctx context.Context) (*polytomic.ConnectionTypeResponseEnvelope, error) {
+			return client.Connections.GetTypes(ctx)
+		},
+	)
 
 	resources := []Importable{}
 	datasources := []Importable{}
 
-	for _, r := range data.Connections {
-		for i, a := range r.Attributes {
-			t, ok := TypeMap[a.Type]
-			if !ok {
-				return fmt.Errorf("type %s not found for %s", a.Type, r.Name)
-			}
-			r.Attributes[i].TfType = t.TfType
-			r.Attributes[i].AttrType = t.AttrType
-			r.Attributes[i].NewAttrType = t.NewAttrType
-			r.Attributes[i].AttrName = provider.ToSnakeCase(a.Name)
-			if a.NameOverride != "" {
-				r.Attributes[i].AttrName = a.NameOverride
-			}
-			r.Attributes[i].Computed = a.Computed || a.Optional
-			if !a.Required {
-				r.Attributes[i].Default = t.Default
+	for _, connType := range data.Data {
+		connSchema, err := fetchOrRead(ctx,
+			filepath.Join(jsonschemaPath, fmt.Sprintf("%s.json", pointer.Get(connType.Id))),
+			func(ctx context.Context) (*polytomic.JsonschemaSchema, error) {
+				return client.Connections.GetConnectionTypeSchema(ctx, pointer.Get(connType.Id))
+			},
+		)
+		if err != nil {
+			return err
+		}
+		r := Connection{
+			Name:         cmp.Or(pointer.Get(connType.Name), pointer.Get(connType.Id)),
+			ResourceName: pointer.Get(connType.Id),
+			Connection:   pointer.Get(connType.Id),
+			Type:         pointer.Get(connType.Id),
+			Datasource:   true,
+		}
+
+		r.ExtraImports = make(map[string]bool)
+		js, err := getJSONSchema(connSchema)
+		if err != nil {
+			return fmt.Errorf("error converting API response to jsonschema: %w", err)
+		}
+		attrs, err := attributesForJSONSchema(js)
+		if err != nil {
+			return fmt.Errorf("error inspecting attributes for %s: %w", r.Connection, err)
+		}
+		for _, a := range attrs {
+			if a.Default.Import != "" {
+				r.ExtraImports[a.Default.Import] = true
 			}
 		}
+		r.Attributes = append(r.Attributes, attrs...)
+		r.Resource = len(r.Attributes) > 0
 		if r.Name == "" {
 			r.Name = strings.Title(r.Connection)
 		}
@@ -153,10 +307,14 @@ func GenerateConnections() error {
 			if err != nil {
 				return err
 			}
-			resources = append(resources, Importable{
+			i := Importable{
 				Name:         r.Connection,
 				ResourceName: fmt.Sprintf("%sConnectionResource", strings.Title(r.Connection)),
-			})
+			}
+			if r.Type != "" {
+				i.Name = r.Type
+			}
+			resources = append(resources, i)
 		}
 		if r.Datasource {
 			err := writeConnectionDataSource(r)
@@ -184,11 +342,60 @@ func GenerateConnections() error {
 	return nil
 }
 
+func attributesForJSONSchema(connSchema *jsonschema.Schema) ([]Attribute, error) {
+	attrs := []Attribute{}
+	for pair := connSchema.Properties.Oldest(); pair != nil; pair = pair.Next() {
+		k := pair.Key
+		a := pair.Value
+		t, ok := TypeMap[a.Type]
+		if !ok {
+			return nil, fmt.Errorf("type %s not found for %s", a.Type, k)
+		}
+		var ex string
+		if len(a.Examples) > 0 {
+			if exstr, ok := a.Examples[0].(string); ok {
+				ex = exstr
+			}
+		}
+		attr := Attribute{
+			TfType:       t.TfType,
+			AttrType:     t.AttrType,
+			AttrReadType: t.ReadAttrType,
+			AttrName:     ValidName(k), // key in the tf schema
+			CapName:      strings.Title(k),
+			Name:         k, // key in the payload
+			Type:         t.GoType,
+			Description:  a.Description,
+			Example:      ex,
+			Sensitive:    a.Extras["sensitive"] == true,
+		}
+		if a.Format == "json" && attr.Example != "" {
+			attr.Example = fmt.Sprintf("jsonencode(%s)", attr.Example)
+			attr.ExampleTypeOverride = "json"
+		}
+		if a.Type == "object" {
+			sa, err := attributesForJSONSchema(a)
+			if err != nil {
+				return nil, fmt.Errorf("error inspecting attributes for %s: %w", k, err)
+			}
+			attr.Attributes = sa
+		}
+		attr.Required = slices.Contains(connSchema.Required, k)
+		attr.Optional = !attr.Required
+		attr.Computed = a.ReadOnly || attr.Optional
+		if attr.Computed {
+			attr.Default = t.Default
+		}
+		attrs = append(attrs, attr)
+	}
+	return attrs, nil
+}
+
 func writeConnectionExamples(r Connection) error {
 	var attributes []Attribute
-	for i, a := range r.Attributes {
+	for _, a := range r.Attributes {
 		if a.ExampleTypeOverride != "" {
-			r.Attributes[i].Type = a.ExampleTypeOverride
+			a.Type = a.ExampleTypeOverride
 		}
 		attributes = append(attributes, a)
 	}
@@ -207,7 +414,7 @@ func writeConnectionExamples(r Connection) error {
 			return err
 		}
 		f, err := os.Create(
-			filepath.Join(newpath, fmt.Sprintf("resource.tf")))
+			filepath.Join(newpath, "resource.tf"))
 
 		if err != nil {
 			return err
@@ -242,7 +449,7 @@ func writeConnectionExamples(r Connection) error {
 			return err
 		}
 		f, err := os.Create(
-			filepath.Join(newpath, fmt.Sprintf("data-source.tf")))
+			filepath.Join(newpath, "data-source.tf"))
 
 		if err != nil {
 			return err
@@ -266,30 +473,92 @@ func writeConnectionExamples(r Connection) error {
 	return nil
 }
 
+func valueAttr(a Attribute) string {
+	b := &strings.Builder{}
+	va(nil, a, b)
+
+	return b.String()
+}
+
+func va(prefix []string, a Attribute, builder *strings.Builder) {
+	// "password": data.Configuration.Attributes()["auth"].(types.Object).Attributes()["basic"].(types.Object).Attributes()["password"].(types.String).ValueString(),
+	builder.WriteString(fmt.Sprintf("\"%s\": ", a.Name))
+	switch a.Type {
+	case "int", "integer", "int64", "number":
+		builder.WriteString("int(")
+	case "map[string]interface{}":
+		fmt.Fprintln(builder, "map[string]interface{}{")
+		ap := append([]string{}, prefix...)
+		ap = append(ap, a.AttrName)
+		for _, aa := range a.Attributes {
+			va(ap, aa, builder)
+		}
+		fmt.Fprintln(builder, "},")
+		return
+	}
+	builder.WriteString("data.Configuration.Attributes()")
+	for _, p := range prefix {
+		builder.WriteString(fmt.Sprintf(`["%s"].(types.Object).Attributes()`, p))
+	}
+	builder.WriteString(fmt.Sprintf("[\"%s\"]", a.Name))
+
+	switch a.Type {
+	case "int", "integer", "int64", "number":
+		fmt.Fprintf(builder, ".(types.%s).ValueInt64()),\n", a.TfType)
+	case "bool":
+		fmt.Fprintf(builder, ".(types.%s).ValueBool(),\n", a.TfType)
+	case "string":
+		fmt.Fprintf(builder, ".(types.%s).ValueString(),\n", a.TfType)
+
+	}
+}
+
 func writeConnectionResource(r Connection) error {
-	tmpl, err := template.New("resource.go.tmpl").ParseFiles(connectionResourceTemplate)
+	tmpl, err := template.New("resource.go.tmpl").
+		Funcs(template.FuncMap{
+			"valueAttr": valueAttr,
+			"lower":     strings.ToLower,
+		}).
+		ParseFiles(connectionResourceTemplate)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(fmt.Errorf("error parsing resource template: %w", err))
 	}
 	var buf bytes.Buffer
 	f, err := os.Create(
-		filepath.Join(outputPath, fmt.Sprintf("resource_%s_connection.go", r.Connection)))
+		filepath.Join(outputPath, fmt.Sprintf("resource_%s_connection.go", r.Connection)),
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	imports := defaultImports
+	for k := range r.ExtraImports {
+		imports += fmt.Sprintf("\n\"%s\"", k)
+	}
+
 	defer f.Close()
 	err = tmpl.Execute(&buf, Connection{
 		Name:         r.Name,
+		Conn:         r.Connection,
 		Connection:   strings.Title(r.Connection),
 		ResourceName: r.Connection,
 		Attributes:   r.Attributes,
 		Type:         r.Type,
 		Config:       r.Config,
+		Imports:      imports,
 	})
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(fmt.Errorf("error executing resource template: %w", err))
 	}
+	_, err = f.Write(buf.Bytes())
+
 	p, err := format.Source(buf.Bytes())
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(fmt.Errorf("error formatting resource %s: %w", r.Connection, err))
 	}
+	f.Close()
+	f, err = os.Create(f.Name())
+
 	_, err = f.Write(p)
 	return err
 }
@@ -302,6 +571,9 @@ func writeConnectionDataSource(r Connection) error {
 	var buf bytes.Buffer
 	f, err := os.Create(
 		filepath.Join(outputPath, fmt.Sprintf("datasource_%s_connection.go", r.Connection)))
+	if err != nil {
+		log.Fatal(err)
+	}
 	defer f.Close()
 
 	var attributes []Attribute
@@ -331,6 +603,13 @@ func writeConnectionDataSource(r Connection) error {
 }
 
 func writeExports(datasources, resources []Importable) error {
+	slices.SortFunc(datasources, func(a, b Importable) int {
+		return cmp.Compare(a.Name, b.Name)
+	})
+	slices.SortFunc(resources, func(a, b Importable) int {
+		return cmp.Compare(a.Name, b.Name)
+	})
+
 	tmpl, err := template.New("connections.go.tmpl").ParseFiles(exportTemplate)
 	if err != nil {
 		log.Fatal(err)
@@ -362,4 +641,34 @@ func writeExports(datasources, resources []Importable) error {
 
 func TerraformResourceName(connection string) string {
 	return fmt.Sprintf("polytomic_%s_connection", connection)
+}
+
+const (
+	legalCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_"
+)
+
+// A name must start with a letter or underscore and
+// may contain only letters, digits, underscores, and dashes.
+// e.g 100_users -> _100_users
+func ValidName(s string) string {
+	if len(s) == 0 {
+		return "_"
+	}
+
+	// if string is not a letter or underscore, prepend underscore
+	if !unicode.IsLetter(rune(s[0])) && s[0] != '_' {
+		s = "_" + s
+	}
+
+	// replace illegal characters with underscore
+	for i, v := range []byte(s) {
+		if !strings.Contains(legalCharacters, string(v)) {
+			s = s[:i] + "_" + s[i+1:]
+		}
+		if unicode.IsLower(rune(v)) && i < len(s)-1 && unicode.IsUpper(rune(s[i+1])) {
+			s = s[:i+1] + "_" + strings.ToLower(s[i+1:])
+		}
+	}
+
+	return s
 }

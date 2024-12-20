@@ -1,15 +1,17 @@
 resource "polytomic_databricks_connection" "databricks" {
   name = "example"
   configuration = {
-    server_hostname       = "https://my.databricks.com"
-    port                  = 443
-    access_token          = "my-access-token"
+    access_token          = "isoz8af6zvp8067gu68gvrp0oftevn"
+    auth_mode             = "access_key_and_secret"
+    aws_access_key_id     = "AKIAIOSFODNN7EXAMPLE"
+    aws_secret_access_key = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+    azure_access_key      = "abcdefghijklmnopqrstuvwxyz0123456789/+ABCDEabcdefghijklmnopqrstuvwxyz0123456789/+ABCDE=="
+    azure_account_name    = "account"
+    cloud_provider        = "aws"
+    container_name        = "container"
     http_path             = "/sql"
-    aws_access_key_id     = "EXAMPLEKEY"
-    aws_secret_access_key = "EXAMPLESECRET"
-    s3_bucket_name        = "my-bucket"
-    s3_bucket_region      = "us-east-1"
-    aws_user              = "my-user"
+    s3_bucket_name        = "s3://polytomic-databricks-results/customer-dataset"
+    server_hostname       = "dbc-1234dsafas-d0001.cloud.databricks.com"
   }
 }
 

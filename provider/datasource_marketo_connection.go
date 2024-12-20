@@ -5,16 +5,13 @@ package provider
 
 import (
 	"context"
-	"fmt"
 
-	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/mitchellh/mapstructure"
-	"github.com/polytomic/polytomic-go"
+	"github.com/polytomic/terraform-provider-polytomic/provider/internal/client"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -22,7 +19,13 @@ var _ datasource.DataSource = &MarketoConnectionDataSource{}
 
 // ExampleDataSource defines the data source implementation.
 type MarketoConnectionDataSource struct {
-	client *polytomic.Client
+	provider *client.Provider
+}
+
+func (d *MarketoConnectionDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+	if provider := client.GetProvider(req.ProviderData, resp.Diagnostics); provider != nil {
+		d.provider = provider
+	}
 }
 
 func (d *MarketoConnectionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
@@ -33,10 +36,6 @@ func (d *MarketoConnectionDataSource) Schema(ctx context.Context, req datasource
 	resp.Schema = schema.Schema{
 		MarkdownDescription: ":meta:subcategory:Connections: Marketo Connection",
 		Attributes: map[string]schema.Attribute{
-			"name": schema.StringAttribute{
-				MarkdownDescription: "",
-				Optional:            true,
-			},
 			"id": schema.StringAttribute{
 				MarkdownDescription: "",
 				Required:            true,
@@ -45,72 +44,41 @@ func (d *MarketoConnectionDataSource) Schema(ctx context.Context, req datasource
 				MarkdownDescription: "",
 				Optional:            true,
 			},
+			"name": schema.StringAttribute{
+				MarkdownDescription: "",
+				Computed:            true,
+			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"client_id": schema.StringAttribute{
 						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
-					"rest_endpoint": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
-					"enforce_api_limits": schema.BoolAttribute{
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
 						Computed:            true,
-						Sensitive:           false,
-					},
-					"daily_api_calls": schema.Int64Attribute{
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
 					},
 					"concurrent_imports": schema.Int64Attribute{
 						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
 						Computed:            true,
-						Sensitive:           false,
+					},
+					"daily_api_calls": schema.Int64Attribute{
+						MarkdownDescription: "",
+						Computed:            true,
+					},
+					"enforce_api_limits": schema.BoolAttribute{
+						MarkdownDescription: "",
+						Computed:            true,
+					},
+					"oauth_token_expiry": schema.StringAttribute{
+						MarkdownDescription: "",
+						Computed:            true,
+					},
+					"rest_endpoint": schema.StringAttribute{
+						MarkdownDescription: "",
+						Computed:            true,
 					},
 				},
 				Optional: true,
 			},
-			"force_destroy": schema.BoolAttribute{
-				MarkdownDescription: forceDestroyMessage,
-				Optional:            true,
-			},
 		},
 	}
-}
-
-func (d *MarketoConnectionDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
-	// Prevent panic if the provider has not been configured.
-	if req.ProviderData == nil {
-		return
-	}
-
-	client, ok := req.ProviderData.(*polytomic.Client)
-
-	if !ok {
-		resp.Diagnostics.AddError(
-			"Unexpected Resource Configure Type",
-			fmt.Sprintf("Expected *polytomic.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
-		)
-
-		return
-	}
-
-	d.client = client
 }
 
 func (d *MarketoConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
@@ -124,7 +92,12 @@ func (d *MarketoConnectionDataSource) Read(ctx context.Context, req datasource.R
 	}
 
 	// Get the connection
-	connection, err := d.client.Connections().Get(ctx, uuid.MustParse(data.Id.ValueString()))
+	client, err := d.provider.Client(data.Organization.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting client", err.Error())
+		return
+	}
+	connection, err := client.Connections.Get(ctx, data.Id.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection", err.Error())
 		return
@@ -132,34 +105,30 @@ func (d *MarketoConnectionDataSource) Read(ctx context.Context, req datasource.R
 
 	// For the purposes of this example code, hardcoding a response value to
 	// save into the Terraform state.
-	data.Id = types.StringValue(connection.ID)
-	data.Name = types.StringValue(connection.Name)
-	data.Organization = types.StringValue(connection.OrganizationId)
-	var conf polytomic.MarketoConfiguration
-	err = mapstructure.Decode(connection.Configuration, &conf)
-	if err != nil {
-		resp.Diagnostics.AddError("Error decoding connection", err.Error())
-		return
-	}
-
+	data.Id = types.StringPointerValue(connection.Data.Id)
+	data.Name = types.StringPointerValue(connection.Data.Name)
+	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
 	var diags diag.Diagnostics
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttributeTypes(ctx),
 		map[string]attr.Value{
 			"client_id": types.StringValue(
-				conf.ClientID,
+				getValueOrEmpty(connection.Data.Configuration["client_id"], "string").(string),
 			),
-			"rest_endpoint": types.StringValue(
-				conf.RESTEndpoint,
+			"concurrent_imports": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["concurrent_imports"], "string").(string),
+			),
+			"daily_api_calls": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["daily_api_calls"], "string").(string),
 			),
 			"enforce_api_limits": types.BoolValue(
-				conf.EnforceAPILimits,
+				getValueOrEmpty(connection.Data.Configuration["enforce_api_limits"], "bool").(bool),
 			),
-			"daily_api_calls": types.Int64Value(
-				int64(conf.DailyAPICalls),
+			"oauth_token_expiry": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["oauth_token_expiry"], "string").(string),
 			),
-			"concurrent_imports": types.Int64Value(
-				int64(conf.ConcurrentImports),
+			"rest_endpoint": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["rest_endpoint"], "string").(string),
 			),
 		},
 	)

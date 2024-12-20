@@ -1,12 +1,12 @@
 resource "polytomic_sqlserver_connection" "sqlserver" {
   name = "example"
   configuration = {
-    hostname = "sqlserver.azure.example.com"
-    username = "polytomic"
-    password = "secret"
     database = "acme"
+    hostname = "sqlserver.azure.example.com"
+    password = "secret"
     port     = 1443
     ssl      = true
+    username = "polytomic"
   }
 }
 

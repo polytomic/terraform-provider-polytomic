@@ -28,6 +28,7 @@ data "polytomic_bulk_destination" "dest" {
 ### Read-Only
 
 - `modes` (Set of Object) (see [below for nested schema](#nestedatt--modes))
+- `organization` (String)
 - `required_configuration` (Set of String)
 
 <a id="nestedatt--modes"></a>
