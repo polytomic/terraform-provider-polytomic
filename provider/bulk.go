@@ -5,7 +5,7 @@ import "github.com/hashicorp/terraform-plugin-framework/types"
 type bulkSourceDatasourceData struct {
 	ConnectionID types.String `tfsdk:"connection_id"`
 	Organization types.String `tfsdk:"organization"`
-	Schemas      types.Set    `tfsdk:"schemas"`
+	Schemas      types.List   `tfsdk:"schemas"`
 }
 
 type bulkDestinationDatasourceData struct {

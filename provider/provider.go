@@ -131,7 +131,6 @@ func (p *Provider) Resources(ctx context.Context) []func() resource.Resource {
 		func() resource.Resource { return &policyResource{} },
 		func() resource.Resource { return &modelResource{} },
 		func() resource.Resource { return &bulkSyncResource{} },
-		func() resource.Resource { return &bulkSyncSchemaResource{} },
 		func() resource.Resource { return &syncResource{} },
 	}
 	all := append(connectionResources, resourceList...)

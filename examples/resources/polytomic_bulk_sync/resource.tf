@@ -7,17 +7,25 @@ data "polytomic_bulk_destination" "dest" {
 }
 
 resource "polytomic_bulk_sync" "sync" {
-  name                 = "Terraform Bulk Sync"
-  source_connection_id = data.polytomic_bulk_source.source.connection_id
-  dest_connection_id   = data.polytomic_bulk_destination.dest.connection_id
-  active               = true
-  discover             = false
-  mode                 = "replicate"
+  name   = "Terraform Bulk Sync"
+  active = true
+  mode   = "replicate"
+
   schedule = {
     frequency = "manual"
   }
+  source = {
+    connection_id = data.polytomic_bulk_source.source.connection_id
+  }
+  destination = {
+    connection_id = data.polytomic_bulk_destination.dest.connection_id
+    configuration = {
+      "schema" = "terraform"
+    }
+  }
   schemas = data.polytomic_bulk_source.source.schemas.*.id
-  dest_configuration = {
-    "dataset" = "terraform"
+
+  discovery = {
+    enabled = false
   }
 }

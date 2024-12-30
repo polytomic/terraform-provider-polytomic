@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 
+	"github.com/AlekSi/pointer"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -42,13 +43,13 @@ func (d *bulkSourceDatasource) Schema(ctx context.Context, req datasource.Schema
 				MarkdownDescription: "",
 				Computed:            true,
 			},
-			"schemas": schema.SetAttribute{
+			"schemas": schema.ListAttribute{
 				MarkdownDescription: "",
 				ElementType: types.ObjectType{
 					AttrTypes: map[string]attr.Type{
 						"id":   types.StringType,
 						"name": types.StringType,
-						"fields": types.SetType{
+						"fields": types.ListType{
 							ElemType: types.ObjectType{
 								AttrTypes: map[string]attr.Type{
 									"id":   types.StringType,
@@ -70,7 +71,6 @@ func (d *bulkSourceDatasource) Read(ctx context.Context, req datasource.ReadRequ
 
 	// Read Terraform configuration data into the model
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
-
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -87,12 +87,28 @@ func (d *bulkSourceDatasource) Read(ctx context.Context, req datasource.ReadRequ
 		return
 	}
 
+	schemas := make([]sourceSchema, len(source.Data.Schemas))
+	for i, s := range source.Data.Schemas {
+		fields := make([]sourceSchemaField, len(s.Fields))
+		for j, f := range s.Fields {
+			fields[j] = sourceSchemaField{
+				ID:   pointer.Get(f.Id),
+				Name: pointer.Get(f.Name),
+				Type: string(pointer.Get(f.Type)),
+			}
+		}
+		schemas[i] = sourceSchema{
+			ID:     pointer.Get(s.Id),
+			Name:   pointer.Get(s.Name),
+			Fields: fields,
+		}
+	}
 	var diags diag.Diagnostics
-	data.Schemas, diags = types.SetValueFrom(ctx, types.ObjectType{
+	data.Schemas, diags = types.ListValueFrom(ctx, types.ObjectType{
 		AttrTypes: map[string]attr.Type{
 			"id":   types.StringType,
 			"name": types.StringType,
-			"fields": types.SetType{
+			"fields": types.ListType{
 				ElemType: types.ObjectType{
 					AttrTypes: map[string]attr.Type{
 						"id":   types.StringType,
@@ -101,7 +117,7 @@ func (d *bulkSourceDatasource) Read(ctx context.Context, req datasource.ReadRequ
 					},
 				},
 			},
-		}}, source.Data.Schemas)
+		}}, schemas)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -109,4 +125,16 @@ func (d *bulkSourceDatasource) Read(ctx context.Context, req datasource.ReadRequ
 
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+}
+
+type sourceSchema struct {
+	ID     string              `json:"id" tfsdk:"id"`
+	Name   string              `json:"name" tfsdk:"name"`
+	Fields []sourceSchemaField `json:"fields" tfsdk:"fields"`
+}
+
+type sourceSchemaField struct {
+	ID   string `json:"id" tfsdk:"id"`
+	Name string `json:"name" tfsdk:"name"`
+	Type string `json:"type" tfsdk:"type"`
 }

@@ -1,20 +1,26 @@
 package provider
 
 import (
+	"cmp"
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
-	"sort"
+	"slices"
+	"time"
 
 	"github.com/AlekSi/pointer"
+	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
+	"github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -51,11 +57,7 @@ func (r *bulkSyncResource) Schema(ctx context.Context, req resource.SchemaReques
 				MarkdownDescription: "",
 				Required:            true,
 			},
-			"dest_connection_id": schema.StringAttribute{
-				MarkdownDescription: "",
-				Required:            true,
-			},
-			"source_connection_id": schema.StringAttribute{
+			"active": schema.BoolAttribute{
 				MarkdownDescription: "",
 				Required:            true,
 			},
@@ -63,26 +65,33 @@ func (r *bulkSyncResource) Schema(ctx context.Context, req resource.SchemaReques
 				MarkdownDescription: "",
 				Required:            true,
 			},
-			"discover": schema.BoolAttribute{
-				MarkdownDescription: "",
-				Required:            true,
+			"source": schema.SingleNestedAttribute{
+				Required:   true,
+				Attributes: bulkSyncConnection{}.SchemaAttributes(),
 			},
-			"active": schema.BoolAttribute{
-				MarkdownDescription: "",
-				Required:            true,
+			"destination": schema.SingleNestedAttribute{
+				Required:   true,
+				Attributes: bulkSyncConnection{}.SchemaAttributes(),
 			},
-			"schemas": schema.SetAttribute{
-				MarkdownDescription: "",
-				ElementType:         types.StringType,
-				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+			"automatically_add_new_fields": schema.StringAttribute{
+				Computed: true,
+				Optional: true,
+				Default:  stringdefault.StaticString(string(polytomic.BulkDiscoverNone)),
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(), // Ensures state carries the default if unset
 				},
 			},
-			"policies": schema.SetAttribute{
-				MarkdownDescription: "",
-				ElementType:         types.StringType,
-				Optional:            true,
+			"automatically_add_new_objects": schema.StringAttribute{
+				Computed: true,
+				Optional: true,
+				Default:  stringdefault.StaticString(string(polytomic.BulkDiscoverNone)),
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(), // Ensures state carries the default if unset
+				},
+			},
+			"disable_record_timestamps": schema.BoolAttribute{
+				Optional: true,
+				Computed: true,
 			},
 			"schedule": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
@@ -133,38 +142,195 @@ func (r *bulkSyncResource) Schema(ctx context.Context, req resource.SchemaReques
 				},
 				Required: true,
 			},
-			"dest_configuration": schema.MapAttribute{
-				MarkdownDescription: "",
-				ElementType:         types.StringType,
-				Optional:            true,
-				// PlanModifiers: []planmodifier.Map{
-				// 	advancedKeyModifier{},
-				// 	mapplanmodifier.UseStateForUnknown(),
-				// },
+			"data_cutoff_timestamp": schema.StringAttribute{
+				CustomType: timetypes.RFC3339Type{},
+				Optional:   true,
 			},
-			"source_configuration": schema.MapAttribute{
+			"schemas": schema.SetNestedAttribute{
+				MarkdownDescription: "",
+				Optional:            true,
+				Computed:            true,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: bulkSyncSchema{}.SchemaAttributes(),
+				},
+				PlanModifiers: []planmodifier.Set{
+					setplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"policies": schema.SetAttribute{
 				MarkdownDescription: "",
 				ElementType:         types.StringType,
 				Optional:            true,
+				Computed:            true,
 			},
 		},
 	}
 }
 
+type bulkSyncConnection struct {
+	ConnectionID  types.String         `tfsdk:"connection_id"`
+	Configuration jsontypes.Normalized `tfsdk:"configuration"`
+}
+
+func (bulkSyncConnection) SchemaAttributes() map[string]schema.Attribute {
+	return map[string]schema.Attribute{
+		"connection_id": schema.StringAttribute{
+			Required: true,
+		},
+		"configuration": schema.StringAttribute{
+			MarkdownDescription: "Integration-specific configuratino for the connection. Documentation for settings is available in the [Polytomic API documentation](https://apidocs.polytomic.com/2024-02-08/guides/configuring-your-connections/overview)",
+			CustomType:          jsontypes.NormalizedType{},
+			Optional:            true,
+			Computed:            true,
+		},
+	}
+}
+
+func (bulkSyncConnection) AttrTypes() map[string]attr.Type {
+	return map[string]attr.Type{
+		"connection_id": types.StringType,
+		"configuration": jsontypes.NormalizedType{},
+	}
+}
+
+type bulkSyncSchemaField struct {
+	Id        types.String `tfsdk:"id"`
+	Enabled   types.Bool   `tfsdk:"enabled"`
+	Obfuscate types.Bool   `tfsdk:"obfuscate"`
+}
+
+func (bulkSyncSchemaField) SchemaAttributes() map[string]schema.Attribute {
+	return map[string]schema.Attribute{
+		"id": schema.StringAttribute{
+			Required: true,
+		},
+		"enabled": schema.BoolAttribute{
+			Optional: true,
+			Computed: true,
+		},
+		"obfuscate": schema.BoolAttribute{
+			Optional: true,
+			Computed: true,
+		},
+	}
+}
+
+func (bulkSyncSchemaField) AttrTypes() map[string]attr.Type {
+	return map[string]attr.Type{
+		"id":        types.StringType,
+		"enabled":   types.BoolType,
+		"obfuscate": types.BoolType,
+	}
+}
+
+type bulkSyncSchema struct {
+	Id                  types.String      `tfsdk:"id"`
+	Enabled             types.Bool        `tfsdk:"enabled"`
+	PartitionKey        types.String      `tfsdk:"partition_key"`
+	TrackingField       types.String      `tfsdk:"tracking_field"`
+	OutputName          types.String      `tfsdk:"output_name"`
+	Fields              types.Set         `tfsdk:"fields"`
+	Filters             types.Set         `tfsdk:"filters"`
+	DataCutoffTimestamp timetypes.RFC3339 `tfsdk:"data_cutoff_timestamp"`
+	DisableDataCutoff   types.Bool        `tfsdk:"disable_data_cutoff"`
+}
+
+func (bulkSyncSchema) SchemaAttributes() map[string]schema.Attribute {
+	return map[string]schema.Attribute{
+		"id": schema.StringAttribute{
+			Required: true,
+		},
+		"enabled": schema.BoolAttribute{
+			Optional: true,
+			Computed: true,
+		},
+		"data_cutoff_timestamp": schema.StringAttribute{
+			CustomType: timetypes.RFC3339Type{},
+			Optional:   true,
+		},
+		"disable_data_cutoff": schema.BoolAttribute{
+			Optional: true,
+			Computed: true,
+		},
+		"partition_key": schema.StringAttribute{
+			Optional: true,
+			Computed: true,
+		},
+		"tracking_field": schema.StringAttribute{
+			Optional: true,
+			Computed: true,
+		},
+		"output_name": schema.StringAttribute{
+			Computed: true,
+		},
+		"fields": schema.SetNestedAttribute{
+			Optional: true,
+			Computed: true,
+			NestedObject: schema.NestedAttributeObject{
+				Attributes: bulkSyncSchemaField{}.SchemaAttributes(),
+			},
+		},
+		"filters": schema.SetNestedAttribute{
+			Optional: true,
+			Computed: true,
+			NestedObject: schema.NestedAttributeObject{
+				Attributes: map[string]schema.Attribute{
+					"field_id": schema.StringAttribute{
+						Required: true,
+					},
+					"function": schema.StringAttribute{
+						Required: true,
+					},
+					"value": schema.StringAttribute{
+						Required: true,
+					},
+				},
+			},
+		},
+	}
+}
+
+func (bulkSyncSchema) AttrTypes() map[string]attr.Type {
+	return map[string]attr.Type{
+		"id":      types.StringType,
+		"enabled": types.BoolType,
+		"fields": types.SetType{
+			ElemType: types.ObjectType{
+				AttrTypes: bulkSyncSchemaField{}.AttrTypes(),
+			},
+		},
+		"filters": types.SetType{
+			ElemType: types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"field_id": types.StringType,
+					"function": types.StringType,
+					"value":    types.StringType,
+				},
+			},
+		},
+		"data_cutoff_timestamp": timetypes.RFC3339Type{},
+		"disable_data_cutoff":   types.BoolType,
+		"partition_key":         types.StringType,
+		"tracking_field":        types.StringType,
+		"output_name":           types.StringType,
+	}
+}
+
 type bulkSyncResourceData struct {
-	Name                     types.String `tfsdk:"name"`
-	Organization             types.String `tfsdk:"organization"`
-	Id                       types.String `tfsdk:"id"`
-	DestConnectionID         types.String `tfsdk:"dest_connection_id"`
-	SourceConnectionID       types.String `tfsdk:"source_connection_id"`
-	Mode                     types.String `tfsdk:"mode"`
-	Discover                 types.Bool   `tfsdk:"discover"`
-	Active                   types.Bool   `tfsdk:"active"`
-	Schemas                  types.Set    `tfsdk:"schemas"`
-	Policies                 types.Set    `tfsdk:"policies"`
-	Schedule                 types.Object `tfsdk:"schedule"`
-	DestinationConfiguration types.Map    `tfsdk:"dest_configuration"`
-	SourceConfiguration      types.Map    `tfsdk:"source_configuration"`
+	Id                         types.String      `tfsdk:"id"`
+	Organization               types.String      `tfsdk:"organization"`
+	Name                       types.String      `tfsdk:"name"`
+	Active                     types.Bool        `tfsdk:"active"`
+	Mode                       types.String      `tfsdk:"mode"`
+	Source                     types.Object      `tfsdk:"source"`
+	Destination                types.Object      `tfsdk:"destination"`
+	AutomaticallyAddNewFields  types.String      `tfsdk:"automatically_add_new_fields"`
+	AutomaticallyAddNewObjects types.String      `tfsdk:"automatically_add_new_objects"`
+	DisableRecordTimestamps    types.Bool        `tfsdk:"disable_record_timestamps"`
+	Schedule                   types.Object      `tfsdk:"schedule"`
+	Schemas                    types.Set         `tfsdk:"schemas"`
+	Policies                   types.Set         `tfsdk:"policies"`
+	DataCutoffTimestamp        timetypes.RFC3339 `tfsdk:"data_cutoff_timestamp"`
 }
 
 type bulkSyncResource struct {
@@ -193,34 +359,91 @@ type BulkSchedule struct {
 func (r *bulkSyncResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data bulkSyncResourceData
 
-	diags := req.Config.Get(ctx, &data)
+	diags := req.Plan.Get(ctx, &data)
 	resp.Diagnostics.Append(diags...)
-
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	var schemaIDs []string
-	diags = data.Schemas.ElementsAs(ctx, &schemaIDs, false)
+	var schemaData []bulkSyncSchema
+	diags = data.Schemas.ElementsAs(ctx, &schemaData, false)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
-	sort.Strings(schemaIDs)
-	schemas := make([]*polytomic.V2CreateBulkSyncRequestSchemasItem, len(schemaIDs))
-	for i, schemaID := range schemaIDs {
+	slices.SortFunc(schemaData, func(a, b bulkSyncSchema) int {
+		return cmp.Compare(a.Id.String(), b.Id.String())
+	})
+
+	schemas := make([]*polytomic.V2CreateBulkSyncRequestSchemasItem, len(schemaData))
+	for i, s := range schemaData {
+		var cutoff *time.Time
+		if !s.DataCutoffTimestamp.IsNull() {
+			t, diags := s.DataCutoffTimestamp.ValueRFC3339Time()
+			if diags.HasError() {
+				resp.Diagnostics.Append(diags...)
+				return
+			}
+			cutoff = &t
+		}
+
+		// fields
+		var fieldData []bulkSyncSchemaField
+		if !s.Fields.IsUnknown() {
+			diags = s.Fields.ElementsAs(ctx, &fieldData, false)
+			if diags.HasError() {
+				resp.Diagnostics.Append(diags...)
+				return
+			}
+			slices.SortFunc(fieldData, func(a, b bulkSyncSchemaField) int {
+				return cmp.Compare(a.Id.String(), b.Id.String())
+			})
+		}
+		fieldConfs := make([]*polytomic.V2SchemaConfigurationFieldsItem, len(fieldData))
+		for i, f := range fieldData {
+			fieldConfs[i] = &polytomic.V2SchemaConfigurationFieldsItem{
+				FieldConfiguration: &polytomic.FieldConfiguration{
+					Id:        f.Id.ValueStringPointer(),
+					Enabled:   f.Enabled.ValueBoolPointer(),
+					Obfuscate: f.Obfuscate.ValueBoolPointer(),
+				},
+			}
+		}
+
+		// filters
+		var filters []*polytomic.BulkFilter
+		if !s.Filters.IsUnknown() {
+			diags = s.Filters.ElementsAs(ctx, &filters, false)
+			if diags.HasError() {
+				resp.Diagnostics.Append(diags...)
+				return
+			}
+		}
+
 		schemas[i] = &polytomic.V2CreateBulkSyncRequestSchemasItem{
-			String: schemaID,
+			SchemaConfiguration: &polytomic.SchemaConfiguration{
+				Id:                  s.Id.ValueStringPointer(),
+				Enabled:             s.Enabled.ValueBoolPointer(),
+				PartitionKey:        s.PartitionKey.ValueStringPointer(),
+				DataCutoffTimestamp: cutoff,
+				DisableDataCutoff:   s.DisableDataCutoff.ValueBoolPointer(),
+				Fields:              fieldConfs,
+				Filters:             filters,
+			},
 		}
 	}
 
+	// policies
 	var policies []string
-	diags = data.Policies.ElementsAs(ctx, &policies, false)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
+	if !(data.Policies.IsUnknown() || data.Policies.IsNull()) {
+		diags = data.Policies.ElementsAs(ctx, &policies, false)
+		if diags.HasError() {
+			resp.Diagnostics.Append(diags...)
+			return
+		}
 	}
 
+	// schedule
 	var schedule BulkSchedule
 	diags = data.Schedule.As(ctx, &schedule, basetypes.ObjectAsOptions{
 		UnhandledNullAsEmpty:    true,
@@ -240,48 +463,47 @@ func (r *bulkSyncResource) Create(ctx context.Context, req resource.CreateReques
 		Month:      schedule.Month,
 	}
 
-	destConfigRaw := make(map[string]string)
-	diags = data.DestinationConfiguration.ElementsAs(ctx, &destConfigRaw, false)
+	// destination connection
+	destination := bulkSyncConnection{}
+	diags = data.Destination.As(ctx, &destination, basetypes.ObjectAsOptions{
+		UnhandledNullAsEmpty:    true,
+		UnhandledUnknownAsEmpty: true,
+	})
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
-	destConf := make(map[string]interface{})
-	for k, v := range destConfigRaw {
-		if k == "advanced" {
-			var advanced map[string]interface{}
-			err := json.Unmarshal([]byte(v), &advanced)
-			if err != nil {
-				resp.Diagnostics.AddError("Error unmarshalling advanced", err.Error())
-				return
-			}
-			destConf[k] = advanced
-		} else {
-			destConf[k] = v
+	var destConf map[string]interface{}
+	if !destination.Configuration.IsUnknown() {
+		dc := make(map[string]interface{})
+		diags = destination.Configuration.Unmarshal(&dc)
+		if diags.HasError() {
+			resp.Diagnostics.Append(diags...)
+			return
 		}
+		destConf = dc
 	}
 
-	sourceConfigRaw := make(map[string]string)
-	diags = data.SourceConfiguration.ElementsAs(ctx, &sourceConfigRaw, false)
+	// source connection
+	source := bulkSyncConnection{}
+	diags = data.Source.As(ctx, &source, basetypes.ObjectAsOptions{
+		UnhandledNullAsEmpty:    true,
+		UnhandledUnknownAsEmpty: true,
+	})
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
-	sourceConf := make(map[string]interface{})
-	for k, v := range sourceConfigRaw {
-		if k == "advanced" {
-			var advanced map[string]interface{}
-			err := json.Unmarshal([]byte(v), &advanced)
-			if err != nil {
-				resp.Diagnostics.AddError("Error unmarshalling advanced", err.Error())
-				return
-			}
-			sourceConf[k] = v
-		} else {
-			sourceConf[k] = v
+	var sourceConf map[string]interface{}
+	if !source.Configuration.IsUnknown() {
+		sc := make(map[string]interface{})
+		diags = source.Configuration.Unmarshal(&sc)
+		if diags.HasError() {
+			resp.Diagnostics.Append(diags...)
+			return
 		}
+		sourceConf = sc
 	}
-
 	client, err := r.provider.Client(data.Organization.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting client", err.Error())
@@ -289,108 +511,37 @@ func (r *bulkSyncResource) Create(ctx context.Context, req resource.CreateReques
 	}
 	created, err := client.BulkSync.Create(ctx,
 		&polytomic.CreateBulkSyncRequest{
-			OrganizationId:           data.Organization.ValueStringPointer(),
-			Name:                     data.Name.ValueString(),
-			DestinationConnectionId:  data.DestConnectionID.ValueString(),
-			SourceConnectionId:       data.SourceConnectionID.ValueString(),
-			Mode:                     pointer.To(polytomic.SyncMode(data.Mode.ValueString())),
-			Discover:                 data.Discover.ValueBoolPointer(),
-			Active:                   data.Active.ValueBoolPointer(),
-			Schemas:                  schemas,
-			Policies:                 policies,
-			Schedule:                 sche,
-			DestinationConfiguration: destConf,
-			SourceConfiguration:      sourceConf,
+			OrganizationId:             data.Organization.ValueStringPointer(),
+			Name:                       data.Name.ValueString(),
+			DestinationConnectionId:    destination.ConnectionID.ValueString(),
+			SourceConnectionId:         source.ConnectionID.ValueString(),
+			Mode:                       pointer.To(polytomic.SyncMode(data.Mode.ValueString())),
+			Active:                     data.Active.ValueBoolPointer(),
+			AutomaticallyAddNewFields:  pointer.To(polytomic.BulkDiscover(data.AutomaticallyAddNewFields.ValueString())),
+			AutomaticallyAddNewObjects: pointer.To(polytomic.BulkDiscover(data.AutomaticallyAddNewObjects.ValueString())),
+			Schemas:                    schemas,
+			Policies:                   policies,
+			Schedule:                   sche,
+			DestinationConfiguration:   destConf,
+			SourceConfiguration:        sourceConf,
 		},
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating bulk sync: %s", err))
 		return
 	}
-
-	sch, diags := types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"frequency":    types.StringType,
-		"day_of_week":  types.StringType,
-		"hour":         types.StringType,
-		"minute":       types.StringType,
-		"month":        types.StringType,
-		"day_of_month": types.StringType,
-	}, BulkSchedule{
-		DayOfMonth: created.Data.Schedule.DayOfMonth,
-		DayOfWeek:  created.Data.Schedule.DayOfWeek,
-		Frequency:  string(created.Data.Schedule.Frequency),
-		Hour:       created.Data.Schedule.Hour,
-		Minute:     created.Data.Schedule.Minute,
-		Month:      created.Data.Schedule.Month,
-	})
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
+	createdSchemas, err := client.BulkSync.Schemas.List(ctx, pointer.Get(created.Data.Id), &bulksync.SchemasListRequest{})
+	if err != nil {
+		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error reading bulk sync schemas: %s", err))
 		return
 	}
-
-	schemaVal, diags := types.SetValueFrom(ctx, types.StringType, schemas)
+	data, diags = bulkSyncDataFromResponse(ctx, created.Data, createdSchemas.Data)
+	resp.Diagnostics.Append(diags...)
 	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
 		return
 	}
-
-	sourceConfRaw := make(map[string]string)
-	for k, v := range created.Data.SourceConfiguration {
-		if k == "advanced" {
-			advanced, err := json.Marshal(v)
-			if err != nil {
-				resp.Diagnostics.AddError("Error marshalling advanced", err.Error())
-				return
-			}
-			sourceConfRaw[k] = string(advanced)
-		} else {
-			sourceConfRaw[k] = stringy(v)
-		}
-	}
-
-	sourceConfVal, diags := types.MapValueFrom(ctx, types.StringType, sourceConfRaw)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
-
-	destConfFinal := make(map[string]string)
-	for k, v := range destConf {
-		if k == "advanced" {
-			advanced, err := json.Marshal(v)
-			if err != nil {
-				resp.Diagnostics.AddError("Error marshalling advanced", err.Error())
-				return
-			}
-			destConfFinal[k] = string(advanced)
-		} else {
-			destConfFinal[k] = stringy(v)
-		}
-	}
-	destConfVal, diags := types.MapValueFrom(ctx, types.StringType, destConfFinal)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
-
-	data.Id = types.StringPointerValue(created.Data.Id)
-	data.Organization = types.StringPointerValue(created.Data.OrganizationId)
-	data.Name = types.StringPointerValue(created.Data.Name)
-	data.DestConnectionID = types.StringPointerValue(created.Data.DestinationConnectionId)
-	data.SourceConnectionID = types.StringPointerValue(created.Data.SourceConnectionId)
-	data.Mode = types.StringPointerValue(created.Data.Mode)
-	data.Discover = types.BoolPointerValue(created.Data.Discover)
-	data.Active = types.BoolPointerValue(created.Data.Active)
-	data.Schedule = sch
-	data.Schemas = schemaVal
-	data.SourceConfiguration = sourceConfVal
-	data.DestinationConfiguration = destConfVal
-
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
 }
 
 func (r *bulkSyncResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -420,98 +571,16 @@ func (r *bulkSyncResource) Read(ctx context.Context, req resource.ReadRequest, r
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error reading bulk sync: %s", err))
 		return
 	}
-
-	schedule, diags := types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"frequency":    types.StringType,
-		"day_of_week":  types.StringType,
-		"hour":         types.StringType,
-		"minute":       types.StringType,
-		"month":        types.StringType,
-		"day_of_month": types.StringType,
-	}, BulkSchedule{
-		DayOfMonth: bulkSync.Data.Schedule.DayOfMonth,
-		DayOfWeek:  bulkSync.Data.Schedule.DayOfWeek,
-		Frequency:  string(bulkSync.Data.Schedule.Frequency),
-		Hour:       bulkSync.Data.Schedule.Hour,
-		Minute:     bulkSync.Data.Schedule.Minute,
-		Month:      bulkSync.Data.Schedule.Month,
-	})
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
-
-	// Get schemas
-	var schemas []*string
-	schemasRes, err := client.BulkSync.Schemas.List(ctx, data.Id.ValueString(), &bulksync.SchemasListRequest{})
+	schemas, err := client.BulkSync.Schemas.List(ctx, data.Id.ValueString(), &bulksync.SchemasListRequest{})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error reading bulk sync schemas: %s", err))
 		return
 	}
-	for _, schema := range schemasRes.Data {
-		if pointer.GetBool(schema.Enabled) {
-			schemas = append(schemas, schema.Id)
-		}
-	}
-
-	schemaValue, diags := types.SetValueFrom(ctx, types.StringType, schemas)
+	data, diags = bulkSyncDataFromResponse(ctx, bulkSync.Data, schemas.Data)
+	resp.Diagnostics.Append(diags...)
 	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
 		return
 	}
-
-	sourceConfRaw := make(map[string]string)
-	for k, v := range bulkSync.Data.SourceConfiguration {
-		if k == "advanced" {
-			advanced, err := json.Marshal(v)
-			if err != nil {
-				resp.Diagnostics.AddError("Error marshalling advanced", err.Error())
-				return
-			}
-			sourceConfRaw[k] = string(advanced)
-		} else {
-			sourceConfRaw[k] = stringy(v)
-		}
-	}
-
-	sourceConfVal, diags := types.MapValueFrom(ctx, types.StringType, sourceConfRaw)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
-
-	destConfRaw := make(map[string]string)
-	for k, v := range bulkSync.Data.DestinationConfiguration {
-		if k == "advanced" {
-			advanced, err := json.Marshal(v)
-			if err != nil {
-				resp.Diagnostics.AddError("Error marshalling advanced", err.Error())
-				return
-			}
-			destConfRaw[k] = string(advanced)
-		} else {
-			destConfRaw[k] = stringy(v)
-		}
-	}
-	destConfVal, diags := types.MapValueFrom(ctx, types.StringType, destConfRaw)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
-
-	data.Id = types.StringPointerValue(bulkSync.Data.Id)
-	data.Organization = types.StringPointerValue(bulkSync.Data.OrganizationId)
-	data.Name = types.StringPointerValue(bulkSync.Data.Name)
-	data.DestConnectionID = types.StringPointerValue(bulkSync.Data.DestinationConnectionId)
-	data.SourceConnectionID = types.StringPointerValue(bulkSync.Data.SourceConnectionId)
-	data.Mode = types.StringPointerValue(bulkSync.Data.Mode)
-	data.Discover = types.BoolPointerValue(bulkSync.Data.Discover)
-	data.Active = types.BoolPointerValue(bulkSync.Data.Active)
-	data.Schedule = schedule
-	data.Schemas = schemaValue
-	data.SourceConfiguration = sourceConfVal
-	data.DestinationConfiguration = destConfVal
-
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 
@@ -522,11 +591,76 @@ func (r *bulkSyncResource) Update(ctx context.Context, req resource.UpdateReques
 
 	diags := req.Plan.Get(ctx, &data)
 	resp.Diagnostics.Append(diags...)
-
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
+	var schemaData []bulkSyncSchema
+	diags = data.Schemas.ElementsAs(ctx, &schemaData, false)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+	slices.SortFunc(schemaData, func(a, b bulkSyncSchema) int {
+		return cmp.Compare(a.Id.String(), b.Id.String())
+	})
+
+	schemas := make([]*polytomic.V2UpdateBulkSyncRequestSchemasItem, len(schemaData))
+	for i, s := range schemaData {
+		var cutoff *time.Time
+		if !s.DataCutoffTimestamp.IsNull() {
+			t, diags := s.DataCutoffTimestamp.ValueRFC3339Time()
+			if diags.HasError() {
+				resp.Diagnostics.Append(diags...)
+				return
+			}
+			cutoff = &t
+		}
+
+		// fields
+		var fields []polytomic.FieldConfiguration
+		diags = s.Fields.ElementsAs(ctx, &fields, false)
+		if diags.HasError() {
+			resp.Diagnostics.Append(diags...)
+			return
+		}
+		fieldConfs := make([]*polytomic.V2SchemaConfigurationFieldsItem, len(fields))
+		for i, f := range fields {
+			fieldConfs[i] = &polytomic.V2SchemaConfigurationFieldsItem{
+				FieldConfiguration: &f,
+			}
+		}
+
+		// filters
+		var filters []*polytomic.BulkFilter
+		diags = s.Filters.ElementsAs(ctx, &filters, false)
+		if diags.HasError() {
+			resp.Diagnostics.Append(diags...)
+			return
+		}
+
+		schemas[i] = &polytomic.V2UpdateBulkSyncRequestSchemasItem{
+			SchemaConfiguration: &polytomic.SchemaConfiguration{
+				Id:                  s.Id.ValueStringPointer(),
+				Enabled:             s.Enabled.ValueBoolPointer(),
+				PartitionKey:        s.PartitionKey.ValueStringPointer(),
+				DataCutoffTimestamp: cutoff,
+				DisableDataCutoff:   s.DisableDataCutoff.ValueBoolPointer(),
+				Fields:              fieldConfs,
+				Filters:             filters,
+			},
+		}
+	}
+
+	// policies
+	var policies []string
+	diags = data.Policies.ElementsAs(ctx, &policies, false)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
+	// schedule
 	var schedule BulkSchedule
 	diags = data.Schedule.As(ctx, &schedule, basetypes.ObjectAsOptions{
 		UnhandledNullAsEmpty:    true,
@@ -546,67 +680,38 @@ func (r *bulkSyncResource) Update(ctx context.Context, req resource.UpdateReques
 		Month:      schedule.Month,
 	}
 
-	var schemaIDs []string
-	diags = data.Schemas.ElementsAs(ctx, &schemaIDs, false)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
-	sort.Strings(schemaIDs)
-	schemas := make([]*polytomic.V2UpdateBulkSyncRequestSchemasItem, len(schemaIDs))
-	for i, schemaID := range schemaIDs {
-		schemas[i] = &polytomic.V2UpdateBulkSyncRequestSchemasItem{
-			String: schemaID,
-		}
-	}
-
-	var policies []string
-	diags = data.Policies.ElementsAs(ctx, &policies, false)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
-
-	destConfigRaw := make(map[string]string)
-	diags = data.DestinationConfiguration.ElementsAs(ctx, &destConfigRaw, false)
+	// destination connection
+	destination := bulkSyncConnection{}
+	diags = data.Destination.As(ctx, &destination, basetypes.ObjectAsOptions{
+		UnhandledNullAsEmpty:    true,
+		UnhandledUnknownAsEmpty: true,
+	})
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
 	destConf := make(map[string]interface{})
-	for k, v := range destConfigRaw {
-		if k == "advanced" {
-			var advanced map[string]interface{}
-			err := json.Unmarshal([]byte(v), &advanced)
-			if err != nil {
-				resp.Diagnostics.AddError("Error unmarshalling advanced", err.Error())
-				return
-			}
-			destConf[k] = advanced
-		} else {
-			destConf[k] = v
-		}
+	diags = destination.Configuration.Unmarshal(&destConf)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
 	}
 
-	sourceConfigRaw := make(map[string]string)
-	diags = data.SourceConfiguration.ElementsAs(ctx, &sourceConfigRaw, false)
+	// source connection
+	source := bulkSyncConnection{}
+	diags = data.Source.As(ctx, &source, basetypes.ObjectAsOptions{
+		UnhandledNullAsEmpty:    true,
+		UnhandledUnknownAsEmpty: true,
+	})
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
 	sourceConf := make(map[string]interface{})
-	for k, v := range sourceConfigRaw {
-		if k == "advanced" {
-			var advanced map[string]interface{}
-			err := json.Unmarshal([]byte(v), &advanced)
-			if err != nil {
-				resp.Diagnostics.AddError("Error unmarshalling advanced", err.Error())
-				return
-			}
-			sourceConf[k] = v
-		} else {
-			sourceConf[k] = v
-		}
+	diags = source.Configuration.Unmarshal(&sourceConf)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
 	}
 
 	client, err := r.provider.Client(data.Organization.ValueString())
@@ -617,117 +722,36 @@ func (r *bulkSyncResource) Update(ctx context.Context, req resource.UpdateReques
 	updated, err := client.BulkSync.Update(ctx,
 		data.Id.ValueString(),
 		&polytomic.UpdateBulkSyncRequest{
-			OrganizationId:           data.Organization.ValueStringPointer(),
-			Name:                     data.Name.ValueString(),
-			DestinationConnectionId:  data.DestConnectionID.ValueString(),
-			SourceConnectionId:       data.SourceConnectionID.ValueString(),
-			Mode:                     pointer.To(polytomic.SyncMode(data.Mode.ValueString())),
-			Discover:                 data.Discover.ValueBoolPointer(),
-			Active:                   data.Active.ValueBoolPointer(),
-			Schemas:                  schemas,
-			Policies:                 policies,
-			Schedule:                 sche,
-			DestinationConfiguration: destConf,
-			SourceConfiguration:      sourceConf,
+			OrganizationId:             data.Organization.ValueStringPointer(),
+			Name:                       data.Name.ValueString(),
+			DestinationConnectionId:    destination.ConnectionID.ValueString(),
+			SourceConnectionId:         source.ConnectionID.ValueString(),
+			Mode:                       pointer.To(polytomic.SyncMode(data.Mode.ValueString())),
+			Active:                     data.Active.ValueBoolPointer(),
+			AutomaticallyAddNewFields:  pointer.To(polytomic.BulkDiscover(data.AutomaticallyAddNewFields.ValueString())),
+			AutomaticallyAddNewObjects: pointer.To(polytomic.BulkDiscover(data.AutomaticallyAddNewObjects.ValueString())),
+			Schemas:                    schemas,
+			Policies:                   policies,
+			Schedule:                   sche,
+			DestinationConfiguration:   destConf,
+			SourceConfiguration:        sourceConf,
 		},
 	)
 	if err != nil {
-		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating organization: %s", err))
+		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating bulk sync: %s", err))
 		return
 	}
-
-	// Get schemas
-	var respSchemas []*string
-	schemasRes, err := client.BulkSync.Schemas.List(ctx, data.Id.ValueString(), &bulksync.SchemasListRequest{Filters: map[string]*string{
-		"enabled": pointer.ToString("true"),
-	}})
+	updatedSchemas, err := client.BulkSync.Schemas.List(ctx, data.Id.ValueString(), &bulksync.SchemasListRequest{})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error reading bulk sync schemas: %s", err))
 		return
 	}
-	for _, schema := range schemasRes.Data {
-		if pointer.GetBool(schema.Enabled) {
-			respSchemas = append(respSchemas, schema.Id)
-		}
-	}
 
-	sch, diags := types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"frequency":    types.StringType,
-		"day_of_week":  types.StringType,
-		"hour":         types.StringType,
-		"minute":       types.StringType,
-		"month":        types.StringType,
-		"day_of_month": types.StringType,
-	}, BulkSchedule{
-		DayOfMonth: updated.Data.Schedule.DayOfMonth,
-		DayOfWeek:  updated.Data.Schedule.DayOfWeek,
-		Frequency:  string(updated.Data.Schedule.Frequency),
-		Hour:       updated.Data.Schedule.Hour,
-		Minute:     updated.Data.Schedule.Minute,
-		Month:      updated.Data.Schedule.Month,
-	})
+	data, diags = bulkSyncDataFromResponse(ctx, updated.Data, updatedSchemas.Data)
+	resp.Diagnostics.Append(diags...)
 	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
 		return
 	}
-
-	schemaValue, diags := types.SetValueFrom(ctx, types.StringType, respSchemas)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
-
-	sourceConfRaw := make(map[string]string)
-	for k, v := range updated.Data.SourceConfiguration {
-		if k == "advanced" {
-			advanced, err := json.Marshal(v)
-			if err != nil {
-				resp.Diagnostics.AddError("Error marshalling advanced", err.Error())
-				return
-			}
-			sourceConfRaw[k] = string(advanced)
-		} else {
-			sourceConfRaw[k] = stringy(v)
-		}
-	}
-
-	sourceConfVal, diags := types.MapValueFrom(ctx, types.StringType, sourceConfRaw)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
-
-	destConfFinal := make(map[string]string)
-	for k, v := range destConf {
-		if k == "advanced" {
-			advanced, err := json.Marshal(v)
-			if err != nil {
-				resp.Diagnostics.AddError("Error marshalling advanced", err.Error())
-				return
-			}
-			destConfFinal[k] = string(advanced)
-		} else {
-			destConfFinal[k] = stringy(v)
-		}
-	}
-	destConfVal, diags := types.MapValueFrom(ctx, types.StringType, destConfFinal)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
-
-	data.Id = types.StringPointerValue(updated.Data.Id)
-	data.Organization = types.StringPointerValue(updated.Data.OrganizationId)
-	data.Name = types.StringPointerValue(updated.Data.Name)
-	data.DestConnectionID = types.StringPointerValue(updated.Data.DestinationConnectionId)
-	data.SourceConnectionID = types.StringPointerValue(updated.Data.SourceConnectionId)
-	data.Mode = types.StringPointerValue(updated.Data.Mode)
-	data.Discover = types.BoolPointerValue(updated.Data.Discover)
-	data.Active = types.BoolPointerValue(updated.Data.Active)
-	data.Schedule = sch
-	data.Schemas = schemaValue
-	data.SourceConfiguration = sourceConfVal
-	data.DestinationConfiguration = destConfVal
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -758,4 +782,84 @@ func (r *bulkSyncResource) Delete(ctx context.Context, req resource.DeleteReques
 
 func (r *bulkSyncResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+}
+
+// bulkSyncDataFromResponse returns the Terraform data for the response from the
+// Polytomic API.
+func bulkSyncDataFromResponse(ctx context.Context, response *polytomic.BulkSyncResponse, schemas []*polytomic.BulkSchema) (bulkSyncResourceData, diag.Diagnostics) {
+	var data bulkSyncResourceData
+	// schedule result
+	sch, diags := types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"frequency":    types.StringType,
+		"day_of_week":  types.StringType,
+		"hour":         types.StringType,
+		"minute":       types.StringType,
+		"month":        types.StringType,
+		"day_of_month": types.StringType,
+	}, BulkSchedule{
+		DayOfMonth: response.Schedule.DayOfMonth,
+		DayOfWeek:  response.Schedule.DayOfWeek,
+		Frequency:  string(response.Schedule.Frequency),
+		Hour:       response.Schedule.Hour,
+		Minute:     response.Schedule.Minute,
+		Month:      response.Schedule.Month,
+	})
+	if diags.HasError() {
+		return data, diags
+	}
+
+	// schemas result
+	schemaVal, diags := types.SetValueFrom(ctx, types.ObjectType{AttrTypes: bulkSyncSchema{}.AttrTypes()}, schemas)
+	if diags.HasError() {
+		return data, diags
+	}
+
+	// source connection result
+	sourceConfVal, err := json.Marshal(response.SourceConfiguration)
+	if err != nil {
+		diags.AddError("Error reading source configuration", err.Error())
+		return data, diags
+	}
+	sourceVal, diags := types.ObjectValueFrom(ctx, bulkSyncConnection{}.AttrTypes(),
+		bulkSyncConnection{
+			ConnectionID:  types.StringPointerValue(response.SourceConnectionId),
+			Configuration: jsontypes.NewNormalizedValue(string(sourceConfVal)),
+		},
+	)
+	if diags.HasError() {
+		return data, diags
+	}
+
+	// destination connection result
+	destConfVal, err := json.Marshal(response.DestinationConfiguration)
+	if err != nil {
+		diags.AddError("Error reading source configuration", err.Error())
+		return data, diags
+	}
+	destVal, diags := types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"connection_id": types.StringType,
+		"configuration": jsontypes.NormalizedType{},
+	},
+		bulkSyncConnection{
+			ConnectionID:  types.StringPointerValue(response.DestinationConnectionId),
+			Configuration: jsontypes.NewNormalizedValue(string(destConfVal)),
+		},
+	)
+	if diags.HasError() {
+		return data, diags
+	}
+
+	data.Id = types.StringPointerValue(response.Id)
+	data.Organization = types.StringPointerValue(response.OrganizationId)
+	data.Name = types.StringPointerValue(response.Name)
+	data.Mode = types.StringPointerValue(response.Mode)
+	data.Active = types.BoolPointerValue(response.Active)
+	data.AutomaticallyAddNewFields = types.StringValue(string(pointer.Get((response.AutomaticallyAddNewFields))))
+	data.AutomaticallyAddNewObjects = types.StringValue(string(pointer.Get((response.AutomaticallyAddNewObjects))))
+	data.Destination = destVal
+	data.Source = sourceVal
+	data.Schedule = sch
+	data.Schemas = schemaVal
+	data.Policies, _ = types.SetValueFrom(ctx, types.StringType, response.Policies)
+	return data, diags
 }

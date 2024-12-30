@@ -22,18 +22,26 @@ data "polytomic_bulk_destination" "dest" {
 }
 
 resource "polytomic_bulk_sync" "sync" {
-  name                 = "Terraform Bulk Sync"
-  source_connection_id = data.polytomic_bulk_source.source.connection_id
-  dest_connection_id   = data.polytomic_bulk_destination.dest.connection_id
-  active               = true
-  discover             = false
-  mode                 = "replicate"
+  name   = "Terraform Bulk Sync"
+  active = true
+  mode   = "replicate"
+
   schedule = {
     frequency = "manual"
   }
+  source = {
+    connection_id = data.polytomic_bulk_source.source.connection_id
+  }
+  destination = {
+    connection_id = data.polytomic_bulk_destination.dest.connection_id
+    configuration = {
+      "schema" = "terraform"
+    }
+  }
   schemas = data.polytomic_bulk_source.source.schemas.*.id
-  dest_configuration = {
-    "dataset" = "terraform"
+
+  discovery = {
+    enabled = false
   }
 }
 ```
@@ -44,24 +52,37 @@ resource "polytomic_bulk_sync" "sync" {
 ### Required
 
 - `active` (Boolean)
-- `dest_connection_id` (String)
-- `discover` (Boolean)
+- `destination` (Attributes) (see [below for nested schema](#nestedatt--destination))
 - `mode` (String)
 - `name` (String)
 - `schedule` (Attributes) (see [below for nested schema](#nestedatt--schedule))
-- `source_connection_id` (String)
+- `source` (Attributes) (see [below for nested schema](#nestedatt--source))
 
 ### Optional
 
-- `dest_configuration` (Map of String)
+- `automatically_add_new_fields` (String)
+- `automatically_add_new_objects` (String)
+- `data_cutoff_timestamp` (String)
+- `disable_record_timestamps` (Boolean)
 - `organization` (String)
 - `policies` (Set of String)
-- `schemas` (Set of String)
-- `source_configuration` (Map of String)
+- `schemas` (Attributes Set) (see [below for nested schema](#nestedatt--schemas))
 
 ### Read-Only
 
 - `id` (String) The ID of this resource.
+
+<a id="nestedatt--destination"></a>
+### Nested Schema for `destination`
+
+Required:
+
+- `connection_id` (String)
+
+Optional:
+
+- `configuration` (String) Integration-specific configuratino for the connection. Documentation for settings is available in the [Polytomic API documentation](https://apidocs.polytomic.com/2024-02-08/guides/configuring-your-connections/overview)
+
 
 <a id="nestedatt--schedule"></a>
 ### Nested Schema for `schedule`
@@ -77,5 +98,61 @@ Optional:
 - `hour` (String)
 - `minute` (String)
 - `month` (String)
+
+
+<a id="nestedatt--source"></a>
+### Nested Schema for `source`
+
+Required:
+
+- `connection_id` (String)
+
+Optional:
+
+- `configuration` (String) Integration-specific configuratino for the connection. Documentation for settings is available in the [Polytomic API documentation](https://apidocs.polytomic.com/2024-02-08/guides/configuring-your-connections/overview)
+
+
+<a id="nestedatt--schemas"></a>
+### Nested Schema for `schemas`
+
+Required:
+
+- `id` (String)
+
+Optional:
+
+- `data_cutoff_timestamp` (String)
+- `disable_data_cutoff` (Boolean)
+- `enabled` (Boolean)
+- `fields` (Attributes Set) (see [below for nested schema](#nestedatt--schemas--fields))
+- `filters` (Attributes Set) (see [below for nested schema](#nestedatt--schemas--filters))
+- `partition_key` (String)
+- `tracking_field` (String)
+
+Read-Only:
+
+- `output_name` (String)
+
+<a id="nestedatt--schemas--fields"></a>
+### Nested Schema for `schemas.fields`
+
+Required:
+
+- `id` (String)
+
+Optional:
+
+- `enabled` (Boolean)
+- `obfuscate` (Boolean)
+
+
+<a id="nestedatt--schemas--filters"></a>
+### Nested Schema for `schemas.filters`
+
+Required:
+
+- `field_id` (String)
+- `function` (String)
+- `value` (String)
 
 
