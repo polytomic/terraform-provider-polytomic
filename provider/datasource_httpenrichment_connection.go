@@ -98,13 +98,26 @@ func (d *HttpenrichmentConnectionDataSource) Schema(ctx context.Context, req dat
 										MarkdownDescription: "",
 										Computed:            true,
 									},
-									"extra_form_data": schema.StringAttribute{
+									"extra_form_data": schema.SetNestedAttribute{
 										MarkdownDescription: "",
 										Computed:            true,
+										NestedObject: schema.NestedAttributeObject{
+											Attributes: map[string]schema.Attribute{
+												"name": schema.StringAttribute{
+													MarkdownDescription: "",
+													Computed:            true,
+												},
+												"value": schema.StringAttribute{
+													MarkdownDescription: "",
+													Computed:            true,
+												},
+											},
+										},
 									},
-									"scopes": schema.StringAttribute{
+									"scopes": schema.SetAttribute{
 										MarkdownDescription: "",
 										Computed:            true,
+										ElementType:         types.StringType,
 									},
 									"token_endpoint": schema.StringAttribute{
 										MarkdownDescription: "",
@@ -118,29 +131,85 @@ func (d *HttpenrichmentConnectionDataSource) Schema(ctx context.Context, req dat
 						MarkdownDescription: "",
 						Computed:            true,
 					},
-					"fields": schema.StringAttribute{
+					"fields": schema.SetNestedAttribute{
 						MarkdownDescription: "List of fields to be returned by the enrichment",
 						Computed:            true,
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+								"name": schema.StringAttribute{
+									MarkdownDescription: "Name of the field",
+									Computed:            true,
+								},
+								"path": schema.StringAttribute{
+									MarkdownDescription: "JSONPath expression to extract the field from the response",
+									Computed:            true,
+								},
+								"type": schema.StringAttribute{
+									MarkdownDescription: "Type of the field",
+									Computed:            true,
+								},
+							},
+						},
 					},
-					"headers": schema.StringAttribute{
+					"headers": schema.SetNestedAttribute{
 						MarkdownDescription: "",
 						Computed:            true,
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+								"name": schema.StringAttribute{
+									MarkdownDescription: "",
+									Computed:            true,
+								},
+								"value": schema.StringAttribute{
+									MarkdownDescription: "",
+									Computed:            true,
+								},
+							},
+						},
 					},
 					"healthcheck": schema.StringAttribute{
 						MarkdownDescription: "Path to request when checking the health of this connection. No health check will be performed if left empty.",
 						Computed:            true,
 					},
-					"input_mappings": schema.StringAttribute{
+					"input_mappings": schema.SetNestedAttribute{
 						MarkdownDescription: "List of input mappings to be used in the query. Each mapping should be a valid JSONPath expression.",
 						Computed:            true,
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+								"name": schema.StringAttribute{
+									MarkdownDescription: "Name of the input mapping",
+									Computed:            true,
+								},
+								"required": schema.BoolAttribute{
+									MarkdownDescription: "Whether the input mapping is required",
+									Computed:            true,
+								},
+								"type": schema.StringAttribute{
+									MarkdownDescription: "Type of the input mapping",
+									Computed:            true,
+								},
+							},
+						},
 					},
 					"method": schema.StringAttribute{
 						MarkdownDescription: "",
 						Computed:            true,
 					},
-					"parameters": schema.StringAttribute{
+					"parameters": schema.SetNestedAttribute{
 						MarkdownDescription: "",
 						Computed:            true,
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+								"name": schema.StringAttribute{
+									MarkdownDescription: "",
+									Computed:            true,
+								},
+								"value": schema.StringAttribute{
+									MarkdownDescription: "",
+									Computed:            true,
+								},
+							},
+						},
 					},
 					"url": schema.StringAttribute{
 						MarkdownDescription: "",
@@ -175,8 +244,6 @@ func (d *HttpenrichmentConnectionDataSource) Read(ctx context.Context, req datas
 		return
 	}
 
-	// For the purposes of this example code, hardcoding a response value to
-	// save into the Terraform state.
 	data.Id = types.StringPointerValue(connection.Data.Id)
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)

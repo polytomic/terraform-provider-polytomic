@@ -182,35 +182,21 @@ func (t *RedshiftConnectionResource) Schema(ctx context.Context, req resource.Sc
 }
 
 type RedshiftConf struct {
-	Aws_access_key_id string `mapstructure:"aws_access_key_id" tfsdk:"aws_access_key_id"`
-
+	Aws_access_key_id     string `mapstructure:"aws_access_key_id" tfsdk:"aws_access_key_id"`
 	Aws_secret_access_key string `mapstructure:"aws_secret_access_key" tfsdk:"aws_secret_access_key"`
-
-	Aws_user string `mapstructure:"aws_user" tfsdk:"aws_user"`
-
-	Database string `mapstructure:"database" tfsdk:"database"`
-
-	Hostname string `mapstructure:"hostname" tfsdk:"hostname"`
-
-	Password string `mapstructure:"password" tfsdk:"password"`
-
-	Port int64 `mapstructure:"port" tfsdk:"port"`
-
-	S3_bucket_name string `mapstructure:"s3_bucket_name" tfsdk:"s3_bucket_name"`
-
-	S3_bucket_region string `mapstructure:"s3_bucket_region" tfsdk:"s3_bucket_region"`
-
-	Ssh bool `mapstructure:"ssh" tfsdk:"ssh"`
-
-	Ssh_host string `mapstructure:"ssh_host" tfsdk:"ssh_host"`
-
-	Ssh_port int64 `mapstructure:"ssh_port" tfsdk:"ssh_port"`
-
-	Ssh_private_key string `mapstructure:"ssh_private_key" tfsdk:"ssh_private_key"`
-
-	Ssh_user string `mapstructure:"ssh_user" tfsdk:"ssh_user"`
-
-	Username string `mapstructure:"username" tfsdk:"username"`
+	Aws_user              string `mapstructure:"aws_user" tfsdk:"aws_user"`
+	Database              string `mapstructure:"database" tfsdk:"database"`
+	Hostname              string `mapstructure:"hostname" tfsdk:"hostname"`
+	Password              string `mapstructure:"password" tfsdk:"password"`
+	Port                  int64  `mapstructure:"port" tfsdk:"port"`
+	S3_bucket_name        string `mapstructure:"s3_bucket_name" tfsdk:"s3_bucket_name"`
+	S3_bucket_region      string `mapstructure:"s3_bucket_region" tfsdk:"s3_bucket_region"`
+	Ssh                   bool   `mapstructure:"ssh" tfsdk:"ssh"`
+	Ssh_host              string `mapstructure:"ssh_host" tfsdk:"ssh_host"`
+	Ssh_port              int64  `mapstructure:"ssh_port" tfsdk:"ssh_port"`
+	Ssh_private_key       string `mapstructure:"ssh_private_key" tfsdk:"ssh_private_key"`
+	Ssh_user              string `mapstructure:"ssh_user" tfsdk:"ssh_user"`
+	Username              string `mapstructure:"username" tfsdk:"username"`
 }
 
 type RedshiftConnectionResource struct {
@@ -242,28 +228,17 @@ func (r *RedshiftConnectionResource) Create(ctx context.Context, req resource.Cr
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "redshift",
 		OrganizationId: data.Organization.ValueStringPointer(),
-		Configuration: map[string]interface{}{
-			"aws_access_key_id":     data.Configuration.Attributes()["aws_access_key_id"].(types.String).ValueString(),
-			"aws_secret_access_key": data.Configuration.Attributes()["aws_secret_access_key"].(types.String).ValueString(),
-			"aws_user":              data.Configuration.Attributes()["aws_user"].(types.String).ValueString(),
-			"database":              data.Configuration.Attributes()["database"].(types.String).ValueString(),
-			"hostname":              data.Configuration.Attributes()["hostname"].(types.String).ValueString(),
-			"password":              data.Configuration.Attributes()["password"].(types.String).ValueString(),
-			"port":                  int(data.Configuration.Attributes()["port"].(types.Int64).ValueInt64()),
-			"s3_bucket_name":        data.Configuration.Attributes()["s3_bucket_name"].(types.String).ValueString(),
-			"s3_bucket_region":      data.Configuration.Attributes()["s3_bucket_region"].(types.String).ValueString(),
-			"ssh":                   data.Configuration.Attributes()["ssh"].(types.Bool).ValueBool(),
-			"ssh_host":              data.Configuration.Attributes()["ssh_host"].(types.String).ValueString(),
-			"ssh_port":              int(data.Configuration.Attributes()["ssh_port"].(types.Int64).ValueInt64()),
-			"ssh_private_key":       data.Configuration.Attributes()["ssh_private_key"].(types.String).ValueString(),
-			"ssh_user":              data.Configuration.Attributes()["ssh_user"].(types.String).ValueString(),
-			"username":              data.Configuration.Attributes()["username"].(types.String).ValueString(),
-		},
-		Validate: pointer.ToBool(false),
+		Configuration:  connConf,
+		Validate:       pointer.ToBool(false),
 	})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
@@ -385,29 +360,18 @@ func (r *RedshiftConnectionResource) Update(ctx context.Context, req resource.Up
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	updated, err := client.Connections.Update(ctx,
 		data.Id.ValueString(),
 		&polytomic.UpdateConnectionRequestSchema{
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueStringPointer(),
-			Configuration: map[string]interface{}{
-				"aws_access_key_id":     data.Configuration.Attributes()["aws_access_key_id"].(types.String).ValueString(),
-				"aws_secret_access_key": data.Configuration.Attributes()["aws_secret_access_key"].(types.String).ValueString(),
-				"aws_user":              data.Configuration.Attributes()["aws_user"].(types.String).ValueString(),
-				"database":              data.Configuration.Attributes()["database"].(types.String).ValueString(),
-				"hostname":              data.Configuration.Attributes()["hostname"].(types.String).ValueString(),
-				"password":              data.Configuration.Attributes()["password"].(types.String).ValueString(),
-				"port":                  int(data.Configuration.Attributes()["port"].(types.Int64).ValueInt64()),
-				"s3_bucket_name":        data.Configuration.Attributes()["s3_bucket_name"].(types.String).ValueString(),
-				"s3_bucket_region":      data.Configuration.Attributes()["s3_bucket_region"].(types.String).ValueString(),
-				"ssh":                   data.Configuration.Attributes()["ssh"].(types.Bool).ValueBool(),
-				"ssh_host":              data.Configuration.Attributes()["ssh_host"].(types.String).ValueString(),
-				"ssh_port":              int(data.Configuration.Attributes()["ssh_port"].(types.Int64).ValueInt64()),
-				"ssh_private_key":       data.Configuration.Attributes()["ssh_private_key"].(types.String).ValueString(),
-				"ssh_user":              data.Configuration.Attributes()["ssh_user"].(types.String).ValueString(),
-				"username":              data.Configuration.Attributes()["username"].(types.String).ValueString(),
-			},
-			Validate: pointer.ToBool(false),
+			Configuration:  connConf,
+			Validate:       pointer.ToBool(false),
 		})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))

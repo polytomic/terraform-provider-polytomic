@@ -99,12 +99,9 @@ func (t *MixpanelConnectionResource) Schema(ctx context.Context, req resource.Sc
 }
 
 type MixpanelConf struct {
-	Project_id int64 `mapstructure:"project_id" tfsdk:"project_id"`
-
-	Region string `mapstructure:"region" tfsdk:"region"`
-
-	Service_account_secret string `mapstructure:"service_account_secret" tfsdk:"service_account_secret"`
-
+	Project_id               int64  `mapstructure:"project_id" tfsdk:"project_id"`
+	Region                   string `mapstructure:"region" tfsdk:"region"`
+	Service_account_secret   string `mapstructure:"service_account_secret" tfsdk:"service_account_secret"`
 	Service_account_username string `mapstructure:"service_account_username" tfsdk:"service_account_username"`
 }
 
@@ -137,17 +134,17 @@ func (r *MixpanelConnectionResource) Create(ctx context.Context, req resource.Cr
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "mixpanel",
 		OrganizationId: data.Organization.ValueStringPointer(),
-		Configuration: map[string]interface{}{
-			"project_id":               int(data.Configuration.Attributes()["project_id"].(types.Int64).ValueInt64()),
-			"region":                   data.Configuration.Attributes()["region"].(types.String).ValueString(),
-			"service_account_secret":   data.Configuration.Attributes()["service_account_secret"].(types.String).ValueString(),
-			"service_account_username": data.Configuration.Attributes()["service_account_username"].(types.String).ValueString(),
-		},
-		Validate: pointer.ToBool(false),
+		Configuration:  connConf,
+		Validate:       pointer.ToBool(false),
 	})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
@@ -247,18 +244,18 @@ func (r *MixpanelConnectionResource) Update(ctx context.Context, req resource.Up
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	updated, err := client.Connections.Update(ctx,
 		data.Id.ValueString(),
 		&polytomic.UpdateConnectionRequestSchema{
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueStringPointer(),
-			Configuration: map[string]interface{}{
-				"project_id":               int(data.Configuration.Attributes()["project_id"].(types.Int64).ValueInt64()),
-				"region":                   data.Configuration.Attributes()["region"].(types.String).ValueString(),
-				"service_account_secret":   data.Configuration.Attributes()["service_account_secret"].(types.String).ValueString(),
-				"service_account_username": data.Configuration.Attributes()["service_account_username"].(types.String).ValueString(),
-			},
-			Validate: pointer.ToBool(false),
+			Configuration:  connConf,
+			Validate:       pointer.ToBool(false),
 		})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))

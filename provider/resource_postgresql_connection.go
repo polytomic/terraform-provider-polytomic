@@ -202,39 +202,23 @@ func (t *PostgresqlConnectionResource) Schema(ctx context.Context, req resource.
 }
 
 type PostgresqlConf struct {
-	Ca_cert string `mapstructure:"ca_cert" tfsdk:"ca_cert"`
-
-	Change_detection bool `mapstructure:"change_detection" tfsdk:"change_detection"`
-
+	Ca_cert            string `mapstructure:"ca_cert" tfsdk:"ca_cert"`
+	Change_detection   bool   `mapstructure:"change_detection" tfsdk:"change_detection"`
 	Client_certificate string `mapstructure:"client_certificate" tfsdk:"client_certificate"`
-
-	Client_certs bool `mapstructure:"client_certs" tfsdk:"client_certs"`
-
-	Client_key string `mapstructure:"client_key" tfsdk:"client_key"`
-
-	Database string `mapstructure:"database" tfsdk:"database"`
-
-	Hostname string `mapstructure:"hostname" tfsdk:"hostname"`
-
-	Password string `mapstructure:"password" tfsdk:"password"`
-
-	Port int64 `mapstructure:"port" tfsdk:"port"`
-
-	Publication string `mapstructure:"publication" tfsdk:"publication"`
-
-	Ssh bool `mapstructure:"ssh" tfsdk:"ssh"`
-
-	Ssh_host string `mapstructure:"ssh_host" tfsdk:"ssh_host"`
-
-	Ssh_port int64 `mapstructure:"ssh_port" tfsdk:"ssh_port"`
-
-	Ssh_private_key string `mapstructure:"ssh_private_key" tfsdk:"ssh_private_key"`
-
-	Ssh_user string `mapstructure:"ssh_user" tfsdk:"ssh_user"`
-
-	Ssl bool `mapstructure:"ssl" tfsdk:"ssl"`
-
-	Username string `mapstructure:"username" tfsdk:"username"`
+	Client_certs       bool   `mapstructure:"client_certs" tfsdk:"client_certs"`
+	Client_key         string `mapstructure:"client_key" tfsdk:"client_key"`
+	Database           string `mapstructure:"database" tfsdk:"database"`
+	Hostname           string `mapstructure:"hostname" tfsdk:"hostname"`
+	Password           string `mapstructure:"password" tfsdk:"password"`
+	Port               int64  `mapstructure:"port" tfsdk:"port"`
+	Publication        string `mapstructure:"publication" tfsdk:"publication"`
+	Ssh                bool   `mapstructure:"ssh" tfsdk:"ssh"`
+	Ssh_host           string `mapstructure:"ssh_host" tfsdk:"ssh_host"`
+	Ssh_port           int64  `mapstructure:"ssh_port" tfsdk:"ssh_port"`
+	Ssh_private_key    string `mapstructure:"ssh_private_key" tfsdk:"ssh_private_key"`
+	Ssh_user           string `mapstructure:"ssh_user" tfsdk:"ssh_user"`
+	Ssl                bool   `mapstructure:"ssl" tfsdk:"ssl"`
+	Username           string `mapstructure:"username" tfsdk:"username"`
 }
 
 type PostgresqlConnectionResource struct {
@@ -266,30 +250,17 @@ func (r *PostgresqlConnectionResource) Create(ctx context.Context, req resource.
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "postgresql",
 		OrganizationId: data.Organization.ValueStringPointer(),
-		Configuration: map[string]interface{}{
-			"ca_cert":            data.Configuration.Attributes()["ca_cert"].(types.String).ValueString(),
-			"change_detection":   data.Configuration.Attributes()["change_detection"].(types.Bool).ValueBool(),
-			"client_certificate": data.Configuration.Attributes()["client_certificate"].(types.String).ValueString(),
-			"client_certs":       data.Configuration.Attributes()["client_certs"].(types.Bool).ValueBool(),
-			"client_key":         data.Configuration.Attributes()["client_key"].(types.String).ValueString(),
-			"database":           data.Configuration.Attributes()["database"].(types.String).ValueString(),
-			"hostname":           data.Configuration.Attributes()["hostname"].(types.String).ValueString(),
-			"password":           data.Configuration.Attributes()["password"].(types.String).ValueString(),
-			"port":               int(data.Configuration.Attributes()["port"].(types.Int64).ValueInt64()),
-			"publication":        data.Configuration.Attributes()["publication"].(types.String).ValueString(),
-			"ssh":                data.Configuration.Attributes()["ssh"].(types.Bool).ValueBool(),
-			"ssh_host":           data.Configuration.Attributes()["ssh_host"].(types.String).ValueString(),
-			"ssh_port":           int(data.Configuration.Attributes()["ssh_port"].(types.Int64).ValueInt64()),
-			"ssh_private_key":    data.Configuration.Attributes()["ssh_private_key"].(types.String).ValueString(),
-			"ssh_user":           data.Configuration.Attributes()["ssh_user"].(types.String).ValueString(),
-			"ssl":                data.Configuration.Attributes()["ssl"].(types.Bool).ValueBool(),
-			"username":           data.Configuration.Attributes()["username"].(types.String).ValueString(),
-		},
-		Validate: pointer.ToBool(false),
+		Configuration:  connConf,
+		Validate:       pointer.ToBool(false),
 	})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
@@ -415,31 +386,18 @@ func (r *PostgresqlConnectionResource) Update(ctx context.Context, req resource.
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	updated, err := client.Connections.Update(ctx,
 		data.Id.ValueString(),
 		&polytomic.UpdateConnectionRequestSchema{
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueStringPointer(),
-			Configuration: map[string]interface{}{
-				"ca_cert":            data.Configuration.Attributes()["ca_cert"].(types.String).ValueString(),
-				"change_detection":   data.Configuration.Attributes()["change_detection"].(types.Bool).ValueBool(),
-				"client_certificate": data.Configuration.Attributes()["client_certificate"].(types.String).ValueString(),
-				"client_certs":       data.Configuration.Attributes()["client_certs"].(types.Bool).ValueBool(),
-				"client_key":         data.Configuration.Attributes()["client_key"].(types.String).ValueString(),
-				"database":           data.Configuration.Attributes()["database"].(types.String).ValueString(),
-				"hostname":           data.Configuration.Attributes()["hostname"].(types.String).ValueString(),
-				"password":           data.Configuration.Attributes()["password"].(types.String).ValueString(),
-				"port":               int(data.Configuration.Attributes()["port"].(types.Int64).ValueInt64()),
-				"publication":        data.Configuration.Attributes()["publication"].(types.String).ValueString(),
-				"ssh":                data.Configuration.Attributes()["ssh"].(types.Bool).ValueBool(),
-				"ssh_host":           data.Configuration.Attributes()["ssh_host"].(types.String).ValueString(),
-				"ssh_port":           int(data.Configuration.Attributes()["ssh_port"].(types.Int64).ValueInt64()),
-				"ssh_private_key":    data.Configuration.Attributes()["ssh_private_key"].(types.String).ValueString(),
-				"ssh_user":           data.Configuration.Attributes()["ssh_user"].(types.String).ValueString(),
-				"ssl":                data.Configuration.Attributes()["ssl"].(types.Bool).ValueBool(),
-				"username":           data.Configuration.Attributes()["username"].(types.String).ValueString(),
-			},
-			Validate: pointer.ToBool(false),
+			Configuration:  connConf,
+			Validate:       pointer.ToBool(false),
 		})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))

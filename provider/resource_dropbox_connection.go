@@ -140,23 +140,15 @@ func (t *DropboxConnectionResource) Schema(ctx context.Context, req resource.Sch
 }
 
 type DropboxConf struct {
-	App_key string `mapstructure:"app_key" tfsdk:"app_key"`
-
-	App_secret string `mapstructure:"app_secret" tfsdk:"app_secret"`
-
-	Bucket string `mapstructure:"bucket" tfsdk:"bucket"`
-
-	Is_single_table bool `mapstructure:"is_single_table" tfsdk:"is_single_table"`
-
-	Oauth_refresh_token string `mapstructure:"oauth_refresh_token" tfsdk:"oauth_refresh_token"`
-
-	Oauth_token_expiry string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
-
+	App_key                  string `mapstructure:"app_key" tfsdk:"app_key"`
+	App_secret               string `mapstructure:"app_secret" tfsdk:"app_secret"`
+	Bucket                   string `mapstructure:"bucket" tfsdk:"bucket"`
+	Is_single_table          bool   `mapstructure:"is_single_table" tfsdk:"is_single_table"`
+	Oauth_refresh_token      string `mapstructure:"oauth_refresh_token" tfsdk:"oauth_refresh_token"`
+	Oauth_token_expiry       string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
 	Single_table_file_format string `mapstructure:"single_table_file_format" tfsdk:"single_table_file_format"`
-
-	Single_table_name string `mapstructure:"single_table_name" tfsdk:"single_table_name"`
-
-	Skip_lines int64 `mapstructure:"skip_lines" tfsdk:"skip_lines"`
+	Single_table_name        string `mapstructure:"single_table_name" tfsdk:"single_table_name"`
+	Skip_lines               int64  `mapstructure:"skip_lines" tfsdk:"skip_lines"`
 }
 
 type DropboxConnectionResource struct {
@@ -188,22 +180,17 @@ func (r *DropboxConnectionResource) Create(ctx context.Context, req resource.Cre
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "dropbox",
 		OrganizationId: data.Organization.ValueStringPointer(),
-		Configuration: map[string]interface{}{
-			"app_key":                  data.Configuration.Attributes()["app_key"].(types.String).ValueString(),
-			"app_secret":               data.Configuration.Attributes()["app_secret"].(types.String).ValueString(),
-			"bucket":                   data.Configuration.Attributes()["bucket"].(types.String).ValueString(),
-			"is_single_table":          data.Configuration.Attributes()["is_single_table"].(types.Bool).ValueBool(),
-			"oauth_refresh_token":      data.Configuration.Attributes()["oauth_refresh_token"].(types.String).ValueString(),
-			"oauth_token_expiry":       data.Configuration.Attributes()["oauth_token_expiry"].(types.String).ValueString(),
-			"single_table_file_format": data.Configuration.Attributes()["single_table_file_format"].(types.String).ValueString(),
-			"single_table_name":        data.Configuration.Attributes()["single_table_name"].(types.String).ValueString(),
-			"skip_lines":               int(data.Configuration.Attributes()["skip_lines"].(types.Int64).ValueInt64()),
-		},
-		Validate: pointer.ToBool(false),
+		Configuration:  connConf,
+		Validate:       pointer.ToBool(false),
 	})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
@@ -313,23 +300,18 @@ func (r *DropboxConnectionResource) Update(ctx context.Context, req resource.Upd
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	updated, err := client.Connections.Update(ctx,
 		data.Id.ValueString(),
 		&polytomic.UpdateConnectionRequestSchema{
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueStringPointer(),
-			Configuration: map[string]interface{}{
-				"app_key":                  data.Configuration.Attributes()["app_key"].(types.String).ValueString(),
-				"app_secret":               data.Configuration.Attributes()["app_secret"].(types.String).ValueString(),
-				"bucket":                   data.Configuration.Attributes()["bucket"].(types.String).ValueString(),
-				"is_single_table":          data.Configuration.Attributes()["is_single_table"].(types.Bool).ValueBool(),
-				"oauth_refresh_token":      data.Configuration.Attributes()["oauth_refresh_token"].(types.String).ValueString(),
-				"oauth_token_expiry":       data.Configuration.Attributes()["oauth_token_expiry"].(types.String).ValueString(),
-				"single_table_file_format": data.Configuration.Attributes()["single_table_file_format"].(types.String).ValueString(),
-				"single_table_name":        data.Configuration.Attributes()["single_table_name"].(types.String).ValueString(),
-				"skip_lines":               int(data.Configuration.Attributes()["skip_lines"].(types.Int64).ValueInt64()),
-			},
-			Validate: pointer.ToBool(false),
+			Configuration:  connConf,
+			Validate:       pointer.ToBool(false),
 		})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))

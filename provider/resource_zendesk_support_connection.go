@@ -113,17 +113,12 @@ func (t *Zendesk_supportConnectionResource) Schema(ctx context.Context, req reso
 }
 
 type Zendesk_supportConf struct {
-	Api_token string `mapstructure:"api_token" tfsdk:"api_token"`
-
-	Auth_method string `mapstructure:"auth_method" tfsdk:"auth_method"`
-
-	Custom_api_limits bool `mapstructure:"custom_api_limits" tfsdk:"custom_api_limits"`
-
-	Domain string `mapstructure:"domain" tfsdk:"domain"`
-
-	Email string `mapstructure:"email" tfsdk:"email"`
-
-	Ratelimit_rpm int64 `mapstructure:"ratelimit_rpm" tfsdk:"ratelimit_rpm"`
+	Api_token         string `mapstructure:"api_token" tfsdk:"api_token"`
+	Auth_method       string `mapstructure:"auth_method" tfsdk:"auth_method"`
+	Custom_api_limits bool   `mapstructure:"custom_api_limits" tfsdk:"custom_api_limits"`
+	Domain            string `mapstructure:"domain" tfsdk:"domain"`
+	Email             string `mapstructure:"email" tfsdk:"email"`
+	Ratelimit_rpm     int64  `mapstructure:"ratelimit_rpm" tfsdk:"ratelimit_rpm"`
 }
 
 type Zendesk_supportConnectionResource struct {
@@ -155,19 +150,17 @@ func (r *Zendesk_supportConnectionResource) Create(ctx context.Context, req reso
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "zendesk_support",
 		OrganizationId: data.Organization.ValueStringPointer(),
-		Configuration: map[string]interface{}{
-			"api_token":         data.Configuration.Attributes()["api_token"].(types.String).ValueString(),
-			"auth_method":       data.Configuration.Attributes()["auth_method"].(types.String).ValueString(),
-			"custom_api_limits": data.Configuration.Attributes()["custom_api_limits"].(types.Bool).ValueBool(),
-			"domain":            data.Configuration.Attributes()["domain"].(types.String).ValueString(),
-			"email":             data.Configuration.Attributes()["email"].(types.String).ValueString(),
-			"ratelimit_rpm":     int(data.Configuration.Attributes()["ratelimit_rpm"].(types.Int64).ValueInt64()),
-		},
-		Validate: pointer.ToBool(false),
+		Configuration:  connConf,
+		Validate:       pointer.ToBool(false),
 	})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
@@ -271,20 +264,18 @@ func (r *Zendesk_supportConnectionResource) Update(ctx context.Context, req reso
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	updated, err := client.Connections.Update(ctx,
 		data.Id.ValueString(),
 		&polytomic.UpdateConnectionRequestSchema{
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueStringPointer(),
-			Configuration: map[string]interface{}{
-				"api_token":         data.Configuration.Attributes()["api_token"].(types.String).ValueString(),
-				"auth_method":       data.Configuration.Attributes()["auth_method"].(types.String).ValueString(),
-				"custom_api_limits": data.Configuration.Attributes()["custom_api_limits"].(types.Bool).ValueBool(),
-				"domain":            data.Configuration.Attributes()["domain"].(types.String).ValueString(),
-				"email":             data.Configuration.Attributes()["email"].(types.String).ValueString(),
-				"ratelimit_rpm":     int(data.Configuration.Attributes()["ratelimit_rpm"].(types.Int64).ValueInt64()),
-			},
-			Validate: pointer.ToBool(false),
+			Configuration:  connConf,
+			Validate:       pointer.ToBool(false),
 		})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))

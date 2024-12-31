@@ -91,8 +91,6 @@ func (d *Zendesk_chatConnectionDataSource) Read(ctx context.Context, req datasou
 		return
 	}
 
-	// For the purposes of this example code, hardcoding a response value to
-	// save into the Terraform state.
 	data.Id = types.StringPointerValue(connection.Data.Id)
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)

@@ -6,8 +6,8 @@ import (
 	"strings"
 	"unicode"
 
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
 
 const (
@@ -143,18 +143,50 @@ func attrValueInt(v any) int {
 	return 0
 }
 
-func objectMapValue(ctx context.Context, value types.Object) map[string]interface{} {
+func objectMapValue(ctx context.Context, value types.Object) (map[string]interface{}, error) {
 	out := make(map[string]interface{})
-	d := value.As(ctx, &out, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})
-	if d.HasError() {
-		summary := ""
-		for _, dd := range d {
-			summary += dd.Summary() + ":\n" + dd.Detail() + "\n"
+
+	for k, v := range value.Attributes() {
+		val, err := attrValue(ctx, v)
+		if err != nil {
+			return nil, fmt.Errorf("error converting value for %s: %w", k, err)
 		}
-		panic(summary)
+		out[k] = val
 	}
-	return out
+
+	return out, nil
+}
+
+func attrValue(ctx context.Context, val attr.Value) (interface{}, error) {
+	switch tv := val.(type) {
+	case types.Bool:
+		return tv.ValueBool(), nil
+	case types.Int32:
+		return tv.ValueInt32(), nil
+	case types.Int64:
+		return tv.ValueInt64(), nil
+	case types.Float32:
+		return tv.ValueFloat32(), nil
+	case types.Float64:
+		return tv.ValueFloat64(), nil
+	case types.Number:
+		return tv.ValueBigFloat(), nil
+	case types.String:
+		return tv.ValueString(), nil
+	case types.Object:
+		return objectMapValue(ctx, tv)
+	case types.Set:
+		elemsIn := tv.Elements()
+		elemsOut := make([]interface{}, len(elemsIn))
+		for i, elem := range elemsIn {
+			elemOut, err := attrValue(ctx, elem)
+			if err != nil {
+				return nil, fmt.Errorf("error converting set element %d: %w", i, err)
+			}
+			elemsOut[i] = elemOut
+		}
+		return elemsOut, nil
+	}
+
+	return nil, fmt.Errorf("unsupported type %T", val)
 }

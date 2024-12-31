@@ -50,9 +50,21 @@ func (d *WebhookConnectionDataSource) Schema(ctx context.Context, req datasource
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
-					"headers": schema.StringAttribute{
+					"headers": schema.SetNestedAttribute{
 						MarkdownDescription: "",
 						Computed:            true,
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+								"name": schema.StringAttribute{
+									MarkdownDescription: "",
+									Computed:            true,
+								},
+								"value": schema.StringAttribute{
+									MarkdownDescription: "",
+									Computed:            true,
+								},
+							},
+						},
 					},
 					"url": schema.StringAttribute{
 						MarkdownDescription: "",
@@ -87,8 +99,6 @@ func (d *WebhookConnectionDataSource) Read(ctx context.Context, req datasource.R
 		return
 	}
 
-	// For the purposes of this example code, hardcoding a response value to
-	// save into the Terraform state.
 	data.Id = types.StringPointerValue(connection.Data.Id)
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)

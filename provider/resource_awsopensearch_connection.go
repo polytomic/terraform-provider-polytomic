@@ -106,15 +106,11 @@ func (t *AwsopensearchConnectionResource) Schema(ctx context.Context, req resour
 }
 
 type AwsopensearchConf struct {
-	Aws_access_key_id string `mapstructure:"aws_access_key_id" tfsdk:"aws_access_key_id"`
-
+	Aws_access_key_id     string `mapstructure:"aws_access_key_id" tfsdk:"aws_access_key_id"`
 	Aws_secret_access_key string `mapstructure:"aws_secret_access_key" tfsdk:"aws_secret_access_key"`
-
-	Aws_user string `mapstructure:"aws_user" tfsdk:"aws_user"`
-
-	Endpoint string `mapstructure:"endpoint" tfsdk:"endpoint"`
-
-	Region string `mapstructure:"region" tfsdk:"region"`
+	Aws_user              string `mapstructure:"aws_user" tfsdk:"aws_user"`
+	Endpoint              string `mapstructure:"endpoint" tfsdk:"endpoint"`
+	Region                string `mapstructure:"region" tfsdk:"region"`
 }
 
 type AwsopensearchConnectionResource struct {
@@ -146,18 +142,17 @@ func (r *AwsopensearchConnectionResource) Create(ctx context.Context, req resour
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "awsopensearch",
 		OrganizationId: data.Organization.ValueStringPointer(),
-		Configuration: map[string]interface{}{
-			"aws_access_key_id":     data.Configuration.Attributes()["aws_access_key_id"].(types.String).ValueString(),
-			"aws_secret_access_key": data.Configuration.Attributes()["aws_secret_access_key"].(types.String).ValueString(),
-			"aws_user":              data.Configuration.Attributes()["aws_user"].(types.String).ValueString(),
-			"endpoint":              data.Configuration.Attributes()["endpoint"].(types.String).ValueString(),
-			"region":                data.Configuration.Attributes()["region"].(types.String).ValueString(),
-		},
-		Validate: pointer.ToBool(false),
+		Configuration:  connConf,
+		Validate:       pointer.ToBool(false),
 	})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
@@ -259,19 +254,18 @@ func (r *AwsopensearchConnectionResource) Update(ctx context.Context, req resour
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	updated, err := client.Connections.Update(ctx,
 		data.Id.ValueString(),
 		&polytomic.UpdateConnectionRequestSchema{
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueStringPointer(),
-			Configuration: map[string]interface{}{
-				"aws_access_key_id":     data.Configuration.Attributes()["aws_access_key_id"].(types.String).ValueString(),
-				"aws_secret_access_key": data.Configuration.Attributes()["aws_secret_access_key"].(types.String).ValueString(),
-				"aws_user":              data.Configuration.Attributes()["aws_user"].(types.String).ValueString(),
-				"endpoint":              data.Configuration.Attributes()["endpoint"].(types.String).ValueString(),
-				"region":                data.Configuration.Attributes()["region"].(types.String).ValueString(),
-			},
-			Validate: pointer.ToBool(false),
+			Configuration:  connConf,
+			Validate:       pointer.ToBool(false),
 		})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))

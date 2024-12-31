@@ -86,7 +86,6 @@ func (t *CosmosdbConnectionResource) Schema(ctx context.Context, req resource.Sc
 
 type CosmosdbConf struct {
 	Key string `mapstructure:"key" tfsdk:"key"`
-
 	Uri string `mapstructure:"uri" tfsdk:"uri"`
 }
 
@@ -119,15 +118,17 @@ func (r *CosmosdbConnectionResource) Create(ctx context.Context, req resource.Cr
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "cosmosdb",
 		OrganizationId: data.Organization.ValueStringPointer(),
-		Configuration: map[string]interface{}{
-			"key": data.Configuration.Attributes()["key"].(types.String).ValueString(),
-			"uri": data.Configuration.Attributes()["uri"].(types.String).ValueString(),
-		},
-		Validate: pointer.ToBool(false),
+		Configuration:  connConf,
+		Validate:       pointer.ToBool(false),
 	})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
@@ -223,16 +224,18 @@ func (r *CosmosdbConnectionResource) Update(ctx context.Context, req resource.Up
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	updated, err := client.Connections.Update(ctx,
 		data.Id.ValueString(),
 		&polytomic.UpdateConnectionRequestSchema{
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueStringPointer(),
-			Configuration: map[string]interface{}{
-				"key": data.Configuration.Attributes()["key"].(types.String).ValueString(),
-				"uri": data.Configuration.Attributes()["uri"].(types.String).ValueString(),
-			},
-			Validate: pointer.ToBool(false),
+			Configuration:  connConf,
+			Validate:       pointer.ToBool(false),
 		})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))

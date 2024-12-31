@@ -50,9 +50,33 @@ func (d *DataliteConnectionDataSource) Schema(ctx context.Context, req datasourc
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
-					"schemas": schema.StringAttribute{
+					"schemas": schema.SetNestedAttribute{
 						MarkdownDescription: "",
 						Computed:            true,
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+								"alias": schema.StringAttribute{
+									MarkdownDescription: "",
+									Computed:            true,
+								},
+								"connection_id": schema.StringAttribute{
+									MarkdownDescription: "",
+									Computed:            true,
+								},
+								"connection_name": schema.StringAttribute{
+									MarkdownDescription: "",
+									Computed:            true,
+								},
+								"connection_type": schema.StringAttribute{
+									MarkdownDescription: "",
+									Computed:            true,
+								},
+								"schema_id": schema.StringAttribute{
+									MarkdownDescription: "",
+									Computed:            true,
+								},
+							},
+						},
 					},
 				},
 				Optional: true,
@@ -83,8 +107,6 @@ func (d *DataliteConnectionDataSource) Read(ctx context.Context, req datasource.
 		return
 	}
 
-	// For the purposes of this example code, hardcoding a response value to
-	// save into the Terraform state.
 	data.Id = types.StringPointerValue(connection.Data.Id)
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)

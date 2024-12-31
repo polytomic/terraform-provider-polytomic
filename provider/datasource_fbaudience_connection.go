@@ -54,9 +54,21 @@ func (d *FbaudienceConnectionDataSource) Schema(ctx context.Context, req datasou
 						MarkdownDescription: "",
 						Computed:            true,
 					},
-					"accounts": schema.StringAttribute{
+					"accounts": schema.SetNestedAttribute{
 						MarkdownDescription: "",
 						Computed:            true,
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+								"label": schema.StringAttribute{
+									MarkdownDescription: "",
+									Computed:            true,
+								},
+								"value": schema.StringAttribute{
+									MarkdownDescription: "",
+									Computed:            true,
+								},
+							},
+						},
 					},
 					"auth_method": schema.StringAttribute{
 						MarkdownDescription: "",
@@ -99,8 +111,6 @@ func (d *FbaudienceConnectionDataSource) Read(ctx context.Context, req datasourc
 		return
 	}
 
-	// For the purposes of this example code, hardcoding a response value to
-	// save into the Terraform state.
 	data.Id = types.StringPointerValue(connection.Data.Id)
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)

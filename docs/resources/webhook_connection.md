@@ -47,7 +47,15 @@ Required:
 
 Optional:
 
-- `headers` (String)
+- `headers` (Attributes Set) (see [below for nested schema](#nestedatt--configuration--headers))
 - `secret` (String, Sensitive)
+
+<a id="nestedatt--configuration--headers"></a>
+### Nested Schema for `configuration.headers`
+
+Optional:
+
+- `name` (String)
+- `value` (String)
 
 

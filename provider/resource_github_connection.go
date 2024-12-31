@@ -81,12 +81,30 @@ func (t *GithubConnectionResource) Schema(ctx context.Context, req resource.Sche
 							stringplanmodifier.UseStateForUnknown(),
 						},
 					},
-					"repositories": schema.StringAttribute{
+					"repositories": schema.SetNestedAttribute{
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+								"label": schema.StringAttribute{
+									MarkdownDescription: "",
+									Required:            false,
+									Optional:            true,
+									Computed:            true,
+									Sensitive:           false,
+								},
+								"value": schema.StringAttribute{
+									MarkdownDescription: "",
+									Required:            false,
+									Optional:            true,
+									Computed:            true,
+									Sensitive:           false,
+								},
+							},
+						},
 					},
 				},
 
@@ -112,15 +130,14 @@ func (t *GithubConnectionResource) Schema(ctx context.Context, req resource.Sche
 }
 
 type GithubConf struct {
-	Authenticated bool `mapstructure:"authenticated" tfsdk:"authenticated"`
-
-	Client_id string `mapstructure:"client_id" tfsdk:"client_id"`
-
-	Client_secret string `mapstructure:"client_secret" tfsdk:"client_secret"`
-
+	Authenticated      bool   `mapstructure:"authenticated" tfsdk:"authenticated"`
+	Client_id          string `mapstructure:"client_id" tfsdk:"client_id"`
+	Client_secret      string `mapstructure:"client_secret" tfsdk:"client_secret"`
 	Oauth_access_token string `mapstructure:"oauth_access_token" tfsdk:"oauth_access_token"`
-
-	Repositories string `mapstructure:"repositories" tfsdk:"repositories"`
+	Repositories       []struct {
+		Label string `mapstructure:"label" tfsdk:"label"`
+		Value string `mapstructure:"value" tfsdk:"value"`
+	} `mapstructure:"repositories" tfsdk:"repositories"`
 }
 
 type GithubConnectionResource struct {
@@ -152,18 +169,17 @@ func (r *GithubConnectionResource) Create(ctx context.Context, req resource.Crea
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "github",
 		OrganizationId: data.Organization.ValueStringPointer(),
-		Configuration: map[string]interface{}{
-			"authenticated":      data.Configuration.Attributes()["authenticated"].(types.Bool).ValueBool(),
-			"client_id":          data.Configuration.Attributes()["client_id"].(types.String).ValueString(),
-			"client_secret":      data.Configuration.Attributes()["client_secret"].(types.String).ValueString(),
-			"oauth_access_token": data.Configuration.Attributes()["oauth_access_token"].(types.String).ValueString(),
-			"repositories":       data.Configuration.Attributes()["repositories"].(types.String).ValueString(),
-		},
-		Validate: pointer.ToBool(false),
+		Configuration:  connConf,
+		Validate:       pointer.ToBool(false),
 	})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
@@ -184,7 +200,14 @@ func (r *GithubConnectionResource) Create(ctx context.Context, req resource.Crea
 		"client_id":          types.StringType,
 		"client_secret":      types.StringType,
 		"oauth_access_token": types.StringType,
-		"repositories":       types.StringType,
+		"repositories": types.SetType{
+			ElemType: types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"label": types.StringType,
+					"value": types.StringType,
+				},
+			},
+		},
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -239,7 +262,14 @@ func (r *GithubConnectionResource) Read(ctx context.Context, req resource.ReadRe
 		"client_id":          types.StringType,
 		"client_secret":      types.StringType,
 		"oauth_access_token": types.StringType,
-		"repositories":       types.StringType,
+		"repositories": types.SetType{
+			ElemType: types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"label": types.StringType,
+					"value": types.StringType,
+				},
+			},
+		},
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -265,19 +295,18 @@ func (r *GithubConnectionResource) Update(ctx context.Context, req resource.Upda
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	updated, err := client.Connections.Update(ctx,
 		data.Id.ValueString(),
 		&polytomic.UpdateConnectionRequestSchema{
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueStringPointer(),
-			Configuration: map[string]interface{}{
-				"authenticated":      data.Configuration.Attributes()["authenticated"].(types.Bool).ValueBool(),
-				"client_id":          data.Configuration.Attributes()["client_id"].(types.String).ValueString(),
-				"client_secret":      data.Configuration.Attributes()["client_secret"].(types.String).ValueString(),
-				"oauth_access_token": data.Configuration.Attributes()["oauth_access_token"].(types.String).ValueString(),
-				"repositories":       data.Configuration.Attributes()["repositories"].(types.String).ValueString(),
-			},
-			Validate: pointer.ToBool(false),
+			Configuration:  connConf,
+			Validate:       pointer.ToBool(false),
 		})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))
@@ -299,7 +328,14 @@ func (r *GithubConnectionResource) Update(ctx context.Context, req resource.Upda
 		"client_id":          types.StringType,
 		"client_secret":      types.StringType,
 		"oauth_access_token": types.StringType,
-		"repositories":       types.StringType,
+		"repositories": types.SetType{
+			ElemType: types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"label": types.StringType,
+					"value": types.StringType,
+				},
+			},
+		},
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

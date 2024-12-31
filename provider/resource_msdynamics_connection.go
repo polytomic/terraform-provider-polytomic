@@ -112,15 +112,11 @@ func (t *MsdynamicsConnectionResource) Schema(ctx context.Context, req resource.
 }
 
 type MsdynamicsConf struct {
-	Client_id string `mapstructure:"client_id" tfsdk:"client_id"`
-
-	Client_secret string `mapstructure:"client_secret" tfsdk:"client_secret"`
-
+	Client_id               string `mapstructure:"client_id" tfsdk:"client_id"`
+	Client_secret           string `mapstructure:"client_secret" tfsdk:"client_secret"`
 	Dynamics_environment_id string `mapstructure:"dynamics_environment_id" tfsdk:"dynamics_environment_id"`
-
-	Oauth_refresh_token string `mapstructure:"oauth_refresh_token" tfsdk:"oauth_refresh_token"`
-
-	Oauth_token_expiry string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
+	Oauth_refresh_token     string `mapstructure:"oauth_refresh_token" tfsdk:"oauth_refresh_token"`
+	Oauth_token_expiry      string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
 }
 
 type MsdynamicsConnectionResource struct {
@@ -152,18 +148,17 @@ func (r *MsdynamicsConnectionResource) Create(ctx context.Context, req resource.
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "msdynamics",
 		OrganizationId: data.Organization.ValueStringPointer(),
-		Configuration: map[string]interface{}{
-			"client_id":               data.Configuration.Attributes()["client_id"].(types.String).ValueString(),
-			"client_secret":           data.Configuration.Attributes()["client_secret"].(types.String).ValueString(),
-			"dynamics_environment_id": data.Configuration.Attributes()["dynamics_environment_id"].(types.String).ValueString(),
-			"oauth_refresh_token":     data.Configuration.Attributes()["oauth_refresh_token"].(types.String).ValueString(),
-			"oauth_token_expiry":      data.Configuration.Attributes()["oauth_token_expiry"].(types.String).ValueString(),
-		},
-		Validate: pointer.ToBool(false),
+		Configuration:  connConf,
+		Validate:       pointer.ToBool(false),
 	})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
@@ -265,19 +260,18 @@ func (r *MsdynamicsConnectionResource) Update(ctx context.Context, req resource.
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	updated, err := client.Connections.Update(ctx,
 		data.Id.ValueString(),
 		&polytomic.UpdateConnectionRequestSchema{
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueStringPointer(),
-			Configuration: map[string]interface{}{
-				"client_id":               data.Configuration.Attributes()["client_id"].(types.String).ValueString(),
-				"client_secret":           data.Configuration.Attributes()["client_secret"].(types.String).ValueString(),
-				"dynamics_environment_id": data.Configuration.Attributes()["dynamics_environment_id"].(types.String).ValueString(),
-				"oauth_refresh_token":     data.Configuration.Attributes()["oauth_refresh_token"].(types.String).ValueString(),
-				"oauth_token_expiry":      data.Configuration.Attributes()["oauth_token_expiry"].(types.String).ValueString(),
-			},
-			Validate: pointer.ToBool(false),
+			Configuration:  connConf,
+			Validate:       pointer.ToBool(false),
 		})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))

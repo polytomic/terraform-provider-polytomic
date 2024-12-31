@@ -108,11 +108,12 @@ func (t *DbtcloudConnectionResource) Schema(ctx context.Context, req resource.Sc
 }
 
 type DbtcloudConf struct {
-	Account map[string]interface{} `mapstructure:"account" tfsdk:"account"`
-
+	Account struct {
+		Id   int64  `mapstructure:"id" tfsdk:"id"`
+		Name string `mapstructure:"name" tfsdk:"name"`
+	} `mapstructure:"account" tfsdk:"account"`
 	Token string `mapstructure:"token" tfsdk:"token"`
-
-	Url string `mapstructure:"url" tfsdk:"url"`
+	Url   string `mapstructure:"url" tfsdk:"url"`
 }
 
 type DbtcloudConnectionResource struct {
@@ -144,19 +145,17 @@ func (r *DbtcloudConnectionResource) Create(ctx context.Context, req resource.Cr
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "dbtcloud",
 		OrganizationId: data.Organization.ValueStringPointer(),
-		Configuration: map[string]interface{}{
-			"account": map[string]interface{}{
-				"id":   int(data.Configuration.Attributes()["account"].(types.Object).Attributes()["id"].(types.Int64).ValueInt64()),
-				"name": data.Configuration.Attributes()["account"].(types.Object).Attributes()["name"].(types.String).ValueString(),
-			},
-			"token": data.Configuration.Attributes()["token"].(types.String).ValueString(),
-			"url":   data.Configuration.Attributes()["url"].(types.String).ValueString(),
-		},
-		Validate: pointer.ToBool(false),
+		Configuration:  connConf,
+		Validate:       pointer.ToBool(false),
 	})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
@@ -262,20 +261,18 @@ func (r *DbtcloudConnectionResource) Update(ctx context.Context, req resource.Up
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	updated, err := client.Connections.Update(ctx,
 		data.Id.ValueString(),
 		&polytomic.UpdateConnectionRequestSchema{
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueStringPointer(),
-			Configuration: map[string]interface{}{
-				"account": map[string]interface{}{
-					"id":   int(data.Configuration.Attributes()["account"].(types.Object).Attributes()["id"].(types.Int64).ValueInt64()),
-					"name": data.Configuration.Attributes()["account"].(types.Object).Attributes()["name"].(types.String).ValueString(),
-				},
-				"token": data.Configuration.Attributes()["token"].(types.String).ValueString(),
-				"url":   data.Configuration.Attributes()["url"].(types.String).ValueString(),
-			},
-			Validate: pointer.ToBool(false),
+			Configuration:  connConf,
+			Validate:       pointer.ToBool(false),
 		})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))

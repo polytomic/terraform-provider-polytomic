@@ -140,23 +140,15 @@ func (t *SnowflakeConnectionResource) Schema(ctx context.Context, req resource.S
 }
 
 type SnowflakeConf struct {
-	Account string `mapstructure:"account" tfsdk:"account"`
-
-	Dbname string `mapstructure:"dbname" tfsdk:"dbname"`
-
-	Key_pair_auth bool `mapstructure:"key_pair_auth" tfsdk:"key_pair_auth"`
-
-	Params string `mapstructure:"params" tfsdk:"params"`
-
-	Password string `mapstructure:"password" tfsdk:"password"`
-
-	Private_key string `mapstructure:"private_key" tfsdk:"private_key"`
-
+	Account                string `mapstructure:"account" tfsdk:"account"`
+	Dbname                 string `mapstructure:"dbname" tfsdk:"dbname"`
+	Key_pair_auth          bool   `mapstructure:"key_pair_auth" tfsdk:"key_pair_auth"`
+	Params                 string `mapstructure:"params" tfsdk:"params"`
+	Password               string `mapstructure:"password" tfsdk:"password"`
+	Private_key            string `mapstructure:"private_key" tfsdk:"private_key"`
 	Private_key_passphrase string `mapstructure:"private_key_passphrase" tfsdk:"private_key_passphrase"`
-
-	Username string `mapstructure:"username" tfsdk:"username"`
-
-	Warehouse string `mapstructure:"warehouse" tfsdk:"warehouse"`
+	Username               string `mapstructure:"username" tfsdk:"username"`
+	Warehouse              string `mapstructure:"warehouse" tfsdk:"warehouse"`
 }
 
 type SnowflakeConnectionResource struct {
@@ -188,22 +180,17 @@ func (r *SnowflakeConnectionResource) Create(ctx context.Context, req resource.C
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "snowflake",
 		OrganizationId: data.Organization.ValueStringPointer(),
-		Configuration: map[string]interface{}{
-			"account":                data.Configuration.Attributes()["account"].(types.String).ValueString(),
-			"dbname":                 data.Configuration.Attributes()["dbname"].(types.String).ValueString(),
-			"key_pair_auth":          data.Configuration.Attributes()["key_pair_auth"].(types.Bool).ValueBool(),
-			"params":                 data.Configuration.Attributes()["params"].(types.String).ValueString(),
-			"password":               data.Configuration.Attributes()["password"].(types.String).ValueString(),
-			"private_key":            data.Configuration.Attributes()["private_key"].(types.String).ValueString(),
-			"private_key_passphrase": data.Configuration.Attributes()["private_key_passphrase"].(types.String).ValueString(),
-			"username":               data.Configuration.Attributes()["username"].(types.String).ValueString(),
-			"warehouse":              data.Configuration.Attributes()["warehouse"].(types.String).ValueString(),
-		},
-		Validate: pointer.ToBool(false),
+		Configuration:  connConf,
+		Validate:       pointer.ToBool(false),
 	})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
@@ -313,23 +300,18 @@ func (r *SnowflakeConnectionResource) Update(ctx context.Context, req resource.U
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	updated, err := client.Connections.Update(ctx,
 		data.Id.ValueString(),
 		&polytomic.UpdateConnectionRequestSchema{
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueStringPointer(),
-			Configuration: map[string]interface{}{
-				"account":                data.Configuration.Attributes()["account"].(types.String).ValueString(),
-				"dbname":                 data.Configuration.Attributes()["dbname"].(types.String).ValueString(),
-				"key_pair_auth":          data.Configuration.Attributes()["key_pair_auth"].(types.Bool).ValueBool(),
-				"params":                 data.Configuration.Attributes()["params"].(types.String).ValueString(),
-				"password":               data.Configuration.Attributes()["password"].(types.String).ValueString(),
-				"private_key":            data.Configuration.Attributes()["private_key"].(types.String).ValueString(),
-				"private_key_passphrase": data.Configuration.Attributes()["private_key_passphrase"].(types.String).ValueString(),
-				"username":               data.Configuration.Attributes()["username"].(types.String).ValueString(),
-				"warehouse":              data.Configuration.Attributes()["warehouse"].(types.String).ValueString(),
-			},
-			Validate: pointer.ToBool(false),
+			Configuration:  connConf,
+			Validate:       pointer.ToBool(false),
 		})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))

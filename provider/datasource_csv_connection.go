@@ -98,13 +98,26 @@ func (d *CsvConnectionDataSource) Schema(ctx context.Context, req datasource.Sch
 										MarkdownDescription: "",
 										Computed:            true,
 									},
-									"extra_form_data": schema.StringAttribute{
+									"extra_form_data": schema.SetNestedAttribute{
 										MarkdownDescription: "",
 										Computed:            true,
+										NestedObject: schema.NestedAttributeObject{
+											Attributes: map[string]schema.Attribute{
+												"name": schema.StringAttribute{
+													MarkdownDescription: "",
+													Computed:            true,
+												},
+												"value": schema.StringAttribute{
+													MarkdownDescription: "",
+													Computed:            true,
+												},
+											},
+										},
 									},
-									"scopes": schema.StringAttribute{
+									"scopes": schema.SetAttribute{
 										MarkdownDescription: "",
 										Computed:            true,
+										ElementType:         types.StringType,
 									},
 									"token_endpoint": schema.StringAttribute{
 										MarkdownDescription: "",
@@ -114,13 +127,37 @@ func (d *CsvConnectionDataSource) Schema(ctx context.Context, req datasource.Sch
 							},
 						},
 					},
-					"headers": schema.StringAttribute{
+					"headers": schema.SetNestedAttribute{
 						MarkdownDescription: "",
 						Computed:            true,
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+								"name": schema.StringAttribute{
+									MarkdownDescription: "",
+									Computed:            true,
+								},
+								"value": schema.StringAttribute{
+									MarkdownDescription: "",
+									Computed:            true,
+								},
+							},
+						},
 					},
-					"parameters": schema.StringAttribute{
+					"parameters": schema.SetNestedAttribute{
 						MarkdownDescription: "",
 						Computed:            true,
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+								"name": schema.StringAttribute{
+									MarkdownDescription: "",
+									Computed:            true,
+								},
+								"value": schema.StringAttribute{
+									MarkdownDescription: "",
+									Computed:            true,
+								},
+							},
+						},
 					},
 					"url": schema.StringAttribute{
 						MarkdownDescription: "e.g. http://www.example.com",
@@ -155,8 +192,6 @@ func (d *CsvConnectionDataSource) Read(ctx context.Context, req datasource.ReadR
 		return
 	}
 
-	// For the purposes of this example code, hardcoding a response value to
-	// save into the Terraform state.
 	data.Id = types.StringPointerValue(connection.Data.Id)
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)

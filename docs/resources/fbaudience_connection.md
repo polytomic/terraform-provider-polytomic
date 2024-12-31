@@ -51,9 +51,17 @@ Required:
 Optional:
 
 - `account_id` (String)
-- `accounts` (String)
+- `accounts` (Attributes Set) (see [below for nested schema](#nestedatt--configuration--accounts))
 - `byo_app_token` (String, Sensitive)
 - `graph_api_version` (String)
 - `user_name` (String)
+
+<a id="nestedatt--configuration--accounts"></a>
+### Nested Schema for `configuration.accounts`
+
+Optional:
+
+- `label` (String)
+- `value` (String)
 
 

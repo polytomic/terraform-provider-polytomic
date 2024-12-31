@@ -43,24 +43,16 @@ const (
 var (
 	TypeMap = map[string]Typer{
 		"array": {
-			AttrType:     "schema.StringAttribute",
-			TfType:       "String",
-			ReadAttrType: "types.StringType",
-			Default: DefaultValue{
-				Value:  "stringdefault.StaticString(\"\")",
-				Import: "github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault",
-			},
-			GoType: "string",
+			AttrType:     "schema.SetAttribute",
+			TfType:       "Set",
+			ReadAttrType: "types.SetType",
+			GoType:       "[]",
 		},
 		"object": {
 			AttrType:     "schema.SingleNestedAttribute",
 			TfType:       "Object",
 			ReadAttrType: "types.ObjectType",
-			// Default: DefaultValue{
-			// 	Value:  "stringdefault.StaticString(\"\")",
-			// 	Import: "github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault",
-			// },
-			GoType: "map[string]interface{}",
+			GoType:       "struct",
 		},
 		"": {
 			AttrType:     "schema.StringAttribute",
@@ -192,6 +184,7 @@ type Attribute struct {
 	AttrName     string       `yaml:"-"`
 	Default      DefaultValue `yaml:"-"`
 	Attributes   []Attribute
+	Elem         *Attribute
 }
 
 var defaultImports = `
@@ -345,50 +338,70 @@ func GenerateConnections(ctx context.Context) error {
 func attributesForJSONSchema(connSchema *jsonschema.Schema) ([]Attribute, error) {
 	attrs := []Attribute{}
 	for pair := connSchema.Properties.Oldest(); pair != nil; pair = pair.Next() {
-		k := pair.Key
-		a := pair.Value
-		t, ok := TypeMap[a.Type]
-		if !ok {
-			return nil, fmt.Errorf("type %s not found for %s", a.Type, k)
+		attr, err := tfAttr(pair.Key, pair.Value, connSchema.Required)
+		if err != nil {
+			return attrs, err
 		}
-		var ex string
-		if len(a.Examples) > 0 {
-			if exstr, ok := a.Examples[0].(string); ok {
-				ex = exstr
-			}
-		}
-		attr := Attribute{
-			TfType:       t.TfType,
-			AttrType:     t.AttrType,
-			AttrReadType: t.ReadAttrType,
-			AttrName:     ValidName(k), // key in the tf schema
-			CapName:      strings.Title(k),
-			Name:         k, // key in the payload
-			Type:         t.GoType,
-			Description:  a.Description,
-			Example:      ex,
-			Sensitive:    a.Extras["sensitive"] == true,
-		}
-		if a.Format == "json" && attr.Example != "" {
-			attr.Example = fmt.Sprintf("jsonencode(%s)", attr.Example)
-			attr.ExampleTypeOverride = "json"
-		}
-		if a.Type == "object" {
-			sa, err := attributesForJSONSchema(a)
-			if err != nil {
-				return nil, fmt.Errorf("error inspecting attributes for %s: %w", k, err)
-			}
-			attr.Attributes = sa
-		}
-		attr.Required = slices.Contains(connSchema.Required, k)
-		attr.Optional = !attr.Required
-		attr.Computed = a.ReadOnly || attr.Optional
-		if attr.Computed {
-			attr.Default = t.Default
-		}
+
 		attrs = append(attrs, attr)
 	}
 	return attrs, nil
+}
+
+func tfAttr(k string, a *jsonschema.Schema, required []string) (Attribute, error) {
+	t, ok := TypeMap[a.Type]
+	if !ok {
+		return Attribute{}, fmt.Errorf("type %s not found for %s", a.Type, k)
+	}
+	var ex string
+	if len(a.Examples) > 0 {
+		if exstr, ok := a.Examples[0].(string); ok {
+			ex = exstr
+		}
+	}
+	attr := Attribute{
+		TfType:       t.TfType,
+		AttrType:     t.AttrType,
+		AttrReadType: t.ReadAttrType,
+		AttrName:     ValidName(k), // key in the tf schema
+		CapName:      strings.Title(k),
+		Name:         k, // key in the payload
+		Type:         t.GoType,
+		Description:  a.Description,
+		Example:      ex,
+		Sensitive:    a.Extras["sensitive"] == true,
+	}
+	if a.Format == "json" && attr.Example != "" {
+		attr.Example = fmt.Sprintf("jsonencode(%s)", attr.Example)
+		attr.ExampleTypeOverride = "json"
+	}
+	switch a.Type {
+	case "array":
+		elem, err := tfAttr(k, a.Items, a.Items.Required)
+		if err != nil {
+			return Attribute{}, fmt.Errorf("error inspecting attributes for %s: %w", k, err)
+		}
+		switch a.Items.Type {
+		case "object":
+			attr.AttrType = "schema.SetNestedAttribute"
+		default:
+			attr.AttrReadType = "types.SetType"
+		}
+		attr.Elem = &elem
+	case "object":
+		sa, err := attributesForJSONSchema(a)
+		if err != nil {
+			return Attribute{}, fmt.Errorf("error inspecting attributes for %s: %w", k, err)
+		}
+		attr.Attributes = sa
+	}
+	attr.Required = slices.Contains(required, k)
+	attr.Optional = !attr.Required
+	attr.Computed = a.ReadOnly || attr.Optional
+	if attr.Computed {
+		attr.Default = t.Default
+	}
+	return attr, nil
 }
 
 func writeConnectionExamples(r Connection) error {

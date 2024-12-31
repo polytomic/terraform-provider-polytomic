@@ -92,11 +92,9 @@ func (t *ZoominfoConnectionResource) Schema(ctx context.Context, req resource.Sc
 }
 
 type ZoominfoConf struct {
-	Client_id string `mapstructure:"client_id" tfsdk:"client_id"`
-
+	Client_id   string `mapstructure:"client_id" tfsdk:"client_id"`
 	Private_key string `mapstructure:"private_key" tfsdk:"private_key"`
-
-	Username string `mapstructure:"username" tfsdk:"username"`
+	Username    string `mapstructure:"username" tfsdk:"username"`
 }
 
 type ZoominfoConnectionResource struct {
@@ -128,16 +126,17 @@ func (r *ZoominfoConnectionResource) Create(ctx context.Context, req resource.Cr
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "zoominfo",
 		OrganizationId: data.Organization.ValueStringPointer(),
-		Configuration: map[string]interface{}{
-			"client_id":   data.Configuration.Attributes()["client_id"].(types.String).ValueString(),
-			"private_key": data.Configuration.Attributes()["private_key"].(types.String).ValueString(),
-			"username":    data.Configuration.Attributes()["username"].(types.String).ValueString(),
-		},
-		Validate: pointer.ToBool(false),
+		Configuration:  connConf,
+		Validate:       pointer.ToBool(false),
 	})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
@@ -235,17 +234,18 @@ func (r *ZoominfoConnectionResource) Update(ctx context.Context, req resource.Up
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	updated, err := client.Connections.Update(ctx,
 		data.Id.ValueString(),
 		&polytomic.UpdateConnectionRequestSchema{
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueStringPointer(),
-			Configuration: map[string]interface{}{
-				"client_id":   data.Configuration.Attributes()["client_id"].(types.String).ValueString(),
-				"private_key": data.Configuration.Attributes()["private_key"].(types.String).ValueString(),
-				"username":    data.Configuration.Attributes()["username"].(types.String).ValueString(),
-			},
-			Validate: pointer.ToBool(false),
+			Configuration:  connConf,
+			Validate:       pointer.ToBool(false),
 		})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))

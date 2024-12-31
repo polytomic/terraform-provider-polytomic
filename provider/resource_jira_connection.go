@@ -110,14 +110,10 @@ func (t *JiraConnectionResource) Schema(ctx context.Context, req resource.Schema
 
 type JiraConf struct {
 	Access_token string `mapstructure:"access_token" tfsdk:"access_token"`
-
-	Api_key string `mapstructure:"api_key" tfsdk:"api_key"`
-
-	Auth_method string `mapstructure:"auth_method" tfsdk:"auth_method"`
-
-	Url string `mapstructure:"url" tfsdk:"url"`
-
-	Username string `mapstructure:"username" tfsdk:"username"`
+	Api_key      string `mapstructure:"api_key" tfsdk:"api_key"`
+	Auth_method  string `mapstructure:"auth_method" tfsdk:"auth_method"`
+	Url          string `mapstructure:"url" tfsdk:"url"`
+	Username     string `mapstructure:"username" tfsdk:"username"`
 }
 
 type JiraConnectionResource struct {
@@ -149,18 +145,17 @@ func (r *JiraConnectionResource) Create(ctx context.Context, req resource.Create
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "jira",
 		OrganizationId: data.Organization.ValueStringPointer(),
-		Configuration: map[string]interface{}{
-			"access_token": data.Configuration.Attributes()["access_token"].(types.String).ValueString(),
-			"api_key":      data.Configuration.Attributes()["api_key"].(types.String).ValueString(),
-			"auth_method":  data.Configuration.Attributes()["auth_method"].(types.String).ValueString(),
-			"url":          data.Configuration.Attributes()["url"].(types.String).ValueString(),
-			"username":     data.Configuration.Attributes()["username"].(types.String).ValueString(),
-		},
-		Validate: pointer.ToBool(false),
+		Configuration:  connConf,
+		Validate:       pointer.ToBool(false),
 	})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
@@ -262,19 +257,18 @@ func (r *JiraConnectionResource) Update(ctx context.Context, req resource.Update
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	updated, err := client.Connections.Update(ctx,
 		data.Id.ValueString(),
 		&polytomic.UpdateConnectionRequestSchema{
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueStringPointer(),
-			Configuration: map[string]interface{}{
-				"access_token": data.Configuration.Attributes()["access_token"].(types.String).ValueString(),
-				"api_key":      data.Configuration.Attributes()["api_key"].(types.String).ValueString(),
-				"auth_method":  data.Configuration.Attributes()["auth_method"].(types.String).ValueString(),
-				"url":          data.Configuration.Attributes()["url"].(types.String).ValueString(),
-				"username":     data.Configuration.Attributes()["username"].(types.String).ValueString(),
-			},
-			Validate: pointer.ToBool(false),
+			Configuration:  connConf,
+			Validate:       pointer.ToBool(false),
 		})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))

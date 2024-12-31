@@ -86,8 +86,7 @@ func (t *TixrConnectionResource) Schema(ctx context.Context, req resource.Schema
 
 type TixrConf struct {
 	Client_private_key string `mapstructure:"client_private_key" tfsdk:"client_private_key"`
-
-	Client_secret string `mapstructure:"client_secret" tfsdk:"client_secret"`
+	Client_secret      string `mapstructure:"client_secret" tfsdk:"client_secret"`
 }
 
 type TixrConnectionResource struct {
@@ -119,15 +118,17 @@ func (r *TixrConnectionResource) Create(ctx context.Context, req resource.Create
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "tixr",
 		OrganizationId: data.Organization.ValueStringPointer(),
-		Configuration: map[string]interface{}{
-			"client_private_key": data.Configuration.Attributes()["client_private_key"].(types.String).ValueString(),
-			"client_secret":      data.Configuration.Attributes()["client_secret"].(types.String).ValueString(),
-		},
-		Validate: pointer.ToBool(false),
+		Configuration:  connConf,
+		Validate:       pointer.ToBool(false),
 	})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
@@ -223,16 +224,18 @@ func (r *TixrConnectionResource) Update(ctx context.Context, req resource.Update
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	updated, err := client.Connections.Update(ctx,
 		data.Id.ValueString(),
 		&polytomic.UpdateConnectionRequestSchema{
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueStringPointer(),
-			Configuration: map[string]interface{}{
-				"client_private_key": data.Configuration.Attributes()["client_private_key"].(types.String).ValueString(),
-				"client_secret":      data.Configuration.Attributes()["client_secret"].(types.String).ValueString(),
-			},
-			Validate: pointer.ToBool(false),
+			Configuration:  connConf,
+			Validate:       pointer.ToBool(false),
 		})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))

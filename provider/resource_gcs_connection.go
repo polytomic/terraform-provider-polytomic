@@ -127,21 +127,14 @@ func (t *GcsConnectionResource) Schema(ctx context.Context, req resource.SchemaR
 }
 
 type GcsConf struct {
-	Bucket string `mapstructure:"bucket" tfsdk:"bucket"`
-
-	Client_email string `mapstructure:"client_email" tfsdk:"client_email"`
-
-	Is_single_table bool `mapstructure:"is_single_table" tfsdk:"is_single_table"`
-
-	Project_id string `mapstructure:"project_id" tfsdk:"project_id"`
-
-	Service_account string `mapstructure:"service_account" tfsdk:"service_account"`
-
+	Bucket                   string `mapstructure:"bucket" tfsdk:"bucket"`
+	Client_email             string `mapstructure:"client_email" tfsdk:"client_email"`
+	Is_single_table          bool   `mapstructure:"is_single_table" tfsdk:"is_single_table"`
+	Project_id               string `mapstructure:"project_id" tfsdk:"project_id"`
+	Service_account          string `mapstructure:"service_account" tfsdk:"service_account"`
 	Single_table_file_format string `mapstructure:"single_table_file_format" tfsdk:"single_table_file_format"`
-
-	Single_table_name string `mapstructure:"single_table_name" tfsdk:"single_table_name"`
-
-	Skip_lines int64 `mapstructure:"skip_lines" tfsdk:"skip_lines"`
+	Single_table_name        string `mapstructure:"single_table_name" tfsdk:"single_table_name"`
+	Skip_lines               int64  `mapstructure:"skip_lines" tfsdk:"skip_lines"`
 }
 
 type GcsConnectionResource struct {
@@ -173,21 +166,17 @@ func (r *GcsConnectionResource) Create(ctx context.Context, req resource.CreateR
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "gcs",
 		OrganizationId: data.Organization.ValueStringPointer(),
-		Configuration: map[string]interface{}{
-			"bucket":                   data.Configuration.Attributes()["bucket"].(types.String).ValueString(),
-			"client_email":             data.Configuration.Attributes()["client_email"].(types.String).ValueString(),
-			"is_single_table":          data.Configuration.Attributes()["is_single_table"].(types.Bool).ValueBool(),
-			"project_id":               data.Configuration.Attributes()["project_id"].(types.String).ValueString(),
-			"service_account":          data.Configuration.Attributes()["service_account"].(types.String).ValueString(),
-			"single_table_file_format": data.Configuration.Attributes()["single_table_file_format"].(types.String).ValueString(),
-			"single_table_name":        data.Configuration.Attributes()["single_table_name"].(types.String).ValueString(),
-			"skip_lines":               int(data.Configuration.Attributes()["skip_lines"].(types.Int64).ValueInt64()),
-		},
-		Validate: pointer.ToBool(false),
+		Configuration:  connConf,
+		Validate:       pointer.ToBool(false),
 	})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
@@ -295,22 +284,18 @@ func (r *GcsConnectionResource) Update(ctx context.Context, req resource.UpdateR
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	updated, err := client.Connections.Update(ctx,
 		data.Id.ValueString(),
 		&polytomic.UpdateConnectionRequestSchema{
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueStringPointer(),
-			Configuration: map[string]interface{}{
-				"bucket":                   data.Configuration.Attributes()["bucket"].(types.String).ValueString(),
-				"client_email":             data.Configuration.Attributes()["client_email"].(types.String).ValueString(),
-				"is_single_table":          data.Configuration.Attributes()["is_single_table"].(types.Bool).ValueBool(),
-				"project_id":               data.Configuration.Attributes()["project_id"].(types.String).ValueString(),
-				"service_account":          data.Configuration.Attributes()["service_account"].(types.String).ValueString(),
-				"single_table_file_format": data.Configuration.Attributes()["single_table_file_format"].(types.String).ValueString(),
-				"single_table_name":        data.Configuration.Attributes()["single_table_name"].(types.String).ValueString(),
-				"skip_lines":               int(data.Configuration.Attributes()["skip_lines"].(types.Int64).ValueInt64()),
-			},
-			Validate: pointer.ToBool(false),
+			Configuration:  connConf,
+			Validate:       pointer.ToBool(false),
 		})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))

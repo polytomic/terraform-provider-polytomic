@@ -86,8 +86,7 @@ func (t *AffinityConnectionResource) Schema(ctx context.Context, req resource.Sc
 
 type AffinityConf struct {
 	Api_key string `mapstructure:"api_key" tfsdk:"api_key"`
-
-	User string `mapstructure:"user" tfsdk:"user"`
+	User    string `mapstructure:"user" tfsdk:"user"`
 }
 
 type AffinityConnectionResource struct {
@@ -119,15 +118,17 @@ func (r *AffinityConnectionResource) Create(ctx context.Context, req resource.Cr
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "affinity",
 		OrganizationId: data.Organization.ValueStringPointer(),
-		Configuration: map[string]interface{}{
-			"api_key": data.Configuration.Attributes()["api_key"].(types.String).ValueString(),
-			"user":    data.Configuration.Attributes()["user"].(types.String).ValueString(),
-		},
-		Validate: pointer.ToBool(false),
+		Configuration:  connConf,
+		Validate:       pointer.ToBool(false),
 	})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
@@ -223,16 +224,18 @@ func (r *AffinityConnectionResource) Update(ctx context.Context, req resource.Up
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	updated, err := client.Connections.Update(ctx,
 		data.Id.ValueString(),
 		&polytomic.UpdateConnectionRequestSchema{
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueStringPointer(),
-			Configuration: map[string]interface{}{
-				"api_key": data.Configuration.Attributes()["api_key"].(types.String).ValueString(),
-				"user":    data.Configuration.Attributes()["user"].(types.String).ValueString(),
-			},
-			Validate: pointer.ToBool(false),
+			Configuration:  connConf,
+			Validate:       pointer.ToBool(false),
 		})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))

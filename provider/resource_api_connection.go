@@ -125,19 +125,39 @@ func (t *ApiConnectionResource) Schema(ctx context.Context, req resource.SchemaR
 										Computed:            true,
 										Sensitive:           false,
 									},
-									"extra_form_data": schema.StringAttribute{
+									"extra_form_data": schema.SetNestedAttribute{
 										MarkdownDescription: "",
 										Required:            false,
 										Optional:            true,
 										Computed:            true,
 										Sensitive:           false,
+										NestedObject: schema.NestedAttributeObject{
+											Attributes: map[string]schema.Attribute{
+												"name": schema.StringAttribute{
+													MarkdownDescription: "",
+													Required:            false,
+													Optional:            true,
+													Computed:            true,
+													Sensitive:           false,
+												},
+												"value": schema.StringAttribute{
+													MarkdownDescription: "",
+													Required:            false,
+													Optional:            true,
+													Computed:            true,
+													Sensitive:           false,
+												},
+											},
+										},
 									},
-									"scopes": schema.StringAttribute{
+									"scopes": schema.SetAttribute{
 										MarkdownDescription: "",
 										Required:            false,
 										Optional:            true,
 										Computed:            true,
 										Sensitive:           false,
+
+										ElementType: types.StringType,
 									},
 									"token_endpoint": schema.StringAttribute{
 										MarkdownDescription: "",
@@ -157,12 +177,30 @@ func (t *ApiConnectionResource) Schema(ctx context.Context, req resource.SchemaR
 						Computed:            true,
 						Sensitive:           false,
 					},
-					"headers": schema.StringAttribute{
+					"headers": schema.SetNestedAttribute{
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+								"name": schema.StringAttribute{
+									MarkdownDescription: "",
+									Required:            false,
+									Optional:            true,
+									Computed:            true,
+									Sensitive:           false,
+								},
+								"value": schema.StringAttribute{
+									MarkdownDescription: "",
+									Required:            false,
+									Optional:            true,
+									Computed:            true,
+									Sensitive:           false,
+								},
+							},
+						},
 					},
 					"healthcheck": schema.StringAttribute{
 						MarkdownDescription: "Path to request when checking the health of this connection. No health check will be performed if left empty.",
@@ -171,12 +209,30 @@ func (t *ApiConnectionResource) Schema(ctx context.Context, req resource.SchemaR
 						Computed:            true,
 						Sensitive:           false,
 					},
-					"parameters": schema.StringAttribute{
+					"parameters": schema.SetNestedAttribute{
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+								"name": schema.StringAttribute{
+									MarkdownDescription: "",
+									Required:            false,
+									Optional:            true,
+									Computed:            true,
+									Sensitive:           false,
+								},
+								"value": schema.StringAttribute{
+									MarkdownDescription: "",
+									Required:            false,
+									Optional:            true,
+									Computed:            true,
+									Sensitive:           false,
+								},
+							},
+						},
 					},
 					"url": schema.StringAttribute{
 						MarkdownDescription: "",
@@ -209,16 +265,37 @@ func (t *ApiConnectionResource) Schema(ctx context.Context, req resource.SchemaR
 }
 
 type ApiConf struct {
-	Auth map[string]interface{} `mapstructure:"auth" tfsdk:"auth"`
-
-	Body string `mapstructure:"body" tfsdk:"body"`
-
-	Headers string `mapstructure:"headers" tfsdk:"headers"`
-
+	Auth struct {
+		Basic struct {
+			Password string `mapstructure:"password" tfsdk:"password"`
+			Username string `mapstructure:"username" tfsdk:"username"`
+		} `mapstructure:"basic" tfsdk:"basic"`
+		Header struct {
+			Name  string `mapstructure:"name" tfsdk:"name"`
+			Value string `mapstructure:"value" tfsdk:"value"`
+		} `mapstructure:"header" tfsdk:"header"`
+		Oauth struct {
+			Auth_style      int64  `mapstructure:"auth_style" tfsdk:"auth_style"`
+			Client_id       string `mapstructure:"client_id" tfsdk:"client_id"`
+			Client_secret   string `mapstructure:"client_secret" tfsdk:"client_secret"`
+			Extra_form_data []struct {
+				Name  string `mapstructure:"name" tfsdk:"name"`
+				Value string `mapstructure:"value" tfsdk:"value"`
+			} `mapstructure:"extra_form_data" tfsdk:"extra_form_data"`
+			Scopes         []string `mapstructure:"scopes" tfsdk:"scopes"`
+			Token_endpoint string   `mapstructure:"token_endpoint" tfsdk:"token_endpoint"`
+		} `mapstructure:"oauth" tfsdk:"oauth"`
+	} `mapstructure:"auth" tfsdk:"auth"`
+	Body    string `mapstructure:"body" tfsdk:"body"`
+	Headers []struct {
+		Name  string `mapstructure:"name" tfsdk:"name"`
+		Value string `mapstructure:"value" tfsdk:"value"`
+	} `mapstructure:"headers" tfsdk:"headers"`
 	Healthcheck string `mapstructure:"healthcheck" tfsdk:"healthcheck"`
-
-	Parameters string `mapstructure:"parameters" tfsdk:"parameters"`
-
+	Parameters  []struct {
+		Name  string `mapstructure:"name" tfsdk:"name"`
+		Value string `mapstructure:"value" tfsdk:"value"`
+	} `mapstructure:"parameters" tfsdk:"parameters"`
 	Url string `mapstructure:"url" tfsdk:"url"`
 }
 
@@ -251,36 +328,17 @@ func (r *ApiConnectionResource) Create(ctx context.Context, req resource.CreateR
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "api",
 		OrganizationId: data.Organization.ValueStringPointer(),
-		Configuration: map[string]interface{}{
-			"auth": map[string]interface{}{
-				"basic": map[string]interface{}{
-					"password": data.Configuration.Attributes()["auth"].(types.Object).Attributes()["basic"].(types.Object).Attributes()["password"].(types.String).ValueString(),
-					"username": data.Configuration.Attributes()["auth"].(types.Object).Attributes()["basic"].(types.Object).Attributes()["username"].(types.String).ValueString(),
-				},
-				"header": map[string]interface{}{
-					"name":  data.Configuration.Attributes()["auth"].(types.Object).Attributes()["header"].(types.Object).Attributes()["name"].(types.String).ValueString(),
-					"value": data.Configuration.Attributes()["auth"].(types.Object).Attributes()["header"].(types.Object).Attributes()["value"].(types.String).ValueString(),
-				},
-				"oauth": map[string]interface{}{
-					"auth_style":      int(data.Configuration.Attributes()["auth"].(types.Object).Attributes()["oauth"].(types.Object).Attributes()["auth_style"].(types.Int64).ValueInt64()),
-					"client_id":       data.Configuration.Attributes()["auth"].(types.Object).Attributes()["oauth"].(types.Object).Attributes()["client_id"].(types.String).ValueString(),
-					"client_secret":   data.Configuration.Attributes()["auth"].(types.Object).Attributes()["oauth"].(types.Object).Attributes()["client_secret"].(types.String).ValueString(),
-					"extra_form_data": data.Configuration.Attributes()["auth"].(types.Object).Attributes()["oauth"].(types.Object).Attributes()["extra_form_data"].(types.String).ValueString(),
-					"scopes":          data.Configuration.Attributes()["auth"].(types.Object).Attributes()["oauth"].(types.Object).Attributes()["scopes"].(types.String).ValueString(),
-					"token_endpoint":  data.Configuration.Attributes()["auth"].(types.Object).Attributes()["oauth"].(types.Object).Attributes()["token_endpoint"].(types.String).ValueString(),
-				},
-			},
-			"body":        data.Configuration.Attributes()["body"].(types.String).ValueString(),
-			"headers":     data.Configuration.Attributes()["headers"].(types.String).ValueString(),
-			"healthcheck": data.Configuration.Attributes()["healthcheck"].(types.String).ValueString(),
-			"parameters":  data.Configuration.Attributes()["parameters"].(types.String).ValueString(),
-			"url":         data.Configuration.Attributes()["url"].(types.String).ValueString(),
-		},
-		Validate: pointer.ToBool(false),
+		Configuration:  connConf,
+		Validate:       pointer.ToBool(false),
 	})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
@@ -311,20 +369,43 @@ func (r *ApiConnectionResource) Create(ctx context.Context, req resource.CreateR
 					},
 				}, "oauth": types.ObjectType{
 					AttrTypes: map[string]attr.Type{
-						"auth_style":      types.NumberType,
-						"client_id":       types.StringType,
-						"client_secret":   types.StringType,
-						"extra_form_data": types.StringType,
-						"scopes":          types.StringType,
-						"token_endpoint":  types.StringType,
+						"auth_style":    types.NumberType,
+						"client_id":     types.StringType,
+						"client_secret": types.StringType,
+						"extra_form_data": types.SetType{
+							ElemType: types.ObjectType{
+								AttrTypes: map[string]attr.Type{
+									"name":  types.StringType,
+									"value": types.StringType,
+								},
+							},
+						},
+						"scopes": types.SetType{
+							ElemType: types.StringType,
+						},
+						"token_endpoint": types.StringType,
 					},
 				},
 			},
 		}, "body": types.StringType,
-		"headers":     types.StringType,
+		"headers": types.SetType{
+			ElemType: types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"name":  types.StringType,
+					"value": types.StringType,
+				},
+			},
+		},
 		"healthcheck": types.StringType,
-		"parameters":  types.StringType,
-		"url":         types.StringType,
+		"parameters": types.SetType{
+			ElemType: types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"name":  types.StringType,
+					"value": types.StringType,
+				},
+			},
+		},
+		"url": types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -389,20 +470,43 @@ func (r *ApiConnectionResource) Read(ctx context.Context, req resource.ReadReque
 					},
 				}, "oauth": types.ObjectType{
 					AttrTypes: map[string]attr.Type{
-						"auth_style":      types.NumberType,
-						"client_id":       types.StringType,
-						"client_secret":   types.StringType,
-						"extra_form_data": types.StringType,
-						"scopes":          types.StringType,
-						"token_endpoint":  types.StringType,
+						"auth_style":    types.NumberType,
+						"client_id":     types.StringType,
+						"client_secret": types.StringType,
+						"extra_form_data": types.SetType{
+							ElemType: types.ObjectType{
+								AttrTypes: map[string]attr.Type{
+									"name":  types.StringType,
+									"value": types.StringType,
+								},
+							},
+						},
+						"scopes": types.SetType{
+							ElemType: types.StringType,
+						},
+						"token_endpoint": types.StringType,
 					},
 				},
 			},
 		}, "body": types.StringType,
-		"headers":     types.StringType,
+		"headers": types.SetType{
+			ElemType: types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"name":  types.StringType,
+					"value": types.StringType,
+				},
+			},
+		},
 		"healthcheck": types.StringType,
-		"parameters":  types.StringType,
-		"url":         types.StringType,
+		"parameters": types.SetType{
+			ElemType: types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"name":  types.StringType,
+					"value": types.StringType,
+				},
+			},
+		},
+		"url": types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -428,37 +532,18 @@ func (r *ApiConnectionResource) Update(ctx context.Context, req resource.UpdateR
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	updated, err := client.Connections.Update(ctx,
 		data.Id.ValueString(),
 		&polytomic.UpdateConnectionRequestSchema{
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueStringPointer(),
-			Configuration: map[string]interface{}{
-				"auth": map[string]interface{}{
-					"basic": map[string]interface{}{
-						"password": data.Configuration.Attributes()["auth"].(types.Object).Attributes()["basic"].(types.Object).Attributes()["password"].(types.String).ValueString(),
-						"username": data.Configuration.Attributes()["auth"].(types.Object).Attributes()["basic"].(types.Object).Attributes()["username"].(types.String).ValueString(),
-					},
-					"header": map[string]interface{}{
-						"name":  data.Configuration.Attributes()["auth"].(types.Object).Attributes()["header"].(types.Object).Attributes()["name"].(types.String).ValueString(),
-						"value": data.Configuration.Attributes()["auth"].(types.Object).Attributes()["header"].(types.Object).Attributes()["value"].(types.String).ValueString(),
-					},
-					"oauth": map[string]interface{}{
-						"auth_style":      int(data.Configuration.Attributes()["auth"].(types.Object).Attributes()["oauth"].(types.Object).Attributes()["auth_style"].(types.Int64).ValueInt64()),
-						"client_id":       data.Configuration.Attributes()["auth"].(types.Object).Attributes()["oauth"].(types.Object).Attributes()["client_id"].(types.String).ValueString(),
-						"client_secret":   data.Configuration.Attributes()["auth"].(types.Object).Attributes()["oauth"].(types.Object).Attributes()["client_secret"].(types.String).ValueString(),
-						"extra_form_data": data.Configuration.Attributes()["auth"].(types.Object).Attributes()["oauth"].(types.Object).Attributes()["extra_form_data"].(types.String).ValueString(),
-						"scopes":          data.Configuration.Attributes()["auth"].(types.Object).Attributes()["oauth"].(types.Object).Attributes()["scopes"].(types.String).ValueString(),
-						"token_endpoint":  data.Configuration.Attributes()["auth"].(types.Object).Attributes()["oauth"].(types.Object).Attributes()["token_endpoint"].(types.String).ValueString(),
-					},
-				},
-				"body":        data.Configuration.Attributes()["body"].(types.String).ValueString(),
-				"headers":     data.Configuration.Attributes()["headers"].(types.String).ValueString(),
-				"healthcheck": data.Configuration.Attributes()["healthcheck"].(types.String).ValueString(),
-				"parameters":  data.Configuration.Attributes()["parameters"].(types.String).ValueString(),
-				"url":         data.Configuration.Attributes()["url"].(types.String).ValueString(),
-			},
-			Validate: pointer.ToBool(false),
+			Configuration:  connConf,
+			Validate:       pointer.ToBool(false),
 		})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))
@@ -490,20 +575,43 @@ func (r *ApiConnectionResource) Update(ctx context.Context, req resource.UpdateR
 					},
 				}, "oauth": types.ObjectType{
 					AttrTypes: map[string]attr.Type{
-						"auth_style":      types.NumberType,
-						"client_id":       types.StringType,
-						"client_secret":   types.StringType,
-						"extra_form_data": types.StringType,
-						"scopes":          types.StringType,
-						"token_endpoint":  types.StringType,
+						"auth_style":    types.NumberType,
+						"client_id":     types.StringType,
+						"client_secret": types.StringType,
+						"extra_form_data": types.SetType{
+							ElemType: types.ObjectType{
+								AttrTypes: map[string]attr.Type{
+									"name":  types.StringType,
+									"value": types.StringType,
+								},
+							},
+						},
+						"scopes": types.SetType{
+							ElemType: types.StringType,
+						},
+						"token_endpoint": types.StringType,
 					},
 				},
 			},
 		}, "body": types.StringType,
-		"headers":     types.StringType,
+		"headers": types.SetType{
+			ElemType: types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"name":  types.StringType,
+					"value": types.StringType,
+				},
+			},
+		},
 		"healthcheck": types.StringType,
-		"parameters":  types.StringType,
-		"url":         types.StringType,
+		"parameters": types.SetType{
+			ElemType: types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"name":  types.StringType,
+					"value": types.StringType,
+				},
+			},
+		},
+		"url": types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

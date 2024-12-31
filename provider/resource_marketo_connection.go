@@ -120,19 +120,13 @@ func (t *MarketoConnectionResource) Schema(ctx context.Context, req resource.Sch
 }
 
 type MarketoConf struct {
-	Client_id string `mapstructure:"client_id" tfsdk:"client_id"`
-
-	Client_secret string `mapstructure:"client_secret" tfsdk:"client_secret"`
-
-	Concurrent_imports int64 `mapstructure:"concurrent_imports" tfsdk:"concurrent_imports"`
-
-	Daily_api_calls int64 `mapstructure:"daily_api_calls" tfsdk:"daily_api_calls"`
-
-	Enforce_api_limits bool `mapstructure:"enforce_api_limits" tfsdk:"enforce_api_limits"`
-
+	Client_id          string `mapstructure:"client_id" tfsdk:"client_id"`
+	Client_secret      string `mapstructure:"client_secret" tfsdk:"client_secret"`
+	Concurrent_imports int64  `mapstructure:"concurrent_imports" tfsdk:"concurrent_imports"`
+	Daily_api_calls    int64  `mapstructure:"daily_api_calls" tfsdk:"daily_api_calls"`
+	Enforce_api_limits bool   `mapstructure:"enforce_api_limits" tfsdk:"enforce_api_limits"`
 	Oauth_token_expiry string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
-
-	Rest_endpoint string `mapstructure:"rest_endpoint" tfsdk:"rest_endpoint"`
+	Rest_endpoint      string `mapstructure:"rest_endpoint" tfsdk:"rest_endpoint"`
 }
 
 type MarketoConnectionResource struct {
@@ -164,20 +158,17 @@ func (r *MarketoConnectionResource) Create(ctx context.Context, req resource.Cre
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "marketo",
 		OrganizationId: data.Organization.ValueStringPointer(),
-		Configuration: map[string]interface{}{
-			"client_id":          data.Configuration.Attributes()["client_id"].(types.String).ValueString(),
-			"client_secret":      data.Configuration.Attributes()["client_secret"].(types.String).ValueString(),
-			"concurrent_imports": int(data.Configuration.Attributes()["concurrent_imports"].(types.Int64).ValueInt64()),
-			"daily_api_calls":    int(data.Configuration.Attributes()["daily_api_calls"].(types.Int64).ValueInt64()),
-			"enforce_api_limits": data.Configuration.Attributes()["enforce_api_limits"].(types.Bool).ValueBool(),
-			"oauth_token_expiry": data.Configuration.Attributes()["oauth_token_expiry"].(types.String).ValueString(),
-			"rest_endpoint":      data.Configuration.Attributes()["rest_endpoint"].(types.String).ValueString(),
-		},
-		Validate: pointer.ToBool(false),
+		Configuration:  connConf,
+		Validate:       pointer.ToBool(false),
 	})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
@@ -283,21 +274,18 @@ func (r *MarketoConnectionResource) Update(ctx context.Context, req resource.Upd
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	updated, err := client.Connections.Update(ctx,
 		data.Id.ValueString(),
 		&polytomic.UpdateConnectionRequestSchema{
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueStringPointer(),
-			Configuration: map[string]interface{}{
-				"client_id":          data.Configuration.Attributes()["client_id"].(types.String).ValueString(),
-				"client_secret":      data.Configuration.Attributes()["client_secret"].(types.String).ValueString(),
-				"concurrent_imports": int(data.Configuration.Attributes()["concurrent_imports"].(types.Int64).ValueInt64()),
-				"daily_api_calls":    int(data.Configuration.Attributes()["daily_api_calls"].(types.Int64).ValueInt64()),
-				"enforce_api_limits": data.Configuration.Attributes()["enforce_api_limits"].(types.Bool).ValueBool(),
-				"oauth_token_expiry": data.Configuration.Attributes()["oauth_token_expiry"].(types.String).ValueString(),
-				"rest_endpoint":      data.Configuration.Attributes()["rest_endpoint"].(types.String).ValueString(),
-			},
-			Validate: pointer.ToBool(false),
+			Configuration:  connConf,
+			Validate:       pointer.ToBool(false),
 		})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))

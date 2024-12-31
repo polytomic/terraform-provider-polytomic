@@ -107,13 +107,9 @@ func (t *SynapseConnectionResource) Schema(ctx context.Context, req resource.Sch
 
 type SynapseConf struct {
 	Database string `mapstructure:"database" tfsdk:"database"`
-
 	Hostname string `mapstructure:"hostname" tfsdk:"hostname"`
-
 	Password string `mapstructure:"password" tfsdk:"password"`
-
-	Port int64 `mapstructure:"port" tfsdk:"port"`
-
+	Port     int64  `mapstructure:"port" tfsdk:"port"`
 	Username string `mapstructure:"username" tfsdk:"username"`
 }
 
@@ -146,18 +142,17 @@ func (r *SynapseConnectionResource) Create(ctx context.Context, req resource.Cre
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "synapse",
 		OrganizationId: data.Organization.ValueStringPointer(),
-		Configuration: map[string]interface{}{
-			"database": data.Configuration.Attributes()["database"].(types.String).ValueString(),
-			"hostname": data.Configuration.Attributes()["hostname"].(types.String).ValueString(),
-			"password": data.Configuration.Attributes()["password"].(types.String).ValueString(),
-			"port":     int(data.Configuration.Attributes()["port"].(types.Int64).ValueInt64()),
-			"username": data.Configuration.Attributes()["username"].(types.String).ValueString(),
-		},
-		Validate: pointer.ToBool(false),
+		Configuration:  connConf,
+		Validate:       pointer.ToBool(false),
 	})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
@@ -259,19 +254,18 @@ func (r *SynapseConnectionResource) Update(ctx context.Context, req resource.Upd
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	updated, err := client.Connections.Update(ctx,
 		data.Id.ValueString(),
 		&polytomic.UpdateConnectionRequestSchema{
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueStringPointer(),
-			Configuration: map[string]interface{}{
-				"database": data.Configuration.Attributes()["database"].(types.String).ValueString(),
-				"hostname": data.Configuration.Attributes()["hostname"].(types.String).ValueString(),
-				"password": data.Configuration.Attributes()["password"].(types.String).ValueString(),
-				"port":     int(data.Configuration.Attributes()["port"].(types.Int64).ValueInt64()),
-				"username": data.Configuration.Attributes()["username"].(types.String).ValueString(),
-			},
-			Validate: pointer.ToBool(false),
+			Configuration:  connConf,
+			Validate:       pointer.ToBool(false),
 		})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))

@@ -92,10 +92,8 @@ func (t *GoogleworkspaceConnectionResource) Schema(ctx context.Context, req reso
 }
 
 type GoogleworkspaceConf struct {
-	Client_email string `mapstructure:"client_email" tfsdk:"client_email"`
-
-	Customer_id string `mapstructure:"customer_id" tfsdk:"customer_id"`
-
+	Client_email    string `mapstructure:"client_email" tfsdk:"client_email"`
+	Customer_id     string `mapstructure:"customer_id" tfsdk:"customer_id"`
 	Service_account string `mapstructure:"service_account" tfsdk:"service_account"`
 }
 
@@ -128,16 +126,17 @@ func (r *GoogleworkspaceConnectionResource) Create(ctx context.Context, req reso
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "googleworkspace",
 		OrganizationId: data.Organization.ValueStringPointer(),
-		Configuration: map[string]interface{}{
-			"client_email":    data.Configuration.Attributes()["client_email"].(types.String).ValueString(),
-			"customer_id":     data.Configuration.Attributes()["customer_id"].(types.String).ValueString(),
-			"service_account": data.Configuration.Attributes()["service_account"].(types.String).ValueString(),
-		},
-		Validate: pointer.ToBool(false),
+		Configuration:  connConf,
+		Validate:       pointer.ToBool(false),
 	})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
@@ -235,17 +234,18 @@ func (r *GoogleworkspaceConnectionResource) Update(ctx context.Context, req reso
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	updated, err := client.Connections.Update(ctx,
 		data.Id.ValueString(),
 		&polytomic.UpdateConnectionRequestSchema{
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueStringPointer(),
-			Configuration: map[string]interface{}{
-				"client_email":    data.Configuration.Attributes()["client_email"].(types.String).ValueString(),
-				"customer_id":     data.Configuration.Attributes()["customer_id"].(types.String).ValueString(),
-				"service_account": data.Configuration.Attributes()["service_account"].(types.String).ValueString(),
-			},
-			Validate: pointer.ToBool(false),
+			Configuration:  connConf,
+			Validate:       pointer.ToBool(false),
 		})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))

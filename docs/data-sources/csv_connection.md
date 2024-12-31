@@ -37,8 +37,8 @@ data "polytomic_csv_connection" "csv" {
 Read-Only:
 
 - `auth` (Attributes) (see [below for nested schema](#nestedatt--configuration--auth))
-- `headers` (String)
-- `parameters` (String)
+- `headers` (Attributes Set) (see [below for nested schema](#nestedatt--configuration--headers))
+- `parameters` (Attributes Set) (see [below for nested schema](#nestedatt--configuration--parameters))
 - `url` (String) e.g. http://www.example.com
 
 <a id="nestedatt--configuration--auth"></a>
@@ -76,8 +76,36 @@ Read-Only:
 - `auth_style` (Number)
 - `client_id` (String)
 - `client_secret` (String)
-- `extra_form_data` (String)
-- `scopes` (String)
+- `extra_form_data` (Attributes Set) (see [below for nested schema](#nestedatt--configuration--auth--oauth--extra_form_data))
+- `scopes` (Set of String)
 - `token_endpoint` (String)
+
+<a id="nestedatt--configuration--auth--oauth--extra_form_data"></a>
+### Nested Schema for `configuration.auth.oauth.token_endpoint`
+
+Read-Only:
+
+- `name` (String)
+- `value` (String)
+
+
+
+
+<a id="nestedatt--configuration--headers"></a>
+### Nested Schema for `configuration.headers`
+
+Read-Only:
+
+- `name` (String)
+- `value` (String)
+
+
+<a id="nestedatt--configuration--parameters"></a>
+### Nested Schema for `configuration.parameters`
+
+Read-Only:
+
+- `name` (String)
+- `value` (String)
 
 

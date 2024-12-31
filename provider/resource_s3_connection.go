@@ -155,29 +155,18 @@ func (t *S3ConnectionResource) Schema(ctx context.Context, req resource.SchemaRe
 }
 
 type S3Conf struct {
-	Auth_mode string `mapstructure:"auth_mode" tfsdk:"auth_mode"`
-
-	Aws_access_key_id string `mapstructure:"aws_access_key_id" tfsdk:"aws_access_key_id"`
-
-	Aws_secret_access_key string `mapstructure:"aws_secret_access_key" tfsdk:"aws_secret_access_key"`
-
-	Aws_user string `mapstructure:"aws_user" tfsdk:"aws_user"`
-
-	External_id string `mapstructure:"external_id" tfsdk:"external_id"`
-
-	Iam_role_arn string `mapstructure:"iam_role_arn" tfsdk:"iam_role_arn"`
-
-	Is_single_table bool `mapstructure:"is_single_table" tfsdk:"is_single_table"`
-
-	S3_bucket_name string `mapstructure:"s3_bucket_name" tfsdk:"s3_bucket_name"`
-
-	S3_bucket_region string `mapstructure:"s3_bucket_region" tfsdk:"s3_bucket_region"`
-
+	Auth_mode                string `mapstructure:"auth_mode" tfsdk:"auth_mode"`
+	Aws_access_key_id        string `mapstructure:"aws_access_key_id" tfsdk:"aws_access_key_id"`
+	Aws_secret_access_key    string `mapstructure:"aws_secret_access_key" tfsdk:"aws_secret_access_key"`
+	Aws_user                 string `mapstructure:"aws_user" tfsdk:"aws_user"`
+	External_id              string `mapstructure:"external_id" tfsdk:"external_id"`
+	Iam_role_arn             string `mapstructure:"iam_role_arn" tfsdk:"iam_role_arn"`
+	Is_single_table          bool   `mapstructure:"is_single_table" tfsdk:"is_single_table"`
+	S3_bucket_name           string `mapstructure:"s3_bucket_name" tfsdk:"s3_bucket_name"`
+	S3_bucket_region         string `mapstructure:"s3_bucket_region" tfsdk:"s3_bucket_region"`
 	Single_table_file_format string `mapstructure:"single_table_file_format" tfsdk:"single_table_file_format"`
-
-	Single_table_name string `mapstructure:"single_table_name" tfsdk:"single_table_name"`
-
-	Skip_lines int64 `mapstructure:"skip_lines" tfsdk:"skip_lines"`
+	Single_table_name        string `mapstructure:"single_table_name" tfsdk:"single_table_name"`
+	Skip_lines               int64  `mapstructure:"skip_lines" tfsdk:"skip_lines"`
 }
 
 type S3ConnectionResource struct {
@@ -209,25 +198,17 @@ func (r *S3ConnectionResource) Create(ctx context.Context, req resource.CreateRe
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "s3",
 		OrganizationId: data.Organization.ValueStringPointer(),
-		Configuration: map[string]interface{}{
-			"auth_mode":                data.Configuration.Attributes()["auth_mode"].(types.String).ValueString(),
-			"aws_access_key_id":        data.Configuration.Attributes()["aws_access_key_id"].(types.String).ValueString(),
-			"aws_secret_access_key":    data.Configuration.Attributes()["aws_secret_access_key"].(types.String).ValueString(),
-			"aws_user":                 data.Configuration.Attributes()["aws_user"].(types.String).ValueString(),
-			"external_id":              data.Configuration.Attributes()["external_id"].(types.String).ValueString(),
-			"iam_role_arn":             data.Configuration.Attributes()["iam_role_arn"].(types.String).ValueString(),
-			"is_single_table":          data.Configuration.Attributes()["is_single_table"].(types.Bool).ValueBool(),
-			"s3_bucket_name":           data.Configuration.Attributes()["s3_bucket_name"].(types.String).ValueString(),
-			"s3_bucket_region":         data.Configuration.Attributes()["s3_bucket_region"].(types.String).ValueString(),
-			"single_table_file_format": data.Configuration.Attributes()["single_table_file_format"].(types.String).ValueString(),
-			"single_table_name":        data.Configuration.Attributes()["single_table_name"].(types.String).ValueString(),
-			"skip_lines":               int(data.Configuration.Attributes()["skip_lines"].(types.Int64).ValueInt64()),
-		},
-		Validate: pointer.ToBool(false),
+		Configuration:  connConf,
+		Validate:       pointer.ToBool(false),
 	})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
@@ -343,26 +324,18 @@ func (r *S3ConnectionResource) Update(ctx context.Context, req resource.UpdateRe
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	updated, err := client.Connections.Update(ctx,
 		data.Id.ValueString(),
 		&polytomic.UpdateConnectionRequestSchema{
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueStringPointer(),
-			Configuration: map[string]interface{}{
-				"auth_mode":                data.Configuration.Attributes()["auth_mode"].(types.String).ValueString(),
-				"aws_access_key_id":        data.Configuration.Attributes()["aws_access_key_id"].(types.String).ValueString(),
-				"aws_secret_access_key":    data.Configuration.Attributes()["aws_secret_access_key"].(types.String).ValueString(),
-				"aws_user":                 data.Configuration.Attributes()["aws_user"].(types.String).ValueString(),
-				"external_id":              data.Configuration.Attributes()["external_id"].(types.String).ValueString(),
-				"iam_role_arn":             data.Configuration.Attributes()["iam_role_arn"].(types.String).ValueString(),
-				"is_single_table":          data.Configuration.Attributes()["is_single_table"].(types.Bool).ValueBool(),
-				"s3_bucket_name":           data.Configuration.Attributes()["s3_bucket_name"].(types.String).ValueString(),
-				"s3_bucket_region":         data.Configuration.Attributes()["s3_bucket_region"].(types.String).ValueString(),
-				"single_table_file_format": data.Configuration.Attributes()["single_table_file_format"].(types.String).ValueString(),
-				"single_table_name":        data.Configuration.Attributes()["single_table_name"].(types.String).ValueString(),
-				"skip_lines":               int(data.Configuration.Attributes()["skip_lines"].(types.Int64).ValueInt64()),
-			},
-			Validate: pointer.ToBool(false),
+			Configuration:  connConf,
+			Validate:       pointer.ToBool(false),
 		})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))

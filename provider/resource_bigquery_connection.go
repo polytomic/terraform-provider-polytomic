@@ -113,17 +113,12 @@ func (t *BigqueryConnectionResource) Schema(ctx context.Context, req resource.Sc
 }
 
 type BigqueryConf struct {
-	Client_email string `mapstructure:"client_email" tfsdk:"client_email"`
-
-	Location string `mapstructure:"location" tfsdk:"location"`
-
-	Override_project_id string `mapstructure:"override_project_id" tfsdk:"override_project_id"`
-
-	Project_id string `mapstructure:"project_id" tfsdk:"project_id"`
-
-	Service_account string `mapstructure:"service_account" tfsdk:"service_account"`
-
-	Structured_values_as_json bool `mapstructure:"structured_values_as_json" tfsdk:"structured_values_as_json"`
+	Client_email              string `mapstructure:"client_email" tfsdk:"client_email"`
+	Location                  string `mapstructure:"location" tfsdk:"location"`
+	Override_project_id       string `mapstructure:"override_project_id" tfsdk:"override_project_id"`
+	Project_id                string `mapstructure:"project_id" tfsdk:"project_id"`
+	Service_account           string `mapstructure:"service_account" tfsdk:"service_account"`
+	Structured_values_as_json bool   `mapstructure:"structured_values_as_json" tfsdk:"structured_values_as_json"`
 }
 
 type BigqueryConnectionResource struct {
@@ -155,19 +150,17 @@ func (r *BigqueryConnectionResource) Create(ctx context.Context, req resource.Cr
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "bigquery",
 		OrganizationId: data.Organization.ValueStringPointer(),
-		Configuration: map[string]interface{}{
-			"client_email":              data.Configuration.Attributes()["client_email"].(types.String).ValueString(),
-			"location":                  data.Configuration.Attributes()["location"].(types.String).ValueString(),
-			"override_project_id":       data.Configuration.Attributes()["override_project_id"].(types.String).ValueString(),
-			"project_id":                data.Configuration.Attributes()["project_id"].(types.String).ValueString(),
-			"service_account":           data.Configuration.Attributes()["service_account"].(types.String).ValueString(),
-			"structured_values_as_json": data.Configuration.Attributes()["structured_values_as_json"].(types.Bool).ValueBool(),
-		},
-		Validate: pointer.ToBool(false),
+		Configuration:  connConf,
+		Validate:       pointer.ToBool(false),
 	})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
@@ -271,20 +264,18 @@ func (r *BigqueryConnectionResource) Update(ctx context.Context, req resource.Up
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	updated, err := client.Connections.Update(ctx,
 		data.Id.ValueString(),
 		&polytomic.UpdateConnectionRequestSchema{
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueStringPointer(),
-			Configuration: map[string]interface{}{
-				"client_email":              data.Configuration.Attributes()["client_email"].(types.String).ValueString(),
-				"location":                  data.Configuration.Attributes()["location"].(types.String).ValueString(),
-				"override_project_id":       data.Configuration.Attributes()["override_project_id"].(types.String).ValueString(),
-				"project_id":                data.Configuration.Attributes()["project_id"].(types.String).ValueString(),
-				"service_account":           data.Configuration.Attributes()["service_account"].(types.String).ValueString(),
-				"structured_values_as_json": data.Configuration.Attributes()["structured_values_as_json"].(types.Bool).ValueBool(),
-			},
-			Validate: pointer.ToBool(false),
+			Configuration:  connConf,
+			Validate:       pointer.ToBool(false),
 		})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))

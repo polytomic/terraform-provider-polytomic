@@ -99,13 +99,10 @@ func (t *AppstoreconnectConnectionResource) Schema(ctx context.Context, req reso
 }
 
 type AppstoreconnectConf struct {
-	Issuer_id string `mapstructure:"issuer_id" tfsdk:"issuer_id"`
-
-	Private_key string `mapstructure:"private_key" tfsdk:"private_key"`
-
+	Issuer_id      string `mapstructure:"issuer_id" tfsdk:"issuer_id"`
+	Private_key    string `mapstructure:"private_key" tfsdk:"private_key"`
 	Private_key_id string `mapstructure:"private_key_id" tfsdk:"private_key_id"`
-
-	Vendor_number string `mapstructure:"vendor_number" tfsdk:"vendor_number"`
+	Vendor_number  string `mapstructure:"vendor_number" tfsdk:"vendor_number"`
 }
 
 type AppstoreconnectConnectionResource struct {
@@ -137,17 +134,17 @@ func (r *AppstoreconnectConnectionResource) Create(ctx context.Context, req reso
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "appstoreconnect",
 		OrganizationId: data.Organization.ValueStringPointer(),
-		Configuration: map[string]interface{}{
-			"issuer_id":      data.Configuration.Attributes()["issuer_id"].(types.String).ValueString(),
-			"private_key":    data.Configuration.Attributes()["private_key"].(types.String).ValueString(),
-			"private_key_id": data.Configuration.Attributes()["private_key_id"].(types.String).ValueString(),
-			"vendor_number":  data.Configuration.Attributes()["vendor_number"].(types.String).ValueString(),
-		},
-		Validate: pointer.ToBool(false),
+		Configuration:  connConf,
+		Validate:       pointer.ToBool(false),
 	})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
@@ -247,18 +244,18 @@ func (r *AppstoreconnectConnectionResource) Update(ctx context.Context, req reso
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	updated, err := client.Connections.Update(ctx,
 		data.Id.ValueString(),
 		&polytomic.UpdateConnectionRequestSchema{
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueStringPointer(),
-			Configuration: map[string]interface{}{
-				"issuer_id":      data.Configuration.Attributes()["issuer_id"].(types.String).ValueString(),
-				"private_key":    data.Configuration.Attributes()["private_key"].(types.String).ValueString(),
-				"private_key_id": data.Configuration.Attributes()["private_key_id"].(types.String).ValueString(),
-				"vendor_number":  data.Configuration.Attributes()["vendor_number"].(types.String).ValueString(),
-			},
-			Validate: pointer.ToBool(false),
+			Configuration:  connConf,
+			Validate:       pointer.ToBool(false),
 		})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))

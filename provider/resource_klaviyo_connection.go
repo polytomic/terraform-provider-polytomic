@@ -88,8 +88,7 @@ func (t *KlaviyoConnectionResource) Schema(ctx context.Context, req resource.Sch
 }
 
 type KlaviyoConf struct {
-	Apikey string `mapstructure:"apikey" tfsdk:"apikey"`
-
+	Apikey         string `mapstructure:"apikey" tfsdk:"apikey"`
 	Private_apikey string `mapstructure:"private_apikey" tfsdk:"private_apikey"`
 }
 
@@ -122,15 +121,17 @@ func (r *KlaviyoConnectionResource) Create(ctx context.Context, req resource.Cre
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "klaviyo",
 		OrganizationId: data.Organization.ValueStringPointer(),
-		Configuration: map[string]interface{}{
-			"apikey":         data.Configuration.Attributes()["apikey"].(types.String).ValueString(),
-			"private_apikey": data.Configuration.Attributes()["private_apikey"].(types.String).ValueString(),
-		},
-		Validate: pointer.ToBool(false),
+		Configuration:  connConf,
+		Validate:       pointer.ToBool(false),
 	})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
@@ -226,16 +227,18 @@ func (r *KlaviyoConnectionResource) Update(ctx context.Context, req resource.Upd
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	updated, err := client.Connections.Update(ctx,
 		data.Id.ValueString(),
 		&polytomic.UpdateConnectionRequestSchema{
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueStringPointer(),
-			Configuration: map[string]interface{}{
-				"apikey":         data.Configuration.Attributes()["apikey"].(types.String).ValueString(),
-				"private_apikey": data.Configuration.Attributes()["private_apikey"].(types.String).ValueString(),
-			},
-			Validate: pointer.ToBool(false),
+			Configuration:  connConf,
+			Validate:       pointer.ToBool(false),
 		})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))

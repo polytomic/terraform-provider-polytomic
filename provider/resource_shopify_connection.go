@@ -86,8 +86,7 @@ func (t *ShopifyConnectionResource) Schema(ctx context.Context, req resource.Sch
 
 type ShopifyConf struct {
 	Admin_api_token string `mapstructure:"admin_api_token" tfsdk:"admin_api_token"`
-
-	Store string `mapstructure:"store" tfsdk:"store"`
+	Store           string `mapstructure:"store" tfsdk:"store"`
 }
 
 type ShopifyConnectionResource struct {
@@ -119,15 +118,17 @@ func (r *ShopifyConnectionResource) Create(ctx context.Context, req resource.Cre
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "shopify",
 		OrganizationId: data.Organization.ValueStringPointer(),
-		Configuration: map[string]interface{}{
-			"admin_api_token": data.Configuration.Attributes()["admin_api_token"].(types.String).ValueString(),
-			"store":           data.Configuration.Attributes()["store"].(types.String).ValueString(),
-		},
-		Validate: pointer.ToBool(false),
+		Configuration:  connConf,
+		Validate:       pointer.ToBool(false),
 	})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
@@ -223,16 +224,18 @@ func (r *ShopifyConnectionResource) Update(ctx context.Context, req resource.Upd
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	updated, err := client.Connections.Update(ctx,
 		data.Id.ValueString(),
 		&polytomic.UpdateConnectionRequestSchema{
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueStringPointer(),
-			Configuration: map[string]interface{}{
-				"admin_api_token": data.Configuration.Attributes()["admin_api_token"].(types.String).ValueString(),
-				"store":           data.Configuration.Attributes()["store"].(types.String).ValueString(),
-			},
-			Validate: pointer.ToBool(false),
+			Configuration:  connConf,
+			Validate:       pointer.ToBool(false),
 		})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))

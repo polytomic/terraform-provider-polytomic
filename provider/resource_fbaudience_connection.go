@@ -51,12 +51,30 @@ func (t *FbaudienceConnectionResource) Schema(ctx context.Context, req resource.
 						Computed:            true,
 						Sensitive:           false,
 					},
-					"accounts": schema.StringAttribute{
+					"accounts": schema.SetNestedAttribute{
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+								"label": schema.StringAttribute{
+									MarkdownDescription: "",
+									Required:            false,
+									Optional:            true,
+									Computed:            true,
+									Sensitive:           false,
+								},
+								"value": schema.StringAttribute{
+									MarkdownDescription: "",
+									Required:            false,
+									Optional:            true,
+									Computed:            true,
+									Sensitive:           false,
+								},
+							},
+						},
 					},
 					"auth_method": schema.StringAttribute{
 						MarkdownDescription: "",
@@ -114,16 +132,14 @@ func (t *FbaudienceConnectionResource) Schema(ctx context.Context, req resource.
 
 type FbaudienceConf struct {
 	Account_id string `mapstructure:"account_id" tfsdk:"account_id"`
-
-	Accounts string `mapstructure:"accounts" tfsdk:"accounts"`
-
-	Auth_method string `mapstructure:"auth_method" tfsdk:"auth_method"`
-
-	Byo_app_token string `mapstructure:"byo_app_token" tfsdk:"byo_app_token"`
-
+	Accounts   []struct {
+		Label string `mapstructure:"label" tfsdk:"label"`
+		Value string `mapstructure:"value" tfsdk:"value"`
+	} `mapstructure:"accounts" tfsdk:"accounts"`
+	Auth_method       string `mapstructure:"auth_method" tfsdk:"auth_method"`
+	Byo_app_token     string `mapstructure:"byo_app_token" tfsdk:"byo_app_token"`
 	Graph_api_version string `mapstructure:"graph_api_version" tfsdk:"graph_api_version"`
-
-	User_name string `mapstructure:"user_name" tfsdk:"user_name"`
+	User_name         string `mapstructure:"user_name" tfsdk:"user_name"`
 }
 
 type FbaudienceConnectionResource struct {
@@ -155,19 +171,17 @@ func (r *FbaudienceConnectionResource) Create(ctx context.Context, req resource.
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "fbaudience",
 		OrganizationId: data.Organization.ValueStringPointer(),
-		Configuration: map[string]interface{}{
-			"account_id":        data.Configuration.Attributes()["account_id"].(types.String).ValueString(),
-			"accounts":          data.Configuration.Attributes()["accounts"].(types.String).ValueString(),
-			"auth_method":       data.Configuration.Attributes()["auth_method"].(types.String).ValueString(),
-			"byo_app_token":     data.Configuration.Attributes()["byo_app_token"].(types.String).ValueString(),
-			"graph_api_version": data.Configuration.Attributes()["graph_api_version"].(types.String).ValueString(),
-			"user_name":         data.Configuration.Attributes()["user_name"].(types.String).ValueString(),
-		},
-		Validate: pointer.ToBool(false),
+		Configuration:  connConf,
+		Validate:       pointer.ToBool(false),
 	})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
@@ -184,8 +198,15 @@ func (r *FbaudienceConnectionResource) Create(ctx context.Context, req resource.
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"account_id":        types.StringType,
-		"accounts":          types.StringType,
+		"account_id": types.StringType,
+		"accounts": types.SetType{
+			ElemType: types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"label": types.StringType,
+					"value": types.StringType,
+				},
+			},
+		},
 		"auth_method":       types.StringType,
 		"byo_app_token":     types.StringType,
 		"graph_api_version": types.StringType,
@@ -240,8 +261,15 @@ func (r *FbaudienceConnectionResource) Read(ctx context.Context, req resource.Re
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"account_id":        types.StringType,
-		"accounts":          types.StringType,
+		"account_id": types.StringType,
+		"accounts": types.SetType{
+			ElemType: types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"label": types.StringType,
+					"value": types.StringType,
+				},
+			},
+		},
 		"auth_method":       types.StringType,
 		"byo_app_token":     types.StringType,
 		"graph_api_version": types.StringType,
@@ -271,20 +299,18 @@ func (r *FbaudienceConnectionResource) Update(ctx context.Context, req resource.
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	updated, err := client.Connections.Update(ctx,
 		data.Id.ValueString(),
 		&polytomic.UpdateConnectionRequestSchema{
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueStringPointer(),
-			Configuration: map[string]interface{}{
-				"account_id":        data.Configuration.Attributes()["account_id"].(types.String).ValueString(),
-				"accounts":          data.Configuration.Attributes()["accounts"].(types.String).ValueString(),
-				"auth_method":       data.Configuration.Attributes()["auth_method"].(types.String).ValueString(),
-				"byo_app_token":     data.Configuration.Attributes()["byo_app_token"].(types.String).ValueString(),
-				"graph_api_version": data.Configuration.Attributes()["graph_api_version"].(types.String).ValueString(),
-				"user_name":         data.Configuration.Attributes()["user_name"].(types.String).ValueString(),
-			},
-			Validate: pointer.ToBool(false),
+			Configuration:  connConf,
+			Validate:       pointer.ToBool(false),
 		})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))
@@ -302,8 +328,15 @@ func (r *FbaudienceConnectionResource) Update(ctx context.Context, req resource.
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"account_id":        types.StringType,
-		"accounts":          types.StringType,
+		"account_id": types.StringType,
+		"accounts": types.SetType{
+			ElemType: types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"label": types.StringType,
+					"value": types.StringType,
+				},
+			},
+		},
 		"auth_method":       types.StringType,
 		"byo_app_token":     types.StringType,
 		"graph_api_version": types.StringType,

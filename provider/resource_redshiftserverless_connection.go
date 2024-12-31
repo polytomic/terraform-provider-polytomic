@@ -118,18 +118,12 @@ func (t *RedshiftserverlessConnectionResource) Schema(ctx context.Context, req r
 
 type RedshiftserverlessConf struct {
 	Data_api_endpoint string `mapstructure:"data_api_endpoint" tfsdk:"data_api_endpoint"`
-
-	Database string `mapstructure:"database" tfsdk:"database"`
-
-	External_id string `mapstructure:"external_id" tfsdk:"external_id"`
-
-	Iam_role_arn string `mapstructure:"iam_role_arn" tfsdk:"iam_role_arn"`
-
-	Override_endpoint bool `mapstructure:"override_endpoint" tfsdk:"override_endpoint"`
-
-	Region string `mapstructure:"region" tfsdk:"region"`
-
-	Workgroup string `mapstructure:"workgroup" tfsdk:"workgroup"`
+	Database          string `mapstructure:"database" tfsdk:"database"`
+	External_id       string `mapstructure:"external_id" tfsdk:"external_id"`
+	Iam_role_arn      string `mapstructure:"iam_role_arn" tfsdk:"iam_role_arn"`
+	Override_endpoint bool   `mapstructure:"override_endpoint" tfsdk:"override_endpoint"`
+	Region            string `mapstructure:"region" tfsdk:"region"`
+	Workgroup         string `mapstructure:"workgroup" tfsdk:"workgroup"`
 }
 
 type RedshiftserverlessConnectionResource struct {
@@ -161,20 +155,17 @@ func (r *RedshiftserverlessConnectionResource) Create(ctx context.Context, req r
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "redshiftserverless",
 		OrganizationId: data.Organization.ValueStringPointer(),
-		Configuration: map[string]interface{}{
-			"data_api_endpoint": data.Configuration.Attributes()["data_api_endpoint"].(types.String).ValueString(),
-			"database":          data.Configuration.Attributes()["database"].(types.String).ValueString(),
-			"external_id":       data.Configuration.Attributes()["external_id"].(types.String).ValueString(),
-			"iam_role_arn":      data.Configuration.Attributes()["iam_role_arn"].(types.String).ValueString(),
-			"override_endpoint": data.Configuration.Attributes()["override_endpoint"].(types.Bool).ValueBool(),
-			"region":            data.Configuration.Attributes()["region"].(types.String).ValueString(),
-			"workgroup":         data.Configuration.Attributes()["workgroup"].(types.String).ValueString(),
-		},
-		Validate: pointer.ToBool(false),
+		Configuration:  connConf,
+		Validate:       pointer.ToBool(false),
 	})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
@@ -280,21 +271,18 @@ func (r *RedshiftserverlessConnectionResource) Update(ctx context.Context, req r
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	updated, err := client.Connections.Update(ctx,
 		data.Id.ValueString(),
 		&polytomic.UpdateConnectionRequestSchema{
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueStringPointer(),
-			Configuration: map[string]interface{}{
-				"data_api_endpoint": data.Configuration.Attributes()["data_api_endpoint"].(types.String).ValueString(),
-				"database":          data.Configuration.Attributes()["database"].(types.String).ValueString(),
-				"external_id":       data.Configuration.Attributes()["external_id"].(types.String).ValueString(),
-				"iam_role_arn":      data.Configuration.Attributes()["iam_role_arn"].(types.String).ValueString(),
-				"override_endpoint": data.Configuration.Attributes()["override_endpoint"].(types.Bool).ValueBool(),
-				"region":            data.Configuration.Attributes()["region"].(types.String).ValueString(),
-				"workgroup":         data.Configuration.Attributes()["workgroup"].(types.String).ValueString(),
-			},
-			Validate: pointer.ToBool(false),
+			Configuration:  connConf,
+			Validate:       pointer.ToBool(false),
 		})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))

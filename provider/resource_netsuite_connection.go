@@ -109,15 +109,11 @@ func (t *NetsuiteConnectionResource) Schema(ctx context.Context, req resource.Sc
 }
 
 type NetsuiteConf struct {
-	Account_id string `mapstructure:"account_id" tfsdk:"account_id"`
-
-	Consumer_key string `mapstructure:"consumer_key" tfsdk:"consumer_key"`
-
+	Account_id      string `mapstructure:"account_id" tfsdk:"account_id"`
+	Consumer_key    string `mapstructure:"consumer_key" tfsdk:"consumer_key"`
 	Consumer_secret string `mapstructure:"consumer_secret" tfsdk:"consumer_secret"`
-
-	Token string `mapstructure:"token" tfsdk:"token"`
-
-	Token_secret string `mapstructure:"token_secret" tfsdk:"token_secret"`
+	Token           string `mapstructure:"token" tfsdk:"token"`
+	Token_secret    string `mapstructure:"token_secret" tfsdk:"token_secret"`
 }
 
 type NetsuiteConnectionResource struct {
@@ -149,18 +145,17 @@ func (r *NetsuiteConnectionResource) Create(ctx context.Context, req resource.Cr
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "netsuite",
 		OrganizationId: data.Organization.ValueStringPointer(),
-		Configuration: map[string]interface{}{
-			"account_id":      data.Configuration.Attributes()["account_id"].(types.String).ValueString(),
-			"consumer_key":    data.Configuration.Attributes()["consumer_key"].(types.String).ValueString(),
-			"consumer_secret": data.Configuration.Attributes()["consumer_secret"].(types.String).ValueString(),
-			"token":           data.Configuration.Attributes()["token"].(types.String).ValueString(),
-			"token_secret":    data.Configuration.Attributes()["token_secret"].(types.String).ValueString(),
-		},
-		Validate: pointer.ToBool(false),
+		Configuration:  connConf,
+		Validate:       pointer.ToBool(false),
 	})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
@@ -262,19 +257,18 @@ func (r *NetsuiteConnectionResource) Update(ctx context.Context, req resource.Up
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	updated, err := client.Connections.Update(ctx,
 		data.Id.ValueString(),
 		&polytomic.UpdateConnectionRequestSchema{
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueStringPointer(),
-			Configuration: map[string]interface{}{
-				"account_id":      data.Configuration.Attributes()["account_id"].(types.String).ValueString(),
-				"consumer_key":    data.Configuration.Attributes()["consumer_key"].(types.String).ValueString(),
-				"consumer_secret": data.Configuration.Attributes()["consumer_secret"].(types.String).ValueString(),
-				"token":           data.Configuration.Attributes()["token"].(types.String).ValueString(),
-				"token_secret":    data.Configuration.Attributes()["token_secret"].(types.String).ValueString(),
-			},
-			Validate: pointer.ToBool(false),
+			Configuration:  connConf,
+			Validate:       pointer.ToBool(false),
 		})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))

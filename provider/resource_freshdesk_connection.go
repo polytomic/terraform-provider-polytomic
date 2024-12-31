@@ -85,8 +85,7 @@ func (t *FreshdeskConnectionResource) Schema(ctx context.Context, req resource.S
 }
 
 type FreshdeskConf struct {
-	Apikey string `mapstructure:"apikey" tfsdk:"apikey"`
-
+	Apikey    string `mapstructure:"apikey" tfsdk:"apikey"`
 	Subdomain string `mapstructure:"subdomain" tfsdk:"subdomain"`
 }
 
@@ -119,15 +118,17 @@ func (r *FreshdeskConnectionResource) Create(ctx context.Context, req resource.C
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "freshdesk",
 		OrganizationId: data.Organization.ValueStringPointer(),
-		Configuration: map[string]interface{}{
-			"apikey":    data.Configuration.Attributes()["apikey"].(types.String).ValueString(),
-			"subdomain": data.Configuration.Attributes()["subdomain"].(types.String).ValueString(),
-		},
-		Validate: pointer.ToBool(false),
+		Configuration:  connConf,
+		Validate:       pointer.ToBool(false),
 	})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
@@ -223,16 +224,18 @@ func (r *FreshdeskConnectionResource) Update(ctx context.Context, req resource.U
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	updated, err := client.Connections.Update(ctx,
 		data.Id.ValueString(),
 		&polytomic.UpdateConnectionRequestSchema{
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueStringPointer(),
-			Configuration: map[string]interface{}{
-				"apikey":    data.Configuration.Attributes()["apikey"].(types.String).ValueString(),
-				"subdomain": data.Configuration.Attributes()["subdomain"].(types.String).ValueString(),
-			},
-			Validate: pointer.ToBool(false),
+			Configuration:  connConf,
+			Validate:       pointer.ToBool(false),
 		})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))

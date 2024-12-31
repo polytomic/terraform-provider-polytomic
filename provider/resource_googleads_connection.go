@@ -44,12 +44,30 @@ func (t *GoogleadsConnectionResource) Schema(ctx context.Context, req resource.S
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
-					"accounts": schema.StringAttribute{
+					"accounts": schema.SetNestedAttribute{
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+								"label": schema.StringAttribute{
+									MarkdownDescription: "",
+									Required:            false,
+									Optional:            true,
+									Computed:            true,
+									Sensitive:           false,
+								},
+								"value": schema.StringAttribute{
+									MarkdownDescription: "",
+									Required:            false,
+									Optional:            true,
+									Computed:            true,
+									Sensitive:           false,
+								},
+							},
+						},
 					},
 					"client_id": schema.StringAttribute{
 						MarkdownDescription: "",
@@ -119,17 +137,15 @@ func (t *GoogleadsConnectionResource) Schema(ctx context.Context, req resource.S
 }
 
 type GoogleadsConf struct {
-	Accounts string `mapstructure:"accounts" tfsdk:"accounts"`
-
-	Client_id string `mapstructure:"client_id" tfsdk:"client_id"`
-
-	Client_secret string `mapstructure:"client_secret" tfsdk:"client_secret"`
-
-	Connected_user string `mapstructure:"connected_user" tfsdk:"connected_user"`
-
+	Accounts []struct {
+		Label string `mapstructure:"label" tfsdk:"label"`
+		Value string `mapstructure:"value" tfsdk:"value"`
+	} `mapstructure:"accounts" tfsdk:"accounts"`
+	Client_id           string `mapstructure:"client_id" tfsdk:"client_id"`
+	Client_secret       string `mapstructure:"client_secret" tfsdk:"client_secret"`
+	Connected_user      string `mapstructure:"connected_user" tfsdk:"connected_user"`
 	Oauth_refresh_token string `mapstructure:"oauth_refresh_token" tfsdk:"oauth_refresh_token"`
-
-	Oauth_token_expiry string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
+	Oauth_token_expiry  string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
 }
 
 type GoogleadsConnectionResource struct {
@@ -161,19 +177,17 @@ func (r *GoogleadsConnectionResource) Create(ctx context.Context, req resource.C
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "googleads",
 		OrganizationId: data.Organization.ValueStringPointer(),
-		Configuration: map[string]interface{}{
-			"accounts":            data.Configuration.Attributes()["accounts"].(types.String).ValueString(),
-			"client_id":           data.Configuration.Attributes()["client_id"].(types.String).ValueString(),
-			"client_secret":       data.Configuration.Attributes()["client_secret"].(types.String).ValueString(),
-			"connected_user":      data.Configuration.Attributes()["connected_user"].(types.String).ValueString(),
-			"oauth_refresh_token": data.Configuration.Attributes()["oauth_refresh_token"].(types.String).ValueString(),
-			"oauth_token_expiry":  data.Configuration.Attributes()["oauth_token_expiry"].(types.String).ValueString(),
-		},
-		Validate: pointer.ToBool(false),
+		Configuration:  connConf,
+		Validate:       pointer.ToBool(false),
 	})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
@@ -190,7 +204,14 @@ func (r *GoogleadsConnectionResource) Create(ctx context.Context, req resource.C
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"accounts":            types.StringType,
+		"accounts": types.SetType{
+			ElemType: types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"label": types.StringType,
+					"value": types.StringType,
+				},
+			},
+		},
 		"client_id":           types.StringType,
 		"client_secret":       types.StringType,
 		"connected_user":      types.StringType,
@@ -246,7 +267,14 @@ func (r *GoogleadsConnectionResource) Read(ctx context.Context, req resource.Rea
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"accounts":            types.StringType,
+		"accounts": types.SetType{
+			ElemType: types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"label": types.StringType,
+					"value": types.StringType,
+				},
+			},
+		},
 		"client_id":           types.StringType,
 		"client_secret":       types.StringType,
 		"connected_user":      types.StringType,
@@ -277,20 +305,18 @@ func (r *GoogleadsConnectionResource) Update(ctx context.Context, req resource.U
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	updated, err := client.Connections.Update(ctx,
 		data.Id.ValueString(),
 		&polytomic.UpdateConnectionRequestSchema{
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueStringPointer(),
-			Configuration: map[string]interface{}{
-				"accounts":            data.Configuration.Attributes()["accounts"].(types.String).ValueString(),
-				"client_id":           data.Configuration.Attributes()["client_id"].(types.String).ValueString(),
-				"client_secret":       data.Configuration.Attributes()["client_secret"].(types.String).ValueString(),
-				"connected_user":      data.Configuration.Attributes()["connected_user"].(types.String).ValueString(),
-				"oauth_refresh_token": data.Configuration.Attributes()["oauth_refresh_token"].(types.String).ValueString(),
-				"oauth_token_expiry":  data.Configuration.Attributes()["oauth_token_expiry"].(types.String).ValueString(),
-			},
-			Validate: pointer.ToBool(false),
+			Configuration:  connConf,
+			Validate:       pointer.ToBool(false),
 		})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))
@@ -308,7 +334,14 @@ func (r *GoogleadsConnectionResource) Update(ctx context.Context, req resource.U
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"accounts":            types.StringType,
+		"accounts": types.SetType{
+			ElemType: types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"label": types.StringType,
+					"value": types.StringType,
+				},
+			},
+		},
 		"client_id":           types.StringType,
 		"client_secret":       types.StringType,
 		"connected_user":      types.StringType,

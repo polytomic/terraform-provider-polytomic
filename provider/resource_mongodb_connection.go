@@ -121,17 +121,11 @@ func (t *MongodbConnectionResource) Schema(ctx context.Context, req resource.Sch
 
 type MongodbConf struct {
 	Database string `mapstructure:"database" tfsdk:"database"`
-
-	Hosts string `mapstructure:"hosts" tfsdk:"hosts"`
-
-	Params string `mapstructure:"params" tfsdk:"params"`
-
+	Hosts    string `mapstructure:"hosts" tfsdk:"hosts"`
+	Params   string `mapstructure:"params" tfsdk:"params"`
 	Password string `mapstructure:"password" tfsdk:"password"`
-
-	Srv bool `mapstructure:"srv" tfsdk:"srv"`
-
-	Ssl bool `mapstructure:"ssl" tfsdk:"ssl"`
-
+	Srv      bool   `mapstructure:"srv" tfsdk:"srv"`
+	Ssl      bool   `mapstructure:"ssl" tfsdk:"ssl"`
 	Username string `mapstructure:"username" tfsdk:"username"`
 }
 
@@ -164,20 +158,17 @@ func (r *MongodbConnectionResource) Create(ctx context.Context, req resource.Cre
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "mongodb",
 		OrganizationId: data.Organization.ValueStringPointer(),
-		Configuration: map[string]interface{}{
-			"database": data.Configuration.Attributes()["database"].(types.String).ValueString(),
-			"hosts":    data.Configuration.Attributes()["hosts"].(types.String).ValueString(),
-			"params":   data.Configuration.Attributes()["params"].(types.String).ValueString(),
-			"password": data.Configuration.Attributes()["password"].(types.String).ValueString(),
-			"srv":      data.Configuration.Attributes()["srv"].(types.Bool).ValueBool(),
-			"ssl":      data.Configuration.Attributes()["ssl"].(types.Bool).ValueBool(),
-			"username": data.Configuration.Attributes()["username"].(types.String).ValueString(),
-		},
-		Validate: pointer.ToBool(false),
+		Configuration:  connConf,
+		Validate:       pointer.ToBool(false),
 	})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
@@ -283,21 +274,18 @@ func (r *MongodbConnectionResource) Update(ctx context.Context, req resource.Upd
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	updated, err := client.Connections.Update(ctx,
 		data.Id.ValueString(),
 		&polytomic.UpdateConnectionRequestSchema{
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueStringPointer(),
-			Configuration: map[string]interface{}{
-				"database": data.Configuration.Attributes()["database"].(types.String).ValueString(),
-				"hosts":    data.Configuration.Attributes()["hosts"].(types.String).ValueString(),
-				"params":   data.Configuration.Attributes()["params"].(types.String).ValueString(),
-				"password": data.Configuration.Attributes()["password"].(types.String).ValueString(),
-				"srv":      data.Configuration.Attributes()["srv"].(types.Bool).ValueBool(),
-				"ssl":      data.Configuration.Attributes()["ssl"].(types.Bool).ValueBool(),
-				"username": data.Configuration.Attributes()["username"].(types.String).ValueString(),
-			},
-			Validate: pointer.ToBool(false),
+			Configuration:  connConf,
+			Validate:       pointer.ToBool(false),
 		})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))

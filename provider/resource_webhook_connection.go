@@ -44,12 +44,30 @@ func (t *WebhookConnectionResource) Schema(ctx context.Context, req resource.Sch
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
-					"headers": schema.StringAttribute{
+					"headers": schema.SetNestedAttribute{
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+								"name": schema.StringAttribute{
+									MarkdownDescription: "",
+									Required:            false,
+									Optional:            true,
+									Computed:            true,
+									Sensitive:           false,
+								},
+								"value": schema.StringAttribute{
+									MarkdownDescription: "",
+									Required:            false,
+									Optional:            true,
+									Computed:            true,
+									Sensitive:           false,
+								},
+							},
+						},
 					},
 					"secret": schema.StringAttribute{
 						MarkdownDescription: "",
@@ -92,11 +110,12 @@ func (t *WebhookConnectionResource) Schema(ctx context.Context, req resource.Sch
 }
 
 type WebhookConf struct {
-	Headers string `mapstructure:"headers" tfsdk:"headers"`
-
+	Headers []struct {
+		Name  string `mapstructure:"name" tfsdk:"name"`
+		Value string `mapstructure:"value" tfsdk:"value"`
+	} `mapstructure:"headers" tfsdk:"headers"`
 	Secret string `mapstructure:"secret" tfsdk:"secret"`
-
-	Url string `mapstructure:"url" tfsdk:"url"`
+	Url    string `mapstructure:"url" tfsdk:"url"`
 }
 
 type WebhookConnectionResource struct {
@@ -128,16 +147,17 @@ func (r *WebhookConnectionResource) Create(ctx context.Context, req resource.Cre
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "webhook",
 		OrganizationId: data.Organization.ValueStringPointer(),
-		Configuration: map[string]interface{}{
-			"headers": data.Configuration.Attributes()["headers"].(types.String).ValueString(),
-			"secret":  data.Configuration.Attributes()["secret"].(types.String).ValueString(),
-			"url":     data.Configuration.Attributes()["url"].(types.String).ValueString(),
-		},
-		Validate: pointer.ToBool(false),
+		Configuration:  connConf,
+		Validate:       pointer.ToBool(false),
 	})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
@@ -154,9 +174,16 @@ func (r *WebhookConnectionResource) Create(ctx context.Context, req resource.Cre
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"headers": types.StringType,
-		"secret":  types.StringType,
-		"url":     types.StringType,
+		"headers": types.SetType{
+			ElemType: types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"name":  types.StringType,
+					"value": types.StringType,
+				},
+			},
+		},
+		"secret": types.StringType,
+		"url":    types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -207,9 +234,16 @@ func (r *WebhookConnectionResource) Read(ctx context.Context, req resource.ReadR
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"headers": types.StringType,
-		"secret":  types.StringType,
-		"url":     types.StringType,
+		"headers": types.SetType{
+			ElemType: types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"name":  types.StringType,
+					"value": types.StringType,
+				},
+			},
+		},
+		"secret": types.StringType,
+		"url":    types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -235,17 +269,18 @@ func (r *WebhookConnectionResource) Update(ctx context.Context, req resource.Upd
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	updated, err := client.Connections.Update(ctx,
 		data.Id.ValueString(),
 		&polytomic.UpdateConnectionRequestSchema{
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueStringPointer(),
-			Configuration: map[string]interface{}{
-				"headers": data.Configuration.Attributes()["headers"].(types.String).ValueString(),
-				"secret":  data.Configuration.Attributes()["secret"].(types.String).ValueString(),
-				"url":     data.Configuration.Attributes()["url"].(types.String).ValueString(),
-			},
-			Validate: pointer.ToBool(false),
+			Configuration:  connConf,
+			Validate:       pointer.ToBool(false),
 		})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))
@@ -263,9 +298,16 @@ func (r *WebhookConnectionResource) Update(ctx context.Context, req resource.Upd
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"headers": types.StringType,
-		"secret":  types.StringType,
-		"url":     types.StringType,
+		"headers": types.SetType{
+			ElemType: types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"name":  types.StringType,
+					"value": types.StringType,
+				},
+			},
+		},
+		"secret": types.StringType,
+		"url":    types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

@@ -95,11 +95,9 @@ func (t *SeamaiConnectionResource) Schema(ctx context.Context, req resource.Sche
 }
 
 type SeamaiConf struct {
-	Apikey_id string `mapstructure:"apikey_id" tfsdk:"apikey_id"`
-
+	Apikey_id     string `mapstructure:"apikey_id" tfsdk:"apikey_id"`
 	Apikey_secret string `mapstructure:"apikey_secret" tfsdk:"apikey_secret"`
-
-	Base_url string `mapstructure:"base_url" tfsdk:"base_url"`
+	Base_url      string `mapstructure:"base_url" tfsdk:"base_url"`
 }
 
 type SeamaiConnectionResource struct {
@@ -131,16 +129,17 @@ func (r *SeamaiConnectionResource) Create(ctx context.Context, req resource.Crea
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "seamai",
 		OrganizationId: data.Organization.ValueStringPointer(),
-		Configuration: map[string]interface{}{
-			"apikey_id":     data.Configuration.Attributes()["apikey_id"].(types.String).ValueString(),
-			"apikey_secret": data.Configuration.Attributes()["apikey_secret"].(types.String).ValueString(),
-			"base_url":      data.Configuration.Attributes()["base_url"].(types.String).ValueString(),
-		},
-		Validate: pointer.ToBool(false),
+		Configuration:  connConf,
+		Validate:       pointer.ToBool(false),
 	})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
@@ -238,17 +237,18 @@ func (r *SeamaiConnectionResource) Update(ctx context.Context, req resource.Upda
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	updated, err := client.Connections.Update(ctx,
 		data.Id.ValueString(),
 		&polytomic.UpdateConnectionRequestSchema{
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueStringPointer(),
-			Configuration: map[string]interface{}{
-				"apikey_id":     data.Configuration.Attributes()["apikey_id"].(types.String).ValueString(),
-				"apikey_secret": data.Configuration.Attributes()["apikey_secret"].(types.String).ValueString(),
-				"base_url":      data.Configuration.Attributes()["base_url"].(types.String).ValueString(),
-			},
-			Validate: pointer.ToBool(false),
+			Configuration:  connConf,
+			Validate:       pointer.ToBool(false),
 		})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))

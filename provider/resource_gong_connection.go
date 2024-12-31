@@ -136,21 +136,14 @@ func (t *GongConnectionResource) Schema(ctx context.Context, req resource.Schema
 }
 
 type GongConf struct {
-	Access_key string `mapstructure:"access_key" tfsdk:"access_key"`
-
-	Access_secret string `mapstructure:"access_secret" tfsdk:"access_secret"`
-
-	Auth_method string `mapstructure:"auth_method" tfsdk:"auth_method"`
-
-	Client_id string `mapstructure:"client_id" tfsdk:"client_id"`
-
-	Client_secret string `mapstructure:"client_secret" tfsdk:"client_secret"`
-
+	Access_key          string `mapstructure:"access_key" tfsdk:"access_key"`
+	Access_secret       string `mapstructure:"access_secret" tfsdk:"access_secret"`
+	Auth_method         string `mapstructure:"auth_method" tfsdk:"auth_method"`
+	Client_id           string `mapstructure:"client_id" tfsdk:"client_id"`
+	Client_secret       string `mapstructure:"client_secret" tfsdk:"client_secret"`
 	Oauth_refresh_token string `mapstructure:"oauth_refresh_token" tfsdk:"oauth_refresh_token"`
-
-	Oauth_token_expiry string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
-
-	Subdomain string `mapstructure:"subdomain" tfsdk:"subdomain"`
+	Oauth_token_expiry  string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
+	Subdomain           string `mapstructure:"subdomain" tfsdk:"subdomain"`
 }
 
 type GongConnectionResource struct {
@@ -182,21 +175,17 @@ func (r *GongConnectionResource) Create(ctx context.Context, req resource.Create
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "gong",
 		OrganizationId: data.Organization.ValueStringPointer(),
-		Configuration: map[string]interface{}{
-			"access_key":          data.Configuration.Attributes()["access_key"].(types.String).ValueString(),
-			"access_secret":       data.Configuration.Attributes()["access_secret"].(types.String).ValueString(),
-			"auth_method":         data.Configuration.Attributes()["auth_method"].(types.String).ValueString(),
-			"client_id":           data.Configuration.Attributes()["client_id"].(types.String).ValueString(),
-			"client_secret":       data.Configuration.Attributes()["client_secret"].(types.String).ValueString(),
-			"oauth_refresh_token": data.Configuration.Attributes()["oauth_refresh_token"].(types.String).ValueString(),
-			"oauth_token_expiry":  data.Configuration.Attributes()["oauth_token_expiry"].(types.String).ValueString(),
-			"subdomain":           data.Configuration.Attributes()["subdomain"].(types.String).ValueString(),
-		},
-		Validate: pointer.ToBool(false),
+		Configuration:  connConf,
+		Validate:       pointer.ToBool(false),
 	})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
@@ -304,22 +293,18 @@ func (r *GongConnectionResource) Update(ctx context.Context, req resource.Update
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	updated, err := client.Connections.Update(ctx,
 		data.Id.ValueString(),
 		&polytomic.UpdateConnectionRequestSchema{
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueStringPointer(),
-			Configuration: map[string]interface{}{
-				"access_key":          data.Configuration.Attributes()["access_key"].(types.String).ValueString(),
-				"access_secret":       data.Configuration.Attributes()["access_secret"].(types.String).ValueString(),
-				"auth_method":         data.Configuration.Attributes()["auth_method"].(types.String).ValueString(),
-				"client_id":           data.Configuration.Attributes()["client_id"].(types.String).ValueString(),
-				"client_secret":       data.Configuration.Attributes()["client_secret"].(types.String).ValueString(),
-				"oauth_refresh_token": data.Configuration.Attributes()["oauth_refresh_token"].(types.String).ValueString(),
-				"oauth_token_expiry":  data.Configuration.Attributes()["oauth_token_expiry"].(types.String).ValueString(),
-				"subdomain":           data.Configuration.Attributes()["subdomain"].(types.String).ValueString(),
-			},
-			Validate: pointer.ToBool(false),
+			Configuration:  connConf,
+			Validate:       pointer.ToBool(false),
 		})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))

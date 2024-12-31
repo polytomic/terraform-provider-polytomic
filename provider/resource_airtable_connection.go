@@ -132,19 +132,13 @@ func (t *AirtableConnectionResource) Schema(ctx context.Context, req resource.Sc
 }
 
 type AirtableConf struct {
-	Api_key string `mapstructure:"api_key" tfsdk:"api_key"`
-
-	Client_id string `mapstructure:"client_id" tfsdk:"client_id"`
-
-	Client_secret string `mapstructure:"client_secret" tfsdk:"client_secret"`
-
-	Connected_user string `mapstructure:"connected_user" tfsdk:"connected_user"`
-
-	Oauth_access_token string `mapstructure:"oauth_access_token" tfsdk:"oauth_access_token"`
-
+	Api_key             string `mapstructure:"api_key" tfsdk:"api_key"`
+	Client_id           string `mapstructure:"client_id" tfsdk:"client_id"`
+	Client_secret       string `mapstructure:"client_secret" tfsdk:"client_secret"`
+	Connected_user      string `mapstructure:"connected_user" tfsdk:"connected_user"`
+	Oauth_access_token  string `mapstructure:"oauth_access_token" tfsdk:"oauth_access_token"`
 	Oauth_refresh_token string `mapstructure:"oauth_refresh_token" tfsdk:"oauth_refresh_token"`
-
-	Oauth_token_expiry string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
+	Oauth_token_expiry  string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
 }
 
 type AirtableConnectionResource struct {
@@ -176,20 +170,17 @@ func (r *AirtableConnectionResource) Create(ctx context.Context, req resource.Cr
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "airtable",
 		OrganizationId: data.Organization.ValueStringPointer(),
-		Configuration: map[string]interface{}{
-			"api_key":             data.Configuration.Attributes()["api_key"].(types.String).ValueString(),
-			"client_id":           data.Configuration.Attributes()["client_id"].(types.String).ValueString(),
-			"client_secret":       data.Configuration.Attributes()["client_secret"].(types.String).ValueString(),
-			"connected_user":      data.Configuration.Attributes()["connected_user"].(types.String).ValueString(),
-			"oauth_access_token":  data.Configuration.Attributes()["oauth_access_token"].(types.String).ValueString(),
-			"oauth_refresh_token": data.Configuration.Attributes()["oauth_refresh_token"].(types.String).ValueString(),
-			"oauth_token_expiry":  data.Configuration.Attributes()["oauth_token_expiry"].(types.String).ValueString(),
-		},
-		Validate: pointer.ToBool(false),
+		Configuration:  connConf,
+		Validate:       pointer.ToBool(false),
 	})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
@@ -295,21 +286,18 @@ func (r *AirtableConnectionResource) Update(ctx context.Context, req resource.Up
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	updated, err := client.Connections.Update(ctx,
 		data.Id.ValueString(),
 		&polytomic.UpdateConnectionRequestSchema{
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueStringPointer(),
-			Configuration: map[string]interface{}{
-				"api_key":             data.Configuration.Attributes()["api_key"].(types.String).ValueString(),
-				"client_id":           data.Configuration.Attributes()["client_id"].(types.String).ValueString(),
-				"client_secret":       data.Configuration.Attributes()["client_secret"].(types.String).ValueString(),
-				"connected_user":      data.Configuration.Attributes()["connected_user"].(types.String).ValueString(),
-				"oauth_access_token":  data.Configuration.Attributes()["oauth_access_token"].(types.String).ValueString(),
-				"oauth_refresh_token": data.Configuration.Attributes()["oauth_refresh_token"].(types.String).ValueString(),
-				"oauth_token_expiry":  data.Configuration.Attributes()["oauth_token_expiry"].(types.String).ValueString(),
-			},
-			Validate: pointer.ToBool(false),
+			Configuration:  connConf,
+			Validate:       pointer.ToBool(false),
 		})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))

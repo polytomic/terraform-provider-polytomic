@@ -42,6 +42,17 @@ resource "polytomic_datalite_connection" "datalite" {
 
 Optional:
 
-- `schemas` (String)
+- `schemas` (Attributes Set) (see [below for nested schema](#nestedatt--configuration--schemas))
+
+<a id="nestedatt--configuration--schemas"></a>
+### Nested Schema for `configuration.schemas`
+
+Optional:
+
+- `alias` (String)
+- `connection_id` (String)
+- `connection_name` (String)
+- `connection_type` (String)
+- `schema_id` (String)
 
 

@@ -88,8 +88,7 @@ func (t *ClariConnectionResource) Schema(ctx context.Context, req resource.Schem
 }
 
 type ClariConf struct {
-	Api_key string `mapstructure:"api_key" tfsdk:"api_key"`
-
+	Api_key      string `mapstructure:"api_key" tfsdk:"api_key"`
 	Api_password string `mapstructure:"api_password" tfsdk:"api_password"`
 }
 
@@ -122,15 +121,17 @@ func (r *ClariConnectionResource) Create(ctx context.Context, req resource.Creat
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "clari",
 		OrganizationId: data.Organization.ValueStringPointer(),
-		Configuration: map[string]interface{}{
-			"api_key":      data.Configuration.Attributes()["api_key"].(types.String).ValueString(),
-			"api_password": data.Configuration.Attributes()["api_password"].(types.String).ValueString(),
-		},
-		Validate: pointer.ToBool(false),
+		Configuration:  connConf,
+		Validate:       pointer.ToBool(false),
 	})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
@@ -226,16 +227,18 @@ func (r *ClariConnectionResource) Update(ctx context.Context, req resource.Updat
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	updated, err := client.Connections.Update(ctx,
 		data.Id.ValueString(),
 		&polytomic.UpdateConnectionRequestSchema{
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueStringPointer(),
-			Configuration: map[string]interface{}{
-				"api_key":      data.Configuration.Attributes()["api_key"].(types.String).ValueString(),
-				"api_password": data.Configuration.Attributes()["api_password"].(types.String).ValueString(),
-			},
-			Validate: pointer.ToBool(false),
+			Configuration:  connConf,
+			Validate:       pointer.ToBool(false),
 		})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))

@@ -116,17 +116,12 @@ func (t *GooglecloudmysqlConnectionResource) Schema(ctx context.Context, req res
 }
 
 type GooglecloudmysqlConf struct {
-	Change_detection bool `mapstructure:"change_detection" tfsdk:"change_detection"`
-
-	Connection_name string `mapstructure:"connection_name" tfsdk:"connection_name"`
-
-	Credentials string `mapstructure:"credentials" tfsdk:"credentials"`
-
-	Database string `mapstructure:"database" tfsdk:"database"`
-
-	Password string `mapstructure:"password" tfsdk:"password"`
-
-	Username string `mapstructure:"username" tfsdk:"username"`
+	Change_detection bool   `mapstructure:"change_detection" tfsdk:"change_detection"`
+	Connection_name  string `mapstructure:"connection_name" tfsdk:"connection_name"`
+	Credentials      string `mapstructure:"credentials" tfsdk:"credentials"`
+	Database         string `mapstructure:"database" tfsdk:"database"`
+	Password         string `mapstructure:"password" tfsdk:"password"`
+	Username         string `mapstructure:"username" tfsdk:"username"`
 }
 
 type GooglecloudmysqlConnectionResource struct {
@@ -158,19 +153,17 @@ func (r *GooglecloudmysqlConnectionResource) Create(ctx context.Context, req res
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "googlecloudmysql",
 		OrganizationId: data.Organization.ValueStringPointer(),
-		Configuration: map[string]interface{}{
-			"change_detection": data.Configuration.Attributes()["change_detection"].(types.Bool).ValueBool(),
-			"connection_name":  data.Configuration.Attributes()["connection_name"].(types.String).ValueString(),
-			"credentials":      data.Configuration.Attributes()["credentials"].(types.String).ValueString(),
-			"database":         data.Configuration.Attributes()["database"].(types.String).ValueString(),
-			"password":         data.Configuration.Attributes()["password"].(types.String).ValueString(),
-			"username":         data.Configuration.Attributes()["username"].(types.String).ValueString(),
-		},
-		Validate: pointer.ToBool(false),
+		Configuration:  connConf,
+		Validate:       pointer.ToBool(false),
 	})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
@@ -274,20 +267,18 @@ func (r *GooglecloudmysqlConnectionResource) Update(ctx context.Context, req res
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	updated, err := client.Connections.Update(ctx,
 		data.Id.ValueString(),
 		&polytomic.UpdateConnectionRequestSchema{
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueStringPointer(),
-			Configuration: map[string]interface{}{
-				"change_detection": data.Configuration.Attributes()["change_detection"].(types.Bool).ValueBool(),
-				"connection_name":  data.Configuration.Attributes()["connection_name"].(types.String).ValueString(),
-				"credentials":      data.Configuration.Attributes()["credentials"].(types.String).ValueString(),
-				"database":         data.Configuration.Attributes()["database"].(types.String).ValueString(),
-				"password":         data.Configuration.Attributes()["password"].(types.String).ValueString(),
-				"username":         data.Configuration.Attributes()["username"].(types.String).ValueString(),
-			},
-			Validate: pointer.ToBool(false),
+			Configuration:  connConf,
+			Validate:       pointer.ToBool(false),
 		})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))

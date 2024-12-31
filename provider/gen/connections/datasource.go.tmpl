@@ -43,6 +43,17 @@ func (d *{{ .Connection }}ConnectionDataSource) Metadata(ctx context.Context, re
 			Attributes: map[string]schema.Attribute{
 				{{ range .Attributes }}{{ template "attribute" . }}{{ end }}
 			},
+		{{ end -}}
+		{{ if .Elem -}}
+			{{ if eq .Elem.TfType "Object" -}}
+			NestedObject: schema.NestedAttributeObject{
+				Attributes: map[string]schema.Attribute{
+					{{ range .Elem.Attributes }}{{ template "attribute" . }}{{ end }}
+				},
+			},
+			{{- else -}}
+			ElementType: {{ .Elem.AttrReadType }},
+			{{ end -}}
 		{{ end }}
 	},
 	{{- end }}
@@ -96,8 +107,6 @@ func (d *{{ .Connection }}ConnectionDataSource) Read(ctx context.Context, req da
 		return
 	}
 
-	// For the purposes of this example code, hardcoding a response value to
-	// save into the Terraform state.
 	data.Id = types.StringPointerValue(connection.Data.Id)
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)

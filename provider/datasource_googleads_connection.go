@@ -50,9 +50,21 @@ func (d *GoogleadsConnectionDataSource) Schema(ctx context.Context, req datasour
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
-					"accounts": schema.StringAttribute{
+					"accounts": schema.SetNestedAttribute{
 						MarkdownDescription: "",
 						Computed:            true,
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+								"label": schema.StringAttribute{
+									MarkdownDescription: "",
+									Computed:            true,
+								},
+								"value": schema.StringAttribute{
+									MarkdownDescription: "",
+									Computed:            true,
+								},
+							},
+						},
 					},
 					"connected_user": schema.StringAttribute{
 						MarkdownDescription: "",
@@ -91,8 +103,6 @@ func (d *GoogleadsConnectionDataSource) Read(ctx context.Context, req datasource
 		return
 	}
 
-	// For the purposes of this example code, hardcoding a response value to
-	// save into the Terraform state.
 	data.Id = types.StringPointerValue(connection.Data.Id)
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)

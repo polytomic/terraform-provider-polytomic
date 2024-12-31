@@ -95,11 +95,9 @@ func (t *NetsuiteopenairConnectionResource) Schema(ctx context.Context, req reso
 }
 
 type NetsuiteopenairConf struct {
-	Client_id string `mapstructure:"client_id" tfsdk:"client_id"`
-
+	Client_id     string `mapstructure:"client_id" tfsdk:"client_id"`
 	Client_secret string `mapstructure:"client_secret" tfsdk:"client_secret"`
-
-	Company_id string `mapstructure:"company_id" tfsdk:"company_id"`
+	Company_id    string `mapstructure:"company_id" tfsdk:"company_id"`
 }
 
 type NetsuiteopenairConnectionResource struct {
@@ -131,16 +129,17 @@ func (r *NetsuiteopenairConnectionResource) Create(ctx context.Context, req reso
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "netsuiteopenair",
 		OrganizationId: data.Organization.ValueStringPointer(),
-		Configuration: map[string]interface{}{
-			"client_id":     data.Configuration.Attributes()["client_id"].(types.String).ValueString(),
-			"client_secret": data.Configuration.Attributes()["client_secret"].(types.String).ValueString(),
-			"company_id":    data.Configuration.Attributes()["company_id"].(types.String).ValueString(),
-		},
-		Validate: pointer.ToBool(false),
+		Configuration:  connConf,
+		Validate:       pointer.ToBool(false),
 	})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
@@ -238,17 +237,18 @@ func (r *NetsuiteopenairConnectionResource) Update(ctx context.Context, req reso
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	updated, err := client.Connections.Update(ctx,
 		data.Id.ValueString(),
 		&polytomic.UpdateConnectionRequestSchema{
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueStringPointer(),
-			Configuration: map[string]interface{}{
-				"client_id":     data.Configuration.Attributes()["client_id"].(types.String).ValueString(),
-				"client_secret": data.Configuration.Attributes()["client_secret"].(types.String).ValueString(),
-				"company_id":    data.Configuration.Attributes()["company_id"].(types.String).ValueString(),
-			},
-			Validate: pointer.ToBool(false),
+			Configuration:  connConf,
+			Validate:       pointer.ToBool(false),
 		})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))

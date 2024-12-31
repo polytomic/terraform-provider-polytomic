@@ -45,11 +45,19 @@ resource "polytomic_googleads_connection" "googleads" {
 
 Optional:
 
-- `accounts` (String)
+- `accounts` (Attributes Set) (see [below for nested schema](#nestedatt--configuration--accounts))
 - `client_id` (String, Sensitive)
 - `client_secret` (String, Sensitive)
 - `connected_user` (String)
 - `oauth_refresh_token` (String, Sensitive)
 - `oauth_token_expiry` (String)
+
+<a id="nestedatt--configuration--accounts"></a>
+### Nested Schema for `configuration.accounts`
+
+Optional:
+
+- `label` (String)
+- `value` (String)
 
 

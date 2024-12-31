@@ -44,12 +44,51 @@ func (t *DataliteConnectionResource) Schema(ctx context.Context, req resource.Sc
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
-					"schemas": schema.StringAttribute{
+					"schemas": schema.SetNestedAttribute{
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+								"alias": schema.StringAttribute{
+									MarkdownDescription: "",
+									Required:            false,
+									Optional:            true,
+									Computed:            true,
+									Sensitive:           false,
+								},
+								"connection_id": schema.StringAttribute{
+									MarkdownDescription: "",
+									Required:            false,
+									Optional:            true,
+									Computed:            true,
+									Sensitive:           false,
+								},
+								"connection_name": schema.StringAttribute{
+									MarkdownDescription: "",
+									Required:            false,
+									Optional:            true,
+									Computed:            true,
+									Sensitive:           false,
+								},
+								"connection_type": schema.StringAttribute{
+									MarkdownDescription: "",
+									Required:            false,
+									Optional:            true,
+									Computed:            true,
+									Sensitive:           false,
+								},
+								"schema_id": schema.StringAttribute{
+									MarkdownDescription: "",
+									Required:            false,
+									Optional:            true,
+									Computed:            true,
+									Sensitive:           false,
+								},
+							},
+						},
 					},
 				},
 
@@ -75,7 +114,13 @@ func (t *DataliteConnectionResource) Schema(ctx context.Context, req resource.Sc
 }
 
 type DataliteConf struct {
-	Schemas string `mapstructure:"schemas" tfsdk:"schemas"`
+	Schemas []struct {
+		Alias           string `mapstructure:"alias" tfsdk:"alias"`
+		Connection_id   string `mapstructure:"connection_id" tfsdk:"connection_id"`
+		Connection_name string `mapstructure:"connection_name" tfsdk:"connection_name"`
+		Connection_type string `mapstructure:"connection_type" tfsdk:"connection_type"`
+		Schema_id       string `mapstructure:"schema_id" tfsdk:"schema_id"`
+	} `mapstructure:"schemas" tfsdk:"schemas"`
 }
 
 type DataliteConnectionResource struct {
@@ -107,14 +152,17 @@ func (r *DataliteConnectionResource) Create(ctx context.Context, req resource.Cr
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "datalite",
 		OrganizationId: data.Organization.ValueStringPointer(),
-		Configuration: map[string]interface{}{
-			"schemas": data.Configuration.Attributes()["schemas"].(types.String).ValueString(),
-		},
-		Validate: pointer.ToBool(false),
+		Configuration:  connConf,
+		Validate:       pointer.ToBool(false),
 	})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
@@ -131,7 +179,17 @@ func (r *DataliteConnectionResource) Create(ctx context.Context, req resource.Cr
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"schemas": types.StringType,
+		"schemas": types.SetType{
+			ElemType: types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"alias":           types.StringType,
+					"connection_id":   types.StringType,
+					"connection_name": types.StringType,
+					"connection_type": types.StringType,
+					"schema_id":       types.StringType,
+				},
+			},
+		},
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -182,7 +240,17 @@ func (r *DataliteConnectionResource) Read(ctx context.Context, req resource.Read
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"schemas": types.StringType,
+		"schemas": types.SetType{
+			ElemType: types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"alias":           types.StringType,
+					"connection_id":   types.StringType,
+					"connection_name": types.StringType,
+					"connection_type": types.StringType,
+					"schema_id":       types.StringType,
+				},
+			},
+		},
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -208,15 +276,18 @@ func (r *DataliteConnectionResource) Update(ctx context.Context, req resource.Up
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	updated, err := client.Connections.Update(ctx,
 		data.Id.ValueString(),
 		&polytomic.UpdateConnectionRequestSchema{
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueStringPointer(),
-			Configuration: map[string]interface{}{
-				"schemas": data.Configuration.Attributes()["schemas"].(types.String).ValueString(),
-			},
-			Validate: pointer.ToBool(false),
+			Configuration:  connConf,
+			Validate:       pointer.ToBool(false),
 		})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))
@@ -234,7 +305,17 @@ func (r *DataliteConnectionResource) Update(ctx context.Context, req resource.Up
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"schemas": types.StringType,
+		"schemas": types.SetType{
+			ElemType: types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"alias":           types.StringType,
+					"connection_id":   types.StringType,
+					"connection_name": types.StringType,
+					"connection_type": types.StringType,
+					"schema_id":       types.StringType,
+				},
+			},
+		},
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

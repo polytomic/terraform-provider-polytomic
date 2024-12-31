@@ -127,21 +127,14 @@ func (t *SftpConnectionResource) Schema(ctx context.Context, req resource.Schema
 }
 
 type SftpConf struct {
-	Is_single_table bool `mapstructure:"is_single_table" tfsdk:"is_single_table"`
-
-	Path string `mapstructure:"path" tfsdk:"path"`
-
+	Is_single_table   bool   `mapstructure:"is_single_table" tfsdk:"is_single_table"`
+	Path              string `mapstructure:"path" tfsdk:"path"`
 	Single_table_name string `mapstructure:"single_table_name" tfsdk:"single_table_name"`
-
-	Skip_lines int64 `mapstructure:"skip_lines" tfsdk:"skip_lines"`
-
-	Ssh_host string `mapstructure:"ssh_host" tfsdk:"ssh_host"`
-
-	Ssh_port int64 `mapstructure:"ssh_port" tfsdk:"ssh_port"`
-
-	Ssh_private_key string `mapstructure:"ssh_private_key" tfsdk:"ssh_private_key"`
-
-	Ssh_user string `mapstructure:"ssh_user" tfsdk:"ssh_user"`
+	Skip_lines        int64  `mapstructure:"skip_lines" tfsdk:"skip_lines"`
+	Ssh_host          string `mapstructure:"ssh_host" tfsdk:"ssh_host"`
+	Ssh_port          int64  `mapstructure:"ssh_port" tfsdk:"ssh_port"`
+	Ssh_private_key   string `mapstructure:"ssh_private_key" tfsdk:"ssh_private_key"`
+	Ssh_user          string `mapstructure:"ssh_user" tfsdk:"ssh_user"`
 }
 
 type SftpConnectionResource struct {
@@ -173,21 +166,17 @@ func (r *SftpConnectionResource) Create(ctx context.Context, req resource.Create
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "sftp",
 		OrganizationId: data.Organization.ValueStringPointer(),
-		Configuration: map[string]interface{}{
-			"is_single_table":   data.Configuration.Attributes()["is_single_table"].(types.Bool).ValueBool(),
-			"path":              data.Configuration.Attributes()["path"].(types.String).ValueString(),
-			"single_table_name": data.Configuration.Attributes()["single_table_name"].(types.String).ValueString(),
-			"skip_lines":        int(data.Configuration.Attributes()["skip_lines"].(types.Int64).ValueInt64()),
-			"ssh_host":          data.Configuration.Attributes()["ssh_host"].(types.String).ValueString(),
-			"ssh_port":          int(data.Configuration.Attributes()["ssh_port"].(types.Int64).ValueInt64()),
-			"ssh_private_key":   data.Configuration.Attributes()["ssh_private_key"].(types.String).ValueString(),
-			"ssh_user":          data.Configuration.Attributes()["ssh_user"].(types.String).ValueString(),
-		},
-		Validate: pointer.ToBool(false),
+		Configuration:  connConf,
+		Validate:       pointer.ToBool(false),
 	})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
@@ -295,22 +284,18 @@ func (r *SftpConnectionResource) Update(ctx context.Context, req resource.Update
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	updated, err := client.Connections.Update(ctx,
 		data.Id.ValueString(),
 		&polytomic.UpdateConnectionRequestSchema{
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueStringPointer(),
-			Configuration: map[string]interface{}{
-				"is_single_table":   data.Configuration.Attributes()["is_single_table"].(types.Bool).ValueBool(),
-				"path":              data.Configuration.Attributes()["path"].(types.String).ValueString(),
-				"single_table_name": data.Configuration.Attributes()["single_table_name"].(types.String).ValueString(),
-				"skip_lines":        int(data.Configuration.Attributes()["skip_lines"].(types.Int64).ValueInt64()),
-				"ssh_host":          data.Configuration.Attributes()["ssh_host"].(types.String).ValueString(),
-				"ssh_port":          int(data.Configuration.Attributes()["ssh_port"].(types.Int64).ValueInt64()),
-				"ssh_private_key":   data.Configuration.Attributes()["ssh_private_key"].(types.String).ValueString(),
-				"ssh_user":          data.Configuration.Attributes()["ssh_user"].(types.String).ValueString(),
-			},
-			Validate: pointer.ToBool(false),
+			Configuration:  connConf,
+			Validate:       pointer.ToBool(false),
 		})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))

@@ -159,22 +159,17 @@ func (t *GsheetsConnectionResource) Schema(ctx context.Context, req resource.Sch
 }
 
 type GsheetsConf struct {
-	Client_id string `mapstructure:"client_id" tfsdk:"client_id"`
-
-	Client_secret string `mapstructure:"client_secret" tfsdk:"client_secret"`
-
-	Connect_mode string `mapstructure:"connect_mode" tfsdk:"connect_mode"`
-
-	Has_headers bool `mapstructure:"has_headers" tfsdk:"has_headers"`
-
+	Client_id           string `mapstructure:"client_id" tfsdk:"client_id"`
+	Client_secret       string `mapstructure:"client_secret" tfsdk:"client_secret"`
+	Connect_mode        string `mapstructure:"connect_mode" tfsdk:"connect_mode"`
+	Has_headers         bool   `mapstructure:"has_headers" tfsdk:"has_headers"`
 	Oauth_refresh_token string `mapstructure:"oauth_refresh_token" tfsdk:"oauth_refresh_token"`
-
-	Oauth_token_expiry string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
-
-	Service_account string `mapstructure:"service_account" tfsdk:"service_account"`
-
-	Spreadsheet_id map[string]interface{} `mapstructure:"spreadsheet_id" tfsdk:"spreadsheet_id"`
-
+	Oauth_token_expiry  string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
+	Service_account     string `mapstructure:"service_account" tfsdk:"service_account"`
+	Spreadsheet_id      struct {
+		Label string `mapstructure:"label" tfsdk:"label"`
+		Value string `mapstructure:"value" tfsdk:"value"`
+	} `mapstructure:"spreadsheet_id" tfsdk:"spreadsheet_id"`
 	User_email string `mapstructure:"user_email" tfsdk:"user_email"`
 }
 
@@ -207,25 +202,17 @@ func (r *GsheetsConnectionResource) Create(ctx context.Context, req resource.Cre
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "gsheets",
 		OrganizationId: data.Organization.ValueStringPointer(),
-		Configuration: map[string]interface{}{
-			"client_id":           data.Configuration.Attributes()["client_id"].(types.String).ValueString(),
-			"client_secret":       data.Configuration.Attributes()["client_secret"].(types.String).ValueString(),
-			"connect_mode":        data.Configuration.Attributes()["connect_mode"].(types.String).ValueString(),
-			"has_headers":         data.Configuration.Attributes()["has_headers"].(types.Bool).ValueBool(),
-			"oauth_refresh_token": data.Configuration.Attributes()["oauth_refresh_token"].(types.String).ValueString(),
-			"oauth_token_expiry":  data.Configuration.Attributes()["oauth_token_expiry"].(types.String).ValueString(),
-			"service_account":     data.Configuration.Attributes()["service_account"].(types.String).ValueString(),
-			"spreadsheet_id": map[string]interface{}{
-				"label": data.Configuration.Attributes()["spreadsheet_id"].(types.Object).Attributes()["label"].(types.String).ValueString(),
-				"value": data.Configuration.Attributes()["spreadsheet_id"].(types.Object).Attributes()["value"].(types.String).ValueString(),
-			},
-			"user_email": data.Configuration.Attributes()["user_email"].(types.String).ValueString(),
-		},
-		Validate: pointer.ToBool(false),
+		Configuration:  connConf,
+		Validate:       pointer.ToBool(false),
 	})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
@@ -343,26 +330,18 @@ func (r *GsheetsConnectionResource) Update(ctx context.Context, req resource.Upd
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	updated, err := client.Connections.Update(ctx,
 		data.Id.ValueString(),
 		&polytomic.UpdateConnectionRequestSchema{
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueStringPointer(),
-			Configuration: map[string]interface{}{
-				"client_id":           data.Configuration.Attributes()["client_id"].(types.String).ValueString(),
-				"client_secret":       data.Configuration.Attributes()["client_secret"].(types.String).ValueString(),
-				"connect_mode":        data.Configuration.Attributes()["connect_mode"].(types.String).ValueString(),
-				"has_headers":         data.Configuration.Attributes()["has_headers"].(types.Bool).ValueBool(),
-				"oauth_refresh_token": data.Configuration.Attributes()["oauth_refresh_token"].(types.String).ValueString(),
-				"oauth_token_expiry":  data.Configuration.Attributes()["oauth_token_expiry"].(types.String).ValueString(),
-				"service_account":     data.Configuration.Attributes()["service_account"].(types.String).ValueString(),
-				"spreadsheet_id": map[string]interface{}{
-					"label": data.Configuration.Attributes()["spreadsheet_id"].(types.Object).Attributes()["label"].(types.String).ValueString(),
-					"value": data.Configuration.Attributes()["spreadsheet_id"].(types.Object).Attributes()["value"].(types.String).ValueString(),
-				},
-				"user_email": data.Configuration.Attributes()["user_email"].(types.String).ValueString(),
-			},
-			Validate: pointer.ToBool(false),
+			Configuration:  connConf,
+			Validate:       pointer.ToBool(false),
 		})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))

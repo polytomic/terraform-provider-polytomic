@@ -109,14 +109,10 @@ func (t *AwsathenaConnectionResource) Schema(ctx context.Context, req resource.S
 }
 
 type AwsathenaConf struct {
-	Access_id string `mapstructure:"access_id" tfsdk:"access_id"`
-
-	Aws_user string `mapstructure:"aws_user" tfsdk:"aws_user"`
-
-	Outputbucket string `mapstructure:"outputbucket" tfsdk:"outputbucket"`
-
-	Region string `mapstructure:"region" tfsdk:"region"`
-
+	Access_id         string `mapstructure:"access_id" tfsdk:"access_id"`
+	Aws_user          string `mapstructure:"aws_user" tfsdk:"aws_user"`
+	Outputbucket      string `mapstructure:"outputbucket" tfsdk:"outputbucket"`
+	Region            string `mapstructure:"region" tfsdk:"region"`
 	Secret_access_key string `mapstructure:"secret_access_key" tfsdk:"secret_access_key"`
 }
 
@@ -149,18 +145,17 @@ func (r *AwsathenaConnectionResource) Create(ctx context.Context, req resource.C
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "awsathena",
 		OrganizationId: data.Organization.ValueStringPointer(),
-		Configuration: map[string]interface{}{
-			"access_id":         data.Configuration.Attributes()["access_id"].(types.String).ValueString(),
-			"aws_user":          data.Configuration.Attributes()["aws_user"].(types.String).ValueString(),
-			"outputbucket":      data.Configuration.Attributes()["outputbucket"].(types.String).ValueString(),
-			"region":            data.Configuration.Attributes()["region"].(types.String).ValueString(),
-			"secret_access_key": data.Configuration.Attributes()["secret_access_key"].(types.String).ValueString(),
-		},
-		Validate: pointer.ToBool(false),
+		Configuration:  connConf,
+		Validate:       pointer.ToBool(false),
 	})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
@@ -262,19 +257,18 @@ func (r *AwsathenaConnectionResource) Update(ctx context.Context, req resource.U
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	updated, err := client.Connections.Update(ctx,
 		data.Id.ValueString(),
 		&polytomic.UpdateConnectionRequestSchema{
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueStringPointer(),
-			Configuration: map[string]interface{}{
-				"access_id":         data.Configuration.Attributes()["access_id"].(types.String).ValueString(),
-				"aws_user":          data.Configuration.Attributes()["aws_user"].(types.String).ValueString(),
-				"outputbucket":      data.Configuration.Attributes()["outputbucket"].(types.String).ValueString(),
-				"region":            data.Configuration.Attributes()["region"].(types.String).ValueString(),
-				"secret_access_key": data.Configuration.Attributes()["secret_access_key"].(types.String).ValueString(),
-			},
-			Validate: pointer.ToBool(false),
+			Configuration:  connConf,
+			Validate:       pointer.ToBool(false),
 		})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))

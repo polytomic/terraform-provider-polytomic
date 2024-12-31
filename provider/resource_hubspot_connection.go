@@ -112,14 +112,10 @@ func (t *HubspotConnectionResource) Schema(ctx context.Context, req resource.Sch
 }
 
 type HubspotConf struct {
-	Client_id string `mapstructure:"client_id" tfsdk:"client_id"`
-
-	Client_secret string `mapstructure:"client_secret" tfsdk:"client_secret"`
-
-	Hub_domain string `mapstructure:"hub_domain" tfsdk:"hub_domain"`
-
-	Hub_user string `mapstructure:"hub_user" tfsdk:"hub_user"`
-
+	Client_id           string `mapstructure:"client_id" tfsdk:"client_id"`
+	Client_secret       string `mapstructure:"client_secret" tfsdk:"client_secret"`
+	Hub_domain          string `mapstructure:"hub_domain" tfsdk:"hub_domain"`
+	Hub_user            string `mapstructure:"hub_user" tfsdk:"hub_user"`
 	Oauth_refresh_token string `mapstructure:"oauth_refresh_token" tfsdk:"oauth_refresh_token"`
 }
 
@@ -152,18 +148,17 @@ func (r *HubspotConnectionResource) Create(ctx context.Context, req resource.Cre
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "hubspot",
 		OrganizationId: data.Organization.ValueStringPointer(),
-		Configuration: map[string]interface{}{
-			"client_id":           data.Configuration.Attributes()["client_id"].(types.String).ValueString(),
-			"client_secret":       data.Configuration.Attributes()["client_secret"].(types.String).ValueString(),
-			"hub_domain":          data.Configuration.Attributes()["hub_domain"].(types.String).ValueString(),
-			"hub_user":            data.Configuration.Attributes()["hub_user"].(types.String).ValueString(),
-			"oauth_refresh_token": data.Configuration.Attributes()["oauth_refresh_token"].(types.String).ValueString(),
-		},
-		Validate: pointer.ToBool(false),
+		Configuration:  connConf,
+		Validate:       pointer.ToBool(false),
 	})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
@@ -265,19 +260,18 @@ func (r *HubspotConnectionResource) Update(ctx context.Context, req resource.Upd
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	updated, err := client.Connections.Update(ctx,
 		data.Id.ValueString(),
 		&polytomic.UpdateConnectionRequestSchema{
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueStringPointer(),
-			Configuration: map[string]interface{}{
-				"client_id":           data.Configuration.Attributes()["client_id"].(types.String).ValueString(),
-				"client_secret":       data.Configuration.Attributes()["client_secret"].(types.String).ValueString(),
-				"hub_domain":          data.Configuration.Attributes()["hub_domain"].(types.String).ValueString(),
-				"hub_user":            data.Configuration.Attributes()["hub_user"].(types.String).ValueString(),
-				"oauth_refresh_token": data.Configuration.Attributes()["oauth_refresh_token"].(types.String).ValueString(),
-			},
-			Validate: pointer.ToBool(false),
+			Configuration:  connConf,
+			Validate:       pointer.ToBool(false),
 		})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))

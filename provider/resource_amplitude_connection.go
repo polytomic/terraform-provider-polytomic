@@ -85,8 +85,7 @@ func (t *AmplitudeConnectionResource) Schema(ctx context.Context, req resource.S
 }
 
 type AmplitudeConf struct {
-	Api_key string `mapstructure:"api_key" tfsdk:"api_key"`
-
+	Api_key    string `mapstructure:"api_key" tfsdk:"api_key"`
 	Secret_key string `mapstructure:"secret_key" tfsdk:"secret_key"`
 }
 
@@ -119,15 +118,17 @@ func (r *AmplitudeConnectionResource) Create(ctx context.Context, req resource.C
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "amplitude",
 		OrganizationId: data.Organization.ValueStringPointer(),
-		Configuration: map[string]interface{}{
-			"api_key":    data.Configuration.Attributes()["api_key"].(types.String).ValueString(),
-			"secret_key": data.Configuration.Attributes()["secret_key"].(types.String).ValueString(),
-		},
-		Validate: pointer.ToBool(false),
+		Configuration:  connConf,
+		Validate:       pointer.ToBool(false),
 	})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
@@ -223,16 +224,18 @@ func (r *AmplitudeConnectionResource) Update(ctx context.Context, req resource.U
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	updated, err := client.Connections.Update(ctx,
 		data.Id.ValueString(),
 		&polytomic.UpdateConnectionRequestSchema{
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueStringPointer(),
-			Configuration: map[string]interface{}{
-				"api_key":    data.Configuration.Attributes()["api_key"].(types.String).ValueString(),
-				"secret_key": data.Configuration.Attributes()["secret_key"].(types.String).ValueString(),
-			},
-			Validate: pointer.ToBool(false),
+			Configuration:  connConf,
+			Validate:       pointer.ToBool(false),
 		})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))

@@ -54,25 +54,29 @@ func unmarshalJSONSchema(input map[string]interface{}) (*jsonschema.Schema, erro
 			}
 		}
 	}
-	props, ok := input["properties"].(map[string]interface{})
-	if !ok {
-		return &a, nil
+	if props, ok := input["properties"].(map[string]interface{}); ok {
+		a.Properties = orderedmap.New[string, *jsonschema.Schema]()
+		for _, k := range slices.Sorted(maps.Keys(props)) {
+			v := props[k]
+			if v == nil {
+				continue
+			}
+			s, ok := v.(map[string]interface{})
+			if !ok {
+				continue
+			}
+			schema, err := unmarshalJSONSchema(s)
+			if err != nil {
+				return nil, fmt.Errorf("error decoding schema for %s: %w", k, err)
+			}
+			a.Properties.Set(k, schema)
+		}
 	}
-	a.Properties = orderedmap.New[string, *jsonschema.Schema]()
-	for _, k := range slices.Sorted(maps.Keys(props)) {
-		v := props[k]
-		if v == nil {
-			continue
-		}
-		s, ok := v.(map[string]interface{})
-		if !ok {
-			continue
-		}
-		schema, err := unmarshalJSONSchema(s)
+	if rawItems, ok := input["items"]; ok {
+		a.Items, err = unmarshalJSONSchema(rawItems.(map[string]interface{}))
 		if err != nil {
-			return nil, fmt.Errorf("error decoding schema for %s: %w", k, err)
+			return nil, fmt.Errorf("error decoding items: %w", err)
 		}
-		a.Properties.Set(k, schema)
 	}
 
 	return &a, nil

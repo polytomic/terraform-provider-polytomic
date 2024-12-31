@@ -147,25 +147,16 @@ func (t *SalesforceConnectionResource) Schema(ctx context.Context, req resource.
 }
 
 type SalesforceConf struct {
-	Client_id string `mapstructure:"client_id" tfsdk:"client_id"`
-
-	Client_secret string `mapstructure:"client_secret" tfsdk:"client_secret"`
-
-	Connect_mode string `mapstructure:"connect_mode" tfsdk:"connect_mode"`
-
-	Daily_api_calls int64 `mapstructure:"daily_api_calls" tfsdk:"daily_api_calls"`
-
-	Domain string `mapstructure:"domain" tfsdk:"domain"`
-
-	Enable_multicurrency_lookup bool `mapstructure:"enable_multicurrency_lookup" tfsdk:"enable_multicurrency_lookup"`
-
-	Enable_tooling bool `mapstructure:"enable_tooling" tfsdk:"enable_tooling"`
-
-	Enforce_api_limits bool `mapstructure:"enforce_api_limits" tfsdk:"enforce_api_limits"`
-
-	Oauth_refresh_token string `mapstructure:"oauth_refresh_token" tfsdk:"oauth_refresh_token"`
-
-	Username string `mapstructure:"username" tfsdk:"username"`
+	Client_id                   string `mapstructure:"client_id" tfsdk:"client_id"`
+	Client_secret               string `mapstructure:"client_secret" tfsdk:"client_secret"`
+	Connect_mode                string `mapstructure:"connect_mode" tfsdk:"connect_mode"`
+	Daily_api_calls             int64  `mapstructure:"daily_api_calls" tfsdk:"daily_api_calls"`
+	Domain                      string `mapstructure:"domain" tfsdk:"domain"`
+	Enable_multicurrency_lookup bool   `mapstructure:"enable_multicurrency_lookup" tfsdk:"enable_multicurrency_lookup"`
+	Enable_tooling              bool   `mapstructure:"enable_tooling" tfsdk:"enable_tooling"`
+	Enforce_api_limits          bool   `mapstructure:"enforce_api_limits" tfsdk:"enforce_api_limits"`
+	Oauth_refresh_token         string `mapstructure:"oauth_refresh_token" tfsdk:"oauth_refresh_token"`
+	Username                    string `mapstructure:"username" tfsdk:"username"`
 }
 
 type SalesforceConnectionResource struct {
@@ -197,23 +188,17 @@ func (r *SalesforceConnectionResource) Create(ctx context.Context, req resource.
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "salesforce",
 		OrganizationId: data.Organization.ValueStringPointer(),
-		Configuration: map[string]interface{}{
-			"client_id":                   data.Configuration.Attributes()["client_id"].(types.String).ValueString(),
-			"client_secret":               data.Configuration.Attributes()["client_secret"].(types.String).ValueString(),
-			"connect_mode":                data.Configuration.Attributes()["connect_mode"].(types.String).ValueString(),
-			"daily_api_calls":             int(data.Configuration.Attributes()["daily_api_calls"].(types.Int64).ValueInt64()),
-			"domain":                      data.Configuration.Attributes()["domain"].(types.String).ValueString(),
-			"enable_multicurrency_lookup": data.Configuration.Attributes()["enable_multicurrency_lookup"].(types.Bool).ValueBool(),
-			"enable_tooling":              data.Configuration.Attributes()["enable_tooling"].(types.Bool).ValueBool(),
-			"enforce_api_limits":          data.Configuration.Attributes()["enforce_api_limits"].(types.Bool).ValueBool(),
-			"oauth_refresh_token":         data.Configuration.Attributes()["oauth_refresh_token"].(types.String).ValueString(),
-			"username":                    data.Configuration.Attributes()["username"].(types.String).ValueString(),
-		},
-		Validate: pointer.ToBool(false),
+		Configuration:  connConf,
+		Validate:       pointer.ToBool(false),
 	})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
@@ -325,24 +310,18 @@ func (r *SalesforceConnectionResource) Update(ctx context.Context, req resource.
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	updated, err := client.Connections.Update(ctx,
 		data.Id.ValueString(),
 		&polytomic.UpdateConnectionRequestSchema{
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueStringPointer(),
-			Configuration: map[string]interface{}{
-				"client_id":                   data.Configuration.Attributes()["client_id"].(types.String).ValueString(),
-				"client_secret":               data.Configuration.Attributes()["client_secret"].(types.String).ValueString(),
-				"connect_mode":                data.Configuration.Attributes()["connect_mode"].(types.String).ValueString(),
-				"daily_api_calls":             int(data.Configuration.Attributes()["daily_api_calls"].(types.Int64).ValueInt64()),
-				"domain":                      data.Configuration.Attributes()["domain"].(types.String).ValueString(),
-				"enable_multicurrency_lookup": data.Configuration.Attributes()["enable_multicurrency_lookup"].(types.Bool).ValueBool(),
-				"enable_tooling":              data.Configuration.Attributes()["enable_tooling"].(types.Bool).ValueBool(),
-				"enforce_api_limits":          data.Configuration.Attributes()["enforce_api_limits"].(types.Bool).ValueBool(),
-				"oauth_refresh_token":         data.Configuration.Attributes()["oauth_refresh_token"].(types.String).ValueString(),
-				"username":                    data.Configuration.Attributes()["username"].(types.String).ValueString(),
-			},
-			Validate: pointer.ToBool(false),
+			Configuration:  connConf,
+			Validate:       pointer.ToBool(false),
 		})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))

@@ -99,13 +99,10 @@ func (t *PosthogConnectionResource) Schema(ctx context.Context, req resource.Sch
 }
 
 type PosthogConf struct {
-	Api_key string `mapstructure:"api_key" tfsdk:"api_key"`
-
+	Api_key          string `mapstructure:"api_key" tfsdk:"api_key"`
 	Authenticated_as string `mapstructure:"authenticated_as" tfsdk:"authenticated_as"`
-
-	Location string `mapstructure:"location" tfsdk:"location"`
-
-	Project string `mapstructure:"project" tfsdk:"project"`
+	Location         string `mapstructure:"location" tfsdk:"location"`
+	Project          string `mapstructure:"project" tfsdk:"project"`
 }
 
 type PosthogConnectionResource struct {
@@ -137,17 +134,17 @@ func (r *PosthogConnectionResource) Create(ctx context.Context, req resource.Cre
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "posthog",
 		OrganizationId: data.Organization.ValueStringPointer(),
-		Configuration: map[string]interface{}{
-			"api_key":          data.Configuration.Attributes()["api_key"].(types.String).ValueString(),
-			"authenticated_as": data.Configuration.Attributes()["authenticated_as"].(types.String).ValueString(),
-			"location":         data.Configuration.Attributes()["location"].(types.String).ValueString(),
-			"project":          data.Configuration.Attributes()["project"].(types.String).ValueString(),
-		},
-		Validate: pointer.ToBool(false),
+		Configuration:  connConf,
+		Validate:       pointer.ToBool(false),
 	})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating connection: %s", err))
@@ -247,18 +244,18 @@ func (r *PosthogConnectionResource) Update(ctx context.Context, req resource.Upd
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	connConf, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
 	updated, err := client.Connections.Update(ctx,
 		data.Id.ValueString(),
 		&polytomic.UpdateConnectionRequestSchema{
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueStringPointer(),
-			Configuration: map[string]interface{}{
-				"api_key":          data.Configuration.Attributes()["api_key"].(types.String).ValueString(),
-				"authenticated_as": data.Configuration.Attributes()["authenticated_as"].(types.String).ValueString(),
-				"location":         data.Configuration.Attributes()["location"].(types.String).ValueString(),
-				"project":          data.Configuration.Attributes()["project"].(types.String).ValueString(),
-			},
-			Validate: pointer.ToBool(false),
+			Configuration:  connConf,
+			Validate:       pointer.ToBool(false),
 		})
 	if err != nil {
 		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating connection: %s", err))
