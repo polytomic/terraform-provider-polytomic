@@ -19,7 +19,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/polytomic/polytomic-go"
 	ptcore "github.com/polytomic/polytomic-go/core"
-	"github.com/polytomic/terraform-provider-polytomic/provider/internal/client"
+	"github.com/polytomic/terraform-provider-polytomic/provider/internal/providerclient"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -144,11 +144,11 @@ type modelResourceResourceData struct {
 }
 
 type modelResource struct {
-	provider *client.Provider
+	provider *providerclient.Provider
 }
 
 func (r *modelResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
-	if provider := client.GetProvider(req.ProviderData, resp.Diagnostics); provider != nil {
+	if provider := providerclient.GetProvider(req.ProviderData, resp.Diagnostics); provider != nil {
 		r.provider = provider
 	}
 }

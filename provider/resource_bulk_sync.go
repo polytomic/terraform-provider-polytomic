@@ -27,7 +27,7 @@ import (
 	"github.com/polytomic/polytomic-go"
 	"github.com/polytomic/polytomic-go/bulksync"
 	ptcore "github.com/polytomic/polytomic-go/core"
-	"github.com/polytomic/terraform-provider-polytomic/provider/internal/client"
+	"github.com/polytomic/terraform-provider-polytomic/provider/internal/providerclient"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -334,11 +334,11 @@ type bulkSyncResourceData struct {
 }
 
 type bulkSyncResource struct {
-	provider *client.Provider
+	provider *providerclient.Provider
 }
 
 func (r *bulkSyncResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
-	if provider := client.GetProvider(req.ProviderData, resp.Diagnostics); provider != nil {
+	if provider := providerclient.GetProvider(req.ProviderData, resp.Diagnostics); provider != nil {
 		r.provider = provider
 	}
 }
@@ -527,12 +527,12 @@ func (r *bulkSyncResource) Create(ctx context.Context, req resource.CreateReques
 		},
 	)
 	if err != nil {
-		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating bulk sync: %s", err))
+		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error creating bulk sync: %s", err))
 		return
 	}
 	createdSchemas, err := client.BulkSync.Schemas.List(ctx, pointer.Get(created.Data.Id), &bulksync.SchemasListRequest{})
 	if err != nil {
-		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error reading bulk sync schemas: %s", err))
+		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error reading bulk sync schemas: %s", err))
 		return
 	}
 	data, diags = bulkSyncDataFromResponse(ctx, created.Data, createdSchemas.Data)
@@ -568,12 +568,12 @@ func (r *bulkSyncResource) Read(ctx context.Context, req resource.ReadRequest, r
 				return
 			}
 		}
-		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error reading bulk sync: %s", err))
+		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error reading bulk sync: %s", err))
 		return
 	}
 	schemas, err := client.BulkSync.Schemas.List(ctx, data.Id.ValueString(), &bulksync.SchemasListRequest{})
 	if err != nil {
-		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error reading bulk sync schemas: %s", err))
+		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error reading bulk sync schemas: %s", err))
 		return
 	}
 	data, diags = bulkSyncDataFromResponse(ctx, bulkSync.Data, schemas.Data)
@@ -738,12 +738,12 @@ func (r *bulkSyncResource) Update(ctx context.Context, req resource.UpdateReques
 		},
 	)
 	if err != nil {
-		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating bulk sync: %s", err))
+		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error creating bulk sync: %s", err))
 		return
 	}
 	updatedSchemas, err := client.BulkSync.Schemas.List(ctx, data.Id.ValueString(), &bulksync.SchemasListRequest{})
 	if err != nil {
-		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error reading bulk sync schemas: %s", err))
+		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error reading bulk sync schemas: %s", err))
 		return
 	}
 
@@ -775,7 +775,7 @@ func (r *bulkSyncResource) Delete(ctx context.Context, req resource.DeleteReques
 	}
 	err = client.BulkSync.Remove(ctx, data.Id.ValueString(), &polytomic.BulkSyncRemoveRequest{})
 	if err != nil {
-		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting organization: %s", err))
+		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error deleting organization: %s", err))
 		return
 	}
 }

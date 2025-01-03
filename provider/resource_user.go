@@ -18,7 +18,7 @@ import (
 	"github.com/polytomic/polytomic-go"
 	ptclient "github.com/polytomic/polytomic-go/client"
 	ptcore "github.com/polytomic/polytomic-go/core"
-	"github.com/polytomic/terraform-provider-polytomic/provider/internal/client"
+	"github.com/polytomic/terraform-provider-polytomic/provider/internal/providerclient"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -71,12 +71,12 @@ type userResourceData struct {
 }
 
 type userResource struct {
-	provider *client.Provider
+	provider *providerclient.Provider
 	client   *ptclient.Client
 }
 
 func (r *userResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
-	if provider := client.GetProvider(req.ProviderData, resp.Diagnostics); provider != nil {
+	if provider := providerclient.GetProvider(req.ProviderData, resp.Diagnostics); provider != nil {
 		r.provider = provider
 		if client, err := provider.PartnerClient(); err == nil {
 			r.client = client
@@ -109,7 +109,7 @@ func (r *userResource) Create(ctx context.Context, req resource.CreateRequest, r
 		},
 	)
 	if err != nil {
-		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating user: %s", err))
+		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error creating user: %s", err))
 		return
 	}
 	data.Id = types.StringPointerValue(created.Data.Id)
@@ -138,7 +138,7 @@ func (r *userResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 				return
 			}
 		}
-		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error reading user: %s", err))
+		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error reading user: %s", err))
 		return
 	}
 	if user.Data.Id == nil {
@@ -179,7 +179,7 @@ func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		},
 	)
 	if err != nil {
-		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating user: %s", err))
+		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error updating user: %s", err))
 		return
 	}
 
@@ -208,7 +208,7 @@ func (r *userResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 
 	_, err := r.client.Users.Remove(ctx, data.Id.ValueString(), data.Organization.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting user: %s", err))
+		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error deleting user: %s", err))
 		return
 	}
 }

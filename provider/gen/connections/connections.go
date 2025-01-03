@@ -24,7 +24,7 @@ import (
 
 const (
 	// General
-	outputPath      = "./provider"
+	outputPath      = "./provider/internal/connections"
 	exportTemplate  = "./provider/gen/connections/connections.go.tmpl"
 	connectionTypes = "./provider/gen/connections/connectiontypes.json"
 	jsonschemaPath  = "./provider/gen/connections/connectiontypes"

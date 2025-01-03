@@ -7,11 +7,11 @@ import (
 
 	ptclient "github.com/polytomic/polytomic-go/client"
 	ptoption "github.com/polytomic/polytomic-go/option"
-	"github.com/polytomic/terraform-provider-polytomic/provider"
 	"github.com/rs/zerolog/log"
 )
 
 const (
+	UserAgent      = "polytomic-terraform-provider/importer"
 	ImportFileName = "import.sh"
 )
 
@@ -36,7 +36,7 @@ func Init(url, key, path string, recreate bool, includePermissions bool) {
 		ptoption.WithBaseURL(url),
 		ptoption.WithToken(key),
 		ptoption.WithHTTPHeader(http.Header{
-			"User-Agent": []string{provider.UserAgent},
+			"User-Agent": []string{UserAgent},
 		}),
 	)
 
