@@ -1,3 +1,9 @@
+## 1.0.0-beta2 (03 Jan 2025)
+
+_This is a pre-release version._
+
+- Updated connection resources to correctly support repeated configuration properties.
+
 ## 1.0.0-beta1 (20 Dec 2024)
 
 _This is a pre-release version._
