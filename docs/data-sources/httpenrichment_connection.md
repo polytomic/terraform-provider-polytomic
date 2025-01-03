@@ -38,12 +38,12 @@ Read-Only:
 
 - `auth` (Attributes) (see [below for nested schema](#nestedatt--configuration--auth))
 - `body` (String)
-- `fields` (String) List of fields to be returned by the enrichment
-- `headers` (String)
+- `fields` (Attributes Set) List of fields to be returned by the enrichment (see [below for nested schema](#nestedatt--configuration--fields))
+- `headers` (Attributes Set) (see [below for nested schema](#nestedatt--configuration--headers))
 - `healthcheck` (String) Path to request when checking the health of this connection. No health check will be performed if left empty.
-- `input_mappings` (String) List of input mappings to be used in the query. Each mapping should be a valid JSONPath expression.
+- `input_mappings` (Attributes Set) List of input mappings to be used in the query. Each mapping should be a valid JSONPath expression. (see [below for nested schema](#nestedatt--configuration--input_mappings))
 - `method` (String)
-- `parameters` (String)
+- `parameters` (Attributes Set) (see [below for nested schema](#nestedatt--configuration--parameters))
 - `url` (String)
 
 <a id="nestedatt--configuration--auth"></a>
@@ -81,8 +81,56 @@ Read-Only:
 - `auth_style` (Number)
 - `client_id` (String)
 - `client_secret` (String)
-- `extra_form_data` (String)
-- `scopes` (String)
+- `extra_form_data` (Attributes Set) (see [below for nested schema](#nestedatt--configuration--auth--oauth--extra_form_data))
+- `scopes` (Set of String)
 - `token_endpoint` (String)
+
+<a id="nestedatt--configuration--auth--oauth--extra_form_data"></a>
+### Nested Schema for `configuration.auth.oauth.token_endpoint`
+
+Read-Only:
+
+- `name` (String)
+- `value` (String)
+
+
+
+
+<a id="nestedatt--configuration--fields"></a>
+### Nested Schema for `configuration.fields`
+
+Read-Only:
+
+- `name` (String) Name of the field
+- `path` (String) JSONPath expression to extract the field from the response
+- `type` (String) Type of the field
+
+
+<a id="nestedatt--configuration--headers"></a>
+### Nested Schema for `configuration.headers`
+
+Read-Only:
+
+- `name` (String)
+- `value` (String)
+
+
+<a id="nestedatt--configuration--input_mappings"></a>
+### Nested Schema for `configuration.input_mappings`
+
+Read-Only:
+
+- `name` (String) Name of the input mapping
+- `required` (Boolean) Whether the input mapping is required
+- `type` (String) Type of the input mapping
+
+
+<a id="nestedatt--configuration--parameters"></a>
+### Nested Schema for `configuration.parameters`
+
+Read-Only:
+
+- `name` (String)
+- `value` (String)
 
 

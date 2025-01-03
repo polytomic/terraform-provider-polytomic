@@ -36,6 +36,17 @@ data "polytomic_datalite_connection" "datalite" {
 
 Read-Only:
 
-- `schemas` (String)
+- `schemas` (Attributes Set) (see [below for nested schema](#nestedatt--configuration--schemas))
+
+<a id="nestedatt--configuration--schemas"></a>
+### Nested Schema for `configuration.schemas`
+
+Read-Only:
+
+- `alias` (String)
+- `connection_id` (String)
+- `connection_name` (String)
+- `connection_type` (String)
+- `schema_id` (String)
 
 

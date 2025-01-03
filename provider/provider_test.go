@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 	ptclient "github.com/polytomic/polytomic-go/client"
-	"github.com/polytomic/terraform-provider-polytomic/provider/internal/client"
+	"github.com/polytomic/terraform-provider-polytomic/provider/internal/providerclient"
 	"github.com/stretchr/testify/require"
 )
 
@@ -34,10 +34,10 @@ func testAccPreCheck(t *testing.T) {
 }
 
 func testClient(t *testing.T) *ptclient.Client {
-	provider, err := client.NewClientProvider(
-		client.WithDeploymentKey(os.Getenv(PolytomicDeploymentKey)),
-		client.WithDeploymentURL(os.Getenv(PolytomicDeploymentURL)),
-		client.WithAPIKey(os.Getenv(PolytomicAPIKey)),
+	provider, err := providerclient.NewClientProvider(
+		providerclient.WithDeploymentKey(os.Getenv(PolytomicDeploymentKey)),
+		providerclient.WithDeploymentURL(os.Getenv(PolytomicDeploymentURL)),
+		providerclient.WithAPIKey(os.Getenv(PolytomicAPIKey)),
 	)
 	require.NoError(t, err)
 	c, err := provider.Client("")

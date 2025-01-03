@@ -17,7 +17,7 @@ import (
 	"github.com/polytomic/polytomic-go"
 	ptcore "github.com/polytomic/polytomic-go/core"
 	"github.com/polytomic/polytomic-go/permissions"
-	"github.com/polytomic/terraform-provider-polytomic/provider/internal/client"
+	"github.com/polytomic/terraform-provider-polytomic/provider/internal/providerclient"
 )
 
 var _ resource.Resource = &policyResource{}
@@ -77,11 +77,11 @@ type policyResourceData struct {
 }
 
 type policyResource struct {
-	provider *client.Provider
+	provider *providerclient.Provider
 }
 
 func (r *policyResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
-	if provider := client.GetProvider(req.ProviderData, resp.Diagnostics); provider != nil {
+	if provider := providerclient.GetProvider(req.ProviderData, resp.Diagnostics); provider != nil {
 		r.provider = provider
 	}
 }
@@ -117,7 +117,7 @@ func (r *policyResource) Create(ctx context.Context, req resource.CreateRequest,
 		},
 	)
 	if err != nil {
-		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating policy: %s", err))
+		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error creating policy: %s", err))
 		return
 	}
 
@@ -272,7 +272,7 @@ func (r *policyResource) Update(ctx context.Context, req resource.UpdateRequest,
 		},
 	)
 	if err != nil {
-		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating policy: %s", err))
+		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error updating policy: %s", err))
 		return
 	}
 
@@ -336,7 +336,7 @@ func (r *policyResource) Delete(ctx context.Context, req resource.DeleteRequest,
 	}
 	err = client.Permissions.Policies.Remove(ctx, data.Id.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting policy: %s", err))
+		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error deleting policy: %s", err))
 		return
 	}
 }

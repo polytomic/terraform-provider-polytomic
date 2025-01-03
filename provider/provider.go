@@ -14,7 +14,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/polytomic/terraform-provider-polytomic/provider/internal/client"
+	"github.com/polytomic/terraform-provider-polytomic/provider/internal/connections"
+	"github.com/polytomic/terraform-provider-polytomic/provider/internal/providerclient"
 )
 
 const (
@@ -29,11 +30,7 @@ const (
 	PolytomicDeploymentURL = "POLYTOMIC_DEPLOYMENT_URL"
 
 	PolytomicDefaultURL = "app.polytomic.com"
-
-	UserAgent = "polytomic-terraform-provider"
 )
-
-const clientError = "Client Error"
 
 var (
 	_ provider.ProviderWithConfigValidators = (*Provider)(nil)
@@ -108,16 +105,16 @@ func (p *Provider) Configure(ctx context.Context, req provider.ConfigureRequest,
 	if deploymentURL.Scheme == "" {
 		deploymentURL.Scheme = "https"
 	}
-	providerOpts := []client.ProviderOpt{
-		client.WithDeploymentURL(deploymentURL.String()),
-		client.WithDeploymentKey(
+	providerOpts := []providerclient.ProviderOpt{
+		providerclient.WithDeploymentURL(deploymentURL.String()),
+		providerclient.WithDeploymentKey(
 			cmp.Or(
 				data.DeploymentKey.ValueString(),
 				os.Getenv(PolytomicDeploymentKey),
 			),
 		),
-		client.WithPartnerKey(data.PartnerKey.ValueString(), data.OrganizationUser.ValueString()),
-		client.WithAPIKey(
+		providerclient.WithPartnerKey(data.PartnerKey.ValueString(), data.OrganizationUser.ValueString()),
+		providerclient.WithAPIKey(
 			cmp.Or(
 				data.APIKey.ValueString(),
 				os.Getenv(PolytomicAPIKey),
@@ -125,7 +122,7 @@ func (p *Provider) Configure(ctx context.Context, req provider.ConfigureRequest,
 		),
 	}
 
-	clientProvider, err := client.NewClientProvider(providerOpts...)
+	clientProvider, err := providerclient.NewClientProvider(providerOpts...)
 	if err != nil {
 		resp.Diagnostics.AddError("Error configuring provider", err.Error())
 		return
@@ -145,7 +142,7 @@ func (p *Provider) Resources(ctx context.Context) []func() resource.Resource {
 		func() resource.Resource { return &bulkSyncResource{} },
 		func() resource.Resource { return &syncResource{} },
 	}
-	all := append(connectionResources, resourceList...)
+	all := append(connections.Resources, resourceList...)
 	return all
 
 }
@@ -156,7 +153,7 @@ func (p *Provider) DataSources(ctx context.Context) []func() datasource.DataSour
 		func() datasource.DataSource { return &bulkDestinationDatasource{} },
 		func() datasource.DataSource { return &identityDatasource{} },
 	}
-	all := append(connectionDatasources, datasources...)
+	all := append(connections.Datasources, datasources...)
 	return all
 }
 

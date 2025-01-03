@@ -14,7 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	ptcore "github.com/polytomic/polytomic-go/core"
 	"github.com/polytomic/polytomic-go/permissions"
-	"github.com/polytomic/terraform-provider-polytomic/provider/internal/client"
+	"github.com/polytomic/terraform-provider-polytomic/provider/internal/providerclient"
 )
 
 var _ resource.Resource = &roleResource{}
@@ -54,11 +54,11 @@ type roleResourceData struct {
 }
 
 type roleResource struct {
-	provider *client.Provider
+	provider *providerclient.Provider
 }
 
 func (r *roleResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
-	if provider := client.GetProvider(req.ProviderData, resp.Diagnostics); provider != nil {
+	if provider := providerclient.GetProvider(req.ProviderData, resp.Diagnostics); provider != nil {
 		r.provider = provider
 	}
 }
@@ -86,7 +86,7 @@ func (r *roleResource) Create(ctx context.Context, req resource.CreateRequest, r
 		},
 	)
 	if err != nil {
-		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating role: %s", err))
+		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error creating role: %s", err))
 		return
 	}
 	data.Id = types.StringPointerValue(role.Data.Id)
@@ -157,7 +157,7 @@ func (r *roleResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		},
 	)
 	if err != nil {
-		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating role: %s", err))
+		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error updating role: %s", err))
 		return
 	}
 
@@ -186,7 +186,7 @@ func (r *roleResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 	}
 	err = client.Permissions.Roles.Remove(ctx, data.Id.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error deleting role: %s", err))
+		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error deleting role: %s", err))
 		return
 	}
 }

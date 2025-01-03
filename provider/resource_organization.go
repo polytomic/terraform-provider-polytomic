@@ -16,7 +16,7 @@ import (
 	"github.com/polytomic/polytomic-go"
 	ptclient "github.com/polytomic/polytomic-go/client"
 	ptcore "github.com/polytomic/polytomic-go/core"
-	"github.com/polytomic/terraform-provider-polytomic/provider/internal/client"
+	"github.com/polytomic/terraform-provider-polytomic/provider/internal/providerclient"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -59,11 +59,11 @@ type organizationResourceData struct {
 
 type organizationResource struct {
 	client   *ptclient.Client
-	provider *client.Provider
+	provider *providerclient.Provider
 }
 
 func (r *organizationResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
-	if provider := client.GetProvider(req.ProviderData, resp.Diagnostics); provider != nil {
+	if provider := providerclient.GetProvider(req.ProviderData, resp.Diagnostics); provider != nil {
 		r.provider = provider
 		if client, err := provider.PartnerClient(); err == nil {
 			r.client = client
@@ -95,7 +95,7 @@ func (r *organizationResource) Create(ctx context.Context, req resource.CreateRe
 		},
 	)
 	if err != nil {
-		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error creating organization: %s", err))
+		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error creating organization: %s", err))
 		return
 	}
 	data.Id = types.StringPointerValue(created.Data.Id)
@@ -126,7 +126,7 @@ func (r *organizationResource) Read(ctx context.Context, req resource.ReadReques
 				return
 			}
 		}
-		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error reading organization: %s", err))
+		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error reading organization: %s", err))
 		return
 	}
 
@@ -155,7 +155,7 @@ func (r *organizationResource) Update(ctx context.Context, req resource.UpdateRe
 		},
 	)
 	if err != nil {
-		resp.Diagnostics.AddError(clientError, fmt.Sprintf("Error updating organization: %s", err))
+		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error updating organization: %s", err))
 		return
 	}
 

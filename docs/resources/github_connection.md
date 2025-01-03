@@ -52,6 +52,14 @@ Optional:
 - `authenticated` (Boolean)
 - `client_id` (String, Sensitive)
 - `client_secret` (String, Sensitive)
-- `repositories` (String)
+- `repositories` (Attributes Set) (see [below for nested schema](#nestedatt--configuration--repositories))
+
+<a id="nestedatt--configuration--repositories"></a>
+### Nested Schema for `configuration.repositories`
+
+Optional:
+
+- `label` (String)
+- `value` (String)
 
 

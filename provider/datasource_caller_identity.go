@@ -7,14 +7,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	ptclient "github.com/polytomic/polytomic-go/client"
-	"github.com/polytomic/terraform-provider-polytomic/provider/internal/client"
+	"github.com/polytomic/terraform-provider-polytomic/provider/internal/providerclient"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
 var _ datasource.DataSource = &identityDatasource{}
 
 type identityDatasource struct {
-	provider *client.Provider
+	provider *providerclient.Provider
 }
 
 type identityDatasourceData struct {
@@ -30,7 +30,7 @@ type identityDatasourceData struct {
 }
 
 func (id *identityDatasource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
-	if provider := client.GetProvider(req.ProviderData, resp.Diagnostics); provider != nil {
+	if provider := providerclient.GetProvider(req.ProviderData, resp.Diagnostics); provider != nil {
 		id.provider = provider
 	}
 }
