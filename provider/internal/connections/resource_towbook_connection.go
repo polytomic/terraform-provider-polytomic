@@ -45,7 +45,7 @@ func (t *TowbookConnectionResource) Schema(ctx context.Context, req resource.Sch
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"api_token": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `API Token`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,

@@ -51,15 +51,15 @@ func (d *PosthogConnectionDataSource) Schema(ctx context.Context, req datasource
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"authenticated_as": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Connected as`,
 						Computed:            true,
 					},
 					"location": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Computed:            true,
 					},
 					"project": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Computed:            true,
 					},
 				},

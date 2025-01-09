@@ -45,35 +45,37 @@ func (t *BigqueryConnectionResource) Schema(ctx context.Context, req resource.Sc
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"client_email": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Service account identity`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
 					},
 					"location": schema.StringAttribute{
-						MarkdownDescription: "Region or multi-region for query operations",
+						MarkdownDescription: `Region or multi-region for query operations`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
 					},
 					"override_project_id": schema.StringAttribute{
-						MarkdownDescription: "Override service key's project ID for cross-account access",
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
+						MarkdownDescription: `Override project ID
+
+    Override service key's project ID for cross-account access`,
+						Required:  false,
+						Optional:  true,
+						Computed:  true,
+						Sensitive: false,
 					},
 					"project_id": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Service account project ID`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
 					},
 					"service_account": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Service account key`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
@@ -83,7 +85,7 @@ func (t *BigqueryConnectionResource) Schema(ctx context.Context, req resource.Sc
 						},
 					},
 					"structured_values_as_json": schema.BoolAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Write object and array values as JSON`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,

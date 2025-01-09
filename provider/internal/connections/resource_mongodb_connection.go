@@ -45,28 +45,30 @@ func (t *MongodbConnectionResource) Schema(ctx context.Context, req resource.Sch
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"database": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Auth Database`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
 					},
 					"hosts": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Hostname(s)`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
 						Sensitive:           false,
 					},
 					"params": schema.StringAttribute{
-						MarkdownDescription: "Additional connection parameters, formatted as a query string",
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
+						MarkdownDescription: `Additional Parameters
+
+    Additional connection parameters, formatted as a query string`,
+						Required:  false,
+						Optional:  true,
+						Computed:  true,
+						Sensitive: false,
 					},
 					"password": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
@@ -76,21 +78,21 @@ func (t *MongodbConnectionResource) Schema(ctx context.Context, req resource.Sch
 						},
 					},
 					"srv": schema.BoolAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Connect using SRV record?`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
 					},
 					"ssl": schema.BoolAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Use TLS/SSL`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
 					},
 					"username": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,

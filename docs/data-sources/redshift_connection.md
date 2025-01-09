@@ -36,17 +36,23 @@ data "polytomic_redshift_connection" "redshift" {
 
 Read-Only:
 
-- `aws_access_key_id` (String) Access Key ID with read/write access to a bucket. More info: https://docs.polytomic.com/docs/redshift
-- `aws_user` (String)
+- `aws_access_key_id` (String) AWS Access Key ID (destinations only)
+
+    Access Key ID with read/write access to a bucket. More info: https://docs.polytomic.com/docs/redshift
+- `aws_user` (String) User ARN
 - `database` (String)
 - `hostname` (String)
 - `port` (Number)
-- `s3_bucket_name` (String) Name of bucket used for staging data load files
-- `s3_bucket_region` (String) Region of bucket. Note: must match region of redshift server
-- `ssh` (Boolean)
-- `ssh_host` (String)
-- `ssh_port` (Number)
-- `ssh_user` (String)
+- `s3_bucket_name` (String) S3 Bucket Name (destinations only)
+
+    Name of bucket used for staging data load files
+- `s3_bucket_region` (String) S3 Bucket Region (destinations only)
+
+    Region of bucket. Note: must match region of redshift server
+- `ssh` (Boolean) Connect over SSH tunnel
+- `ssh_host` (String) SSH host
+- `ssh_port` (Number) SSH port
+- `ssh_user` (String) SSH user
 - `username` (String)
 
 

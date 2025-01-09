@@ -51,33 +51,33 @@ func (d *GsheetsConnectionDataSource) Schema(ctx context.Context, req datasource
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"connect_mode": schema.StringAttribute{
-						MarkdownDescription: "Default: browser",
+						MarkdownDescription: `Default: browser`,
 						Computed:            true,
 					},
 					"has_headers": schema.BoolAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Columns have headers`,
 						Computed:            true,
 					},
 					"oauth_token_expiry": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Computed:            true,
 					},
 					"spreadsheet_id": schema.SingleNestedAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Spreadsheet`,
 						Computed:            true,
 						Attributes: map[string]schema.Attribute{
 							"label": schema.StringAttribute{
-								MarkdownDescription: "",
+								MarkdownDescription: ``,
 								Computed:            true,
 							},
 							"value": schema.StringAttribute{
-								MarkdownDescription: "",
+								MarkdownDescription: ``,
 								Computed:            true,
 							},
 						},
 					},
 					"user_email": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Connected user's email`,
 						Computed:            true,
 					},
 				},

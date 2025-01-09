@@ -51,15 +51,15 @@ func (d *MixpanelConnectionDataSource) Schema(ctx context.Context, req datasourc
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"project_id": schema.Int64Attribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Project ID`,
 						Computed:            true,
 					},
 					"region": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Server`,
 						Computed:            true,
 					},
 					"service_account_username": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Service account username`,
 						Computed:            true,
 					},
 				},

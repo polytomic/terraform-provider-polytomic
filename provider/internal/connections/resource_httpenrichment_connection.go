@@ -45,28 +45,28 @@ func (t *HttpenrichmentConnectionResource) Schema(ctx context.Context, req resou
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"auth": schema.SingleNestedAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Authentication method`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
 						Attributes: map[string]schema.Attribute{
 							"basic": schema.SingleNestedAttribute{
-								MarkdownDescription: "",
+								MarkdownDescription: `Basic authentication`,
 								Required:            false,
 								Optional:            true,
 								Computed:            true,
 								Sensitive:           false,
 								Attributes: map[string]schema.Attribute{
 									"password": schema.StringAttribute{
-										MarkdownDescription: "",
+										MarkdownDescription: ``,
 										Required:            false,
 										Optional:            true,
 										Computed:            true,
 										Sensitive:           false,
 									},
 									"username": schema.StringAttribute{
-										MarkdownDescription: "",
+										MarkdownDescription: ``,
 										Required:            false,
 										Optional:            true,
 										Computed:            true,
@@ -75,21 +75,21 @@ func (t *HttpenrichmentConnectionResource) Schema(ctx context.Context, req resou
 								},
 							},
 							"header": schema.SingleNestedAttribute{
-								MarkdownDescription: "",
+								MarkdownDescription: `Header key`,
 								Required:            false,
 								Optional:            true,
 								Computed:            true,
 								Sensitive:           false,
 								Attributes: map[string]schema.Attribute{
 									"name": schema.StringAttribute{
-										MarkdownDescription: "",
+										MarkdownDescription: ``,
 										Required:            false,
 										Optional:            true,
 										Computed:            true,
 										Sensitive:           false,
 									},
 									"value": schema.StringAttribute{
-										MarkdownDescription: "",
+										MarkdownDescription: ``,
 										Required:            false,
 										Optional:            true,
 										Computed:            true,
@@ -98,35 +98,35 @@ func (t *HttpenrichmentConnectionResource) Schema(ctx context.Context, req resou
 								},
 							},
 							"oauth": schema.SingleNestedAttribute{
-								MarkdownDescription: "",
+								MarkdownDescription: ``,
 								Required:            false,
 								Optional:            true,
 								Computed:            true,
 								Sensitive:           false,
 								Attributes: map[string]schema.Attribute{
 									"auth_style": schema.Int64Attribute{
-										MarkdownDescription: "",
+										MarkdownDescription: `Auth style`,
 										Required:            false,
 										Optional:            true,
 										Computed:            true,
 										Sensitive:           false,
 									},
 									"client_id": schema.StringAttribute{
-										MarkdownDescription: "",
+										MarkdownDescription: `Client ID`,
 										Required:            false,
 										Optional:            true,
 										Computed:            true,
 										Sensitive:           false,
 									},
 									"client_secret": schema.StringAttribute{
-										MarkdownDescription: "",
+										MarkdownDescription: `Client secret`,
 										Required:            false,
 										Optional:            true,
 										Computed:            true,
 										Sensitive:           false,
 									},
 									"extra_form_data": schema.SetNestedAttribute{
-										MarkdownDescription: "",
+										MarkdownDescription: `Extra form data`,
 										Required:            false,
 										Optional:            true,
 										Computed:            true,
@@ -134,14 +134,14 @@ func (t *HttpenrichmentConnectionResource) Schema(ctx context.Context, req resou
 										NestedObject: schema.NestedAttributeObject{
 											Attributes: map[string]schema.Attribute{
 												"name": schema.StringAttribute{
-													MarkdownDescription: "",
+													MarkdownDescription: ``,
 													Required:            false,
 													Optional:            true,
 													Computed:            true,
 													Sensitive:           false,
 												},
 												"value": schema.StringAttribute{
-													MarkdownDescription: "",
+													MarkdownDescription: ``,
 													Required:            false,
 													Optional:            true,
 													Computed:            true,
@@ -151,7 +151,7 @@ func (t *HttpenrichmentConnectionResource) Schema(ctx context.Context, req resou
 										},
 									},
 									"scopes": schema.SetAttribute{
-										MarkdownDescription: "",
+										MarkdownDescription: ``,
 										Required:            false,
 										Optional:            true,
 										Computed:            true,
@@ -160,7 +160,7 @@ func (t *HttpenrichmentConnectionResource) Schema(ctx context.Context, req resou
 										ElementType: types.StringType,
 									},
 									"token_endpoint": schema.StringAttribute{
-										MarkdownDescription: "",
+										MarkdownDescription: `Token endpoint`,
 										Required:            false,
 										Optional:            true,
 										Computed:            true,
@@ -171,14 +171,14 @@ func (t *HttpenrichmentConnectionResource) Schema(ctx context.Context, req resou
 						},
 					},
 					"body": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `JSON payload`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
 					},
 					"fields": schema.SetNestedAttribute{
-						MarkdownDescription: "List of fields to be returned by the enrichment",
+						MarkdownDescription: `List of fields to be returned by the enrichment`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
@@ -186,21 +186,21 @@ func (t *HttpenrichmentConnectionResource) Schema(ctx context.Context, req resou
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 								"name": schema.StringAttribute{
-									MarkdownDescription: "Name of the field",
+									MarkdownDescription: `Name of the field`,
 									Required:            false,
 									Optional:            true,
 									Computed:            true,
 									Sensitive:           false,
 								},
 								"path": schema.StringAttribute{
-									MarkdownDescription: "JSONPath expression to extract the field from the response",
+									MarkdownDescription: `JSONPath expression to extract the field from the response`,
 									Required:            false,
 									Optional:            true,
 									Computed:            true,
 									Sensitive:           false,
 								},
 								"type": schema.StringAttribute{
-									MarkdownDescription: "Type of the field",
+									MarkdownDescription: `Type of the field`,
 									Required:            false,
 									Optional:            true,
 									Computed:            true,
@@ -210,7 +210,7 @@ func (t *HttpenrichmentConnectionResource) Schema(ctx context.Context, req resou
 						},
 					},
 					"headers": schema.SetNestedAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
@@ -218,14 +218,14 @@ func (t *HttpenrichmentConnectionResource) Schema(ctx context.Context, req resou
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 								"name": schema.StringAttribute{
-									MarkdownDescription: "",
+									MarkdownDescription: ``,
 									Required:            false,
 									Optional:            true,
 									Computed:            true,
 									Sensitive:           false,
 								},
 								"value": schema.StringAttribute{
-									MarkdownDescription: "",
+									MarkdownDescription: ``,
 									Required:            false,
 									Optional:            true,
 									Computed:            true,
@@ -235,36 +235,40 @@ func (t *HttpenrichmentConnectionResource) Schema(ctx context.Context, req resou
 						},
 					},
 					"healthcheck": schema.StringAttribute{
-						MarkdownDescription: "Path to request when checking the health of this connection. No health check will be performed if left empty.",
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
+						MarkdownDescription: `Health check endpoint
+
+    Path to request when checking the health of this connection. No health check will be performed if left empty.`,
+						Required:  false,
+						Optional:  true,
+						Computed:  true,
+						Sensitive: false,
 					},
 					"input_mappings": schema.SetNestedAttribute{
-						MarkdownDescription: "List of input mappings to be used in the query. Each mapping should be a valid JSONPath expression.",
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
+						MarkdownDescription: `Input mappings
+
+    List of input mappings to be used in the query. Each mapping should be a valid JSONPath expression.`,
+						Required:  false,
+						Optional:  true,
+						Computed:  true,
+						Sensitive: false,
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 								"name": schema.StringAttribute{
-									MarkdownDescription: "Name of the input mapping",
+									MarkdownDescription: `Name of the input mapping`,
 									Required:            false,
 									Optional:            true,
 									Computed:            true,
 									Sensitive:           false,
 								},
 								"required": schema.BoolAttribute{
-									MarkdownDescription: "Whether the input mapping is required",
+									MarkdownDescription: `Whether the input mapping is required`,
 									Required:            false,
 									Optional:            true,
 									Computed:            true,
 									Sensitive:           false,
 								},
 								"type": schema.StringAttribute{
-									MarkdownDescription: "Type of the input mapping",
+									MarkdownDescription: `Type of the input mapping`,
 									Required:            false,
 									Optional:            true,
 									Computed:            true,
@@ -274,14 +278,14 @@ func (t *HttpenrichmentConnectionResource) Schema(ctx context.Context, req resou
 						},
 					},
 					"method": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `HTTP Method`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
 					},
 					"parameters": schema.SetNestedAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Query string parameters`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
@@ -289,14 +293,14 @@ func (t *HttpenrichmentConnectionResource) Schema(ctx context.Context, req resou
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 								"name": schema.StringAttribute{
-									MarkdownDescription: "",
+									MarkdownDescription: ``,
 									Required:            false,
 									Optional:            true,
 									Computed:            true,
 									Sensitive:           false,
 								},
 								"value": schema.StringAttribute{
-									MarkdownDescription: "",
+									MarkdownDescription: ``,
 									Required:            false,
 									Optional:            true,
 									Computed:            true,
@@ -306,7 +310,7 @@ func (t *HttpenrichmentConnectionResource) Schema(ctx context.Context, req resou
 						},
 					},
 					"url": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Base URL`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,

@@ -39,7 +39,18 @@ resource "polytomic_redshift_connection" "redshift" {
 
 ### Optional
 
-- `force_destroy` (Boolean) Indicates whether dependent models, syncs, and bulk syncs should be cascade deleted when this connection is destroy. This only deletes other resources when the connection is destroyed, not when setting this parameter to `true`. Once this parameter is set to `true`, there must be a successful `terraform apply` run before a destroy is required to update this value in the resource state. Without a successful `terraform apply` after this parameter is set, this flag will have no effect. If setting this field in the same operation that would require replacing the connection or destroying the connection, this flag will not work. Additionally when importing a connection, a successful `terraform apply` is required to set this value in state before it will take effect on a destroy operation.
+- `force_destroy` (Boolean) Indicates whether dependent models, syncs, and bulk syncs should be cascade
+deleted when this connection is destroy.
+
+  This only deletes other resources when the connection is destroyed, not when
+setting this parameter to `true`. Once this parameter is set to `true`, there
+must be a successful `terraform apply` run before a destroy is required to
+update this value in the resource state. Without a successful `terraform apply`
+after this parameter is set, this flag will have no effect. If setting this
+field in the same operation that would require replacing the connection or
+destroying the connection, this flag will not work. Additionally when importing
+a connection, a successful `terraform apply` is required to set this value in
+state before it will take effect on a destroy operation.
 - `organization` (String) Organization ID
 
 ### Read-Only
@@ -59,15 +70,21 @@ Required:
 
 Optional:
 
-- `aws_access_key_id` (String) Access Key ID with read/write access to a bucket. More info: https://docs.polytomic.com/docs/redshift
-- `aws_secret_access_key` (String, Sensitive)
-- `aws_user` (String)
-- `s3_bucket_name` (String) Name of bucket used for staging data load files
-- `s3_bucket_region` (String) Region of bucket. Note: must match region of redshift server
-- `ssh` (Boolean)
-- `ssh_host` (String)
-- `ssh_port` (Number)
-- `ssh_private_key` (String, Sensitive)
-- `ssh_user` (String)
+- `aws_access_key_id` (String) AWS Access Key ID (destinations only)
+
+    Access Key ID with read/write access to a bucket. More info: https://docs.polytomic.com/docs/redshift
+- `aws_secret_access_key` (String, Sensitive) AWS Secret Access Key (destinations only)
+- `aws_user` (String) User ARN
+- `s3_bucket_name` (String) S3 Bucket Name (destinations only)
+
+    Name of bucket used for staging data load files
+- `s3_bucket_region` (String) S3 Bucket Region (destinations only)
+
+    Region of bucket. Note: must match region of redshift server
+- `ssh` (Boolean) Connect over SSH tunnel
+- `ssh_host` (String) SSH host
+- `ssh_port` (Number) SSH port
+- `ssh_private_key` (String, Sensitive) Private key
+- `ssh_user` (String) SSH user
 
 

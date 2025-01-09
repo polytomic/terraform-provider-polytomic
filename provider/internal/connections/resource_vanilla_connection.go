@@ -45,7 +45,7 @@ func (t *VanillaConnectionResource) Schema(ctx context.Context, req resource.Sch
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"api_key": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `API key`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
@@ -55,7 +55,7 @@ func (t *VanillaConnectionResource) Schema(ctx context.Context, req resource.Sch
 						},
 					},
 					"domain": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,

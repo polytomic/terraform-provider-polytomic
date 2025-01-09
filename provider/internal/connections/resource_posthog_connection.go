@@ -45,7 +45,7 @@ func (t *PosthogConnectionResource) Schema(ctx context.Context, req resource.Sch
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"api_key": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Personal API key`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
@@ -55,21 +55,21 @@ func (t *PosthogConnectionResource) Schema(ctx context.Context, req resource.Sch
 						},
 					},
 					"authenticated_as": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Connected as`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
 					},
 					"location": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
 						Sensitive:           false,
 					},
 					"project": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,

@@ -45,7 +45,7 @@ func (t *SeamaiConnectionResource) Schema(ctx context.Context, req resource.Sche
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"apikey_id": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `API Key ID`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
@@ -55,7 +55,7 @@ func (t *SeamaiConnectionResource) Schema(ctx context.Context, req resource.Sche
 						},
 					},
 					"apikey_secret": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `API Key Secret`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
@@ -65,11 +65,13 @@ func (t *SeamaiConnectionResource) Schema(ctx context.Context, req resource.Sche
 						},
 					},
 					"base_url": schema.StringAttribute{
-						MarkdownDescription: "Alternate environment API URL (including any necessary paths",
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
+						MarkdownDescription: `Alternative base URL
+
+    Alternate environment API URL (including any necessary paths`,
+						Required:  false,
+						Optional:  true,
+						Computed:  true,
+						Sensitive: false,
 					},
 				},
 

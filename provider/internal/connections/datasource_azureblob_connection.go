@@ -51,28 +51,32 @@ func (d *AzureblobConnectionDataSource) Schema(ctx context.Context, req datasour
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"account_name": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Account Name`,
 						Computed:            true,
 					},
 					"container_name": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Container Name`,
 						Computed:            true,
 					},
 					"is_single_table": schema.BoolAttribute{
-						MarkdownDescription: "Treat the files as a single table.",
-						Computed:            true,
+						MarkdownDescription: `Files are time-based snapshots
+
+    Treat the files as a single table.`,
+						Computed: true,
 					},
 					"single_table_file_format": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `File format`,
 						Computed:            true,
 					},
 					"single_table_name": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Collection name`,
 						Computed:            true,
 					},
 					"skip_lines": schema.Int64Attribute{
-						MarkdownDescription: "Skip first N lines of each CSV file.",
-						Computed:            true,
+						MarkdownDescription: `Skip first lines
+
+    Skip first N lines of each CSV file.`,
+						Computed: true,
 					},
 				},
 				Optional: true,

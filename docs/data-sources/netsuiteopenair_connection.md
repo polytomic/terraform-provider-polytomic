@@ -36,6 +36,6 @@ data "polytomic_netsuiteopenair_connection" "netsuiteopenair" {
 
 Read-Only:
 
-- `company_id` (String)
+- `company_id` (String) Company ID
 
 

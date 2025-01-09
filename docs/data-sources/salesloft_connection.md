@@ -36,8 +36,8 @@ data "polytomic_salesloft_connection" "salesloft" {
 
 Read-Only:
 
-- `auth_method` (String)
-- `connected_user` (String)
+- `auth_method` (String) Authentication method
+- `connected_user` (String) Connected user's email
 - `oauth_token_expiry` (String)
 
 

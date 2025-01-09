@@ -45,7 +45,7 @@ func (t *OutreachConnectionResource) Schema(ctx context.Context, req resource.Sc
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"client_id": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
@@ -55,7 +55,7 @@ func (t *OutreachConnectionResource) Schema(ctx context.Context, req resource.Sc
 						},
 					},
 					"client_secret": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
@@ -65,7 +65,7 @@ func (t *OutreachConnectionResource) Schema(ctx context.Context, req resource.Sc
 						},
 					},
 					"oauth_refresh_token": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
@@ -75,7 +75,7 @@ func (t *OutreachConnectionResource) Schema(ctx context.Context, req resource.Sc
 						},
 					},
 					"oauth_token_expiry": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,

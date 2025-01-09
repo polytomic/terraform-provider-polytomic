@@ -36,6 +36,6 @@ data "polytomic_heap_connection" "heap" {
 
 Read-Only:
 
-- `application_id` (String)
+- `application_id` (String) Application ID
 
 

@@ -45,14 +45,14 @@ func (t *GongConnectionResource) Schema(ctx context.Context, req resource.Schema
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"access_key": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Access key`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
 					},
 					"access_secret": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Access secret`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
@@ -62,14 +62,14 @@ func (t *GongConnectionResource) Schema(ctx context.Context, req resource.Schema
 						},
 					},
 					"auth_method": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Authentication method`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
 						Sensitive:           false,
 					},
 					"client_id": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
@@ -79,7 +79,7 @@ func (t *GongConnectionResource) Schema(ctx context.Context, req resource.Schema
 						},
 					},
 					"client_secret": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
@@ -89,7 +89,7 @@ func (t *GongConnectionResource) Schema(ctx context.Context, req resource.Schema
 						},
 					},
 					"oauth_refresh_token": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
@@ -99,14 +99,14 @@ func (t *GongConnectionResource) Schema(ctx context.Context, req resource.Schema
 						},
 					},
 					"oauth_token_expiry": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
 					},
 					"subdomain": schema.StringAttribute{
-						MarkdownDescription: "Gong subdomain i.e. company-17 if you access Gong via https://company-17.app.gong.io",
+						MarkdownDescription: `Gong subdomain i.e. company-17 if you access Gong via https://company-17.app.gong.io`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,

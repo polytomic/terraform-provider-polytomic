@@ -45,7 +45,7 @@ func (t *LinkedinadsConnectionResource) Schema(ctx context.Context, req resource
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"accounts": schema.SetNestedAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
@@ -53,14 +53,14 @@ func (t *LinkedinadsConnectionResource) Schema(ctx context.Context, req resource
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 								"label": schema.StringAttribute{
-									MarkdownDescription: "",
+									MarkdownDescription: ``,
 									Required:            false,
 									Optional:            true,
 									Computed:            true,
 									Sensitive:           false,
 								},
 								"value": schema.StringAttribute{
-									MarkdownDescription: "",
+									MarkdownDescription: ``,
 									Required:            false,
 									Optional:            true,
 									Computed:            true,
@@ -70,7 +70,7 @@ func (t *LinkedinadsConnectionResource) Schema(ctx context.Context, req resource
 						},
 					},
 					"client_id": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
@@ -80,7 +80,7 @@ func (t *LinkedinadsConnectionResource) Schema(ctx context.Context, req resource
 						},
 					},
 					"client_secret": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
@@ -90,14 +90,14 @@ func (t *LinkedinadsConnectionResource) Schema(ctx context.Context, req resource
 						},
 					},
 					"connected_user": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Connected user`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
 					},
 					"oauth_refresh_token": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
@@ -107,7 +107,7 @@ func (t *LinkedinadsConnectionResource) Schema(ctx context.Context, req resource
 						},
 					},
 					"oauth_token_expiry": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,

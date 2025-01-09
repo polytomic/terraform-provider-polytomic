@@ -36,6 +36,6 @@ data "polytomic_uservoice_connection" "uservoice" {
 
 Read-Only:
 
-- `domain` (String)
+- `domain` (String) Subdomain
 
 

@@ -36,12 +36,16 @@ data "polytomic_sftp_connection" "sftp" {
 
 Read-Only:
 
-- `is_single_table` (Boolean) Treat the files as a single table.
+- `is_single_table` (Boolean) Files are time-based snapshots
+
+    Treat the files as a single table.
 - `path` (String) The path to the directory on the SFTP server containing the files.
-- `single_table_name` (String)
-- `skip_lines` (Number) Skip first N lines of each CSV file.
-- `ssh_host` (String)
-- `ssh_port` (Number)
-- `ssh_user` (String)
+- `single_table_name` (String) Collection name
+- `skip_lines` (Number) Skip first lines
+
+    Skip first N lines of each CSV file.
+- `ssh_host` (String) Host
+- `ssh_port` (Number) Port
+- `ssh_user` (String) User
 
 

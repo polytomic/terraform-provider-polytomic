@@ -45,14 +45,14 @@ func (t *MarketoConnectionResource) Schema(ctx context.Context, req resource.Sch
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"client_id": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Client ID`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
 						Sensitive:           false,
 					},
 					"client_secret": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Client Secret`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
@@ -62,35 +62,35 @@ func (t *MarketoConnectionResource) Schema(ctx context.Context, req resource.Sch
 						},
 					},
 					"concurrent_imports": schema.Int64Attribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Concurrent import jobs`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
 					},
 					"daily_api_calls": schema.Int64Attribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Daily call limit`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
 					},
 					"enforce_api_limits": schema.BoolAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Enforce API limits`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
 					},
 					"oauth_token_expiry": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
 					},
 					"rest_endpoint": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `REST Endpoint`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,

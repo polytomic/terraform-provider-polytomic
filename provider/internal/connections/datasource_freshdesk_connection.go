@@ -51,7 +51,7 @@ func (d *FreshdeskConnectionDataSource) Schema(ctx context.Context, req datasour
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"subdomain": schema.StringAttribute{
-						MarkdownDescription: "e.g. 'polytomic' if your helpdesk is at https://polytomic.freshdesk.com",
+						MarkdownDescription: `e.g. 'polytomic' if your helpdesk is at https://polytomic.freshdesk.com`,
 						Computed:            true,
 					},
 				},

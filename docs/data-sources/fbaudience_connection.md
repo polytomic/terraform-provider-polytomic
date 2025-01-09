@@ -36,11 +36,11 @@ data "polytomic_fbaudience_connection" "fbaudience" {
 
 Read-Only:
 
-- `account_id` (String)
+- `account_id` (String) Account ID
 - `accounts` (Attributes Set) (see [below for nested schema](#nestedatt--configuration--accounts))
-- `auth_method` (String)
-- `graph_api_version` (String)
-- `user_name` (String)
+- `auth_method` (String) Authentication Method
+- `graph_api_version` (String) Graph API Version
+- `user_name` (String) Connected as
 
 <a id="nestedatt--configuration--accounts"></a>
 ### Nested Schema for `configuration.accounts`

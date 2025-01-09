@@ -51,48 +51,58 @@ func (d *S3ConnectionDataSource) Schema(ctx context.Context, req datasource.Sche
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"auth_mode": schema.StringAttribute{
-						MarkdownDescription: "How to authenticate with AWS. Defaults to Access Key and Secret",
-						Computed:            true,
+						MarkdownDescription: `Authentication Method
+
+    How to authenticate with AWS. Defaults to Access Key and Secret`,
+						Computed: true,
 					},
 					"aws_access_key_id": schema.StringAttribute{
-						MarkdownDescription: "Access Key ID with read/write access to a bucket.",
-						Computed:            true,
+						MarkdownDescription: `AWS Access Key ID
+
+    Access Key ID with read/write access to a bucket.`,
+						Computed: true,
 					},
 					"aws_user": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `User ARN`,
 						Computed:            true,
 					},
 					"external_id": schema.StringAttribute{
-						MarkdownDescription: "External ID for the IAM role",
+						MarkdownDescription: `External ID for the IAM role`,
 						Computed:            true,
 					},
 					"iam_role_arn": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `IAM Role ARN`,
 						Computed:            true,
 					},
 					"is_single_table": schema.BoolAttribute{
-						MarkdownDescription: "Treat the files as a single table.",
-						Computed:            true,
+						MarkdownDescription: `Files are time-based snapshots
+
+    Treat the files as a single table.`,
+						Computed: true,
 					},
 					"s3_bucket_name": schema.StringAttribute{
-						MarkdownDescription: "Bucket name (folder optional); ex: s3://polytomic/dataset",
-						Computed:            true,
+						MarkdownDescription: `S3 Bucket Name
+
+    Bucket name (folder optional); ex: s3://polytomic/dataset`,
+						Computed: true,
 					},
 					"s3_bucket_region": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `S3 Bucket Region`,
 						Computed:            true,
 					},
 					"single_table_file_format": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `File format`,
 						Computed:            true,
 					},
 					"single_table_name": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Collection name`,
 						Computed:            true,
 					},
 					"skip_lines": schema.Int64Attribute{
-						MarkdownDescription: "Skip first N lines of each CSV file.",
-						Computed:            true,
+						MarkdownDescription: `Skip first lines
+
+    Skip first N lines of each CSV file.`,
+						Computed: true,
 					},
 				},
 				Optional: true,

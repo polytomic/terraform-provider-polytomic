@@ -45,7 +45,7 @@ func (t *FullstoryConnectionResource) Schema(ctx context.Context, req resource.S
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"api_key": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `API token`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,

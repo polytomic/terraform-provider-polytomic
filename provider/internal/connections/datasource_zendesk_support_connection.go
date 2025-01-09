@@ -51,24 +51,26 @@ func (d *Zendesk_supportConnectionDataSource) Schema(ctx context.Context, req da
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"auth_method": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Authentication method`,
 						Computed:            true,
 					},
 					"custom_api_limits": schema.BoolAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Enforce custom API limits`,
 						Computed:            true,
 					},
 					"domain": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Zendesk Subdomain`,
 						Computed:            true,
 					},
 					"email": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Computed:            true,
 					},
 					"ratelimit_rpm": schema.Int64Attribute{
-						MarkdownDescription: "Set a custom maximum request per minute limit.",
-						Computed:            true,
+						MarkdownDescription: `Maximum requests per minute
+
+    Set a custom maximum request per minute limit.`,
+						Computed: true,
 					},
 				},
 				Optional: true,

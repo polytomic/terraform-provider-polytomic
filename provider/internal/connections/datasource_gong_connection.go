@@ -51,19 +51,19 @@ func (d *GongConnectionDataSource) Schema(ctx context.Context, req datasource.Sc
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"access_key": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Access key`,
 						Computed:            true,
 					},
 					"auth_method": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Authentication method`,
 						Computed:            true,
 					},
 					"oauth_token_expiry": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Computed:            true,
 					},
 					"subdomain": schema.StringAttribute{
-						MarkdownDescription: "Gong subdomain i.e. company-17 if you access Gong via https://company-17.app.gong.io",
+						MarkdownDescription: `Gong subdomain i.e. company-17 if you access Gong via https://company-17.app.gong.io`,
 						Computed:            true,
 					},
 				},

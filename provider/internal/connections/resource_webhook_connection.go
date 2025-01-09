@@ -45,7 +45,7 @@ func (t *WebhookConnectionResource) Schema(ctx context.Context, req resource.Sch
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"headers": schema.SetNestedAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
@@ -53,14 +53,14 @@ func (t *WebhookConnectionResource) Schema(ctx context.Context, req resource.Sch
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 								"name": schema.StringAttribute{
-									MarkdownDescription: "",
+									MarkdownDescription: ``,
 									Required:            false,
 									Optional:            true,
 									Computed:            true,
 									Sensitive:           false,
 								},
 								"value": schema.StringAttribute{
-									MarkdownDescription: "",
+									MarkdownDescription: ``,
 									Required:            false,
 									Optional:            true,
 									Computed:            true,
@@ -70,7 +70,7 @@ func (t *WebhookConnectionResource) Schema(ctx context.Context, req resource.Sch
 						},
 					},
 					"secret": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
@@ -80,7 +80,7 @@ func (t *WebhookConnectionResource) Schema(ctx context.Context, req resource.Sch
 						},
 					},
 					"url": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Webhook URL`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,

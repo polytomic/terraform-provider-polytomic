@@ -45,21 +45,21 @@ func (t *NetsuiteConnectionResource) Schema(ctx context.Context, req resource.Sc
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"account_id": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Account ID`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
 						Sensitive:           false,
 					},
 					"consumer_key": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Consumer Key`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
 						Sensitive:           false,
 					},
 					"consumer_secret": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Consumer Secret`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
@@ -69,14 +69,14 @@ func (t *NetsuiteConnectionResource) Schema(ctx context.Context, req resource.Sc
 						},
 					},
 					"token": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Token ID`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
 						Sensitive:           false,
 					},
 					"token_secret": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Token Secret`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,

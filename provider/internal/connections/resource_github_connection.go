@@ -45,14 +45,14 @@ func (t *GithubConnectionResource) Schema(ctx context.Context, req resource.Sche
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"authenticated": schema.BoolAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
 					},
 					"client_id": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
@@ -62,7 +62,7 @@ func (t *GithubConnectionResource) Schema(ctx context.Context, req resource.Sche
 						},
 					},
 					"client_secret": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
@@ -72,7 +72,7 @@ func (t *GithubConnectionResource) Schema(ctx context.Context, req resource.Sche
 						},
 					},
 					"oauth_access_token": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
@@ -82,7 +82,7 @@ func (t *GithubConnectionResource) Schema(ctx context.Context, req resource.Sche
 						},
 					},
 					"repositories": schema.SetNestedAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
@@ -90,14 +90,14 @@ func (t *GithubConnectionResource) Schema(ctx context.Context, req resource.Sche
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 								"label": schema.StringAttribute{
-									MarkdownDescription: "",
+									MarkdownDescription: ``,
 									Required:            false,
 									Optional:            true,
 									Computed:            true,
 									Sensitive:           false,
 								},
 								"value": schema.StringAttribute{
-									MarkdownDescription: "",
+									MarkdownDescription: ``,
 									Required:            false,
 									Optional:            true,
 									Computed:            true,

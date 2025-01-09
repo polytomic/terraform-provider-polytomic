@@ -36,10 +36,12 @@ data "polytomic_bigquery_connection" "bigquery" {
 
 Read-Only:
 
-- `client_email` (String)
+- `client_email` (String) Service account identity
 - `location` (String) Region or multi-region for query operations
-- `override_project_id` (String) Override service key's project ID for cross-account access
-- `project_id` (String)
-- `structured_values_as_json` (Boolean)
+- `override_project_id` (String) Override project ID
+
+    Override service key's project ID for cross-account access
+- `project_id` (String) Service account project ID
+- `structured_values_as_json` (Boolean) Write object and array values as JSON
 
 

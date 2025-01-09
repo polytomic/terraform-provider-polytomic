@@ -36,7 +36,18 @@ resource "polytomic_s3_connection" "s3" {
 
 ### Optional
 
-- `force_destroy` (Boolean) Indicates whether dependent models, syncs, and bulk syncs should be cascade deleted when this connection is destroy. This only deletes other resources when the connection is destroyed, not when setting this parameter to `true`. Once this parameter is set to `true`, there must be a successful `terraform apply` run before a destroy is required to update this value in the resource state. Without a successful `terraform apply` after this parameter is set, this flag will have no effect. If setting this field in the same operation that would require replacing the connection or destroying the connection, this flag will not work. Additionally when importing a connection, a successful `terraform apply` is required to set this value in state before it will take effect on a destroy operation.
+- `force_destroy` (Boolean) Indicates whether dependent models, syncs, and bulk syncs should be cascade
+deleted when this connection is destroy.
+
+  This only deletes other resources when the connection is destroyed, not when
+setting this parameter to `true`. Once this parameter is set to `true`, there
+must be a successful `terraform apply` run before a destroy is required to
+update this value in the resource state. Without a successful `terraform apply`
+after this parameter is set, this flag will have no effect. If setting this
+field in the same operation that would require replacing the connection or
+destroying the connection, this flag will not work. Additionally when importing
+a connection, a successful `terraform apply` is required to set this value in
+state before it will take effect on a destroy operation.
 - `organization` (String) Organization ID
 
 ### Read-Only
@@ -48,20 +59,30 @@ resource "polytomic_s3_connection" "s3" {
 
 Required:
 
-- `auth_mode` (String) How to authenticate with AWS. Defaults to Access Key and Secret
-- `s3_bucket_name` (String) Bucket name (folder optional); ex: s3://polytomic/dataset
-- `s3_bucket_region` (String)
+- `auth_mode` (String) Authentication Method
+
+    How to authenticate with AWS. Defaults to Access Key and Secret
+- `s3_bucket_name` (String) S3 Bucket Name
+
+    Bucket name (folder optional); ex: s3://polytomic/dataset
+- `s3_bucket_region` (String) S3 Bucket Region
 
 Optional:
 
-- `aws_access_key_id` (String) Access Key ID with read/write access to a bucket.
-- `aws_secret_access_key` (String, Sensitive)
-- `aws_user` (String)
+- `aws_access_key_id` (String) AWS Access Key ID
+
+    Access Key ID with read/write access to a bucket.
+- `aws_secret_access_key` (String, Sensitive) AWS Secret Access Key
+- `aws_user` (String) User ARN
 - `external_id` (String) External ID for the IAM role
-- `iam_role_arn` (String)
-- `is_single_table` (Boolean) Treat the files as a single table.
-- `single_table_file_format` (String)
-- `single_table_name` (String)
-- `skip_lines` (Number) Skip first N lines of each CSV file.
+- `iam_role_arn` (String) IAM Role ARN
+- `is_single_table` (Boolean) Files are time-based snapshots
+
+    Treat the files as a single table.
+- `single_table_file_format` (String) File format
+- `single_table_name` (String) Collection name
+- `skip_lines` (Number) Skip first lines
+
+    Skip first N lines of each CSV file.
 
 

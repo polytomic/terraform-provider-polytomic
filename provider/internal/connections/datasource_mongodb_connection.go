@@ -51,27 +51,29 @@ func (d *MongodbConnectionDataSource) Schema(ctx context.Context, req datasource
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"database": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Auth Database`,
 						Computed:            true,
 					},
 					"hosts": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Hostname(s)`,
 						Computed:            true,
 					},
 					"params": schema.StringAttribute{
-						MarkdownDescription: "Additional connection parameters, formatted as a query string",
-						Computed:            true,
+						MarkdownDescription: `Additional Parameters
+
+    Additional connection parameters, formatted as a query string`,
+						Computed: true,
 					},
 					"srv": schema.BoolAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Connect using SRV record?`,
 						Computed:            true,
 					},
 					"ssl": schema.BoolAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Use TLS/SSL`,
 						Computed:            true,
 					},
 					"username": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Computed:            true,
 					},
 				},

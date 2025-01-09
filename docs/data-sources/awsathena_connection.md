@@ -36,8 +36,10 @@ data "polytomic_awsathena_connection" "awsathena" {
 
 Read-Only:
 
-- `aws_user` (String)
-- `outputbucket` (String) A pre-existing bucket (folder optional) that AWS can use to store query results. ex: s3://polytomic-athena-results/customer-dataset
-- `region` (String)
+- `aws_user` (String) User ARN
+- `outputbucket` (String) AWS S3 output bucket
+
+    A pre-existing bucket (folder optional) that AWS can use to store query results. ex: s3://polytomic-athena-results/customer-dataset
+- `region` (String) AWS region
 
 

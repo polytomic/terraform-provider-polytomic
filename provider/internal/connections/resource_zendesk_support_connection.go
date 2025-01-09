@@ -45,7 +45,7 @@ func (t *Zendesk_supportConnectionResource) Schema(ctx context.Context, req reso
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"api_token": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `API token`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
@@ -55,39 +55,41 @@ func (t *Zendesk_supportConnectionResource) Schema(ctx context.Context, req reso
 						},
 					},
 					"auth_method": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Authentication method`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
 						Sensitive:           false,
 					},
 					"custom_api_limits": schema.BoolAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Enforce custom API limits`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
 					},
 					"domain": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Zendesk Subdomain`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
 						Sensitive:           false,
 					},
 					"email": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
 					},
 					"ratelimit_rpm": schema.Int64Attribute{
-						MarkdownDescription: "Set a custom maximum request per minute limit.",
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
+						MarkdownDescription: `Maximum requests per minute
+
+    Set a custom maximum request per minute limit.`,
+						Required:  false,
+						Optional:  true,
+						Computed:  true,
+						Sensitive: false,
 					},
 				},
 

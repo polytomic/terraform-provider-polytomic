@@ -45,7 +45,7 @@ func (t *DynamodbConnectionResource) Schema(ctx context.Context, req resource.Sc
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"access_id": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `AWS Access ID`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
@@ -55,21 +55,21 @@ func (t *DynamodbConnectionResource) Schema(ctx context.Context, req resource.Sc
 						},
 					},
 					"aws_user": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `User ARN`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
 					},
 					"region": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `AWS region`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
 						Sensitive:           false,
 					},
 					"secret_access_key": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `AWS Secret Access Key`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,

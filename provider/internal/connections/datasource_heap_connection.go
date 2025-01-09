@@ -51,7 +51,7 @@ func (d *HeapConnectionDataSource) Schema(ctx context.Context, req datasource.Sc
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"application_id": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Application ID`,
 						Computed:            true,
 					},
 				},

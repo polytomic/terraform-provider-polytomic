@@ -51,7 +51,7 @@ func (d *ScamalyticsConnectionDataSource) Schema(ctx context.Context, req dataso
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"endpoint": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Enrichment Endpoint`,
 						Computed:            true,
 					},
 				},

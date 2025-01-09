@@ -51,87 +51,101 @@ func (d *DatabricksConnectionDataSource) Schema(ctx context.Context, req datasou
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"auth_mode": schema.StringAttribute{
-						MarkdownDescription: "How to authenticate with AWS. Defaults to Access Key and Secret",
-						Computed:            true,
+						MarkdownDescription: `Authentication Method
+
+    How to authenticate with AWS. Defaults to Access Key and Secret`,
+						Computed: true,
 					},
 					"aws_access_key_id": schema.StringAttribute{
-						MarkdownDescription: "See https://docs.polytomic.com/docs/databricks-connections#writing-to-databricks",
-						Computed:            true,
+						MarkdownDescription: `AWS Access Key ID (destinations only)
+
+    See https://docs.polytomic.com/docs/databricks-connections#writing-to-databricks`,
+						Computed: true,
 					},
 					"aws_user": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `User ARN (destinations only)`,
 						Computed:            true,
 					},
 					"azure_account_name": schema.StringAttribute{
-						MarkdownDescription: "The account name of the storage account",
-						Computed:            true,
+						MarkdownDescription: `Storage Account Name (destination support only)
+
+    The account name of the storage account`,
+						Computed: true,
 					},
 					"cloud_provider": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Cloud Provider (destination support only)`,
 						Computed:            true,
 					},
 					"concurrent_queries": schema.Int64Attribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Concurrent query limit`,
 						Computed:            true,
 					},
 					"container_name": schema.StringAttribute{
-						MarkdownDescription: "The container which we will stage files in",
-						Computed:            true,
+						MarkdownDescription: `Storage Container Name (destination support only)
+
+    The container which we will stage files in`,
+						Computed: true,
 					},
 					"deleted_file_retention_days": schema.Int64Attribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Deleted file retention`,
 						Computed:            true,
 					},
 					"enable_delta_uniform": schema.BoolAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Enable Delta UniForm tables`,
 						Computed:            true,
 					},
 					"enforce_query_limit": schema.BoolAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Limit concurrent queries`,
 						Computed:            true,
 					},
 					"external_id": schema.StringAttribute{
-						MarkdownDescription: "External ID for the IAM role",
-						Computed:            true,
+						MarkdownDescription: `External ID
+
+    External ID for the IAM role`,
+						Computed: true,
 					},
 					"http_path": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `HTTP Path`,
 						Computed:            true,
 					},
 					"iam_role_arn": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `IAM Role ARN`,
 						Computed:            true,
 					},
 					"log_file_retention_days": schema.Int64Attribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Log retention`,
 						Computed:            true,
 					},
 					"port": schema.Int64Attribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Computed:            true,
 					},
 					"s3_bucket_name": schema.StringAttribute{
-						MarkdownDescription: "Name of bucket used for staging data load files",
-						Computed:            true,
+						MarkdownDescription: `S3 Bucket Name (destinations only)
+
+    Name of bucket used for staging data load files`,
+						Computed: true,
 					},
 					"s3_bucket_region": schema.StringAttribute{
-						MarkdownDescription: "Region of bucket.example=us-east-1",
-						Computed:            true,
+						MarkdownDescription: `S3 Bucket Region (destinations only)
+
+    Region of bucket.example=us-east-1`,
+						Computed: true,
 					},
 					"server_hostname": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Server Hostname`,
 						Computed:            true,
 					},
 					"set_retention_properties": schema.BoolAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Configure data retention for tables`,
 						Computed:            true,
 					},
 					"storage_credential_name": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Storage credential name`,
 						Computed:            true,
 					},
 					"unity_catalog_enabled": schema.BoolAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Unity Catalog enabled`,
 						Computed:            true,
 					},
 				},

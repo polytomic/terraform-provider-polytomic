@@ -36,7 +36,7 @@ data "polytomic_zoominfo_connection" "zoominfo" {
 
 Read-Only:
 
-- `client_id` (String)
+- `client_id` (String) Client ID
 - `username` (String)
 
 

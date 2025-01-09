@@ -51,8 +51,10 @@ func (d *SlackConnectionDataSource) Schema(ctx context.Context, req datasource.S
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"event_url": schema.StringAttribute{
-						MarkdownDescription: "Used if ingesting Slack events.",
-						Computed:            true,
+						MarkdownDescription: `Event Subscription Request URL
+
+    Used if ingesting Slack events.`,
+						Computed: true,
 					},
 				},
 				Optional: true,

@@ -36,15 +36,15 @@ data "polytomic_mysql_connection" "mysql" {
 
 Read-Only:
 
-- `account` (String)
-- `change_detection` (Boolean)
-- `dbname` (String)
+- `account` (String) Username
+- `change_detection` (Boolean) Use replication for bulk syncs
+- `dbname` (String) Database
 - `hostname` (String)
 - `port` (Number)
-- `ssh` (Boolean)
-- `ssh_host` (String)
-- `ssh_port` (Number)
-- `ssh_user` (String)
-- `ssl` (Boolean)
+- `ssh` (Boolean) Connect over SSH tunnel
+- `ssh_host` (String) SSH host
+- `ssh_port` (Number) SSH port
+- `ssh_user` (String) SSH user
+- `ssl` (Boolean) Use SSL
 
 

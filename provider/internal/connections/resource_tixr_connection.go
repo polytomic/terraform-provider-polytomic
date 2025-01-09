@@ -45,14 +45,16 @@ func (t *TixrConnectionResource) Schema(ctx context.Context, req resource.Schema
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"client_private_key": schema.StringAttribute{
-						MarkdownDescription: "e.g. MDAwMA==",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
+						MarkdownDescription: `Client Private Key
+
+    e.g. MDAwMA==`,
+						Required:  true,
+						Optional:  false,
+						Computed:  false,
+						Sensitive: false,
 					},
 					"client_secret": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Client Secret`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,

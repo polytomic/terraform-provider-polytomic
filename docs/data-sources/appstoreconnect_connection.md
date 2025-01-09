@@ -36,8 +36,8 @@ data "polytomic_appstoreconnect_connection" "appstoreconnect" {
 
 Read-Only:
 
-- `issuer_id` (String)
-- `private_key_id` (String)
-- `vendor_number` (String)
+- `issuer_id` (String) Issuer ID
+- `private_key_id` (String) Private key ID
+- `vendor_number` (String) Vendor number
 
 

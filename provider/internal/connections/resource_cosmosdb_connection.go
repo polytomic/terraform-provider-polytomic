@@ -45,7 +45,7 @@ func (t *CosmosdbConnectionResource) Schema(ctx context.Context, req resource.Sc
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"key": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
@@ -55,7 +55,7 @@ func (t *CosmosdbConnectionResource) Schema(ctx context.Context, req resource.Sc
 						},
 					},
 					"uri": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,

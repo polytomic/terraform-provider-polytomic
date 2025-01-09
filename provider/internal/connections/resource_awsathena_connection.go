@@ -45,7 +45,7 @@ func (t *AwsathenaConnectionResource) Schema(ctx context.Context, req resource.S
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"access_id": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `AWS Access ID`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
@@ -55,28 +55,30 @@ func (t *AwsathenaConnectionResource) Schema(ctx context.Context, req resource.S
 						},
 					},
 					"aws_user": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `User ARN`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
 					},
 					"outputbucket": schema.StringAttribute{
-						MarkdownDescription: "A pre-existing bucket (folder optional) that AWS can use to store query results. ex: s3://polytomic-athena-results/customer-dataset",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
+						MarkdownDescription: `AWS S3 output bucket
+
+    A pre-existing bucket (folder optional) that AWS can use to store query results. ex: s3://polytomic-athena-results/customer-dataset`,
+						Required:  true,
+						Optional:  false,
+						Computed:  false,
+						Sensitive: false,
 					},
 					"region": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `AWS region`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
 						Sensitive:           false,
 					},
 					"secret_access_key": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `AWS Secret Access Key`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,

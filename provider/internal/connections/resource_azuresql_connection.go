@@ -45,21 +45,21 @@ func (t *AzuresqlConnectionResource) Schema(ctx context.Context, req resource.Sc
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"database": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
 						Sensitive:           false,
 					},
 					"hostname": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Server`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
 						Sensitive:           false,
 					},
 					"password": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
@@ -69,21 +69,21 @@ func (t *AzuresqlConnectionResource) Schema(ctx context.Context, req resource.Sc
 						},
 					},
 					"port": schema.Int64Attribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
 						Sensitive:           false,
 					},
 					"ssl": schema.BoolAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Use SSL`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
 					},
 					"username": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,

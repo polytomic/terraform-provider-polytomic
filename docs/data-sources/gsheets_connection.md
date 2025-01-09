@@ -37,10 +37,10 @@ data "polytomic_gsheets_connection" "gsheets" {
 Read-Only:
 
 - `connect_mode` (String) Default: browser
-- `has_headers` (Boolean)
+- `has_headers` (Boolean) Columns have headers
 - `oauth_token_expiry` (String)
-- `spreadsheet_id` (Attributes) (see [below for nested schema](#nestedatt--configuration--spreadsheet_id))
-- `user_email` (String)
+- `spreadsheet_id` (Attributes) Spreadsheet (see [below for nested schema](#nestedatt--configuration--spreadsheet_id))
+- `user_email` (String) Connected user's email
 
 <a id="nestedatt--configuration--spreadsheet_id"></a>
 ### Nested Schema for `configuration.spreadsheet_id`

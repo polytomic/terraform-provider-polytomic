@@ -359,6 +359,15 @@ func tfAttr(k string, a *jsonschema.Schema, required []string) (Attribute, error
 			ex = exstr
 		}
 	}
+
+	title := strings.TrimSpace(strings.TrimSuffix(a.Title, "(optional)"))
+	desc := ""
+	if !strings.EqualFold(title, ValidName(k)) {
+		desc = title
+		desc += "\n\n"
+	}
+	desc += fmt.Sprintf("    %s", a.Description)
+	desc = strings.TrimSpace(desc)
 	attr := Attribute{
 		TfType:       t.TfType,
 		AttrType:     t.AttrType,
@@ -367,7 +376,7 @@ func tfAttr(k string, a *jsonschema.Schema, required []string) (Attribute, error
 		CapName:      strings.Title(k),
 		Name:         k, // key in the payload
 		Type:         t.GoType,
-		Description:  a.Description,
+		Description:  desc,
 		Example:      ex,
 		Sensitive:    a.Extras["sensitive"] == true,
 	}

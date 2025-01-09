@@ -45,7 +45,7 @@ func (t *YotpoConnectionResource) Schema(ctx context.Context, req resource.Schem
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"secret": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
@@ -55,11 +55,13 @@ func (t *YotpoConnectionResource) Schema(ctx context.Context, req resource.Schem
 						},
 					},
 					"store_id": schema.StringAttribute{
-						MarkdownDescription: "Also known as Client ID or Store ID.",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
+						MarkdownDescription: `App Key
+
+    Also known as Client ID or Store ID.`,
+						Required:  true,
+						Optional:  false,
+						Computed:  false,
+						Sensitive: false,
 					},
 				},
 

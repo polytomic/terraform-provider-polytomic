@@ -51,8 +51,10 @@ func (d *SeamaiConnectionDataSource) Schema(ctx context.Context, req datasource.
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"base_url": schema.StringAttribute{
-						MarkdownDescription: "Alternate environment API URL (including any necessary paths",
-						Computed:            true,
+						MarkdownDescription: `Alternative base URL
+
+    Alternate environment API URL (including any necessary paths`,
+						Computed: true,
 					},
 				},
 				Optional: true,

@@ -37,11 +37,15 @@ data "polytomic_gcs_connection" "gcs" {
 Read-Only:
 
 - `bucket` (String)
-- `client_email` (String)
-- `is_single_table` (Boolean) Treat the files as a single table.
-- `project_id` (String)
-- `single_table_file_format` (String)
-- `single_table_name` (String)
-- `skip_lines` (Number) Skip first N lines of each CSV file.
+- `client_email` (String) Service account identity
+- `is_single_table` (Boolean) Files are time-based snapshots
+
+    Treat the files as a single table.
+- `project_id` (String) Service account project ID
+- `single_table_file_format` (String) File format
+- `single_table_name` (String) Collection name
+- `skip_lines` (Number) Skip first lines
+
+    Skip first N lines of each CSV file.
 
 

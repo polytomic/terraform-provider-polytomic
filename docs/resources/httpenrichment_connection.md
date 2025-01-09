@@ -33,7 +33,18 @@ resource "polytomic_httpenrichment_connection" "httpenrichment" {
 
 ### Optional
 
-- `force_destroy` (Boolean) Indicates whether dependent models, syncs, and bulk syncs should be cascade deleted when this connection is destroy. This only deletes other resources when the connection is destroyed, not when setting this parameter to `true`. Once this parameter is set to `true`, there must be a successful `terraform apply` run before a destroy is required to update this value in the resource state. Without a successful `terraform apply` after this parameter is set, this flag will have no effect. If setting this field in the same operation that would require replacing the connection or destroying the connection, this flag will not work. Additionally when importing a connection, a successful `terraform apply` is required to set this value in state before it will take effect on a destroy operation.
+- `force_destroy` (Boolean) Indicates whether dependent models, syncs, and bulk syncs should be cascade
+deleted when this connection is destroy.
+
+  This only deletes other resources when the connection is destroyed, not when
+setting this parameter to `true`. Once this parameter is set to `true`, there
+must be a successful `terraform apply` run before a destroy is required to
+update this value in the resource state. Without a successful `terraform apply`
+after this parameter is set, this flag will have no effect. If setting this
+field in the same operation that would require replacing the connection or
+destroying the connection, this flag will not work. Additionally when importing
+a connection, a successful `terraform apply` is required to set this value in
+state before it will take effect on a destroy operation.
 - `organization` (String) Organization ID
 
 ### Read-Only
@@ -45,26 +56,30 @@ resource "polytomic_httpenrichment_connection" "httpenrichment" {
 
 Required:
 
-- `url` (String)
+- `url` (String) Base URL
 
 Optional:
 
-- `auth` (Attributes) (see [below for nested schema](#nestedatt--configuration--auth))
-- `body` (String)
+- `auth` (Attributes) Authentication method (see [below for nested schema](#nestedatt--configuration--auth))
+- `body` (String) JSON payload
 - `fields` (Attributes Set) List of fields to be returned by the enrichment (see [below for nested schema](#nestedatt--configuration--fields))
 - `headers` (Attributes Set) (see [below for nested schema](#nestedatt--configuration--headers))
-- `healthcheck` (String) Path to request when checking the health of this connection. No health check will be performed if left empty.
-- `input_mappings` (Attributes Set) List of input mappings to be used in the query. Each mapping should be a valid JSONPath expression. (see [below for nested schema](#nestedatt--configuration--input_mappings))
-- `method` (String)
-- `parameters` (Attributes Set) (see [below for nested schema](#nestedatt--configuration--parameters))
+- `healthcheck` (String) Health check endpoint
+
+    Path to request when checking the health of this connection. No health check will be performed if left empty.
+- `input_mappings` (Attributes Set) Input mappings
+
+    List of input mappings to be used in the query. Each mapping should be a valid JSONPath expression. (see [below for nested schema](#nestedatt--configuration--input_mappings))
+- `method` (String) HTTP Method
+- `parameters` (Attributes Set) Query string parameters (see [below for nested schema](#nestedatt--configuration--parameters))
 
 <a id="nestedatt--configuration--auth"></a>
 ### Nested Schema for `configuration.auth`
 
 Optional:
 
-- `basic` (Attributes) (see [below for nested schema](#nestedatt--configuration--auth--basic))
-- `header` (Attributes) (see [below for nested schema](#nestedatt--configuration--auth--header))
+- `basic` (Attributes) Basic authentication (see [below for nested schema](#nestedatt--configuration--auth--basic))
+- `header` (Attributes) Header key (see [below for nested schema](#nestedatt--configuration--auth--header))
 - `oauth` (Attributes) (see [below for nested schema](#nestedatt--configuration--auth--oauth))
 
 <a id="nestedatt--configuration--auth--basic"></a>
@@ -90,12 +105,12 @@ Optional:
 
 Optional:
 
-- `auth_style` (Number)
-- `client_id` (String)
-- `client_secret` (String)
-- `extra_form_data` (Attributes Set) (see [below for nested schema](#nestedatt--configuration--auth--oauth--extra_form_data))
+- `auth_style` (Number) Auth style
+- `client_id` (String) Client ID
+- `client_secret` (String) Client secret
+- `extra_form_data` (Attributes Set) Extra form data (see [below for nested schema](#nestedatt--configuration--auth--oauth--extra_form_data))
 - `scopes` (Set of String)
-- `token_endpoint` (String)
+- `token_endpoint` (String) Token endpoint
 
 <a id="nestedatt--configuration--auth--oauth--extra_form_data"></a>
 ### Nested Schema for `configuration.auth.oauth.token_endpoint`

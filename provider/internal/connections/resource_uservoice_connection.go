@@ -45,7 +45,7 @@ func (t *UservoiceConnectionResource) Schema(ctx context.Context, req resource.S
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"api_key": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `API key`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
@@ -55,7 +55,7 @@ func (t *UservoiceConnectionResource) Schema(ctx context.Context, req resource.S
 						},
 					},
 					"domain": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Subdomain`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,

@@ -45,7 +45,7 @@ func (t *AirtableConnectionResource) Schema(ctx context.Context, req resource.Sc
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"api_key": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `API key`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
@@ -55,7 +55,7 @@ func (t *AirtableConnectionResource) Schema(ctx context.Context, req resource.Sc
 						},
 					},
 					"client_id": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
@@ -65,7 +65,7 @@ func (t *AirtableConnectionResource) Schema(ctx context.Context, req resource.Sc
 						},
 					},
 					"client_secret": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
@@ -75,14 +75,14 @@ func (t *AirtableConnectionResource) Schema(ctx context.Context, req resource.Sc
 						},
 					},
 					"connected_user": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Connected user's email`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
 					},
 					"oauth_access_token": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
@@ -92,7 +92,7 @@ func (t *AirtableConnectionResource) Schema(ctx context.Context, req resource.Sc
 						},
 					},
 					"oauth_refresh_token": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
@@ -102,7 +102,7 @@ func (t *AirtableConnectionResource) Schema(ctx context.Context, req resource.Sc
 						},
 					},
 					"oauth_token_expiry": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,

@@ -36,6 +36,6 @@ data "polytomic_amplitude_connection" "amplitude" {
 
 Read-Only:
 
-- `api_key` (String)
+- `api_key` (String) API Key
 
 

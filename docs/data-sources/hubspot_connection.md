@@ -36,7 +36,7 @@ data "polytomic_hubspot_connection" "hubspot" {
 
 Read-Only:
 
-- `hub_domain` (String)
-- `hub_user` (String)
+- `hub_domain` (String) HubSpot domain
+- `hub_user` (String) HubSpot user
 
 

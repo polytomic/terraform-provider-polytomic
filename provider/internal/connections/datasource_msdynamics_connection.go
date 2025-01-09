@@ -51,11 +51,11 @@ func (d *MsdynamicsConnectionDataSource) Schema(ctx context.Context, req datasou
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"dynamics_environment_id": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Environment ID`,
 						Computed:            true,
 					},
 					"oauth_token_expiry": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Computed:            true,
 					},
 				},

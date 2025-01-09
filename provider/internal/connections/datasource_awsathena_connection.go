@@ -51,15 +51,17 @@ func (d *AwsathenaConnectionDataSource) Schema(ctx context.Context, req datasour
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"aws_user": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `User ARN`,
 						Computed:            true,
 					},
 					"outputbucket": schema.StringAttribute{
-						MarkdownDescription: "A pre-existing bucket (folder optional) that AWS can use to store query results. ex: s3://polytomic-athena-results/customer-dataset",
-						Computed:            true,
+						MarkdownDescription: `AWS S3 output bucket
+
+    A pre-existing bucket (folder optional) that AWS can use to store query results. ex: s3://polytomic-athena-results/customer-dataset`,
+						Computed: true,
 					},
 					"region": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `AWS region`,
 						Computed:            true,
 					},
 				},

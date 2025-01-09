@@ -45,49 +45,53 @@ func (t *SftpConnectionResource) Schema(ctx context.Context, req resource.Schema
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"is_single_table": schema.BoolAttribute{
-						MarkdownDescription: "Treat the files as a single table.",
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
+						MarkdownDescription: `Files are time-based snapshots
+
+    Treat the files as a single table.`,
+						Required:  false,
+						Optional:  true,
+						Computed:  true,
+						Sensitive: false,
 					},
 					"path": schema.StringAttribute{
-						MarkdownDescription: "The path to the directory on the SFTP server containing the files.",
+						MarkdownDescription: `The path to the directory on the SFTP server containing the files.`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
 					},
 					"single_table_name": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Collection name`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
 					},
 					"skip_lines": schema.Int64Attribute{
-						MarkdownDescription: "Skip first N lines of each CSV file.",
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
+						MarkdownDescription: `Skip first lines
+
+    Skip first N lines of each CSV file.`,
+						Required:  false,
+						Optional:  true,
+						Computed:  true,
+						Sensitive: false,
 					},
 					"ssh_host": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Host`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
 					},
 					"ssh_port": schema.Int64Attribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Port`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
 					},
 					"ssh_private_key": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Private key`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
@@ -97,7 +101,7 @@ func (t *SftpConnectionResource) Schema(ctx context.Context, req resource.Schema
 						},
 					},
 					"ssh_user": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `User`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,

@@ -45,7 +45,7 @@ func (t *AffinityConnectionResource) Schema(ctx context.Context, req resource.Sc
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"api_key": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `API Key`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
@@ -55,7 +55,7 @@ func (t *AffinityConnectionResource) Schema(ctx context.Context, req resource.Sc
 						},
 					},
 					"user": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,

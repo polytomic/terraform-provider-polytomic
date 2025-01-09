@@ -37,7 +37,7 @@ data "polytomic_synapse_connection" "synapse" {
 Read-Only:
 
 - `database` (String)
-- `hostname` (String)
+- `hostname` (String) Server
 - `port` (Number)
 - `username` (String)
 

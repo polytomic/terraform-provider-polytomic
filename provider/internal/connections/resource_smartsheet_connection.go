@@ -45,7 +45,7 @@ func (t *SmartsheetConnectionResource) Schema(ctx context.Context, req resource.
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"client_id": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
@@ -55,7 +55,7 @@ func (t *SmartsheetConnectionResource) Schema(ctx context.Context, req resource.
 						},
 					},
 					"client_secret": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
@@ -65,7 +65,7 @@ func (t *SmartsheetConnectionResource) Schema(ctx context.Context, req resource.
 						},
 					},
 					"oauth_refresh_token": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,

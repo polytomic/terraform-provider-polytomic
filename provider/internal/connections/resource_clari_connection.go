@@ -45,7 +45,7 @@ func (t *ClariConnectionResource) Schema(ctx context.Context, req resource.Schem
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"api_key": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `API key`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
@@ -55,7 +55,7 @@ func (t *ClariConnectionResource) Schema(ctx context.Context, req resource.Schem
 						},
 					},
 					"api_password": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `API password`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,

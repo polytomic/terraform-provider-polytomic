@@ -13,7 +13,7 @@ var _ resource.ResourceWithImportState = &{{ .Connection }}ConnectionResource{}
 
 {{ define "attribute" -}}
 	"{{ .AttrName }}": {{ .AttrType }} {
-		MarkdownDescription: "{{ .Description }}",
+		MarkdownDescription: `{{ .Description }}`,
 		Required:  {{ .Required }},
 		Optional:  {{ .Optional }},
 		Computed:  {{ .Computed }},

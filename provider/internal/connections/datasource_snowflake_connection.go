@@ -51,27 +51,31 @@ func (d *SnowflakeConnectionDataSource) Schema(ctx context.Context, req datasour
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"account": schema.StringAttribute{
-						MarkdownDescription: "e.g. uc193736182, ja8382948.us-central-1.gcp",
-						Computed:            true,
+						MarkdownDescription: `Account Name
+
+    e.g. uc193736182, ja8382948.us-central-1.gcp`,
+						Computed: true,
 					},
 					"dbname": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Database`,
 						Computed:            true,
 					},
 					"key_pair_auth": schema.BoolAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Use key pair authentication`,
 						Computed:            true,
 					},
 					"params": schema.StringAttribute{
-						MarkdownDescription: "Additional connection parameters, formatted as a query string",
-						Computed:            true,
+						MarkdownDescription: `Additional parameters
+
+    Additional connection parameters, formatted as a query string`,
+						Computed: true,
 					},
 					"username": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Computed:            true,
 					},
 					"warehouse": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Compute warehouse`,
 						Computed:            true,
 					},
 				},

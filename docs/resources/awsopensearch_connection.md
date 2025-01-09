@@ -34,7 +34,18 @@ resource "polytomic_awsopensearch_connection" "awsopensearch" {
 
 ### Optional
 
-- `force_destroy` (Boolean) Indicates whether dependent models, syncs, and bulk syncs should be cascade deleted when this connection is destroy. This only deletes other resources when the connection is destroyed, not when setting this parameter to `true`. Once this parameter is set to `true`, there must be a successful `terraform apply` run before a destroy is required to update this value in the resource state. Without a successful `terraform apply` after this parameter is set, this flag will have no effect. If setting this field in the same operation that would require replacing the connection or destroying the connection, this flag will not work. Additionally when importing a connection, a successful `terraform apply` is required to set this value in state before it will take effect on a destroy operation.
+- `force_destroy` (Boolean) Indicates whether dependent models, syncs, and bulk syncs should be cascade
+deleted when this connection is destroy.
+
+  This only deletes other resources when the connection is destroyed, not when
+setting this parameter to `true`. Once this parameter is set to `true`, there
+must be a successful `terraform apply` run before a destroy is required to
+update this value in the resource state. Without a successful `terraform apply`
+after this parameter is set, this flag will have no effect. If setting this
+field in the same operation that would require replacing the connection or
+destroying the connection, this flag will not work. Additionally when importing
+a connection, a successful `terraform apply` is required to set this value in
+state before it will take effect on a destroy operation.
 - `organization` (String) Organization ID
 
 ### Read-Only
@@ -46,13 +57,13 @@ resource "polytomic_awsopensearch_connection" "awsopensearch" {
 
 Required:
 
-- `aws_access_key_id` (String)
-- `aws_secret_access_key` (String, Sensitive)
-- `endpoint` (String)
+- `aws_access_key_id` (String) AWS Access Key ID
+- `aws_secret_access_key` (String, Sensitive) AWS Secret Access Key
+- `endpoint` (String) Endpoint(s)
 - `region` (String)
 
 Optional:
 
-- `aws_user` (String)
+- `aws_user` (String) User ARN
 
 

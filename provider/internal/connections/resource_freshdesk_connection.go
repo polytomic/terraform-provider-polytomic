@@ -45,7 +45,7 @@ func (t *FreshdeskConnectionResource) Schema(ctx context.Context, req resource.S
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"apikey": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `API Key`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
@@ -55,7 +55,7 @@ func (t *FreshdeskConnectionResource) Schema(ctx context.Context, req resource.S
 						},
 					},
 					"subdomain": schema.StringAttribute{
-						MarkdownDescription: "e.g. 'polytomic' if your helpdesk is at https://polytomic.freshdesk.com",
+						MarkdownDescription: `e.g. 'polytomic' if your helpdesk is at https://polytomic.freshdesk.com`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,

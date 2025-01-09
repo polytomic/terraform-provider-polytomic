@@ -45,14 +45,14 @@ func (t *AwsopensearchConnectionResource) Schema(ctx context.Context, req resour
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"aws_access_key_id": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `AWS Access Key ID`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
 						Sensitive:           false,
 					},
 					"aws_secret_access_key": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `AWS Secret Access Key`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
@@ -62,21 +62,21 @@ func (t *AwsopensearchConnectionResource) Schema(ctx context.Context, req resour
 						},
 					},
 					"aws_user": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `User ARN`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
 					},
 					"endpoint": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Endpoint(s)`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
 						Sensitive:           false,
 					},
 					"region": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,

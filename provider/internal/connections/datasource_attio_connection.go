@@ -51,7 +51,7 @@ func (d *AttioConnectionDataSource) Schema(ctx context.Context, req datasource.S
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"workspace_name": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Workspace name`,
 						Computed:            true,
 					},
 				},

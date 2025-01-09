@@ -37,9 +37,9 @@ data "polytomic_azuresql_connection" "azuresql" {
 Read-Only:
 
 - `database` (String)
-- `hostname` (String)
+- `hostname` (String) Server
 - `port` (Number)
-- `ssl` (Boolean)
+- `ssl` (Boolean) Use SSL
 - `username` (String)
 
 

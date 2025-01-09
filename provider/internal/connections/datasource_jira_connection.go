@@ -51,15 +51,15 @@ func (d *JiraConnectionDataSource) Schema(ctx context.Context, req datasource.Sc
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"auth_method": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Authentication method`,
 						Computed:            true,
 					},
 					"url": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Jira URL`,
 						Computed:            true,
 					},
 					"username": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Computed:            true,
 					},
 				},

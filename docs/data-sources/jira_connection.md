@@ -36,8 +36,8 @@ data "polytomic_jira_connection" "jira" {
 
 Read-Only:
 
-- `auth_method` (String)
-- `url` (String)
+- `auth_method` (String) Authentication method
+- `url` (String) Jira URL
 - `username` (String)
 
 

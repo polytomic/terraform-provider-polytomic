@@ -36,7 +36,7 @@ data "polytomic_googleworkspace_connection" "googleworkspace" {
 
 Read-Only:
 
-- `client_email` (String)
-- `customer_id` (String)
+- `client_email` (String) Service account identity
+- `customer_id` (String) Customer ID
 
 

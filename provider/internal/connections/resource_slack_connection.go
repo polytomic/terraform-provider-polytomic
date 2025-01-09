@@ -45,7 +45,7 @@ func (t *SlackConnectionResource) Schema(ctx context.Context, req resource.Schem
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"api_key": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Bot API Key`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
@@ -55,11 +55,13 @@ func (t *SlackConnectionResource) Schema(ctx context.Context, req resource.Schem
 						},
 					},
 					"event_url": schema.StringAttribute{
-						MarkdownDescription: "Used if ingesting Slack events.",
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
+						MarkdownDescription: `Event Subscription Request URL
+
+    Used if ingesting Slack events.`,
+						Required:  false,
+						Optional:  true,
+						Computed:  true,
+						Sensitive: false,
 					},
 				},
 

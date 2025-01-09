@@ -41,7 +41,18 @@ resource "polytomic_databricks_connection" "databricks" {
 
 ### Optional
 
-- `force_destroy` (Boolean) Indicates whether dependent models, syncs, and bulk syncs should be cascade deleted when this connection is destroy. This only deletes other resources when the connection is destroyed, not when setting this parameter to `true`. Once this parameter is set to `true`, there must be a successful `terraform apply` run before a destroy is required to update this value in the resource state. Without a successful `terraform apply` after this parameter is set, this flag will have no effect. If setting this field in the same operation that would require replacing the connection or destroying the connection, this flag will not work. Additionally when importing a connection, a successful `terraform apply` is required to set this value in state before it will take effect on a destroy operation.
+- `force_destroy` (Boolean) Indicates whether dependent models, syncs, and bulk syncs should be cascade
+deleted when this connection is destroy.
+
+  This only deletes other resources when the connection is destroyed, not when
+setting this parameter to `true`. Once this parameter is set to `true`, there
+must be a successful `terraform apply` run before a destroy is required to
+update this value in the resource state. Without a successful `terraform apply`
+after this parameter is set, this flag will have no effect. If setting this
+field in the same operation that would require replacing the connection or
+destroying the connection, this flag will not work. Additionally when importing
+a connection, a successful `terraform apply` is required to set this value in
+state before it will take effect on a destroy operation.
 - `organization` (String) Organization ID
 
 ### Read-Only
@@ -53,32 +64,48 @@ resource "polytomic_databricks_connection" "databricks" {
 
 Required:
 
-- `access_token` (String, Sensitive)
-- `auth_mode` (String) How to authenticate with AWS. Defaults to Access Key and Secret
-- `http_path` (String)
+- `access_token` (String, Sensitive) Access Token
+- `auth_mode` (String) Authentication Method
+
+    How to authenticate with AWS. Defaults to Access Key and Secret
+- `http_path` (String) HTTP Path
 - `port` (Number)
-- `server_hostname` (String)
+- `server_hostname` (String) Server Hostname
 
 Optional:
 
-- `aws_access_key_id` (String) See https://docs.polytomic.com/docs/databricks-connections#writing-to-databricks
-- `aws_secret_access_key` (String, Sensitive)
-- `aws_user` (String)
-- `azure_access_key` (String, Sensitive) The access key associated with this storage account
-- `azure_account_name` (String) The account name of the storage account
-- `cloud_provider` (String)
-- `concurrent_queries` (Number)
-- `container_name` (String) The container which we will stage files in
-- `deleted_file_retention_days` (Number)
-- `enable_delta_uniform` (Boolean)
-- `enforce_query_limit` (Boolean)
-- `external_id` (String) External ID for the IAM role
-- `iam_role_arn` (String)
-- `log_file_retention_days` (Number)
-- `s3_bucket_name` (String) Name of bucket used for staging data load files
-- `s3_bucket_region` (String) Region of bucket.example=us-east-1
-- `set_retention_properties` (Boolean)
-- `storage_credential_name` (String)
-- `unity_catalog_enabled` (Boolean)
+- `aws_access_key_id` (String) AWS Access Key ID (destinations only)
+
+    See https://docs.polytomic.com/docs/databricks-connections#writing-to-databricks
+- `aws_secret_access_key` (String, Sensitive) AWS Secret Access Key (destinations only)
+- `aws_user` (String) User ARN (destinations only)
+- `azure_access_key` (String, Sensitive) Storage Account Access Key (destination support only)
+
+    The access key associated with this storage account
+- `azure_account_name` (String) Storage Account Name (destination support only)
+
+    The account name of the storage account
+- `cloud_provider` (String) Cloud Provider (destination support only)
+- `concurrent_queries` (Number) Concurrent query limit
+- `container_name` (String) Storage Container Name (destination support only)
+
+    The container which we will stage files in
+- `deleted_file_retention_days` (Number) Deleted file retention
+- `enable_delta_uniform` (Boolean) Enable Delta UniForm tables
+- `enforce_query_limit` (Boolean) Limit concurrent queries
+- `external_id` (String) External ID
+
+    External ID for the IAM role
+- `iam_role_arn` (String) IAM Role ARN
+- `log_file_retention_days` (Number) Log retention
+- `s3_bucket_name` (String) S3 Bucket Name (destinations only)
+
+    Name of bucket used for staging data load files
+- `s3_bucket_region` (String) S3 Bucket Region (destinations only)
+
+    Region of bucket.example=us-east-1
+- `set_retention_properties` (Boolean) Configure data retention for tables
+- `storage_credential_name` (String) Storage credential name
+- `unity_catalog_enabled` (Boolean) Unity Catalog enabled
 
 

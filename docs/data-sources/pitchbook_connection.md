@@ -36,6 +36,6 @@ data "polytomic_pitchbook_connection" "pitchbook" {
 
 Read-Only:
 
-- `api_key` (String)
+- `api_key` (String) API Key
 
 

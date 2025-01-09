@@ -36,6 +36,8 @@ data "polytomic_seamai_connection" "seamai" {
 
 Read-Only:
 
-- `base_url` (String) Alternate environment API URL (including any necessary paths
+- `base_url` (String) Alternative base URL
+
+    Alternate environment API URL (including any necessary paths
 
 

@@ -51,51 +51,57 @@ func (d *RedshiftConnectionDataSource) Schema(ctx context.Context, req datasourc
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"aws_access_key_id": schema.StringAttribute{
-						MarkdownDescription: "Access Key ID with read/write access to a bucket. More info: https://docs.polytomic.com/docs/redshift",
-						Computed:            true,
+						MarkdownDescription: `AWS Access Key ID (destinations only)
+
+    Access Key ID with read/write access to a bucket. More info: https://docs.polytomic.com/docs/redshift`,
+						Computed: true,
 					},
 					"aws_user": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `User ARN`,
 						Computed:            true,
 					},
 					"database": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Computed:            true,
 					},
 					"hostname": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Computed:            true,
 					},
 					"port": schema.Int64Attribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Computed:            true,
 					},
 					"s3_bucket_name": schema.StringAttribute{
-						MarkdownDescription: "Name of bucket used for staging data load files",
-						Computed:            true,
+						MarkdownDescription: `S3 Bucket Name (destinations only)
+
+    Name of bucket used for staging data load files`,
+						Computed: true,
 					},
 					"s3_bucket_region": schema.StringAttribute{
-						MarkdownDescription: "Region of bucket. Note: must match region of redshift server",
-						Computed:            true,
+						MarkdownDescription: `S3 Bucket Region (destinations only)
+
+    Region of bucket. Note: must match region of redshift server`,
+						Computed: true,
 					},
 					"ssh": schema.BoolAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Connect over SSH tunnel`,
 						Computed:            true,
 					},
 					"ssh_host": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `SSH host`,
 						Computed:            true,
 					},
 					"ssh_port": schema.Int64Attribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `SSH port`,
 						Computed:            true,
 					},
 					"ssh_user": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `SSH user`,
 						Computed:            true,
 					},
 					"username": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Computed:            true,
 					},
 				},

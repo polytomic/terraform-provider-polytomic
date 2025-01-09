@@ -45,7 +45,7 @@ func (t *ScamalyticsConnectionResource) Schema(ctx context.Context, req resource
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"apikey": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `API Key`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
@@ -55,7 +55,7 @@ func (t *ScamalyticsConnectionResource) Schema(ctx context.Context, req resource
 						},
 					},
 					"endpoint": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Enrichment Endpoint`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,

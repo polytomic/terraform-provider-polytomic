@@ -45,7 +45,7 @@ func (t *HubspotConnectionResource) Schema(ctx context.Context, req resource.Sch
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"client_id": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
@@ -55,7 +55,7 @@ func (t *HubspotConnectionResource) Schema(ctx context.Context, req resource.Sch
 						},
 					},
 					"client_secret": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
@@ -65,21 +65,21 @@ func (t *HubspotConnectionResource) Schema(ctx context.Context, req resource.Sch
 						},
 					},
 					"hub_domain": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `HubSpot domain`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
 					},
 					"hub_user": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `HubSpot user`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
 					},
 					"oauth_refresh_token": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,

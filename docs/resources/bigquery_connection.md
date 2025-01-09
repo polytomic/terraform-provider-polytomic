@@ -31,7 +31,18 @@ resource "polytomic_bigquery_connection" "bigquery" {
 
 ### Optional
 
-- `force_destroy` (Boolean) Indicates whether dependent models, syncs, and bulk syncs should be cascade deleted when this connection is destroy. This only deletes other resources when the connection is destroyed, not when setting this parameter to `true`. Once this parameter is set to `true`, there must be a successful `terraform apply` run before a destroy is required to update this value in the resource state. Without a successful `terraform apply` after this parameter is set, this flag will have no effect. If setting this field in the same operation that would require replacing the connection or destroying the connection, this flag will not work. Additionally when importing a connection, a successful `terraform apply` is required to set this value in state before it will take effect on a destroy operation.
+- `force_destroy` (Boolean) Indicates whether dependent models, syncs, and bulk syncs should be cascade
+deleted when this connection is destroy.
+
+  This only deletes other resources when the connection is destroyed, not when
+setting this parameter to `true`. Once this parameter is set to `true`, there
+must be a successful `terraform apply` run before a destroy is required to
+update this value in the resource state. Without a successful `terraform apply`
+after this parameter is set, this flag will have no effect. If setting this
+field in the same operation that would require replacing the connection or
+destroying the connection, this flag will not work. Additionally when importing
+a connection, a successful `terraform apply` is required to set this value in
+state before it will take effect on a destroy operation.
 - `organization` (String) Organization ID
 
 ### Read-Only
@@ -43,14 +54,16 @@ resource "polytomic_bigquery_connection" "bigquery" {
 
 Required:
 
-- `service_account` (String, Sensitive)
+- `service_account` (String, Sensitive) Service account key
 
 Optional:
 
-- `client_email` (String)
+- `client_email` (String) Service account identity
 - `location` (String) Region or multi-region for query operations
-- `override_project_id` (String) Override service key's project ID for cross-account access
-- `project_id` (String)
-- `structured_values_as_json` (Boolean)
+- `override_project_id` (String) Override project ID
+
+    Override service key's project ID for cross-account access
+- `project_id` (String) Service account project ID
+- `structured_values_as_json` (Boolean) Write object and array values as JSON
 
 

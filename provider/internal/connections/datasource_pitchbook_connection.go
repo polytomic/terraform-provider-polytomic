@@ -51,7 +51,7 @@ func (d *PitchbookConnectionDataSource) Schema(ctx context.Context, req datasour
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"api_key": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `API Key`,
 						Computed:            true,
 					},
 				},

@@ -45,7 +45,7 @@ func (t *GoogleadsConnectionResource) Schema(ctx context.Context, req resource.S
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"accounts": schema.SetNestedAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
@@ -53,14 +53,14 @@ func (t *GoogleadsConnectionResource) Schema(ctx context.Context, req resource.S
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 								"label": schema.StringAttribute{
-									MarkdownDescription: "",
+									MarkdownDescription: ``,
 									Required:            false,
 									Optional:            true,
 									Computed:            true,
 									Sensitive:           false,
 								},
 								"value": schema.StringAttribute{
-									MarkdownDescription: "",
+									MarkdownDescription: ``,
 									Required:            false,
 									Optional:            true,
 									Computed:            true,
@@ -70,7 +70,7 @@ func (t *GoogleadsConnectionResource) Schema(ctx context.Context, req resource.S
 						},
 					},
 					"client_id": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
@@ -80,7 +80,7 @@ func (t *GoogleadsConnectionResource) Schema(ctx context.Context, req resource.S
 						},
 					},
 					"client_secret": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
@@ -90,14 +90,14 @@ func (t *GoogleadsConnectionResource) Schema(ctx context.Context, req resource.S
 						},
 					},
 					"connected_user": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Connected user's email`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
 					},
 					"oauth_refresh_token": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
@@ -107,7 +107,7 @@ func (t *GoogleadsConnectionResource) Schema(ctx context.Context, req resource.S
 						},
 					},
 					"oauth_token_expiry": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,

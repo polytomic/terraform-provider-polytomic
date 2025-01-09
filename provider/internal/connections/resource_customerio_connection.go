@@ -45,7 +45,7 @@ func (t *CustomerioConnectionResource) Schema(ctx context.Context, req resource.
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"app_api_key": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `App API Key`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
@@ -55,14 +55,14 @@ func (t *CustomerioConnectionResource) Schema(ctx context.Context, req resource.
 						},
 					},
 					"site_id": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Site ID`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
 						Sensitive:           false,
 					},
 					"tracking_api_key": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Tracking API Key`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,

@@ -51,11 +51,11 @@ func (d *QuickbooksConnectionDataSource) Schema(ctx context.Context, req datasou
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"oauth_token_expiry": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Computed:            true,
 					},
 					"realm_id": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Company ID`,
 						Computed:            true,
 					},
 				},

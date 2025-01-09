@@ -36,8 +36,8 @@ data "polytomic_dayforce_connection" "dayforce" {
 
 Read-Only:
 
-- `client_name` (String)
-- `company_id` (String)
+- `client_name` (String) Client Name
+- `company_id` (String) Company ID
 - `username` (String)
 
 

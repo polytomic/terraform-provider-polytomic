@@ -36,8 +36,8 @@ data "polytomic_gong_connection" "gong" {
 
 Read-Only:
 
-- `access_key` (String)
-- `auth_method` (String)
+- `access_key` (String) Access key
+- `auth_method` (String) Authentication method
 - `oauth_token_expiry` (String)
 - `subdomain` (String) Gong subdomain i.e. company-17 if you access Gong via https://company-17.app.gong.io
 

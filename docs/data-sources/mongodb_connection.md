@@ -36,11 +36,13 @@ data "polytomic_mongodb_connection" "mongodb" {
 
 Read-Only:
 
-- `database` (String)
-- `hosts` (String)
-- `params` (String) Additional connection parameters, formatted as a query string
-- `srv` (Boolean)
-- `ssl` (Boolean)
+- `database` (String) Auth Database
+- `hosts` (String) Hostname(s)
+- `params` (String) Additional Parameters
+
+    Additional connection parameters, formatted as a query string
+- `srv` (Boolean) Connect using SRV record?
+- `ssl` (Boolean) Use TLS/SSL
 - `username` (String)
 
 

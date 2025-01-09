@@ -45,7 +45,7 @@ func (t *SalesforceConnectionResource) Schema(ctx context.Context, req resource.
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"client_id": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Client ID`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
@@ -55,7 +55,7 @@ func (t *SalesforceConnectionResource) Schema(ctx context.Context, req resource.
 						},
 					},
 					"client_secret": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Client Secret`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
@@ -65,49 +65,57 @@ func (t *SalesforceConnectionResource) Schema(ctx context.Context, req resource.
 						},
 					},
 					"connect_mode": schema.StringAttribute{
-						MarkdownDescription: "Default: browser (i.e. oauth through Polytomic). If 'code' is specified, the response will include an auth_code for the user to enter when completing authorization. NOTE: when supplying client_id and client_secret the connect mode must be 'api'.",
+						MarkdownDescription: `Default: browser (i.e. oauth through Polytomic). If 'code' is specified, the response will include an auth_code for the user to enter when completing authorization. NOTE: when supplying client_id and client_secret the connect mode must be 'api'.`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
 					},
 					"daily_api_calls": schema.Int64Attribute{
-						MarkdownDescription: "The daily Salesforce API call cap that Polytomic should adhere to.",
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
+						MarkdownDescription: `Daily call limit
+
+    The daily Salesforce API call cap that Polytomic should adhere to.`,
+						Required:  false,
+						Optional:  true,
+						Computed:  true,
+						Sensitive: false,
 					},
 					"domain": schema.StringAttribute{
-						MarkdownDescription: "The Salesforce instance's login domain, e.g. acmecorp.my.salesforce.com",
+						MarkdownDescription: `The Salesforce instance's login domain, e.g. acmecorp.my.salesforce.com`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
 						Sensitive:           false,
 					},
 					"enable_multicurrency_lookup": schema.BoolAttribute{
-						MarkdownDescription: "If incremenetal mode for bulk-syncing from Salesforce formula fields is enabled, setting this to true extends support to accurate currency conversions.",
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
+						MarkdownDescription: `Enable multicurrency source field support
+
+    If incremenetal mode for bulk-syncing from Salesforce formula fields is enabled, setting this to true extends support to accurate currency conversions.`,
+						Required:  false,
+						Optional:  true,
+						Computed:  true,
+						Sensitive: false,
 					},
 					"enable_tooling": schema.BoolAttribute{
-						MarkdownDescription: "If true, expose objects from the Salesforce Tooling API in the Polytomic bulk sync source object list.",
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
+						MarkdownDescription: `Enable support for Tooling API
+
+    If true, expose objects from the Salesforce Tooling API in the Polytomic bulk sync source object list.`,
+						Required:  false,
+						Optional:  true,
+						Computed:  true,
+						Sensitive: false,
 					},
 					"enforce_api_limits": schema.BoolAttribute{
-						MarkdownDescription: "If true, Polytomic will restrict itself to a fixed daily cap of Salesforce API calls enforced by the number in daily_api_calls.",
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
+						MarkdownDescription: `Enforce API limits
+
+    If true, Polytomic will restrict itself to a fixed daily cap of Salesforce API calls enforced by the number in daily_api_calls.`,
+						Required:  false,
+						Optional:  true,
+						Computed:  true,
+						Sensitive: false,
 					},
 					"oauth_refresh_token": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
@@ -117,7 +125,7 @@ func (t *SalesforceConnectionResource) Schema(ctx context.Context, req resource.
 						},
 					},
 					"username": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Salesforce user`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,

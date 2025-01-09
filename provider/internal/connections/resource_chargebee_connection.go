@@ -45,7 +45,7 @@ func (t *ChargebeeConnectionResource) Schema(ctx context.Context, req resource.S
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"api_key": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `API key`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
@@ -55,25 +55,29 @@ func (t *ChargebeeConnectionResource) Schema(ctx context.Context, req resource.S
 						},
 					},
 					"product_catalog": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Product Catalog version`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
 						Sensitive:           false,
 					},
 					"ratelimit_rpm": schema.Int64Attribute{
-						MarkdownDescription: "Default rate limits can be found at https://support.chargebee.com/support/solutions/articles/243576-what-are-the-chargebee-api-limits-",
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
+						MarkdownDescription: `Maximum Requests Per Minute
+
+    Default rate limits can be found at https://support.chargebee.com/support/solutions/articles/243576-what-are-the-chargebee-api-limits-`,
+						Required:  false,
+						Optional:  true,
+						Computed:  true,
+						Sensitive: false,
 					},
 					"site": schema.StringAttribute{
-						MarkdownDescription: "https://{site}.chargebee.com",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
+						MarkdownDescription: `Chargebee site
+
+    https://{site}.chargebee.com`,
+						Required:  true,
+						Optional:  false,
+						Computed:  false,
+						Sensitive: false,
 					},
 				},
 

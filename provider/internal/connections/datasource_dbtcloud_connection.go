@@ -51,21 +51,21 @@ func (d *DbtcloudConnectionDataSource) Schema(ctx context.Context, req datasourc
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"account": schema.SingleNestedAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Computed:            true,
 						Attributes: map[string]schema.Attribute{
 							"id": schema.Int64Attribute{
-								MarkdownDescription: "",
+								MarkdownDescription: ``,
 								Computed:            true,
 							},
 							"name": schema.StringAttribute{
-								MarkdownDescription: "",
+								MarkdownDescription: ``,
 								Computed:            true,
 							},
 						},
 					},
 					"url": schema.StringAttribute{
-						MarkdownDescription: "URL of dbt Cloud instance e.g. https://cloud.getdbt.com",
+						MarkdownDescription: `URL of dbt Cloud instance e.g. https://cloud.getdbt.com`,
 						Computed:            true,
 					},
 				},

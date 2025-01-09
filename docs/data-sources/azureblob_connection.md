@@ -36,11 +36,15 @@ data "polytomic_azureblob_connection" "azureblob" {
 
 Read-Only:
 
-- `account_name` (String)
-- `container_name` (String)
-- `is_single_table` (Boolean) Treat the files as a single table.
-- `single_table_file_format` (String)
-- `single_table_name` (String)
-- `skip_lines` (Number) Skip first N lines of each CSV file.
+- `account_name` (String) Account Name
+- `container_name` (String) Container Name
+- `is_single_table` (Boolean) Files are time-based snapshots
+
+    Treat the files as a single table.
+- `single_table_file_format` (String) File format
+- `single_table_name` (String) Collection name
+- `skip_lines` (Number) Skip first lines
+
+    Skip first N lines of each CSV file.
 
 

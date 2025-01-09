@@ -51,23 +51,25 @@ func (d *BigqueryConnectionDataSource) Schema(ctx context.Context, req datasourc
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"client_email": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Service account identity`,
 						Computed:            true,
 					},
 					"location": schema.StringAttribute{
-						MarkdownDescription: "Region or multi-region for query operations",
+						MarkdownDescription: `Region or multi-region for query operations`,
 						Computed:            true,
 					},
 					"override_project_id": schema.StringAttribute{
-						MarkdownDescription: "Override service key's project ID for cross-account access",
-						Computed:            true,
+						MarkdownDescription: `Override project ID
+
+    Override service key's project ID for cross-account access`,
+						Computed: true,
 					},
 					"project_id": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Service account project ID`,
 						Computed:            true,
 					},
 					"structured_values_as_json": schema.BoolAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Write object and array values as JSON`,
 						Computed:            true,
 					},
 				},

@@ -36,7 +36,7 @@ data "polytomic_customerio_connection" "customerio" {
 
 Read-Only:
 
-- `site_id` (String)
-- `tracking_api_key` (String)
+- `site_id` (String) Site ID
+- `tracking_api_key` (String) Tracking API Key
 
 

@@ -36,6 +36,6 @@ data "polytomic_dittofeed_connection" "dittofeed" {
 
 Read-Only:
 
-- `url` (String)
+- `url` (String) Dittofeed URL
 
 

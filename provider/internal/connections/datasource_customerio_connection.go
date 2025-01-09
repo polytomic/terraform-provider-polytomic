@@ -51,11 +51,11 @@ func (d *CustomerioConnectionDataSource) Schema(ctx context.Context, req datasou
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"site_id": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Site ID`,
 						Computed:            true,
 					},
 					"tracking_api_key": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Tracking API Key`,
 						Computed:            true,
 					},
 				},

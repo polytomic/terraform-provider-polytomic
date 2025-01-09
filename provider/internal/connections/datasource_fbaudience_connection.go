@@ -51,35 +51,35 @@ func (d *FbaudienceConnectionDataSource) Schema(ctx context.Context, req datasou
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"account_id": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Account ID`,
 						Computed:            true,
 					},
 					"accounts": schema.SetNestedAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Computed:            true,
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 								"label": schema.StringAttribute{
-									MarkdownDescription: "",
+									MarkdownDescription: ``,
 									Computed:            true,
 								},
 								"value": schema.StringAttribute{
-									MarkdownDescription: "",
+									MarkdownDescription: ``,
 									Computed:            true,
 								},
 							},
 						},
 					},
 					"auth_method": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Authentication Method`,
 						Computed:            true,
 					},
 					"graph_api_version": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Graph API Version`,
 						Computed:            true,
 					},
 					"user_name": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Connected as`,
 						Computed:            true,
 					},
 				},

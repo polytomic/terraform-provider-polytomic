@@ -45,7 +45,7 @@ func (t *DropboxConnectionResource) Schema(ctx context.Context, req resource.Sch
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"app_key": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
@@ -55,7 +55,7 @@ func (t *DropboxConnectionResource) Schema(ctx context.Context, req resource.Sch
 						},
 					},
 					"app_secret": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
@@ -65,21 +65,23 @@ func (t *DropboxConnectionResource) Schema(ctx context.Context, req resource.Sch
 						},
 					},
 					"bucket": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Folder`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
 						Sensitive:           false,
 					},
 					"is_single_table": schema.BoolAttribute{
-						MarkdownDescription: "Treat the files as a single table.",
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
+						MarkdownDescription: `Files are time-based snapshots
+
+    Treat the files as a single table.`,
+						Required:  false,
+						Optional:  true,
+						Computed:  true,
+						Sensitive: false,
 					},
 					"oauth_refresh_token": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
@@ -89,32 +91,34 @@ func (t *DropboxConnectionResource) Schema(ctx context.Context, req resource.Sch
 						},
 					},
 					"oauth_token_expiry": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
 					},
 					"single_table_file_format": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `File format`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
 					},
 					"single_table_name": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Collection name`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
 					},
 					"skip_lines": schema.Int64Attribute{
-						MarkdownDescription: "Skip first N lines of each CSV file.",
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
+						MarkdownDescription: `Skip first lines
+
+    Skip first N lines of each CSV file.`,
+						Required:  false,
+						Optional:  true,
+						Computed:  true,
+						Sensitive: false,
 					},
 				},
 

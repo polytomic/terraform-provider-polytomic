@@ -51,51 +51,51 @@ func (d *PostgresqlConnectionDataSource) Schema(ctx context.Context, req datasou
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"change_detection": schema.BoolAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Use logical replication for bulk syncs`,
 						Computed:            true,
 					},
 					"client_certs": schema.BoolAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Use client certificates`,
 						Computed:            true,
 					},
 					"database": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Computed:            true,
 					},
 					"hostname": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Computed:            true,
 					},
 					"port": schema.Int64Attribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Computed:            true,
 					},
 					"publication": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Computed:            true,
 					},
 					"ssh": schema.BoolAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Connect over SSH tunnel`,
 						Computed:            true,
 					},
 					"ssh_host": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `SSH host`,
 						Computed:            true,
 					},
 					"ssh_port": schema.Int64Attribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `SSH port`,
 						Computed:            true,
 					},
 					"ssh_user": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `SSH user`,
 						Computed:            true,
 					},
 					"ssl": schema.BoolAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Use SSL`,
 						Computed:            true,
 					},
 					"username": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Computed:            true,
 					},
 				},

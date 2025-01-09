@@ -51,31 +51,33 @@ func (d *RedshiftserverlessConnectionDataSource) Schema(ctx context.Context, req
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"data_api_endpoint": schema.StringAttribute{
-						MarkdownDescription: "Example: https://redshift-data.us-west-2.amazonaws.com",
-						Computed:            true,
+						MarkdownDescription: `Redshift Data API endpoint
+
+    Example: https://redshift-data.us-west-2.amazonaws.com`,
+						Computed: true,
 					},
 					"database": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Computed:            true,
 					},
 					"external_id": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `External ID`,
 						Computed:            true,
 					},
 					"iam_role_arn": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `IAM Role ARN`,
 						Computed:            true,
 					},
 					"override_endpoint": schema.BoolAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Override Redshift Data API endpoint`,
 						Computed:            true,
 					},
 					"region": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Computed:            true,
 					},
 					"workgroup": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Computed:            true,
 					},
 				},

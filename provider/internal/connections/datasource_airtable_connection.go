@@ -51,11 +51,11 @@ func (d *AirtableConnectionDataSource) Schema(ctx context.Context, req datasourc
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"connected_user": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Connected user's email`,
 						Computed:            true,
 					},
 					"oauth_token_expiry": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Computed:            true,
 					},
 				},

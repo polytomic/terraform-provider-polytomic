@@ -45,28 +45,28 @@ func (t *ApiConnectionResource) Schema(ctx context.Context, req resource.SchemaR
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"auth": schema.SingleNestedAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Authentication method`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
 						Attributes: map[string]schema.Attribute{
 							"basic": schema.SingleNestedAttribute{
-								MarkdownDescription: "",
+								MarkdownDescription: `Basic authentication`,
 								Required:            false,
 								Optional:            true,
 								Computed:            true,
 								Sensitive:           false,
 								Attributes: map[string]schema.Attribute{
 									"password": schema.StringAttribute{
-										MarkdownDescription: "",
+										MarkdownDescription: ``,
 										Required:            false,
 										Optional:            true,
 										Computed:            true,
 										Sensitive:           false,
 									},
 									"username": schema.StringAttribute{
-										MarkdownDescription: "",
+										MarkdownDescription: ``,
 										Required:            false,
 										Optional:            true,
 										Computed:            true,
@@ -75,21 +75,21 @@ func (t *ApiConnectionResource) Schema(ctx context.Context, req resource.SchemaR
 								},
 							},
 							"header": schema.SingleNestedAttribute{
-								MarkdownDescription: "",
+								MarkdownDescription: `Header key`,
 								Required:            false,
 								Optional:            true,
 								Computed:            true,
 								Sensitive:           false,
 								Attributes: map[string]schema.Attribute{
 									"name": schema.StringAttribute{
-										MarkdownDescription: "",
+										MarkdownDescription: ``,
 										Required:            false,
 										Optional:            true,
 										Computed:            true,
 										Sensitive:           false,
 									},
 									"value": schema.StringAttribute{
-										MarkdownDescription: "",
+										MarkdownDescription: ``,
 										Required:            false,
 										Optional:            true,
 										Computed:            true,
@@ -98,35 +98,35 @@ func (t *ApiConnectionResource) Schema(ctx context.Context, req resource.SchemaR
 								},
 							},
 							"oauth": schema.SingleNestedAttribute{
-								MarkdownDescription: "",
+								MarkdownDescription: ``,
 								Required:            false,
 								Optional:            true,
 								Computed:            true,
 								Sensitive:           false,
 								Attributes: map[string]schema.Attribute{
 									"auth_style": schema.Int64Attribute{
-										MarkdownDescription: "",
+										MarkdownDescription: `Auth style`,
 										Required:            false,
 										Optional:            true,
 										Computed:            true,
 										Sensitive:           false,
 									},
 									"client_id": schema.StringAttribute{
-										MarkdownDescription: "",
+										MarkdownDescription: `Client ID`,
 										Required:            false,
 										Optional:            true,
 										Computed:            true,
 										Sensitive:           false,
 									},
 									"client_secret": schema.StringAttribute{
-										MarkdownDescription: "",
+										MarkdownDescription: `Client secret`,
 										Required:            false,
 										Optional:            true,
 										Computed:            true,
 										Sensitive:           false,
 									},
 									"extra_form_data": schema.SetNestedAttribute{
-										MarkdownDescription: "",
+										MarkdownDescription: `Extra form data`,
 										Required:            false,
 										Optional:            true,
 										Computed:            true,
@@ -134,14 +134,14 @@ func (t *ApiConnectionResource) Schema(ctx context.Context, req resource.SchemaR
 										NestedObject: schema.NestedAttributeObject{
 											Attributes: map[string]schema.Attribute{
 												"name": schema.StringAttribute{
-													MarkdownDescription: "",
+													MarkdownDescription: ``,
 													Required:            false,
 													Optional:            true,
 													Computed:            true,
 													Sensitive:           false,
 												},
 												"value": schema.StringAttribute{
-													MarkdownDescription: "",
+													MarkdownDescription: ``,
 													Required:            false,
 													Optional:            true,
 													Computed:            true,
@@ -151,7 +151,7 @@ func (t *ApiConnectionResource) Schema(ctx context.Context, req resource.SchemaR
 										},
 									},
 									"scopes": schema.SetAttribute{
-										MarkdownDescription: "",
+										MarkdownDescription: ``,
 										Required:            false,
 										Optional:            true,
 										Computed:            true,
@@ -160,7 +160,7 @@ func (t *ApiConnectionResource) Schema(ctx context.Context, req resource.SchemaR
 										ElementType: types.StringType,
 									},
 									"token_endpoint": schema.StringAttribute{
-										MarkdownDescription: "",
+										MarkdownDescription: `Token endpoint`,
 										Required:            false,
 										Optional:            true,
 										Computed:            true,
@@ -171,14 +171,14 @@ func (t *ApiConnectionResource) Schema(ctx context.Context, req resource.SchemaR
 						},
 					},
 					"body": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `JSON payload`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
 					},
 					"headers": schema.SetNestedAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
@@ -186,14 +186,14 @@ func (t *ApiConnectionResource) Schema(ctx context.Context, req resource.SchemaR
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 								"name": schema.StringAttribute{
-									MarkdownDescription: "",
+									MarkdownDescription: ``,
 									Required:            false,
 									Optional:            true,
 									Computed:            true,
 									Sensitive:           false,
 								},
 								"value": schema.StringAttribute{
-									MarkdownDescription: "",
+									MarkdownDescription: ``,
 									Required:            false,
 									Optional:            true,
 									Computed:            true,
@@ -203,14 +203,16 @@ func (t *ApiConnectionResource) Schema(ctx context.Context, req resource.SchemaR
 						},
 					},
 					"healthcheck": schema.StringAttribute{
-						MarkdownDescription: "Path to request when checking the health of this connection. No health check will be performed if left empty.",
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
+						MarkdownDescription: `Health check endpoint
+
+    Path to request when checking the health of this connection. No health check will be performed if left empty.`,
+						Required:  false,
+						Optional:  true,
+						Computed:  true,
+						Sensitive: false,
 					},
 					"parameters": schema.SetNestedAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Query string parameters`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
@@ -218,14 +220,14 @@ func (t *ApiConnectionResource) Schema(ctx context.Context, req resource.SchemaR
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 								"name": schema.StringAttribute{
-									MarkdownDescription: "",
+									MarkdownDescription: ``,
 									Required:            false,
 									Optional:            true,
 									Computed:            true,
 									Sensitive:           false,
 								},
 								"value": schema.StringAttribute{
-									MarkdownDescription: "",
+									MarkdownDescription: ``,
 									Required:            false,
 									Optional:            true,
 									Computed:            true,
@@ -235,7 +237,7 @@ func (t *ApiConnectionResource) Schema(ctx context.Context, req resource.SchemaR
 						},
 					},
 					"url": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Base URL`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,

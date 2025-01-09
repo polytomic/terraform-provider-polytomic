@@ -51,15 +51,15 @@ func (d *AppstoreconnectConnectionDataSource) Schema(ctx context.Context, req da
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"issuer_id": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Issuer ID`,
 						Computed:            true,
 					},
 					"private_key_id": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Private key ID`,
 						Computed:            true,
 					},
 					"vendor_number": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Vendor number`,
 						Computed:            true,
 					},
 				},

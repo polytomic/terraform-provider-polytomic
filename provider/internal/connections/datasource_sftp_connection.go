@@ -51,31 +51,35 @@ func (d *SftpConnectionDataSource) Schema(ctx context.Context, req datasource.Sc
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"is_single_table": schema.BoolAttribute{
-						MarkdownDescription: "Treat the files as a single table.",
-						Computed:            true,
+						MarkdownDescription: `Files are time-based snapshots
+
+    Treat the files as a single table.`,
+						Computed: true,
 					},
 					"path": schema.StringAttribute{
-						MarkdownDescription: "The path to the directory on the SFTP server containing the files.",
+						MarkdownDescription: `The path to the directory on the SFTP server containing the files.`,
 						Computed:            true,
 					},
 					"single_table_name": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Collection name`,
 						Computed:            true,
 					},
 					"skip_lines": schema.Int64Attribute{
-						MarkdownDescription: "Skip first N lines of each CSV file.",
-						Computed:            true,
+						MarkdownDescription: `Skip first lines
+
+    Skip first N lines of each CSV file.`,
+						Computed: true,
 					},
 					"ssh_host": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Host`,
 						Computed:            true,
 					},
 					"ssh_port": schema.Int64Attribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Port`,
 						Computed:            true,
 					},
 					"ssh_user": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `User`,
 						Computed:            true,
 					},
 				},

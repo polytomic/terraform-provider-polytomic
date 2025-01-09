@@ -45,21 +45,21 @@ func (t *DbtcloudConnectionResource) Schema(ctx context.Context, req resource.Sc
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"account": schema.SingleNestedAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
 						Attributes: map[string]schema.Attribute{
 							"id": schema.Int64Attribute{
-								MarkdownDescription: "",
+								MarkdownDescription: ``,
 								Required:            false,
 								Optional:            true,
 								Computed:            true,
 								Sensitive:           false,
 							},
 							"name": schema.StringAttribute{
-								MarkdownDescription: "",
+								MarkdownDescription: ``,
 								Required:            false,
 								Optional:            true,
 								Computed:            true,
@@ -68,7 +68,7 @@ func (t *DbtcloudConnectionResource) Schema(ctx context.Context, req resource.Sc
 						},
 					},
 					"token": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Service Account Token`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
@@ -78,7 +78,7 @@ func (t *DbtcloudConnectionResource) Schema(ctx context.Context, req resource.Sc
 						},
 					},
 					"url": schema.StringAttribute{
-						MarkdownDescription: "URL of dbt Cloud instance e.g. https://cloud.getdbt.com",
+						MarkdownDescription: `URL of dbt Cloud instance e.g. https://cloud.getdbt.com`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,

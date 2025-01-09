@@ -51,16 +51,18 @@ func (d *Zendesk_chatConnectionDataSource) Schema(ctx context.Context, req datas
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"custom_api_limits": schema.BoolAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Enforce custom API limits`,
 						Computed:            true,
 					},
 					"domain": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Zendesk Support Subdomain (required if you login to Chat via Zendesk Support)`,
 						Computed:            true,
 					},
 					"ratelimit_rpm": schema.Int64Attribute{
-						MarkdownDescription: "Set a custom maximum request per minute limit.",
-						Computed:            true,
+						MarkdownDescription: `Maximum requests per minute
+
+    Set a custom maximum request per minute limit.`,
+						Computed: true,
 					},
 				},
 				Optional: true,

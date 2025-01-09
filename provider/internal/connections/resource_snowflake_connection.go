@@ -45,35 +45,39 @@ func (t *SnowflakeConnectionResource) Schema(ctx context.Context, req resource.S
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"account": schema.StringAttribute{
-						MarkdownDescription: "e.g. uc193736182, ja8382948.us-central-1.gcp",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
+						MarkdownDescription: `Account Name
+
+    e.g. uc193736182, ja8382948.us-central-1.gcp`,
+						Required:  true,
+						Optional:  false,
+						Computed:  false,
+						Sensitive: false,
 					},
 					"dbname": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Database`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
 						Sensitive:           false,
 					},
 					"key_pair_auth": schema.BoolAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Use key pair authentication`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
 					},
 					"params": schema.StringAttribute{
-						MarkdownDescription: "Additional connection parameters, formatted as a query string",
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
+						MarkdownDescription: `Additional parameters
+
+    Additional connection parameters, formatted as a query string`,
+						Required:  false,
+						Optional:  true,
+						Computed:  true,
+						Sensitive: false,
 					},
 					"password": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
@@ -83,7 +87,7 @@ func (t *SnowflakeConnectionResource) Schema(ctx context.Context, req resource.S
 						},
 					},
 					"private_key": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Private key`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
@@ -93,7 +97,7 @@ func (t *SnowflakeConnectionResource) Schema(ctx context.Context, req resource.S
 						},
 					},
 					"private_key_passphrase": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Private key passphrase`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
@@ -103,14 +107,14 @@ func (t *SnowflakeConnectionResource) Schema(ctx context.Context, req resource.S
 						},
 					},
 					"username": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
 						Sensitive:           false,
 					},
 					"warehouse": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Compute warehouse`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,

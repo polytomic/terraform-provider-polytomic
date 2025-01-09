@@ -36,17 +36,17 @@ data "polytomic_postgresql_connection" "postgresql" {
 
 Read-Only:
 
-- `change_detection` (Boolean)
-- `client_certs` (Boolean)
+- `change_detection` (Boolean) Use logical replication for bulk syncs
+- `client_certs` (Boolean) Use client certificates
 - `database` (String)
 - `hostname` (String)
 - `port` (Number)
 - `publication` (String)
-- `ssh` (Boolean)
-- `ssh_host` (String)
-- `ssh_port` (Number)
-- `ssh_user` (String)
-- `ssl` (Boolean)
+- `ssh` (Boolean) Connect over SSH tunnel
+- `ssh_host` (String) SSH host
+- `ssh_port` (Number) SSH port
+- `ssh_user` (String) SSH user
+- `ssl` (Boolean) Use SSL
 - `username` (String)
 
 

@@ -51,11 +51,11 @@ func (d *GoogleworkspaceConnectionDataSource) Schema(ctx context.Context, req da
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"client_email": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Service account identity`,
 						Computed:            true,
 					},
 					"customer_id": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Customer ID`,
 						Computed:            true,
 					},
 				},

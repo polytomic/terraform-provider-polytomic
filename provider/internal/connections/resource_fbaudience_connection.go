@@ -45,14 +45,14 @@ func (t *FbaudienceConnectionResource) Schema(ctx context.Context, req resource.
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"account_id": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Account ID`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
 					},
 					"accounts": schema.SetNestedAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
@@ -60,14 +60,14 @@ func (t *FbaudienceConnectionResource) Schema(ctx context.Context, req resource.
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 								"label": schema.StringAttribute{
-									MarkdownDescription: "",
+									MarkdownDescription: ``,
 									Required:            false,
 									Optional:            true,
 									Computed:            true,
 									Sensitive:           false,
 								},
 								"value": schema.StringAttribute{
-									MarkdownDescription: "",
+									MarkdownDescription: ``,
 									Required:            false,
 									Optional:            true,
 									Computed:            true,
@@ -77,14 +77,14 @@ func (t *FbaudienceConnectionResource) Schema(ctx context.Context, req resource.
 						},
 					},
 					"auth_method": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Authentication Method`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
 						Sensitive:           false,
 					},
 					"byo_app_token": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Token`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
@@ -94,14 +94,14 @@ func (t *FbaudienceConnectionResource) Schema(ctx context.Context, req resource.
 						},
 					},
 					"graph_api_version": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Graph API Version`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
 					},
 					"user_name": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Connected as`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,

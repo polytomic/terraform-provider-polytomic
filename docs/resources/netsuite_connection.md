@@ -35,7 +35,18 @@ resource "polytomic_netsuite_connection" "netsuite" {
 
 ### Optional
 
-- `force_destroy` (Boolean) Indicates whether dependent models, syncs, and bulk syncs should be cascade deleted when this connection is destroy. This only deletes other resources when the connection is destroyed, not when setting this parameter to `true`. Once this parameter is set to `true`, there must be a successful `terraform apply` run before a destroy is required to update this value in the resource state. Without a successful `terraform apply` after this parameter is set, this flag will have no effect. If setting this field in the same operation that would require replacing the connection or destroying the connection, this flag will not work. Additionally when importing a connection, a successful `terraform apply` is required to set this value in state before it will take effect on a destroy operation.
+- `force_destroy` (Boolean) Indicates whether dependent models, syncs, and bulk syncs should be cascade
+deleted when this connection is destroy.
+
+  This only deletes other resources when the connection is destroyed, not when
+setting this parameter to `true`. Once this parameter is set to `true`, there
+must be a successful `terraform apply` run before a destroy is required to
+update this value in the resource state. Without a successful `terraform apply`
+after this parameter is set, this flag will have no effect. If setting this
+field in the same operation that would require replacing the connection or
+destroying the connection, this flag will not work. Additionally when importing
+a connection, a successful `terraform apply` is required to set this value in
+state before it will take effect on a destroy operation.
 - `organization` (String) Organization ID
 
 ### Read-Only
@@ -47,10 +58,10 @@ resource "polytomic_netsuite_connection" "netsuite" {
 
 Required:
 
-- `account_id` (String)
-- `consumer_key` (String)
-- `consumer_secret` (String, Sensitive)
-- `token` (String)
-- `token_secret` (String, Sensitive)
+- `account_id` (String) Account ID
+- `consumer_key` (String) Consumer Key
+- `consumer_secret` (String, Sensitive) Consumer Secret
+- `token` (String) Token ID
+- `token_secret` (String, Sensitive) Token Secret
 
 

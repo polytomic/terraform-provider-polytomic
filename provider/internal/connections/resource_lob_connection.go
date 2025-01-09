@@ -45,7 +45,7 @@ func (t *LobConnectionResource) Schema(ctx context.Context, req resource.SchemaR
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"apikey": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `API Key`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,

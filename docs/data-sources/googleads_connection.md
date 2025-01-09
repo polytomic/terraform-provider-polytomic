@@ -37,7 +37,7 @@ data "polytomic_googleads_connection" "googleads" {
 Read-Only:
 
 - `accounts` (Attributes Set) (see [below for nested schema](#nestedatt--configuration--accounts))
-- `connected_user` (String)
+- `connected_user` (String) Connected user's email
 - `oauth_token_expiry` (String)
 
 <a id="nestedatt--configuration--accounts"></a>

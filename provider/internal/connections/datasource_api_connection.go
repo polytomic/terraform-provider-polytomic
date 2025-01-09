@@ -51,76 +51,76 @@ func (d *ApiConnectionDataSource) Schema(ctx context.Context, req datasource.Sch
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"auth": schema.SingleNestedAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Authentication method`,
 						Computed:            true,
 						Attributes: map[string]schema.Attribute{
 							"basic": schema.SingleNestedAttribute{
-								MarkdownDescription: "",
+								MarkdownDescription: `Basic authentication`,
 								Computed:            true,
 								Attributes: map[string]schema.Attribute{
 									"password": schema.StringAttribute{
-										MarkdownDescription: "",
+										MarkdownDescription: ``,
 										Computed:            true,
 									},
 									"username": schema.StringAttribute{
-										MarkdownDescription: "",
+										MarkdownDescription: ``,
 										Computed:            true,
 									},
 								},
 							},
 							"header": schema.SingleNestedAttribute{
-								MarkdownDescription: "",
+								MarkdownDescription: `Header key`,
 								Computed:            true,
 								Attributes: map[string]schema.Attribute{
 									"name": schema.StringAttribute{
-										MarkdownDescription: "",
+										MarkdownDescription: ``,
 										Computed:            true,
 									},
 									"value": schema.StringAttribute{
-										MarkdownDescription: "",
+										MarkdownDescription: ``,
 										Computed:            true,
 									},
 								},
 							},
 							"oauth": schema.SingleNestedAttribute{
-								MarkdownDescription: "",
+								MarkdownDescription: ``,
 								Computed:            true,
 								Attributes: map[string]schema.Attribute{
 									"auth_style": schema.Int64Attribute{
-										MarkdownDescription: "",
+										MarkdownDescription: `Auth style`,
 										Computed:            true,
 									},
 									"client_id": schema.StringAttribute{
-										MarkdownDescription: "",
+										MarkdownDescription: `Client ID`,
 										Computed:            true,
 									},
 									"client_secret": schema.StringAttribute{
-										MarkdownDescription: "",
+										MarkdownDescription: `Client secret`,
 										Computed:            true,
 									},
 									"extra_form_data": schema.SetNestedAttribute{
-										MarkdownDescription: "",
+										MarkdownDescription: `Extra form data`,
 										Computed:            true,
 										NestedObject: schema.NestedAttributeObject{
 											Attributes: map[string]schema.Attribute{
 												"name": schema.StringAttribute{
-													MarkdownDescription: "",
+													MarkdownDescription: ``,
 													Computed:            true,
 												},
 												"value": schema.StringAttribute{
-													MarkdownDescription: "",
+													MarkdownDescription: ``,
 													Computed:            true,
 												},
 											},
 										},
 									},
 									"scopes": schema.SetAttribute{
-										MarkdownDescription: "",
+										MarkdownDescription: ``,
 										Computed:            true,
 										ElementType:         types.StringType,
 									},
 									"token_endpoint": schema.StringAttribute{
-										MarkdownDescription: "",
+										MarkdownDescription: `Token endpoint`,
 										Computed:            true,
 									},
 								},
@@ -128,47 +128,49 @@ func (d *ApiConnectionDataSource) Schema(ctx context.Context, req datasource.Sch
 						},
 					},
 					"body": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `JSON payload`,
 						Computed:            true,
 					},
 					"headers": schema.SetNestedAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Computed:            true,
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 								"name": schema.StringAttribute{
-									MarkdownDescription: "",
+									MarkdownDescription: ``,
 									Computed:            true,
 								},
 								"value": schema.StringAttribute{
-									MarkdownDescription: "",
+									MarkdownDescription: ``,
 									Computed:            true,
 								},
 							},
 						},
 					},
 					"healthcheck": schema.StringAttribute{
-						MarkdownDescription: "Path to request when checking the health of this connection. No health check will be performed if left empty.",
-						Computed:            true,
+						MarkdownDescription: `Health check endpoint
+
+    Path to request when checking the health of this connection. No health check will be performed if left empty.`,
+						Computed: true,
 					},
 					"parameters": schema.SetNestedAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Query string parameters`,
 						Computed:            true,
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 								"name": schema.StringAttribute{
-									MarkdownDescription: "",
+									MarkdownDescription: ``,
 									Computed:            true,
 								},
 								"value": schema.StringAttribute{
-									MarkdownDescription: "",
+									MarkdownDescription: ``,
 									Computed:            true,
 								},
 							},
 						},
 					},
 					"url": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Base URL`,
 						Computed:            true,
 					},
 				},

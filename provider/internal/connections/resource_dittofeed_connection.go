@@ -45,14 +45,14 @@ func (t *DittofeedConnectionResource) Schema(ctx context.Context, req resource.S
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"url": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Dittofeed URL`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
 						Sensitive:           false,
 					},
 					"write_key": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Write Key`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,

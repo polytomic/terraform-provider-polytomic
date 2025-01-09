@@ -51,27 +51,27 @@ func (d *MarketoConnectionDataSource) Schema(ctx context.Context, req datasource
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"client_id": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Client ID`,
 						Computed:            true,
 					},
 					"concurrent_imports": schema.Int64Attribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Concurrent import jobs`,
 						Computed:            true,
 					},
 					"daily_api_calls": schema.Int64Attribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Daily call limit`,
 						Computed:            true,
 					},
 					"enforce_api_limits": schema.BoolAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Enforce API limits`,
 						Computed:            true,
 					},
 					"oauth_token_expiry": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Computed:            true,
 					},
 					"rest_endpoint": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `REST Endpoint`,
 						Computed:            true,
 					},
 				},

@@ -45,21 +45,23 @@ func (t *GooglecloudsqlConnectionResource) Schema(ctx context.Context, req resou
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"change_detection": schema.BoolAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Use logical replication for bulk syncs`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
 					},
 					"connection_name": schema.StringAttribute{
-						MarkdownDescription: "Takes the form of project:region:instance",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
+						MarkdownDescription: `Cloud SQL connection name
+
+    Takes the form of project:region:instance`,
+						Required:  true,
+						Optional:  false,
+						Computed:  false,
+						Sensitive: false,
 					},
 					"credentials": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Service Account Key`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
@@ -69,14 +71,14 @@ func (t *GooglecloudsqlConnectionResource) Schema(ctx context.Context, req resou
 						},
 					},
 					"database": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
 						Sensitive:           false,
 					},
 					"password": schema.StringAttribute{
-						MarkdownDescription: "May be omitted when authenticating to Postgres using the service account key.",
+						MarkdownDescription: `May be omitted when authenticating to Postgres using the service account key.`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
@@ -86,14 +88,14 @@ func (t *GooglecloudsqlConnectionResource) Schema(ctx context.Context, req resou
 						},
 					},
 					"publication": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
 					},
 					"username": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,

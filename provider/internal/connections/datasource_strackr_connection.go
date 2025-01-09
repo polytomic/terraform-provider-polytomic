@@ -51,11 +51,11 @@ func (d *StrackrConnectionDataSource) Schema(ctx context.Context, req datasource
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"currency_type": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Currency Type`,
 						Computed:            true,
 					},
 					"linkbuilder_customs_text": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Linkbuilder Customs Text`,
 						Computed:            true,
 					},
 				},

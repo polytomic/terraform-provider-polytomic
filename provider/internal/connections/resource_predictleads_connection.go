@@ -45,7 +45,7 @@ func (t *PredictleadsConnectionResource) Schema(ctx context.Context, req resourc
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"api_key": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `API Key`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
@@ -55,7 +55,7 @@ func (t *PredictleadsConnectionResource) Schema(ctx context.Context, req resourc
 						},
 					},
 					"api_token": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `API Token`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,

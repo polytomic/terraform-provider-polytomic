@@ -45,21 +45,21 @@ func (t *MixpanelConnectionResource) Schema(ctx context.Context, req resource.Sc
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"project_id": schema.Int64Attribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Project ID`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
 						Sensitive:           false,
 					},
 					"region": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Server`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
 						Sensitive:           false,
 					},
 					"service_account_secret": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Service account secret`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
@@ -69,7 +69,7 @@ func (t *MixpanelConnectionResource) Schema(ctx context.Context, req resource.Sc
 						},
 					},
 					"service_account_username": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Service account username`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,

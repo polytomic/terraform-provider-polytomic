@@ -36,26 +36,40 @@ data "polytomic_databricks_connection" "databricks" {
 
 Read-Only:
 
-- `auth_mode` (String) How to authenticate with AWS. Defaults to Access Key and Secret
-- `aws_access_key_id` (String) See https://docs.polytomic.com/docs/databricks-connections#writing-to-databricks
-- `aws_user` (String)
-- `azure_account_name` (String) The account name of the storage account
-- `cloud_provider` (String)
-- `concurrent_queries` (Number)
-- `container_name` (String) The container which we will stage files in
-- `deleted_file_retention_days` (Number)
-- `enable_delta_uniform` (Boolean)
-- `enforce_query_limit` (Boolean)
-- `external_id` (String) External ID for the IAM role
-- `http_path` (String)
-- `iam_role_arn` (String)
-- `log_file_retention_days` (Number)
+- `auth_mode` (String) Authentication Method
+
+    How to authenticate with AWS. Defaults to Access Key and Secret
+- `aws_access_key_id` (String) AWS Access Key ID (destinations only)
+
+    See https://docs.polytomic.com/docs/databricks-connections#writing-to-databricks
+- `aws_user` (String) User ARN (destinations only)
+- `azure_account_name` (String) Storage Account Name (destination support only)
+
+    The account name of the storage account
+- `cloud_provider` (String) Cloud Provider (destination support only)
+- `concurrent_queries` (Number) Concurrent query limit
+- `container_name` (String) Storage Container Name (destination support only)
+
+    The container which we will stage files in
+- `deleted_file_retention_days` (Number) Deleted file retention
+- `enable_delta_uniform` (Boolean) Enable Delta UniForm tables
+- `enforce_query_limit` (Boolean) Limit concurrent queries
+- `external_id` (String) External ID
+
+    External ID for the IAM role
+- `http_path` (String) HTTP Path
+- `iam_role_arn` (String) IAM Role ARN
+- `log_file_retention_days` (Number) Log retention
 - `port` (Number)
-- `s3_bucket_name` (String) Name of bucket used for staging data load files
-- `s3_bucket_region` (String) Region of bucket.example=us-east-1
-- `server_hostname` (String)
-- `set_retention_properties` (Boolean)
-- `storage_credential_name` (String)
-- `unity_catalog_enabled` (Boolean)
+- `s3_bucket_name` (String) S3 Bucket Name (destinations only)
+
+    Name of bucket used for staging data load files
+- `s3_bucket_region` (String) S3 Bucket Region (destinations only)
+
+    Region of bucket.example=us-east-1
+- `server_hostname` (String) Server Hostname
+- `set_retention_properties` (Boolean) Configure data retention for tables
+- `storage_credential_name` (String) Storage credential name
+- `unity_catalog_enabled` (Boolean) Unity Catalog enabled
 
 

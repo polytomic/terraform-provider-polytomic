@@ -46,7 +46,7 @@ func (t *StrackrConnectionResource) Schema(ctx context.Context, req resource.Sch
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"api_id": schema.Int64Attribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `API ID`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
@@ -56,7 +56,7 @@ func (t *StrackrConnectionResource) Schema(ctx context.Context, req resource.Sch
 						},
 					},
 					"api_key": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `API Key`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
@@ -66,14 +66,14 @@ func (t *StrackrConnectionResource) Schema(ctx context.Context, req resource.Sch
 						},
 					},
 					"currency_type": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Currency Type`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
 						Sensitive:           false,
 					},
 					"linkbuilder_customs_text": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Linkbuilder Customs Text`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,

@@ -36,7 +36,7 @@ data "polytomic_posthog_connection" "posthog" {
 
 Read-Only:
 
-- `authenticated_as` (String)
+- `authenticated_as` (String) Connected as
 - `location` (String)
 - `project` (String)
 

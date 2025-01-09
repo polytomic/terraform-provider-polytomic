@@ -35,7 +35,18 @@ resource "polytomic_salesforce_connection" "salesforce" {
 
 ### Optional
 
-- `force_destroy` (Boolean) Indicates whether dependent models, syncs, and bulk syncs should be cascade deleted when this connection is destroy. This only deletes other resources when the connection is destroyed, not when setting this parameter to `true`. Once this parameter is set to `true`, there must be a successful `terraform apply` run before a destroy is required to update this value in the resource state. Without a successful `terraform apply` after this parameter is set, this flag will have no effect. If setting this field in the same operation that would require replacing the connection or destroying the connection, this flag will not work. Additionally when importing a connection, a successful `terraform apply` is required to set this value in state before it will take effect on a destroy operation.
+- `force_destroy` (Boolean) Indicates whether dependent models, syncs, and bulk syncs should be cascade
+deleted when this connection is destroy.
+
+  This only deletes other resources when the connection is destroyed, not when
+setting this parameter to `true`. Once this parameter is set to `true`, there
+must be a successful `terraform apply` run before a destroy is required to
+update this value in the resource state. Without a successful `terraform apply`
+after this parameter is set, this flag will have no effect. If setting this
+field in the same operation that would require replacing the connection or
+destroying the connection, this flag will not work. Additionally when importing
+a connection, a successful `terraform apply` is required to set this value in
+state before it will take effect on a destroy operation.
 - `organization` (String) Organization ID
 
 ### Read-Only
@@ -47,18 +58,26 @@ resource "polytomic_salesforce_connection" "salesforce" {
 
 Required:
 
-- `client_id` (String, Sensitive)
-- `client_secret` (String, Sensitive)
+- `client_id` (String, Sensitive) Client ID
+- `client_secret` (String, Sensitive) Client Secret
 - `domain` (String) The Salesforce instance's login domain, e.g. acmecorp.my.salesforce.com
 
 Optional:
 
 - `connect_mode` (String) Default: browser (i.e. oauth through Polytomic). If 'code' is specified, the response will include an auth_code for the user to enter when completing authorization. NOTE: when supplying client_id and client_secret the connect mode must be 'api'.
-- `daily_api_calls` (Number) The daily Salesforce API call cap that Polytomic should adhere to.
-- `enable_multicurrency_lookup` (Boolean) If incremenetal mode for bulk-syncing from Salesforce formula fields is enabled, setting this to true extends support to accurate currency conversions.
-- `enable_tooling` (Boolean) If true, expose objects from the Salesforce Tooling API in the Polytomic bulk sync source object list.
-- `enforce_api_limits` (Boolean) If true, Polytomic will restrict itself to a fixed daily cap of Salesforce API calls enforced by the number in daily_api_calls.
+- `daily_api_calls` (Number) Daily call limit
+
+    The daily Salesforce API call cap that Polytomic should adhere to.
+- `enable_multicurrency_lookup` (Boolean) Enable multicurrency source field support
+
+    If incremenetal mode for bulk-syncing from Salesforce formula fields is enabled, setting this to true extends support to accurate currency conversions.
+- `enable_tooling` (Boolean) Enable support for Tooling API
+
+    If true, expose objects from the Salesforce Tooling API in the Polytomic bulk sync source object list.
+- `enforce_api_limits` (Boolean) Enforce API limits
+
+    If true, Polytomic will restrict itself to a fixed daily cap of Salesforce API calls enforced by the number in daily_api_calls.
 - `oauth_refresh_token` (String, Sensitive)
-- `username` (String)
+- `username` (String) Salesforce user
 
 

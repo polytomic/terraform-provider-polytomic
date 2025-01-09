@@ -36,6 +36,8 @@ data "polytomic_tixr_connection" "tixr" {
 
 Read-Only:
 
-- `client_private_key` (String) e.g. MDAwMA==
+- `client_private_key` (String) Client Private Key
+
+    e.g. MDAwMA==
 
 

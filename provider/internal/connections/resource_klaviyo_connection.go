@@ -45,7 +45,7 @@ func (t *KlaviyoConnectionResource) Schema(ctx context.Context, req resource.Sch
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"apikey": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Public API key`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
@@ -55,7 +55,7 @@ func (t *KlaviyoConnectionResource) Schema(ctx context.Context, req resource.Sch
 						},
 					},
 					"private_apikey": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Private API key`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,

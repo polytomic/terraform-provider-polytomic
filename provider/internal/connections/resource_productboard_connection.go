@@ -45,7 +45,7 @@ func (t *ProductboardConnectionResource) Schema(ctx context.Context, req resourc
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"access_key": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Access token`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,

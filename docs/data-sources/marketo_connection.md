@@ -36,11 +36,11 @@ data "polytomic_marketo_connection" "marketo" {
 
 Read-Only:
 
-- `client_id` (String)
-- `concurrent_imports` (Number)
-- `daily_api_calls` (Number)
-- `enforce_api_limits` (Boolean)
+- `client_id` (String) Client ID
+- `concurrent_imports` (Number) Concurrent import jobs
+- `daily_api_calls` (Number) Daily call limit
+- `enforce_api_limits` (Boolean) Enforce API limits
 - `oauth_token_expiry` (String)
-- `rest_endpoint` (String)
+- `rest_endpoint` (String) REST Endpoint
 
 

@@ -36,8 +36,8 @@ data "polytomic_mixpanel_connection" "mixpanel" {
 
 Read-Only:
 
-- `project_id` (Number)
-- `region` (String)
-- `service_account_username` (String)
+- `project_id` (Number) Project ID
+- `region` (String) Server
+- `service_account_username` (String) Service account username
 
 

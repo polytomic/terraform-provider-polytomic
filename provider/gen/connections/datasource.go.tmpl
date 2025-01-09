@@ -37,7 +37,7 @@ func (d *{{ .Connection }}ConnectionDataSource) Metadata(ctx context.Context, re
 {{ define "attribute" -}}
 	{{- if not .Sensitive -}}
 	"{{ .AttrName }}": {{ .AttrType }} {
-		MarkdownDescription: "{{ .Description }}",
+		MarkdownDescription: `{{ .Description }}`,
 		Computed: true,
 		{{ if .Attributes -}}
 			Attributes: map[string]schema.Attribute{

@@ -45,7 +45,7 @@ func (t *GsheetsConnectionResource) Schema(ctx context.Context, req resource.Sch
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"client_id": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
@@ -55,7 +55,7 @@ func (t *GsheetsConnectionResource) Schema(ctx context.Context, req resource.Sch
 						},
 					},
 					"client_secret": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
@@ -65,21 +65,21 @@ func (t *GsheetsConnectionResource) Schema(ctx context.Context, req resource.Sch
 						},
 					},
 					"connect_mode": schema.StringAttribute{
-						MarkdownDescription: "Default: browser",
+						MarkdownDescription: `Default: browser`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
 					},
 					"has_headers": schema.BoolAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Columns have headers`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
 					},
 					"oauth_refresh_token": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
@@ -89,14 +89,14 @@ func (t *GsheetsConnectionResource) Schema(ctx context.Context, req resource.Sch
 						},
 					},
 					"oauth_token_expiry": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
 					},
 					"service_account": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Service account key`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
@@ -106,21 +106,21 @@ func (t *GsheetsConnectionResource) Schema(ctx context.Context, req resource.Sch
 						},
 					},
 					"spreadsheet_id": schema.SingleNestedAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Spreadsheet`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
 						Sensitive:           false,
 						Attributes: map[string]schema.Attribute{
 							"label": schema.StringAttribute{
-								MarkdownDescription: "",
+								MarkdownDescription: ``,
 								Required:            false,
 								Optional:            true,
 								Computed:            true,
 								Sensitive:           false,
 							},
 							"value": schema.StringAttribute{
-								MarkdownDescription: "",
+								MarkdownDescription: ``,
 								Required:            false,
 								Optional:            true,
 								Computed:            true,
@@ -129,7 +129,7 @@ func (t *GsheetsConnectionResource) Schema(ctx context.Context, req resource.Sch
 						},
 					},
 					"user_email": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Connected user's email`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,

@@ -51,8 +51,10 @@ func (d *KustomerConnectionDataSource) Schema(ctx context.Context, req datasourc
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"domain": schema.StringAttribute{
-						MarkdownDescription: "e.g. 'polytomic' if your portal is 'https://polytomic.kustomerapp.com/app'",
-						Computed:            true,
+						MarkdownDescription: `Customer Portal Subdomain
+
+    e.g. 'polytomic' if your portal is 'https://polytomic.kustomerapp.com/app'`,
+						Computed: true,
 					},
 				},
 				Optional: true,

@@ -45,7 +45,7 @@ func (t *IntellimizeConnectionResource) Schema(ctx context.Context, req resource
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"apikey": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Intellimize API Key`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,

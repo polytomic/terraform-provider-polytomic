@@ -45,21 +45,25 @@ func (t *S3ConnectionResource) Schema(ctx context.Context, req resource.SchemaRe
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"auth_mode": schema.StringAttribute{
-						MarkdownDescription: "How to authenticate with AWS. Defaults to Access Key and Secret",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
+						MarkdownDescription: `Authentication Method
+
+    How to authenticate with AWS. Defaults to Access Key and Secret`,
+						Required:  true,
+						Optional:  false,
+						Computed:  false,
+						Sensitive: false,
 					},
 					"aws_access_key_id": schema.StringAttribute{
-						MarkdownDescription: "Access Key ID with read/write access to a bucket.",
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
+						MarkdownDescription: `AWS Access Key ID
+
+    Access Key ID with read/write access to a bucket.`,
+						Required:  false,
+						Optional:  true,
+						Computed:  true,
+						Sensitive: false,
 					},
 					"aws_secret_access_key": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `AWS Secret Access Key`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
@@ -69,67 +73,73 @@ func (t *S3ConnectionResource) Schema(ctx context.Context, req resource.SchemaRe
 						},
 					},
 					"aws_user": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `User ARN`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
 					},
 					"external_id": schema.StringAttribute{
-						MarkdownDescription: "External ID for the IAM role",
+						MarkdownDescription: `External ID for the IAM role`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
 					},
 					"iam_role_arn": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `IAM Role ARN`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
 					},
 					"is_single_table": schema.BoolAttribute{
-						MarkdownDescription: "Treat the files as a single table.",
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
+						MarkdownDescription: `Files are time-based snapshots
+
+    Treat the files as a single table.`,
+						Required:  false,
+						Optional:  true,
+						Computed:  true,
+						Sensitive: false,
 					},
 					"s3_bucket_name": schema.StringAttribute{
-						MarkdownDescription: "Bucket name (folder optional); ex: s3://polytomic/dataset",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
+						MarkdownDescription: `S3 Bucket Name
+
+    Bucket name (folder optional); ex: s3://polytomic/dataset`,
+						Required:  true,
+						Optional:  false,
+						Computed:  false,
+						Sensitive: false,
 					},
 					"s3_bucket_region": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `S3 Bucket Region`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
 						Sensitive:           false,
 					},
 					"single_table_file_format": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `File format`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
 					},
 					"single_table_name": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Collection name`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
 					},
 					"skip_lines": schema.Int64Attribute{
-						MarkdownDescription: "Skip first N lines of each CSV file.",
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
+						MarkdownDescription: `Skip first lines
+
+    Skip first N lines of each CSV file.`,
+						Required:  false,
+						Optional:  true,
+						Computed:  true,
+						Sensitive: false,
 					},
 				},
 

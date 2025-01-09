@@ -36,6 +36,8 @@ data "polytomic_slack_connection" "slack" {
 
 Read-Only:
 
-- `event_url` (String) Used if ingesting Slack events.
+- `event_url` (String) Event Subscription Request URL
+
+    Used if ingesting Slack events.
 
 

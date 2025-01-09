@@ -36,6 +36,6 @@ data "polytomic_attio_connection" "attio" {
 
 Read-Only:
 
-- `workspace_name` (String)
+- `workspace_name` (String) Workspace name
 
 

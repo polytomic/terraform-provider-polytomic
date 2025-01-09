@@ -45,7 +45,7 @@ func (t *ShopifyConnectionResource) Schema(ctx context.Context, req resource.Sch
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"admin_api_token": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Admin API token`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
@@ -55,7 +55,7 @@ func (t *ShopifyConnectionResource) Schema(ctx context.Context, req resource.Sch
 						},
 					},
 					"store": schema.StringAttribute{
-						MarkdownDescription: "Enter your Shopify store name.",
+						MarkdownDescription: `Enter your Shopify store name.`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,

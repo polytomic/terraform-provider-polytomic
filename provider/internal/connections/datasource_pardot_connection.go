@@ -51,23 +51,23 @@ func (d *PardotConnectionDataSource) Schema(ctx context.Context, req datasource.
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"account_type": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Account type`,
 						Computed:            true,
 					},
 					"business_unit_id": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Business Unit ID`,
 						Computed:            true,
 					},
 					"daily_api_calls": schema.Int64Attribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Daily call limit`,
 						Computed:            true,
 					},
 					"enforce_api_limits": schema.BoolAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Enforce API limits`,
 						Computed:            true,
 					},
 					"username": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Computed:            true,
 					},
 				},

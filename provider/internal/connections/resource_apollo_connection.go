@@ -45,7 +45,7 @@ func (t *ApolloConnectionResource) Schema(ctx context.Context, req resource.Sche
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"apikey": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Apollo API Key`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,

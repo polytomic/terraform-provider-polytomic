@@ -45,7 +45,7 @@ func (t *NetsuiteopenairConnectionResource) Schema(ctx context.Context, req reso
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"client_id": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Client ID`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
@@ -55,7 +55,7 @@ func (t *NetsuiteopenairConnectionResource) Schema(ctx context.Context, req reso
 						},
 					},
 					"client_secret": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Client Secret`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
@@ -65,7 +65,7 @@ func (t *NetsuiteopenairConnectionResource) Schema(ctx context.Context, req reso
 						},
 					},
 					"company_id": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Company ID`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,

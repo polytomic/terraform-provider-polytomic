@@ -45,7 +45,7 @@ func (t *KustomerConnectionResource) Schema(ctx context.Context, req resource.Sc
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"apikey": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `API Key`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
@@ -55,11 +55,13 @@ func (t *KustomerConnectionResource) Schema(ctx context.Context, req resource.Sc
 						},
 					},
 					"domain": schema.StringAttribute{
-						MarkdownDescription: "e.g. 'polytomic' if your portal is 'https://polytomic.kustomerapp.com/app'",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
+						MarkdownDescription: `Customer Portal Subdomain
+
+    e.g. 'polytomic' if your portal is 'https://polytomic.kustomerapp.com/app'`,
+						Required:  true,
+						Optional:  false,
+						Computed:  false,
+						Sensitive: false,
 					},
 				},
 

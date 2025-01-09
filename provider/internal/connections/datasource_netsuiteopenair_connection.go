@@ -51,7 +51,7 @@ func (d *NetsuiteopenairConnectionDataSource) Schema(ctx context.Context, req da
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"company_id": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Company ID`,
 						Computed:            true,
 					},
 				},

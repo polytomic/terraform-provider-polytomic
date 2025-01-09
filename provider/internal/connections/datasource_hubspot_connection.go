@@ -51,11 +51,11 @@ func (d *HubspotConnectionDataSource) Schema(ctx context.Context, req datasource
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"hub_domain": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `HubSpot domain`,
 						Computed:            true,
 					},
 					"hub_user": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `HubSpot user`,
 						Computed:            true,
 					},
 				},

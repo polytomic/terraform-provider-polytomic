@@ -36,8 +36,12 @@ data "polytomic_chargebee_connection" "chargebee" {
 
 Read-Only:
 
-- `product_catalog` (String)
-- `ratelimit_rpm` (Number) Default rate limits can be found at https://support.chargebee.com/support/solutions/articles/243576-what-are-the-chargebee-api-limits-
-- `site` (String) https://{site}.chargebee.com
+- `product_catalog` (String) Product Catalog version
+- `ratelimit_rpm` (Number) Maximum Requests Per Minute
+
+    Default rate limits can be found at https://support.chargebee.com/support/solutions/articles/243576-what-are-the-chargebee-api-limits-
+- `site` (String) Chargebee site
+
+    https://{site}.chargebee.com
 
 

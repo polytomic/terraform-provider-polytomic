@@ -37,7 +37,7 @@ data "polytomic_webhook_connection" "webhook" {
 Read-Only:
 
 - `headers` (Attributes Set) (see [below for nested schema](#nestedatt--configuration--headers))
-- `url` (String)
+- `url` (String) Webhook URL
 
 <a id="nestedatt--configuration--headers"></a>
 ### Nested Schema for `configuration.headers`

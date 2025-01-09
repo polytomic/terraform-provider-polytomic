@@ -45,7 +45,7 @@ func (t *IroncladConnectionResource) Schema(ctx context.Context, req resource.Sc
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"api_key": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Access token`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
@@ -55,21 +55,21 @@ func (t *IroncladConnectionResource) Schema(ctx context.Context, req resource.Sc
 						},
 					},
 					"auth_method": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Authentication method`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
 						Sensitive:           false,
 					},
 					"client_id": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Client ID`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
 					},
 					"client_secret": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Client secret`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
@@ -79,7 +79,7 @@ func (t *IroncladConnectionResource) Schema(ctx context.Context, req resource.Sc
 						},
 					},
 					"user_as_email": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Ironclad user email`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,

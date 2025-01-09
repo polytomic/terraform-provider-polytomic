@@ -45,14 +45,14 @@ func (t *ZoominfoConnectionResource) Schema(ctx context.Context, req resource.Sc
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"client_id": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Client ID`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
 						Sensitive:           false,
 					},
 					"private_key": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Private API key`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
@@ -62,7 +62,7 @@ func (t *ZoominfoConnectionResource) Schema(ctx context.Context, req resource.Sc
 						},
 					},
 					"username": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,

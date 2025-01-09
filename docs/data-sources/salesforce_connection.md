@@ -37,11 +37,19 @@ data "polytomic_salesforce_connection" "salesforce" {
 Read-Only:
 
 - `connect_mode` (String) Default: browser (i.e. oauth through Polytomic). If 'code' is specified, the response will include an auth_code for the user to enter when completing authorization. NOTE: when supplying client_id and client_secret the connect mode must be 'api'.
-- `daily_api_calls` (Number) The daily Salesforce API call cap that Polytomic should adhere to.
+- `daily_api_calls` (Number) Daily call limit
+
+    The daily Salesforce API call cap that Polytomic should adhere to.
 - `domain` (String) The Salesforce instance's login domain, e.g. acmecorp.my.salesforce.com
-- `enable_multicurrency_lookup` (Boolean) If incremenetal mode for bulk-syncing from Salesforce formula fields is enabled, setting this to true extends support to accurate currency conversions.
-- `enable_tooling` (Boolean) If true, expose objects from the Salesforce Tooling API in the Polytomic bulk sync source object list.
-- `enforce_api_limits` (Boolean) If true, Polytomic will restrict itself to a fixed daily cap of Salesforce API calls enforced by the number in daily_api_calls.
-- `username` (String)
+- `enable_multicurrency_lookup` (Boolean) Enable multicurrency source field support
+
+    If incremenetal mode for bulk-syncing from Salesforce formula fields is enabled, setting this to true extends support to accurate currency conversions.
+- `enable_tooling` (Boolean) Enable support for Tooling API
+
+    If true, expose objects from the Salesforce Tooling API in the Polytomic bulk sync source object list.
+- `enforce_api_limits` (Boolean) Enforce API limits
+
+    If true, Polytomic will restrict itself to a fixed daily cap of Salesforce API calls enforced by the number in daily_api_calls.
+- `username` (String) Salesforce user
 
 

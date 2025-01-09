@@ -51,28 +51,28 @@ func (d *DataliteConnectionDataSource) Schema(ctx context.Context, req datasourc
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"schemas": schema.SetNestedAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Computed:            true,
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 								"alias": schema.StringAttribute{
-									MarkdownDescription: "",
+									MarkdownDescription: ``,
 									Computed:            true,
 								},
 								"connection_id": schema.StringAttribute{
-									MarkdownDescription: "",
+									MarkdownDescription: ``,
 									Computed:            true,
 								},
 								"connection_name": schema.StringAttribute{
-									MarkdownDescription: "",
+									MarkdownDescription: ``,
 									Computed:            true,
 								},
 								"connection_type": schema.StringAttribute{
-									MarkdownDescription: "",
+									MarkdownDescription: ``,
 									Computed:            true,
 								},
 								"schema_id": schema.StringAttribute{
-									MarkdownDescription: "",
+									MarkdownDescription: ``,
 									Computed:            true,
 								},
 							},

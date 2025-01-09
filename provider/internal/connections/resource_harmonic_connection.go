@@ -45,7 +45,7 @@ func (t *HarmonicConnectionResource) Schema(ctx context.Context, req resource.Sc
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"api_key": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Harmonic API key`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,

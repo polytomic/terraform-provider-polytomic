@@ -45,21 +45,21 @@ func (t *DayforceConnectionResource) Schema(ctx context.Context, req resource.Sc
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"client_name": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Client Name`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
 						Sensitive:           false,
 					},
 					"company_id": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Company ID`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
 						Sensitive:           false,
 					},
 					"password": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
@@ -69,7 +69,7 @@ func (t *DayforceConnectionResource) Schema(ctx context.Context, req resource.Sc
 						},
 					},
 					"username": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,

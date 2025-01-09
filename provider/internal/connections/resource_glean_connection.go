@@ -45,7 +45,7 @@ func (t *GleanConnectionResource) Schema(ctx context.Context, req resource.Schem
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"api_key": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `API key`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
@@ -55,7 +55,7 @@ func (t *GleanConnectionResource) Schema(ctx context.Context, req resource.Schem
 						},
 					},
 					"domain": schema.StringAttribute{
-						MarkdownDescription: "https://{domain}-be.glean.com",
+						MarkdownDescription: `https://{domain}-be.glean.com`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,

@@ -36,7 +36,7 @@ data "polytomic_strackr_connection" "strackr" {
 
 Read-Only:
 
-- `currency_type` (String)
-- `linkbuilder_customs_text` (String)
+- `currency_type` (String) Currency Type
+- `linkbuilder_customs_text` (String) Linkbuilder Customs Text
 
 

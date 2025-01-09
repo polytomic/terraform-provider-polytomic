@@ -33,7 +33,18 @@ resource "polytomic_sftp_connection" "sftp" {
 
 ### Optional
 
-- `force_destroy` (Boolean) Indicates whether dependent models, syncs, and bulk syncs should be cascade deleted when this connection is destroy. This only deletes other resources when the connection is destroyed, not when setting this parameter to `true`. Once this parameter is set to `true`, there must be a successful `terraform apply` run before a destroy is required to update this value in the resource state. Without a successful `terraform apply` after this parameter is set, this flag will have no effect. If setting this field in the same operation that would require replacing the connection or destroying the connection, this flag will not work. Additionally when importing a connection, a successful `terraform apply` is required to set this value in state before it will take effect on a destroy operation.
+- `force_destroy` (Boolean) Indicates whether dependent models, syncs, and bulk syncs should be cascade
+deleted when this connection is destroy.
+
+  This only deletes other resources when the connection is destroyed, not when
+setting this parameter to `true`. Once this parameter is set to `true`, there
+must be a successful `terraform apply` run before a destroy is required to
+update this value in the resource state. Without a successful `terraform apply`
+after this parameter is set, this flag will have no effect. If setting this
+field in the same operation that would require replacing the connection or
+destroying the connection, this flag will not work. Additionally when importing
+a connection, a successful `terraform apply` is required to set this value in
+state before it will take effect on a destroy operation.
 - `organization` (String) Organization ID
 
 ### Read-Only
@@ -45,13 +56,17 @@ resource "polytomic_sftp_connection" "sftp" {
 
 Optional:
 
-- `is_single_table` (Boolean) Treat the files as a single table.
+- `is_single_table` (Boolean) Files are time-based snapshots
+
+    Treat the files as a single table.
 - `path` (String) The path to the directory on the SFTP server containing the files.
-- `single_table_name` (String)
-- `skip_lines` (Number) Skip first N lines of each CSV file.
-- `ssh_host` (String)
-- `ssh_port` (Number)
-- `ssh_private_key` (String, Sensitive)
-- `ssh_user` (String)
+- `single_table_name` (String) Collection name
+- `skip_lines` (Number) Skip first lines
+
+    Skip first N lines of each CSV file.
+- `ssh_host` (String) Host
+- `ssh_port` (Number) Port
+- `ssh_private_key` (String, Sensitive) Private key
+- `ssh_user` (String) User
 
 

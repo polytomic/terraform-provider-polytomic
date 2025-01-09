@@ -51,7 +51,7 @@ func (d *ShopifyConnectionDataSource) Schema(ctx context.Context, req datasource
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"store": schema.StringAttribute{
-						MarkdownDescription: "Enter your Shopify store name.",
+						MarkdownDescription: `Enter your Shopify store name.`,
 						Computed:            true,
 					},
 				},

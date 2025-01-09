@@ -36,18 +36,20 @@ data "polytomic_csv_connection" "csv" {
 
 Read-Only:
 
-- `auth` (Attributes) (see [below for nested schema](#nestedatt--configuration--auth))
+- `auth` (Attributes) Authentication method (see [below for nested schema](#nestedatt--configuration--auth))
 - `headers` (Attributes Set) (see [below for nested schema](#nestedatt--configuration--headers))
-- `parameters` (Attributes Set) (see [below for nested schema](#nestedatt--configuration--parameters))
-- `url` (String) e.g. http://www.example.com
+- `parameters` (Attributes Set) Query string parameters (see [below for nested schema](#nestedatt--configuration--parameters))
+- `url` (String) Base URL
+
+    e.g. http://www.example.com
 
 <a id="nestedatt--configuration--auth"></a>
 ### Nested Schema for `configuration.auth`
 
 Read-Only:
 
-- `basic` (Attributes) (see [below for nested schema](#nestedatt--configuration--auth--basic))
-- `header` (Attributes) (see [below for nested schema](#nestedatt--configuration--auth--header))
+- `basic` (Attributes) Basic authentication (see [below for nested schema](#nestedatt--configuration--auth--basic))
+- `header` (Attributes) Header key (see [below for nested schema](#nestedatt--configuration--auth--header))
 - `oauth` (Attributes) (see [below for nested schema](#nestedatt--configuration--auth--oauth))
 
 <a id="nestedatt--configuration--auth--basic"></a>
@@ -73,12 +75,12 @@ Read-Only:
 
 Read-Only:
 
-- `auth_style` (Number)
-- `client_id` (String)
-- `client_secret` (String)
-- `extra_form_data` (Attributes Set) (see [below for nested schema](#nestedatt--configuration--auth--oauth--extra_form_data))
+- `auth_style` (Number) Auth style
+- `client_id` (String) Client ID
+- `client_secret` (String) Client secret
+- `extra_form_data` (Attributes Set) Extra form data (see [below for nested schema](#nestedatt--configuration--auth--oauth--extra_form_data))
 - `scopes` (Set of String)
-- `token_endpoint` (String)
+- `token_endpoint` (String) Token endpoint
 
 <a id="nestedatt--configuration--auth--oauth--extra_form_data"></a>
 ### Nested Schema for `configuration.auth.oauth.token_endpoint`

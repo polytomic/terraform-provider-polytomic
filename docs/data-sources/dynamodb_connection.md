@@ -36,7 +36,7 @@ data "polytomic_dynamodb_connection" "dynamodb" {
 
 Read-Only:
 
-- `aws_user` (String)
-- `region` (String)
+- `aws_user` (String) User ARN
+- `region` (String) AWS region
 
 

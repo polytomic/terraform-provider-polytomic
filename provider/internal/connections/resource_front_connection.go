@@ -45,7 +45,7 @@ func (t *FrontConnectionResource) Schema(ctx context.Context, req resource.Schem
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"api_key": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `API Token`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,

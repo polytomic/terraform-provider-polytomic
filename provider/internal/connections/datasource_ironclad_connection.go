@@ -51,15 +51,15 @@ func (d *IroncladConnectionDataSource) Schema(ctx context.Context, req datasourc
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"auth_method": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Authentication method`,
 						Computed:            true,
 					},
 					"client_id": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Client ID`,
 						Computed:            true,
 					},
 					"user_as_email": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Ironclad user email`,
 						Computed:            true,
 					},
 				},

@@ -36,10 +36,12 @@ data "polytomic_zendesk_support_connection" "zendesk_support" {
 
 Read-Only:
 
-- `auth_method` (String)
-- `custom_api_limits` (Boolean)
-- `domain` (String)
+- `auth_method` (String) Authentication method
+- `custom_api_limits` (Boolean) Enforce custom API limits
+- `domain` (String) Zendesk Subdomain
 - `email` (String)
-- `ratelimit_rpm` (Number) Set a custom maximum request per minute limit.
+- `ratelimit_rpm` (Number) Maximum requests per minute
+
+    Set a custom maximum request per minute limit.
 
 

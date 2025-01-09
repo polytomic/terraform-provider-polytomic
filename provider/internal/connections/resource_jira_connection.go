@@ -45,7 +45,7 @@ func (t *JiraConnectionResource) Schema(ctx context.Context, req resource.Schema
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"access_token": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Personal access token`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
@@ -55,7 +55,7 @@ func (t *JiraConnectionResource) Schema(ctx context.Context, req resource.Schema
 						},
 					},
 					"api_key": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `API token`,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
@@ -65,21 +65,21 @@ func (t *JiraConnectionResource) Schema(ctx context.Context, req resource.Schema
 						},
 					},
 					"auth_method": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Authentication method`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
 						Sensitive:           false,
 					},
 					"url": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Jira URL`,
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
 						Sensitive:           false,
 					},
 					"username": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Required:            false,
 						Optional:            true,
 						Computed:            true,

@@ -51,76 +51,76 @@ func (d *HttpenrichmentConnectionDataSource) Schema(ctx context.Context, req dat
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"auth": schema.SingleNestedAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Authentication method`,
 						Computed:            true,
 						Attributes: map[string]schema.Attribute{
 							"basic": schema.SingleNestedAttribute{
-								MarkdownDescription: "",
+								MarkdownDescription: `Basic authentication`,
 								Computed:            true,
 								Attributes: map[string]schema.Attribute{
 									"password": schema.StringAttribute{
-										MarkdownDescription: "",
+										MarkdownDescription: ``,
 										Computed:            true,
 									},
 									"username": schema.StringAttribute{
-										MarkdownDescription: "",
+										MarkdownDescription: ``,
 										Computed:            true,
 									},
 								},
 							},
 							"header": schema.SingleNestedAttribute{
-								MarkdownDescription: "",
+								MarkdownDescription: `Header key`,
 								Computed:            true,
 								Attributes: map[string]schema.Attribute{
 									"name": schema.StringAttribute{
-										MarkdownDescription: "",
+										MarkdownDescription: ``,
 										Computed:            true,
 									},
 									"value": schema.StringAttribute{
-										MarkdownDescription: "",
+										MarkdownDescription: ``,
 										Computed:            true,
 									},
 								},
 							},
 							"oauth": schema.SingleNestedAttribute{
-								MarkdownDescription: "",
+								MarkdownDescription: ``,
 								Computed:            true,
 								Attributes: map[string]schema.Attribute{
 									"auth_style": schema.Int64Attribute{
-										MarkdownDescription: "",
+										MarkdownDescription: `Auth style`,
 										Computed:            true,
 									},
 									"client_id": schema.StringAttribute{
-										MarkdownDescription: "",
+										MarkdownDescription: `Client ID`,
 										Computed:            true,
 									},
 									"client_secret": schema.StringAttribute{
-										MarkdownDescription: "",
+										MarkdownDescription: `Client secret`,
 										Computed:            true,
 									},
 									"extra_form_data": schema.SetNestedAttribute{
-										MarkdownDescription: "",
+										MarkdownDescription: `Extra form data`,
 										Computed:            true,
 										NestedObject: schema.NestedAttributeObject{
 											Attributes: map[string]schema.Attribute{
 												"name": schema.StringAttribute{
-													MarkdownDescription: "",
+													MarkdownDescription: ``,
 													Computed:            true,
 												},
 												"value": schema.StringAttribute{
-													MarkdownDescription: "",
+													MarkdownDescription: ``,
 													Computed:            true,
 												},
 											},
 										},
 									},
 									"scopes": schema.SetAttribute{
-										MarkdownDescription: "",
+										MarkdownDescription: ``,
 										Computed:            true,
 										ElementType:         types.StringType,
 									},
 									"token_endpoint": schema.StringAttribute{
-										MarkdownDescription: "",
+										MarkdownDescription: `Token endpoint`,
 										Computed:            true,
 									},
 								},
@@ -128,91 +128,95 @@ func (d *HttpenrichmentConnectionDataSource) Schema(ctx context.Context, req dat
 						},
 					},
 					"body": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `JSON payload`,
 						Computed:            true,
 					},
 					"fields": schema.SetNestedAttribute{
-						MarkdownDescription: "List of fields to be returned by the enrichment",
+						MarkdownDescription: `List of fields to be returned by the enrichment`,
 						Computed:            true,
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 								"name": schema.StringAttribute{
-									MarkdownDescription: "Name of the field",
+									MarkdownDescription: `Name of the field`,
 									Computed:            true,
 								},
 								"path": schema.StringAttribute{
-									MarkdownDescription: "JSONPath expression to extract the field from the response",
+									MarkdownDescription: `JSONPath expression to extract the field from the response`,
 									Computed:            true,
 								},
 								"type": schema.StringAttribute{
-									MarkdownDescription: "Type of the field",
+									MarkdownDescription: `Type of the field`,
 									Computed:            true,
 								},
 							},
 						},
 					},
 					"headers": schema.SetNestedAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: ``,
 						Computed:            true,
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 								"name": schema.StringAttribute{
-									MarkdownDescription: "",
+									MarkdownDescription: ``,
 									Computed:            true,
 								},
 								"value": schema.StringAttribute{
-									MarkdownDescription: "",
+									MarkdownDescription: ``,
 									Computed:            true,
 								},
 							},
 						},
 					},
 					"healthcheck": schema.StringAttribute{
-						MarkdownDescription: "Path to request when checking the health of this connection. No health check will be performed if left empty.",
-						Computed:            true,
+						MarkdownDescription: `Health check endpoint
+
+    Path to request when checking the health of this connection. No health check will be performed if left empty.`,
+						Computed: true,
 					},
 					"input_mappings": schema.SetNestedAttribute{
-						MarkdownDescription: "List of input mappings to be used in the query. Each mapping should be a valid JSONPath expression.",
-						Computed:            true,
+						MarkdownDescription: `Input mappings
+
+    List of input mappings to be used in the query. Each mapping should be a valid JSONPath expression.`,
+						Computed: true,
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 								"name": schema.StringAttribute{
-									MarkdownDescription: "Name of the input mapping",
+									MarkdownDescription: `Name of the input mapping`,
 									Computed:            true,
 								},
 								"required": schema.BoolAttribute{
-									MarkdownDescription: "Whether the input mapping is required",
+									MarkdownDescription: `Whether the input mapping is required`,
 									Computed:            true,
 								},
 								"type": schema.StringAttribute{
-									MarkdownDescription: "Type of the input mapping",
+									MarkdownDescription: `Type of the input mapping`,
 									Computed:            true,
 								},
 							},
 						},
 					},
 					"method": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `HTTP Method`,
 						Computed:            true,
 					},
 					"parameters": schema.SetNestedAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Query string parameters`,
 						Computed:            true,
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 								"name": schema.StringAttribute{
-									MarkdownDescription: "",
+									MarkdownDescription: ``,
 									Computed:            true,
 								},
 								"value": schema.StringAttribute{
-									MarkdownDescription: "",
+									MarkdownDescription: ``,
 									Computed:            true,
 								},
 							},
 						},
 					},
 					"url": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Base URL`,
 						Computed:            true,
 					},
 				},

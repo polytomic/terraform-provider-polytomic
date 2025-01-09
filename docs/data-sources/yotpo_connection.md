@@ -36,6 +36,8 @@ data "polytomic_yotpo_connection" "yotpo" {
 
 Read-Only:
 
-- `store_id` (String) Also known as Client ID or Store ID.
+- `store_id` (String) App Key
+
+    Also known as Client ID or Store ID.
 
 

@@ -51,16 +51,20 @@ func (d *ChargebeeConnectionDataSource) Schema(ctx context.Context, req datasour
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"product_catalog": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: `Product Catalog version`,
 						Computed:            true,
 					},
 					"ratelimit_rpm": schema.Int64Attribute{
-						MarkdownDescription: "Default rate limits can be found at https://support.chargebee.com/support/solutions/articles/243576-what-are-the-chargebee-api-limits-",
-						Computed:            true,
+						MarkdownDescription: `Maximum Requests Per Minute
+
+    Default rate limits can be found at https://support.chargebee.com/support/solutions/articles/243576-what-are-the-chargebee-api-limits-`,
+						Computed: true,
 					},
 					"site": schema.StringAttribute{
-						MarkdownDescription: "https://{site}.chargebee.com",
-						Computed:            true,
+						MarkdownDescription: `Chargebee site
+
+    https://{site}.chargebee.com`,
+						Computed: true,
 					},
 				},
 				Optional: true,
