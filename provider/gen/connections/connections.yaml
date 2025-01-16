@@ -741,8 +741,8 @@ connections:
         example: us-east-1
   - connection: redshiftserverless
     name: Redshift Serverless
-    type: polytomic.RedshiftServerlessConnectionType
-    config: polytomic.RedshiftServerlessConnectionConfiguration
+    type: RedshiftServerlessConnectionType
+    config: RedshiftServerlessConnectionConfiguration
     datasource: true
     resource: true
     attributes:
@@ -754,6 +754,10 @@ connections:
         type: string
         required: true
         example: default-workgroup
+      - name: Region
+        type: string
+        required: true
+        example: us-east-1
       - name: IAMRoleARN
         type: string
         required: true
@@ -763,8 +767,19 @@ connections:
         required: true
         example: db
         sensitive: true
+      - name: ConnectionMethod
+        type: string
+        required: true
+        example: endpoint
+        description: Method to use when connecting to Redshift Serverless; either `data_api` or `endpoint`
+      - name: ServerlessEndpoint
+        type: string
+        optional: true
+        description: Required if `connection_method` is `endpoint`.
+        example: acme.12345.us-west-2.redshift-serverless.amazonaws.com:5439
       - name: OverrideEndpoint
         type: bool
+        description: Override the Data API endpoint for connecting to Redshift; only applicable when `connection_method`` is `data_api`.
         example: true
         optional: true
       - name: DataAPIEndpoint

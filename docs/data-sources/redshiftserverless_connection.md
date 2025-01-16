@@ -37,13 +37,16 @@ data "polytomic_redshiftserverless_connection" "redshiftserverless" {
 
 Required:
 
+- `connection_method` (String) Method to use when connecting to Redshift Serverless; either `data_api` or `endpoint`
 - `database` (String)
 - `iam_role_arn` (String)
+- `region` (String)
 - `workgroup` (String)
 
 Optional:
 
 - `data_api_endpoint` (String) Required if `override_endpoint` is `true`.
-- `override_endpoint` (Boolean)
+- `override_endpoint` (Boolean) Override the Data API endpoint for connecting to Redshift; only applicable when `connection_method`` is `data_api`.
+- `serverless_endpoint` (String) Required if `connection_method` is `endpoint`.
 
 

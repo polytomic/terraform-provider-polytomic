@@ -56,6 +56,13 @@ func (t *RedshiftserverlessConnectionResource) Schema(ctx context.Context, req r
 						Computed:            false,
 						Sensitive:           false,
 					},
+					"region": schema.StringAttribute{
+						MarkdownDescription: "",
+						Required:            true,
+						Optional:            false,
+						Computed:            false,
+						Sensitive:           false,
+					},
 					"iam_role_arn": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            true,
@@ -70,8 +77,23 @@ func (t *RedshiftserverlessConnectionResource) Schema(ctx context.Context, req r
 						Computed:            false,
 						Sensitive:           true,
 					},
+					"connection_method": schema.StringAttribute{
+						MarkdownDescription: "Method to use when connecting to Redshift Serverless; either `data_api` or `endpoint`",
+						Required:            true,
+						Optional:            false,
+						Computed:            false,
+						Sensitive:           false,
+					},
+					"serverless_endpoint": schema.StringAttribute{
+						MarkdownDescription: "Required if `connection_method` is `endpoint`.",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+						Sensitive:           false,
+						Default:             stringdefault.StaticString(""),
+					},
 					"override_endpoint": schema.BoolAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: "Override the Data API endpoint for connecting to Redshift; only applicable when `connection_method`` is `data_api`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
@@ -125,15 +147,18 @@ func (r *RedshiftserverlessConnectionResource) Create(ctx context.Context, req r
 	created, err := r.client.Connections().Create(ctx,
 		polytomic.CreateConnectionMutation{
 			Name:           data.Name.ValueString(),
-			Type:           polytomic.RedshiftServerlessConnectionType,
+			Type:           RedshiftServerlessConnectionType,
 			OrganizationId: data.Organization.ValueString(),
-			Configuration: polytomic.RedshiftServerlessConnectionConfiguration{
-				Database:         data.Configuration.Attributes()["database"].(types.String).ValueString(),
-				Workgroup:        data.Configuration.Attributes()["workgroup"].(types.String).ValueString(),
-				IAMRoleARN:       data.Configuration.Attributes()["iam_role_arn"].(types.String).ValueString(),
-				ExternalID:       data.Configuration.Attributes()["external_id"].(types.String).ValueString(),
-				OverrideEndpoint: data.Configuration.Attributes()["override_endpoint"].(types.Bool).ValueBool(),
-				DataAPIEndpoint:  data.Configuration.Attributes()["data_api_endpoint"].(types.String).ValueString(),
+			Configuration: RedshiftServerlessConnectionConfiguration{
+				Database:           data.Configuration.Attributes()["database"].(types.String).ValueString(),
+				Workgroup:          data.Configuration.Attributes()["workgroup"].(types.String).ValueString(),
+				Region:             data.Configuration.Attributes()["region"].(types.String).ValueString(),
+				IAMRoleARN:         data.Configuration.Attributes()["iam_role_arn"].(types.String).ValueString(),
+				ExternalID:         data.Configuration.Attributes()["external_id"].(types.String).ValueString(),
+				ConnectionMethod:   data.Configuration.Attributes()["connection_method"].(types.String).ValueString(),
+				ServerlessEndpoint: data.Configuration.Attributes()["serverless_endpoint"].(types.String).ValueString(),
+				OverrideEndpoint:   data.Configuration.Attributes()["override_endpoint"].(types.Bool).ValueBool(),
+				DataAPIEndpoint:    data.Configuration.Attributes()["data_api_endpoint"].(types.String).ValueString(),
 			},
 		},
 		polytomic.WithIdempotencyKey(uuid.NewString()),
@@ -147,19 +172,22 @@ func (r *RedshiftserverlessConnectionResource) Create(ctx context.Context, req r
 	data.Name = types.StringValue(created.Name)
 	data.Organization = types.StringValue(created.OrganizationId)
 
-	var output polytomic.RedshiftServerlessConnectionConfiguration
+	var output RedshiftServerlessConnectionConfiguration
 	cfg := &mapstructure.DecoderConfig{
 		Result: &output,
 	}
 	decoder, _ := mapstructure.NewDecoder(cfg)
 	decoder.Decode(created.Configuration)
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"database":          types.StringType,
-		"workgroup":         types.StringType,
-		"iam_role_arn":      types.StringType,
-		"external_id":       types.StringType,
-		"override_endpoint": types.BoolType,
-		"data_api_endpoint": types.StringType,
+		"database":            types.StringType,
+		"workgroup":           types.StringType,
+		"region":              types.StringType,
+		"iam_role_arn":        types.StringType,
+		"external_id":         types.StringType,
+		"connection_method":   types.StringType,
+		"serverless_endpoint": types.StringType,
+		"override_endpoint":   types.BoolType,
+		"data_api_endpoint":   types.StringType,
 	}, output)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -199,19 +227,22 @@ func (r *RedshiftserverlessConnectionResource) Read(ctx context.Context, req res
 	data.Name = types.StringValue(connection.Name)
 	data.Organization = types.StringValue(connection.OrganizationId)
 
-	var output polytomic.RedshiftServerlessConnectionConfiguration
+	var output RedshiftServerlessConnectionConfiguration
 	cfg := &mapstructure.DecoderConfig{
 		Result: &output,
 	}
 	decoder, _ := mapstructure.NewDecoder(cfg)
 	decoder.Decode(connection.Configuration)
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"database":          types.StringType,
-		"workgroup":         types.StringType,
-		"iam_role_arn":      types.StringType,
-		"external_id":       types.StringType,
-		"override_endpoint": types.BoolType,
-		"data_api_endpoint": types.StringType,
+		"database":            types.StringType,
+		"workgroup":           types.StringType,
+		"region":              types.StringType,
+		"iam_role_arn":        types.StringType,
+		"external_id":         types.StringType,
+		"connection_method":   types.StringType,
+		"serverless_endpoint": types.StringType,
+		"override_endpoint":   types.BoolType,
+		"data_api_endpoint":   types.StringType,
 	}, output)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -237,13 +268,16 @@ func (r *RedshiftserverlessConnectionResource) Update(ctx context.Context, req r
 		polytomic.UpdateConnectionMutation{
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueString(),
-			Configuration: polytomic.RedshiftServerlessConnectionConfiguration{
-				Database:         data.Configuration.Attributes()["database"].(types.String).ValueString(),
-				Workgroup:        data.Configuration.Attributes()["workgroup"].(types.String).ValueString(),
-				IAMRoleARN:       data.Configuration.Attributes()["iam_role_arn"].(types.String).ValueString(),
-				ExternalID:       data.Configuration.Attributes()["external_id"].(types.String).ValueString(),
-				OverrideEndpoint: data.Configuration.Attributes()["override_endpoint"].(types.Bool).ValueBool(),
-				DataAPIEndpoint:  data.Configuration.Attributes()["data_api_endpoint"].(types.String).ValueString(),
+			Configuration: RedshiftServerlessConnectionConfiguration{
+				Database:           data.Configuration.Attributes()["database"].(types.String).ValueString(),
+				Workgroup:          data.Configuration.Attributes()["workgroup"].(types.String).ValueString(),
+				Region:             data.Configuration.Attributes()["region"].(types.String).ValueString(),
+				IAMRoleARN:         data.Configuration.Attributes()["iam_role_arn"].(types.String).ValueString(),
+				ExternalID:         data.Configuration.Attributes()["external_id"].(types.String).ValueString(),
+				ConnectionMethod:   data.Configuration.Attributes()["connection_method"].(types.String).ValueString(),
+				ServerlessEndpoint: data.Configuration.Attributes()["serverless_endpoint"].(types.String).ValueString(),
+				OverrideEndpoint:   data.Configuration.Attributes()["override_endpoint"].(types.Bool).ValueBool(),
+				DataAPIEndpoint:    data.Configuration.Attributes()["data_api_endpoint"].(types.String).ValueString(),
 			},
 		},
 		polytomic.WithIdempotencyKey(uuid.NewString()),
@@ -258,19 +292,22 @@ func (r *RedshiftserverlessConnectionResource) Update(ctx context.Context, req r
 	data.Name = types.StringValue(updated.Name)
 	data.Organization = types.StringValue(updated.OrganizationId)
 
-	var output polytomic.RedshiftServerlessConnectionConfiguration
+	var output RedshiftServerlessConnectionConfiguration
 	cfg := &mapstructure.DecoderConfig{
 		Result: &output,
 	}
 	decoder, _ := mapstructure.NewDecoder(cfg)
 	decoder.Decode(updated.Configuration)
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"database":          types.StringType,
-		"workgroup":         types.StringType,
-		"iam_role_arn":      types.StringType,
-		"external_id":       types.StringType,
-		"override_endpoint": types.BoolType,
-		"data_api_endpoint": types.StringType,
+		"database":            types.StringType,
+		"workgroup":           types.StringType,
+		"region":              types.StringType,
+		"iam_role_arn":        types.StringType,
+		"external_id":         types.StringType,
+		"connection_method":   types.StringType,
+		"serverless_endpoint": types.StringType,
+		"override_endpoint":   types.BoolType,
+		"data_api_endpoint":   types.StringType,
 	}, output)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

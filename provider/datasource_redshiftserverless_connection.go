@@ -61,6 +61,13 @@ func (d *RedshiftserverlessConnectionDataSource) Schema(ctx context.Context, req
 						Computed:            false,
 						Sensitive:           false,
 					},
+					"region": schema.StringAttribute{
+						MarkdownDescription: "",
+						Required:            true,
+						Optional:            false,
+						Computed:            false,
+						Sensitive:           false,
+					},
 					"iam_role_arn": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            true,
@@ -68,8 +75,22 @@ func (d *RedshiftserverlessConnectionDataSource) Schema(ctx context.Context, req
 						Computed:            false,
 						Sensitive:           false,
 					},
+					"connection_method": schema.StringAttribute{
+						MarkdownDescription: "Method to use when connecting to Redshift Serverless; either `data_api` or `endpoint`",
+						Required:            true,
+						Optional:            false,
+						Computed:            false,
+						Sensitive:           false,
+					},
+					"serverless_endpoint": schema.StringAttribute{
+						MarkdownDescription: "Required if `connection_method` is `endpoint`.",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+						Sensitive:           false,
+					},
 					"override_endpoint": schema.BoolAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: "Override the Data API endpoint for connecting to Redshift; only applicable when `connection_method`` is `data_api`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
@@ -135,7 +156,7 @@ func (d *RedshiftserverlessConnectionDataSource) Read(ctx context.Context, req d
 	data.Id = types.StringValue(connection.ID)
 	data.Name = types.StringValue(connection.Name)
 	data.Organization = types.StringValue(connection.OrganizationId)
-	var conf polytomic.RedshiftServerlessConnectionConfiguration
+	var conf RedshiftServerlessConnectionConfiguration
 	err = mapstructure.Decode(connection.Configuration, &conf)
 	if err != nil {
 		resp.Diagnostics.AddError("Error decoding connection", err.Error())
@@ -152,8 +173,17 @@ func (d *RedshiftserverlessConnectionDataSource) Read(ctx context.Context, req d
 			"workgroup": types.StringValue(
 				conf.Workgroup,
 			),
+			"region": types.StringValue(
+				conf.Region,
+			),
 			"iam_role_arn": types.StringValue(
 				conf.IAMRoleARN,
+			),
+			"connection_method": types.StringValue(
+				conf.ConnectionMethod,
+			),
+			"serverless_endpoint": types.StringValue(
+				conf.ServerlessEndpoint,
 			),
 			"override_endpoint": types.BoolValue(
 				conf.OverrideEndpoint,

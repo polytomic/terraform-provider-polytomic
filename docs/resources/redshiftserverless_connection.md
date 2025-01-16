@@ -16,12 +16,15 @@ Redshift Serverless Connection
 resource "polytomic_redshiftserverless_connection" "redshiftserverless" {
   name = "example"
   configuration = {
-    database          = "dev"
-    workgroup         = "default-workgroup"
-    iam_role_arn      = "arn:aws:iam::XXXX:role/polytomic-redshiftserverless"
-    external_id       = "db"
-    override_endpoint = true
-    data_api_endpoint = "https://redshift-data.us-west-2.amazonaws.com"
+    database            = "dev"
+    workgroup           = "default-workgroup"
+    region              = "us-east-1"
+    iam_role_arn        = "arn:aws:iam::XXXX:role/polytomic-redshiftserverless"
+    external_id         = "db"
+    connection_method   = "endpoint"
+    serverless_endpoint = "acme.12345.us-west-2.redshift-serverless.amazonaws.com:5439"
+    override_endpoint   = true
+    data_api_endpoint   = "https://redshift-data.us-west-2.amazonaws.com"
   }
 }
 ```
@@ -48,14 +51,17 @@ resource "polytomic_redshiftserverless_connection" "redshiftserverless" {
 
 Required:
 
+- `connection_method` (String) Method to use when connecting to Redshift Serverless; either `data_api` or `endpoint`
 - `database` (String)
 - `external_id` (String, Sensitive)
 - `iam_role_arn` (String)
+- `region` (String)
 - `workgroup` (String)
 
 Optional:
 
 - `data_api_endpoint` (String) Required if `override_endpoint` is `true`.
-- `override_endpoint` (Boolean)
+- `override_endpoint` (Boolean) Override the Data API endpoint for connecting to Redshift; only applicable when `connection_method`` is `data_api`.
+- `serverless_endpoint` (String) Required if `connection_method` is `endpoint`.
 
 
