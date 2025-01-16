@@ -1,3 +1,21 @@
+## 1.0.0-beta2 (03 Jan 2025)
+
+_This is a pre-release version._
+
+- Updated connection resources to correctly support repeated configuration properties.
+
+## 1.0.0-beta1 (20 Dec 2024)
+
+_This is a pre-release version._
+
+- Rewrite to use generated Polytomic SDK.
+- Model configuration is now specified as a JSON payload.
+- Some connection resource and datasource names have changed.
+
+## 0.3.42 (16 Jan 2025)
+
+- Support for Redshift Serverless endpoint connections.
+
 ## 0.3.41 (9 May 2024)
 
 - Reverted breaking change from v0.3.39.
