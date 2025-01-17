@@ -12,6 +12,10 @@ _This is a pre-release version._
 - Model configuration is now specified as a JSON payload.
 - Some connection resource and datasource names have changed.
 
+## 0.3.43 (17 Jan 2025)
+
+- Correct issue with Redshift Serverless endpoint connection mode.
+
 ## 0.3.42 (16 Jan 2025)
 
 - Support for Redshift Serverless endpoint connections.
