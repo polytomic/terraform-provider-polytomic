@@ -30,79 +30,81 @@ import (
 var _ resource.Resource = &AwsopensearchConnectionResource{}
 var _ resource.ResourceWithImportState = &AwsopensearchConnectionResource{}
 
-func (t *AwsopensearchConnectionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = schema.Schema{
-		MarkdownDescription: ":meta:subcategory:Connections: AWS OpenSearch Connection",
-		Attributes: map[string]schema.Attribute{
-			"organization": schema.StringAttribute{
-				MarkdownDescription: "Organization ID",
-				Optional:            true,
-				Computed:            true,
-			},
-			"name": schema.StringAttribute{
-				Required: true,
-			},
-			"configuration": schema.SingleNestedAttribute{
-				Attributes: map[string]schema.Attribute{
-					"aws_access_key_id": schema.StringAttribute{
-						MarkdownDescription: `AWS Access Key ID`,
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
-					"aws_secret_access_key": schema.StringAttribute{
-						MarkdownDescription: `AWS Secret Access Key`,
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           true,
-						PlanModifiers: []planmodifier.String{
-							stringplanmodifier.UseStateForUnknown(),
-						},
-					},
-					"aws_user": schema.StringAttribute{
-						MarkdownDescription: `User ARN`,
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
-					},
-					"endpoint": schema.StringAttribute{
-						MarkdownDescription: `Endpoint(s)`,
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
-					"region": schema.StringAttribute{
-						MarkdownDescription: ``,
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
+var AwsopensearchSchema = schema.Schema{
+	MarkdownDescription: ":meta:subcategory:Connections: AWS OpenSearch Connection",
+	Attributes: map[string]schema.Attribute{
+		"organization": schema.StringAttribute{
+			MarkdownDescription: "Organization ID",
+			Optional:            true,
+			Computed:            true,
+		},
+		"name": schema.StringAttribute{
+			Required: true,
+		},
+		"configuration": schema.SingleNestedAttribute{
+			Attributes: map[string]schema.Attribute{
+				"aws_access_key_id": schema.StringAttribute{
+					MarkdownDescription: `AWS Access Key ID`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
+				},
+				"aws_secret_access_key": schema.StringAttribute{
+					MarkdownDescription: `AWS Secret Access Key`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
 					},
 				},
+				"aws_user": schema.StringAttribute{
+					MarkdownDescription: `User ARN`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
+				"endpoint": schema.StringAttribute{
+					MarkdownDescription: `Endpoint(s)`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
+				},
+				"region": schema.StringAttribute{
+					MarkdownDescription: ``,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
+				},
+			},
 
-				Required: true,
+			Required: true,
 
-				PlanModifiers: []planmodifier.Object{
-					objectplanmodifier.UseStateForUnknown(),
-				},
-			},
-			"force_destroy": schema.BoolAttribute{
-				MarkdownDescription: forceDestroyMessage,
-				Optional:            true,
-			},
-			"id": schema.StringAttribute{
-				Computed:            true,
-				MarkdownDescription: "AWS OpenSearch Connection identifier",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
+			PlanModifiers: []planmodifier.Object{
+				objectplanmodifier.UseStateForUnknown(),
 			},
 		},
-	}
+		"force_destroy": schema.BoolAttribute{
+			MarkdownDescription: forceDestroyMessage,
+			Optional:            true,
+		},
+		"id": schema.StringAttribute{
+			Computed:            true,
+			MarkdownDescription: "AWS OpenSearch Connection identifier",
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
+		},
+	},
+}
+
+func (t *AwsopensearchConnectionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = AwsopensearchSchema
 }
 
 type AwsopensearchConf struct {
@@ -217,6 +219,14 @@ func (r *AwsopensearchConnectionResource) Read(ctx context.Context, req resource
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
 
+	configAttributes, ok := getConfigAttributes(AwsopensearchSchema)
+	if !ok {
+		resp.Diagnostics.AddError("Error getting connection configuration attributes", "Could not get configuration attributes")
+		return
+	}
+
+	connection.Data.Configuration = clearSensitiveValuesFromRead(configAttributes, connection.Data.Configuration)
+
 	conf := AwsopensearchConf{}
 	err = mapstructure.Decode(connection.Data.Configuration, &conf)
 	if err != nil {
@@ -259,6 +269,20 @@ func (r *AwsopensearchConnectionResource) Update(ctx context.Context, req resour
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
+
+	configAttributes, ok := getConfigAttributes(AwsopensearchSchema)
+	if !ok {
+		resp.Diagnostics.AddError("Error getting connection configuration attributes", "Could not get configuration attributes")
+		return
+	}
+
+	var prevData connectionData
+
+	diags = req.State.Get(ctx, &prevData)
+	resp.Diagnostics.Append(diags...)
+
+	connConf = handleSensitiveValues(ctx, configAttributes, connConf, prevData.Configuration.Attributes())
+
 	updated, err := client.Connections.Update(ctx,
 		data.Id.ValueString(),
 		&polytomic.UpdateConnectionRequestSchema{

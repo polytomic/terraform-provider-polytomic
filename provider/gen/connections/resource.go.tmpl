@@ -61,45 +61,47 @@ var _ resource.ResourceWithImportState = &{{ .Connection }}ConnectionResource{}
 	}
 {{- end -}}
 
-func (t *{{ .Connection }}ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = schema.Schema{
-		MarkdownDescription: ":meta:subcategory:Connections: {{ .Name }} Connection",
-		Attributes: map[string]schema.Attribute{
-			"organization": schema.StringAttribute{
-				MarkdownDescription: "Organization ID",
-				Optional:            true,
-				Computed:            true,
+var {{ .Connection }}Schema = schema.Schema{
+	MarkdownDescription: ":meta:subcategory:Connections: {{ .Name }} Connection",
+	Attributes: map[string]schema.Attribute{
+		"organization": schema.StringAttribute{
+			MarkdownDescription: "Organization ID",
+			Optional:            true,
+			Computed:            true,
+		},
+		"name": schema.StringAttribute{
+			Required: true,
+		},
+		"configuration": schema.SingleNestedAttribute{
+			Attributes: map[string]schema.Attribute{
+				{{ range .Attributes }}{{- template "attribute" . }}{{ end }}
 			},
-			"name": schema.StringAttribute{
-				Required: true,
-			},
-			"configuration": schema.SingleNestedAttribute{
-				Attributes: map[string]schema.Attribute{
-					{{ range .Attributes }}{{- template "attribute" . }}{{ end }}
-				},
-				{{ if .Attributes}}
-				Required: true,
-				{{ else }}
-				Optional: true,
-				Type: types.ObjectType{},
-				{{ end }}
-				PlanModifiers: []planmodifier.Object{
-					objectplanmodifier.UseStateForUnknown(),
-				},
-			},
-			"force_destroy": schema.BoolAttribute{
-				MarkdownDescription: forceDestroyMessage,
-				Optional:            true,
-			},
-			"id": schema.StringAttribute{
-				Computed:            true,
-				MarkdownDescription: "{{ .Name }} Connection identifier",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
+			{{ if .Attributes}}
+			Required: true,
+			{{ else }}
+			Optional: true,
+			Type: types.ObjectType{},
+			{{ end }}
+			PlanModifiers: []planmodifier.Object{
+				objectplanmodifier.UseStateForUnknown(),
 			},
 		},
-	}
+		"force_destroy": schema.BoolAttribute{
+			MarkdownDescription: forceDestroyMessage,
+			Optional:            true,
+		},
+		"id": schema.StringAttribute{
+			Computed:            true,
+			MarkdownDescription: "{{ .Name }} Connection identifier",
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
+		},
+	},
+}
+
+func (t *{{ .Connection }}ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = {{ .Connection }}Schema
 }
 
 {{ define "confattrType" -}}
@@ -227,6 +229,15 @@ func (r *{{ .Connection }}ConnectionResource) Read(ctx context.Context, req reso
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
 
+	configAttributes, ok := getConfigAttributes({{ .Connection }}Schema)
+	if !ok {
+		resp.Diagnostics.AddError("Error getting connection configuration attributes", "Could not get configuration attributes")
+		return
+	}
+
+	connection.Data.Configuration = clearSensitiveValuesFromRead(configAttributes, connection.Data.Configuration)
+
+
 	conf := {{ .Connection }}Conf{}
 	err = mapstructure.Decode(connection.Data.Configuration, &conf)
 	if err != nil {
@@ -263,6 +274,20 @@ func (r *{{ .Connection }}ConnectionResource) Update(ctx context.Context, req re
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
+
+	configAttributes, ok := getConfigAttributes({{ .Connection }}Schema)
+	if !ok {
+		resp.Diagnostics.AddError("Error getting connection configuration attributes", "Could not get configuration attributes")
+		return
+	}
+
+	var prevData connectionData
+
+	diags = req.State.Get(ctx, &prevData)
+	resp.Diagnostics.Append(diags...)
+
+	connConf = handleSensitiveValues(ctx, configAttributes, connConf, prevData.Configuration.Attributes())
+
 	updated, err := client.Connections.Update(ctx,
 		data.Id.ValueString(),
 		&polytomic.UpdateConnectionRequestSchema{

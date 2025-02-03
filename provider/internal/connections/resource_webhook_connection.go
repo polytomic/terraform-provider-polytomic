@@ -30,83 +30,85 @@ import (
 var _ resource.Resource = &WebhookConnectionResource{}
 var _ resource.ResourceWithImportState = &WebhookConnectionResource{}
 
-func (t *WebhookConnectionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = schema.Schema{
-		MarkdownDescription: ":meta:subcategory:Connections: Webhook Connection",
-		Attributes: map[string]schema.Attribute{
-			"organization": schema.StringAttribute{
-				MarkdownDescription: "Organization ID",
-				Optional:            true,
-				Computed:            true,
-			},
-			"name": schema.StringAttribute{
-				Required: true,
-			},
-			"configuration": schema.SingleNestedAttribute{
-				Attributes: map[string]schema.Attribute{
-					"headers": schema.SetNestedAttribute{
-						MarkdownDescription: ``,
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
-						NestedObject: schema.NestedAttributeObject{
-							Attributes: map[string]schema.Attribute{
-								"name": schema.StringAttribute{
-									MarkdownDescription: ``,
-									Required:            false,
-									Optional:            true,
-									Computed:            true,
-									Sensitive:           false,
-								},
-								"value": schema.StringAttribute{
-									MarkdownDescription: ``,
-									Required:            false,
-									Optional:            true,
-									Computed:            true,
-									Sensitive:           false,
-								},
+var WebhookSchema = schema.Schema{
+	MarkdownDescription: ":meta:subcategory:Connections: Webhook Connection",
+	Attributes: map[string]schema.Attribute{
+		"organization": schema.StringAttribute{
+			MarkdownDescription: "Organization ID",
+			Optional:            true,
+			Computed:            true,
+		},
+		"name": schema.StringAttribute{
+			Required: true,
+		},
+		"configuration": schema.SingleNestedAttribute{
+			Attributes: map[string]schema.Attribute{
+				"headers": schema.SetNestedAttribute{
+					MarkdownDescription: ``,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+					NestedObject: schema.NestedAttributeObject{
+						Attributes: map[string]schema.Attribute{
+							"name": schema.StringAttribute{
+								MarkdownDescription: ``,
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
+								Sensitive:           false,
+							},
+							"value": schema.StringAttribute{
+								MarkdownDescription: ``,
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
+								Sensitive:           false,
 							},
 						},
 					},
-					"secret": schema.StringAttribute{
-						MarkdownDescription: ``,
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           true,
-						PlanModifiers: []planmodifier.String{
-							stringplanmodifier.UseStateForUnknown(),
-						},
-					},
-					"url": schema.StringAttribute{
-						MarkdownDescription: `Webhook URL`,
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
+				},
+				"secret": schema.StringAttribute{
+					MarkdownDescription: ``,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
 					},
 				},
-
-				Required: true,
-
-				PlanModifiers: []planmodifier.Object{
-					objectplanmodifier.UseStateForUnknown(),
+				"url": schema.StringAttribute{
+					MarkdownDescription: `Webhook URL`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
 				},
 			},
-			"force_destroy": schema.BoolAttribute{
-				MarkdownDescription: forceDestroyMessage,
-				Optional:            true,
-			},
-			"id": schema.StringAttribute{
-				Computed:            true,
-				MarkdownDescription: "Webhook Connection identifier",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
+
+			Required: true,
+
+			PlanModifiers: []planmodifier.Object{
+				objectplanmodifier.UseStateForUnknown(),
 			},
 		},
-	}
+		"force_destroy": schema.BoolAttribute{
+			MarkdownDescription: forceDestroyMessage,
+			Optional:            true,
+		},
+		"id": schema.StringAttribute{
+			Computed:            true,
+			MarkdownDescription: "Webhook Connection identifier",
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
+		},
+	},
+}
+
+func (t *WebhookConnectionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = WebhookSchema
 }
 
 type WebhookConf struct {
@@ -227,6 +229,14 @@ func (r *WebhookConnectionResource) Read(ctx context.Context, req resource.ReadR
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
 
+	configAttributes, ok := getConfigAttributes(WebhookSchema)
+	if !ok {
+		resp.Diagnostics.AddError("Error getting connection configuration attributes", "Could not get configuration attributes")
+		return
+	}
+
+	connection.Data.Configuration = clearSensitiveValuesFromRead(configAttributes, connection.Data.Configuration)
+
 	conf := WebhookConf{}
 	err = mapstructure.Decode(connection.Data.Configuration, &conf)
 	if err != nil {
@@ -274,6 +284,20 @@ func (r *WebhookConnectionResource) Update(ctx context.Context, req resource.Upd
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
+
+	configAttributes, ok := getConfigAttributes(WebhookSchema)
+	if !ok {
+		resp.Diagnostics.AddError("Error getting connection configuration attributes", "Could not get configuration attributes")
+		return
+	}
+
+	var prevData connectionData
+
+	diags = req.State.Get(ctx, &prevData)
+	resp.Diagnostics.Append(diags...)
+
+	connConf = handleSensitiveValues(ctx, configAttributes, connConf, prevData.Configuration.Attributes())
+
 	updated, err := client.Connections.Update(ctx,
 		data.Id.ValueString(),
 		&polytomic.UpdateConnectionRequestSchema{

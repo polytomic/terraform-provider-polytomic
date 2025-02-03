@@ -30,61 +30,63 @@ import (
 var _ resource.Resource = &KlaviyoConnectionResource{}
 var _ resource.ResourceWithImportState = &KlaviyoConnectionResource{}
 
-func (t *KlaviyoConnectionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = schema.Schema{
-		MarkdownDescription: ":meta:subcategory:Connections: Klaviyo Connection",
-		Attributes: map[string]schema.Attribute{
-			"organization": schema.StringAttribute{
-				MarkdownDescription: "Organization ID",
-				Optional:            true,
-				Computed:            true,
-			},
-			"name": schema.StringAttribute{
-				Required: true,
-			},
-			"configuration": schema.SingleNestedAttribute{
-				Attributes: map[string]schema.Attribute{
-					"apikey": schema.StringAttribute{
-						MarkdownDescription: `Public API key`,
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           true,
-						PlanModifiers: []planmodifier.String{
-							stringplanmodifier.UseStateForUnknown(),
-						},
-					},
-					"private_apikey": schema.StringAttribute{
-						MarkdownDescription: `Private API key`,
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           true,
-						PlanModifiers: []planmodifier.String{
-							stringplanmodifier.UseStateForUnknown(),
-						},
+var KlaviyoSchema = schema.Schema{
+	MarkdownDescription: ":meta:subcategory:Connections: Klaviyo Connection",
+	Attributes: map[string]schema.Attribute{
+		"organization": schema.StringAttribute{
+			MarkdownDescription: "Organization ID",
+			Optional:            true,
+			Computed:            true,
+		},
+		"name": schema.StringAttribute{
+			Required: true,
+		},
+		"configuration": schema.SingleNestedAttribute{
+			Attributes: map[string]schema.Attribute{
+				"apikey": schema.StringAttribute{
+					MarkdownDescription: `Public API key`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
 					},
 				},
-
-				Required: true,
-
-				PlanModifiers: []planmodifier.Object{
-					objectplanmodifier.UseStateForUnknown(),
+				"private_apikey": schema.StringAttribute{
+					MarkdownDescription: `Private API key`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
+					},
 				},
 			},
-			"force_destroy": schema.BoolAttribute{
-				MarkdownDescription: forceDestroyMessage,
-				Optional:            true,
-			},
-			"id": schema.StringAttribute{
-				Computed:            true,
-				MarkdownDescription: "Klaviyo Connection identifier",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
+
+			Required: true,
+
+			PlanModifiers: []planmodifier.Object{
+				objectplanmodifier.UseStateForUnknown(),
 			},
 		},
-	}
+		"force_destroy": schema.BoolAttribute{
+			MarkdownDescription: forceDestroyMessage,
+			Optional:            true,
+		},
+		"id": schema.StringAttribute{
+			Computed:            true,
+			MarkdownDescription: "Klaviyo Connection identifier",
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
+		},
+	},
+}
+
+func (t *KlaviyoConnectionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = KlaviyoSchema
 }
 
 type KlaviyoConf struct {
@@ -193,6 +195,14 @@ func (r *KlaviyoConnectionResource) Read(ctx context.Context, req resource.ReadR
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
 
+	configAttributes, ok := getConfigAttributes(KlaviyoSchema)
+	if !ok {
+		resp.Diagnostics.AddError("Error getting connection configuration attributes", "Could not get configuration attributes")
+		return
+	}
+
+	connection.Data.Configuration = clearSensitiveValuesFromRead(configAttributes, connection.Data.Configuration)
+
 	conf := KlaviyoConf{}
 	err = mapstructure.Decode(connection.Data.Configuration, &conf)
 	if err != nil {
@@ -232,6 +242,20 @@ func (r *KlaviyoConnectionResource) Update(ctx context.Context, req resource.Upd
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
+
+	configAttributes, ok := getConfigAttributes(KlaviyoSchema)
+	if !ok {
+		resp.Diagnostics.AddError("Error getting connection configuration attributes", "Could not get configuration attributes")
+		return
+	}
+
+	var prevData connectionData
+
+	diags = req.State.Get(ctx, &prevData)
+	resp.Diagnostics.Append(diags...)
+
+	connConf = handleSensitiveValues(ctx, configAttributes, connConf, prevData.Configuration.Attributes())
+
 	updated, err := client.Connections.Update(ctx,
 		data.Id.ValueString(),
 		&polytomic.UpdateConnectionRequestSchema{

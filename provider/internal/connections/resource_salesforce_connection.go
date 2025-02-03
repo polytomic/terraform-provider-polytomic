@@ -30,128 +30,130 @@ import (
 var _ resource.Resource = &SalesforceConnectionResource{}
 var _ resource.ResourceWithImportState = &SalesforceConnectionResource{}
 
-func (t *SalesforceConnectionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = schema.Schema{
-		MarkdownDescription: ":meta:subcategory:Connections: Salesforce Connection",
-		Attributes: map[string]schema.Attribute{
-			"organization": schema.StringAttribute{
-				MarkdownDescription: "Organization ID",
-				Optional:            true,
-				Computed:            true,
-			},
-			"name": schema.StringAttribute{
-				Required: true,
-			},
-			"configuration": schema.SingleNestedAttribute{
-				Attributes: map[string]schema.Attribute{
-					"client_id": schema.StringAttribute{
-						MarkdownDescription: `Client ID`,
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           true,
-						PlanModifiers: []planmodifier.String{
-							stringplanmodifier.UseStateForUnknown(),
-						},
+var SalesforceSchema = schema.Schema{
+	MarkdownDescription: ":meta:subcategory:Connections: Salesforce Connection",
+	Attributes: map[string]schema.Attribute{
+		"organization": schema.StringAttribute{
+			MarkdownDescription: "Organization ID",
+			Optional:            true,
+			Computed:            true,
+		},
+		"name": schema.StringAttribute{
+			Required: true,
+		},
+		"configuration": schema.SingleNestedAttribute{
+			Attributes: map[string]schema.Attribute{
+				"client_id": schema.StringAttribute{
+					MarkdownDescription: `Client ID`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
 					},
-					"client_secret": schema.StringAttribute{
-						MarkdownDescription: `Client Secret`,
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           true,
-						PlanModifiers: []planmodifier.String{
-							stringplanmodifier.UseStateForUnknown(),
-						},
+				},
+				"client_secret": schema.StringAttribute{
+					MarkdownDescription: `Client Secret`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
 					},
-					"connect_mode": schema.StringAttribute{
-						MarkdownDescription: `Default: browser (i.e. oauth through Polytomic). If 'code' is specified, the response will include an auth_code for the user to enter when completing authorization. NOTE: when supplying client_id and client_secret the connect mode must be 'api'.`,
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
-					},
-					"daily_api_calls": schema.Int64Attribute{
-						MarkdownDescription: `Daily call limit
+				},
+				"connect_mode": schema.StringAttribute{
+					MarkdownDescription: `Default: browser (i.e. oauth through Polytomic). If 'code' is specified, the response will include an auth_code for the user to enter when completing authorization. NOTE: when supplying client_id and client_secret the connect mode must be 'api'.`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
+				"daily_api_calls": schema.Int64Attribute{
+					MarkdownDescription: `Daily call limit
 
     The daily Salesforce API call cap that Polytomic should adhere to.`,
-						Required:  false,
-						Optional:  true,
-						Computed:  true,
-						Sensitive: false,
-					},
-					"domain": schema.StringAttribute{
-						MarkdownDescription: `The Salesforce instance's login domain, e.g. acmecorp.my.salesforce.com`,
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
-					"enable_multicurrency_lookup": schema.BoolAttribute{
-						MarkdownDescription: `Enable multicurrency source field support
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
+				},
+				"domain": schema.StringAttribute{
+					MarkdownDescription: `The Salesforce instance's login domain, e.g. acmecorp.my.salesforce.com`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
+				},
+				"enable_multicurrency_lookup": schema.BoolAttribute{
+					MarkdownDescription: `Enable multicurrency source field support
 
     If incremenetal mode for bulk-syncing from Salesforce formula fields is enabled, setting this to true extends support to accurate currency conversions.`,
-						Required:  false,
-						Optional:  true,
-						Computed:  true,
-						Sensitive: false,
-					},
-					"enable_tooling": schema.BoolAttribute{
-						MarkdownDescription: `Enable support for Tooling API
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
+				},
+				"enable_tooling": schema.BoolAttribute{
+					MarkdownDescription: `Enable support for Tooling API
 
     If true, expose objects from the Salesforce Tooling API in the Polytomic bulk sync source object list.`,
-						Required:  false,
-						Optional:  true,
-						Computed:  true,
-						Sensitive: false,
-					},
-					"enforce_api_limits": schema.BoolAttribute{
-						MarkdownDescription: `Enforce API limits
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
+				},
+				"enforce_api_limits": schema.BoolAttribute{
+					MarkdownDescription: `Enforce API limits
 
     If true, Polytomic will restrict itself to a fixed daily cap of Salesforce API calls enforced by the number in daily_api_calls.`,
-						Required:  false,
-						Optional:  true,
-						Computed:  true,
-						Sensitive: false,
-					},
-					"oauth_refresh_token": schema.StringAttribute{
-						MarkdownDescription: ``,
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           true,
-						PlanModifiers: []planmodifier.String{
-							stringplanmodifier.UseStateForUnknown(),
-						},
-					},
-					"username": schema.StringAttribute{
-						MarkdownDescription: `Salesforce user`,
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
+				},
+				"oauth_refresh_token": schema.StringAttribute{
+					MarkdownDescription: ``,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
 					},
 				},
-
-				Required: true,
-
-				PlanModifiers: []planmodifier.Object{
-					objectplanmodifier.UseStateForUnknown(),
+				"username": schema.StringAttribute{
+					MarkdownDescription: `Salesforce user`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
 				},
 			},
-			"force_destroy": schema.BoolAttribute{
-				MarkdownDescription: forceDestroyMessage,
-				Optional:            true,
-			},
-			"id": schema.StringAttribute{
-				Computed:            true,
-				MarkdownDescription: "Salesforce Connection identifier",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
+
+			Required: true,
+
+			PlanModifiers: []planmodifier.Object{
+				objectplanmodifier.UseStateForUnknown(),
 			},
 		},
-	}
+		"force_destroy": schema.BoolAttribute{
+			MarkdownDescription: forceDestroyMessage,
+			Optional:            true,
+		},
+		"id": schema.StringAttribute{
+			Computed:            true,
+			MarkdownDescription: "Salesforce Connection identifier",
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
+		},
+	},
+}
+
+func (t *SalesforceConnectionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = SalesforceSchema
 }
 
 type SalesforceConf struct {
@@ -276,6 +278,14 @@ func (r *SalesforceConnectionResource) Read(ctx context.Context, req resource.Re
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
 
+	configAttributes, ok := getConfigAttributes(SalesforceSchema)
+	if !ok {
+		resp.Diagnostics.AddError("Error getting connection configuration attributes", "Could not get configuration attributes")
+		return
+	}
+
+	connection.Data.Configuration = clearSensitiveValuesFromRead(configAttributes, connection.Data.Configuration)
+
 	conf := SalesforceConf{}
 	err = mapstructure.Decode(connection.Data.Configuration, &conf)
 	if err != nil {
@@ -323,6 +333,20 @@ func (r *SalesforceConnectionResource) Update(ctx context.Context, req resource.
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
+
+	configAttributes, ok := getConfigAttributes(SalesforceSchema)
+	if !ok {
+		resp.Diagnostics.AddError("Error getting connection configuration attributes", "Could not get configuration attributes")
+		return
+	}
+
+	var prevData connectionData
+
+	diags = req.State.Get(ctx, &prevData)
+	resp.Diagnostics.Append(diags...)
+
+	connConf = handleSensitiveValues(ctx, configAttributes, connConf, prevData.Configuration.Attributes())
+
 	updated, err := client.Connections.Update(ctx,
 		data.Id.ValueString(),
 		&polytomic.UpdateConnectionRequestSchema{

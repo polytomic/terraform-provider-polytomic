@@ -30,84 +30,86 @@ import (
 var _ resource.Resource = &AwsathenaConnectionResource{}
 var _ resource.ResourceWithImportState = &AwsathenaConnectionResource{}
 
-func (t *AwsathenaConnectionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = schema.Schema{
-		MarkdownDescription: ":meta:subcategory:Connections: AWS Athena Connection",
-		Attributes: map[string]schema.Attribute{
-			"organization": schema.StringAttribute{
-				MarkdownDescription: "Organization ID",
-				Optional:            true,
-				Computed:            true,
-			},
-			"name": schema.StringAttribute{
-				Required: true,
-			},
-			"configuration": schema.SingleNestedAttribute{
-				Attributes: map[string]schema.Attribute{
-					"access_id": schema.StringAttribute{
-						MarkdownDescription: `AWS Access ID`,
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           true,
-						PlanModifiers: []planmodifier.String{
-							stringplanmodifier.UseStateForUnknown(),
-						},
+var AwsathenaSchema = schema.Schema{
+	MarkdownDescription: ":meta:subcategory:Connections: AWS Athena Connection",
+	Attributes: map[string]schema.Attribute{
+		"organization": schema.StringAttribute{
+			MarkdownDescription: "Organization ID",
+			Optional:            true,
+			Computed:            true,
+		},
+		"name": schema.StringAttribute{
+			Required: true,
+		},
+		"configuration": schema.SingleNestedAttribute{
+			Attributes: map[string]schema.Attribute{
+				"access_id": schema.StringAttribute{
+					MarkdownDescription: `AWS Access ID`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
 					},
-					"aws_user": schema.StringAttribute{
-						MarkdownDescription: `User ARN`,
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
-					},
-					"outputbucket": schema.StringAttribute{
-						MarkdownDescription: `AWS S3 output bucket
+				},
+				"aws_user": schema.StringAttribute{
+					MarkdownDescription: `User ARN`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
+				"outputbucket": schema.StringAttribute{
+					MarkdownDescription: `AWS S3 output bucket
 
     A pre-existing bucket (folder optional) that AWS can use to store query results. ex: s3://polytomic-athena-results/customer-dataset`,
-						Required:  true,
-						Optional:  false,
-						Computed:  false,
-						Sensitive: false,
-					},
-					"region": schema.StringAttribute{
-						MarkdownDescription: `AWS region`,
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
-					"secret_access_key": schema.StringAttribute{
-						MarkdownDescription: `AWS Secret Access Key`,
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           true,
-						PlanModifiers: []planmodifier.String{
-							stringplanmodifier.UseStateForUnknown(),
-						},
-					},
+					Required:  true,
+					Optional:  false,
+					Computed:  false,
+					Sensitive: false,
 				},
-
-				Required: true,
-
-				PlanModifiers: []planmodifier.Object{
-					objectplanmodifier.UseStateForUnknown(),
+				"region": schema.StringAttribute{
+					MarkdownDescription: `AWS region`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
+				},
+				"secret_access_key": schema.StringAttribute{
+					MarkdownDescription: `AWS Secret Access Key`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
+					},
 				},
 			},
-			"force_destroy": schema.BoolAttribute{
-				MarkdownDescription: forceDestroyMessage,
-				Optional:            true,
-			},
-			"id": schema.StringAttribute{
-				Computed:            true,
-				MarkdownDescription: "AWS Athena Connection identifier",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
+
+			Required: true,
+
+			PlanModifiers: []planmodifier.Object{
+				objectplanmodifier.UseStateForUnknown(),
 			},
 		},
-	}
+		"force_destroy": schema.BoolAttribute{
+			MarkdownDescription: forceDestroyMessage,
+			Optional:            true,
+		},
+		"id": schema.StringAttribute{
+			Computed:            true,
+			MarkdownDescription: "AWS Athena Connection identifier",
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
+		},
+	},
+}
+
+func (t *AwsathenaConnectionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = AwsathenaSchema
 }
 
 type AwsathenaConf struct {
@@ -222,6 +224,14 @@ func (r *AwsathenaConnectionResource) Read(ctx context.Context, req resource.Rea
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
 
+	configAttributes, ok := getConfigAttributes(AwsathenaSchema)
+	if !ok {
+		resp.Diagnostics.AddError("Error getting connection configuration attributes", "Could not get configuration attributes")
+		return
+	}
+
+	connection.Data.Configuration = clearSensitiveValuesFromRead(configAttributes, connection.Data.Configuration)
+
 	conf := AwsathenaConf{}
 	err = mapstructure.Decode(connection.Data.Configuration, &conf)
 	if err != nil {
@@ -264,6 +274,20 @@ func (r *AwsathenaConnectionResource) Update(ctx context.Context, req resource.U
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
+
+	configAttributes, ok := getConfigAttributes(AwsathenaSchema)
+	if !ok {
+		resp.Diagnostics.AddError("Error getting connection configuration attributes", "Could not get configuration attributes")
+		return
+	}
+
+	var prevData connectionData
+
+	diags = req.State.Get(ctx, &prevData)
+	resp.Diagnostics.Append(diags...)
+
+	connConf = handleSensitiveValues(ctx, configAttributes, connConf, prevData.Configuration.Attributes())
+
 	updated, err := client.Connections.Update(ctx,
 		data.Id.ValueString(),
 		&polytomic.UpdateConnectionRequestSchema{

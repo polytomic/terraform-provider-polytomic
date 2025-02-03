@@ -4,9 +4,12 @@ import (
 	"context"
 	_ "embed"
 	"fmt"
+	"log"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	// "go.opentelemetry.io/otel/attribute"
 )
 
 //go:embed force_destroy.md
@@ -56,10 +59,16 @@ func objectMapValue(ctx context.Context, value types.Object) (map[string]interfa
 	out := make(map[string]interface{})
 
 	for k, v := range value.Attributes() {
+		if v.IsNull() || v.IsUnknown() {
+			// don't want to write empty values
+			continue
+		}
+
 		val, err := attrValue(ctx, v)
 		if err != nil {
 			return nil, fmt.Errorf("error converting value for %s: %w", k, err)
 		}
+
 		out[k] = val
 	}
 
@@ -98,4 +107,149 @@ func attrValue(ctx context.Context, val attr.Value) (interface{}, error) {
 	}
 
 	return nil, fmt.Errorf("unsupported type %T", val)
+}
+
+func clearSensitiveValuesFromRead(attrs map[string]schema.Attribute, config map[string]any) map[string]any {
+	for k, v := range attrs {
+		switch v := v.(type) {
+		case schema.ListNestedAttribute:
+			if v.IsSensitive() {
+				delete(config, k)
+			} else {
+				followCfg, ok := config[k].(map[string]any)
+				if !ok {
+					continue
+				}
+
+				config[k] = clearSensitiveValuesFromRead(v.NestedObject.Attributes, followCfg)
+			}
+		case schema.MapNestedAttribute:
+			if v.IsSensitive() {
+				delete(config, k)
+			} else {
+				followCfg, ok := config[k].(map[string]any)
+				if !ok {
+					continue
+				}
+
+				config[k] = clearSensitiveValuesFromRead(v.NestedObject.Attributes, followCfg)
+			}
+		case schema.SetNestedAttribute:
+			if v.IsSensitive() {
+				delete(config, k)
+			} else {
+				followCfg, ok := config[k].(map[string]any)
+				if !ok {
+					continue
+				}
+
+				config[k] = clearSensitiveValuesFromRead(v.NestedObject.Attributes, followCfg)
+			}
+		case schema.SingleNestedAttribute:
+			if v.IsSensitive() {
+				delete(config, k)
+			} else {
+				followCfg, ok := config[k].(map[string]any)
+				if !ok {
+					continue
+				}
+
+				config[k] = clearSensitiveValuesFromRead(v.Attributes, followCfg)
+			}
+		default:
+			if v.IsSensitive() {
+				delete(config, k)
+			}
+		}
+	}
+	return config
+}
+
+func getConfigAttributes(s schema.Schema) (map[string]schema.Attribute, bool) {
+	attrsRaw, ok := s.Attributes["configuration"]
+	if !ok {
+		return nil, false
+	}
+
+	attrs, ok := attrsRaw.(schema.SingleNestedAttribute)
+	if !ok {
+		return nil, false
+	}
+
+	return attrs.Attributes, true
+}
+
+func handleSensitiveValues(ctx context.Context, attrs map[string]schema.Attribute, config map[string]any, priorState map[string]attr.Value) map[string]any {
+	for k, v := range config {
+		attr := attrs[k]
+
+		switch v := attr.(type) {
+		case schema.ListNestedAttribute:
+			if v.IsSensitive() {
+				delete(config, k)
+			} else {
+				nestedPstate, ok := priorState[k].(types.Object)
+				if !ok {
+					log.Printf("prior state for %s is not an object", k)
+					continue
+				}
+				config[k] = handleSensitiveValues(ctx, v.NestedObject.Attributes, config[k].(map[string]any), nestedPstate.Attributes())
+			}
+			continue
+		case schema.MapNestedAttribute:
+			if v.IsSensitive() {
+				delete(config, k)
+			} else {
+				nestedPstate, ok := priorState[k].(types.Object)
+				if !ok {
+					log.Printf("prior state for %s is not an object", k)
+					continue
+				}
+
+				config[k] = handleSensitiveValues(ctx, v.NestedObject.Attributes, config[k].(map[string]any), nestedPstate.Attributes())
+			}
+			continue
+		case schema.SetNestedAttribute:
+			if v.IsSensitive() {
+				delete(config, k)
+			} else {
+				nestedPstate, ok := priorState[k].(types.Object)
+				if !ok {
+					log.Printf("prior state for %s is not an object", k)
+					continue
+				}
+				config[k] = handleSensitiveValues(ctx, v.NestedObject.Attributes, config[k].(map[string]any), nestedPstate.Attributes())
+			}
+			continue
+		case schema.SingleNestedAttribute:
+			if v.IsSensitive() {
+				delete(config, k)
+			} else {
+				nestedPstate, ok := priorState[k].(types.Object)
+				if !ok {
+					log.Printf("prior state for %s is not an object", k)
+					continue
+				}
+				config[k] = handleSensitiveValues(ctx, v.Attributes, config[k].(map[string]any), nestedPstate.Attributes())
+			}
+			continue
+		}
+
+		if attr.IsSensitive() {
+			// if sensitive, see if the value equals the prior state, if it does clear it
+			log.Printf("checking sensitive value for %s", k)
+			compVal, err := attrValue(ctx, priorState[k])
+			if err != nil {
+				log.Printf("error getting prior state for %s: %s", k, err)
+				continue
+				// TODO: maybe return err?
+			}
+
+			if v == compVal {
+				delete(config, k)
+			}
+		}
+	}
+
+	return config
 }

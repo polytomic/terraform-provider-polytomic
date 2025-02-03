@@ -30,313 +30,315 @@ import (
 var _ resource.Resource = &HttpenrichmentConnectionResource{}
 var _ resource.ResourceWithImportState = &HttpenrichmentConnectionResource{}
 
-func (t *HttpenrichmentConnectionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = schema.Schema{
-		MarkdownDescription: ":meta:subcategory:Connections: HTTP Enrichment Connection",
-		Attributes: map[string]schema.Attribute{
-			"organization": schema.StringAttribute{
-				MarkdownDescription: "Organization ID",
-				Optional:            true,
-				Computed:            true,
-			},
-			"name": schema.StringAttribute{
-				Required: true,
-			},
-			"configuration": schema.SingleNestedAttribute{
-				Attributes: map[string]schema.Attribute{
-					"auth": schema.SingleNestedAttribute{
-						MarkdownDescription: `Authentication method`,
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
+var HttpenrichmentSchema = schema.Schema{
+	MarkdownDescription: ":meta:subcategory:Connections: HTTP Enrichment Connection",
+	Attributes: map[string]schema.Attribute{
+		"organization": schema.StringAttribute{
+			MarkdownDescription: "Organization ID",
+			Optional:            true,
+			Computed:            true,
+		},
+		"name": schema.StringAttribute{
+			Required: true,
+		},
+		"configuration": schema.SingleNestedAttribute{
+			Attributes: map[string]schema.Attribute{
+				"auth": schema.SingleNestedAttribute{
+					MarkdownDescription: `Authentication method`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+					Attributes: map[string]schema.Attribute{
+						"basic": schema.SingleNestedAttribute{
+							MarkdownDescription: `Basic authentication`,
+							Required:            false,
+							Optional:            true,
+							Computed:            true,
+							Sensitive:           false,
+							Attributes: map[string]schema.Attribute{
+								"password": schema.StringAttribute{
+									MarkdownDescription: ``,
+									Required:            false,
+									Optional:            true,
+									Computed:            true,
+									Sensitive:           false,
+								},
+								"username": schema.StringAttribute{
+									MarkdownDescription: ``,
+									Required:            false,
+									Optional:            true,
+									Computed:            true,
+									Sensitive:           false,
+								},
+							},
+						},
+						"header": schema.SingleNestedAttribute{
+							MarkdownDescription: `Header key`,
+							Required:            false,
+							Optional:            true,
+							Computed:            true,
+							Sensitive:           false,
+							Attributes: map[string]schema.Attribute{
+								"name": schema.StringAttribute{
+									MarkdownDescription: ``,
+									Required:            false,
+									Optional:            true,
+									Computed:            true,
+									Sensitive:           false,
+								},
+								"value": schema.StringAttribute{
+									MarkdownDescription: ``,
+									Required:            false,
+									Optional:            true,
+									Computed:            true,
+									Sensitive:           false,
+								},
+							},
+						},
+						"oauth": schema.SingleNestedAttribute{
+							MarkdownDescription: ``,
+							Required:            false,
+							Optional:            true,
+							Computed:            true,
+							Sensitive:           false,
+							Attributes: map[string]schema.Attribute{
+								"auth_style": schema.Int64Attribute{
+									MarkdownDescription: `Auth style`,
+									Required:            false,
+									Optional:            true,
+									Computed:            true,
+									Sensitive:           false,
+								},
+								"client_id": schema.StringAttribute{
+									MarkdownDescription: `Client ID`,
+									Required:            false,
+									Optional:            true,
+									Computed:            true,
+									Sensitive:           false,
+								},
+								"client_secret": schema.StringAttribute{
+									MarkdownDescription: `Client secret`,
+									Required:            false,
+									Optional:            true,
+									Computed:            true,
+									Sensitive:           false,
+								},
+								"extra_form_data": schema.SetNestedAttribute{
+									MarkdownDescription: `Extra form data`,
+									Required:            false,
+									Optional:            true,
+									Computed:            true,
+									Sensitive:           false,
+									NestedObject: schema.NestedAttributeObject{
+										Attributes: map[string]schema.Attribute{
+											"name": schema.StringAttribute{
+												MarkdownDescription: ``,
+												Required:            false,
+												Optional:            true,
+												Computed:            true,
+												Sensitive:           false,
+											},
+											"value": schema.StringAttribute{
+												MarkdownDescription: ``,
+												Required:            false,
+												Optional:            true,
+												Computed:            true,
+												Sensitive:           false,
+											},
+										},
+									},
+								},
+								"scopes": schema.SetAttribute{
+									MarkdownDescription: ``,
+									Required:            false,
+									Optional:            true,
+									Computed:            true,
+									Sensitive:           false,
+
+									ElementType: types.StringType,
+								},
+								"token_endpoint": schema.StringAttribute{
+									MarkdownDescription: `Token endpoint`,
+									Required:            false,
+									Optional:            true,
+									Computed:            true,
+									Sensitive:           false,
+								},
+							},
+						},
+					},
+				},
+				"body": schema.StringAttribute{
+					MarkdownDescription: `JSON payload`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
+				"fields": schema.SetNestedAttribute{
+					MarkdownDescription: `List of fields to be returned by the enrichment`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+					NestedObject: schema.NestedAttributeObject{
 						Attributes: map[string]schema.Attribute{
-							"basic": schema.SingleNestedAttribute{
-								MarkdownDescription: `Basic authentication`,
+							"name": schema.StringAttribute{
+								MarkdownDescription: `Name of the field`,
 								Required:            false,
 								Optional:            true,
 								Computed:            true,
 								Sensitive:           false,
-								Attributes: map[string]schema.Attribute{
-									"password": schema.StringAttribute{
-										MarkdownDescription: ``,
-										Required:            false,
-										Optional:            true,
-										Computed:            true,
-										Sensitive:           false,
-									},
-									"username": schema.StringAttribute{
-										MarkdownDescription: ``,
-										Required:            false,
-										Optional:            true,
-										Computed:            true,
-										Sensitive:           false,
-									},
-								},
 							},
-							"header": schema.SingleNestedAttribute{
-								MarkdownDescription: `Header key`,
+							"path": schema.StringAttribute{
+								MarkdownDescription: `JSONPath expression to extract the field from the response`,
 								Required:            false,
 								Optional:            true,
 								Computed:            true,
 								Sensitive:           false,
-								Attributes: map[string]schema.Attribute{
-									"name": schema.StringAttribute{
-										MarkdownDescription: ``,
-										Required:            false,
-										Optional:            true,
-										Computed:            true,
-										Sensitive:           false,
-									},
-									"value": schema.StringAttribute{
-										MarkdownDescription: ``,
-										Required:            false,
-										Optional:            true,
-										Computed:            true,
-										Sensitive:           false,
-									},
-								},
 							},
-							"oauth": schema.SingleNestedAttribute{
+							"type": schema.StringAttribute{
+								MarkdownDescription: `Type of the field`,
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
+								Sensitive:           false,
+							},
+						},
+					},
+				},
+				"headers": schema.SetNestedAttribute{
+					MarkdownDescription: ``,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+					NestedObject: schema.NestedAttributeObject{
+						Attributes: map[string]schema.Attribute{
+							"name": schema.StringAttribute{
 								MarkdownDescription: ``,
 								Required:            false,
 								Optional:            true,
 								Computed:            true,
 								Sensitive:           false,
-								Attributes: map[string]schema.Attribute{
-									"auth_style": schema.Int64Attribute{
-										MarkdownDescription: `Auth style`,
-										Required:            false,
-										Optional:            true,
-										Computed:            true,
-										Sensitive:           false,
-									},
-									"client_id": schema.StringAttribute{
-										MarkdownDescription: `Client ID`,
-										Required:            false,
-										Optional:            true,
-										Computed:            true,
-										Sensitive:           false,
-									},
-									"client_secret": schema.StringAttribute{
-										MarkdownDescription: `Client secret`,
-										Required:            false,
-										Optional:            true,
-										Computed:            true,
-										Sensitive:           false,
-									},
-									"extra_form_data": schema.SetNestedAttribute{
-										MarkdownDescription: `Extra form data`,
-										Required:            false,
-										Optional:            true,
-										Computed:            true,
-										Sensitive:           false,
-										NestedObject: schema.NestedAttributeObject{
-											Attributes: map[string]schema.Attribute{
-												"name": schema.StringAttribute{
-													MarkdownDescription: ``,
-													Required:            false,
-													Optional:            true,
-													Computed:            true,
-													Sensitive:           false,
-												},
-												"value": schema.StringAttribute{
-													MarkdownDescription: ``,
-													Required:            false,
-													Optional:            true,
-													Computed:            true,
-													Sensitive:           false,
-												},
-											},
-										},
-									},
-									"scopes": schema.SetAttribute{
-										MarkdownDescription: ``,
-										Required:            false,
-										Optional:            true,
-										Computed:            true,
-										Sensitive:           false,
-
-										ElementType: types.StringType,
-									},
-									"token_endpoint": schema.StringAttribute{
-										MarkdownDescription: `Token endpoint`,
-										Required:            false,
-										Optional:            true,
-										Computed:            true,
-										Sensitive:           false,
-									},
-								},
+							},
+							"value": schema.StringAttribute{
+								MarkdownDescription: ``,
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
+								Sensitive:           false,
 							},
 						},
 					},
-					"body": schema.StringAttribute{
-						MarkdownDescription: `JSON payload`,
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
-					},
-					"fields": schema.SetNestedAttribute{
-						MarkdownDescription: `List of fields to be returned by the enrichment`,
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
-						NestedObject: schema.NestedAttributeObject{
-							Attributes: map[string]schema.Attribute{
-								"name": schema.StringAttribute{
-									MarkdownDescription: `Name of the field`,
-									Required:            false,
-									Optional:            true,
-									Computed:            true,
-									Sensitive:           false,
-								},
-								"path": schema.StringAttribute{
-									MarkdownDescription: `JSONPath expression to extract the field from the response`,
-									Required:            false,
-									Optional:            true,
-									Computed:            true,
-									Sensitive:           false,
-								},
-								"type": schema.StringAttribute{
-									MarkdownDescription: `Type of the field`,
-									Required:            false,
-									Optional:            true,
-									Computed:            true,
-									Sensitive:           false,
-								},
-							},
-						},
-					},
-					"headers": schema.SetNestedAttribute{
-						MarkdownDescription: ``,
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
-						NestedObject: schema.NestedAttributeObject{
-							Attributes: map[string]schema.Attribute{
-								"name": schema.StringAttribute{
-									MarkdownDescription: ``,
-									Required:            false,
-									Optional:            true,
-									Computed:            true,
-									Sensitive:           false,
-								},
-								"value": schema.StringAttribute{
-									MarkdownDescription: ``,
-									Required:            false,
-									Optional:            true,
-									Computed:            true,
-									Sensitive:           false,
-								},
-							},
-						},
-					},
-					"healthcheck": schema.StringAttribute{
-						MarkdownDescription: `Health check endpoint
+				},
+				"healthcheck": schema.StringAttribute{
+					MarkdownDescription: `Health check endpoint
 
     Path to request when checking the health of this connection. No health check will be performed if left empty.`,
-						Required:  false,
-						Optional:  true,
-						Computed:  true,
-						Sensitive: false,
-					},
-					"input_mappings": schema.SetNestedAttribute{
-						MarkdownDescription: `Input mappings
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
+				},
+				"input_mappings": schema.SetNestedAttribute{
+					MarkdownDescription: `Input mappings
 
     List of input mappings to be used in the query. Each mapping should be a valid JSONPath expression.`,
-						Required:  false,
-						Optional:  true,
-						Computed:  true,
-						Sensitive: false,
-						NestedObject: schema.NestedAttributeObject{
-							Attributes: map[string]schema.Attribute{
-								"name": schema.StringAttribute{
-									MarkdownDescription: `Name of the input mapping`,
-									Required:            false,
-									Optional:            true,
-									Computed:            true,
-									Sensitive:           false,
-								},
-								"required": schema.BoolAttribute{
-									MarkdownDescription: `Whether the input mapping is required`,
-									Required:            false,
-									Optional:            true,
-									Computed:            true,
-									Sensitive:           false,
-								},
-								"type": schema.StringAttribute{
-									MarkdownDescription: `Type of the input mapping`,
-									Required:            false,
-									Optional:            true,
-									Computed:            true,
-									Sensitive:           false,
-								},
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
+					NestedObject: schema.NestedAttributeObject{
+						Attributes: map[string]schema.Attribute{
+							"name": schema.StringAttribute{
+								MarkdownDescription: `Name of the input mapping`,
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
+								Sensitive:           false,
+							},
+							"required": schema.BoolAttribute{
+								MarkdownDescription: `Whether the input mapping is required`,
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
+								Sensitive:           false,
+							},
+							"type": schema.StringAttribute{
+								MarkdownDescription: `Type of the input mapping`,
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
+								Sensitive:           false,
 							},
 						},
 					},
-					"method": schema.StringAttribute{
-						MarkdownDescription: `HTTP Method`,
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
-					},
-					"parameters": schema.SetNestedAttribute{
-						MarkdownDescription: `Query string parameters`,
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
-						NestedObject: schema.NestedAttributeObject{
-							Attributes: map[string]schema.Attribute{
-								"name": schema.StringAttribute{
-									MarkdownDescription: ``,
-									Required:            false,
-									Optional:            true,
-									Computed:            true,
-									Sensitive:           false,
-								},
-								"value": schema.StringAttribute{
-									MarkdownDescription: ``,
-									Required:            false,
-									Optional:            true,
-									Computed:            true,
-									Sensitive:           false,
-								},
+				},
+				"method": schema.StringAttribute{
+					MarkdownDescription: `HTTP Method`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
+				"parameters": schema.SetNestedAttribute{
+					MarkdownDescription: `Query string parameters`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+					NestedObject: schema.NestedAttributeObject{
+						Attributes: map[string]schema.Attribute{
+							"name": schema.StringAttribute{
+								MarkdownDescription: ``,
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
+								Sensitive:           false,
+							},
+							"value": schema.StringAttribute{
+								MarkdownDescription: ``,
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
+								Sensitive:           false,
 							},
 						},
 					},
-					"url": schema.StringAttribute{
-						MarkdownDescription: `Base URL`,
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
 				},
-
-				Required: true,
-
-				PlanModifiers: []planmodifier.Object{
-					objectplanmodifier.UseStateForUnknown(),
+				"url": schema.StringAttribute{
+					MarkdownDescription: `Base URL`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
 				},
 			},
-			"force_destroy": schema.BoolAttribute{
-				MarkdownDescription: forceDestroyMessage,
-				Optional:            true,
-			},
-			"id": schema.StringAttribute{
-				Computed:            true,
-				MarkdownDescription: "HTTP Enrichment Connection identifier",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
+
+			Required: true,
+
+			PlanModifiers: []planmodifier.Object{
+				objectplanmodifier.UseStateForUnknown(),
 			},
 		},
-	}
+		"force_destroy": schema.BoolAttribute{
+			MarkdownDescription: forceDestroyMessage,
+			Optional:            true,
+		},
+		"id": schema.StringAttribute{
+			Computed:            true,
+			MarkdownDescription: "HTTP Enrichment Connection identifier",
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
+		},
+	},
+}
+
+func (t *HttpenrichmentConnectionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = HttpenrichmentSchema
 }
 
 type HttpenrichmentConf struct {
@@ -554,6 +556,14 @@ func (r *HttpenrichmentConnectionResource) Read(ctx context.Context, req resourc
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
 
+	configAttributes, ok := getConfigAttributes(HttpenrichmentSchema)
+	if !ok {
+		resp.Diagnostics.AddError("Error getting connection configuration attributes", "Could not get configuration attributes")
+		return
+	}
+
+	connection.Data.Configuration = clearSensitiveValuesFromRead(configAttributes, connection.Data.Configuration)
+
 	conf := HttpenrichmentConf{}
 	err = mapstructure.Decode(connection.Data.Configuration, &conf)
 	if err != nil {
@@ -661,6 +671,20 @@ func (r *HttpenrichmentConnectionResource) Update(ctx context.Context, req resou
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
+
+	configAttributes, ok := getConfigAttributes(HttpenrichmentSchema)
+	if !ok {
+		resp.Diagnostics.AddError("Error getting connection configuration attributes", "Could not get configuration attributes")
+		return
+	}
+
+	var prevData connectionData
+
+	diags = req.State.Get(ctx, &prevData)
+	resp.Diagnostics.Append(diags...)
+
+	connConf = handleSensitiveValues(ctx, configAttributes, connConf, prevData.Configuration.Attributes())
+
 	updated, err := client.Connections.Update(ctx,
 		data.Id.ValueString(),
 		&polytomic.UpdateConnectionRequestSchema{

@@ -30,138 +30,140 @@ import (
 var _ resource.Resource = &S3ConnectionResource{}
 var _ resource.ResourceWithImportState = &S3ConnectionResource{}
 
-func (t *S3ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = schema.Schema{
-		MarkdownDescription: ":meta:subcategory:Connections: S3 Connection",
-		Attributes: map[string]schema.Attribute{
-			"organization": schema.StringAttribute{
-				MarkdownDescription: "Organization ID",
-				Optional:            true,
-				Computed:            true,
-			},
-			"name": schema.StringAttribute{
-				Required: true,
-			},
-			"configuration": schema.SingleNestedAttribute{
-				Attributes: map[string]schema.Attribute{
-					"auth_mode": schema.StringAttribute{
-						MarkdownDescription: `Authentication Method
+var S3Schema = schema.Schema{
+	MarkdownDescription: ":meta:subcategory:Connections: S3 Connection",
+	Attributes: map[string]schema.Attribute{
+		"organization": schema.StringAttribute{
+			MarkdownDescription: "Organization ID",
+			Optional:            true,
+			Computed:            true,
+		},
+		"name": schema.StringAttribute{
+			Required: true,
+		},
+		"configuration": schema.SingleNestedAttribute{
+			Attributes: map[string]schema.Attribute{
+				"auth_mode": schema.StringAttribute{
+					MarkdownDescription: `Authentication Method
 
     How to authenticate with AWS. Defaults to Access Key and Secret`,
-						Required:  true,
-						Optional:  false,
-						Computed:  false,
-						Sensitive: false,
-					},
-					"aws_access_key_id": schema.StringAttribute{
-						MarkdownDescription: `AWS Access Key ID
+					Required:  true,
+					Optional:  false,
+					Computed:  false,
+					Sensitive: false,
+				},
+				"aws_access_key_id": schema.StringAttribute{
+					MarkdownDescription: `AWS Access Key ID
 
     Access Key ID with read/write access to a bucket.`,
-						Required:  false,
-						Optional:  true,
-						Computed:  true,
-						Sensitive: false,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
+				},
+				"aws_secret_access_key": schema.StringAttribute{
+					MarkdownDescription: `AWS Secret Access Key`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
 					},
-					"aws_secret_access_key": schema.StringAttribute{
-						MarkdownDescription: `AWS Secret Access Key`,
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           true,
-						PlanModifiers: []planmodifier.String{
-							stringplanmodifier.UseStateForUnknown(),
-						},
-					},
-					"aws_user": schema.StringAttribute{
-						MarkdownDescription: `User ARN`,
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
-					},
-					"external_id": schema.StringAttribute{
-						MarkdownDescription: `External ID for the IAM role`,
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
-					},
-					"iam_role_arn": schema.StringAttribute{
-						MarkdownDescription: `IAM Role ARN`,
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
-					},
-					"is_single_table": schema.BoolAttribute{
-						MarkdownDescription: `Files are time-based snapshots
+				},
+				"aws_user": schema.StringAttribute{
+					MarkdownDescription: `User ARN`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
+				"external_id": schema.StringAttribute{
+					MarkdownDescription: `External ID for the IAM role`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
+				"iam_role_arn": schema.StringAttribute{
+					MarkdownDescription: `IAM Role ARN`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
+				"is_single_table": schema.BoolAttribute{
+					MarkdownDescription: `Files are time-based snapshots
 
     Treat the files as a single table.`,
-						Required:  false,
-						Optional:  true,
-						Computed:  true,
-						Sensitive: false,
-					},
-					"s3_bucket_name": schema.StringAttribute{
-						MarkdownDescription: `S3 Bucket Name
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
+				},
+				"s3_bucket_name": schema.StringAttribute{
+					MarkdownDescription: `S3 Bucket Name
 
     Bucket name (folder optional); ex: s3://polytomic/dataset`,
-						Required:  true,
-						Optional:  false,
-						Computed:  false,
-						Sensitive: false,
-					},
-					"s3_bucket_region": schema.StringAttribute{
-						MarkdownDescription: `S3 Bucket Region`,
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
-					"single_table_file_format": schema.StringAttribute{
-						MarkdownDescription: `File format`,
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
-					},
-					"single_table_name": schema.StringAttribute{
-						MarkdownDescription: `Collection name`,
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
-					},
-					"skip_lines": schema.Int64Attribute{
-						MarkdownDescription: `Skip first lines
+					Required:  true,
+					Optional:  false,
+					Computed:  false,
+					Sensitive: false,
+				},
+				"s3_bucket_region": schema.StringAttribute{
+					MarkdownDescription: `S3 Bucket Region`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
+				},
+				"single_table_file_format": schema.StringAttribute{
+					MarkdownDescription: `File format`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
+				"single_table_name": schema.StringAttribute{
+					MarkdownDescription: `Collection name`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
+				"skip_lines": schema.Int64Attribute{
+					MarkdownDescription: `Skip first lines
 
     Skip first N lines of each CSV file.`,
-						Required:  false,
-						Optional:  true,
-						Computed:  true,
-						Sensitive: false,
-					},
-				},
-
-				Required: true,
-
-				PlanModifiers: []planmodifier.Object{
-					objectplanmodifier.UseStateForUnknown(),
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
 				},
 			},
-			"force_destroy": schema.BoolAttribute{
-				MarkdownDescription: forceDestroyMessage,
-				Optional:            true,
-			},
-			"id": schema.StringAttribute{
-				Computed:            true,
-				MarkdownDescription: "S3 Connection identifier",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
+
+			Required: true,
+
+			PlanModifiers: []planmodifier.Object{
+				objectplanmodifier.UseStateForUnknown(),
 			},
 		},
-	}
+		"force_destroy": schema.BoolAttribute{
+			MarkdownDescription: forceDestroyMessage,
+			Optional:            true,
+		},
+		"id": schema.StringAttribute{
+			Computed:            true,
+			MarkdownDescription: "S3 Connection identifier",
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
+		},
+	},
+}
+
+func (t *S3ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = S3Schema
 }
 
 type S3Conf struct {
@@ -290,6 +292,14 @@ func (r *S3ConnectionResource) Read(ctx context.Context, req resource.ReadReques
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
 
+	configAttributes, ok := getConfigAttributes(S3Schema)
+	if !ok {
+		resp.Diagnostics.AddError("Error getting connection configuration attributes", "Could not get configuration attributes")
+		return
+	}
+
+	connection.Data.Configuration = clearSensitiveValuesFromRead(configAttributes, connection.Data.Configuration)
+
 	conf := S3Conf{}
 	err = mapstructure.Decode(connection.Data.Configuration, &conf)
 	if err != nil {
@@ -339,6 +349,20 @@ func (r *S3ConnectionResource) Update(ctx context.Context, req resource.UpdateRe
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
+
+	configAttributes, ok := getConfigAttributes(S3Schema)
+	if !ok {
+		resp.Diagnostics.AddError("Error getting connection configuration attributes", "Could not get configuration attributes")
+		return
+	}
+
+	var prevData connectionData
+
+	diags = req.State.Get(ctx, &prevData)
+	resp.Diagnostics.Append(diags...)
+
+	connConf = handleSensitiveValues(ctx, configAttributes, connConf, prevData.Configuration.Attributes())
+
 	updated, err := client.Connections.Update(ctx,
 		data.Id.ValueString(),
 		&polytomic.UpdateConnectionRequestSchema{
