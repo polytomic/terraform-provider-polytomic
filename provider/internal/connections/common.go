@@ -59,8 +59,8 @@ func objectMapValue(ctx context.Context, value types.Object) (map[string]interfa
 	out := make(map[string]interface{})
 
 	for k, v := range value.Attributes() {
-		if v.IsNull() || v.IsUnknown() {
-			// don't want to write empty values
+		if v.IsUnknown() {
+			// don't want to write unknown values
 			continue
 		}
 
