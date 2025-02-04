@@ -202,7 +202,7 @@ var DatabricksSchema = schema.Schema{
 				"s3_bucket_region": schema.StringAttribute{
 					MarkdownDescription: `S3 Bucket Region (destinations only)
 
-    Region of bucket.example=us-east-1`,
+    Region of bucket`,
 					Required:  false,
 					Optional:  true,
 					Computed:  true,

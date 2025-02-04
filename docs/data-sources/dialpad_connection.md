@@ -34,4 +34,9 @@ data "polytomic_dialpad_connection" "dialpad" {
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
+Read-Only:
+
+- `auth_method` (String) Authentication method
+- `oauth_token_expiry` (String)
+
 

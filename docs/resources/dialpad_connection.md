@@ -16,7 +16,11 @@ Dialpad Connection
 resource "polytomic_dialpad_connection" "dialpad" {
   name = "example"
   configuration = {
-    api_key = "tdYoegMt2eLlP0FWY9F3vxU3mM9ZG6TIQpzTeeH1uLEJWB81oEXqIyjbbRBzSv8QYaoiH8rH4sdrhIt1"
+    api_key             = "2px8lqeoakuea2ccl4rxm13i6tb"
+    application_id      = "a45gadsfdsaf47byor2ugfbhsgllpf12gf56gfds"
+    auth_method         = "api_key"
+    client_secret       = "ay8d5hdepz62px8lqeoakuea2ccl4rxm13i6tbyorxhu1i20kc8ruvksmzxq"
+    oauth_refresh_token = "dasfdasz62px8lqeoakuea2ccl4rxm13i6tbyorxhu1i20kc8ruvksmzxq"
   }
 }
 ```
@@ -54,6 +58,14 @@ state before it will take effect on a destroy operation.
 
 Required:
 
-- `api_key` (String, Sensitive) API key
+- `auth_method` (String) Authentication method
+
+Optional:
+
+- `api_key` (String, Sensitive) API Key
+- `application_id` (String, Sensitive)
+- `client_secret` (String, Sensitive)
+- `oauth_refresh_token` (String, Sensitive)
+- `oauth_token_expiry` (String)
 
 

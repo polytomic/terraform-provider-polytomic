@@ -51,10 +51,10 @@ var Zendesk_chatSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"domain": schema.StringAttribute{
-					MarkdownDescription: `Zendesk Support Subdomain (required if you login to Chat via Zendesk Support)`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
+					MarkdownDescription: `Zendesk Support Subdomain`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
 					Sensitive:           false,
 				},
 				"ratelimit_rpm": schema.Int64Attribute{

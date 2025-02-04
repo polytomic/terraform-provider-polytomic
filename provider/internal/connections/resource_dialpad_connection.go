@@ -44,14 +44,58 @@ var DialpadSchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"api_key": schema.StringAttribute{
-					MarkdownDescription: `API key`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
+					MarkdownDescription: `API Key`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
 					Sensitive:           true,
 					PlanModifiers: []planmodifier.String{
 						stringplanmodifier.UseStateForUnknown(),
 					},
+				},
+				"application_id": schema.StringAttribute{
+					MarkdownDescription: ``,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
+					},
+				},
+				"auth_method": schema.StringAttribute{
+					MarkdownDescription: `Authentication method`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
+				},
+				"client_secret": schema.StringAttribute{
+					MarkdownDescription: ``,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
+					},
+				},
+				"oauth_refresh_token": schema.StringAttribute{
+					MarkdownDescription: ``,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
+					},
+				},
+				"oauth_token_expiry": schema.StringAttribute{
+					MarkdownDescription: ``,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
 				},
 			},
 
@@ -80,7 +124,12 @@ func (t *DialpadConnectionResource) Schema(ctx context.Context, req resource.Sch
 }
 
 type DialpadConf struct {
-	Api_key string `mapstructure:"api_key" tfsdk:"api_key"`
+	Api_key             string `mapstructure:"api_key" tfsdk:"api_key"`
+	Application_id      string `mapstructure:"application_id" tfsdk:"application_id"`
+	Auth_method         string `mapstructure:"auth_method" tfsdk:"auth_method"`
+	Client_secret       string `mapstructure:"client_secret" tfsdk:"client_secret"`
+	Oauth_refresh_token string `mapstructure:"oauth_refresh_token" tfsdk:"oauth_refresh_token"`
+	Oauth_token_expiry  string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
 }
 
 type DialpadConnectionResource struct {
@@ -139,7 +188,12 @@ func (r *DialpadConnectionResource) Create(ctx context.Context, req resource.Cre
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"api_key": types.StringType,
+		"api_key":             types.StringType,
+		"application_id":      types.StringType,
+		"auth_method":         types.StringType,
+		"client_secret":       types.StringType,
+		"oauth_refresh_token": types.StringType,
+		"oauth_token_expiry":  types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -205,7 +259,12 @@ func (r *DialpadConnectionResource) Read(ctx context.Context, req resource.ReadR
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"api_key": types.StringType,
+		"api_key":             types.StringType,
+		"application_id":      types.StringType,
+		"auth_method":         types.StringType,
+		"client_secret":       types.StringType,
+		"oauth_refresh_token": types.StringType,
+		"oauth_token_expiry":  types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -274,7 +333,12 @@ func (r *DialpadConnectionResource) Update(ctx context.Context, req resource.Upd
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"api_key": types.StringType,
+		"api_key":             types.StringType,
+		"application_id":      types.StringType,
+		"auth_method":         types.StringType,
+		"client_secret":       types.StringType,
+		"oauth_refresh_token": types.StringType,
+		"oauth_token_expiry":  types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

@@ -93,7 +93,7 @@ var FbaudienceSchema = schema.Schema{
 					},
 				},
 				"graph_api_version": schema.StringAttribute{
-					MarkdownDescription: `Graph API Version`,
+					MarkdownDescription: `Graph API version`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,

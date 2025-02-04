@@ -19,7 +19,7 @@ resource "polytomic_fbaudience_connection" "fbaudience" {
     account_id        = "1234567890"
     auth_method       = "token"
     byo_app_token     = "secret"
-    graph_api_version = "v19.0"
+    graph_api_version = "v22.0"
   }
 }
 ```
@@ -64,7 +64,7 @@ Optional:
 - `account_id` (String) Account ID
 - `accounts` (Attributes Set) (see [below for nested schema](#nestedatt--configuration--accounts))
 - `byo_app_token` (String, Sensitive) Token
-- `graph_api_version` (String) Graph API Version
+- `graph_api_version` (String) Graph API version
 - `user_name` (String) Connected as
 
 <a id="nestedatt--configuration--accounts"></a>

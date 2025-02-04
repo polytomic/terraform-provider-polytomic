@@ -52,10 +52,13 @@ state before it will take effect on a destroy operation.
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
+Required:
+
+- `domain` (String) Zendesk Support Subdomain
+
 Optional:
 
 - `custom_api_limits` (Boolean) Enforce custom API limits
-- `domain` (String) Zendesk Support Subdomain (required if you login to Chat via Zendesk Support)
 - `ratelimit_rpm` (Number) Maximum requests per minute
 
     Set a custom maximum request per minute limit.

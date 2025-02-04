@@ -43,6 +43,13 @@ var RedshiftserverlessSchema = schema.Schema{
 		},
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
+				"connection_method": schema.StringAttribute{
+					MarkdownDescription: `Connection method`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
+				},
 				"data_api_endpoint": schema.StringAttribute{
 					MarkdownDescription: `Redshift Data API endpoint
 
@@ -57,6 +64,13 @@ var RedshiftserverlessSchema = schema.Schema{
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
+					Sensitive:           false,
+				},
+				"endpoint": schema.StringAttribute{
+					MarkdownDescription: `Redshift Serverless endpoint`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
 					Sensitive:           false,
 				},
 				"external_id": schema.StringAttribute{
@@ -121,8 +135,10 @@ func (t *RedshiftserverlessConnectionResource) Schema(ctx context.Context, req r
 }
 
 type RedshiftserverlessConf struct {
+	Connection_method string `mapstructure:"connection_method" tfsdk:"connection_method"`
 	Data_api_endpoint string `mapstructure:"data_api_endpoint" tfsdk:"data_api_endpoint"`
 	Database          string `mapstructure:"database" tfsdk:"database"`
+	Endpoint          string `mapstructure:"endpoint" tfsdk:"endpoint"`
 	External_id       string `mapstructure:"external_id" tfsdk:"external_id"`
 	Iam_role_arn      string `mapstructure:"iam_role_arn" tfsdk:"iam_role_arn"`
 	Override_endpoint bool   `mapstructure:"override_endpoint" tfsdk:"override_endpoint"`
@@ -186,8 +202,10 @@ func (r *RedshiftserverlessConnectionResource) Create(ctx context.Context, req r
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"connection_method": types.StringType,
 		"data_api_endpoint": types.StringType,
 		"database":          types.StringType,
+		"endpoint":          types.StringType,
 		"external_id":       types.StringType,
 		"iam_role_arn":      types.StringType,
 		"override_endpoint": types.BoolType,
@@ -258,8 +276,10 @@ func (r *RedshiftserverlessConnectionResource) Read(ctx context.Context, req res
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"connection_method": types.StringType,
 		"data_api_endpoint": types.StringType,
 		"database":          types.StringType,
+		"endpoint":          types.StringType,
 		"external_id":       types.StringType,
 		"iam_role_arn":      types.StringType,
 		"override_endpoint": types.BoolType,
@@ -333,8 +353,10 @@ func (r *RedshiftserverlessConnectionResource) Update(ctx context.Context, req r
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"connection_method": types.StringType,
 		"data_api_endpoint": types.StringType,
 		"database":          types.StringType,
+		"endpoint":          types.StringType,
 		"external_id":       types.StringType,
 		"iam_role_arn":      types.StringType,
 		"override_endpoint": types.BoolType,

@@ -43,6 +43,23 @@ var NetsuiteopenairSchema = schema.Schema{
 		},
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
+				"api_key": schema.StringAttribute{
+					MarkdownDescription: `API Key`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
+					},
+				},
+				"api_namespace": schema.StringAttribute{
+					MarkdownDescription: `API Namespace`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
+				},
 				"client_id": schema.StringAttribute{
 					MarkdownDescription: `Client ID`,
 					Required:            true,
@@ -97,6 +114,8 @@ func (t *NetsuiteopenairConnectionResource) Schema(ctx context.Context, req reso
 }
 
 type NetsuiteopenairConf struct {
+	Api_key       string `mapstructure:"api_key" tfsdk:"api_key"`
+	Api_namespace string `mapstructure:"api_namespace" tfsdk:"api_namespace"`
 	Client_id     string `mapstructure:"client_id" tfsdk:"client_id"`
 	Client_secret string `mapstructure:"client_secret" tfsdk:"client_secret"`
 	Company_id    string `mapstructure:"company_id" tfsdk:"company_id"`
@@ -158,6 +177,8 @@ func (r *NetsuiteopenairConnectionResource) Create(ctx context.Context, req reso
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"api_key":       types.StringType,
+		"api_namespace": types.StringType,
 		"client_id":     types.StringType,
 		"client_secret": types.StringType,
 		"company_id":    types.StringType,
@@ -226,6 +247,8 @@ func (r *NetsuiteopenairConnectionResource) Read(ctx context.Context, req resour
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"api_key":       types.StringType,
+		"api_namespace": types.StringType,
 		"client_id":     types.StringType,
 		"client_secret": types.StringType,
 		"company_id":    types.StringType,
@@ -297,6 +320,8 @@ func (r *NetsuiteopenairConnectionResource) Update(ctx context.Context, req reso
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"api_key":       types.StringType,
+		"api_namespace": types.StringType,
 		"client_id":     types.StringType,
 		"client_secret": types.StringType,
 		"company_id":    types.StringType,

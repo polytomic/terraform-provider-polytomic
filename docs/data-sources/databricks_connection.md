@@ -66,7 +66,7 @@ Read-Only:
     Name of bucket used for staging data load files
 - `s3_bucket_region` (String) S3 Bucket Region (destinations only)
 
-    Region of bucket.example=us-east-1
+    Region of bucket
 - `server_hostname` (String) Server Hostname
 - `set_retention_properties` (Boolean) Configure data retention for tables
 - `storage_credential_name` (String) Storage credential name

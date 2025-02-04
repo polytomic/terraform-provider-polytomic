@@ -26,6 +26,7 @@ resource "polytomic_databricks_connection" "databricks" {
     container_name        = "container"
     http_path             = "/sql"
     s3_bucket_name        = "s3://polytomic-databricks-results/customer-dataset"
+    s3_bucket_region      = "us-east-1"
     server_hostname       = "dbc-1234dsafas-d0001.cloud.databricks.com"
   }
 }
@@ -103,7 +104,7 @@ Optional:
     Name of bucket used for staging data load files
 - `s3_bucket_region` (String) S3 Bucket Region (destinations only)
 
-    Region of bucket.example=us-east-1
+    Region of bucket
 - `set_retention_properties` (Boolean) Configure data retention for tables
 - `storage_credential_name` (String) Storage credential name
 - `unity_catalog_enabled` (Boolean) Unity Catalog enabled

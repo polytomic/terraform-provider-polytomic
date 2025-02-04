@@ -75,7 +75,7 @@ func (d *FbaudienceConnectionDataSource) Schema(ctx context.Context, req datasou
 						Computed:            true,
 					},
 					"graph_api_version": schema.StringAttribute{
-						MarkdownDescription: `Graph API Version`,
+						MarkdownDescription: `Graph API version`,
 						Computed:            true,
 					},
 					"user_name": schema.StringAttribute{

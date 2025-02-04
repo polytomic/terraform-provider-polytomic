@@ -55,7 +55,7 @@ state before it will take effect on a destroy operation.
 
 Required:
 
-- `api_key` (String, Sensitive) API key
+- `api_key` (String, Sensitive) API token
 - `domain` (String) https://{domain}-be.glean.com
 
 

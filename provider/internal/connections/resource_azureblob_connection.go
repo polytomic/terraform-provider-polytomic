@@ -45,9 +45,9 @@ var AzureblobSchema = schema.Schema{
 			Attributes: map[string]schema.Attribute{
 				"access_key": schema.StringAttribute{
 					MarkdownDescription: `Access Key`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
 					Sensitive:           true,
 					PlanModifiers: []planmodifier.String{
 						stringplanmodifier.UseStateForUnknown(),
@@ -59,6 +59,30 @@ var AzureblobSchema = schema.Schema{
 					Optional:            false,
 					Computed:            false,
 					Sensitive:           false,
+				},
+				"auth_method": schema.StringAttribute{
+					MarkdownDescription: `Authentication method`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
+				},
+				"client_id": schema.StringAttribute{
+					MarkdownDescription: `Client ID`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
+				"client_secret": schema.StringAttribute{
+					MarkdownDescription: `Client Secret`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
+					},
 				},
 				"container_name": schema.StringAttribute{
 					MarkdownDescription: `Container Name`,
@@ -75,6 +99,16 @@ var AzureblobSchema = schema.Schema{
 					Optional:  true,
 					Computed:  true,
 					Sensitive: false,
+				},
+				"oauth_refresh_token": schema.StringAttribute{
+					MarkdownDescription: ``,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
+					},
 				},
 				"single_table_file_format": schema.StringAttribute{
 					MarkdownDescription: `File format`,
@@ -98,6 +132,13 @@ var AzureblobSchema = schema.Schema{
 					Optional:  true,
 					Computed:  true,
 					Sensitive: false,
+				},
+				"tenant_id": schema.StringAttribute{
+					MarkdownDescription: `Tenant ID`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
 				},
 			},
 
@@ -128,11 +169,16 @@ func (t *AzureblobConnectionResource) Schema(ctx context.Context, req resource.S
 type AzureblobConf struct {
 	Access_key               string `mapstructure:"access_key" tfsdk:"access_key"`
 	Account_name             string `mapstructure:"account_name" tfsdk:"account_name"`
+	Auth_method              string `mapstructure:"auth_method" tfsdk:"auth_method"`
+	Client_id                string `mapstructure:"client_id" tfsdk:"client_id"`
+	Client_secret            string `mapstructure:"client_secret" tfsdk:"client_secret"`
 	Container_name           string `mapstructure:"container_name" tfsdk:"container_name"`
 	Is_single_table          bool   `mapstructure:"is_single_table" tfsdk:"is_single_table"`
+	Oauth_refresh_token      string `mapstructure:"oauth_refresh_token" tfsdk:"oauth_refresh_token"`
 	Single_table_file_format string `mapstructure:"single_table_file_format" tfsdk:"single_table_file_format"`
 	Single_table_name        string `mapstructure:"single_table_name" tfsdk:"single_table_name"`
 	Skip_lines               int64  `mapstructure:"skip_lines" tfsdk:"skip_lines"`
+	Tenant_id                string `mapstructure:"tenant_id" tfsdk:"tenant_id"`
 }
 
 type AzureblobConnectionResource struct {
@@ -193,11 +239,16 @@ func (r *AzureblobConnectionResource) Create(ctx context.Context, req resource.C
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"access_key":               types.StringType,
 		"account_name":             types.StringType,
+		"auth_method":              types.StringType,
+		"client_id":                types.StringType,
+		"client_secret":            types.StringType,
 		"container_name":           types.StringType,
 		"is_single_table":          types.BoolType,
+		"oauth_refresh_token":      types.StringType,
 		"single_table_file_format": types.StringType,
 		"single_table_name":        types.StringType,
 		"skip_lines":               types.NumberType,
+		"tenant_id":                types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -265,11 +316,16 @@ func (r *AzureblobConnectionResource) Read(ctx context.Context, req resource.Rea
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"access_key":               types.StringType,
 		"account_name":             types.StringType,
+		"auth_method":              types.StringType,
+		"client_id":                types.StringType,
+		"client_secret":            types.StringType,
 		"container_name":           types.StringType,
 		"is_single_table":          types.BoolType,
+		"oauth_refresh_token":      types.StringType,
 		"single_table_file_format": types.StringType,
 		"single_table_name":        types.StringType,
 		"skip_lines":               types.NumberType,
+		"tenant_id":                types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -340,11 +396,16 @@ func (r *AzureblobConnectionResource) Update(ctx context.Context, req resource.U
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"access_key":               types.StringType,
 		"account_name":             types.StringType,
+		"auth_method":              types.StringType,
+		"client_id":                types.StringType,
+		"client_secret":            types.StringType,
 		"container_name":           types.StringType,
 		"is_single_table":          types.BoolType,
+		"oauth_refresh_token":      types.StringType,
 		"single_table_file_format": types.StringType,
 		"single_table_name":        types.StringType,
 		"skip_lines":               types.NumberType,
+		"tenant_id":                types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

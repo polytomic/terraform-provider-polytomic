@@ -54,6 +54,14 @@ func (d *AzureblobConnectionDataSource) Schema(ctx context.Context, req datasour
 						MarkdownDescription: `Account Name`,
 						Computed:            true,
 					},
+					"auth_method": schema.StringAttribute{
+						MarkdownDescription: `Authentication method`,
+						Computed:            true,
+					},
+					"client_id": schema.StringAttribute{
+						MarkdownDescription: `Client ID`,
+						Computed:            true,
+					},
 					"container_name": schema.StringAttribute{
 						MarkdownDescription: `Container Name`,
 						Computed:            true,
@@ -77,6 +85,10 @@ func (d *AzureblobConnectionDataSource) Schema(ctx context.Context, req datasour
 
     Skip first N lines of each CSV file.`,
 						Computed: true,
+					},
+					"tenant_id": schema.StringAttribute{
+						MarkdownDescription: `Tenant ID`,
+						Computed:            true,
 					},
 				},
 				Optional: true,
@@ -117,6 +129,12 @@ func (d *AzureblobConnectionDataSource) Read(ctx context.Context, req datasource
 			"account_name": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["account_name"], "string").(string),
 			),
+			"auth_method": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["auth_method"], "string").(string),
+			),
+			"client_id": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["client_id"], "string").(string),
+			),
 			"container_name": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["container_name"], "string").(string),
 			),
@@ -131,6 +149,9 @@ func (d *AzureblobConnectionDataSource) Read(ctx context.Context, req datasource
 			),
 			"skip_lines": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["skip_lines"], "string").(string),
+			),
+			"tenant_id": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["tenant_id"], "string").(string),
 			),
 		},
 	)

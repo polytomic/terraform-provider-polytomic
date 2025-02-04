@@ -67,7 +67,7 @@ func (d *SalesforceConnectionDataSource) Schema(ctx context.Context, req datasou
 					"enable_multicurrency_lookup": schema.BoolAttribute{
 						MarkdownDescription: `Enable multicurrency source field support
 
-    If incremenetal mode for bulk-syncing from Salesforce formula fields is enabled, setting this to true extends support to accurate currency conversions.`,
+    If incremental mode for bulk-syncing from Salesforce formula fields is enabled, setting this to true extends support to accurate currency conversions.`,
 						Computed: true,
 					},
 					"enable_tooling": schema.BoolAttribute{
