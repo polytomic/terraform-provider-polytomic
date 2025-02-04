@@ -189,7 +189,14 @@ func (r *MailercheckConnectionResource) Read(ctx context.Context, req resource.R
 		return
 	}
 
-	connection.Data.Configuration = clearSensitiveValuesFromRead(configAttributes, connection.Data.Configuration)
+	originalConfData, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
+
+	// reset sensitive values so terraform doesn't think we have changes
+	connection.Data.Configuration = resetSensitiveValues(configAttributes, originalConfData, connection.Data.Configuration)
 
 	conf := MailercheckConf{}
 	err = mapstructure.Decode(connection.Data.Configuration, &conf)

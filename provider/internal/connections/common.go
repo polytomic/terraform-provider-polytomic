@@ -108,45 +108,27 @@ func attrValue(ctx context.Context, val attr.Value) (interface{}, error) {
 	return nil, fmt.Errorf("unsupported type %T", val)
 }
 
-func clearSensitiveValuesFromRead(attrs map[string]schema.Attribute, config map[string]any) map[string]any {
-	for k, v := range attrs {
-		if v.IsSensitive() {
-			delete(config, k)
+// used to wipe whatever is read from the api back to its original state
+func resetSensitiveValues(attrs map[string]schema.Attribute, state, read map[string]any) map[string]any {
+	for k, attr := range attrs {
+		if attr.IsSensitive() {
+			read[k] = state[k]
 			continue
 		}
 
-		switch v := v.(type) {
+		switch v := attr.(type) {
 		case schema.ListNestedAttribute:
-			followCfg, ok := config[k].(map[string]any)
-			if !ok {
-				continue
-			}
-
-			config[k] = clearSensitiveValuesFromRead(v.NestedObject.Attributes, followCfg)
+			read[k] = resetSensitiveValues(v.NestedObject.Attributes, state[k].(map[string]any), read[k].(map[string]any))
 		case schema.MapNestedAttribute:
-			followCfg, ok := config[k].(map[string]any)
-			if !ok {
-				continue
-			}
-
-			config[k] = clearSensitiveValuesFromRead(v.NestedObject.Attributes, followCfg)
+			read[k] = resetSensitiveValues(v.NestedObject.Attributes, state[k].(map[string]any), read[k].(map[string]any))
 		case schema.SetNestedAttribute:
-			followCfg, ok := config[k].(map[string]any)
-			if !ok {
-				continue
-			}
-
-			config[k] = clearSensitiveValuesFromRead(v.NestedObject.Attributes, followCfg)
+			read[k] = resetSensitiveValues(v.NestedObject.Attributes, state[k].(map[string]any), read[k].(map[string]any))
 		case schema.SingleNestedAttribute:
-			followCfg, ok := config[k].(map[string]any)
-			if !ok {
-				continue
-			}
-
-			config[k] = clearSensitiveValuesFromRead(v.Attributes, followCfg)
+			read[k] = resetSensitiveValues(v.Attributes, state[k].(map[string]any), read[k].(map[string]any))
 		}
 	}
-	return config
+
+	return read
 }
 
 func getConfigAttributes(s schema.Schema) (map[string]schema.Attribute, bool) {

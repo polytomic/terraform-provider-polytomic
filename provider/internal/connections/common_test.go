@@ -306,10 +306,11 @@ func TestHandleSensitiveValues(t *testing.T) {
 		})
 	}
 }
-func TestClearSensitiveValuesFromRead(t *testing.T) {
+func TestResetSensitiveValues(t *testing.T) {
 	tests := map[string]struct {
 		attrs    map[string]schema.Attribute
-		config   map[string]any
+		state    map[string]any
+		read     map[string]any
 		expected map[string]any
 	}{
 		"no sensitive values": {
@@ -317,7 +318,11 @@ func TestClearSensitiveValuesFromRead(t *testing.T) {
 				"name": schema.StringAttribute{},
 				"age":  schema.Int64Attribute{},
 			},
-			config: map[string]any{
+			state: map[string]any{
+				"name": "Alice",
+				"age":  int64(42),
+			},
+			read: map[string]any{
 				"name": "Alice",
 				"age":  int64(42),
 			},
@@ -331,23 +336,35 @@ func TestClearSensitiveValuesFromRead(t *testing.T) {
 				"password": schema.StringAttribute{Sensitive: true},
 				"token":    schema.StringAttribute{Sensitive: true},
 			},
-			config: map[string]any{
+			state: map[string]any{
 				"password": "secret",
 				"token":    "token123",
 			},
-			expected: map[string]any{},
+			read: map[string]any{
+				"password": "new_secretdasdfasdf",
+				"token":    "new_token123adsfasdfa",
+			},
+			expected: map[string]any{
+				"password": "secret",
+				"token":    "token123",
+			},
 		},
 		"mixed sensitive and non-sensitive values": {
 			attrs: map[string]schema.Attribute{
 				"name":     schema.StringAttribute{},
 				"password": schema.StringAttribute{Sensitive: true},
 			},
-			config: map[string]any{
+			state: map[string]any{
 				"name":     "Alice",
 				"password": "secret",
 			},
+			read: map[string]any{
+				"name":     "Alice",
+				"password": "new_secret",
+			},
 			expected: map[string]any{
-				"name": "Alice",
+				"name":     "Alice",
+				"password": "secret",
 			},
 		},
 		"nested sensitive values": {
@@ -358,61 +375,23 @@ func TestClearSensitiveValuesFromRead(t *testing.T) {
 						"name":     schema.StringAttribute{},
 					},
 				},
-				"nestedMap": schema.MapNestedAttribute{
-					NestedObject: schema.NestedAttributeObject{
-						Attributes: map[string]schema.Attribute{
-							"password": schema.StringAttribute{Sensitive: true},
-							"name":     schema.StringAttribute{},
-						},
-					},
-				},
-				"nestedSet": schema.SetNestedAttribute{
-					NestedObject: schema.NestedAttributeObject{
-						Attributes: map[string]schema.Attribute{
-							"password": schema.StringAttribute{Sensitive: true},
-							"name":     schema.StringAttribute{},
-						},
-					},
-				},
-				"nestedList": schema.ListNestedAttribute{
-					NestedObject: schema.NestedAttributeObject{
-						Attributes: map[string]schema.Attribute{
-							"password": schema.StringAttribute{Sensitive: true},
-							"name":     schema.StringAttribute{},
-						},
-					},
-				},
 			},
-			config: map[string]any{
+			state: map[string]any{
 				"nestedSingle": map[string]any{
 					"name":     "Alice",
 					"password": "secret",
 				},
-				"nestedMap": map[string]any{
+			},
+			read: map[string]any{
+				"nestedSingle": map[string]any{
 					"name":     "Alice",
-					"password": "secret",
-				},
-				"nestedSet": map[string]any{
-					"name":     "Alice",
-					"password": "secret",
-				},
-				"nestedList": map[string]any{
-					"name":     "Alice",
-					"password": "secret",
+					"password": "new_secret",
 				},
 			},
 			expected: map[string]any{
 				"nestedSingle": map[string]any{
-					"name": "Alice",
-				},
-				"nestedMap": map[string]any{
-					"name": "Alice",
-				},
-				"nestedSet": map[string]any{
-					"name": "Alice",
-				},
-				"nestedList": map[string]any{
-					"name": "Alice",
+					"name":     "Alice",
+					"password": "secret",
 				},
 			},
 		},
@@ -420,7 +399,7 @@ func TestClearSensitiveValuesFromRead(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			actual := clearSensitiveValuesFromRead(test.attrs, test.config)
+			actual := resetSensitiveValues(test.attrs, test.state, test.read)
 			assert.EqualValues(t, test.expected, actual)
 		})
 	}
