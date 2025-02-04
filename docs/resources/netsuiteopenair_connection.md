@@ -53,6 +53,8 @@ state before it will take effect on a destroy operation.
 
 Required:
 
+- `api_key` (String, Sensitive) API Key
+- `api_namespace` (String) API Namespace
 - `client_id` (String, Sensitive) Client ID
 - `client_secret` (String, Sensitive) Client Secret
 - `company_id` (String) Company ID

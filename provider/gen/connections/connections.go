@@ -244,10 +244,7 @@ func fetchOrRead[T any, PT *T](ctx context.Context, path string, fetch func(cont
 }
 
 func GenerateConnections(ctx context.Context) error {
-	client := ptclient.NewClient(
-		option.WithBaseURL(os.Getenv("POLYTOMIC_DEPLOYMENT_URL")),
-		option.WithToken(os.Getenv("POLYTOMIC_API_KEY")),
-	)
+	client := newFunction()
 	data, err := fetchOrRead(ctx,
 		connectionTypes,
 		func(ctx context.Context) (*polytomic.ConnectionTypeResponseEnvelope, error) {
@@ -333,6 +330,22 @@ func GenerateConnections(ctx context.Context) error {
 	}
 
 	return nil
+}
+
+func newFunction() *ptclient.Client {
+	baseURL, ok := os.LookupEnv("POLYTOMIC_DEPLOYMENT_URL")
+	if !ok {
+		fmt.Println("POLYTOMIC_DEPLOYMENT_URL not set; using production.")
+	}
+	apiKey, ok := os.LookupEnv("POLYTOMIC_API_KEY")
+	if !ok {
+		fmt.Println("POLYTOMIC_API_KEY not set; using cached connection definitions.")
+	}
+	client := ptclient.NewClient(
+		option.WithBaseURL(baseURL),
+		option.WithToken(apiKey),
+	)
+	return client
 }
 
 func attributesForJSONSchema(connSchema *jsonschema.Schema) ([]Attribute, error) {

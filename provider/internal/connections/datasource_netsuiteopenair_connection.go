@@ -50,6 +50,10 @@ func (d *NetsuiteopenairConnectionDataSource) Schema(ctx context.Context, req da
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
+					"api_namespace": schema.StringAttribute{
+						MarkdownDescription: `API Namespace`,
+						Computed:            true,
+					},
 					"company_id": schema.StringAttribute{
 						MarkdownDescription: `Company ID`,
 						Computed:            true,
@@ -90,6 +94,9 @@ func (d *NetsuiteopenairConnectionDataSource) Read(ctx context.Context, req data
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttributeTypes(ctx),
 		map[string]attr.Value{
+			"api_namespace": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["api_namespace"], "string").(string),
+			),
 			"company_id": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["company_id"], "string").(string),
 			),

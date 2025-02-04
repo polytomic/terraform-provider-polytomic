@@ -77,14 +77,9 @@ func (c *Connections) Init(ctx context.Context) error {
 				return fmt.Errorf("not single nested attribute %s", resp.TypeName)
 			}
 			for k, v := range configSchema.Attributes {
-				if configVal, ok := config[k]; ok {
-					if v.IsSensitive() && !isEmpty(configVal) {
-						config[k] = variableRef(name, k)
-						c.variables = append(c.variables, Variable{
-							Name:      variableName(name, k),
-							Type:      varTypeMap[v.GetType().String()],
-							Sensitive: true,
-						})
+				if _, ok := config[k]; ok {
+					if v.IsSensitive() {
+						delete(config, k)
 					}
 				}
 			}

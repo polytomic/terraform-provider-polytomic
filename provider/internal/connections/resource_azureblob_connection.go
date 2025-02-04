@@ -30,107 +30,155 @@ import (
 var _ resource.Resource = &AzureblobConnectionResource{}
 var _ resource.ResourceWithImportState = &AzureblobConnectionResource{}
 
-func (t *AzureblobConnectionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = schema.Schema{
-		MarkdownDescription: ":meta:subcategory:Connections: Azure Blob Storage Connection",
-		Attributes: map[string]schema.Attribute{
-			"organization": schema.StringAttribute{
-				MarkdownDescription: "Organization ID",
-				Optional:            true,
-				Computed:            true,
-			},
-			"name": schema.StringAttribute{
-				Required: true,
-			},
-			"configuration": schema.SingleNestedAttribute{
-				Attributes: map[string]schema.Attribute{
-					"access_key": schema.StringAttribute{
-						MarkdownDescription: `Access Key`,
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           true,
-						PlanModifiers: []planmodifier.String{
-							stringplanmodifier.UseStateForUnknown(),
-						},
+var AzureblobSchema = schema.Schema{
+	MarkdownDescription: ":meta:subcategory:Connections: Azure Blob Storage Connection",
+	Attributes: map[string]schema.Attribute{
+		"organization": schema.StringAttribute{
+			MarkdownDescription: "Organization ID",
+			Optional:            true,
+			Computed:            true,
+		},
+		"name": schema.StringAttribute{
+			Required: true,
+		},
+		"configuration": schema.SingleNestedAttribute{
+			Attributes: map[string]schema.Attribute{
+				"access_key": schema.StringAttribute{
+					MarkdownDescription: `Access Key`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
 					},
-					"account_name": schema.StringAttribute{
-						MarkdownDescription: `Account Name`,
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
+				},
+				"account_name": schema.StringAttribute{
+					MarkdownDescription: `Account Name`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
+				},
+				"auth_method": schema.StringAttribute{
+					MarkdownDescription: `Authentication method`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
+				},
+				"client_id": schema.StringAttribute{
+					MarkdownDescription: `Client ID`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
+				"client_secret": schema.StringAttribute{
+					MarkdownDescription: `Client Secret`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
 					},
-					"container_name": schema.StringAttribute{
-						MarkdownDescription: `Container Name`,
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
-					"is_single_table": schema.BoolAttribute{
-						MarkdownDescription: `Files are time-based snapshots
+				},
+				"container_name": schema.StringAttribute{
+					MarkdownDescription: `Container Name`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
+				},
+				"is_single_table": schema.BoolAttribute{
+					MarkdownDescription: `Files are time-based snapshots
 
     Treat the files as a single table.`,
-						Required:  false,
-						Optional:  true,
-						Computed:  true,
-						Sensitive: false,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
+				},
+				"oauth_refresh_token": schema.StringAttribute{
+					MarkdownDescription: ``,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
 					},
-					"single_table_file_format": schema.StringAttribute{
-						MarkdownDescription: `File format`,
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
-					},
-					"single_table_name": schema.StringAttribute{
-						MarkdownDescription: `Collection name`,
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
-					},
-					"skip_lines": schema.Int64Attribute{
-						MarkdownDescription: `Skip first lines
+				},
+				"single_table_file_format": schema.StringAttribute{
+					MarkdownDescription: `File format`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
+				"single_table_name": schema.StringAttribute{
+					MarkdownDescription: `Collection name`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
+				"skip_lines": schema.Int64Attribute{
+					MarkdownDescription: `Skip first lines
 
     Skip first N lines of each CSV file.`,
-						Required:  false,
-						Optional:  true,
-						Computed:  true,
-						Sensitive: false,
-					},
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
 				},
-
-				Required: true,
-
-				PlanModifiers: []planmodifier.Object{
-					objectplanmodifier.UseStateForUnknown(),
+				"tenant_id": schema.StringAttribute{
+					MarkdownDescription: `Tenant ID`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
 				},
 			},
-			"force_destroy": schema.BoolAttribute{
-				MarkdownDescription: forceDestroyMessage,
-				Optional:            true,
-			},
-			"id": schema.StringAttribute{
-				Computed:            true,
-				MarkdownDescription: "Azure Blob Storage Connection identifier",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
+
+			Required: true,
+
+			PlanModifiers: []planmodifier.Object{
+				objectplanmodifier.UseStateForUnknown(),
 			},
 		},
-	}
+		"force_destroy": schema.BoolAttribute{
+			MarkdownDescription: forceDestroyMessage,
+			Optional:            true,
+		},
+		"id": schema.StringAttribute{
+			Computed:            true,
+			MarkdownDescription: "Azure Blob Storage Connection identifier",
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
+		},
+	},
+}
+
+func (t *AzureblobConnectionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = AzureblobSchema
 }
 
 type AzureblobConf struct {
 	Access_key               string `mapstructure:"access_key" tfsdk:"access_key"`
 	Account_name             string `mapstructure:"account_name" tfsdk:"account_name"`
+	Auth_method              string `mapstructure:"auth_method" tfsdk:"auth_method"`
+	Client_id                string `mapstructure:"client_id" tfsdk:"client_id"`
+	Client_secret            string `mapstructure:"client_secret" tfsdk:"client_secret"`
 	Container_name           string `mapstructure:"container_name" tfsdk:"container_name"`
 	Is_single_table          bool   `mapstructure:"is_single_table" tfsdk:"is_single_table"`
+	Oauth_refresh_token      string `mapstructure:"oauth_refresh_token" tfsdk:"oauth_refresh_token"`
 	Single_table_file_format string `mapstructure:"single_table_file_format" tfsdk:"single_table_file_format"`
 	Single_table_name        string `mapstructure:"single_table_name" tfsdk:"single_table_name"`
 	Skip_lines               int64  `mapstructure:"skip_lines" tfsdk:"skip_lines"`
+	Tenant_id                string `mapstructure:"tenant_id" tfsdk:"tenant_id"`
 }
 
 type AzureblobConnectionResource struct {
@@ -191,11 +239,16 @@ func (r *AzureblobConnectionResource) Create(ctx context.Context, req resource.C
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"access_key":               types.StringType,
 		"account_name":             types.StringType,
+		"auth_method":              types.StringType,
+		"client_id":                types.StringType,
+		"client_secret":            types.StringType,
 		"container_name":           types.StringType,
 		"is_single_table":          types.BoolType,
+		"oauth_refresh_token":      types.StringType,
 		"single_table_file_format": types.StringType,
 		"single_table_name":        types.StringType,
 		"skip_lines":               types.NumberType,
+		"tenant_id":                types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -239,6 +292,21 @@ func (r *AzureblobConnectionResource) Read(ctx context.Context, req resource.Rea
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
 
+	configAttributes, ok := getConfigAttributes(AzureblobSchema)
+	if !ok {
+		resp.Diagnostics.AddError("Error getting connection configuration attributes", "Could not get configuration attributes")
+		return
+	}
+
+	originalConfData, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
+
+	// reset sensitive values so terraform doesn't think we have changes
+	connection.Data.Configuration = resetSensitiveValues(configAttributes, originalConfData, connection.Data.Configuration)
+
 	conf := AzureblobConf{}
 	err = mapstructure.Decode(connection.Data.Configuration, &conf)
 	if err != nil {
@@ -248,11 +316,16 @@ func (r *AzureblobConnectionResource) Read(ctx context.Context, req resource.Rea
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"access_key":               types.StringType,
 		"account_name":             types.StringType,
+		"auth_method":              types.StringType,
+		"client_id":                types.StringType,
+		"client_secret":            types.StringType,
 		"container_name":           types.StringType,
 		"is_single_table":          types.BoolType,
+		"oauth_refresh_token":      types.StringType,
 		"single_table_file_format": types.StringType,
 		"single_table_name":        types.StringType,
 		"skip_lines":               types.NumberType,
+		"tenant_id":                types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -283,6 +356,20 @@ func (r *AzureblobConnectionResource) Update(ctx context.Context, req resource.U
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
+
+	configAttributes, ok := getConfigAttributes(AzureblobSchema)
+	if !ok {
+		resp.Diagnostics.AddError("Error getting connection configuration attributes", "Could not get configuration attributes")
+		return
+	}
+
+	var prevData connectionData
+
+	diags = req.State.Get(ctx, &prevData)
+	resp.Diagnostics.Append(diags...)
+
+	connConf = handleSensitiveValues(ctx, configAttributes, connConf, prevData.Configuration.Attributes())
+
 	updated, err := client.Connections.Update(ctx,
 		data.Id.ValueString(),
 		&polytomic.UpdateConnectionRequestSchema{
@@ -309,11 +396,16 @@ func (r *AzureblobConnectionResource) Update(ctx context.Context, req resource.U
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"access_key":               types.StringType,
 		"account_name":             types.StringType,
+		"auth_method":              types.StringType,
+		"client_id":                types.StringType,
+		"client_secret":            types.StringType,
 		"container_name":           types.StringType,
 		"is_single_table":          types.BoolType,
+		"oauth_refresh_token":      types.StringType,
 		"single_table_file_format": types.StringType,
 		"single_table_name":        types.StringType,
 		"skip_lines":               types.NumberType,
+		"tenant_id":                types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

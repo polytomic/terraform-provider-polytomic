@@ -37,6 +37,8 @@ data "polytomic_azureblob_connection" "azureblob" {
 Read-Only:
 
 - `account_name` (String) Account Name
+- `auth_method` (String) Authentication method
+- `client_id` (String) Client ID
 - `container_name` (String) Container Name
 - `is_single_table` (Boolean) Files are time-based snapshots
 
@@ -46,5 +48,6 @@ Read-Only:
 - `skip_lines` (Number) Skip first lines
 
     Skip first N lines of each CSV file.
+- `tenant_id` (String) Tenant ID
 
 

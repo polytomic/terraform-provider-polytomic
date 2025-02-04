@@ -43,7 +43,7 @@ Read-Only:
 - `domain` (String) The Salesforce instance's login domain, e.g. acmecorp.my.salesforce.com
 - `enable_multicurrency_lookup` (Boolean) Enable multicurrency source field support
 
-    If incremenetal mode for bulk-syncing from Salesforce formula fields is enabled, setting this to true extends support to accurate currency conversions.
+    If incremental mode for bulk-syncing from Salesforce formula fields is enabled, setting this to true extends support to accurate currency conversions.
 - `enable_tooling` (Boolean) Enable support for Tooling API
 
     If true, expose objects from the Salesforce Tooling API in the Polytomic bulk sync source object list.

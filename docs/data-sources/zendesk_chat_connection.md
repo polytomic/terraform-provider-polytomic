@@ -37,7 +37,7 @@ data "polytomic_zendesk_chat_connection" "zendesk_chat" {
 Read-Only:
 
 - `custom_api_limits` (Boolean) Enforce custom API limits
-- `domain` (String) Zendesk Support Subdomain (required if you login to Chat via Zendesk Support)
+- `domain` (String) Zendesk Support Subdomain
 - `ratelimit_rpm` (Number) Maximum requests per minute
 
     Set a custom maximum request per minute limit.

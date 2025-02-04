@@ -36,10 +36,12 @@ data "polytomic_redshiftserverless_connection" "redshiftserverless" {
 
 Read-Only:
 
+- `connection_method` (String) Connection method
 - `data_api_endpoint` (String) Redshift Data API endpoint
 
     Example: https://redshift-data.us-west-2.amazonaws.com
 - `database` (String)
+- `endpoint` (String) Redshift Serverless endpoint
 - `external_id` (String) External ID
 - `iam_role_arn` (String) IAM Role ARN
 - `override_endpoint` (Boolean) Override Redshift Data API endpoint

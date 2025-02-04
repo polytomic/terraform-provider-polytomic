@@ -19,6 +19,7 @@ resource "polytomic_azureblob_connection" "azureblob" {
     access_key               = "abcdefghijklmnopqrstuvwxyz0123456789/+ABCDEabcdefghijklmnopqrstuvwxyz0123456789/+ABCDE=="
     account_name             = "account"
     container_name           = "container"
+    oauth_refresh_token      = "dasfdasz62px8lqeoakuea2ccl4rxm13i6tbyorxhu1i20kc8ruvksmzxq"
     single_table_file_format = "csv"
     single_table_name        = "collection"
   }
@@ -58,19 +59,24 @@ state before it will take effect on a destroy operation.
 
 Required:
 
-- `access_key` (String, Sensitive) Access Key
 - `account_name` (String) Account Name
+- `auth_method` (String) Authentication method
 - `container_name` (String) Container Name
 
 Optional:
 
+- `access_key` (String, Sensitive) Access Key
+- `client_id` (String) Client ID
+- `client_secret` (String, Sensitive) Client Secret
 - `is_single_table` (Boolean) Files are time-based snapshots
 
     Treat the files as a single table.
+- `oauth_refresh_token` (String, Sensitive)
 - `single_table_file_format` (String) File format
 - `single_table_name` (String) Collection name
 - `skip_lines` (Number) Skip first lines
 
     Skip first N lines of each CSV file.
+- `tenant_id` (String) Tenant ID
 
 

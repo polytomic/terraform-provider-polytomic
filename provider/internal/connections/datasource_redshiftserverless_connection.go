@@ -50,6 +50,10 @@ func (d *RedshiftserverlessConnectionDataSource) Schema(ctx context.Context, req
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
+					"connection_method": schema.StringAttribute{
+						MarkdownDescription: `Connection method`,
+						Computed:            true,
+					},
 					"data_api_endpoint": schema.StringAttribute{
 						MarkdownDescription: `Redshift Data API endpoint
 
@@ -58,6 +62,10 @@ func (d *RedshiftserverlessConnectionDataSource) Schema(ctx context.Context, req
 					},
 					"database": schema.StringAttribute{
 						MarkdownDescription: ``,
+						Computed:            true,
+					},
+					"endpoint": schema.StringAttribute{
+						MarkdownDescription: `Redshift Serverless endpoint`,
 						Computed:            true,
 					},
 					"external_id": schema.StringAttribute{
@@ -116,11 +124,17 @@ func (d *RedshiftserverlessConnectionDataSource) Read(ctx context.Context, req d
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttributeTypes(ctx),
 		map[string]attr.Value{
+			"connection_method": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["connection_method"], "string").(string),
+			),
 			"data_api_endpoint": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["data_api_endpoint"], "string").(string),
 			),
 			"database": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["database"], "string").(string),
+			),
+			"endpoint": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["endpoint"], "string").(string),
 			),
 			"external_id": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["external_id"], "string").(string),

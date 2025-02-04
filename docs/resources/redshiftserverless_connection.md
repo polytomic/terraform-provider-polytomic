@@ -16,10 +16,12 @@ Redshift Serverless Connection
 resource "polytomic_redshiftserverless_connection" "redshiftserverless" {
   name = "example"
   configuration = {
-    database     = "users"
-    iam_role_arn = "arn:aws:iam::012345678910:role/role"
-    region       = "us-west-2"
-    workgroup    = "default"
+    connection_method = "data_api"
+    database          = "users"
+    endpoint          = "acme.12345.us-west-2.redshift-serverless.amazonaws.com:5439"
+    iam_role_arn      = "arn:aws:iam::012345678910:role/role"
+    region            = "us-west-2"
+    workgroup         = "default"
   }
 }
 ```
@@ -57,6 +59,7 @@ state before it will take effect on a destroy operation.
 
 Required:
 
+- `connection_method` (String) Connection method
 - `database` (String)
 - `iam_role_arn` (String) IAM Role ARN
 - `workgroup` (String)
@@ -66,6 +69,7 @@ Optional:
 - `data_api_endpoint` (String) Redshift Data API endpoint
 
     Example: https://redshift-data.us-west-2.amazonaws.com
+- `endpoint` (String) Redshift Serverless endpoint
 - `external_id` (String) External ID
 - `override_endpoint` (Boolean) Override Redshift Data API endpoint
 - `region` (String)

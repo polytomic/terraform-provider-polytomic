@@ -30,234 +30,236 @@ import (
 var _ resource.Resource = &DatabricksConnectionResource{}
 var _ resource.ResourceWithImportState = &DatabricksConnectionResource{}
 
-func (t *DatabricksConnectionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = schema.Schema{
-		MarkdownDescription: ":meta:subcategory:Connections: Databricks Connection",
-		Attributes: map[string]schema.Attribute{
-			"organization": schema.StringAttribute{
-				MarkdownDescription: "Organization ID",
-				Optional:            true,
-				Computed:            true,
-			},
-			"name": schema.StringAttribute{
-				Required: true,
-			},
-			"configuration": schema.SingleNestedAttribute{
-				Attributes: map[string]schema.Attribute{
-					"access_token": schema.StringAttribute{
-						MarkdownDescription: `Access Token`,
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           true,
-						PlanModifiers: []planmodifier.String{
-							stringplanmodifier.UseStateForUnknown(),
-						},
+var DatabricksSchema = schema.Schema{
+	MarkdownDescription: ":meta:subcategory:Connections: Databricks Connection",
+	Attributes: map[string]schema.Attribute{
+		"organization": schema.StringAttribute{
+			MarkdownDescription: "Organization ID",
+			Optional:            true,
+			Computed:            true,
+		},
+		"name": schema.StringAttribute{
+			Required: true,
+		},
+		"configuration": schema.SingleNestedAttribute{
+			Attributes: map[string]schema.Attribute{
+				"access_token": schema.StringAttribute{
+					MarkdownDescription: `Access Token`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
 					},
-					"auth_mode": schema.StringAttribute{
-						MarkdownDescription: `Authentication Method
+				},
+				"auth_mode": schema.StringAttribute{
+					MarkdownDescription: `Authentication Method
 
     How to authenticate with AWS. Defaults to Access Key and Secret`,
-						Required:  true,
-						Optional:  false,
-						Computed:  false,
-						Sensitive: false,
-					},
-					"aws_access_key_id": schema.StringAttribute{
-						MarkdownDescription: `AWS Access Key ID (destinations only)
+					Required:  true,
+					Optional:  false,
+					Computed:  false,
+					Sensitive: false,
+				},
+				"aws_access_key_id": schema.StringAttribute{
+					MarkdownDescription: `AWS Access Key ID (destinations only)
 
     See https://docs.polytomic.com/docs/databricks-connections#writing-to-databricks`,
-						Required:  false,
-						Optional:  true,
-						Computed:  true,
-						Sensitive: false,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
+				},
+				"aws_secret_access_key": schema.StringAttribute{
+					MarkdownDescription: `AWS Secret Access Key (destinations only)`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
 					},
-					"aws_secret_access_key": schema.StringAttribute{
-						MarkdownDescription: `AWS Secret Access Key (destinations only)`,
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           true,
-						PlanModifiers: []planmodifier.String{
-							stringplanmodifier.UseStateForUnknown(),
-						},
-					},
-					"aws_user": schema.StringAttribute{
-						MarkdownDescription: `User ARN (destinations only)`,
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
-					},
-					"azure_access_key": schema.StringAttribute{
-						MarkdownDescription: `Storage Account Access Key (destination support only)
+				},
+				"aws_user": schema.StringAttribute{
+					MarkdownDescription: `User ARN (destinations only)`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
+				"azure_access_key": schema.StringAttribute{
+					MarkdownDescription: `Storage Account Access Key (destination support only)
 
     The access key associated with this storage account`,
-						Required:  false,
-						Optional:  true,
-						Computed:  true,
-						Sensitive: true,
-						PlanModifiers: []planmodifier.String{
-							stringplanmodifier.UseStateForUnknown(),
-						},
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
 					},
-					"azure_account_name": schema.StringAttribute{
-						MarkdownDescription: `Storage Account Name (destination support only)
+				},
+				"azure_account_name": schema.StringAttribute{
+					MarkdownDescription: `Storage Account Name (destination support only)
 
     The account name of the storage account`,
-						Required:  false,
-						Optional:  true,
-						Computed:  true,
-						Sensitive: false,
-					},
-					"cloud_provider": schema.StringAttribute{
-						MarkdownDescription: `Cloud Provider (destination support only)`,
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
-					},
-					"concurrent_queries": schema.Int64Attribute{
-						MarkdownDescription: `Concurrent query limit`,
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
-					},
-					"container_name": schema.StringAttribute{
-						MarkdownDescription: `Storage Container Name (destination support only)
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
+				},
+				"cloud_provider": schema.StringAttribute{
+					MarkdownDescription: `Cloud Provider (destination support only)`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
+				"concurrent_queries": schema.Int64Attribute{
+					MarkdownDescription: `Concurrent query limit`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
+				"container_name": schema.StringAttribute{
+					MarkdownDescription: `Storage Container Name (destination support only)
 
     The container which we will stage files in`,
-						Required:  false,
-						Optional:  true,
-						Computed:  true,
-						Sensitive: false,
-					},
-					"deleted_file_retention_days": schema.Int64Attribute{
-						MarkdownDescription: `Deleted file retention`,
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
-					},
-					"enable_delta_uniform": schema.BoolAttribute{
-						MarkdownDescription: `Enable Delta UniForm tables`,
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
-					},
-					"enforce_query_limit": schema.BoolAttribute{
-						MarkdownDescription: `Limit concurrent queries`,
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
-					},
-					"external_id": schema.StringAttribute{
-						MarkdownDescription: `External ID
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
+				},
+				"deleted_file_retention_days": schema.Int64Attribute{
+					MarkdownDescription: `Deleted file retention`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
+				"enable_delta_uniform": schema.BoolAttribute{
+					MarkdownDescription: `Enable Delta UniForm tables`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
+				"enforce_query_limit": schema.BoolAttribute{
+					MarkdownDescription: `Limit concurrent queries`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
+				"external_id": schema.StringAttribute{
+					MarkdownDescription: `External ID
 
     External ID for the IAM role`,
-						Required:  false,
-						Optional:  true,
-						Computed:  true,
-						Sensitive: false,
-					},
-					"http_path": schema.StringAttribute{
-						MarkdownDescription: `HTTP Path`,
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
-					"iam_role_arn": schema.StringAttribute{
-						MarkdownDescription: `IAM Role ARN`,
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
-					},
-					"log_file_retention_days": schema.Int64Attribute{
-						MarkdownDescription: `Log retention`,
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
-					},
-					"port": schema.Int64Attribute{
-						MarkdownDescription: ``,
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
-					"s3_bucket_name": schema.StringAttribute{
-						MarkdownDescription: `S3 Bucket Name (destinations only)
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
+				},
+				"http_path": schema.StringAttribute{
+					MarkdownDescription: `HTTP Path`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
+				},
+				"iam_role_arn": schema.StringAttribute{
+					MarkdownDescription: `IAM Role ARN`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
+				"log_file_retention_days": schema.Int64Attribute{
+					MarkdownDescription: `Log retention`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
+				"port": schema.Int64Attribute{
+					MarkdownDescription: ``,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
+				},
+				"s3_bucket_name": schema.StringAttribute{
+					MarkdownDescription: `S3 Bucket Name (destinations only)
 
     Name of bucket used for staging data load files`,
-						Required:  false,
-						Optional:  true,
-						Computed:  true,
-						Sensitive: false,
-					},
-					"s3_bucket_region": schema.StringAttribute{
-						MarkdownDescription: `S3 Bucket Region (destinations only)
-
-    Region of bucket.example=us-east-1`,
-						Required:  false,
-						Optional:  true,
-						Computed:  true,
-						Sensitive: false,
-					},
-					"server_hostname": schema.StringAttribute{
-						MarkdownDescription: `Server Hostname`,
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
-					"set_retention_properties": schema.BoolAttribute{
-						MarkdownDescription: `Configure data retention for tables`,
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
-					},
-					"storage_credential_name": schema.StringAttribute{
-						MarkdownDescription: `Storage credential name`,
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
-					},
-					"unity_catalog_enabled": schema.BoolAttribute{
-						MarkdownDescription: `Unity Catalog enabled`,
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
-					},
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
 				},
+				"s3_bucket_region": schema.StringAttribute{
+					MarkdownDescription: `S3 Bucket Region (destinations only)
 
-				Required: true,
-
-				PlanModifiers: []planmodifier.Object{
-					objectplanmodifier.UseStateForUnknown(),
+    Region of bucket`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
+				},
+				"server_hostname": schema.StringAttribute{
+					MarkdownDescription: `Server Hostname`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
+				},
+				"set_retention_properties": schema.BoolAttribute{
+					MarkdownDescription: `Configure data retention for tables`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
+				"storage_credential_name": schema.StringAttribute{
+					MarkdownDescription: `Storage credential name`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
+				"unity_catalog_enabled": schema.BoolAttribute{
+					MarkdownDescription: `Unity Catalog enabled`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
 				},
 			},
-			"force_destroy": schema.BoolAttribute{
-				MarkdownDescription: forceDestroyMessage,
-				Optional:            true,
-			},
-			"id": schema.StringAttribute{
-				Computed:            true,
-				MarkdownDescription: "Databricks Connection identifier",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
+
+			Required: true,
+
+			PlanModifiers: []planmodifier.Object{
+				objectplanmodifier.UseStateForUnknown(),
 			},
 		},
-	}
+		"force_destroy": schema.BoolAttribute{
+			MarkdownDescription: forceDestroyMessage,
+			Optional:            true,
+		},
+		"id": schema.StringAttribute{
+			Computed:            true,
+			MarkdownDescription: "Databricks Connection identifier",
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
+		},
+	},
+}
+
+func (t *DatabricksConnectionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = DatabricksSchema
 }
 
 type DatabricksConf struct {
@@ -410,6 +412,21 @@ func (r *DatabricksConnectionResource) Read(ctx context.Context, req resource.Re
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
 
+	configAttributes, ok := getConfigAttributes(DatabricksSchema)
+	if !ok {
+		resp.Diagnostics.AddError("Error getting connection configuration attributes", "Could not get configuration attributes")
+		return
+	}
+
+	originalConfData, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
+
+	// reset sensitive values so terraform doesn't think we have changes
+	connection.Data.Configuration = resetSensitiveValues(configAttributes, originalConfData, connection.Data.Configuration)
+
 	conf := DatabricksConf{}
 	err = mapstructure.Decode(connection.Data.Configuration, &conf)
 	if err != nil {
@@ -471,6 +488,20 @@ func (r *DatabricksConnectionResource) Update(ctx context.Context, req resource.
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
+
+	configAttributes, ok := getConfigAttributes(DatabricksSchema)
+	if !ok {
+		resp.Diagnostics.AddError("Error getting connection configuration attributes", "Could not get configuration attributes")
+		return
+	}
+
+	var prevData connectionData
+
+	diags = req.State.Get(ctx, &prevData)
+	resp.Diagnostics.Append(diags...)
+
+	connConf = handleSensitiveValues(ctx, configAttributes, connConf, prevData.Configuration.Attributes())
+
 	updated, err := client.Connections.Update(ctx,
 		data.Id.ValueString(),
 		&polytomic.UpdateConnectionRequestSchema{

@@ -11,6 +11,7 @@ resource "polytomic_databricks_connection" "databricks" {
     container_name        = "container"
     http_path             = "/sql"
     s3_bucket_name        = "s3://polytomic-databricks-results/customer-dataset"
+    s3_bucket_region      = "us-east-1"
     server_hostname       = "dbc-1234dsafas-d0001.cloud.databricks.com"
   }
 }

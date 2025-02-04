@@ -6,8 +6,10 @@ package connections
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/polytomic/terraform-provider-polytomic/provider/internal/providerclient"
 )
@@ -47,8 +49,17 @@ func (d *DialpadConnectionDataSource) Schema(ctx context.Context, req datasource
 				Computed:            true,
 			},
 			"configuration": schema.SingleNestedAttribute{
-				Attributes: map[string]schema.Attribute{},
-				Optional:   true,
+				Attributes: map[string]schema.Attribute{
+					"auth_method": schema.StringAttribute{
+						MarkdownDescription: `Authentication method`,
+						Computed:            true,
+					},
+					"oauth_token_expiry": schema.StringAttribute{
+						MarkdownDescription: ``,
+						Computed:            true,
+					},
+				},
+				Optional: true,
 			},
 		},
 	}
@@ -79,6 +90,23 @@ func (d *DialpadConnectionDataSource) Read(ctx context.Context, req datasource.R
 	data.Id = types.StringPointerValue(connection.Data.Id)
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
+	var diags diag.Diagnostics
+	data.Configuration, diags = types.ObjectValue(
+		data.Configuration.AttributeTypes(ctx),
+		map[string]attr.Value{
+			"auth_method": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["auth_method"], "string").(string),
+			),
+			"oauth_token_expiry": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["oauth_token_expiry"], "string").(string),
+			),
+		},
+	)
+
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
 
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)

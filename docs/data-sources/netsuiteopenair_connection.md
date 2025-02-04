@@ -36,6 +36,7 @@ data "polytomic_netsuiteopenair_connection" "netsuiteopenair" {
 
 Read-Only:
 
+- `api_namespace` (String) API Namespace
 - `company_id` (String) Company ID
 
 

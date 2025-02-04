@@ -129,7 +129,7 @@ func (d *DatabricksConnectionDataSource) Schema(ctx context.Context, req datasou
 					"s3_bucket_region": schema.StringAttribute{
 						MarkdownDescription: `S3 Bucket Region (destinations only)
 
-    Region of bucket.example=us-east-1`,
+    Region of bucket`,
 						Computed: true,
 					},
 					"server_hostname": schema.StringAttribute{

@@ -30,97 +30,115 @@ import (
 var _ resource.Resource = &RedshiftserverlessConnectionResource{}
 var _ resource.ResourceWithImportState = &RedshiftserverlessConnectionResource{}
 
-func (t *RedshiftserverlessConnectionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = schema.Schema{
-		MarkdownDescription: ":meta:subcategory:Connections: Redshift Serverless Connection",
-		Attributes: map[string]schema.Attribute{
-			"organization": schema.StringAttribute{
-				MarkdownDescription: "Organization ID",
-				Optional:            true,
-				Computed:            true,
-			},
-			"name": schema.StringAttribute{
-				Required: true,
-			},
-			"configuration": schema.SingleNestedAttribute{
-				Attributes: map[string]schema.Attribute{
-					"data_api_endpoint": schema.StringAttribute{
-						MarkdownDescription: `Redshift Data API endpoint
+var RedshiftserverlessSchema = schema.Schema{
+	MarkdownDescription: ":meta:subcategory:Connections: Redshift Serverless Connection",
+	Attributes: map[string]schema.Attribute{
+		"organization": schema.StringAttribute{
+			MarkdownDescription: "Organization ID",
+			Optional:            true,
+			Computed:            true,
+		},
+		"name": schema.StringAttribute{
+			Required: true,
+		},
+		"configuration": schema.SingleNestedAttribute{
+			Attributes: map[string]schema.Attribute{
+				"connection_method": schema.StringAttribute{
+					MarkdownDescription: `Connection method`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
+				},
+				"data_api_endpoint": schema.StringAttribute{
+					MarkdownDescription: `Redshift Data API endpoint
 
     Example: https://redshift-data.us-west-2.amazonaws.com`,
-						Required:  false,
-						Optional:  true,
-						Computed:  true,
-						Sensitive: false,
-					},
-					"database": schema.StringAttribute{
-						MarkdownDescription: ``,
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
-					"external_id": schema.StringAttribute{
-						MarkdownDescription: `External ID`,
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
-					},
-					"iam_role_arn": schema.StringAttribute{
-						MarkdownDescription: `IAM Role ARN`,
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
-					"override_endpoint": schema.BoolAttribute{
-						MarkdownDescription: `Override Redshift Data API endpoint`,
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
-					},
-					"region": schema.StringAttribute{
-						MarkdownDescription: ``,
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Sensitive:           false,
-					},
-					"workgroup": schema.StringAttribute{
-						MarkdownDescription: ``,
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Sensitive:           false,
-					},
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
 				},
-
-				Required: true,
-
-				PlanModifiers: []planmodifier.Object{
-					objectplanmodifier.UseStateForUnknown(),
+				"database": schema.StringAttribute{
+					MarkdownDescription: ``,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
+				},
+				"endpoint": schema.StringAttribute{
+					MarkdownDescription: `Redshift Serverless endpoint`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
+				"external_id": schema.StringAttribute{
+					MarkdownDescription: `External ID`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
+				"iam_role_arn": schema.StringAttribute{
+					MarkdownDescription: `IAM Role ARN`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
+				},
+				"override_endpoint": schema.BoolAttribute{
+					MarkdownDescription: `Override Redshift Data API endpoint`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
+				"region": schema.StringAttribute{
+					MarkdownDescription: ``,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
+				"workgroup": schema.StringAttribute{
+					MarkdownDescription: ``,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
 				},
 			},
-			"force_destroy": schema.BoolAttribute{
-				MarkdownDescription: forceDestroyMessage,
-				Optional:            true,
-			},
-			"id": schema.StringAttribute{
-				Computed:            true,
-				MarkdownDescription: "Redshift Serverless Connection identifier",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
+
+			Required: true,
+
+			PlanModifiers: []planmodifier.Object{
+				objectplanmodifier.UseStateForUnknown(),
 			},
 		},
-	}
+		"force_destroy": schema.BoolAttribute{
+			MarkdownDescription: forceDestroyMessage,
+			Optional:            true,
+		},
+		"id": schema.StringAttribute{
+			Computed:            true,
+			MarkdownDescription: "Redshift Serverless Connection identifier",
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
+		},
+	},
+}
+
+func (t *RedshiftserverlessConnectionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = RedshiftserverlessSchema
 }
 
 type RedshiftserverlessConf struct {
+	Connection_method string `mapstructure:"connection_method" tfsdk:"connection_method"`
 	Data_api_endpoint string `mapstructure:"data_api_endpoint" tfsdk:"data_api_endpoint"`
 	Database          string `mapstructure:"database" tfsdk:"database"`
+	Endpoint          string `mapstructure:"endpoint" tfsdk:"endpoint"`
 	External_id       string `mapstructure:"external_id" tfsdk:"external_id"`
 	Iam_role_arn      string `mapstructure:"iam_role_arn" tfsdk:"iam_role_arn"`
 	Override_endpoint bool   `mapstructure:"override_endpoint" tfsdk:"override_endpoint"`
@@ -184,8 +202,10 @@ func (r *RedshiftserverlessConnectionResource) Create(ctx context.Context, req r
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"connection_method": types.StringType,
 		"data_api_endpoint": types.StringType,
 		"database":          types.StringType,
+		"endpoint":          types.StringType,
 		"external_id":       types.StringType,
 		"iam_role_arn":      types.StringType,
 		"override_endpoint": types.BoolType,
@@ -234,6 +254,21 @@ func (r *RedshiftserverlessConnectionResource) Read(ctx context.Context, req res
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
 
+	configAttributes, ok := getConfigAttributes(RedshiftserverlessSchema)
+	if !ok {
+		resp.Diagnostics.AddError("Error getting connection configuration attributes", "Could not get configuration attributes")
+		return
+	}
+
+	originalConfData, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
+
+	// reset sensitive values so terraform doesn't think we have changes
+	connection.Data.Configuration = resetSensitiveValues(configAttributes, originalConfData, connection.Data.Configuration)
+
 	conf := RedshiftserverlessConf{}
 	err = mapstructure.Decode(connection.Data.Configuration, &conf)
 	if err != nil {
@@ -241,8 +276,10 @@ func (r *RedshiftserverlessConnectionResource) Read(ctx context.Context, req res
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"connection_method": types.StringType,
 		"data_api_endpoint": types.StringType,
 		"database":          types.StringType,
+		"endpoint":          types.StringType,
 		"external_id":       types.StringType,
 		"iam_role_arn":      types.StringType,
 		"override_endpoint": types.BoolType,
@@ -278,6 +315,20 @@ func (r *RedshiftserverlessConnectionResource) Update(ctx context.Context, req r
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
+
+	configAttributes, ok := getConfigAttributes(RedshiftserverlessSchema)
+	if !ok {
+		resp.Diagnostics.AddError("Error getting connection configuration attributes", "Could not get configuration attributes")
+		return
+	}
+
+	var prevData connectionData
+
+	diags = req.State.Get(ctx, &prevData)
+	resp.Diagnostics.Append(diags...)
+
+	connConf = handleSensitiveValues(ctx, configAttributes, connConf, prevData.Configuration.Attributes())
+
 	updated, err := client.Connections.Update(ctx,
 		data.Id.ValueString(),
 		&polytomic.UpdateConnectionRequestSchema{
@@ -302,8 +353,10 @@ func (r *RedshiftserverlessConnectionResource) Update(ctx context.Context, req r
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"connection_method": types.StringType,
 		"data_api_endpoint": types.StringType,
 		"database":          types.StringType,
+		"endpoint":          types.StringType,
 		"external_id":       types.StringType,
 		"iam_role_arn":      types.StringType,
 		"override_endpoint": types.BoolType,
