@@ -103,6 +103,27 @@ func (d *RedshiftserverlessConnectionDataSource) Schema(ctx context.Context, req
 						Computed:            true,
 						Sensitive:           false,
 					},
+					"use_unload": schema.BoolAttribute{
+						MarkdownDescription: "Enable or disable the ability to unload data from Redshift Serverless.",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+						Sensitive:           false,
+					},
+					"s3_bucket_name": schema.StringAttribute{
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+						Sensitive:           false,
+					},
+					"s3_bucket_region": schema.StringAttribute{
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+						Sensitive:           false,
+					},
 				},
 				Optional: true,
 			},
@@ -190,6 +211,15 @@ func (d *RedshiftserverlessConnectionDataSource) Read(ctx context.Context, req d
 			),
 			"data_api_endpoint": types.StringValue(
 				conf.DataAPIEndpoint,
+			),
+			"use_unload": types.BoolValue(
+				conf.UseUnload,
+			),
+			"s3_bucket_name": types.StringValue(
+				conf.S3BucketName,
+			),
+			"s3_bucket_region": types.StringValue(
+				conf.S3BucketRegion,
 			),
 		},
 	)

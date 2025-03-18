@@ -25,6 +25,9 @@ resource "polytomic_redshiftserverless_connection" "redshiftserverless" {
     serverless_endpoint = "acme.12345.us-west-2.redshift-serverless.amazonaws.com:5439"
     override_endpoint   = true
     data_api_endpoint   = "https://redshift-data.us-west-2.amazonaws.com"
+    use_unload          = true
+    s3_bucket_name      = "my-bucket"
+    s3_bucket_region    = "us-east-1"
   }
 }
 ```
@@ -62,6 +65,9 @@ Optional:
 
 - `data_api_endpoint` (String) Required if `override_endpoint` is `true`.
 - `override_endpoint` (Boolean) Override the Data API endpoint for connecting to Redshift; only applicable when `connection_method`` is `data_api`.
+- `s3_bucket_name` (String)
+- `s3_bucket_region` (String)
 - `serverless_endpoint` (String) Required if `connection_method` is `endpoint`.
+- `use_unload` (Boolean) Enable or disable the ability to unload data from Redshift Serverless.
 
 

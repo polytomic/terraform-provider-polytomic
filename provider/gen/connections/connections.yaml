@@ -787,6 +787,19 @@ connections:
         description: Required if `override_endpoint` is `true`.
         example: https://redshift-data.us-west-2.amazonaws.com
         optional: true
+      - name: UseUnload
+        type: bool
+        description: Enable or disable the ability to unload data from Redshift Serverless.
+        example: true
+        optional: true
+      - name: S3BucketName
+        type: string
+        optional: true
+        example: my-bucket
+      - name: S3BucketRegion
+        type: string
+        optional: true
+        example: us-east-1
   - connection: segment
     name: Segment
     type: polytomic.SegmentConnectionType

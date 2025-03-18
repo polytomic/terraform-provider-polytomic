@@ -10,6 +10,9 @@ resource "polytomic_redshiftserverless_connection" "redshiftserverless" {
     serverless_endpoint = "acme.12345.us-west-2.redshift-serverless.amazonaws.com:5439"
     override_endpoint   = true
     data_api_endpoint   = "https://redshift-data.us-west-2.amazonaws.com"
+    use_unload          = true
+    s3_bucket_name      = "my-bucket"
+    s3_bucket_region    = "us-east-1"
   }
 }
 

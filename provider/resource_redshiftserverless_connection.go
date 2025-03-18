@@ -107,6 +107,29 @@ func (t *RedshiftserverlessConnectionResource) Schema(ctx context.Context, req r
 						Sensitive:           false,
 						Default:             stringdefault.StaticString(""),
 					},
+					"use_unload": schema.BoolAttribute{
+						MarkdownDescription: "Enable or disable the ability to unload data from Redshift Serverless.",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+						Sensitive:           false,
+					},
+					"s3_bucket_name": schema.StringAttribute{
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+						Sensitive:           false,
+						Default:             stringdefault.StaticString(""),
+					},
+					"s3_bucket_region": schema.StringAttribute{
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+						Sensitive:           false,
+						Default:             stringdefault.StaticString(""),
+					},
 				},
 
 				Required: true,
@@ -159,6 +182,9 @@ func (r *RedshiftserverlessConnectionResource) Create(ctx context.Context, req r
 				ServerlessEndpoint: data.Configuration.Attributes()["serverless_endpoint"].(types.String).ValueString(),
 				OverrideEndpoint:   data.Configuration.Attributes()["override_endpoint"].(types.Bool).ValueBool(),
 				DataAPIEndpoint:    data.Configuration.Attributes()["data_api_endpoint"].(types.String).ValueString(),
+				UseUnload:          data.Configuration.Attributes()["use_unload"].(types.Bool).ValueBool(),
+				S3BucketName:       data.Configuration.Attributes()["s3_bucket_name"].(types.String).ValueString(),
+				S3BucketRegion:     data.Configuration.Attributes()["s3_bucket_region"].(types.String).ValueString(),
 			},
 		},
 		polytomic.WithIdempotencyKey(uuid.NewString()),
@@ -188,6 +214,9 @@ func (r *RedshiftserverlessConnectionResource) Create(ctx context.Context, req r
 		"serverless_endpoint": types.StringType,
 		"override_endpoint":   types.BoolType,
 		"data_api_endpoint":   types.StringType,
+		"use_unload":          types.BoolType,
+		"s3_bucket_name":      types.StringType,
+		"s3_bucket_region":    types.StringType,
 	}, output)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -243,6 +272,9 @@ func (r *RedshiftserverlessConnectionResource) Read(ctx context.Context, req res
 		"serverless_endpoint": types.StringType,
 		"override_endpoint":   types.BoolType,
 		"data_api_endpoint":   types.StringType,
+		"use_unload":          types.BoolType,
+		"s3_bucket_name":      types.StringType,
+		"s3_bucket_region":    types.StringType,
 	}, output)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -278,6 +310,9 @@ func (r *RedshiftserverlessConnectionResource) Update(ctx context.Context, req r
 				ServerlessEndpoint: data.Configuration.Attributes()["serverless_endpoint"].(types.String).ValueString(),
 				OverrideEndpoint:   data.Configuration.Attributes()["override_endpoint"].(types.Bool).ValueBool(),
 				DataAPIEndpoint:    data.Configuration.Attributes()["data_api_endpoint"].(types.String).ValueString(),
+				UseUnload:          data.Configuration.Attributes()["use_unload"].(types.Bool).ValueBool(),
+				S3BucketName:       data.Configuration.Attributes()["s3_bucket_name"].(types.String).ValueString(),
+				S3BucketRegion:     data.Configuration.Attributes()["s3_bucket_region"].(types.String).ValueString(),
 			},
 		},
 		polytomic.WithIdempotencyKey(uuid.NewString()),
@@ -308,6 +343,9 @@ func (r *RedshiftserverlessConnectionResource) Update(ctx context.Context, req r
 		"serverless_endpoint": types.StringType,
 		"override_endpoint":   types.BoolType,
 		"data_api_endpoint":   types.StringType,
+		"use_unload":          types.BoolType,
+		"s3_bucket_name":      types.StringType,
+		"s3_bucket_region":    types.StringType,
 	}, output)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

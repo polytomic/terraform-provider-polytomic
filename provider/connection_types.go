@@ -16,4 +16,8 @@ type RedshiftServerlessConnectionConfiguration struct {
 	ServerlessEndpoint string `json:"endpoint,omitempty" mapstructure:"endpoint" tfsdk:"serverless_endpoint"`
 	OverrideEndpoint   bool   `json:"override_endpoint,omitempty" mapstructure:"override_endpoint" tfsdk:"override_endpoint"`
 	DataAPIEndpoint    string `json:"data_api_endpoint,omitempty" mapstructure:"data_api_endpoint" tfsdk:"data_api_endpoint"`
+
+	UseUnload      bool   `json:"use_unload,omitempty" mapstructure:"use_unload" tfsdk:"use_unload"`
+	S3BucketName   string `json:"s3_bucket_name" mapstructure:"s3_bucket_name" tfsdk:"s3_bucket_name"`
+	S3BucketRegion string `json:"s3_bucket_region" mapstructure:"s3_bucket_region" tfsdk:"s3_bucket_region"`
 }
