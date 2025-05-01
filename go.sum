@@ -198,8 +198,8 @@ github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINE
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 h1:Jamvg5psRIccs7FGNTlIRMkT8wgtp5eCXdBlqhYGL6U=
 github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
-github.com/polytomic/polytomic-go v1.11.0 h1:eCAIy39/pU7GiLxcK0L0RSIfiKQ5pUlOCQx7UbekXlw=
-github.com/polytomic/polytomic-go v1.11.0/go.mod h1:C+8UTbTtZa1+l8I93qEFskoMrS+hlCDpfElezI9O8Mo=
+github.com/polytomic/polytomic-go v1.11.2 h1:sEZnipLgletU93MWht3MOrJ0pXEGEtTIui1ZwZbX+r8=
+github.com/polytomic/polytomic-go v1.11.2/go.mod h1:C+8UTbTtZa1+l8I93qEFskoMrS+hlCDpfElezI9O8Mo=
 github.com/polytomic/terraform-plugin-framework v1.13.1 h1:NKDFOcxc8xftgHR9lo6zmiDOROv9bUZwiU1ZDR9bdow=
 github.com/polytomic/terraform-plugin-framework v1.13.1/go.mod h1:j64rwMGpgM3NYXTKuxrCnyubQb/4VKldEKlcG8cvmjU=
 github.com/posener/complete v1.1.1/go.mod h1:em0nMJCgc9GFtwrmVmEMR/ZL6WyhyjMBndrE9hABlRI=
