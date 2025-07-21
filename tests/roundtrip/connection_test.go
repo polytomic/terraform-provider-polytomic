@@ -1,17 +1,24 @@
 package roundtrip
 
 import (
+	"fmt"
 	"testing"
 
+	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/polytomic/terraform-provider-polytomic/provider"
 )
 
 // Test connection round-trip
 func TestAccRoundTrip_Connection(t *testing.T) {
-	resourceName := "polytomic_csv_connection.test"
+	connName := provider.ValidName(provider.ToSnakeCase(fmt.Sprintf("test-%s", uuid.NewString())))
+	var testOrgName string
+	if !provider.APIKey() {
+		testOrgName = connName
+	}
+	resourceName := fmt.Sprintf("polytomic_csv_connection.%s", connName)
 	tfConfig := provider.TestCaseTfResource(t, connectionResourceTemplate, provider.TestCaseTfArgs{
-		Name:   "roundtrip_test",
+		Name:   connName,
 		APIKey: provider.APIKey(),
 	})
 
@@ -23,9 +30,10 @@ func TestAccRoundTrip_Connection(t *testing.T) {
 			{
 				Config: tfConfig,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "name", "roundtrip_test"),
+					resource.TestCheckResourceAttr(resourceName, "name", connName),
 					resource.TestCheckResourceAttrSet(resourceName, "id"),
 					ImportAndValidate(
+						t.Context(),
 						[]string{resourceName},
 						RoundTripOptions{
 							ValidateSensitive: false,
@@ -33,6 +41,7 @@ func TestAccRoundTrip_Connection(t *testing.T) {
 								"created_at",
 								"updated_at",
 							},
+							OrgName: testOrgName,
 						},
 					)),
 			},
@@ -62,7 +71,7 @@ resource "polytomic_organization" "test" {
   name = "{{.Name}}"
 }
 {{end}}
-resource "polytomic_csv_connection" "test" {
+resource "polytomic_csv_connection" "{{.Name}}" {
   name          = "{{.Name}}"
   {{if not .APIKey}}
   organization  = polytomic_organization.test.id

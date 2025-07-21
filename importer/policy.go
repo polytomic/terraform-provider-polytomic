@@ -6,6 +6,7 @@ import (
 	"io"
 
 	"github.com/AlekSi/pointer"
+	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hclwrite"
 	"github.com/polytomic/polytomic-go"
 	ptclient "github.com/polytomic/polytomic-go/client"
@@ -54,6 +55,8 @@ func (p *Policies) Init(ctx context.Context) error {
 		p.Resources[name] = hyrdatedPolicy.Data
 	}
 
+	// Organization variable will be handled centrally
+
 	return nil
 
 }
@@ -67,9 +70,16 @@ func (p *Policies) GenerateTerraformFiles(ctx context.Context, writer io.Writer,
 		resourceBlock := body.AppendNewBlock("resource", []string{PolicyResource, name})
 
 		resourceBlock.Body().SetAttributeValue("name", cty.StringVal(pointer.GetString(policy.Name)))
-		if policy.OrganizationId != nil {
-			resourceBlock.Body().SetAttributeValue("organization", cty.StringVal(pointer.GetString(policy.OrganizationId)))
-		}
+		resourceBlock.Body().SetAttributeTraversal("organization",
+			hcl.Traversal{
+				hcl.TraverseRoot{
+					Name: "local",
+				},
+				hcl.TraverseAttr{
+					Name: "organization_id",
+				},
+			},
+		)
 
 		var policyActions []map[string]interface{}
 		for _, action := range policy.PolicyActions {
@@ -80,7 +90,7 @@ func (p *Policies) GenerateTerraformFiles(ctx context.Context, writer io.Writer,
 		}
 		resourceBlock.Body().SetAttributeValue("policy_actions", typeConverter(policyActions))
 
-		writer.Write(hclFile.Bytes())
+		writer.Write(ReplaceRefs(hclFile.Bytes(), refs))
 	}
 	return nil
 }

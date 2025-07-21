@@ -1,11 +1,10 @@
 package provider
 
 import (
-	"os"
 	"testing"
 
 	ptclient "github.com/polytomic/polytomic-go/client"
-	"github.com/polytomic/terraform-provider-polytomic/provider/internal/providerclient"
+	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 	"github.com/stretchr/testify/require"
 )
 
@@ -17,9 +16,7 @@ func testClient(t *testing.T, org string) *ptclient.Client {
 	t.Helper()
 
 	provider, err := providerclient.NewClientProvider(
-		providerclient.WithDeploymentKey(os.Getenv(PolytomicDeploymentKey)),
-		providerclient.WithDeploymentURL(os.Getenv(PolytomicDeploymentURL)),
-		providerclient.WithAPIKey(os.Getenv(PolytomicAPIKey)),
+		providerclient.OptionsFromEnv(),
 	)
 	require.NoError(t, err)
 	c, err := provider.Client(org)
@@ -31,9 +28,7 @@ func testPartnerClient(t *testing.T) *ptclient.Client {
 	t.Helper()
 
 	provider, err := providerclient.NewClientProvider(
-		providerclient.WithDeploymentKey(os.Getenv(PolytomicDeploymentKey)),
-		providerclient.WithDeploymentURL(os.Getenv(PolytomicDeploymentURL)),
-		providerclient.WithAPIKey(os.Getenv(PolytomicAPIKey)),
+		providerclient.OptionsFromEnv(),
 	)
 	require.NoError(t, err)
 	c, err := provider.PartnerClient()

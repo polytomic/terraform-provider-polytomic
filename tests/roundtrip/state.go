@@ -28,8 +28,8 @@ type RawState struct {
 	Resources []StateResource `json:"resources,omitempty"`
 }
 
-// getWorkspaceState reads the terraform state from workspace
-func getWorkspaceState(ws *TerraformWorkspace) (*terraform.State, map[string]*terraform.ResourceState, error) {
+// GetState reads the terraform state from workspace
+func (ws *TerraformWorkspace) GetState() (*terraform.State, map[string]*terraform.ResourceState, error) {
 	stateFile := filepath.Join(ws.Dir, "terraform.tfstate")
 
 	content, err := os.ReadFile(stateFile)

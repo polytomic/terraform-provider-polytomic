@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	ptclient "github.com/polytomic/polytomic-go/client"
-	"github.com/polytomic/terraform-provider-polytomic/provider/internal/providerclient"
+	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -96,13 +96,9 @@ func (id *identityDatasource) Read(ctx context.Context, req datasource.ReadReque
 	// Get the schemas
 	var client *ptclient.Client
 	var err error
-	if data.OrganizationID.ValueString() != "" {
-		client, err = id.provider.Client(data.OrganizationID.ValueString())
-	} else {
-		client, err = id.provider.PartnerClient()
-	}
+	client, err = id.provider.Client(data.OrganizationID.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("error getting partner client", err.Error())
+		resp.Diagnostics.AddError("error getting client", err.Error())
 		return
 	}
 

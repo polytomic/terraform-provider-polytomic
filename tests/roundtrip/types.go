@@ -6,6 +6,9 @@ type RoundTripOptions struct {
 	ValidateSensitive  bool
 	IgnoreFields       []string
 	ExpectedVariables  []string
+	// OrgName contains the name of the organization being tested; this will be
+	// empty if tests are running with an API key.
+	OrgName string
 }
 
 // ValidationResult represents the result of comparing a field between original and imported resources
@@ -21,6 +24,7 @@ type ValidationResult struct {
 
 // TerraformWorkspace represents a temporary terraform workspace for testing
 type TerraformWorkspace struct {
-	Dir    string
-	TfPath string
+	Dir         string
+	TfPath      string
+	ProviderDir string // Directory containing the built provider binary (for cleanup)
 }

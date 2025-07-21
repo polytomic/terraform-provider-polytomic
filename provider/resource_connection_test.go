@@ -5,13 +5,14 @@ import (
 	"testing"
 
 	"github.com/AlekSi/pointer"
+	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestAccConnectionResource(t *testing.T) {
-	name := "TestAccConnection"
+	name := fmt.Sprintf("TestAccConnection-%s", uuid.NewString())
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: TestAccProtoV6ProviderFactories,

@@ -1,19 +1,20 @@
 package roundtrip
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"reflect"
-	"sort"
 	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/polytomic/terraform-provider-polytomic/importer"
+	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 	"github.com/polytomic/terraform-provider-polytomic/provider"
 )
 
@@ -30,7 +31,7 @@ func PreCheck(t *testing.T) func() {
 }
 
 // ImportAndValidate runs the importer and validates round-trip
-func ImportAndValidate(resourceNames []string, opts RoundTripOptions) resource.TestCheckFunc {
+func ImportAndValidate(ctx context.Context, resourceNames []string, opts RoundTripOptions) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		// Step 1: Get current resources from state
 		resources := make(map[string]*terraform.ResourceState)
@@ -55,12 +56,15 @@ func ImportAndValidate(resourceNames []string, opts RoundTripOptions) resource.T
 			}
 		}()
 
-		err = runImporter(exportDir, opts.IncludePermissions)
+		err = runImporter(ctx, exportDir, opts.IncludePermissions)
 		if err != nil {
 			return fmt.Errorf("importer failed: %w", err)
 		}
 
 		// Step 3: Validate generated files
+		if opts.OrgName != "" {
+			exportDir = filepath.Join(exportDir, opts.OrgName)
+		}
 		err = validateGeneratedFiles(exportDir)
 		if err != nil {
 			return fmt.Errorf("generated files validation failed: %w", err)
@@ -80,13 +84,13 @@ func ImportAndValidate(resourceNames []string, opts RoundTripOptions) resource.T
 		}
 
 		// Create .tfrc file for local provider override
-		err = createTfrcFile(importWS)
+		err = importWS.CreateTfrcFile()
 		if err != nil {
 			return fmt.Errorf("failed to create .tfrc file: %w", err)
 		}
 
 		// Initialize terraform
-		err = terraformInit(importWS)
+		err = importWS.Init()
 		if err != nil {
 			return fmt.Errorf("terraform init failed: %w", err)
 		}
@@ -94,7 +98,7 @@ func ImportAndValidate(resourceNames []string, opts RoundTripOptions) resource.T
 		// Run import script
 		importScript := filepath.Join(exportDir, "import.sh")
 		if _, err := os.Stat(importScript); err == nil {
-			err = executeImportScript(importWS, importScript)
+			err = importWS.ExecuteImportScript(importScript)
 			if err != nil {
 				return fmt.Errorf("import script failed: %w", err)
 			}
@@ -109,7 +113,7 @@ func ImportAndValidate(resourceNames []string, opts RoundTripOptions) resource.T
 		}
 
 		// Step 5: Validate no drift
-		hasDrift, driftDetails, err := checkForDrift(importWS)
+		hasDrift, driftDetails, err := importWS.CheckForDrift()
 		if err != nil {
 			return fmt.Errorf("plan failed: %w", err)
 		}
@@ -119,7 +123,7 @@ func ImportAndValidate(resourceNames []string, opts RoundTripOptions) resource.T
 		}
 
 		// Step 6: Validate specific fields
-		_, importedResources, err := getWorkspaceState(importWS)
+		_, importedResources, err := importWS.GetState()
 		if err != nil {
 			return fmt.Errorf("failed to get imported state: %w", err)
 		}
@@ -159,28 +163,15 @@ func ImportAndValidate(resourceNames []string, opts RoundTripOptions) resource.T
 }
 
 // runImporter executes the importer using the importer package
-func runImporter(outputDir string, includePermissions bool) error {
-	// Get credentials from environment
-	apiKey := os.Getenv("POLYTOMIC_API_KEY")
-	deploymentKey := os.Getenv("POLYTOMIC_DEPLOYMENT_KEY")
-	url := os.Getenv("POLYTOMIC_DEPLOYMENT_URL")
-
-	if apiKey == "" && deploymentKey == "" {
-		return fmt.Errorf("POLYTOMIC_API_KEY or POLYTOMIC_DEPLOYMENT_KEY must be set")
-	}
-
-	if url == "" {
-		return fmt.Errorf("POLYTOMIC_DEPLOYMENT_URL must be set")
+func runImporter(ctx context.Context, outputDir string, includePermissions bool) error {
+	client, err := providerclient.NewClientProvider(providerclient.OptionsFromEnv())
+	if err != nil {
+		return fmt.Errorf("failed to create client provider: %w", err)
 	}
 
 	// Initialize and run importer directly
 	// Note: importer.Init uses log.Fatal on errors, so if we get here it succeeded
-	importer.Init(url, apiKey, outputDir, true, includePermissions)
-
-	// Verify that files were actually created
-	if _, err := os.Stat(filepath.Join(outputDir, "main.tf")); err != nil {
-		return fmt.Errorf("importer did not create main.tf: %w", err)
-	}
+	importer.Init(ctx, client, "", outputDir, true, includePermissions)
 
 	return nil
 }
@@ -206,13 +197,22 @@ func setupTempWorkspace() (*TerraformWorkspace, error) {
 
 // cleanupWorkspace removes the temporary workspace
 func cleanupWorkspace(ws *TerraformWorkspace) {
-	if ws != nil && ws.Dir != "" {
+	if ws != nil {
 		// Keep workspace for debugging if TEST_KEEP_WORKSPACES is set
 		if os.Getenv("TEST_KEEP_WORKSPACES") == "true" {
 			fmt.Printf("Keeping workspace for debugging: %s\n", ws.Dir)
+			if ws.ProviderDir != "" {
+				fmt.Printf("Keeping provider directory for debugging: %s\n", ws.ProviderDir)
+			}
 			return
 		}
-		os.RemoveAll(ws.Dir)
+
+		if ws.Dir != "" {
+			os.RemoveAll(ws.Dir)
+		}
+		if ws.ProviderDir != "" {
+			os.RemoveAll(ws.ProviderDir)
+		}
 	}
 }
 
@@ -251,13 +251,71 @@ func copyGeneratedFiles(exportDir, workspaceDir string) error {
 	return nil
 }
 
-// createTfrcFile creates a .tfrc file in the workspace for local provider override
-func createTfrcFile(ws *TerraformWorkspace) error {
-	// Find the provider binary path
-	providerPath, err := exec.LookPath("terraform-provider-polytomic")
+// buildProvider builds the terraform-provider-polytomic binary and returns its path
+func buildProvider() (string, error) {
+	// Get the go binary path
+	goPath, err := exec.LookPath("go")
 	if err != nil {
-		return fmt.Errorf("terraform-provider-polytomic not found in PATH: %w", err)
+		return "", fmt.Errorf("go not found in PATH: %w", err)
 	}
+
+	// Find the repository root (contains go.mod)
+	repoRoot, err := findRepoRoot()
+	if err != nil {
+		return "", fmt.Errorf("failed to find repository root: %w", err)
+	}
+
+	// Create a temporary directory for the provider binary
+	tempDir, err := os.MkdirTemp("", "provider-build-")
+	if err != nil {
+		return "", fmt.Errorf("failed to create temp directory: %w", err)
+	}
+
+	// Build the provider into the temp directory
+	providerPath := filepath.Join(tempDir, "terraform-provider-polytomic")
+	cmd := exec.Command(goPath, "build", "-o", providerPath, ".")
+	cmd.Dir = repoRoot
+
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		os.RemoveAll(tempDir)
+		return "", fmt.Errorf("go build failed: %w\nOutput: %s", err, output)
+	}
+
+	return providerPath, nil
+}
+
+// findRepoRoot finds the repository root using go env GOMOD
+func findRepoRoot() (string, error) {
+	goPath, err := exec.LookPath("go")
+	if err != nil {
+		return "", fmt.Errorf("go not found in PATH: %w", err)
+	}
+
+	// Use 'go env GOMOD' to find the current module's go.mod file
+	cmd := exec.Command(goPath, "env", "GOMOD")
+	output, err := cmd.Output()
+	if err != nil {
+		return "", fmt.Errorf("failed to run 'go env GOMOD': %w", err)
+	}
+
+	goModPath := strings.TrimSpace(string(output))
+	if goModPath == "" || goModPath == "/dev/null" {
+		return "", fmt.Errorf("not in a Go module")
+	}
+
+	return filepath.Dir(goModPath), nil
+}
+
+// CreateTfrcFile creates a .tfrc file in the workspace for local provider override
+func (ws *TerraformWorkspace) CreateTfrcFile() error {
+	// Build the provider
+	providerPath, err := buildProvider()
+	if err != nil {
+		return fmt.Errorf("failed to build provider: %w", err)
+	}
+	// Store the provider directory for cleanup
+	ws.ProviderDir = filepath.Dir(providerPath)
 
 	// Get the directory containing the provider binary
 	providerDir := filepath.Dir(providerPath)
@@ -281,8 +339,8 @@ func createTfrcFile(ws *TerraformWorkspace) error {
 	return nil
 }
 
-// terraformInit runs terraform init in the workspace
-func terraformInit(ws *TerraformWorkspace) error {
+// Init runs terraform init in the workspace
+func (ws *TerraformWorkspace) Init() error {
 	cmd := exec.Command(ws.TfPath, "init")
 	cmd.Dir = ws.Dir
 	cmd.Env = append(os.Environ(),
@@ -297,8 +355,8 @@ func terraformInit(ws *TerraformWorkspace) error {
 	return nil
 }
 
-// executeImportScript runs the generated import script
-func executeImportScript(ws *TerraformWorkspace, scriptPath string) error {
+// ExecuteImportScript runs the generated import script
+func (ws *TerraformWorkspace) ExecuteImportScript(scriptPath string) error {
 	// Read and modify script to work in the workspace directory
 	content, err := os.ReadFile(scriptPath)
 	if err != nil {
@@ -333,8 +391,8 @@ func executeImportScript(ws *TerraformWorkspace, scriptPath string) error {
 	return nil
 }
 
-// checkForDrift runs terraform plan and checks for changes
-func checkForDrift(ws *TerraformWorkspace) (bool, string, error) {
+// CheckForDrift runs terraform plan and checks for changes
+func (ws *TerraformWorkspace) CheckForDrift() (bool, string, error) {
 	cmd := exec.Command(ws.TfPath, "plan", "-detailed-exitcode", "-out=tfplan")
 	cmd.Dir = ws.Dir
 	cmd.Env = append(os.Environ(),
@@ -383,16 +441,6 @@ func mapResourceName(testName string, originalRS *terraform.ResourceState, impor
 	}
 
 	return ""
-}
-
-// getAttributeKeys returns sorted list of attribute keys for debugging
-func getAttributeKeys(attrs map[string]string) []string {
-	keys := make([]string, 0, len(attrs))
-	for k := range attrs {
-		keys = append(keys, k)
-	}
-	sort.Strings(keys)
-	return keys
 }
 
 // validateResourceFields compares fields between original and imported resources

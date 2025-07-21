@@ -6,6 +6,7 @@ import (
 	"io"
 
 	"github.com/AlekSi/pointer"
+	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hclwrite"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -30,7 +31,6 @@ type Connections struct {
 
 	Resources   map[string]Connection
 	Datasources map[string]Connection
-	variables   []Variable
 }
 
 type Connection struct {
@@ -103,14 +103,21 @@ func (c *Connections) Init(ctx context.Context) error {
 				Name:         conn.Name,
 				Organization: conn.OrganizationId,
 			}
+
 		} else {
 			log.Warn().Msgf("connection type %s not supported", pointer.GetString(conn.Type.Id))
 		}
 	}
+
+	// Organization variable will be handled centrally
+
 	return nil
 }
 
 func (c *Connections) GenerateTerraformFiles(ctx context.Context, writer io.Writer, refs map[string]string) error {
+	// Check if we should use organization variable
+	// useOrgVariable := len(c.organizationIDs) == 1
+
 	for _, name := range sortedKeys(c.Datasources) {
 		conn := c.Datasources[name]
 		hclFile := hclwrite.NewEmptyFile()
@@ -118,7 +125,16 @@ func (c *Connections) GenerateTerraformFiles(ctx context.Context, writer io.Writ
 		resourceBlock := body.AppendNewBlock("data", []string{conn.Resource, name})
 		resourceBlock.Body().SetAttributeValue("id", cty.StringVal(pointer.GetString(conn.ID)))
 		resourceBlock.Body().SetAttributeValue("name", cty.StringVal(pointer.GetString(conn.Name)))
-		resourceBlock.Body().SetAttributeValue("organization", cty.StringVal(pointer.GetString(conn.Organization)))
+		resourceBlock.Body().SetAttributeTraversal("organization",
+			hcl.Traversal{
+				hcl.TraverseRoot{
+					Name: "local",
+				},
+				hcl.TraverseAttr{
+					Name: "organization_id",
+				},
+			},
+		)
 		body.AppendNewline()
 
 		writer.Write(hclFile.Bytes())
@@ -131,11 +147,21 @@ func (c *Connections) GenerateTerraformFiles(ctx context.Context, writer io.Writ
 		body := hclFile.Body()
 		resourceBlock := body.AppendNewBlock("resource", []string{conn.Resource, name})
 		resourceBlock.Body().SetAttributeValue("name", cty.StringVal(pointer.GetString(conn.Name)))
-		resourceBlock.Body().SetAttributeValue("organization", cty.StringVal(pointer.GetString(conn.Organization)))
+		resourceBlock.Body().SetAttributeTraversal("organization",
+			hcl.Traversal{
+				hcl.TraverseRoot{
+					Name: "local",
+				},
+				hcl.TraverseAttr{
+					Name: "organization_id",
+				},
+			},
+		)
+
 		resourceBlock.Body().SetAttributeValue("configuration", config)
 		body.AppendNewline()
 
-		writer.Write(unquoteVariableRef(hclFile.Bytes()))
+		writer.Write(hclFile.Bytes())
 	}
 	return nil
 
@@ -144,11 +170,12 @@ func (c *Connections) GenerateTerraformFiles(ctx context.Context, writer io.Writ
 func (c *Connections) GenerateImports(ctx context.Context, writer io.Writer) error {
 	for _, name := range sortedKeys(c.Resources) {
 		conn := c.Resources[name]
-		writer.Write([]byte(fmt.Sprintf("terraform import %s.%s %s",
+		fmt.Fprintf(writer, "terraform import %s.%s %s # %s\n",
 			conn.Resource,
 			name,
-			pointer.GetString(conn.ID))))
-		writer.Write([]byte(fmt.Sprintf(" # %s\n", pointer.GetString(conn.Name))))
+			pointer.Get(conn.ID),
+			pointer.Get(conn.Name),
+		)
 	}
 	return nil
 }
@@ -174,5 +201,5 @@ func (c *Connections) DatasourceRefs() map[string]string {
 }
 
 func (c *Connections) Variables() []Variable {
-	return c.variables
+	return nil
 }

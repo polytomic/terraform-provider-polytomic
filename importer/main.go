@@ -3,10 +3,14 @@ package importer
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io"
+	"strings"
 	"text/template"
 
-	"github.com/spf13/viper"
+	"github.com/AlekSi/pointer"
+	"github.com/hashicorp/hcl/v2/hclwrite"
+	"github.com/polytomic/polytomic-go"
 )
 
 var (
@@ -23,26 +27,53 @@ var (
 provider "polytomic" {
 	# Configuration comes from environment variables:
 	# POLYTOMIC_DEPLOYMENT_URL
-	# POLYTOMIC_API_KEY or POLYTOMIC_DEPLOYMENT_KEY
+	# POLYTOMIC_API_KEY or POLYTOMIC_DEPLOYMENT_KEY or POLYTOMIC_PARTNER_KEY
 }
+
+{{ if .OrgResource }}
+	resource "polytomic_organization" "{{ .Slug }}" {
+		name = "{{ .Name }}"
+	}
+
+	locals {
+		organization_id = polytomic_organization.{{ .Slug }}.id
+	}
+{{ else }}
+    data "polytomic_caller_identity" "self" {}
+
+	locals {
+		organization_id = data.polytomic_caller_identity.self.organization_id
+	}
+{{ end -}}
 `
 )
 
-func NewMain() *Main {
-	return &Main{}
+func NewMain(org *polytomic.Organization, orgResource bool) *Main {
+	slug := strings.TrimSpace(pointer.Get(org.Name))
+	if slug == "" {
+		panic("organization name is empty")
+	}
+
+	m := &Main{
+		OrgResource: orgResource,
+		Slug:        pointer.Get(org.Name),
+		Name:        pointer.Get(org.Name),
+	}
+	if orgResource && pointer.Get(org.Id) != "" {
+		m.ID = pointer.Get(org.Id)
+	}
+
+	return m
 }
 
 type Main struct {
-	URL         string
-	APIKey      string
-	WriteAPIKey bool
+	OrgResource bool
+	ID          string
+	Slug        string
+	Name        string
 }
 
 func (m *Main) Init(ctx context.Context) error {
-	m.URL = viper.GetString("url")
-	m.APIKey = viper.GetString("api-key")
-	m.WriteAPIKey = viper.GetBool("with-api-key")
-
 	return nil
 }
 
@@ -52,24 +83,20 @@ func (m *Main) GenerateTerraformFiles(ctx context.Context, writer io.Writer, ref
 		return err
 	}
 	var buf bytes.Buffer
-	err = tmpl.Execute(&buf, struct {
-		URL         string
-		APIKey      string
-		WriteAPIKey bool
-	}{
-		URL:         m.URL,
-		APIKey:      m.APIKey,
-		WriteAPIKey: m.WriteAPIKey,
-	})
+	err = tmpl.Execute(&buf, m)
 	if err != nil {
 		return err
 	}
-	_, err = writer.Write(buf.Bytes())
+	_, err = writer.Write(hclwrite.Format(buf.Bytes()))
 	return err
 }
 
 func (m *Main) GenerateImports(ctx context.Context, writer io.Writer) error {
-	return nil
+	if m.ID == "" {
+		return nil
+	}
+	_, err := fmt.Fprintf(writer, "terraform import polytomic_organization.%s %s # %s\n", m.Slug, m.ID, m.Name)
+	return err
 }
 
 func (m *Main) Filename() string {
@@ -77,7 +104,11 @@ func (m *Main) Filename() string {
 }
 
 func (m *Main) ResourceRefs() map[string]string {
-	return nil
+	result := map[string]string{}
+	if m.ID != "" {
+		result[m.ID] = fmt.Sprintf("polytomic_organization.%s.id", m.Slug)
+	}
+	return result
 }
 
 func (m *Main) DatasourceRefs() map[string]string {

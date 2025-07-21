@@ -14,7 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	ptcore "github.com/polytomic/polytomic-go/core"
 	"github.com/polytomic/polytomic-go/permissions"
-	"github.com/polytomic/terraform-provider-polytomic/provider/internal/providerclient"
+	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
 var _ resource.Resource = &roleResource{}

@@ -8,6 +8,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
+	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 	"github.com/stretchr/testify/require"
 )
 
@@ -21,12 +22,12 @@ var TestAccProtoV6ProviderFactories = map[string]func() (tfprotov6.ProviderServe
 
 // TestAccPreCheck performs pre-checks for acceptance testing
 func TestAccPreCheck(t *testing.T) {
-	if os.Getenv(PolytomicAPIKey) == "" && os.Getenv(PolytomicDeploymentKey) == "" {
-		t.Fatalf("%s or %s must be set for acceptance testing", PolytomicAPIKey, PolytomicDeploymentKey)
+	if os.Getenv(providerclient.PolytomicAPIKey) == "" && os.Getenv(providerclient.PolytomicDeploymentKey) == "" {
+		t.Fatalf("%s or %s must be set for acceptance testing", providerclient.PolytomicAPIKey, providerclient.PolytomicDeploymentKey)
 	}
 
-	if os.Getenv(PolytomicDeploymentURL) == "" {
-		t.Fatalf("%s must be set for acceptance testing", PolytomicDeploymentURL)
+	if os.Getenv(providerclient.PolytomicDeploymentURL) == "" {
+		t.Fatalf("%s must be set for acceptance testing", providerclient.PolytomicDeploymentURL)
 	}
 }
 
@@ -38,7 +39,7 @@ func GetTestAccProtoV6ProviderFactories() map[string]func() (tfprotov6.ProviderS
 // APIKey returns true if the test is being run using an API key, rather than a
 // deployment key.
 func APIKey() bool {
-	return os.Getenv(PolytomicAPIKey) != "" && os.Getenv(PolytomicDeploymentKey) == ""
+	return os.Getenv(providerclient.PolytomicAPIKey) != "" && os.Getenv(providerclient.PolytomicDeploymentKey) == ""
 }
 
 type TestCaseTfArgs struct {

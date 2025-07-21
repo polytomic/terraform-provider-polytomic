@@ -6,8 +6,13 @@ default: testacc
 # Run acceptance tests
 .PHONY: testacc
 testacc:
-	POLYTOMIC_DEPLOYMENT_URL=$(POLYTOMIC_DEPLOYMENT_URL) TF_ACC=1 go test ./... $(TESTARGS) -timeout 120m
+	POLYTOMIC_DEPLOYMENT_URL=$(POLYTOMIC_DEPLOYMENT_URL) TF_ACC=1 go test ./tests/... $(TESTARGS) -timeout 120m
+	POLYTOMIC_DEPLOYMENT_URL=$(POLYTOMIC_DEPLOYMENT_URL) TF_ACC=1 go test ./provider/... $(TESTARGS) -timeout 120m
+	POLYTOMIC_DEPLOYMENT_URL=$(POLYTOMIC_DEPLOYMENT_URL) TF_ACC=1 go test ./importer/... $(TESTARGS) -timeout 120m
 
+.PHONY: generate-local
+generate-local:
+	POLYTOMIC_DEPLOYMENT_URL=$(POLYTOMIC_DEPLOYMENT_URL) go generate ./...
 
 .PHONY: dev
 dev:
