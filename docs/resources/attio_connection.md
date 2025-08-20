@@ -53,6 +53,7 @@ state before it will take effect on a destroy operation.
 
 Optional:
 
+- `enable_webhooks` (Boolean) Enable Attio webhook updates for bulk syncs
 - `workspace_name` (String) Workspace name
 
 

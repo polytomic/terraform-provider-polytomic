@@ -63,5 +63,6 @@ Required:
 Optional:
 
 - `aws_user` (String) User ARN
+- `change_detection` (Boolean) Use DynamoDB Streams for bulk syncs
 
 

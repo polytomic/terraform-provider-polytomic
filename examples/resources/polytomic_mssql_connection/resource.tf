@@ -4,6 +4,7 @@ resource "polytomic_mssql_connection" "mssql" {
     database = "sampledb"
     hostname = "example.database.windows.net"
     password = "secret"
+    ssh_host = "bastion.example.com"
     username = "user"
   }
 }

@@ -1,0 +1,1 @@
+{"$id":"https://github.com/polytomic/app/services/polytomic/backend/clerk/connection-conf","$schema":"https://json-schema.org/draft/2020-12/schema","properties":{"secret_key":{"sensitive":true,"title":"Secret Key","type":"string"}},"required":["secret_key"],"type":"object"}

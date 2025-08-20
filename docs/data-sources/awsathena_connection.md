@@ -36,6 +36,7 @@ data "polytomic_awsathena_connection" "awsathena" {
 
 Read-Only:
 
+- `access_id` (String) AWS Access ID
 - `aws_user` (String) User ARN
 - `outputbucket` (String) AWS S3 output bucket
 

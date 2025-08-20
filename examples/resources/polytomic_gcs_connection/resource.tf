@@ -1,8 +1,9 @@
 resource "polytomic_gcs_connection" "gcs" {
   name = "example"
   configuration = {
-    bucket            = "my-bucket"
-    single_table_name = "collection"
+    bucket                   = "my-bucket"
+    single_table_file_format = "csv"
+    single_table_name        = "collection"
   }
 }
 

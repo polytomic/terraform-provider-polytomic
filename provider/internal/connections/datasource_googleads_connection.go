@@ -70,6 +70,12 @@ func (d *GoogleadsConnectionDataSource) Schema(ctx context.Context, req datasour
 						MarkdownDescription: `Connected user's email`,
 						Computed:            true,
 					},
+					"custom_reports": schema.StringAttribute{
+						MarkdownDescription: `Custom reports
+
+    One report per line. Format is a report name followed by a Google Ads SQL query. e.g. myReport:ad_groups:campaign.id`,
+						Computed: true,
+					},
 					"oauth_token_expiry": schema.StringAttribute{
 						MarkdownDescription: ``,
 						Computed:            true,
@@ -115,6 +121,9 @@ func (d *GoogleadsConnectionDataSource) Read(ctx context.Context, req datasource
 			),
 			"connected_user": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["connected_user"], "string").(string),
+			),
+			"custom_reports": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["custom_reports"], "string").(string),
 			),
 			"oauth_token_expiry": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["oauth_token_expiry"], "string").(string),

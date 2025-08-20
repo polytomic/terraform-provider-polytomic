@@ -46,6 +46,7 @@ Read-Only:
 - `azure_account_name` (String) Storage Account Name (destination support only)
 
     The account name of the storage account
+- `bulk_sync_staging_schema` (String) Staging schema name
 - `cloud_provider` (String) Cloud Provider (destination support only)
 - `concurrent_queries` (Number) Concurrent query limit
 - `container_name` (String) Storage Container Name (destination support only)
@@ -71,5 +72,6 @@ Read-Only:
 - `set_retention_properties` (Boolean) Configure data retention for tables
 - `storage_credential_name` (String) Storage credential name
 - `unity_catalog_enabled` (Boolean) Unity Catalog enabled
+- `use_bulk_sync_staging_schema` (Boolean) Use custom bulk sync staging schema
 
 

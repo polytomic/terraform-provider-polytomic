@@ -53,6 +53,13 @@ var HarmonicSchema = schema.Schema{
 						stringplanmodifier.UseStateForUnknown(),
 					},
 				},
+				"deals_data": schema.BoolAttribute{
+					MarkdownDescription: `Enable Harmonic Deal Data API`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
 			},
 
 			Required: true,
@@ -80,7 +87,8 @@ func (t *HarmonicConnectionResource) Schema(ctx context.Context, req resource.Sc
 }
 
 type HarmonicConf struct {
-	Api_key string `mapstructure:"api_key" tfsdk:"api_key"`
+	Api_key    string `mapstructure:"api_key" tfsdk:"api_key"`
+	Deals_data bool   `mapstructure:"deals_data" tfsdk:"deals_data"`
 }
 
 type HarmonicConnectionResource struct {
@@ -139,7 +147,8 @@ func (r *HarmonicConnectionResource) Create(ctx context.Context, req resource.Cr
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"api_key": types.StringType,
+		"api_key":    types.StringType,
+		"deals_data": types.BoolType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -205,7 +214,8 @@ func (r *HarmonicConnectionResource) Read(ctx context.Context, req resource.Read
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"api_key": types.StringType,
+		"api_key":    types.StringType,
+		"deals_data": types.BoolType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -274,7 +284,8 @@ func (r *HarmonicConnectionResource) Update(ctx context.Context, req resource.Up
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"api_key": types.StringType,
+		"api_key":    types.StringType,
+		"deals_data": types.BoolType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

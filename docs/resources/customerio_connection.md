@@ -58,6 +58,10 @@ Required:
 
 - `app_api_key` (String, Sensitive) App API Key
 - `site_id` (String) Site ID
-- `tracking_api_key` (String) Tracking API Key
+- `tracking_api_key` (String, Sensitive) Tracking API Key
+
+Optional:
+
+- `region` (String) Datacenter region we detected
 
 

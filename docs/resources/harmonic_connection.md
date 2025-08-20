@@ -56,4 +56,8 @@ Required:
 
 - `api_key` (String, Sensitive) Harmonic API key
 
+Optional:
+
+- `deals_data` (Boolean) Enable Harmonic Deal Data API
+
 

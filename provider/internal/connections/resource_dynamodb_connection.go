@@ -60,6 +60,13 @@ var DynamodbSchema = schema.Schema{
 					Computed:            true,
 					Sensitive:           false,
 				},
+				"change_detection": schema.BoolAttribute{
+					MarkdownDescription: `Use DynamoDB Streams for bulk syncs`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
 				"region": schema.StringAttribute{
 					MarkdownDescription: `AWS region`,
 					Required:            true,
@@ -106,6 +113,7 @@ func (t *DynamodbConnectionResource) Schema(ctx context.Context, req resource.Sc
 type DynamodbConf struct {
 	Access_id         string `mapstructure:"access_id" tfsdk:"access_id"`
 	Aws_user          string `mapstructure:"aws_user" tfsdk:"aws_user"`
+	Change_detection  bool   `mapstructure:"change_detection" tfsdk:"change_detection"`
 	Region            string `mapstructure:"region" tfsdk:"region"`
 	Secret_access_key string `mapstructure:"secret_access_key" tfsdk:"secret_access_key"`
 }
@@ -168,6 +176,7 @@ func (r *DynamodbConnectionResource) Create(ctx context.Context, req resource.Cr
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"access_id":         types.StringType,
 		"aws_user":          types.StringType,
+		"change_detection":  types.BoolType,
 		"region":            types.StringType,
 		"secret_access_key": types.StringType,
 	}, conf)
@@ -237,6 +246,7 @@ func (r *DynamodbConnectionResource) Read(ctx context.Context, req resource.Read
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"access_id":         types.StringType,
 		"aws_user":          types.StringType,
+		"change_detection":  types.BoolType,
 		"region":            types.StringType,
 		"secret_access_key": types.StringType,
 	}, conf)
@@ -309,6 +319,7 @@ func (r *DynamodbConnectionResource) Update(ctx context.Context, req resource.Up
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"access_id":         types.StringType,
 		"aws_user":          types.StringType,
+		"change_detection":  types.BoolType,
 		"region":            types.StringType,
 		"secret_access_key": types.StringType,
 	}, conf)

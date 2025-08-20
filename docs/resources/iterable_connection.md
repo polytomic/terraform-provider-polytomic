@@ -56,4 +56,16 @@ Required:
 
 - `api_key` (String, Sensitive) API Key
 
+Optional:
+
+- `event_types` (Attributes Set) Event Types (see [below for nested schema](#nestedatt--configuration--event_types))
+
+<a id="nestedatt--configuration--event_types"></a>
+### Nested Schema for `configuration.event_types`
+
+Optional:
+
+- `label` (String)
+- `value` (String)
+
 

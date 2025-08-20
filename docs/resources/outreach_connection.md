@@ -58,6 +58,7 @@ Optional:
 
 - `client_id` (String, Sensitive)
 - `client_secret` (String, Sensitive)
+- `connected_user` (String) Connected user
 - `oauth_refresh_token` (String, Sensitive)
 - `oauth_token_expiry` (String)
 

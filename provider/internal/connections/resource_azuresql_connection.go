@@ -43,6 +43,37 @@ var AzuresqlSchema = schema.Schema{
 		},
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
+				"access_key": schema.StringAttribute{
+					MarkdownDescription: `Storage account access key (destination only)`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
+					},
+				},
+				"account_name": schema.StringAttribute{
+					MarkdownDescription: `Storage account name (destination only)`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
+				"blob_store": schema.BoolAttribute{
+					MarkdownDescription: `Use Azure blob storage for faster bulk loading (destination only)`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
+				"container_name": schema.StringAttribute{
+					MarkdownDescription: `Storage container name (destination only)`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
 				"database": schema.StringAttribute{
 					MarkdownDescription: ``,
 					Required:            true,
@@ -72,6 +103,44 @@ var AzuresqlSchema = schema.Schema{
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
+					Sensitive:           false,
+				},
+				"ssh": schema.BoolAttribute{
+					MarkdownDescription: `Connect over SSH tunnel`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
+				"ssh_host": schema.StringAttribute{
+					MarkdownDescription: `SSH host`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
+				"ssh_port": schema.Int64Attribute{
+					MarkdownDescription: `SSH port`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
+				"ssh_private_key": schema.StringAttribute{
+					MarkdownDescription: `Private key`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
+					},
+				},
+				"ssh_user": schema.StringAttribute{
+					MarkdownDescription: `SSH user`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
 					Sensitive:           false,
 				},
 				"ssl": schema.BoolAttribute{
@@ -115,12 +184,21 @@ func (t *AzuresqlConnectionResource) Schema(ctx context.Context, req resource.Sc
 }
 
 type AzuresqlConf struct {
-	Database string `mapstructure:"database" tfsdk:"database"`
-	Hostname string `mapstructure:"hostname" tfsdk:"hostname"`
-	Password string `mapstructure:"password" tfsdk:"password"`
-	Port     int64  `mapstructure:"port" tfsdk:"port"`
-	Ssl      bool   `mapstructure:"ssl" tfsdk:"ssl"`
-	Username string `mapstructure:"username" tfsdk:"username"`
+	Access_key      string `mapstructure:"access_key" tfsdk:"access_key"`
+	Account_name    string `mapstructure:"account_name" tfsdk:"account_name"`
+	BlobStore       bool   `mapstructure:"blobStore" tfsdk:"blobStore"`
+	Container_name  string `mapstructure:"container_name" tfsdk:"container_name"`
+	Database        string `mapstructure:"database" tfsdk:"database"`
+	Hostname        string `mapstructure:"hostname" tfsdk:"hostname"`
+	Password        string `mapstructure:"password" tfsdk:"password"`
+	Port            int64  `mapstructure:"port" tfsdk:"port"`
+	Ssh             bool   `mapstructure:"ssh" tfsdk:"ssh"`
+	Ssh_host        string `mapstructure:"ssh_host" tfsdk:"ssh_host"`
+	Ssh_port        int64  `mapstructure:"ssh_port" tfsdk:"ssh_port"`
+	Ssh_private_key string `mapstructure:"ssh_private_key" tfsdk:"ssh_private_key"`
+	Ssh_user        string `mapstructure:"ssh_user" tfsdk:"ssh_user"`
+	Ssl             bool   `mapstructure:"ssl" tfsdk:"ssl"`
+	Username        string `mapstructure:"username" tfsdk:"username"`
 }
 
 type AzuresqlConnectionResource struct {
@@ -179,12 +257,21 @@ func (r *AzuresqlConnectionResource) Create(ctx context.Context, req resource.Cr
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"database": types.StringType,
-		"hostname": types.StringType,
-		"password": types.StringType,
-		"port":     types.NumberType,
-		"ssl":      types.BoolType,
-		"username": types.StringType,
+		"access_key":      types.StringType,
+		"account_name":    types.StringType,
+		"blob_store":      types.BoolType,
+		"container_name":  types.StringType,
+		"database":        types.StringType,
+		"hostname":        types.StringType,
+		"password":        types.StringType,
+		"port":            types.NumberType,
+		"ssh":             types.BoolType,
+		"ssh_host":        types.StringType,
+		"ssh_port":        types.NumberType,
+		"ssh_private_key": types.StringType,
+		"ssh_user":        types.StringType,
+		"ssl":             types.BoolType,
+		"username":        types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -250,12 +337,21 @@ func (r *AzuresqlConnectionResource) Read(ctx context.Context, req resource.Read
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"database": types.StringType,
-		"hostname": types.StringType,
-		"password": types.StringType,
-		"port":     types.NumberType,
-		"ssl":      types.BoolType,
-		"username": types.StringType,
+		"access_key":      types.StringType,
+		"account_name":    types.StringType,
+		"blob_store":      types.BoolType,
+		"container_name":  types.StringType,
+		"database":        types.StringType,
+		"hostname":        types.StringType,
+		"password":        types.StringType,
+		"port":            types.NumberType,
+		"ssh":             types.BoolType,
+		"ssh_host":        types.StringType,
+		"ssh_port":        types.NumberType,
+		"ssh_private_key": types.StringType,
+		"ssh_user":        types.StringType,
+		"ssl":             types.BoolType,
+		"username":        types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -324,12 +420,21 @@ func (r *AzuresqlConnectionResource) Update(ctx context.Context, req resource.Up
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"database": types.StringType,
-		"hostname": types.StringType,
-		"password": types.StringType,
-		"port":     types.NumberType,
-		"ssl":      types.BoolType,
-		"username": types.StringType,
+		"access_key":      types.StringType,
+		"account_name":    types.StringType,
+		"blob_store":      types.BoolType,
+		"container_name":  types.StringType,
+		"database":        types.StringType,
+		"hostname":        types.StringType,
+		"password":        types.StringType,
+		"port":            types.NumberType,
+		"ssh":             types.BoolType,
+		"ssh_host":        types.StringType,
+		"ssh_port":        types.NumberType,
+		"ssh_private_key": types.StringType,
+		"ssh_user":        types.StringType,
+		"ssl":             types.BoolType,
+		"username":        types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

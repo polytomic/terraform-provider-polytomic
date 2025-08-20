@@ -50,6 +50,10 @@ func (d *AttioConnectionDataSource) Schema(ctx context.Context, req datasource.S
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
+					"enable_webhooks": schema.BoolAttribute{
+						MarkdownDescription: `Enable Attio webhook updates for bulk syncs`,
+						Computed:            true,
+					},
 					"workspace_name": schema.StringAttribute{
 						MarkdownDescription: `Workspace name`,
 						Computed:            true,
@@ -90,6 +94,9 @@ func (d *AttioConnectionDataSource) Read(ctx context.Context, req datasource.Rea
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttributeTypes(ctx),
 		map[string]attr.Value{
+			"enable_webhooks": types.BoolValue(
+				getValueOrEmpty(connection.Data.Configuration["enable_webhooks"], "bool").(bool),
+			),
 			"workspace_name": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["workspace_name"], "string").(string),
 			),

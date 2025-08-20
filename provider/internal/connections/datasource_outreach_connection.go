@@ -50,6 +50,10 @@ func (d *OutreachConnectionDataSource) Schema(ctx context.Context, req datasourc
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
+					"connected_user": schema.StringAttribute{
+						MarkdownDescription: `Connected user`,
+						Computed:            true,
+					},
 					"oauth_token_expiry": schema.StringAttribute{
 						MarkdownDescription: ``,
 						Computed:            true,
@@ -90,6 +94,9 @@ func (d *OutreachConnectionDataSource) Read(ctx context.Context, req datasource.
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttributeTypes(ctx),
 		map[string]attr.Value{
+			"connected_user": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["connected_user"], "string").(string),
+			),
 			"oauth_token_expiry": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["oauth_token_expiry"], "string").(string),
 			),

@@ -54,11 +54,13 @@ var ShopifySchema = schema.Schema{
 					},
 				},
 				"store": schema.StringAttribute{
-					MarkdownDescription: `Enter your Shopify store name.`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
-					Sensitive:           false,
+					MarkdownDescription: `Store Slug
+
+    e.g. 'example' if your store is example.myshopify.com`,
+					Required:  true,
+					Optional:  false,
+					Computed:  false,
+					Sensitive: false,
 				},
 			},
 

@@ -43,25 +43,59 @@ var GoogleworkspaceSchema = schema.Schema{
 		},
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
-				"client_email": schema.StringAttribute{
-					MarkdownDescription: `Service account identity`,
+				"auth_method": schema.StringAttribute{
+					MarkdownDescription: `Default: browser`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,
 					Sensitive:           false,
 				},
+				"client_email": schema.StringAttribute{
+					MarkdownDescription: `Connected Account`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
+				"client_id": schema.StringAttribute{
+					MarkdownDescription: ``,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
+					},
+				},
+				"client_secret": schema.StringAttribute{
+					MarkdownDescription: ``,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
+					},
+				},
 				"customer_id": schema.StringAttribute{
 					MarkdownDescription: `Customer ID`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
+				"oauth_token_expiry": schema.StringAttribute{
+					MarkdownDescription: ``,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
 					Sensitive:           false,
 				},
 				"service_account": schema.StringAttribute{
 					MarkdownDescription: `Service account key`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
 					Sensitive:           true,
 					PlanModifiers: []planmodifier.String{
 						stringplanmodifier.UseStateForUnknown(),
@@ -94,9 +128,13 @@ func (t *GoogleworkspaceConnectionResource) Schema(ctx context.Context, req reso
 }
 
 type GoogleworkspaceConf struct {
-	Client_email    string `mapstructure:"client_email" tfsdk:"client_email"`
-	Customer_id     string `mapstructure:"customer_id" tfsdk:"customer_id"`
-	Service_account string `mapstructure:"service_account" tfsdk:"service_account"`
+	Auth_method        string `mapstructure:"auth_method" tfsdk:"auth_method"`
+	Client_email       string `mapstructure:"client_email" tfsdk:"client_email"`
+	Client_id          string `mapstructure:"client_id" tfsdk:"client_id"`
+	Client_secret      string `mapstructure:"client_secret" tfsdk:"client_secret"`
+	Customer_id        string `mapstructure:"customer_id" tfsdk:"customer_id"`
+	Oauth_token_expiry string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
+	Service_account    string `mapstructure:"service_account" tfsdk:"service_account"`
 }
 
 type GoogleworkspaceConnectionResource struct {
@@ -155,9 +193,13 @@ func (r *GoogleworkspaceConnectionResource) Create(ctx context.Context, req reso
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"client_email":    types.StringType,
-		"customer_id":     types.StringType,
-		"service_account": types.StringType,
+		"auth_method":        types.StringType,
+		"client_email":       types.StringType,
+		"client_id":          types.StringType,
+		"client_secret":      types.StringType,
+		"customer_id":        types.StringType,
+		"oauth_token_expiry": types.StringType,
+		"service_account":    types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -223,9 +265,13 @@ func (r *GoogleworkspaceConnectionResource) Read(ctx context.Context, req resour
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"client_email":    types.StringType,
-		"customer_id":     types.StringType,
-		"service_account": types.StringType,
+		"auth_method":        types.StringType,
+		"client_email":       types.StringType,
+		"client_id":          types.StringType,
+		"client_secret":      types.StringType,
+		"customer_id":        types.StringType,
+		"oauth_token_expiry": types.StringType,
+		"service_account":    types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -294,9 +340,13 @@ func (r *GoogleworkspaceConnectionResource) Update(ctx context.Context, req reso
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"client_email":    types.StringType,
-		"customer_id":     types.StringType,
-		"service_account": types.StringType,
+		"auth_method":        types.StringType,
+		"client_email":       types.StringType,
+		"client_id":          types.StringType,
+		"client_secret":      types.StringType,
+		"customer_id":        types.StringType,
+		"oauth_token_expiry": types.StringType,
+		"service_account":    types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

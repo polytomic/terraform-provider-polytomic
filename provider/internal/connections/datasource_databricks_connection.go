@@ -72,6 +72,10 @@ func (d *DatabricksConnectionDataSource) Schema(ctx context.Context, req datasou
     The account name of the storage account`,
 						Computed: true,
 					},
+					"bulk_sync_staging_schema": schema.StringAttribute{
+						MarkdownDescription: `Staging schema name`,
+						Computed:            true,
+					},
 					"cloud_provider": schema.StringAttribute{
 						MarkdownDescription: `Cloud Provider (destination support only)`,
 						Computed:            true,
@@ -148,6 +152,10 @@ func (d *DatabricksConnectionDataSource) Schema(ctx context.Context, req datasou
 						MarkdownDescription: `Unity Catalog enabled`,
 						Computed:            true,
 					},
+					"use_bulk_sync_staging_schema": schema.BoolAttribute{
+						MarkdownDescription: `Use custom bulk sync staging schema`,
+						Computed:            true,
+					},
 				},
 				Optional: true,
 			},
@@ -195,6 +203,9 @@ func (d *DatabricksConnectionDataSource) Read(ctx context.Context, req datasourc
 			),
 			"azure_account_name": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["azure_account_name"], "string").(string),
+			),
+			"bulk_sync_staging_schema": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["bulk_sync_staging_schema"], "string").(string),
 			),
 			"cloud_provider": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["cloud_provider"], "string").(string),
@@ -246,6 +257,9 @@ func (d *DatabricksConnectionDataSource) Read(ctx context.Context, req datasourc
 			),
 			"unity_catalog_enabled": types.BoolValue(
 				getValueOrEmpty(connection.Data.Configuration["unity_catalog_enabled"], "bool").(bool),
+			),
+			"use_bulk_sync_staging_schema": types.BoolValue(
+				getValueOrEmpty(connection.Data.Configuration["use_bulk_sync_staging_schema"], "bool").(bool),
 			),
 		},
 	)

@@ -40,6 +40,8 @@ Read-Only:
 - `auth_method` (String) Authentication method
 - `client_id` (String) Client ID
 - `container_name` (String) Container Name
+- `directory_glob_pattern` (String) Tables glob path
+- `is_directory_snapshot` (Boolean) Multi-directory multi-table
 - `is_single_table` (Boolean) Files are time-based snapshots
 
     Treat the files as a single table.

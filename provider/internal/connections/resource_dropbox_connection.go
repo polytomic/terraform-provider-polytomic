@@ -70,6 +70,20 @@ var DropboxSchema = schema.Schema{
 					Computed:            false,
 					Sensitive:           false,
 				},
+				"directory_glob_pattern": schema.StringAttribute{
+					MarkdownDescription: `Tables glob path`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
+				"is_directory_snapshot": schema.BoolAttribute{
+					MarkdownDescription: `Multi-directory multi-table`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
 				"is_single_table": schema.BoolAttribute{
 					MarkdownDescription: `Files are time-based snapshots
 
@@ -149,6 +163,8 @@ type DropboxConf struct {
 	App_key                  string `mapstructure:"app_key" tfsdk:"app_key"`
 	App_secret               string `mapstructure:"app_secret" tfsdk:"app_secret"`
 	Bucket                   string `mapstructure:"bucket" tfsdk:"bucket"`
+	Directory_glob_pattern   string `mapstructure:"directory_glob_pattern" tfsdk:"directory_glob_pattern"`
+	Is_directory_snapshot    bool   `mapstructure:"is_directory_snapshot" tfsdk:"is_directory_snapshot"`
 	Is_single_table          bool   `mapstructure:"is_single_table" tfsdk:"is_single_table"`
 	Oauth_refresh_token      string `mapstructure:"oauth_refresh_token" tfsdk:"oauth_refresh_token"`
 	Oauth_token_expiry       string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
@@ -216,6 +232,8 @@ func (r *DropboxConnectionResource) Create(ctx context.Context, req resource.Cre
 		"app_key":                  types.StringType,
 		"app_secret":               types.StringType,
 		"bucket":                   types.StringType,
+		"directory_glob_pattern":   types.StringType,
+		"is_directory_snapshot":    types.BoolType,
 		"is_single_table":          types.BoolType,
 		"oauth_refresh_token":      types.StringType,
 		"oauth_token_expiry":       types.StringType,
@@ -290,6 +308,8 @@ func (r *DropboxConnectionResource) Read(ctx context.Context, req resource.ReadR
 		"app_key":                  types.StringType,
 		"app_secret":               types.StringType,
 		"bucket":                   types.StringType,
+		"directory_glob_pattern":   types.StringType,
+		"is_directory_snapshot":    types.BoolType,
 		"is_single_table":          types.BoolType,
 		"oauth_refresh_token":      types.StringType,
 		"oauth_token_expiry":       types.StringType,
@@ -367,6 +387,8 @@ func (r *DropboxConnectionResource) Update(ctx context.Context, req resource.Upd
 		"app_key":                  types.StringType,
 		"app_secret":               types.StringType,
 		"bucket":                   types.StringType,
+		"directory_glob_pattern":   types.StringType,
+		"is_directory_snapshot":    types.BoolType,
 		"is_single_table":          types.BoolType,
 		"oauth_refresh_token":      types.StringType,
 		"oauth_token_expiry":       types.StringType,

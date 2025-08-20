@@ -36,6 +36,7 @@ data "polytomic_redshiftserverless_connection" "redshiftserverless" {
 
 Read-Only:
 
+- `bulk_sync_staging_schema` (String) Staging schema name
 - `connection_method` (String) Connection method
 - `data_api_endpoint` (String) Redshift Data API endpoint
 
@@ -46,6 +47,10 @@ Read-Only:
 - `iam_role_arn` (String) IAM Role ARN
 - `override_endpoint` (Boolean) Override Redshift Data API endpoint
 - `region` (String)
+- `s3_bucket_name` (String) S3 bucket name (destination/unload support only)
+- `s3_bucket_region` (String) S3 bucket region (destination/unload support only)
+- `use_bulk_sync_staging_schema` (Boolean) Use custom bulk sync staging schema
+- `use_unload` (Boolean) Read data using Unload
 - `workgroup` (String)
 
 

@@ -36,6 +36,7 @@ data "polytomic_attio_connection" "attio" {
 
 Read-Only:
 
+- `enable_webhooks` (Boolean) Enable Attio webhook updates for bulk syncs
 - `workspace_name` (String) Workspace name
 
 

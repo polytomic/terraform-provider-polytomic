@@ -50,6 +50,18 @@ func (d *AzuresqlConnectionDataSource) Schema(ctx context.Context, req datasourc
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
+					"account_name": schema.StringAttribute{
+						MarkdownDescription: `Storage account name (destination only)`,
+						Computed:            true,
+					},
+					"blob_store": schema.BoolAttribute{
+						MarkdownDescription: `Use Azure blob storage for faster bulk loading (destination only)`,
+						Computed:            true,
+					},
+					"container_name": schema.StringAttribute{
+						MarkdownDescription: `Storage container name (destination only)`,
+						Computed:            true,
+					},
 					"database": schema.StringAttribute{
 						MarkdownDescription: ``,
 						Computed:            true,
@@ -60,6 +72,22 @@ func (d *AzuresqlConnectionDataSource) Schema(ctx context.Context, req datasourc
 					},
 					"port": schema.Int64Attribute{
 						MarkdownDescription: ``,
+						Computed:            true,
+					},
+					"ssh": schema.BoolAttribute{
+						MarkdownDescription: `Connect over SSH tunnel`,
+						Computed:            true,
+					},
+					"ssh_host": schema.StringAttribute{
+						MarkdownDescription: `SSH host`,
+						Computed:            true,
+					},
+					"ssh_port": schema.Int64Attribute{
+						MarkdownDescription: `SSH port`,
+						Computed:            true,
+					},
+					"ssh_user": schema.StringAttribute{
+						MarkdownDescription: `SSH user`,
 						Computed:            true,
 					},
 					"ssl": schema.BoolAttribute{
@@ -106,6 +134,15 @@ func (d *AzuresqlConnectionDataSource) Read(ctx context.Context, req datasource.
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttributeTypes(ctx),
 		map[string]attr.Value{
+			"account_name": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["account_name"], "string").(string),
+			),
+			"blob_store": types.BoolValue(
+				getValueOrEmpty(connection.Data.Configuration["blobStore"], "bool").(bool),
+			),
+			"container_name": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["container_name"], "string").(string),
+			),
 			"database": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["database"], "string").(string),
 			),
@@ -114,6 +151,18 @@ func (d *AzuresqlConnectionDataSource) Read(ctx context.Context, req datasource.
 			),
 			"port": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["port"], "string").(string),
+			),
+			"ssh": types.BoolValue(
+				getValueOrEmpty(connection.Data.Configuration["ssh"], "bool").(bool),
+			),
+			"ssh_host": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["ssh_host"], "string").(string),
+			),
+			"ssh_port": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["ssh_port"], "string").(string),
+			),
+			"ssh_user": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["ssh_user"], "string").(string),
 			),
 			"ssl": types.BoolValue(
 				getValueOrEmpty(connection.Data.Configuration["ssl"], "bool").(bool),

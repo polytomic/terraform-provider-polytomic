@@ -16,6 +16,8 @@ Google Workspace Connection
 resource "polytomic_googleworkspace_connection" "googleworkspace" {
   name = "example"
   configuration = {
+    client_id     = "eb669428-1854-4cb1-a560-403e05b8acbf"
+    client_secret = "ay8d5hdepz62px8lqeoakuea2ccl4rxm13i6tbyorxhu1i20kc8ruvksmzxq"
   }
 }
 ```
@@ -51,13 +53,14 @@ state before it will take effect on a destroy operation.
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
-Required:
-
-- `customer_id` (String) Customer ID
-- `service_account` (String, Sensitive) Service account key
-
 Optional:
 
-- `client_email` (String) Service account identity
+- `auth_method` (String) Default: browser
+- `client_email` (String) Connected Account
+- `client_id` (String, Sensitive)
+- `client_secret` (String, Sensitive)
+- `customer_id` (String) Customer ID
+- `oauth_token_expiry` (String)
+- `service_account` (String, Sensitive) Service account key
 
 

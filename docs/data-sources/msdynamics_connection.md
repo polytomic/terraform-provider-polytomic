@@ -36,7 +36,7 @@ data "polytomic_msdynamics_connection" "msdynamics" {
 
 Read-Only:
 
-- `dynamics_environment_id` (String) Environment ID
+- `dynamics_url` (String) Dynamics URL
 - `oauth_token_expiry` (String)
 
 

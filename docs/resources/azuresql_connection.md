@@ -16,10 +16,14 @@ Azure SQL Connection
 resource "polytomic_azuresql_connection" "azuresql" {
   name = "example"
   configuration = {
-    database = "sampledb"
-    hostname = "example.database.windows.net"
-    password = "secret"
-    username = "user"
+    access_key     = "abcdefghijklmnopqrstuvwxyz0123456789/+ABCDEabcdefghijklmnopqrstuvwxyz0123456789/+ABCDE=="
+    account_name   = "account"
+    container_name = "container"
+    database       = "sampledb"
+    hostname       = "example.database.windows.net"
+    password       = "secret"
+    ssh_host       = "bastion.example.com"
+    username       = "user"
   }
 }
 ```
@@ -65,6 +69,15 @@ Required:
 
 Optional:
 
+- `access_key` (String, Sensitive) Storage account access key (destination only)
+- `account_name` (String) Storage account name (destination only)
+- `blob_store` (Boolean) Use Azure blob storage for faster bulk loading (destination only)
+- `container_name` (String) Storage container name (destination only)
+- `ssh` (Boolean) Connect over SSH tunnel
+- `ssh_host` (String) SSH host
+- `ssh_port` (Number) SSH port
+- `ssh_private_key` (String, Sensitive) Private key
+- `ssh_user` (String) SSH user
 - `ssl` (Boolean) Use SSL
 
 

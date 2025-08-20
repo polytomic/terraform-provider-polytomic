@@ -36,7 +36,7 @@ data "polytomic_customerio_connection" "customerio" {
 
 Read-Only:
 
+- `region` (String) Datacenter region we detected
 - `site_id` (String) Site ID
-- `tracking_api_key` (String) Tracking API Key
 
 

@@ -69,6 +69,13 @@ var RedshiftSchema = schema.Schema{
 					Computed:            true,
 					Sensitive:           false,
 				},
+				"bulk_sync_staging_schema": schema.StringAttribute{
+					MarkdownDescription: `Staging schema name`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
 				"database": schema.StringAttribute{
 					MarkdownDescription: ``,
 					Required:            true,
@@ -156,6 +163,13 @@ var RedshiftSchema = schema.Schema{
 					Computed:            true,
 					Sensitive:           false,
 				},
+				"use_bulk_sync_staging_schema": schema.BoolAttribute{
+					MarkdownDescription: `Use custom bulk sync staging schema`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
 				"username": schema.StringAttribute{
 					MarkdownDescription: ``,
 					Required:            true,
@@ -190,21 +204,23 @@ func (t *RedshiftConnectionResource) Schema(ctx context.Context, req resource.Sc
 }
 
 type RedshiftConf struct {
-	Aws_access_key_id     string `mapstructure:"aws_access_key_id" tfsdk:"aws_access_key_id"`
-	Aws_secret_access_key string `mapstructure:"aws_secret_access_key" tfsdk:"aws_secret_access_key"`
-	Aws_user              string `mapstructure:"aws_user" tfsdk:"aws_user"`
-	Database              string `mapstructure:"database" tfsdk:"database"`
-	Hostname              string `mapstructure:"hostname" tfsdk:"hostname"`
-	Password              string `mapstructure:"password" tfsdk:"password"`
-	Port                  int64  `mapstructure:"port" tfsdk:"port"`
-	S3_bucket_name        string `mapstructure:"s3_bucket_name" tfsdk:"s3_bucket_name"`
-	S3_bucket_region      string `mapstructure:"s3_bucket_region" tfsdk:"s3_bucket_region"`
-	Ssh                   bool   `mapstructure:"ssh" tfsdk:"ssh"`
-	Ssh_host              string `mapstructure:"ssh_host" tfsdk:"ssh_host"`
-	Ssh_port              int64  `mapstructure:"ssh_port" tfsdk:"ssh_port"`
-	Ssh_private_key       string `mapstructure:"ssh_private_key" tfsdk:"ssh_private_key"`
-	Ssh_user              string `mapstructure:"ssh_user" tfsdk:"ssh_user"`
-	Username              string `mapstructure:"username" tfsdk:"username"`
+	Aws_access_key_id            string `mapstructure:"aws_access_key_id" tfsdk:"aws_access_key_id"`
+	Aws_secret_access_key        string `mapstructure:"aws_secret_access_key" tfsdk:"aws_secret_access_key"`
+	Aws_user                     string `mapstructure:"aws_user" tfsdk:"aws_user"`
+	Bulk_sync_staging_schema     string `mapstructure:"bulk_sync_staging_schema" tfsdk:"bulk_sync_staging_schema"`
+	Database                     string `mapstructure:"database" tfsdk:"database"`
+	Hostname                     string `mapstructure:"hostname" tfsdk:"hostname"`
+	Password                     string `mapstructure:"password" tfsdk:"password"`
+	Port                         int64  `mapstructure:"port" tfsdk:"port"`
+	S3_bucket_name               string `mapstructure:"s3_bucket_name" tfsdk:"s3_bucket_name"`
+	S3_bucket_region             string `mapstructure:"s3_bucket_region" tfsdk:"s3_bucket_region"`
+	Ssh                          bool   `mapstructure:"ssh" tfsdk:"ssh"`
+	Ssh_host                     string `mapstructure:"ssh_host" tfsdk:"ssh_host"`
+	Ssh_port                     int64  `mapstructure:"ssh_port" tfsdk:"ssh_port"`
+	Ssh_private_key              string `mapstructure:"ssh_private_key" tfsdk:"ssh_private_key"`
+	Ssh_user                     string `mapstructure:"ssh_user" tfsdk:"ssh_user"`
+	Use_bulk_sync_staging_schema bool   `mapstructure:"use_bulk_sync_staging_schema" tfsdk:"use_bulk_sync_staging_schema"`
+	Username                     string `mapstructure:"username" tfsdk:"username"`
 }
 
 type RedshiftConnectionResource struct {
@@ -263,21 +279,23 @@ func (r *RedshiftConnectionResource) Create(ctx context.Context, req resource.Cr
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"aws_access_key_id":     types.StringType,
-		"aws_secret_access_key": types.StringType,
-		"aws_user":              types.StringType,
-		"database":              types.StringType,
-		"hostname":              types.StringType,
-		"password":              types.StringType,
-		"port":                  types.NumberType,
-		"s3_bucket_name":        types.StringType,
-		"s3_bucket_region":      types.StringType,
-		"ssh":                   types.BoolType,
-		"ssh_host":              types.StringType,
-		"ssh_port":              types.NumberType,
-		"ssh_private_key":       types.StringType,
-		"ssh_user":              types.StringType,
-		"username":              types.StringType,
+		"aws_access_key_id":            types.StringType,
+		"aws_secret_access_key":        types.StringType,
+		"aws_user":                     types.StringType,
+		"bulk_sync_staging_schema":     types.StringType,
+		"database":                     types.StringType,
+		"hostname":                     types.StringType,
+		"password":                     types.StringType,
+		"port":                         types.NumberType,
+		"s3_bucket_name":               types.StringType,
+		"s3_bucket_region":             types.StringType,
+		"ssh":                          types.BoolType,
+		"ssh_host":                     types.StringType,
+		"ssh_port":                     types.NumberType,
+		"ssh_private_key":              types.StringType,
+		"ssh_user":                     types.StringType,
+		"use_bulk_sync_staging_schema": types.BoolType,
+		"username":                     types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -343,21 +361,23 @@ func (r *RedshiftConnectionResource) Read(ctx context.Context, req resource.Read
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"aws_access_key_id":     types.StringType,
-		"aws_secret_access_key": types.StringType,
-		"aws_user":              types.StringType,
-		"database":              types.StringType,
-		"hostname":              types.StringType,
-		"password":              types.StringType,
-		"port":                  types.NumberType,
-		"s3_bucket_name":        types.StringType,
-		"s3_bucket_region":      types.StringType,
-		"ssh":                   types.BoolType,
-		"ssh_host":              types.StringType,
-		"ssh_port":              types.NumberType,
-		"ssh_private_key":       types.StringType,
-		"ssh_user":              types.StringType,
-		"username":              types.StringType,
+		"aws_access_key_id":            types.StringType,
+		"aws_secret_access_key":        types.StringType,
+		"aws_user":                     types.StringType,
+		"bulk_sync_staging_schema":     types.StringType,
+		"database":                     types.StringType,
+		"hostname":                     types.StringType,
+		"password":                     types.StringType,
+		"port":                         types.NumberType,
+		"s3_bucket_name":               types.StringType,
+		"s3_bucket_region":             types.StringType,
+		"ssh":                          types.BoolType,
+		"ssh_host":                     types.StringType,
+		"ssh_port":                     types.NumberType,
+		"ssh_private_key":              types.StringType,
+		"ssh_user":                     types.StringType,
+		"use_bulk_sync_staging_schema": types.BoolType,
+		"username":                     types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -426,21 +446,23 @@ func (r *RedshiftConnectionResource) Update(ctx context.Context, req resource.Up
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"aws_access_key_id":     types.StringType,
-		"aws_secret_access_key": types.StringType,
-		"aws_user":              types.StringType,
-		"database":              types.StringType,
-		"hostname":              types.StringType,
-		"password":              types.StringType,
-		"port":                  types.NumberType,
-		"s3_bucket_name":        types.StringType,
-		"s3_bucket_region":      types.StringType,
-		"ssh":                   types.BoolType,
-		"ssh_host":              types.StringType,
-		"ssh_port":              types.NumberType,
-		"ssh_private_key":       types.StringType,
-		"ssh_user":              types.StringType,
-		"username":              types.StringType,
+		"aws_access_key_id":            types.StringType,
+		"aws_secret_access_key":        types.StringType,
+		"aws_user":                     types.StringType,
+		"bulk_sync_staging_schema":     types.StringType,
+		"database":                     types.StringType,
+		"hostname":                     types.StringType,
+		"password":                     types.StringType,
+		"port":                         types.NumberType,
+		"s3_bucket_name":               types.StringType,
+		"s3_bucket_region":             types.StringType,
+		"ssh":                          types.BoolType,
+		"ssh_host":                     types.StringType,
+		"ssh_port":                     types.NumberType,
+		"ssh_private_key":              types.StringType,
+		"ssh_user":                     types.StringType,
+		"use_bulk_sync_staging_schema": types.BoolType,
+		"username":                     types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

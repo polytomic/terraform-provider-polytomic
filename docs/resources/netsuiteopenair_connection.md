@@ -58,5 +58,7 @@ Required:
 - `client_id` (String, Sensitive) Client ID
 - `client_secret` (String, Sensitive) Client Secret
 - `company_id` (String) Company ID
+- `per_day_rate_limit` (Number) Per Day Rate Limit
+- `per_minute_rate_limit` (Number) Per Minute Rate Limit
 
 

@@ -78,15 +78,31 @@ var S3Schema = schema.Schema{
 					Computed:            true,
 					Sensitive:           false,
 				},
-				"external_id": schema.StringAttribute{
-					MarkdownDescription: `External ID for the IAM role`,
+				"directory_glob_pattern": schema.StringAttribute{
+					MarkdownDescription: `Tables glob path`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,
 					Sensitive:           false,
 				},
+				"external_id": schema.StringAttribute{
+					MarkdownDescription: `External ID
+
+    External ID for the IAM role`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
+				},
 				"iam_role_arn": schema.StringAttribute{
 					MarkdownDescription: `IAM Role ARN`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
+				"is_directory_snapshot": schema.BoolAttribute{
+					MarkdownDescription: `Multi-directory multi-table`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,
@@ -171,8 +187,10 @@ type S3Conf struct {
 	Aws_access_key_id        string `mapstructure:"aws_access_key_id" tfsdk:"aws_access_key_id"`
 	Aws_secret_access_key    string `mapstructure:"aws_secret_access_key" tfsdk:"aws_secret_access_key"`
 	Aws_user                 string `mapstructure:"aws_user" tfsdk:"aws_user"`
+	Directory_glob_pattern   string `mapstructure:"directory_glob_pattern" tfsdk:"directory_glob_pattern"`
 	External_id              string `mapstructure:"external_id" tfsdk:"external_id"`
 	Iam_role_arn             string `mapstructure:"iam_role_arn" tfsdk:"iam_role_arn"`
+	Is_directory_snapshot    bool   `mapstructure:"is_directory_snapshot" tfsdk:"is_directory_snapshot"`
 	Is_single_table          bool   `mapstructure:"is_single_table" tfsdk:"is_single_table"`
 	S3_bucket_name           string `mapstructure:"s3_bucket_name" tfsdk:"s3_bucket_name"`
 	S3_bucket_region         string `mapstructure:"s3_bucket_region" tfsdk:"s3_bucket_region"`
@@ -241,8 +259,10 @@ func (r *S3ConnectionResource) Create(ctx context.Context, req resource.CreateRe
 		"aws_access_key_id":        types.StringType,
 		"aws_secret_access_key":    types.StringType,
 		"aws_user":                 types.StringType,
+		"directory_glob_pattern":   types.StringType,
 		"external_id":              types.StringType,
 		"iam_role_arn":             types.StringType,
+		"is_directory_snapshot":    types.BoolType,
 		"is_single_table":          types.BoolType,
 		"s3_bucket_name":           types.StringType,
 		"s3_bucket_region":         types.StringType,
@@ -318,8 +338,10 @@ func (r *S3ConnectionResource) Read(ctx context.Context, req resource.ReadReques
 		"aws_access_key_id":        types.StringType,
 		"aws_secret_access_key":    types.StringType,
 		"aws_user":                 types.StringType,
+		"directory_glob_pattern":   types.StringType,
 		"external_id":              types.StringType,
 		"iam_role_arn":             types.StringType,
+		"is_directory_snapshot":    types.BoolType,
 		"is_single_table":          types.BoolType,
 		"s3_bucket_name":           types.StringType,
 		"s3_bucket_region":         types.StringType,
@@ -398,8 +420,10 @@ func (r *S3ConnectionResource) Update(ctx context.Context, req resource.UpdateRe
 		"aws_access_key_id":        types.StringType,
 		"aws_secret_access_key":    types.StringType,
 		"aws_user":                 types.StringType,
+		"directory_glob_pattern":   types.StringType,
 		"external_id":              types.StringType,
 		"iam_role_arn":             types.StringType,
+		"is_directory_snapshot":    types.BoolType,
 		"is_single_table":          types.BoolType,
 		"s3_bucket_name":           types.StringType,
 		"s3_bucket_region":         types.StringType,

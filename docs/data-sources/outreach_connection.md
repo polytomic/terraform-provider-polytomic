@@ -36,6 +36,7 @@ data "polytomic_outreach_connection" "outreach" {
 
 Read-Only:
 
+- `connected_user` (String) Connected user
 - `oauth_token_expiry` (String)
 
 

@@ -40,6 +40,7 @@ Read-Only:
 
     Access Key ID with read/write access to a bucket. More info: https://docs.polytomic.com/docs/redshift
 - `aws_user` (String) User ARN
+- `bulk_sync_staging_schema` (String) Staging schema name
 - `database` (String)
 - `hostname` (String)
 - `port` (Number)
@@ -53,6 +54,7 @@ Read-Only:
 - `ssh_host` (String) SSH host
 - `ssh_port` (Number) SSH port
 - `ssh_user` (String) SSH user
+- `use_bulk_sync_staging_schema` (Boolean) Use custom bulk sync staging schema
 - `username` (String)
 
 

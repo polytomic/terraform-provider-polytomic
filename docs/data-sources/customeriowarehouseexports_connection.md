@@ -43,7 +43,9 @@ Read-Only:
 
     Access Key ID with read/write access to a bucket.
 - `aws_user` (String) User ARN
-- `external_id` (String) External ID for the IAM role
+- `external_id` (String) External ID
+
+    External ID for the IAM role
 - `iam_role_arn` (String) IAM Role ARN
 - `s3_bucket_name` (String) S3 Bucket Name
 

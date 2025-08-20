@@ -37,6 +37,7 @@ data "polytomic_dynamodb_connection" "dynamodb" {
 Read-Only:
 
 - `aws_user` (String) User ARN
+- `change_detection` (Boolean) Use DynamoDB Streams for bulk syncs
 - `region` (String) AWS region
 
 

@@ -75,6 +75,7 @@ Optional:
     Access Key ID with read/write access to a bucket. More info: https://docs.polytomic.com/docs/redshift
 - `aws_secret_access_key` (String, Sensitive) AWS Secret Access Key (destinations only)
 - `aws_user` (String) User ARN
+- `bulk_sync_staging_schema` (String) Staging schema name
 - `s3_bucket_name` (String) S3 Bucket Name (destinations only)
 
     Name of bucket used for staging data load files
@@ -86,5 +87,6 @@ Optional:
 - `ssh_port` (Number) SSH port
 - `ssh_private_key` (String, Sensitive) Private key
 - `ssh_user` (String) SSH user
+- `use_bulk_sync_staging_schema` (Boolean) Use custom bulk sync staging schema
 
 

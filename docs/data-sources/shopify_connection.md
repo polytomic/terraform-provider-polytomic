@@ -36,6 +36,8 @@ data "polytomic_shopify_connection" "shopify" {
 
 Read-Only:
 
-- `store` (String) Enter your Shopify store name.
+- `store` (String) Store Slug
+
+    e.g. 'example' if your store is example.myshopify.com
 
 

@@ -6,8 +6,10 @@ package connections
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/polytomic/terraform-provider-polytomic/provider/internal/providerclient"
 )
@@ -47,8 +49,13 @@ func (d *HarmonicConnectionDataSource) Schema(ctx context.Context, req datasourc
 				Computed:            true,
 			},
 			"configuration": schema.SingleNestedAttribute{
-				Attributes: map[string]schema.Attribute{},
-				Optional:   true,
+				Attributes: map[string]schema.Attribute{
+					"deals_data": schema.BoolAttribute{
+						MarkdownDescription: `Enable Harmonic Deal Data API`,
+						Computed:            true,
+					},
+				},
+				Optional: true,
 			},
 		},
 	}
@@ -79,6 +86,20 @@ func (d *HarmonicConnectionDataSource) Read(ctx context.Context, req datasource.
 	data.Id = types.StringPointerValue(connection.Data.Id)
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
+	var diags diag.Diagnostics
+	data.Configuration, diags = types.ObjectValue(
+		data.Configuration.AttributeTypes(ctx),
+		map[string]attr.Value{
+			"deals_data": types.BoolValue(
+				getValueOrEmpty(connection.Data.Configuration["deals_data"], "bool").(bool),
+			),
+		},
+	)
+
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
 
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)

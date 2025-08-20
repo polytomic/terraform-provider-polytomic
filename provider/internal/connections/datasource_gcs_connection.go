@@ -58,6 +58,14 @@ func (d *GcsConnectionDataSource) Schema(ctx context.Context, req datasource.Sch
 						MarkdownDescription: `Service account identity`,
 						Computed:            true,
 					},
+					"directory_glob_pattern": schema.StringAttribute{
+						MarkdownDescription: `Tables glob path`,
+						Computed:            true,
+					},
+					"is_directory_snapshot": schema.BoolAttribute{
+						MarkdownDescription: `Multi-directory multi-table`,
+						Computed:            true,
+					},
 					"is_single_table": schema.BoolAttribute{
 						MarkdownDescription: `Files are time-based snapshots
 
@@ -123,6 +131,12 @@ func (d *GcsConnectionDataSource) Read(ctx context.Context, req datasource.ReadR
 			),
 			"client_email": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["client_email"], "string").(string),
+			),
+			"directory_glob_pattern": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["directory_glob_pattern"], "string").(string),
+			),
+			"is_directory_snapshot": types.BoolValue(
+				getValueOrEmpty(connection.Data.Configuration["is_directory_snapshot"], "bool").(bool),
 			),
 			"is_single_table": types.BoolValue(
 				getValueOrEmpty(connection.Data.Configuration["is_single_table"], "bool").(bool),

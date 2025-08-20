@@ -34,4 +34,8 @@ data "polytomic_harmonic_connection" "harmonic" {
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
+Read-Only:
+
+- `deals_data` (Boolean) Enable Harmonic Deal Data API
+
 

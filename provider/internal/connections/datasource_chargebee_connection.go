@@ -57,7 +57,7 @@ func (d *ChargebeeConnectionDataSource) Schema(ctx context.Context, req datasour
 					"ratelimit_rpm": schema.Int64Attribute{
 						MarkdownDescription: `Maximum Requests Per Minute
 
-    Default rate limits can be found at https://support.chargebee.com/support/solutions/articles/243576-what-are-the-chargebee-api-limits-`,
+    Default rate limits can be found at https://www.chargebee.com/docs/2.0/site-configuration/articles-and-faq/what-are-the-chargebee-api-limits.html`,
 						Computed: true,
 					},
 					"site": schema.StringAttribute{

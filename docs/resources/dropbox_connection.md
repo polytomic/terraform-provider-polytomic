@@ -16,11 +16,12 @@ Dropbox Connection
 resource "polytomic_dropbox_connection" "dropbox" {
   name = "example"
   configuration = {
-    app_key             = "a45gadsfdsaf47byor2ugfbhsgllpf12gf56gfds"
-    app_secret          = "ay8d5hdepz62px8lqeoakuea2ccl4rxm13i6tbyorxhu1i20kc8ruvksmzxq"
-    bucket              = "my-folder"
-    oauth_refresh_token = "dasfdasz62px8lqeoakuea2ccl4rxm13i6tbyorxhu1i20kc8ruvksmzxq"
-    single_table_name   = "collection"
+    app_key                  = "a45gadsfdsaf47byor2ugfbhsgllpf12gf56gfds"
+    app_secret               = "ay8d5hdepz62px8lqeoakuea2ccl4rxm13i6tbyorxhu1i20kc8ruvksmzxq"
+    bucket                   = "my-folder"
+    oauth_refresh_token      = "dasfdasz62px8lqeoakuea2ccl4rxm13i6tbyorxhu1i20kc8ruvksmzxq"
+    single_table_file_format = "csv"
+    single_table_name        = "collection"
   }
 }
 ```
@@ -64,6 +65,8 @@ Optional:
 
 - `app_key` (String, Sensitive)
 - `app_secret` (String, Sensitive)
+- `directory_glob_pattern` (String) Tables glob path
+- `is_directory_snapshot` (Boolean) Multi-directory multi-table
 - `is_single_table` (Boolean) Files are time-based snapshots
 
     Treat the files as a single table.

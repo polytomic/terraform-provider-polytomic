@@ -16,8 +16,9 @@ Google Cloud Storage Connection
 resource "polytomic_gcs_connection" "gcs" {
   name = "example"
   configuration = {
-    bucket            = "my-bucket"
-    single_table_name = "collection"
+    bucket                   = "my-bucket"
+    single_table_file_format = "csv"
+    single_table_name        = "collection"
   }
 }
 ```
@@ -56,11 +57,13 @@ state before it will take effect on a destroy operation.
 Required:
 
 - `bucket` (String)
-- `service_account` (String, Sensitive) Service Account Key
+- `service_account` (String, Sensitive) Service account key
 
 Optional:
 
 - `client_email` (String) Service account identity
+- `directory_glob_pattern` (String) Tables glob path
+- `is_directory_snapshot` (Boolean) Multi-directory multi-table
 - `is_single_table` (Boolean) Files are time-based snapshots
 
     Treat the files as a single table.

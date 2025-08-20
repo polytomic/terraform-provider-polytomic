@@ -50,6 +50,10 @@ func (d *AwsathenaConnectionDataSource) Schema(ctx context.Context, req datasour
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
+					"access_id": schema.StringAttribute{
+						MarkdownDescription: `AWS Access ID`,
+						Computed:            true,
+					},
 					"aws_user": schema.StringAttribute{
 						MarkdownDescription: `User ARN`,
 						Computed:            true,
@@ -100,6 +104,9 @@ func (d *AwsathenaConnectionDataSource) Read(ctx context.Context, req datasource
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttributeTypes(ctx),
 		map[string]attr.Value{
+			"access_id": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["access_id"], "string").(string),
+			),
 			"aws_user": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["aws_user"], "string").(string),
 			),

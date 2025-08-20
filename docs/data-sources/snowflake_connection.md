@@ -36,14 +36,16 @@ data "polytomic_snowflake_connection" "snowflake" {
 
 Read-Only:
 
-- `account` (String) Account Name
+- `account` (String) Account identifier
 
-    e.g. uc193736182, ja8382948.us-central-1.gcp
+    e.g. FRXJLEC-UJA94780
+- `bulk_sync_staging_schema` (String) Staging schema name
 - `dbname` (String) Database
 - `key_pair_auth` (Boolean) Use key pair authentication
 - `params` (String) Additional parameters
 
     Additional connection parameters, formatted as a query string
+- `use_bulk_sync_staging_schema` (Boolean) Use custom bulk sync staging schema
 - `username` (String)
 - `warehouse` (String) Compute warehouse
 

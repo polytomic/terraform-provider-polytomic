@@ -91,6 +91,20 @@ var AzureblobSchema = schema.Schema{
 					Computed:            false,
 					Sensitive:           false,
 				},
+				"directory_glob_pattern": schema.StringAttribute{
+					MarkdownDescription: `Tables glob path`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
+				"is_directory_snapshot": schema.BoolAttribute{
+					MarkdownDescription: `Multi-directory multi-table`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
 				"is_single_table": schema.BoolAttribute{
 					MarkdownDescription: `Files are time-based snapshots
 
@@ -173,6 +187,8 @@ type AzureblobConf struct {
 	Client_id                string `mapstructure:"client_id" tfsdk:"client_id"`
 	Client_secret            string `mapstructure:"client_secret" tfsdk:"client_secret"`
 	Container_name           string `mapstructure:"container_name" tfsdk:"container_name"`
+	Directory_glob_pattern   string `mapstructure:"directory_glob_pattern" tfsdk:"directory_glob_pattern"`
+	Is_directory_snapshot    bool   `mapstructure:"is_directory_snapshot" tfsdk:"is_directory_snapshot"`
 	Is_single_table          bool   `mapstructure:"is_single_table" tfsdk:"is_single_table"`
 	Oauth_refresh_token      string `mapstructure:"oauth_refresh_token" tfsdk:"oauth_refresh_token"`
 	Single_table_file_format string `mapstructure:"single_table_file_format" tfsdk:"single_table_file_format"`
@@ -243,6 +259,8 @@ func (r *AzureblobConnectionResource) Create(ctx context.Context, req resource.C
 		"client_id":                types.StringType,
 		"client_secret":            types.StringType,
 		"container_name":           types.StringType,
+		"directory_glob_pattern":   types.StringType,
+		"is_directory_snapshot":    types.BoolType,
 		"is_single_table":          types.BoolType,
 		"oauth_refresh_token":      types.StringType,
 		"single_table_file_format": types.StringType,
@@ -320,6 +338,8 @@ func (r *AzureblobConnectionResource) Read(ctx context.Context, req resource.Rea
 		"client_id":                types.StringType,
 		"client_secret":            types.StringType,
 		"container_name":           types.StringType,
+		"directory_glob_pattern":   types.StringType,
+		"is_directory_snapshot":    types.BoolType,
 		"is_single_table":          types.BoolType,
 		"oauth_refresh_token":      types.StringType,
 		"single_table_file_format": types.StringType,
@@ -400,6 +420,8 @@ func (r *AzureblobConnectionResource) Update(ctx context.Context, req resource.U
 		"client_id":                types.StringType,
 		"client_secret":            types.StringType,
 		"container_name":           types.StringType,
+		"directory_glob_pattern":   types.StringType,
+		"is_directory_snapshot":    types.BoolType,
 		"is_single_table":          types.BoolType,
 		"oauth_refresh_token":      types.StringType,
 		"single_table_file_format": types.StringType,

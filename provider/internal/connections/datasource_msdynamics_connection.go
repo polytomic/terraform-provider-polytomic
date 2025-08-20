@@ -50,8 +50,8 @@ func (d *MsdynamicsConnectionDataSource) Schema(ctx context.Context, req datasou
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
-					"dynamics_environment_id": schema.StringAttribute{
-						MarkdownDescription: `Environment ID`,
+					"dynamics_url": schema.StringAttribute{
+						MarkdownDescription: `Dynamics URL`,
 						Computed:            true,
 					},
 					"oauth_token_expiry": schema.StringAttribute{
@@ -94,8 +94,8 @@ func (d *MsdynamicsConnectionDataSource) Read(ctx context.Context, req datasourc
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttributeTypes(ctx),
 		map[string]attr.Value{
-			"dynamics_environment_id": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["dynamics_environment_id"], "string").(string),
+			"dynamics_url": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["dynamics_url"], "string").(string),
 			),
 			"oauth_token_expiry": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["oauth_token_expiry"], "string").(string),

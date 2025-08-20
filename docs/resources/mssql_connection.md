@@ -19,6 +19,7 @@ resource "polytomic_mssql_connection" "mssql" {
     database = "sampledb"
     hostname = "example.database.windows.net"
     password = "secret"
+    ssh_host = "bastion.example.com"
     username = "user"
   }
 }
@@ -65,6 +66,12 @@ Required:
 
 Optional:
 
+- `change_detection` (Boolean) Use change data capture for bulk syncs
+- `ssh` (Boolean) Connect over SSH tunnel
+- `ssh_host` (String) SSH host
+- `ssh_port` (Number) SSH port
+- `ssh_private_key` (String, Sensitive) Private key
+- `ssh_user` (String) SSH user
 - `ssl` (Boolean) Use SSL
 
 

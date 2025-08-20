@@ -51,10 +51,14 @@ func (d *SnowflakeConnectionDataSource) Schema(ctx context.Context, req datasour
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"account": schema.StringAttribute{
-						MarkdownDescription: `Account Name
+						MarkdownDescription: `Account identifier
 
-    e.g. uc193736182, ja8382948.us-central-1.gcp`,
+    e.g. FRXJLEC-UJA94780`,
 						Computed: true,
+					},
+					"bulk_sync_staging_schema": schema.StringAttribute{
+						MarkdownDescription: `Staging schema name`,
+						Computed:            true,
 					},
 					"dbname": schema.StringAttribute{
 						MarkdownDescription: `Database`,
@@ -69,6 +73,10 @@ func (d *SnowflakeConnectionDataSource) Schema(ctx context.Context, req datasour
 
     Additional connection parameters, formatted as a query string`,
 						Computed: true,
+					},
+					"use_bulk_sync_staging_schema": schema.BoolAttribute{
+						MarkdownDescription: `Use custom bulk sync staging schema`,
+						Computed:            true,
 					},
 					"username": schema.StringAttribute{
 						MarkdownDescription: ``,
@@ -117,6 +125,9 @@ func (d *SnowflakeConnectionDataSource) Read(ctx context.Context, req datasource
 			"account": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["account"], "string").(string),
 			),
+			"bulk_sync_staging_schema": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["bulk_sync_staging_schema"], "string").(string),
+			),
 			"dbname": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["dbname"], "string").(string),
 			),
@@ -125,6 +136,9 @@ func (d *SnowflakeConnectionDataSource) Read(ctx context.Context, req datasource
 			),
 			"params": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["params"], "string").(string),
+			),
+			"use_bulk_sync_staging_schema": types.BoolValue(
+				getValueOrEmpty(connection.Data.Configuration["use_bulk_sync_staging_schema"], "bool").(bool),
 			),
 			"username": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["username"], "string").(string),

@@ -39,7 +39,7 @@ Read-Only:
 - `product_catalog` (String) Product Catalog version
 - `ratelimit_rpm` (Number) Maximum Requests Per Minute
 
-    Default rate limits can be found at https://support.chargebee.com/support/solutions/articles/243576-what-are-the-chargebee-api-limits-
+    Default rate limits can be found at https://www.chargebee.com/docs/2.0/site-configuration/articles-and-faq/what-are-the-chargebee-api-limits.html
 - `site` (String) Chargebee site
 
     https://{site}.chargebee.com

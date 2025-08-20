@@ -60,7 +60,7 @@ var GooglecloudsqlSchema = schema.Schema{
 					Sensitive: false,
 				},
 				"credentials": schema.StringAttribute{
-					MarkdownDescription: `Service Account Key`,
+					MarkdownDescription: `Service account key`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,

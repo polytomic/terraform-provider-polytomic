@@ -38,6 +38,9 @@ Read-Only:
 
 - `accounts` (Attributes Set) (see [below for nested schema](#nestedatt--configuration--accounts))
 - `connected_user` (String) Connected user's email
+- `custom_reports` (String) Custom reports
+
+    One report per line. Format is a report name followed by a Google Ads SQL query. e.g. myReport:ad_groups:campaign.id
 - `oauth_token_expiry` (String)
 
 <a id="nestedatt--configuration--accounts"></a>

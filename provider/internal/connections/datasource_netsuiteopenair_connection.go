@@ -58,6 +58,14 @@ func (d *NetsuiteopenairConnectionDataSource) Schema(ctx context.Context, req da
 						MarkdownDescription: `Company ID`,
 						Computed:            true,
 					},
+					"per_day_rate_limit": schema.Int64Attribute{
+						MarkdownDescription: `Per Day Rate Limit`,
+						Computed:            true,
+					},
+					"per_minute_rate_limit": schema.Int64Attribute{
+						MarkdownDescription: `Per Minute Rate Limit`,
+						Computed:            true,
+					},
 				},
 				Optional: true,
 			},
@@ -99,6 +107,12 @@ func (d *NetsuiteopenairConnectionDataSource) Read(ctx context.Context, req data
 			),
 			"company_id": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["company_id"], "string").(string),
+			),
+			"per_day_rate_limit": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["per_day_rate_limit"], "string").(string),
+			),
+			"per_minute_rate_limit": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["per_minute_rate_limit"], "string").(string),
 			),
 		},
 	)

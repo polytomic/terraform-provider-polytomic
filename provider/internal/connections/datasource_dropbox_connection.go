@@ -54,6 +54,14 @@ func (d *DropboxConnectionDataSource) Schema(ctx context.Context, req datasource
 						MarkdownDescription: `Folder`,
 						Computed:            true,
 					},
+					"directory_glob_pattern": schema.StringAttribute{
+						MarkdownDescription: `Tables glob path`,
+						Computed:            true,
+					},
+					"is_directory_snapshot": schema.BoolAttribute{
+						MarkdownDescription: `Multi-directory multi-table`,
+						Computed:            true,
+					},
 					"is_single_table": schema.BoolAttribute{
 						MarkdownDescription: `Files are time-based snapshots
 
@@ -116,6 +124,12 @@ func (d *DropboxConnectionDataSource) Read(ctx context.Context, req datasource.R
 		map[string]attr.Value{
 			"bucket": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["bucket"], "string").(string),
+			),
+			"directory_glob_pattern": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["directory_glob_pattern"], "string").(string),
+			),
+			"is_directory_snapshot": types.BoolValue(
+				getValueOrEmpty(connection.Data.Configuration["is_directory_snapshot"], "bool").(bool),
 			),
 			"is_single_table": types.BoolValue(
 				getValueOrEmpty(connection.Data.Configuration["is_single_table"], "bool").(bool),

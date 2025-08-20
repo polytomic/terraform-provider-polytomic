@@ -34,4 +34,16 @@ data "polytomic_iterable_connection" "iterable" {
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
+Read-Only:
+
+- `event_types` (Attributes Set) Event Types (see [below for nested schema](#nestedatt--configuration--event_types))
+
+<a id="nestedatt--configuration--event_types"></a>
+### Nested Schema for `configuration.event_types`
+
+Read-Only:
+
+- `label` (String)
+- `value` (String)
+
 

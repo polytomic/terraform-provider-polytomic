@@ -38,6 +38,8 @@ Read-Only:
 
 - `bucket` (String)
 - `client_email` (String) Service account identity
+- `directory_glob_pattern` (String) Tables glob path
+- `is_directory_snapshot` (Boolean) Multi-directory multi-table
 - `is_single_table` (Boolean) Files are time-based snapshots
 
     Treat the files as a single table.

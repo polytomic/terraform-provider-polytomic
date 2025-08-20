@@ -67,8 +67,10 @@ func (d *CustomeriowarehouseexportsConnectionDataSource) Schema(ctx context.Cont
 						Computed:            true,
 					},
 					"external_id": schema.StringAttribute{
-						MarkdownDescription: `External ID for the IAM role`,
-						Computed:            true,
+						MarkdownDescription: `External ID
+
+    External ID for the IAM role`,
+						Computed: true,
 					},
 					"iam_role_arn": schema.StringAttribute{
 						MarkdownDescription: `IAM Role ARN`,

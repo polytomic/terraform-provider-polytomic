@@ -58,16 +58,4 @@ Required:
 - `token` (String, Sensitive) Service Account Token
 - `url` (String) URL of dbt Cloud instance e.g. https://cloud.getdbt.com
 
-Optional:
-
-- `account` (Attributes) (see [below for nested schema](#nestedatt--configuration--account))
-
-<a id="nestedatt--configuration--account"></a>
-### Nested Schema for `configuration.account`
-
-Optional:
-
-- `id` (Number)
-- `name` (String)
-
 

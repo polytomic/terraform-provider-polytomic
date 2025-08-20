@@ -63,8 +63,8 @@ var MsdynamicsSchema = schema.Schema{
 						stringplanmodifier.UseStateForUnknown(),
 					},
 				},
-				"dynamics_environment_id": schema.StringAttribute{
-					MarkdownDescription: `Environment ID`,
+				"dynamics_url": schema.StringAttribute{
+					MarkdownDescription: `Dynamics URL`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
@@ -114,11 +114,11 @@ func (t *MsdynamicsConnectionResource) Schema(ctx context.Context, req resource.
 }
 
 type MsdynamicsConf struct {
-	Client_id               string `mapstructure:"client_id" tfsdk:"client_id"`
-	Client_secret           string `mapstructure:"client_secret" tfsdk:"client_secret"`
-	Dynamics_environment_id string `mapstructure:"dynamics_environment_id" tfsdk:"dynamics_environment_id"`
-	Oauth_refresh_token     string `mapstructure:"oauth_refresh_token" tfsdk:"oauth_refresh_token"`
-	Oauth_token_expiry      string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
+	Client_id           string `mapstructure:"client_id" tfsdk:"client_id"`
+	Client_secret       string `mapstructure:"client_secret" tfsdk:"client_secret"`
+	Dynamics_url        string `mapstructure:"dynamics_url" tfsdk:"dynamics_url"`
+	Oauth_refresh_token string `mapstructure:"oauth_refresh_token" tfsdk:"oauth_refresh_token"`
+	Oauth_token_expiry  string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
 }
 
 type MsdynamicsConnectionResource struct {
@@ -177,11 +177,11 @@ func (r *MsdynamicsConnectionResource) Create(ctx context.Context, req resource.
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"client_id":               types.StringType,
-		"client_secret":           types.StringType,
-		"dynamics_environment_id": types.StringType,
-		"oauth_refresh_token":     types.StringType,
-		"oauth_token_expiry":      types.StringType,
+		"client_id":           types.StringType,
+		"client_secret":       types.StringType,
+		"dynamics_url":        types.StringType,
+		"oauth_refresh_token": types.StringType,
+		"oauth_token_expiry":  types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -247,11 +247,11 @@ func (r *MsdynamicsConnectionResource) Read(ctx context.Context, req resource.Re
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"client_id":               types.StringType,
-		"client_secret":           types.StringType,
-		"dynamics_environment_id": types.StringType,
-		"oauth_refresh_token":     types.StringType,
-		"oauth_token_expiry":      types.StringType,
+		"client_id":           types.StringType,
+		"client_secret":       types.StringType,
+		"dynamics_url":        types.StringType,
+		"oauth_refresh_token": types.StringType,
+		"oauth_token_expiry":  types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -320,11 +320,11 @@ func (r *MsdynamicsConnectionResource) Update(ctx context.Context, req resource.
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"client_id":               types.StringType,
-		"client_secret":           types.StringType,
-		"dynamics_environment_id": types.StringType,
-		"oauth_refresh_token":     types.StringType,
-		"oauth_token_expiry":      types.StringType,
+		"client_id":           types.StringType,
+		"client_secret":       types.StringType,
+		"dynamics_url":        types.StringType,
+		"oauth_refresh_token": types.StringType,
+		"oauth_token_expiry":  types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

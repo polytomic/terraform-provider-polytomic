@@ -57,7 +57,7 @@ state before it will take effect on a destroy operation.
 
 Required:
 
-- `access_id` (String, Sensitive) AWS Access ID
+- `access_id` (String) AWS Access ID
 - `outputbucket` (String) AWS S3 output bucket
 
     A pre-existing bucket (folder optional) that AWS can use to store query results. ex: s3://polytomic-athena-results/customer-dataset

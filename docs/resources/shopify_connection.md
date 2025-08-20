@@ -17,7 +17,6 @@ resource "polytomic_shopify_connection" "shopify" {
   name = "example"
   configuration = {
     admin_api_token = "secret"
-    store           = "store"
   }
 }
 ```
@@ -56,6 +55,8 @@ state before it will take effect on a destroy operation.
 Required:
 
 - `admin_api_token` (String, Sensitive) Admin API token
-- `store` (String) Enter your Shopify store name.
+- `store` (String) Store Slug
+
+    e.g. 'example' if your store is example.myshopify.com
 
 

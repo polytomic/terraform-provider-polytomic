@@ -36,7 +36,9 @@ data "polytomic_googleworkspace_connection" "googleworkspace" {
 
 Read-Only:
 
-- `client_email` (String) Service account identity
+- `auth_method` (String) Default: browser
+- `client_email` (String) Connected Account
 - `customer_id` (String) Customer ID
+- `oauth_token_expiry` (String)
 
 

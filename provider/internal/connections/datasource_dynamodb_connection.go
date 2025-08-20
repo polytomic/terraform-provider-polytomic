@@ -54,6 +54,10 @@ func (d *DynamodbConnectionDataSource) Schema(ctx context.Context, req datasourc
 						MarkdownDescription: `User ARN`,
 						Computed:            true,
 					},
+					"change_detection": schema.BoolAttribute{
+						MarkdownDescription: `Use DynamoDB Streams for bulk syncs`,
+						Computed:            true,
+					},
 					"region": schema.StringAttribute{
 						MarkdownDescription: `AWS region`,
 						Computed:            true,
@@ -96,6 +100,9 @@ func (d *DynamodbConnectionDataSource) Read(ctx context.Context, req datasource.
 		map[string]attr.Value{
 			"aws_user": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["aws_user"], "string").(string),
+			),
+			"change_detection": types.BoolValue(
+				getValueOrEmpty(connection.Data.Configuration["change_detection"], "bool").(bool),
 			),
 			"region": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["region"], "string").(string),

@@ -244,13 +244,16 @@ func fetchOrRead[T any, PT *T](ctx context.Context, path string, fetch func(cont
 }
 
 func GenerateConnections(ctx context.Context) error {
-	client := newFunction()
+	client := getPTClient()
 	data, err := fetchOrRead(ctx,
 		connectionTypes,
 		func(ctx context.Context) (*polytomic.ConnectionTypeResponseEnvelope, error) {
 			return client.Connections.GetTypes(ctx)
 		},
 	)
+	if err != nil {
+		return err
+	}
 
 	resources := []Importable{}
 	datasources := []Importable{}
@@ -332,7 +335,7 @@ func GenerateConnections(ctx context.Context) error {
 	return nil
 }
 
-func newFunction() *ptclient.Client {
+func getPTClient() *ptclient.Client {
 	baseURL, ok := os.LookupEnv("POLYTOMIC_DEPLOYMENT_URL")
 	if !ok {
 		fmt.Println("POLYTOMIC_DEPLOYMENT_URL not set; using production.")
@@ -533,9 +536,9 @@ func va(prefix []string, a Attribute, builder *strings.Builder) {
 	}
 	builder.WriteString("data.Configuration.Attributes()")
 	for _, p := range prefix {
-		builder.WriteString(fmt.Sprintf(`["%s"].(types.Object).Attributes()`, p))
+		fmt.Fprintf(builder, `["%s"].(types.Object).Attributes()`, p)
 	}
-	builder.WriteString(fmt.Sprintf("[\"%s\"]", a.Name))
+	fmt.Fprintf(builder, "[\"%s\"]", a.Name)
 
 	switch a.Type {
 	case "int", "integer", "int64", "number":
@@ -586,6 +589,9 @@ func writeConnectionResource(r Connection) error {
 		log.Fatal(fmt.Errorf("error executing resource template: %w", err))
 	}
 	_, err = f.Write(buf.Bytes())
+	if err != nil {
+		log.Fatal(fmt.Errorf("error writing resource %s: %w", r.Connection, err))
+	}
 
 	p, err := format.Source(buf.Bytes())
 	if err != nil {
@@ -593,6 +599,9 @@ func writeConnectionResource(r Connection) error {
 	}
 	f.Close()
 	f, err = os.Create(f.Name())
+	if err != nil {
+		log.Fatal(fmt.Errorf("error creating resource %s: %w", r.Connection, err))
+	}
 
 	_, err = f.Write(p)
 	return err

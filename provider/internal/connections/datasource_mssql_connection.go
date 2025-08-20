@@ -50,6 +50,10 @@ func (d *MssqlConnectionDataSource) Schema(ctx context.Context, req datasource.S
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
+					"change_detection": schema.BoolAttribute{
+						MarkdownDescription: `Use change data capture for bulk syncs`,
+						Computed:            true,
+					},
 					"database": schema.StringAttribute{
 						MarkdownDescription: ``,
 						Computed:            true,
@@ -60,6 +64,22 @@ func (d *MssqlConnectionDataSource) Schema(ctx context.Context, req datasource.S
 					},
 					"port": schema.Int64Attribute{
 						MarkdownDescription: ``,
+						Computed:            true,
+					},
+					"ssh": schema.BoolAttribute{
+						MarkdownDescription: `Connect over SSH tunnel`,
+						Computed:            true,
+					},
+					"ssh_host": schema.StringAttribute{
+						MarkdownDescription: `SSH host`,
+						Computed:            true,
+					},
+					"ssh_port": schema.Int64Attribute{
+						MarkdownDescription: `SSH port`,
+						Computed:            true,
+					},
+					"ssh_user": schema.StringAttribute{
+						MarkdownDescription: `SSH user`,
 						Computed:            true,
 					},
 					"ssl": schema.BoolAttribute{
@@ -106,6 +126,9 @@ func (d *MssqlConnectionDataSource) Read(ctx context.Context, req datasource.Rea
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttributeTypes(ctx),
 		map[string]attr.Value{
+			"change_detection": types.BoolValue(
+				getValueOrEmpty(connection.Data.Configuration["change_detection"], "bool").(bool),
+			),
 			"database": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["database"], "string").(string),
 			),
@@ -114,6 +137,18 @@ func (d *MssqlConnectionDataSource) Read(ctx context.Context, req datasource.Rea
 			),
 			"port": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["port"], "string").(string),
+			),
+			"ssh": types.BoolValue(
+				getValueOrEmpty(connection.Data.Configuration["ssh"], "bool").(bool),
+			),
+			"ssh_host": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["ssh_host"], "string").(string),
+			),
+			"ssh_port": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["ssh_port"], "string").(string),
+			),
+			"ssh_user": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["ssh_user"], "string").(string),
 			),
 			"ssl": types.BoolValue(
 				getValueOrEmpty(connection.Data.Configuration["ssl"], "bool").(bool),

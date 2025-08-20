@@ -109,6 +109,13 @@ var DatabricksSchema = schema.Schema{
 					Computed:  true,
 					Sensitive: false,
 				},
+				"bulk_sync_staging_schema": schema.StringAttribute{
+					MarkdownDescription: `Staging schema name`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
 				"cloud_provider": schema.StringAttribute{
 					MarkdownDescription: `Cloud Provider (destination support only)`,
 					Required:            false,
@@ -236,6 +243,13 @@ var DatabricksSchema = schema.Schema{
 					Computed:            true,
 					Sensitive:           false,
 				},
+				"use_bulk_sync_staging_schema": schema.BoolAttribute{
+					MarkdownDescription: `Use custom bulk sync staging schema`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
 			},
 
 			Required: true,
@@ -263,30 +277,32 @@ func (t *DatabricksConnectionResource) Schema(ctx context.Context, req resource.
 }
 
 type DatabricksConf struct {
-	Access_token                string `mapstructure:"access_token" tfsdk:"access_token"`
-	Auth_mode                   string `mapstructure:"auth_mode" tfsdk:"auth_mode"`
-	Aws_access_key_id           string `mapstructure:"aws_access_key_id" tfsdk:"aws_access_key_id"`
-	Aws_secret_access_key       string `mapstructure:"aws_secret_access_key" tfsdk:"aws_secret_access_key"`
-	Aws_user                    string `mapstructure:"aws_user" tfsdk:"aws_user"`
-	Azure_access_key            string `mapstructure:"azure_access_key" tfsdk:"azure_access_key"`
-	Azure_account_name          string `mapstructure:"azure_account_name" tfsdk:"azure_account_name"`
-	Cloud_provider              string `mapstructure:"cloud_provider" tfsdk:"cloud_provider"`
-	Concurrent_queries          int64  `mapstructure:"concurrent_queries" tfsdk:"concurrent_queries"`
-	Container_name              string `mapstructure:"container_name" tfsdk:"container_name"`
-	Deleted_file_retention_days int64  `mapstructure:"deleted_file_retention_days" tfsdk:"deleted_file_retention_days"`
-	Enable_delta_uniform        bool   `mapstructure:"enable_delta_uniform" tfsdk:"enable_delta_uniform"`
-	Enforce_query_limit         bool   `mapstructure:"enforce_query_limit" tfsdk:"enforce_query_limit"`
-	External_id                 string `mapstructure:"external_id" tfsdk:"external_id"`
-	Http_path                   string `mapstructure:"http_path" tfsdk:"http_path"`
-	Iam_role_arn                string `mapstructure:"iam_role_arn" tfsdk:"iam_role_arn"`
-	Log_file_retention_days     int64  `mapstructure:"log_file_retention_days" tfsdk:"log_file_retention_days"`
-	Port                        int64  `mapstructure:"port" tfsdk:"port"`
-	S3_bucket_name              string `mapstructure:"s3_bucket_name" tfsdk:"s3_bucket_name"`
-	S3_bucket_region            string `mapstructure:"s3_bucket_region" tfsdk:"s3_bucket_region"`
-	Server_hostname             string `mapstructure:"server_hostname" tfsdk:"server_hostname"`
-	Set_retention_properties    bool   `mapstructure:"set_retention_properties" tfsdk:"set_retention_properties"`
-	Storage_credential_name     string `mapstructure:"storage_credential_name" tfsdk:"storage_credential_name"`
-	Unity_catalog_enabled       bool   `mapstructure:"unity_catalog_enabled" tfsdk:"unity_catalog_enabled"`
+	Access_token                 string `mapstructure:"access_token" tfsdk:"access_token"`
+	Auth_mode                    string `mapstructure:"auth_mode" tfsdk:"auth_mode"`
+	Aws_access_key_id            string `mapstructure:"aws_access_key_id" tfsdk:"aws_access_key_id"`
+	Aws_secret_access_key        string `mapstructure:"aws_secret_access_key" tfsdk:"aws_secret_access_key"`
+	Aws_user                     string `mapstructure:"aws_user" tfsdk:"aws_user"`
+	Azure_access_key             string `mapstructure:"azure_access_key" tfsdk:"azure_access_key"`
+	Azure_account_name           string `mapstructure:"azure_account_name" tfsdk:"azure_account_name"`
+	Bulk_sync_staging_schema     string `mapstructure:"bulk_sync_staging_schema" tfsdk:"bulk_sync_staging_schema"`
+	Cloud_provider               string `mapstructure:"cloud_provider" tfsdk:"cloud_provider"`
+	Concurrent_queries           int64  `mapstructure:"concurrent_queries" tfsdk:"concurrent_queries"`
+	Container_name               string `mapstructure:"container_name" tfsdk:"container_name"`
+	Deleted_file_retention_days  int64  `mapstructure:"deleted_file_retention_days" tfsdk:"deleted_file_retention_days"`
+	Enable_delta_uniform         bool   `mapstructure:"enable_delta_uniform" tfsdk:"enable_delta_uniform"`
+	Enforce_query_limit          bool   `mapstructure:"enforce_query_limit" tfsdk:"enforce_query_limit"`
+	External_id                  string `mapstructure:"external_id" tfsdk:"external_id"`
+	Http_path                    string `mapstructure:"http_path" tfsdk:"http_path"`
+	Iam_role_arn                 string `mapstructure:"iam_role_arn" tfsdk:"iam_role_arn"`
+	Log_file_retention_days      int64  `mapstructure:"log_file_retention_days" tfsdk:"log_file_retention_days"`
+	Port                         int64  `mapstructure:"port" tfsdk:"port"`
+	S3_bucket_name               string `mapstructure:"s3_bucket_name" tfsdk:"s3_bucket_name"`
+	S3_bucket_region             string `mapstructure:"s3_bucket_region" tfsdk:"s3_bucket_region"`
+	Server_hostname              string `mapstructure:"server_hostname" tfsdk:"server_hostname"`
+	Set_retention_properties     bool   `mapstructure:"set_retention_properties" tfsdk:"set_retention_properties"`
+	Storage_credential_name      string `mapstructure:"storage_credential_name" tfsdk:"storage_credential_name"`
+	Unity_catalog_enabled        bool   `mapstructure:"unity_catalog_enabled" tfsdk:"unity_catalog_enabled"`
+	Use_bulk_sync_staging_schema bool   `mapstructure:"use_bulk_sync_staging_schema" tfsdk:"use_bulk_sync_staging_schema"`
 }
 
 type DatabricksConnectionResource struct {
@@ -345,30 +361,32 @@ func (r *DatabricksConnectionResource) Create(ctx context.Context, req resource.
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"access_token":                types.StringType,
-		"auth_mode":                   types.StringType,
-		"aws_access_key_id":           types.StringType,
-		"aws_secret_access_key":       types.StringType,
-		"aws_user":                    types.StringType,
-		"azure_access_key":            types.StringType,
-		"azure_account_name":          types.StringType,
-		"cloud_provider":              types.StringType,
-		"concurrent_queries":          types.NumberType,
-		"container_name":              types.StringType,
-		"deleted_file_retention_days": types.NumberType,
-		"enable_delta_uniform":        types.BoolType,
-		"enforce_query_limit":         types.BoolType,
-		"external_id":                 types.StringType,
-		"http_path":                   types.StringType,
-		"iam_role_arn":                types.StringType,
-		"log_file_retention_days":     types.NumberType,
-		"port":                        types.NumberType,
-		"s3_bucket_name":              types.StringType,
-		"s3_bucket_region":            types.StringType,
-		"server_hostname":             types.StringType,
-		"set_retention_properties":    types.BoolType,
-		"storage_credential_name":     types.StringType,
-		"unity_catalog_enabled":       types.BoolType,
+		"access_token":                 types.StringType,
+		"auth_mode":                    types.StringType,
+		"aws_access_key_id":            types.StringType,
+		"aws_secret_access_key":        types.StringType,
+		"aws_user":                     types.StringType,
+		"azure_access_key":             types.StringType,
+		"azure_account_name":           types.StringType,
+		"bulk_sync_staging_schema":     types.StringType,
+		"cloud_provider":               types.StringType,
+		"concurrent_queries":           types.NumberType,
+		"container_name":               types.StringType,
+		"deleted_file_retention_days":  types.NumberType,
+		"enable_delta_uniform":         types.BoolType,
+		"enforce_query_limit":          types.BoolType,
+		"external_id":                  types.StringType,
+		"http_path":                    types.StringType,
+		"iam_role_arn":                 types.StringType,
+		"log_file_retention_days":      types.NumberType,
+		"port":                         types.NumberType,
+		"s3_bucket_name":               types.StringType,
+		"s3_bucket_region":             types.StringType,
+		"server_hostname":              types.StringType,
+		"set_retention_properties":     types.BoolType,
+		"storage_credential_name":      types.StringType,
+		"unity_catalog_enabled":        types.BoolType,
+		"use_bulk_sync_staging_schema": types.BoolType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -434,30 +452,32 @@ func (r *DatabricksConnectionResource) Read(ctx context.Context, req resource.Re
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"access_token":                types.StringType,
-		"auth_mode":                   types.StringType,
-		"aws_access_key_id":           types.StringType,
-		"aws_secret_access_key":       types.StringType,
-		"aws_user":                    types.StringType,
-		"azure_access_key":            types.StringType,
-		"azure_account_name":          types.StringType,
-		"cloud_provider":              types.StringType,
-		"concurrent_queries":          types.NumberType,
-		"container_name":              types.StringType,
-		"deleted_file_retention_days": types.NumberType,
-		"enable_delta_uniform":        types.BoolType,
-		"enforce_query_limit":         types.BoolType,
-		"external_id":                 types.StringType,
-		"http_path":                   types.StringType,
-		"iam_role_arn":                types.StringType,
-		"log_file_retention_days":     types.NumberType,
-		"port":                        types.NumberType,
-		"s3_bucket_name":              types.StringType,
-		"s3_bucket_region":            types.StringType,
-		"server_hostname":             types.StringType,
-		"set_retention_properties":    types.BoolType,
-		"storage_credential_name":     types.StringType,
-		"unity_catalog_enabled":       types.BoolType,
+		"access_token":                 types.StringType,
+		"auth_mode":                    types.StringType,
+		"aws_access_key_id":            types.StringType,
+		"aws_secret_access_key":        types.StringType,
+		"aws_user":                     types.StringType,
+		"azure_access_key":             types.StringType,
+		"azure_account_name":           types.StringType,
+		"bulk_sync_staging_schema":     types.StringType,
+		"cloud_provider":               types.StringType,
+		"concurrent_queries":           types.NumberType,
+		"container_name":               types.StringType,
+		"deleted_file_retention_days":  types.NumberType,
+		"enable_delta_uniform":         types.BoolType,
+		"enforce_query_limit":          types.BoolType,
+		"external_id":                  types.StringType,
+		"http_path":                    types.StringType,
+		"iam_role_arn":                 types.StringType,
+		"log_file_retention_days":      types.NumberType,
+		"port":                         types.NumberType,
+		"s3_bucket_name":               types.StringType,
+		"s3_bucket_region":             types.StringType,
+		"server_hostname":              types.StringType,
+		"set_retention_properties":     types.BoolType,
+		"storage_credential_name":      types.StringType,
+		"unity_catalog_enabled":        types.BoolType,
+		"use_bulk_sync_staging_schema": types.BoolType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -526,30 +546,32 @@ func (r *DatabricksConnectionResource) Update(ctx context.Context, req resource.
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"access_token":                types.StringType,
-		"auth_mode":                   types.StringType,
-		"aws_access_key_id":           types.StringType,
-		"aws_secret_access_key":       types.StringType,
-		"aws_user":                    types.StringType,
-		"azure_access_key":            types.StringType,
-		"azure_account_name":          types.StringType,
-		"cloud_provider":              types.StringType,
-		"concurrent_queries":          types.NumberType,
-		"container_name":              types.StringType,
-		"deleted_file_retention_days": types.NumberType,
-		"enable_delta_uniform":        types.BoolType,
-		"enforce_query_limit":         types.BoolType,
-		"external_id":                 types.StringType,
-		"http_path":                   types.StringType,
-		"iam_role_arn":                types.StringType,
-		"log_file_retention_days":     types.NumberType,
-		"port":                        types.NumberType,
-		"s3_bucket_name":              types.StringType,
-		"s3_bucket_region":            types.StringType,
-		"server_hostname":             types.StringType,
-		"set_retention_properties":    types.BoolType,
-		"storage_credential_name":     types.StringType,
-		"unity_catalog_enabled":       types.BoolType,
+		"access_token":                 types.StringType,
+		"auth_mode":                    types.StringType,
+		"aws_access_key_id":            types.StringType,
+		"aws_secret_access_key":        types.StringType,
+		"aws_user":                     types.StringType,
+		"azure_access_key":             types.StringType,
+		"azure_account_name":           types.StringType,
+		"bulk_sync_staging_schema":     types.StringType,
+		"cloud_provider":               types.StringType,
+		"concurrent_queries":           types.NumberType,
+		"container_name":               types.StringType,
+		"deleted_file_retention_days":  types.NumberType,
+		"enable_delta_uniform":         types.BoolType,
+		"enforce_query_limit":          types.BoolType,
+		"external_id":                  types.StringType,
+		"http_path":                    types.StringType,
+		"iam_role_arn":                 types.StringType,
+		"log_file_retention_days":      types.NumberType,
+		"port":                         types.NumberType,
+		"s3_bucket_name":               types.StringType,
+		"s3_bucket_region":             types.StringType,
+		"server_hostname":              types.StringType,
+		"set_retention_properties":     types.BoolType,
+		"storage_credential_name":      types.StringType,
+		"unity_catalog_enabled":        types.BoolType,
+		"use_bulk_sync_staging_schema": types.BoolType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

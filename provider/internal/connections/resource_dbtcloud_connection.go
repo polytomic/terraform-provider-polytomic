@@ -43,29 +43,6 @@ var DbtcloudSchema = schema.Schema{
 		},
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
-				"account": schema.SingleNestedAttribute{
-					MarkdownDescription: ``,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
-					Attributes: map[string]schema.Attribute{
-						"id": schema.Int64Attribute{
-							MarkdownDescription: ``,
-							Required:            false,
-							Optional:            true,
-							Computed:            true,
-							Sensitive:           false,
-						},
-						"name": schema.StringAttribute{
-							MarkdownDescription: ``,
-							Required:            false,
-							Optional:            true,
-							Computed:            true,
-							Sensitive:           false,
-						},
-					},
-				},
 				"token": schema.StringAttribute{
 					MarkdownDescription: `Service Account Token`,
 					Required:            true,
@@ -110,10 +87,6 @@ func (t *DbtcloudConnectionResource) Schema(ctx context.Context, req resource.Sc
 }
 
 type DbtcloudConf struct {
-	Account struct {
-		Id   int64  `mapstructure:"id" tfsdk:"id"`
-		Name string `mapstructure:"name" tfsdk:"name"`
-	} `mapstructure:"account" tfsdk:"account"`
 	Token string `mapstructure:"token" tfsdk:"token"`
 	Url   string `mapstructure:"url" tfsdk:"url"`
 }
@@ -174,13 +147,8 @@ func (r *DbtcloudConnectionResource) Create(ctx context.Context, req resource.Cr
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"account": types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-				"id":   types.NumberType,
-				"name": types.StringType,
-			},
-		}, "token": types.StringType,
-		"url": types.StringType,
+		"token": types.StringType,
+		"url":   types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -246,13 +214,8 @@ func (r *DbtcloudConnectionResource) Read(ctx context.Context, req resource.Read
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"account": types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-				"id":   types.NumberType,
-				"name": types.StringType,
-			},
-		}, "token": types.StringType,
-		"url": types.StringType,
+		"token": types.StringType,
+		"url":   types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -321,13 +284,8 @@ func (r *DbtcloudConnectionResource) Update(ctx context.Context, req resource.Up
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"account": types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-				"id":   types.NumberType,
-				"name": types.StringType,
-			},
-		}, "token": types.StringType,
-		"url": types.StringType,
+		"token": types.StringType,
+		"url":   types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

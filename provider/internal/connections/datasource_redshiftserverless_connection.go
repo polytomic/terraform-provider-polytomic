@@ -50,6 +50,10 @@ func (d *RedshiftserverlessConnectionDataSource) Schema(ctx context.Context, req
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
+					"bulk_sync_staging_schema": schema.StringAttribute{
+						MarkdownDescription: `Staging schema name`,
+						Computed:            true,
+					},
 					"connection_method": schema.StringAttribute{
 						MarkdownDescription: `Connection method`,
 						Computed:            true,
@@ -82,6 +86,22 @@ func (d *RedshiftserverlessConnectionDataSource) Schema(ctx context.Context, req
 					},
 					"region": schema.StringAttribute{
 						MarkdownDescription: ``,
+						Computed:            true,
+					},
+					"s3_bucket_name": schema.StringAttribute{
+						MarkdownDescription: `S3 bucket name (destination/unload support only)`,
+						Computed:            true,
+					},
+					"s3_bucket_region": schema.StringAttribute{
+						MarkdownDescription: `S3 bucket region (destination/unload support only)`,
+						Computed:            true,
+					},
+					"use_bulk_sync_staging_schema": schema.BoolAttribute{
+						MarkdownDescription: `Use custom bulk sync staging schema`,
+						Computed:            true,
+					},
+					"use_unload": schema.BoolAttribute{
+						MarkdownDescription: `Read data using Unload`,
 						Computed:            true,
 					},
 					"workgroup": schema.StringAttribute{
@@ -124,6 +144,9 @@ func (d *RedshiftserverlessConnectionDataSource) Read(ctx context.Context, req d
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttributeTypes(ctx),
 		map[string]attr.Value{
+			"bulk_sync_staging_schema": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["bulk_sync_staging_schema"], "string").(string),
+			),
 			"connection_method": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["connection_method"], "string").(string),
 			),
@@ -147,6 +170,18 @@ func (d *RedshiftserverlessConnectionDataSource) Read(ctx context.Context, req d
 			),
 			"region": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["region"], "string").(string),
+			),
+			"s3_bucket_name": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["s3_bucket_name"], "string").(string),
+			),
+			"s3_bucket_region": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["s3_bucket_region"], "string").(string),
+			),
+			"use_bulk_sync_staging_schema": types.BoolValue(
+				getValueOrEmpty(connection.Data.Configuration["use_bulk_sync_staging_schema"], "bool").(bool),
+			),
+			"use_unload": types.BoolValue(
+				getValueOrEmpty(connection.Data.Configuration["use_unload"], "bool").(bool),
 			),
 			"workgroup": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["workgroup"], "string").(string),

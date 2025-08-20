@@ -48,10 +48,7 @@ var AwsathenaSchema = schema.Schema{
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
-					Sensitive:           true,
-					PlanModifiers: []planmodifier.String{
-						stringplanmodifier.UseStateForUnknown(),
-					},
+					Sensitive:           false,
 				},
 				"aws_user": schema.StringAttribute{
 					MarkdownDescription: `User ARN`,

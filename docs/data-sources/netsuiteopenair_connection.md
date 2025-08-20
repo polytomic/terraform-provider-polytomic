@@ -38,5 +38,7 @@ Read-Only:
 
 - `api_namespace` (String) API Namespace
 - `company_id` (String) Company ID
+- `per_day_rate_limit` (Number) Per Day Rate Limit
+- `per_minute_rate_limit` (Number) Per Minute Rate Limit
 
 

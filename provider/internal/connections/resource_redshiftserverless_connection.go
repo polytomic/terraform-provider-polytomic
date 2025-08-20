@@ -43,6 +43,13 @@ var RedshiftserverlessSchema = schema.Schema{
 		},
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
+				"bulk_sync_staging_schema": schema.StringAttribute{
+					MarkdownDescription: `Staging schema name`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
 				"connection_method": schema.StringAttribute{
 					MarkdownDescription: `Connection method`,
 					Required:            true,
@@ -101,6 +108,34 @@ var RedshiftserverlessSchema = schema.Schema{
 					Computed:            true,
 					Sensitive:           false,
 				},
+				"s3_bucket_name": schema.StringAttribute{
+					MarkdownDescription: `S3 bucket name (destination/unload support only)`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
+				"s3_bucket_region": schema.StringAttribute{
+					MarkdownDescription: `S3 bucket region (destination/unload support only)`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
+				"use_bulk_sync_staging_schema": schema.BoolAttribute{
+					MarkdownDescription: `Use custom bulk sync staging schema`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
+				"use_unload": schema.BoolAttribute{
+					MarkdownDescription: `Read data using Unload`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
 				"workgroup": schema.StringAttribute{
 					MarkdownDescription: ``,
 					Required:            true,
@@ -135,15 +170,20 @@ func (t *RedshiftserverlessConnectionResource) Schema(ctx context.Context, req r
 }
 
 type RedshiftserverlessConf struct {
-	Connection_method string `mapstructure:"connection_method" tfsdk:"connection_method"`
-	Data_api_endpoint string `mapstructure:"data_api_endpoint" tfsdk:"data_api_endpoint"`
-	Database          string `mapstructure:"database" tfsdk:"database"`
-	Endpoint          string `mapstructure:"endpoint" tfsdk:"endpoint"`
-	External_id       string `mapstructure:"external_id" tfsdk:"external_id"`
-	Iam_role_arn      string `mapstructure:"iam_role_arn" tfsdk:"iam_role_arn"`
-	Override_endpoint bool   `mapstructure:"override_endpoint" tfsdk:"override_endpoint"`
-	Region            string `mapstructure:"region" tfsdk:"region"`
-	Workgroup         string `mapstructure:"workgroup" tfsdk:"workgroup"`
+	Bulk_sync_staging_schema     string `mapstructure:"bulk_sync_staging_schema" tfsdk:"bulk_sync_staging_schema"`
+	Connection_method            string `mapstructure:"connection_method" tfsdk:"connection_method"`
+	Data_api_endpoint            string `mapstructure:"data_api_endpoint" tfsdk:"data_api_endpoint"`
+	Database                     string `mapstructure:"database" tfsdk:"database"`
+	Endpoint                     string `mapstructure:"endpoint" tfsdk:"endpoint"`
+	External_id                  string `mapstructure:"external_id" tfsdk:"external_id"`
+	Iam_role_arn                 string `mapstructure:"iam_role_arn" tfsdk:"iam_role_arn"`
+	Override_endpoint            bool   `mapstructure:"override_endpoint" tfsdk:"override_endpoint"`
+	Region                       string `mapstructure:"region" tfsdk:"region"`
+	S3_bucket_name               string `mapstructure:"s3_bucket_name" tfsdk:"s3_bucket_name"`
+	S3_bucket_region             string `mapstructure:"s3_bucket_region" tfsdk:"s3_bucket_region"`
+	Use_bulk_sync_staging_schema bool   `mapstructure:"use_bulk_sync_staging_schema" tfsdk:"use_bulk_sync_staging_schema"`
+	Use_unload                   bool   `mapstructure:"use_unload" tfsdk:"use_unload"`
+	Workgroup                    string `mapstructure:"workgroup" tfsdk:"workgroup"`
 }
 
 type RedshiftserverlessConnectionResource struct {
@@ -202,15 +242,20 @@ func (r *RedshiftserverlessConnectionResource) Create(ctx context.Context, req r
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"connection_method": types.StringType,
-		"data_api_endpoint": types.StringType,
-		"database":          types.StringType,
-		"endpoint":          types.StringType,
-		"external_id":       types.StringType,
-		"iam_role_arn":      types.StringType,
-		"override_endpoint": types.BoolType,
-		"region":            types.StringType,
-		"workgroup":         types.StringType,
+		"bulk_sync_staging_schema":     types.StringType,
+		"connection_method":            types.StringType,
+		"data_api_endpoint":            types.StringType,
+		"database":                     types.StringType,
+		"endpoint":                     types.StringType,
+		"external_id":                  types.StringType,
+		"iam_role_arn":                 types.StringType,
+		"override_endpoint":            types.BoolType,
+		"region":                       types.StringType,
+		"s3_bucket_name":               types.StringType,
+		"s3_bucket_region":             types.StringType,
+		"use_bulk_sync_staging_schema": types.BoolType,
+		"use_unload":                   types.BoolType,
+		"workgroup":                    types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -276,15 +321,20 @@ func (r *RedshiftserverlessConnectionResource) Read(ctx context.Context, req res
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"connection_method": types.StringType,
-		"data_api_endpoint": types.StringType,
-		"database":          types.StringType,
-		"endpoint":          types.StringType,
-		"external_id":       types.StringType,
-		"iam_role_arn":      types.StringType,
-		"override_endpoint": types.BoolType,
-		"region":            types.StringType,
-		"workgroup":         types.StringType,
+		"bulk_sync_staging_schema":     types.StringType,
+		"connection_method":            types.StringType,
+		"data_api_endpoint":            types.StringType,
+		"database":                     types.StringType,
+		"endpoint":                     types.StringType,
+		"external_id":                  types.StringType,
+		"iam_role_arn":                 types.StringType,
+		"override_endpoint":            types.BoolType,
+		"region":                       types.StringType,
+		"s3_bucket_name":               types.StringType,
+		"s3_bucket_region":             types.StringType,
+		"use_bulk_sync_staging_schema": types.BoolType,
+		"use_unload":                   types.BoolType,
+		"workgroup":                    types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -353,15 +403,20 @@ func (r *RedshiftserverlessConnectionResource) Update(ctx context.Context, req r
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"connection_method": types.StringType,
-		"data_api_endpoint": types.StringType,
-		"database":          types.StringType,
-		"endpoint":          types.StringType,
-		"external_id":       types.StringType,
-		"iam_role_arn":      types.StringType,
-		"override_endpoint": types.BoolType,
-		"region":            types.StringType,
-		"workgroup":         types.StringType,
+		"bulk_sync_staging_schema":     types.StringType,
+		"connection_method":            types.StringType,
+		"data_api_endpoint":            types.StringType,
+		"database":                     types.StringType,
+		"endpoint":                     types.StringType,
+		"external_id":                  types.StringType,
+		"iam_role_arn":                 types.StringType,
+		"override_endpoint":            types.BoolType,
+		"region":                       types.StringType,
+		"s3_bucket_name":               types.StringType,
+		"s3_bucket_region":             types.StringType,
+		"use_bulk_sync_staging_schema": types.BoolType,
+		"use_unload":                   types.BoolType,
+		"workgroup":                    types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

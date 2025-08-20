@@ -6,8 +6,10 @@ package connections
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/polytomic/terraform-provider-polytomic/provider/internal/providerclient"
 )
@@ -47,8 +49,25 @@ func (d *IterableConnectionDataSource) Schema(ctx context.Context, req datasourc
 				Computed:            true,
 			},
 			"configuration": schema.SingleNestedAttribute{
-				Attributes: map[string]schema.Attribute{},
-				Optional:   true,
+				Attributes: map[string]schema.Attribute{
+					"event_types": schema.SetNestedAttribute{
+						MarkdownDescription: `Event Types`,
+						Computed:            true,
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+								"label": schema.StringAttribute{
+									MarkdownDescription: ``,
+									Computed:            true,
+								},
+								"value": schema.StringAttribute{
+									MarkdownDescription: ``,
+									Computed:            true,
+								},
+							},
+						},
+					},
+				},
+				Optional: true,
 			},
 		},
 	}
@@ -79,6 +98,20 @@ func (d *IterableConnectionDataSource) Read(ctx context.Context, req datasource.
 	data.Id = types.StringPointerValue(connection.Data.Id)
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
+	var diags diag.Diagnostics
+	data.Configuration, diags = types.ObjectValue(
+		data.Configuration.AttributeTypes(ctx),
+		map[string]attr.Value{
+			"event_types": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["event_types"], "string").(string),
+			),
+		},
+	)
+
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
 
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)

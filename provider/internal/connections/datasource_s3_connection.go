@@ -66,12 +66,22 @@ func (d *S3ConnectionDataSource) Schema(ctx context.Context, req datasource.Sche
 						MarkdownDescription: `User ARN`,
 						Computed:            true,
 					},
-					"external_id": schema.StringAttribute{
-						MarkdownDescription: `External ID for the IAM role`,
+					"directory_glob_pattern": schema.StringAttribute{
+						MarkdownDescription: `Tables glob path`,
 						Computed:            true,
+					},
+					"external_id": schema.StringAttribute{
+						MarkdownDescription: `External ID
+
+    External ID for the IAM role`,
+						Computed: true,
 					},
 					"iam_role_arn": schema.StringAttribute{
 						MarkdownDescription: `IAM Role ARN`,
+						Computed:            true,
+					},
+					"is_directory_snapshot": schema.BoolAttribute{
+						MarkdownDescription: `Multi-directory multi-table`,
 						Computed:            true,
 					},
 					"is_single_table": schema.BoolAttribute{
@@ -149,11 +159,17 @@ func (d *S3ConnectionDataSource) Read(ctx context.Context, req datasource.ReadRe
 			"aws_user": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["aws_user"], "string").(string),
 			),
+			"directory_glob_pattern": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["directory_glob_pattern"], "string").(string),
+			),
 			"external_id": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["external_id"], "string").(string),
 			),
 			"iam_role_arn": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["iam_role_arn"], "string").(string),
+			),
+			"is_directory_snapshot": types.BoolValue(
+				getValueOrEmpty(connection.Data.Configuration["is_directory_snapshot"], "bool").(bool),
 			),
 			"is_single_table": types.BoolValue(
 				getValueOrEmpty(connection.Data.Configuration["is_single_table"], "bool").(bool),

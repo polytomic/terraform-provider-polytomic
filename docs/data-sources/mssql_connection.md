@@ -36,9 +36,14 @@ data "polytomic_mssql_connection" "mssql" {
 
 Read-Only:
 
+- `change_detection` (Boolean) Use change data capture for bulk syncs
 - `database` (String)
 - `hostname` (String) Server
 - `port` (Number)
+- `ssh` (Boolean) Connect over SSH tunnel
+- `ssh_host` (String) SSH host
+- `ssh_port` (Number) SSH port
+- `ssh_user` (String) SSH user
 - `ssl` (Boolean) Use SSL
 - `username` (String)
 

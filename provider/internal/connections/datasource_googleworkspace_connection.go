@@ -50,12 +50,20 @@ func (d *GoogleworkspaceConnectionDataSource) Schema(ctx context.Context, req da
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
+					"auth_method": schema.StringAttribute{
+						MarkdownDescription: `Default: browser`,
+						Computed:            true,
+					},
 					"client_email": schema.StringAttribute{
-						MarkdownDescription: `Service account identity`,
+						MarkdownDescription: `Connected Account`,
 						Computed:            true,
 					},
 					"customer_id": schema.StringAttribute{
 						MarkdownDescription: `Customer ID`,
+						Computed:            true,
+					},
+					"oauth_token_expiry": schema.StringAttribute{
+						MarkdownDescription: ``,
 						Computed:            true,
 					},
 				},
@@ -94,11 +102,17 @@ func (d *GoogleworkspaceConnectionDataSource) Read(ctx context.Context, req data
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttributeTypes(ctx),
 		map[string]attr.Value{
+			"auth_method": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["auth_method"], "string").(string),
+			),
 			"client_email": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["client_email"], "string").(string),
 			),
 			"customer_id": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["customer_id"], "string").(string),
+			),
+			"oauth_token_expiry": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["oauth_token_expiry"], "string").(string),
 			),
 		},
 	)

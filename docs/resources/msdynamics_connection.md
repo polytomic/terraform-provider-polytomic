@@ -56,7 +56,7 @@ state before it will take effect on a destroy operation.
 
 Required:
 
-- `dynamics_environment_id` (String) Environment ID
+- `dynamics_url` (String) Dynamics URL
 
 Optional:
 

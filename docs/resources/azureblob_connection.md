@@ -68,6 +68,8 @@ Optional:
 - `access_key` (String, Sensitive) Access Key
 - `client_id` (String) Client ID
 - `client_secret` (String, Sensitive) Client Secret
+- `directory_glob_pattern` (String) Tables glob path
+- `is_directory_snapshot` (Boolean) Multi-directory multi-table
 - `is_single_table` (Boolean) Files are time-based snapshots
 
     Treat the files as a single table.

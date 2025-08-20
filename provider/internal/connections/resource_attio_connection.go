@@ -43,6 +43,13 @@ var AttioSchema = schema.Schema{
 		},
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
+				"enable_webhooks": schema.BoolAttribute{
+					MarkdownDescription: `Enable Attio webhook updates for bulk syncs`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
 				"workspace_name": schema.StringAttribute{
 					MarkdownDescription: `Workspace name`,
 					Required:            false,
@@ -77,7 +84,8 @@ func (t *AttioConnectionResource) Schema(ctx context.Context, req resource.Schem
 }
 
 type AttioConf struct {
-	Workspace_name string `mapstructure:"workspace_name" tfsdk:"workspace_name"`
+	Enable_webhooks bool   `mapstructure:"enable_webhooks" tfsdk:"enable_webhooks"`
+	Workspace_name  string `mapstructure:"workspace_name" tfsdk:"workspace_name"`
 }
 
 type AttioConnectionResource struct {
@@ -136,7 +144,8 @@ func (r *AttioConnectionResource) Create(ctx context.Context, req resource.Creat
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"workspace_name": types.StringType,
+		"enable_webhooks": types.BoolType,
+		"workspace_name":  types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -202,7 +211,8 @@ func (r *AttioConnectionResource) Read(ctx context.Context, req resource.ReadReq
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"workspace_name": types.StringType,
+		"enable_webhooks": types.BoolType,
+		"workspace_name":  types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -271,7 +281,8 @@ func (r *AttioConnectionResource) Update(ctx context.Context, req resource.Updat
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"workspace_name": types.StringType,
+		"enable_webhooks": types.BoolType,
+		"workspace_name":  types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

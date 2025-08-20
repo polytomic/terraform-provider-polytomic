@@ -44,13 +44,20 @@ var SnowflakeSchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"account": schema.StringAttribute{
-					MarkdownDescription: `Account Name
+					MarkdownDescription: `Account identifier
 
-    e.g. uc193736182, ja8382948.us-central-1.gcp`,
+    e.g. FRXJLEC-UJA94780`,
 					Required:  true,
 					Optional:  false,
 					Computed:  false,
 					Sensitive: false,
+				},
+				"bulk_sync_staging_schema": schema.StringAttribute{
+					MarkdownDescription: `Staging schema name`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
 				},
 				"dbname": schema.StringAttribute{
 					MarkdownDescription: `Database`,
@@ -105,6 +112,13 @@ var SnowflakeSchema = schema.Schema{
 						stringplanmodifier.UseStateForUnknown(),
 					},
 				},
+				"use_bulk_sync_staging_schema": schema.BoolAttribute{
+					MarkdownDescription: `Use custom bulk sync staging schema`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
 				"username": schema.StringAttribute{
 					MarkdownDescription: ``,
 					Required:            true,
@@ -146,15 +160,17 @@ func (t *SnowflakeConnectionResource) Schema(ctx context.Context, req resource.S
 }
 
 type SnowflakeConf struct {
-	Account                string `mapstructure:"account" tfsdk:"account"`
-	Dbname                 string `mapstructure:"dbname" tfsdk:"dbname"`
-	Key_pair_auth          bool   `mapstructure:"key_pair_auth" tfsdk:"key_pair_auth"`
-	Params                 string `mapstructure:"params" tfsdk:"params"`
-	Password               string `mapstructure:"password" tfsdk:"password"`
-	Private_key            string `mapstructure:"private_key" tfsdk:"private_key"`
-	Private_key_passphrase string `mapstructure:"private_key_passphrase" tfsdk:"private_key_passphrase"`
-	Username               string `mapstructure:"username" tfsdk:"username"`
-	Warehouse              string `mapstructure:"warehouse" tfsdk:"warehouse"`
+	Account                      string `mapstructure:"account" tfsdk:"account"`
+	Bulk_sync_staging_schema     string `mapstructure:"bulk_sync_staging_schema" tfsdk:"bulk_sync_staging_schema"`
+	Dbname                       string `mapstructure:"dbname" tfsdk:"dbname"`
+	Key_pair_auth                bool   `mapstructure:"key_pair_auth" tfsdk:"key_pair_auth"`
+	Params                       string `mapstructure:"params" tfsdk:"params"`
+	Password                     string `mapstructure:"password" tfsdk:"password"`
+	Private_key                  string `mapstructure:"private_key" tfsdk:"private_key"`
+	Private_key_passphrase       string `mapstructure:"private_key_passphrase" tfsdk:"private_key_passphrase"`
+	Use_bulk_sync_staging_schema bool   `mapstructure:"use_bulk_sync_staging_schema" tfsdk:"use_bulk_sync_staging_schema"`
+	Username                     string `mapstructure:"username" tfsdk:"username"`
+	Warehouse                    string `mapstructure:"warehouse" tfsdk:"warehouse"`
 }
 
 type SnowflakeConnectionResource struct {
@@ -213,15 +229,17 @@ func (r *SnowflakeConnectionResource) Create(ctx context.Context, req resource.C
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"account":                types.StringType,
-		"dbname":                 types.StringType,
-		"key_pair_auth":          types.BoolType,
-		"params":                 types.StringType,
-		"password":               types.StringType,
-		"private_key":            types.StringType,
-		"private_key_passphrase": types.StringType,
-		"username":               types.StringType,
-		"warehouse":              types.StringType,
+		"account":                      types.StringType,
+		"bulk_sync_staging_schema":     types.StringType,
+		"dbname":                       types.StringType,
+		"key_pair_auth":                types.BoolType,
+		"params":                       types.StringType,
+		"password":                     types.StringType,
+		"private_key":                  types.StringType,
+		"private_key_passphrase":       types.StringType,
+		"use_bulk_sync_staging_schema": types.BoolType,
+		"username":                     types.StringType,
+		"warehouse":                    types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -287,15 +305,17 @@ func (r *SnowflakeConnectionResource) Read(ctx context.Context, req resource.Rea
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"account":                types.StringType,
-		"dbname":                 types.StringType,
-		"key_pair_auth":          types.BoolType,
-		"params":                 types.StringType,
-		"password":               types.StringType,
-		"private_key":            types.StringType,
-		"private_key_passphrase": types.StringType,
-		"username":               types.StringType,
-		"warehouse":              types.StringType,
+		"account":                      types.StringType,
+		"bulk_sync_staging_schema":     types.StringType,
+		"dbname":                       types.StringType,
+		"key_pair_auth":                types.BoolType,
+		"params":                       types.StringType,
+		"password":                     types.StringType,
+		"private_key":                  types.StringType,
+		"private_key_passphrase":       types.StringType,
+		"use_bulk_sync_staging_schema": types.BoolType,
+		"username":                     types.StringType,
+		"warehouse":                    types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -364,15 +384,17 @@ func (r *SnowflakeConnectionResource) Update(ctx context.Context, req resource.U
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"account":                types.StringType,
-		"dbname":                 types.StringType,
-		"key_pair_auth":          types.BoolType,
-		"params":                 types.StringType,
-		"password":               types.StringType,
-		"private_key":            types.StringType,
-		"private_key_passphrase": types.StringType,
-		"username":               types.StringType,
-		"warehouse":              types.StringType,
+		"account":                      types.StringType,
+		"bulk_sync_staging_schema":     types.StringType,
+		"dbname":                       types.StringType,
+		"key_pair_auth":                types.BoolType,
+		"params":                       types.StringType,
+		"password":                     types.StringType,
+		"private_key":                  types.StringType,
+		"private_key_passphrase":       types.StringType,
+		"use_bulk_sync_staging_schema": types.BoolType,
+		"username":                     types.StringType,
+		"warehouse":                    types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

@@ -61,7 +61,7 @@ Required:
 - `connection_name` (String) Cloud SQL connection name
 
     Takes the form of project:region:instance
-- `credentials` (String, Sensitive) Service Account Key
+- `credentials` (String, Sensitive) Service account key
 - `database` (String)
 
 Optional:

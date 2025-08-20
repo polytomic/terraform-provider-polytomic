@@ -87,6 +87,20 @@ var NetsuiteopenairSchema = schema.Schema{
 					Computed:            false,
 					Sensitive:           false,
 				},
+				"per_day_rate_limit": schema.Int64Attribute{
+					MarkdownDescription: `Per Day Rate Limit`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
+				},
+				"per_minute_rate_limit": schema.Int64Attribute{
+					MarkdownDescription: `Per Minute Rate Limit`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
+				},
 			},
 
 			Required: true,
@@ -114,11 +128,13 @@ func (t *NetsuiteopenairConnectionResource) Schema(ctx context.Context, req reso
 }
 
 type NetsuiteopenairConf struct {
-	Api_key       string `mapstructure:"api_key" tfsdk:"api_key"`
-	Api_namespace string `mapstructure:"api_namespace" tfsdk:"api_namespace"`
-	Client_id     string `mapstructure:"client_id" tfsdk:"client_id"`
-	Client_secret string `mapstructure:"client_secret" tfsdk:"client_secret"`
-	Company_id    string `mapstructure:"company_id" tfsdk:"company_id"`
+	Api_key               string `mapstructure:"api_key" tfsdk:"api_key"`
+	Api_namespace         string `mapstructure:"api_namespace" tfsdk:"api_namespace"`
+	Client_id             string `mapstructure:"client_id" tfsdk:"client_id"`
+	Client_secret         string `mapstructure:"client_secret" tfsdk:"client_secret"`
+	Company_id            string `mapstructure:"company_id" tfsdk:"company_id"`
+	Per_day_rate_limit    int64  `mapstructure:"per_day_rate_limit" tfsdk:"per_day_rate_limit"`
+	Per_minute_rate_limit int64  `mapstructure:"per_minute_rate_limit" tfsdk:"per_minute_rate_limit"`
 }
 
 type NetsuiteopenairConnectionResource struct {
@@ -177,11 +193,13 @@ func (r *NetsuiteopenairConnectionResource) Create(ctx context.Context, req reso
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"api_key":       types.StringType,
-		"api_namespace": types.StringType,
-		"client_id":     types.StringType,
-		"client_secret": types.StringType,
-		"company_id":    types.StringType,
+		"api_key":               types.StringType,
+		"api_namespace":         types.StringType,
+		"client_id":             types.StringType,
+		"client_secret":         types.StringType,
+		"company_id":            types.StringType,
+		"per_day_rate_limit":    types.NumberType,
+		"per_minute_rate_limit": types.NumberType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -247,11 +265,13 @@ func (r *NetsuiteopenairConnectionResource) Read(ctx context.Context, req resour
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"api_key":       types.StringType,
-		"api_namespace": types.StringType,
-		"client_id":     types.StringType,
-		"client_secret": types.StringType,
-		"company_id":    types.StringType,
+		"api_key":               types.StringType,
+		"api_namespace":         types.StringType,
+		"client_id":             types.StringType,
+		"client_secret":         types.StringType,
+		"company_id":            types.StringType,
+		"per_day_rate_limit":    types.NumberType,
+		"per_minute_rate_limit": types.NumberType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -320,11 +340,13 @@ func (r *NetsuiteopenairConnectionResource) Update(ctx context.Context, req reso
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"api_key":       types.StringType,
-		"api_namespace": types.StringType,
-		"client_id":     types.StringType,
-		"client_secret": types.StringType,
-		"company_id":    types.StringType,
+		"api_key":               types.StringType,
+		"api_namespace":         types.StringType,
+		"client_id":             types.StringType,
+		"client_secret":         types.StringType,
+		"company_id":            types.StringType,
+		"per_day_rate_limit":    types.NumberType,
+		"per_minute_rate_limit": types.NumberType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

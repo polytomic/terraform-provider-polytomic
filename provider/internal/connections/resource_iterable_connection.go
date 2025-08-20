@@ -53,6 +53,31 @@ var IterableSchema = schema.Schema{
 						stringplanmodifier.UseStateForUnknown(),
 					},
 				},
+				"event_types": schema.SetNestedAttribute{
+					MarkdownDescription: `Event Types`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+					NestedObject: schema.NestedAttributeObject{
+						Attributes: map[string]schema.Attribute{
+							"label": schema.StringAttribute{
+								MarkdownDescription: ``,
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
+								Sensitive:           false,
+							},
+							"value": schema.StringAttribute{
+								MarkdownDescription: ``,
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
+								Sensitive:           false,
+							},
+						},
+					},
+				},
 			},
 
 			Required: true,
@@ -80,7 +105,11 @@ func (t *IterableConnectionResource) Schema(ctx context.Context, req resource.Sc
 }
 
 type IterableConf struct {
-	Api_key string `mapstructure:"api_key" tfsdk:"api_key"`
+	Api_key     string `mapstructure:"api_key" tfsdk:"api_key"`
+	Event_types []struct {
+		Label string `mapstructure:"label" tfsdk:"label"`
+		Value string `mapstructure:"value" tfsdk:"value"`
+	} `mapstructure:"event_types" tfsdk:"event_types"`
 }
 
 type IterableConnectionResource struct {
@@ -140,6 +169,14 @@ func (r *IterableConnectionResource) Create(ctx context.Context, req resource.Cr
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"api_key": types.StringType,
+		"event_types": types.SetType{
+			ElemType: types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"label": types.StringType,
+					"value": types.StringType,
+				},
+			},
+		},
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -206,6 +243,14 @@ func (r *IterableConnectionResource) Read(ctx context.Context, req resource.Read
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"api_key": types.StringType,
+		"event_types": types.SetType{
+			ElemType: types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"label": types.StringType,
+					"value": types.StringType,
+				},
+			},
+		},
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -275,6 +320,14 @@ func (r *IterableConnectionResource) Update(ctx context.Context, req resource.Up
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"api_key": types.StringType,
+		"event_types": types.SetType{
+			ElemType: types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"label": types.StringType,
+					"value": types.StringType,
+				},
+			},
+		},
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

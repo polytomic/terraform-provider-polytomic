@@ -21,6 +21,8 @@ resource "polytomic_redshiftserverless_connection" "redshiftserverless" {
     endpoint          = "acme.12345.us-west-2.redshift-serverless.amazonaws.com:5439"
     iam_role_arn      = "arn:aws:iam::012345678910:role/role"
     region            = "us-west-2"
+    s3_bucket_name    = "my-bucket"
+    s3_bucket_region  = "us-west-2"
     workgroup         = "default"
   }
 }
@@ -66,6 +68,7 @@ Required:
 
 Optional:
 
+- `bulk_sync_staging_schema` (String) Staging schema name
 - `data_api_endpoint` (String) Redshift Data API endpoint
 
     Example: https://redshift-data.us-west-2.amazonaws.com
@@ -73,5 +76,9 @@ Optional:
 - `external_id` (String) External ID
 - `override_endpoint` (Boolean) Override Redshift Data API endpoint
 - `region` (String)
+- `s3_bucket_name` (String) S3 bucket name (destination/unload support only)
+- `s3_bucket_region` (String) S3 bucket region (destination/unload support only)
+- `use_bulk_sync_staging_schema` (Boolean) Use custom bulk sync staging schema
+- `use_unload` (Boolean) Read data using Unload
 
 

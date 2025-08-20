@@ -1,7 +1,7 @@
 resource "polytomic_snowflake_connection" "snowflake" {
   name = "example"
   configuration = {
-    account   = "uc193736182"
+    account   = "FRXJLEC-UJA94780"
     dbname    = "database_name"
     password  = "password"
     username  = "user"

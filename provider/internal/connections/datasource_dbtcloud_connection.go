@@ -50,20 +50,6 @@ func (d *DbtcloudConnectionDataSource) Schema(ctx context.Context, req datasourc
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
-					"account": schema.SingleNestedAttribute{
-						MarkdownDescription: ``,
-						Computed:            true,
-						Attributes: map[string]schema.Attribute{
-							"id": schema.Int64Attribute{
-								MarkdownDescription: ``,
-								Computed:            true,
-							},
-							"name": schema.StringAttribute{
-								MarkdownDescription: ``,
-								Computed:            true,
-							},
-						},
-					},
 					"url": schema.StringAttribute{
 						MarkdownDescription: `URL of dbt Cloud instance e.g. https://cloud.getdbt.com`,
 						Computed:            true,
@@ -104,9 +90,6 @@ func (d *DbtcloudConnectionDataSource) Read(ctx context.Context, req datasource.
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttributeTypes(ctx),
 		map[string]attr.Value{
-			"account": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["account"], "string").(string),
-			),
 			"url": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["url"], "string").(string),
 			),

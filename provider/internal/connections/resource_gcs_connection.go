@@ -57,6 +57,20 @@ var GcsSchema = schema.Schema{
 					Computed:            true,
 					Sensitive:           false,
 				},
+				"directory_glob_pattern": schema.StringAttribute{
+					MarkdownDescription: `Tables glob path`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
+				"is_directory_snapshot": schema.BoolAttribute{
+					MarkdownDescription: `Multi-directory multi-table`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
 				"is_single_table": schema.BoolAttribute{
 					MarkdownDescription: `Files are time-based snapshots
 
@@ -74,7 +88,7 @@ var GcsSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"service_account": schema.StringAttribute{
-					MarkdownDescription: `Service Account Key`,
+					MarkdownDescription: `Service account key`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
@@ -135,6 +149,8 @@ func (t *GcsConnectionResource) Schema(ctx context.Context, req resource.SchemaR
 type GcsConf struct {
 	Bucket                   string `mapstructure:"bucket" tfsdk:"bucket"`
 	Client_email             string `mapstructure:"client_email" tfsdk:"client_email"`
+	Directory_glob_pattern   string `mapstructure:"directory_glob_pattern" tfsdk:"directory_glob_pattern"`
+	Is_directory_snapshot    bool   `mapstructure:"is_directory_snapshot" tfsdk:"is_directory_snapshot"`
 	Is_single_table          bool   `mapstructure:"is_single_table" tfsdk:"is_single_table"`
 	Project_id               string `mapstructure:"project_id" tfsdk:"project_id"`
 	Service_account          string `mapstructure:"service_account" tfsdk:"service_account"`
@@ -201,6 +217,8 @@ func (r *GcsConnectionResource) Create(ctx context.Context, req resource.CreateR
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"bucket":                   types.StringType,
 		"client_email":             types.StringType,
+		"directory_glob_pattern":   types.StringType,
+		"is_directory_snapshot":    types.BoolType,
 		"is_single_table":          types.BoolType,
 		"project_id":               types.StringType,
 		"service_account":          types.StringType,
@@ -274,6 +292,8 @@ func (r *GcsConnectionResource) Read(ctx context.Context, req resource.ReadReque
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"bucket":                   types.StringType,
 		"client_email":             types.StringType,
+		"directory_glob_pattern":   types.StringType,
+		"is_directory_snapshot":    types.BoolType,
 		"is_single_table":          types.BoolType,
 		"project_id":               types.StringType,
 		"service_account":          types.StringType,
@@ -350,6 +370,8 @@ func (r *GcsConnectionResource) Update(ctx context.Context, req resource.UpdateR
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"bucket":                   types.StringType,
 		"client_email":             types.StringType,
+		"directory_glob_pattern":   types.StringType,
+		"is_directory_snapshot":    types.BoolType,
 		"is_single_table":          types.BoolType,
 		"project_id":               types.StringType,
 		"service_account":          types.StringType,

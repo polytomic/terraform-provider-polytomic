@@ -16,7 +16,7 @@ Snowflake Connection
 resource "polytomic_snowflake_connection" "snowflake" {
   name = "example"
   configuration = {
-    account   = "uc193736182"
+    account   = "FRXJLEC-UJA94780"
     dbname    = "database_name"
     password  = "password"
     username  = "user"
@@ -58,14 +58,15 @@ state before it will take effect on a destroy operation.
 
 Required:
 
-- `account` (String) Account Name
+- `account` (String) Account identifier
 
-    e.g. uc193736182, ja8382948.us-central-1.gcp
+    e.g. FRXJLEC-UJA94780
 - `dbname` (String) Database
 - `username` (String)
 
 Optional:
 
+- `bulk_sync_staging_schema` (String) Staging schema name
 - `key_pair_auth` (Boolean) Use key pair authentication
 - `params` (String) Additional parameters
 
@@ -73,6 +74,7 @@ Optional:
 - `password` (String, Sensitive)
 - `private_key` (String, Sensitive) Private key
 - `private_key_passphrase` (String, Sensitive) Private key passphrase
+- `use_bulk_sync_staging_schema` (Boolean) Use custom bulk sync staging schema
 - `warehouse` (String) Compute warehouse
 
 

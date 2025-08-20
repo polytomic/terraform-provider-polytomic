@@ -43,8 +43,12 @@ Read-Only:
 
     Access Key ID with read/write access to a bucket.
 - `aws_user` (String) User ARN
-- `external_id` (String) External ID for the IAM role
+- `directory_glob_pattern` (String) Tables glob path
+- `external_id` (String) External ID
+
+    External ID for the IAM role
 - `iam_role_arn` (String) IAM Role ARN
+- `is_directory_snapshot` (Boolean) Multi-directory multi-table
 - `is_single_table` (Boolean) Files are time-based snapshots
 
     Treat the files as a single table.

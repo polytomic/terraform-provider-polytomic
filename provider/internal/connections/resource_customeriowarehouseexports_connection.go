@@ -79,11 +79,13 @@ var CustomeriowarehouseexportsSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"external_id": schema.StringAttribute{
-					MarkdownDescription: `External ID for the IAM role`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
+					MarkdownDescription: `External ID
+
+    External ID for the IAM role`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
 				},
 				"iam_role_arn": schema.StringAttribute{
 					MarkdownDescription: `IAM Role ARN`,

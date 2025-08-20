@@ -60,6 +60,10 @@ func (d *RedshiftConnectionDataSource) Schema(ctx context.Context, req datasourc
 						MarkdownDescription: `User ARN`,
 						Computed:            true,
 					},
+					"bulk_sync_staging_schema": schema.StringAttribute{
+						MarkdownDescription: `Staging schema name`,
+						Computed:            true,
+					},
 					"database": schema.StringAttribute{
 						MarkdownDescription: ``,
 						Computed:            true,
@@ -98,6 +102,10 @@ func (d *RedshiftConnectionDataSource) Schema(ctx context.Context, req datasourc
 					},
 					"ssh_user": schema.StringAttribute{
 						MarkdownDescription: `SSH user`,
+						Computed:            true,
+					},
+					"use_bulk_sync_staging_schema": schema.BoolAttribute{
+						MarkdownDescription: `Use custom bulk sync staging schema`,
 						Computed:            true,
 					},
 					"username": schema.StringAttribute{
@@ -146,6 +154,9 @@ func (d *RedshiftConnectionDataSource) Read(ctx context.Context, req datasource.
 			"aws_user": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["aws_user"], "string").(string),
 			),
+			"bulk_sync_staging_schema": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["bulk_sync_staging_schema"], "string").(string),
+			),
 			"database": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["database"], "string").(string),
 			),
@@ -172,6 +183,9 @@ func (d *RedshiftConnectionDataSource) Read(ctx context.Context, req datasource.
 			),
 			"ssh_user": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["ssh_user"], "string").(string),
+			),
+			"use_bulk_sync_staging_schema": types.BoolValue(
+				getValueOrEmpty(connection.Data.Configuration["use_bulk_sync_staging_schema"], "bool").(bool),
 			),
 			"username": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["username"], "string").(string),

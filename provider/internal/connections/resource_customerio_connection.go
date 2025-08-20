@@ -53,6 +53,13 @@ var CustomerioSchema = schema.Schema{
 						stringplanmodifier.UseStateForUnknown(),
 					},
 				},
+				"region": schema.StringAttribute{
+					MarkdownDescription: `Datacenter region we detected`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
 				"site_id": schema.StringAttribute{
 					MarkdownDescription: `Site ID`,
 					Required:            true,
@@ -65,7 +72,10 @@ var CustomerioSchema = schema.Schema{
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
-					Sensitive:           false,
+					Sensitive:           true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
+					},
 				},
 			},
 
@@ -95,6 +105,7 @@ func (t *CustomerioConnectionResource) Schema(ctx context.Context, req resource.
 
 type CustomerioConf struct {
 	App_api_key      string `mapstructure:"app_api_key" tfsdk:"app_api_key"`
+	Region           string `mapstructure:"region" tfsdk:"region"`
 	Site_id          string `mapstructure:"site_id" tfsdk:"site_id"`
 	Tracking_api_key string `mapstructure:"tracking_api_key" tfsdk:"tracking_api_key"`
 }
@@ -156,6 +167,7 @@ func (r *CustomerioConnectionResource) Create(ctx context.Context, req resource.
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"app_api_key":      types.StringType,
+		"region":           types.StringType,
 		"site_id":          types.StringType,
 		"tracking_api_key": types.StringType,
 	}, conf)
@@ -224,6 +236,7 @@ func (r *CustomerioConnectionResource) Read(ctx context.Context, req resource.Re
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"app_api_key":      types.StringType,
+		"region":           types.StringType,
 		"site_id":          types.StringType,
 		"tracking_api_key": types.StringType,
 	}, conf)
@@ -295,6 +308,7 @@ func (r *CustomerioConnectionResource) Update(ctx context.Context, req resource.
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"app_api_key":      types.StringType,
+		"region":           types.StringType,
 		"site_id":          types.StringType,
 		"tracking_api_key": types.StringType,
 	}, conf)

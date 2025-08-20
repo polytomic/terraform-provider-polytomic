@@ -1,0 +1,1 @@
+{"$id":"https://github.com/polytomic/app/services/polytomic/backend/sealsubscriptions/connection-conf","$schema":"https://json-schema.org/draft/2020-12/schema","properties":{"seal_token":{"sensitive":true,"title":"Seal Token","type":"string"}},"required":["seal_token"],"type":"object"}

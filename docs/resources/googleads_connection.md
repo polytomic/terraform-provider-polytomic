@@ -60,6 +60,9 @@ Optional:
 - `client_id` (String, Sensitive)
 - `client_secret` (String, Sensitive)
 - `connected_user` (String) Connected user's email
+- `custom_reports` (String) Custom reports
+
+    One report per line. Format is a report name followed by a Google Ads SQL query. e.g. myReport:ad_groups:campaign.id
 - `oauth_refresh_token` (String, Sensitive)
 - `oauth_token_expiry` (String)
 

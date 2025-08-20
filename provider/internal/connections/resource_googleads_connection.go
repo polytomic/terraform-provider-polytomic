@@ -95,6 +95,15 @@ var GoogleadsSchema = schema.Schema{
 					Computed:            true,
 					Sensitive:           false,
 				},
+				"custom_reports": schema.StringAttribute{
+					MarkdownDescription: `Custom reports
+
+    One report per line. Format is a report name followed by a Google Ads SQL query. e.g. myReport:ad_groups:campaign.id`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
+				},
 				"oauth_refresh_token": schema.StringAttribute{
 					MarkdownDescription: ``,
 					Required:            false,
@@ -146,6 +155,7 @@ type GoogleadsConf struct {
 	Client_id           string `mapstructure:"client_id" tfsdk:"client_id"`
 	Client_secret       string `mapstructure:"client_secret" tfsdk:"client_secret"`
 	Connected_user      string `mapstructure:"connected_user" tfsdk:"connected_user"`
+	Custom_reports      string `mapstructure:"custom_reports" tfsdk:"custom_reports"`
 	Oauth_refresh_token string `mapstructure:"oauth_refresh_token" tfsdk:"oauth_refresh_token"`
 	Oauth_token_expiry  string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
 }
@@ -217,6 +227,7 @@ func (r *GoogleadsConnectionResource) Create(ctx context.Context, req resource.C
 		"client_id":           types.StringType,
 		"client_secret":       types.StringType,
 		"connected_user":      types.StringType,
+		"custom_reports":      types.StringType,
 		"oauth_refresh_token": types.StringType,
 		"oauth_token_expiry":  types.StringType,
 	}, conf)
@@ -295,6 +306,7 @@ func (r *GoogleadsConnectionResource) Read(ctx context.Context, req resource.Rea
 		"client_id":           types.StringType,
 		"client_secret":       types.StringType,
 		"connected_user":      types.StringType,
+		"custom_reports":      types.StringType,
 		"oauth_refresh_token": types.StringType,
 		"oauth_token_expiry":  types.StringType,
 	}, conf)
@@ -376,6 +388,7 @@ func (r *GoogleadsConnectionResource) Update(ctx context.Context, req resource.U
 		"client_id":           types.StringType,
 		"client_secret":       types.StringType,
 		"connected_user":      types.StringType,
+		"custom_reports":      types.StringType,
 		"oauth_refresh_token": types.StringType,
 		"oauth_token_expiry":  types.StringType,
 	}, conf)

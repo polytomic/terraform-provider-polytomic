@@ -36,9 +36,16 @@ data "polytomic_azuresql_connection" "azuresql" {
 
 Read-Only:
 
+- `account_name` (String) Storage account name (destination only)
+- `blob_store` (Boolean) Use Azure blob storage for faster bulk loading (destination only)
+- `container_name` (String) Storage container name (destination only)
 - `database` (String)
 - `hostname` (String) Server
 - `port` (Number)
+- `ssh` (Boolean) Connect over SSH tunnel
+- `ssh_host` (String) SSH host
+- `ssh_port` (Number) SSH port
+- `ssh_user` (String) SSH user
 - `ssl` (Boolean) Use SSL
 - `username` (String)
 
