@@ -42,8 +42,7 @@ type ProviderData struct {
 	DeploymentKey types.String `tfsdk:"deployment_api_key"`
 	DeploymentUrl types.String `tfsdk:"deployment_url"`
 
-	PartnerKey       types.String `tfsdk:"partner_key"`
-	OrganizationUser types.String `tfsdk:"organization_user"`
+	PartnerKey types.String `tfsdk:"partner_key"`
 
 	APIKey types.String `tfsdk:"api_key"`
 }
@@ -72,10 +71,6 @@ func (p *Provider) ConfigValidators(context.Context) []provider.ConfigValidator 
 		providervalidator.RequiredTogether(
 			path.MatchRoot("deployment_api_key"),
 			path.MatchRoot("deployment_url"),
-		),
-		providervalidator.RequiredTogether(
-			path.MatchRoot("partner_key"),
-			path.MatchRoot("organization_user"),
 		),
 	}
 }
@@ -113,7 +108,7 @@ func (p *Provider) Configure(ctx context.Context, req provider.ConfigureRequest,
 				os.Getenv(PolytomicDeploymentKey),
 			),
 		),
-		providerclient.WithPartnerKey(data.PartnerKey.ValueString(), data.OrganizationUser.ValueString()),
+		providerclient.WithPartnerKey(data.PartnerKey.ValueString()),
 		providerclient.WithAPIKey(
 			cmp.Or(
 				data.APIKey.ValueString(),
@@ -177,11 +172,6 @@ func (p *Provider) Schema(ctx context.Context, req provider.SchemaRequest, resp 
 				MarkdownDescription: "Polytomic partner key",
 				Optional:            true,
 				Sensitive:           true,
-			},
-			"organization_user": schema.StringAttribute{
-				MarkdownDescription: "Polytomic organization user; required if `partner_key` is set.",
-				Optional:            true,
-				Sensitive:           false,
 			},
 		},
 	}

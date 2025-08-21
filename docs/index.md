@@ -29,13 +29,11 @@ provider "polytomic" {
 ```terraform
 provider "polytomic" {
   partner_key = "<value from settings page>"
-  organization_user = "terraform@polytomic.com"
 }
 ```
 
-The `organization_user` may be any valid email address. When using a partner key
-to access resources in an organization the user with this email address will be
-used. The user will be created in the organization if it does not exist.
+When accessing organization specific resources using a Partner key, the
+`organization` must be specified.
 
 ### Deployment API Key (On-Premises only)
 
@@ -54,7 +52,6 @@ provider "polytomic" {
 - `api_key` (String, Sensitive) Polytomic API key
 - `deployment_api_key` (String, Sensitive) Polytomic deployment key
 - `deployment_url` (String) Polytomic deployment URL (defaults to app.polytomic.com)
-- `organization_user` (String) Polytomic organization user; required if `partner_key` is set.
 - `partner_key` (String, Sensitive) Polytomic partner key
 
 

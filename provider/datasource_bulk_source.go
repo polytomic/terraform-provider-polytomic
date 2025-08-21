@@ -41,7 +41,8 @@ func (d *bulkSourceDatasource) Schema(ctx context.Context, req datasource.Schema
 			},
 			"organization": schema.StringAttribute{
 				MarkdownDescription: "",
-				Computed:            true,
+				Optional:            true,
+				Description:         "The organization to which the connection belongs. This is required when using a partner or deployment key.",
 			},
 			"schemas": schema.ListAttribute{
 				MarkdownDescription: "",

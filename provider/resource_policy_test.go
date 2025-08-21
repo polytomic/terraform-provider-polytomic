@@ -1,7 +1,6 @@
 package provider
 
 import (
-	"context"
 	"fmt"
 	"testing"
 
@@ -35,13 +34,18 @@ func TestAccPolicy(t *testing.T) {
 
 func testAccPolicyExists(t *testing.T, name string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		_, ok := s.RootModule().Resources["polytomic_policy.test"]
+		org, ok := s.RootModule().Resources["polytomic_organization.test"]
+		if !ok {
+			return fmt.Errorf("not found: %s", "polytomic_organization.test")
+		}
+
+		_, ok = s.RootModule().Resources["polytomic_policy.test"]
 		if !ok {
 			return fmt.Errorf("not found: %s", "polytomic_policy.test")
 		}
 
-		client := testClient(t)
-		policies, err := client.Permissions.Policies.List(context.TODO())
+		client := testClient(t, org.Primary.ID)
+		policies, err := client.Permissions.Policies.List(t.Context())
 		if err != nil {
 			return err
 		}
@@ -64,8 +68,13 @@ func testAccPolicyExists(t *testing.T, name string) resource.TestCheckFunc {
 
 func testAccPolicyResource(name string) string {
 	return fmt.Sprintf(`
+resource "polytomic_organization" "test" {
+  name = "%s"
+}
+
 resource "polytomic_policy" "test" {
 	name           = "%s"
+	organization   = polytomic_organization.test.id
 	policy_actions = [
 		{
 			action = "apply_policy"
@@ -83,6 +92,7 @@ resource "polytomic_policy" "test" {
 }
 resource "polytomic_role" "test" {
 	name         = "%s"
+	organization = polytomic_organization.test.id
 }
-`, name, name)
+`, name, name, name)
 }

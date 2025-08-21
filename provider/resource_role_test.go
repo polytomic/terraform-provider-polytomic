@@ -1,7 +1,6 @@
 package provider
 
 import (
-	"context"
 	"fmt"
 	"testing"
 
@@ -31,13 +30,18 @@ func TestAccRole(t *testing.T) {
 
 func testAccRoleExists(t *testing.T, name string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		_, ok := s.RootModule().Resources["polytomic_role.test"]
+		org, ok := s.RootModule().Resources["polytomic_organization.test"]
+		if !ok {
+			return fmt.Errorf("not found: %s", "polytomic_organization.test")
+		}
+
+		_, ok = s.RootModule().Resources["polytomic_role.test"]
 		if !ok {
 			return fmt.Errorf("not found: %s", "polytomic_role.test")
 		}
 
-		client := testClient(t)
-		roles, err := client.Permissions.Roles.List(context.TODO())
+		client := testClient(t, org.Primary.ID)
+		roles, err := client.Permissions.Roles.List(t.Context())
 		if err != nil {
 			return err
 		}
@@ -60,8 +64,13 @@ func testAccRoleExists(t *testing.T, name string) resource.TestCheckFunc {
 
 func testAccRoleResource(name string) string {
 	return fmt.Sprintf(`
+resource "polytomic_organization" "test" {
+  name = "%s"
+}
+
 resource "polytomic_role" "test" {
 	name         = "%s"
+	organization = polytomic_organization.test.id
 }
-`, name)
+`, name, name)
 }
