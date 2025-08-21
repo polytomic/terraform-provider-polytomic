@@ -25,9 +25,12 @@ data "polytomic_bulk_source" "source" {
 
 - `connection_id` (String)
 
+### Optional
+
+- `organization` (String) The organization to which the connection belongs. This is required when using a partner or deployment key.
+
 ### Read-Only
 
-- `organization` (String)
 - `schemas` (List of Object) (see [below for nested schema](#nestedatt--schemas))
 
 <a id="nestedatt--schemas"></a>

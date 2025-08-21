@@ -33,14 +33,21 @@ func testAccPreCheck(t *testing.T) {
 	}
 }
 
-func testClient(t *testing.T) *ptclient.Client {
+func testClient(t *testing.T, org string) *ptclient.Client {
+	t.Helper()
+
 	provider, err := providerclient.NewClientProvider(
 		providerclient.WithDeploymentKey(os.Getenv(PolytomicDeploymentKey)),
 		providerclient.WithDeploymentURL(os.Getenv(PolytomicDeploymentURL)),
 		providerclient.WithAPIKey(os.Getenv(PolytomicAPIKey)),
 	)
 	require.NoError(t, err)
-	c, err := provider.Client("")
+	if org == "" {
+		c, err := provider.PartnerClient()
+		require.NoError(t, err)
+		return c
+	}
+	c, err := provider.Client(org)
 	require.NoError(t, err)
 	return c
 }

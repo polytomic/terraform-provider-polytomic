@@ -1,18 +1,15 @@
 package providerclient
 
 import (
-	"context"
+	"cmp"
 	"encoding/base64"
 	"errors"
 	"fmt"
 	"net/http"
-	"strings"
 	"sync"
 
-	"github.com/AlekSi/pointer"
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/polytomic/polytomic-go"
 	ptclient "github.com/polytomic/polytomic-go/client"
 	ptoption "github.com/polytomic/polytomic-go/option"
 )
@@ -27,11 +24,8 @@ const (
 type Provider struct {
 	DeploymentKey string
 	DeploymentURL string
-
-	PartnerKey       string
-	OrganizationUser string
-
-	APIKey string
+	PartnerKey    string
+	APIKey        string
 
 	mu      sync.Mutex
 	clients map[uuid.UUID]*ptclient.Client
@@ -51,10 +45,9 @@ func WithDeploymentURL(url string) ProviderOpt {
 	}
 }
 
-func WithPartnerKey(key, orgUser string) ProviderOpt {
+func WithPartnerKey(key string) ProviderOpt {
 	return func(p *Provider) {
 		p.PartnerKey = key
-		p.OrganizationUser = orgUser
 	}
 }
 
@@ -85,44 +78,6 @@ func (p *Provider) Validate() error {
 	return nil
 }
 
-type clientOptions struct {
-	DeploymentKey  string
-	RequestOptions []ptoption.RequestOption
-}
-
-type clientOpt func(*clientOptions)
-
-func setDeploymentKey(key string) clientOpt {
-	return func(o *clientOptions) {
-		o.DeploymentKey = key
-	}
-}
-
-func setRequestOptions(opts ...ptoption.RequestOption) clientOpt {
-	return func(o *clientOptions) {
-		o.RequestOptions = opts
-	}
-}
-
-func client(deploymentURL string, opts ...clientOpt) *ptclient.Client {
-	options := clientOptions{}
-	for _, opt := range opts {
-		opt(&options)
-	}
-	headers := http.Header{
-		"User-Agent": []string{UserAgent},
-	}
-	if options.DeploymentKey != "" {
-		headers["Authorization"] = []string{"Basic " + basicAuth(options.DeploymentKey, "")}
-	}
-	return ptclient.NewClient(
-		append([]ptoption.RequestOption{
-			ptoption.WithBaseURL(deploymentURL),
-			ptoption.WithHTTPHeader(headers),
-		}, options.RequestOptions...)...,
-	)
-}
-
 func (p *Provider) Client(org string) (*ptclient.Client, error) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
@@ -132,69 +87,58 @@ func (p *Provider) Client(org string) (*ptclient.Client, error) {
 		var err error
 		orgID, err = uuid.Parse(org)
 		if err != nil {
+			return nil, fmt.Errorf("invalid organization ID %s: %w", org, err)
 		}
 	}
 	if client, ok := p.clients[orgID]; ok {
 		return client, nil
 	}
 
+	headers := http.Header{
+		"User-Agent": []string{UserAgent},
+	}
 	if p.APIKey != "" {
 		// construct a client with the API key
-		return client(p.DeploymentURL,
-			setRequestOptions(
-				ptoption.WithToken(p.APIKey),
-			),
+		return ptclient.NewClient(
+			ptoption.WithBaseURL(p.DeploymentURL),
+			ptoption.WithToken(p.APIKey),
+			ptoption.WithHTTPHeader(headers),
 		), nil
 	}
-	if p.PartnerKey != "" && orgID != uuid.Nil {
-		ctx := context.Background()
-		// ensure that the org user exists in the organization and return a client using its key
-		pc, err := p.PartnerClient()
-		if err != nil {
-			panic(err)
+	if orgID == uuid.Nil {
+		return nil, errors.New("organization ID must be specified with partner or deployment key")
+	}
+	if p.PartnerKey != "" || p.DeploymentKey != "" {
+		// Use Basic Auth with organization ID as username and partner key as password
+		headers["Authorization"] = []string{
+			"Basic " + basicAuth(orgID.String(), cmp.Or(p.PartnerKey, p.DeploymentKey)),
 		}
 
-		userID := uuid.Nil
-		if uid, err := uuid.Parse(p.OrganizationUser); err == nil {
-			userID = uid
-		} else {
-			users, err := pc.Users.List(ctx, org)
-			if err != nil {
-				return nil, err
-			}
-			for _, user := range users.Data {
-				if strings.ToLower(pointer.Get(user.Email)) == strings.ToLower(p.OrganizationUser) {
-					userID = uuid.MustParse(*user.Id)
-					break
-				}
-			}
-		}
-		if userID == uuid.Nil {
-		}
-
-		key, err := pc.Users.CreateApiKey(ctx, org, userID.String(), &polytomic.UsersCreateApiKeyRequest{Force: pointer.To(true)})
-		if err != nil {
-			return nil, err
-		}
-		p.clients[orgID] = client(p.DeploymentURL, setRequestOptions(ptoption.WithToken(key.Data.String())))
+		p.clients[orgID] = ptclient.NewClient(
+			ptoption.WithBaseURL(p.DeploymentURL),
+			ptoption.WithHTTPHeader(headers),
+		)
 		return p.clients[orgID], nil
 	}
-	if p.DeploymentKey != "" {
-		// construct a client with the deployment key
-		return client(p.DeploymentURL, setDeploymentKey(p.DeploymentKey)), nil
-	}
 
-	return nil, errors.New("No valid authentication method found")
+	return nil, errors.New("no valid authentication method found")
 }
 
 func (p *Provider) PartnerClient() (*ptclient.Client, error) {
 	if p.PartnerKey == "" && p.DeploymentKey == "" {
-		return nil, errors.New("Partner Key is required")
+		return nil, errors.New("partner key is required")
 	}
-	if p.PartnerKey != "" {
-		return client(p.DeploymentURL, setRequestOptions(ptoption.WithToken(p.PartnerKey))), nil
+	headers := http.Header{
+		"User-Agent": []string{UserAgent},
 	}
-	return client(p.DeploymentURL, setDeploymentKey(p.DeploymentKey)), nil
+	// For partner client without specific org, use partner key as bearer token
+	return ptclient.NewClient(
+		ptoption.WithBaseURL(p.DeploymentURL),
+		ptoption.WithToken(
+			cmp.Or(p.PartnerKey, p.DeploymentKey),
+		),
+		ptoption.WithHTTPHeader(headers),
+	), nil
 }
 
 // GetClient returns a Polytomic client from the provider data for the specified

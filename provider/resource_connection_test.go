@@ -1,7 +1,6 @@
 package provider
 
 import (
-	"context"
 	"fmt"
 	"testing"
 
@@ -32,13 +31,18 @@ func TestAccConnectionResource(t *testing.T) {
 
 func testAccConnectionExists(t *testing.T, name string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
+		org, ok := s.RootModule().Resources["polytomic_organization.test"]
+		if !ok {
+			return fmt.Errorf("not found: %s", "polytomic_organization.test")
+		}
+
 		resource, ok := s.RootModule().Resources["polytomic_csv_connection.test"]
 		if !ok {
 			return fmt.Errorf("not found: polytomic_csv_connection.test")
 		}
 
-		client := testClient(t)
-		conn, err := client.Connections.Get(context.Background(), resource.Primary.ID)
+		client := testClient(t, org.Primary.ID)
+		conn, err := client.Connections.Get(t.Context(), resource.Primary.ID)
 		if err != nil {
 			return err
 		}
@@ -50,11 +54,16 @@ func testAccConnectionExists(t *testing.T, name string) resource.TestCheckFunc {
 
 func testAccConnectionResource(name string) string {
 	return fmt.Sprintf(`
+resource "polytomic_organization" "test" {
+  name = "%s"
+}
+
 resource "polytomic_csv_connection" "test" {
-  name         = "%s"
+  name          = "%s"
+  organization  = polytomic_organization.test.id
   configuration = {
     url = "https://gist.githubusercontent.com/jpalawaga/20df01c463b82950cc7421e5117a67bc/raw/14bae37fb748114901f7cfdaa5834e4b417537d5/"
   }
 }
-`, name)
+`, name, name)
 }
