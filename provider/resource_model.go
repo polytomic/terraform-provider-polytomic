@@ -25,11 +25,9 @@ import (
 // Ensure provider defined types fully satisfy framework interfaces
 var _ resource.Resource = &modelResource{}
 var _ resource.ResourceWithImportState = &modelResource{}
-var _ resource.ResourceWithUpgradeState = &modelResource{}
 
 func (r *modelResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Version:             1,
 		MarkdownDescription: ":meta:subcategory:Models: Model",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
@@ -128,21 +126,6 @@ func (r *modelResource) Schema(ctx context.Context, req resource.SchemaRequest, 
 			},
 		},
 	}
-}
-
-type modelResourceResourceDataV0 struct {
-	ID               types.String `tfsdk:"id"`
-	Organization     types.String `tfsdk:"organization"`
-	Name             types.String `tfsdk:"name"`
-	Type             types.String `tfsdk:"type"`
-	Version          types.Int64  `tfsdk:"version"`
-	ConnectionID     types.String `tfsdk:"connection_id"`
-	Configuration    types.Map    `tfsdk:"configuration"`
-	Fields           types.Set    `tfsdk:"fields"`
-	AdditionalFields types.Set    `tfsdk:"additional_fields"`
-	Relations        types.Set    `tfsdk:"relations"`
-	Identifier       types.String `tfsdk:"identifier"`
-	TrackingColumns  types.Set    `tfsdk:"tracking_columns"`
 }
 
 type modelResourceResourceData struct {
@@ -776,135 +759,4 @@ func (r *modelResource) Delete(ctx context.Context, req resource.DeleteRequest, 
 
 func (r *modelResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
-}
-func (r *modelResource) UpgradeState(ctx context.Context) map[int64]resource.StateUpgrader {
-	return map[int64]resource.StateUpgrader{
-		// State upgrade implementation from 0 (prior state version) to 1 (Schema.Version)
-		0: {
-			PriorSchema: &schema.Schema{
-				Attributes: map[string]schema.Attribute{
-					"id": schema.StringAttribute{
-						MarkdownDescription: "",
-						Computed:            true,
-						PlanModifiers: []planmodifier.String{
-							stringplanmodifier.UseStateForUnknown(),
-						},
-					},
-					"organization": schema.StringAttribute{
-						MarkdownDescription: "",
-						Optional:            true,
-						Computed:            true,
-					},
-					"connection_id": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            true,
-					},
-					"name": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            true,
-					},
-					"type": schema.StringAttribute{
-						MarkdownDescription: "",
-						Computed:            true,
-						PlanModifiers: []planmodifier.String{
-							stringplanmodifier.UseStateForUnknown(),
-						},
-					},
-					"version": schema.Int64Attribute{
-						MarkdownDescription: "",
-						Computed:            true,
-						PlanModifiers: []planmodifier.Int64{
-							int64planmodifier.UseStateForUnknown(),
-						},
-					},
-					"configuration": schema.MapAttribute{
-						MarkdownDescription: "",
-						ElementType:         types.StringType,
-						Required:            true,
-					},
-					"fields": schema.SetAttribute{
-						MarkdownDescription: "",
-						ElementType:         types.StringType,
-						Optional:            true,
-						Computed:            true,
-					},
-					"additional_fields": schema.SetAttribute{
-						MarkdownDescription: "",
-						ElementType: types.ObjectType{
-							AttrTypes: map[string]attr.Type{
-								"name":  types.StringType,
-								"type":  types.StringType,
-								"label": types.StringType,
-							},
-						},
-						Optional: true,
-						Computed: true,
-					},
-					"relations": schema.SetAttribute{
-						MarkdownDescription: "",
-						ElementType: types.ObjectType{
-							AttrTypes: map[string]attr.Type{
-								"to": types.ObjectType{
-									AttrTypes: map[string]attr.Type{
-										"model_id": types.StringType,
-										"field":    types.StringType,
-									},
-								},
-								"from": types.StringType,
-							},
-						},
-						Optional: true,
-						Computed: true,
-					},
-					"identifier": schema.StringAttribute{
-						MarkdownDescription: "",
-						Optional:            true,
-						Computed:            true,
-						PlanModifiers: []planmodifier.String{
-							stringplanmodifier.UseStateForUnknown(),
-						},
-					},
-					"tracking_columns": schema.SetAttribute{
-						MarkdownDescription: "",
-						ElementType:         types.StringType,
-						Optional:            true,
-						Computed:            true,
-						PlanModifiers: []planmodifier.Set{
-							setplanmodifier.UseStateForUnknown(),
-						},
-					},
-				},
-			},
-			StateUpgrader: func(ctx context.Context, req resource.UpgradeStateRequest, resp *resource.UpgradeStateResponse) {
-				var priorStateData modelResourceResourceDataV0
-
-				resp.Diagnostics.Append(req.State.Get(ctx, &priorStateData)...)
-
-				if resp.Diagnostics.HasError() {
-					return
-				}
-				confBytes, err := json.Marshal(priorStateData.Configuration.Elements())
-				if err != nil {
-					resp.Diagnostics.AddError("Error marshalling configuration", err.Error())
-					return
-				}
-
-				upgradedStateData := modelResourceResourceData{
-					ID:               priorStateData.ID,
-					Organization:     priorStateData.Organization,
-					Name:             priorStateData.Name,
-					Type:             priorStateData.Type,
-					Version:          priorStateData.Version,
-					Configuration:    types.StringValue(string(confBytes)),
-					Fields:           priorStateData.Fields,
-					AdditionalFields: priorStateData.AdditionalFields,
-					Relations:        priorStateData.Relations,
-					Identifier:       priorStateData.Identifier,
-					TrackingColumns:  priorStateData.TrackingColumns,
-				}
-
-				resp.Diagnostics.Append(resp.State.Set(ctx, upgradedStateData)...)
-			},
-		},
-	}
 }
