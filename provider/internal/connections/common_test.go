@@ -1,7 +1,6 @@
 package connections
 
 import (
-	"context"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -47,7 +46,7 @@ func TestAttrValue(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			actual, err := attrValue(context.Background(), test.val)
+			actual, err := attrValue(t.Context(), test.val)
 			if test.expectErr {
 				assert.Error(t, err)
 			} else {
@@ -59,10 +58,10 @@ func TestAttrValue(t *testing.T) {
 }
 func TestHandleSensitiveValues(t *testing.T) {
 	tests := map[string]struct {
-		attrs    map[string]schema.Attribute
-		config   map[string]any
-		data     connectionData
-		expected map[string]any
+		attrs      map[string]schema.Attribute
+		config     map[string]any
+		priorState connectionData
+		expected   map[string]any
 	}{
 		"no sensitive values": {
 			attrs: map[string]schema.Attribute{
@@ -73,7 +72,7 @@ func TestHandleSensitiveValues(t *testing.T) {
 				"name": "Alice",
 				"age":  int64(42),
 			},
-			data: connectionData{
+			priorState: connectionData{
 				Configuration: types.ObjectValueMust(
 					map[string]attr.Type{
 						"name": types.StringType,
@@ -99,7 +98,7 @@ func TestHandleSensitiveValues(t *testing.T) {
 				"password": "secret",
 				"token":    "token123",
 			},
-			data: connectionData{
+			priorState: connectionData{
 				Configuration: types.ObjectValueMust(
 					map[string]attr.Type{
 						"password": types.StringType,
@@ -120,7 +119,7 @@ func TestHandleSensitiveValues(t *testing.T) {
 			config: map[string]any{
 				"password": "secret123",
 			},
-			data: connectionData{
+			priorState: connectionData{
 				Configuration: types.ObjectValueMust(
 					map[string]attr.Type{
 						"password": types.StringType,
@@ -143,7 +142,7 @@ func TestHandleSensitiveValues(t *testing.T) {
 				"name":     "Alice",
 				"password": "secret",
 			},
-			data: connectionData{
+			priorState: connectionData{
 				Configuration: types.ObjectValueMust(
 					map[string]attr.Type{
 						"name":     types.StringType,
@@ -210,7 +209,7 @@ func TestHandleSensitiveValues(t *testing.T) {
 					"password": "secret",
 				},
 			},
-			data: connectionData{
+			priorState: connectionData{
 				Configuration: types.ObjectValueMust(
 					map[string]attr.Type{
 						"nestedSingle": types.ObjectType{
@@ -301,7 +300,7 @@ func TestHandleSensitiveValues(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			actual := handleSensitiveValues(context.Background(), test.attrs, test.config, test.data.Configuration.Attributes())
+			actual := handleSensitiveValues(t.Context(), test.attrs, test.config, test.priorState.Configuration.Attributes())
 			assert.EqualValues(t, test.expected, actual)
 		})
 	}

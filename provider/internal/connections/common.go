@@ -148,12 +148,6 @@ func getConfigAttributes(s schema.Schema) (map[string]schema.Attribute, bool) {
 func handleSensitiveValues(ctx context.Context, attrs map[string]schema.Attribute, config map[string]any, priorState map[string]attr.Value) map[string]any {
 	for k, v := range config {
 		attr := attrs[k]
-
-		if attr.IsSensitive() {
-			delete(config, k)
-			continue
-		}
-
 		switch subAttr := attr.(type) {
 		case schema.ListNestedAttribute:
 			nestedPstate, ok := priorState[k].(types.Object)
