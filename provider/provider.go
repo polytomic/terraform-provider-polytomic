@@ -144,7 +144,6 @@ func (p *Provider) Resources(ctx context.Context) []func() resource.Resource {
 	}
 	all := append(connections.Resources, resourceList...)
 	return all
-
 }
 
 func (p *Provider) DataSources(ctx context.Context) []func() datasource.DataSource {
@@ -186,7 +185,6 @@ func (p *Provider) Schema(ctx context.Context, req provider.SchemaRequest, resp 
 			},
 		},
 	}
-
 }
 
 func New(version string) func() provider.Provider {

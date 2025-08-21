@@ -1,7 +1,6 @@
 package connections
 
 import (
-	"context"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -47,7 +46,7 @@ func TestAttrValue(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			actual, err := attrValue(context.Background(), test.val)
+			actual, err := attrValue(t.Context(), test.val)
 			if test.expectErr {
 				assert.Error(t, err)
 			} else {
@@ -59,10 +58,10 @@ func TestAttrValue(t *testing.T) {
 }
 func TestHandleSensitiveValues(t *testing.T) {
 	tests := map[string]struct {
-		attrs    map[string]schema.Attribute
-		config   map[string]any
-		data     connectionData
-		expected map[string]any
+		attrs      map[string]schema.Attribute
+		config     map[string]any
+		priorState connectionData
+		expected   map[string]any
 	}{
 		"no sensitive values": {
 			attrs: map[string]schema.Attribute{
@@ -73,7 +72,7 @@ func TestHandleSensitiveValues(t *testing.T) {
 				"name": "Alice",
 				"age":  int64(42),
 			},
-			data: connectionData{
+			priorState: connectionData{
 				Configuration: types.ObjectValueMust(
 					map[string]attr.Type{
 						"name": types.StringType,
@@ -99,7 +98,7 @@ func TestHandleSensitiveValues(t *testing.T) {
 				"password": "secret",
 				"token":    "token123",
 			},
-			data: connectionData{
+			priorState: connectionData{
 				Configuration: types.ObjectValueMust(
 					map[string]attr.Type{
 						"password": types.StringType,
@@ -120,7 +119,7 @@ func TestHandleSensitiveValues(t *testing.T) {
 			config: map[string]any{
 				"password": "secret123",
 			},
-			data: connectionData{
+			priorState: connectionData{
 				Configuration: types.ObjectValueMust(
 					map[string]attr.Type{
 						"password": types.StringType,
@@ -143,7 +142,7 @@ func TestHandleSensitiveValues(t *testing.T) {
 				"name":     "Alice",
 				"password": "secret",
 			},
-			data: connectionData{
+			priorState: connectionData{
 				Configuration: types.ObjectValueMust(
 					map[string]attr.Type{
 						"name":     types.StringType,
@@ -210,7 +209,7 @@ func TestHandleSensitiveValues(t *testing.T) {
 					"password": "secret",
 				},
 			},
-			data: connectionData{
+			priorState: connectionData{
 				Configuration: types.ObjectValueMust(
 					map[string]attr.Type{
 						"nestedSingle": types.ObjectType{
@@ -301,7 +300,7 @@ func TestHandleSensitiveValues(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			actual := handleSensitiveValues(context.Background(), test.attrs, test.config, test.data.Configuration.Attributes())
+			actual := handleSensitiveValues(t.Context(), test.attrs, test.config, test.priorState.Configuration.Attributes())
 			assert.EqualValues(t, test.expected, actual)
 		})
 	}
@@ -392,6 +391,198 @@ func TestResetSensitiveValues(t *testing.T) {
 				"nestedSingle": map[string]any{
 					"name":     "Alice",
 					"password": "secret",
+				},
+			},
+		},
+		"nested list with sensitive values": {
+			attrs: map[string]schema.Attribute{
+				"nestedList": schema.ListNestedAttribute{
+					NestedObject: schema.NestedAttributeObject{
+						Attributes: map[string]schema.Attribute{
+							"password": schema.StringAttribute{Sensitive: true},
+							"name":     schema.StringAttribute{},
+						},
+					},
+				},
+			},
+			state: map[string]any{
+				"nestedList": []map[string]any{
+					{
+						"name":     "Alice",
+						"password": "secret1",
+					},
+					{
+						"name":     "Bob",
+						"password": "secret2",
+					},
+				},
+			},
+			read: map[string]any{
+				"nestedList": []map[string]any{
+					{
+						"name":     "Alice",
+						"password": "new_secret1",
+					},
+					{
+						"name":     "Bob",
+						"password": "new_secret2",
+					},
+				},
+			},
+			expected: map[string]any{
+				"nestedList": []map[string]any{
+					{
+						"name":     "Alice",
+						"password": "secret1",
+					},
+					{
+						"name":     "Bob",
+						"password": "secret2",
+					},
+				},
+			},
+		},
+		"nested set with sensitive values": {
+			attrs: map[string]schema.Attribute{
+				"nestedSet": schema.SetNestedAttribute{
+					NestedObject: schema.NestedAttributeObject{
+						Attributes: map[string]schema.Attribute{
+							"password": schema.StringAttribute{Sensitive: true},
+							"name":     schema.StringAttribute{},
+						},
+					},
+				},
+			},
+			state: map[string]any{
+				"nestedSet": []map[string]any{
+					{
+						"name":     "Alice",
+						"password": "secret1",
+					},
+				},
+			},
+			read: map[string]any{
+				"nestedSet": []map[string]any{
+					{
+						"name":     "Alice",
+						"password": "new_secret1",
+					},
+				},
+			},
+			expected: map[string]any{
+				"nestedSet": []map[string]any{
+					{
+						"name":     "Alice",
+						"password": "secret1",
+					},
+				},
+			},
+		},
+		"nested map with sensitive values": {
+			attrs: map[string]schema.Attribute{
+				"nestedMap": schema.MapNestedAttribute{
+					NestedObject: schema.NestedAttributeObject{
+						Attributes: map[string]schema.Attribute{
+							"password": schema.StringAttribute{Sensitive: true},
+							"name":     schema.StringAttribute{},
+						},
+					},
+				},
+			},
+			state: map[string]any{
+				"nestedMap": map[string]any{
+					"item1": map[string]any{
+						"name":     "Alice",
+						"password": "secret1",
+					},
+				},
+			},
+			read: map[string]any{
+				"nestedMap": map[string]any{
+					"item1": map[string]any{
+						"name":     "Alice",
+						"password": "new_secret1",
+					},
+				},
+			},
+			expected: map[string]any{
+				"nestedMap": map[string]any{
+					"item1": map[string]any{
+						"name":     "Alice",
+						"password": "secret1",
+					},
+				},
+			},
+		},
+		"nested list as interface slice": {
+			attrs: map[string]schema.Attribute{
+				"nestedList": schema.ListNestedAttribute{
+					NestedObject: schema.NestedAttributeObject{
+						Attributes: map[string]schema.Attribute{
+							"password": schema.StringAttribute{Sensitive: true},
+							"name":     schema.StringAttribute{},
+						},
+					},
+				},
+			},
+			state: map[string]any{
+				"nestedList": []interface{}{
+					map[string]interface{}{
+						"name":     "Alice",
+						"password": "secret1",
+					},
+				},
+			},
+			read: map[string]any{
+				"nestedList": []interface{}{
+					map[string]interface{}{
+						"name":     "Alice",
+						"password": "new_secret1",
+					},
+				},
+			},
+			expected: map[string]any{
+				"nestedList": []interface{}{
+					map[string]interface{}{
+						"name":     "Alice",
+						"password": "secret1",
+					},
+				},
+			},
+		},
+		"nested set as interface slice": {
+			attrs: map[string]schema.Attribute{
+				"nestedSet": schema.SetNestedAttribute{
+					NestedObject: schema.NestedAttributeObject{
+						Attributes: map[string]schema.Attribute{
+							"password": schema.StringAttribute{Sensitive: true},
+							"name":     schema.StringAttribute{},
+						},
+					},
+				},
+			},
+			state: map[string]any{
+				"nestedSet": []interface{}{
+					map[string]interface{}{
+						"name":     "Alice",
+						"password": "secret1",
+					},
+				},
+			},
+			read: map[string]any{
+				"nestedSet": []interface{}{
+					map[string]interface{}{
+						"name":     "Alice",
+						"password": "new_secret1",
+					},
+				},
+			},
+			expected: map[string]any{
+				"nestedSet": []interface{}{
+					map[string]interface{}{
+						"name":     "Alice",
+						"password": "secret1",
+					},
 				},
 			},
 		},
