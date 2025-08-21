@@ -118,13 +118,65 @@ func resetSensitiveValues(attrs map[string]schema.Attribute, state, read map[str
 
 		switch v := attr.(type) {
 		case schema.ListNestedAttribute:
-			read[k] = resetSensitiveValues(v.NestedObject.Attributes, state[k].(map[string]any), read[k].(map[string]any))
+			// Try []map[string]any first
+			if stateList, stateOk := state[k].([]map[string]any); stateOk {
+				if readList, readOk := read[k].([]map[string]any); readOk && len(stateList) == len(readList) {
+					for i := range readList {
+						readList[i] = resetSensitiveValues(v.NestedObject.Attributes, stateList[i], readList[i])
+					}
+				}
+			} else if stateList, stateOk := state[k].([]interface{}); stateOk {
+				// Try []interface{} 
+				if readList, readOk := read[k].([]interface{}); readOk && len(stateList) == len(readList) {
+					for i := range readList {
+						if stateItem, ok := stateList[i].(map[string]any); ok {
+							if readItem, ok := readList[i].(map[string]any); ok {
+								readList[i] = resetSensitiveValues(v.NestedObject.Attributes, stateItem, readItem)
+							}
+						}
+					}
+				}
+			}
 		case schema.MapNestedAttribute:
-			read[k] = resetSensitiveValues(v.NestedObject.Attributes, state[k].(map[string]any), read[k].(map[string]any))
+			stateMap, stateOk := state[k].(map[string]any)
+			readMap, readOk := read[k].(map[string]any)
+			if stateOk && readOk {
+				for mapKey := range readMap {
+					if stateItem, exists := stateMap[mapKey]; exists {
+						if stateItemMap, ok := stateItem.(map[string]any); ok {
+							if readItemMap, ok := readMap[mapKey].(map[string]any); ok {
+								readMap[mapKey] = resetSensitiveValues(v.NestedObject.Attributes, stateItemMap, readItemMap)
+							}
+						}
+					}
+				}
+			}
 		case schema.SetNestedAttribute:
-			read[k] = resetSensitiveValues(v.NestedObject.Attributes, state[k].(map[string]any), read[k].(map[string]any))
+			// Try []map[string]any first
+			if stateSet, stateOk := state[k].([]map[string]any); stateOk {
+				if readSet, readOk := read[k].([]map[string]any); readOk && len(stateSet) == len(readSet) {
+					for i := range readSet {
+						readSet[i] = resetSensitiveValues(v.NestedObject.Attributes, stateSet[i], readSet[i])
+					}
+				}
+			} else if stateSet, stateOk := state[k].([]interface{}); stateOk {
+				// Try []interface{}
+				if readSet, readOk := read[k].([]interface{}); readOk && len(stateSet) == len(readSet) {
+					for i := range readSet {
+						if stateItem, ok := stateSet[i].(map[string]any); ok {
+							if readItem, ok := readSet[i].(map[string]any); ok {
+								readSet[i] = resetSensitiveValues(v.NestedObject.Attributes, stateItem, readItem)
+							}
+						}
+					}
+				}
+			}
 		case schema.SingleNestedAttribute:
-			read[k] = resetSensitiveValues(v.Attributes, state[k].(map[string]any), read[k].(map[string]any))
+			stateNested, stateOk := state[k].(map[string]any)
+			readNested, readOk := read[k].(map[string]any)
+			if stateOk && readOk {
+				read[k] = resetSensitiveValues(v.Attributes, stateNested, readNested)
+			}
 		}
 	}
 
