@@ -21,19 +21,10 @@ var (
 }
 
 provider "polytomic" {
-	deployment_url = "{{ .URL }}"
-	{{- if .WriteAPIKey }}
-	api_key = "{{ .APIKey }}"
-	{{- else }}
-	api_key = var.polytomic_api_key
-	{{- end }}
+	# Configuration comes from environment variables:
+	# POLYTOMIC_DEPLOYMENT_URL
+	# POLYTOMIC_API_KEY or POLYTOMIC_DEPLOYMENT_KEY
 }
-
-{{- if not .WriteAPIKey }}
-variable "polytomic_api_key" {
-	type = string
-}
-{{- end }}
 `
 )
 

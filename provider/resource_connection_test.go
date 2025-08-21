@@ -14,13 +14,16 @@ func TestAccConnectionResource(t *testing.T) {
 	name := "TestAccConnection"
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		ProtoV6ProviderFactories: TestAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccConnectionResource(name),
+				Config: TestCaseTfResource(t, connectionResourceTemplate, TestCaseTfArgs{
+					Name:   name,
+					APIKey: APIKey(),
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					// Check if the resource exists
-					testAccConnectionExists(t, name),
+					testAccConnectionExists(t, name, APIKey()),
 					// Check the name
 					resource.TestCheckResourceAttr("polytomic_csv_connection.test", "name", name),
 				),
@@ -29,11 +32,15 @@ func TestAccConnectionResource(t *testing.T) {
 	})
 }
 
-func testAccConnectionExists(t *testing.T, name string) resource.TestCheckFunc {
+func testAccConnectionExists(t *testing.T, name string, apiKey bool) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		org, ok := s.RootModule().Resources["polytomic_organization.test"]
-		if !ok {
-			return fmt.Errorf("not found: %s", "polytomic_organization.test")
+		var orgID string
+		if !apiKey {
+			org, ok := s.RootModule().Resources["polytomic_organization.test"]
+			if !ok {
+				return fmt.Errorf("not found: %s", "polytomic_organization.test")
+			}
+			orgID = org.Primary.ID
 		}
 
 		resource, ok := s.RootModule().Resources["polytomic_csv_connection.test"]
@@ -41,7 +48,7 @@ func testAccConnectionExists(t *testing.T, name string) resource.TestCheckFunc {
 			return fmt.Errorf("not found: polytomic_csv_connection.test")
 		}
 
-		client := testClient(t, org.Primary.ID)
+		client := testClient(t, orgID)
 		conn, err := client.Connections.Get(t.Context(), resource.Primary.ID)
 		if err != nil {
 			return err
@@ -52,18 +59,19 @@ func testAccConnectionExists(t *testing.T, name string) resource.TestCheckFunc {
 	}
 }
 
-func testAccConnectionResource(name string) string {
-	return fmt.Sprintf(`
+const connectionResourceTemplate = `
+{{if not .APIKey}}
 resource "polytomic_organization" "test" {
-  name = "%s"
+  name = "{{.Name}}"
 }
-
+{{end}}
 resource "polytomic_csv_connection" "test" {
-  name          = "%s"
-  organization  = polytomic_organization.test.id
+  name          = "{{.Name}}"
   configuration = {
     url = "https://gist.githubusercontent.com/jpalawaga/20df01c463b82950cc7421e5117a67bc/raw/14bae37fb748114901f7cfdaa5834e4b417537d5/"
   }
+{{if not .APIKey}}
+  organization  = polytomic_organization.test.id
+{{end}}
 }
-`, name, name)
-}
+`

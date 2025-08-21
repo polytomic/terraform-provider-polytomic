@@ -13,13 +13,16 @@ func TestAccPolicy(t *testing.T) {
 	name := "TestAccPolicy"
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		ProtoV6ProviderFactories: TestAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccPolicyResource(name),
+				Config: TestCaseTfResource(t, policyResourceTemplate, TestCaseTfArgs{
+					Name:   name,
+					APIKey: APIKey(),
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					// Check if the resource exists
-					testAccPolicyExists(t, name),
+					testAccPolicyExists(t, name, APIKey()),
 					// Check the name
 					resource.TestCheckResourceAttr("polytomic_policy.test", "name", name),
 					// Number of policy actions
@@ -32,19 +35,23 @@ func TestAccPolicy(t *testing.T) {
 	})
 }
 
-func testAccPolicyExists(t *testing.T, name string) resource.TestCheckFunc {
+func testAccPolicyExists(t *testing.T, name string, apiKey bool) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		org, ok := s.RootModule().Resources["polytomic_organization.test"]
-		if !ok {
-			return fmt.Errorf("not found: %s", "polytomic_organization.test")
+		var orgID string
+		if !apiKey {
+			org, ok := s.RootModule().Resources["polytomic_organization.test"]
+			if !ok {
+				return fmt.Errorf("not found: %s", "polytomic_organization.test")
+			}
+			orgID = org.Primary.ID
 		}
 
-		_, ok = s.RootModule().Resources["polytomic_policy.test"]
+		_, ok := s.RootModule().Resources["polytomic_policy.test"]
 		if !ok {
 			return fmt.Errorf("not found: %s", "polytomic_policy.test")
 		}
 
-		client := testClient(t, org.Primary.ID)
+		client := testClient(t, orgID)
 		policies, err := client.Permissions.Policies.List(t.Context())
 		if err != nil {
 			return err
@@ -66,15 +73,15 @@ func testAccPolicyExists(t *testing.T, name string) resource.TestCheckFunc {
 	}
 }
 
-func testAccPolicyResource(name string) string {
-	return fmt.Sprintf(`
+const policyResourceTemplate = `
+{{if not .APIKey}}
 resource "polytomic_organization" "test" {
-  name = "%s"
+	name = "{{.Name}}"
 }
+{{end}}
 
 resource "polytomic_policy" "test" {
-	name           = "%s"
-	organization   = polytomic_organization.test.id
+	name           = "{{.Name}}"
 	policy_actions = [
 		{
 			action = "apply_policy"
@@ -89,10 +96,14 @@ resource "polytomic_policy" "test" {
 			]
 		}
 	]
+{{if not .APIKey}}
+	organization   = polytomic_organization.test.id
+{{end}}
 }
+
 resource "polytomic_role" "test" {
-	name         = "%s"
-	organization = polytomic_organization.test.id
-}
-`, name, name, name)
-}
+	name         = "{{.Name}}"
+{{if not .APIKey}}
+	organization   = polytomic_organization.test.id
+{{end}}
+}`
