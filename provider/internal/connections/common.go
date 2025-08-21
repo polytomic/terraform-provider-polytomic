@@ -126,7 +126,7 @@ func resetSensitiveValues(attrs map[string]schema.Attribute, state, read map[str
 					}
 				}
 			} else if stateList, stateOk := state[k].([]interface{}); stateOk {
-				// Try []interface{} 
+				// Try []interface{}
 				if readList, readOk := read[k].([]interface{}); readOk && len(stateList) == len(readList) {
 					for i := range readList {
 						if stateItem, ok := stateList[i].(map[string]any); ok {
