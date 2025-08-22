@@ -13,13 +13,16 @@ func TestAccRole(t *testing.T) {
 	name := "TestAccRole"
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		ProtoV6ProviderFactories: TestAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRoleResource(name),
+				Config: TestCaseTfResource(t, policyResourceTemplate, TestCaseTfArgs{
+					Name:   name,
+					APIKey: APIKey(),
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					// Check if the resource exists
-					testAccRoleExists(t, name),
+					testAccRoleExists(t, name, APIKey()),
 					// Check the name
 					resource.TestCheckResourceAttr("polytomic_role.test", "name", name),
 				),
@@ -28,19 +31,23 @@ func TestAccRole(t *testing.T) {
 	})
 }
 
-func testAccRoleExists(t *testing.T, name string) resource.TestCheckFunc {
+func testAccRoleExists(t *testing.T, name string, apiKey bool) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		org, ok := s.RootModule().Resources["polytomic_organization.test"]
-		if !ok {
-			return fmt.Errorf("not found: %s", "polytomic_organization.test")
+		var orgID string
+		if !apiKey {
+			org, ok := s.RootModule().Resources["polytomic_organization.test"]
+			if !ok {
+				return fmt.Errorf("not found: %s", "polytomic_organization.test")
+			}
+			orgID = org.Primary.ID
 		}
 
-		_, ok = s.RootModule().Resources["polytomic_role.test"]
+		_, ok := s.RootModule().Resources["polytomic_role.test"]
 		if !ok {
 			return fmt.Errorf("not found: %s", "polytomic_role.test")
 		}
 
-		client := testClient(t, org.Primary.ID)
+		client := testClient(t, orgID)
 		roles, err := client.Permissions.Roles.List(t.Context())
 		if err != nil {
 			return err
@@ -62,15 +69,17 @@ func testAccRoleExists(t *testing.T, name string) resource.TestCheckFunc {
 	}
 }
 
-func testAccRoleResource(name string) string {
-	return fmt.Sprintf(`
+const roleResourceTemplate = `
+{{if not .APIKey}}
 resource "polytomic_organization" "test" {
-  name = "%s"
+	name = "{{.Name}}"
 }
+{{end}}
 
 resource "polytomic_role" "test" {
-	name         = "%s"
+	name         = "{{.Name}}"
+	{{if not .APIKey}}
 	organization = polytomic_organization.test.id
+	{{end}}
 }
-`, name, name)
-}
+`

@@ -2,7 +2,6 @@ package provider
 
 import (
 	"fmt"
-	"os"
 	"testing"
 
 	"github.com/AlekSi/pointer"
@@ -11,8 +10,8 @@ import (
 )
 
 func TestAccOrganization_basic(t *testing.T) {
-	if os.Getenv("TEST_ORG_RESOURCES") != "true" {
-		t.Skip("Skipping test that creates resources in the Terraform test organization. To run, set TEST_ORG_RESOURCES=true")
+	if APIKey() {
+		t.Skip("Skipping test that creates organization resources. To run, use a deployment or partner key.")
 	}
 
 	orgName := "terraform-test-org"
@@ -22,7 +21,7 @@ func TestAccOrganization_basic(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		ProtoV6ProviderFactories: TestAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccOrganizationResource(orgName, ssoDomain, ssoOrgId),
@@ -54,7 +53,7 @@ func testAccOrganizationExists(t *testing.T, name string) resource.TestCheckFunc
 			return fmt.Errorf("name is %s; want %s", rs.Primary.Attributes["name"], name)
 		}
 
-		client := testClient(t, "")
+		client := testPartnerClient(t)
 		organization, err := client.Organization.Get(t.Context(), rs.Primary.ID)
 		if err != nil {
 			return err

@@ -2,7 +2,6 @@ package provider
 
 import (
 	"fmt"
-	"os"
 	"strings"
 	"testing"
 
@@ -12,8 +11,8 @@ import (
 )
 
 func TestAccUser_basic(t *testing.T) {
-	if os.Getenv("TEST_ORG_RESOURCES") != "true" {
-		t.Skip("Skipping test that creates resources in the Terraform test organization. To run, set TEST_ORG_RESOURCES=true")
+	if APIKey() {
+		t.Skip("Skipping test that creates organization resources. To run, use a deployment or partner key.")
 	}
 
 	email := "test@example.com"
@@ -24,29 +23,33 @@ func TestAccUser_basic(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		ProtoV6ProviderFactories: TestAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccUserResource(email, role, org),
 				Check: resource.ComposeTestCheckFunc(
-					testAccUserExists(t, email),
+					testAccUserExists(t, email, APIKey()),
 				),
 			},
 			{
 				Config: testAccUserResource(email2, role, org),
 				Check: resource.ComposeTestCheckFunc(
-					testAccUserExists(t, email2),
+					testAccUserExists(t, email2, APIKey()),
 				),
 			},
 		},
 	})
 }
 
-func testAccUserExists(t *testing.T, email string) resource.TestCheckFunc {
+func testAccUserExists(t *testing.T, email string, apiKey bool) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		org, ok := s.RootModule().Resources["polytomic_organization.acme"]
-		if !ok {
-			return fmt.Errorf("not found: %s", "polytomic_organization.acme")
+		var orgID string
+		if !apiKey {
+			org, ok := s.RootModule().Resources["polytomic_organization.acme"]
+			if !ok {
+				return fmt.Errorf("not found: %s", "polytomic_organization.acme")
+			}
+			orgID = org.Primary.ID
 		}
 
 		rs, ok := s.RootModule().Resources["polytomic_user.admin"]
@@ -57,8 +60,8 @@ func testAccUserExists(t *testing.T, email string) resource.TestCheckFunc {
 			return fmt.Errorf("email is %s; want %s", rs.Primary.Attributes["email"], email)
 		}
 
-		client := testClient(t, "")
-		users, err := client.Users.List(t.Context(), org.Primary.ID)
+		client := testPartnerClient(t)
+		users, err := client.Users.List(t.Context(), orgID)
 		if err != nil {
 			return err
 		}
