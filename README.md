@@ -28,11 +28,15 @@ See [Polytomic Importer](./importer/README.md)
 
 ## Development
 
-If you wish to work on the provider, you'll first need [Go](http://www.golang.org) installed on your machine (see [Requirements](#requirements) above).
+If you wish to work on the provider, you'll first need
+[Go](http://www.golang.org) installed on your machine (see
+[Requirements](#requirements) above).
 
-Connections can be added by editing `provider/gen/connections/connections.yaml` and running `go generate`
+Connections can be added by editing `provider/gen/connections/connections.yaml`
+and running `go generate`
 
-To compile the provider, run `go install`. This will build the provider and put the provider binary in the `$GOPATH/bin` directory.
+To compile the provider, run `go install`. This will build the provider and put
+the provider binary in the `$GOPATH/bin` directory.
 
 To generate or update documentation, run `go generate`.
 
@@ -44,10 +48,15 @@ _Note:_ Acceptance tests create real resources, and often cost money to run.
 make testacc
 ```
 
+Acceptance tests should be run with one of the following set in the environment:
+
+- `POLYTOMIC_API_KEY`
+- `POLYTOMIC_DEPLOYMENT_KEY`
+
 ### Requirements
 
-- [Terraform](https://www.terraform.io/downloads.html) >= 1.0
-- [Go](https://golang.org/doc/install) >= 1.18
+- [Terraform](https://www.terraform.io/downloads.html) >= 1.5
+- [Go](https://golang.org/doc/install) >= 1.25
 
 ### Building The Provider
 

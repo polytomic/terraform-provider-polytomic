@@ -2,7 +2,6 @@ package provider
 
 import (
 	"fmt"
-	"os"
 	"strings"
 	"testing"
 
@@ -12,8 +11,8 @@ import (
 )
 
 func TestAccUser_basic(t *testing.T) {
-	if os.Getenv("TEST_ORG_RESOURCES") != "true" || APIKey() {
-		t.Skip("Skipping test that creates resources in the Terraform test organization. To run, set TEST_ORG_RESOURCES=true and use a deployment or partner key.")
+	if APIKey() {
+		t.Skip("Skipping test that creates organization resources. To run, use a deployment or partner key.")
 	}
 
 	email := "test@example.com"
