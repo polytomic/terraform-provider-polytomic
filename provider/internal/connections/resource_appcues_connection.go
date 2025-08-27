@@ -185,6 +185,10 @@ func (r *AppcuesConnectionResource) Read(ctx context.Context, req resource.ReadR
 
 	client, err := r.provider.Client(data.Organization.ValueString())
 	if err != nil {
+		resp.Diagnostics.AddWarning("Error getting client; trying partner client", err.Error())
+		client, err = r.provider.PartnerClient()
+	}
+	if err != nil {
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}

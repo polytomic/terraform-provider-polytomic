@@ -43,6 +43,15 @@ var RedshiftSchema = schema.Schema{
 		},
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
+				"auth_mode": schema.StringAttribute{
+					MarkdownDescription: `Authentication Method
+
+    How to authenticate with AWS. Defaults to Access Key and Secret`,
+					Required:  true,
+					Optional:  false,
+					Computed:  false,
+					Sensitive: false,
+				},
 				"aws_access_key_id": schema.StringAttribute{
 					MarkdownDescription: `AWS Access Key ID (destinations only)
 
@@ -83,11 +92,27 @@ var RedshiftSchema = schema.Schema{
 					Computed:            false,
 					Sensitive:           false,
 				},
+				"external_id": schema.StringAttribute{
+					MarkdownDescription: `External ID
+
+    External ID for the IAM role`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
+				},
 				"hostname": schema.StringAttribute{
 					MarkdownDescription: ``,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
+					Sensitive:           false,
+				},
+				"iam_role_arn": schema.StringAttribute{
+					MarkdownDescription: `IAM Role ARN`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
 					Sensitive:           false,
 				},
 				"password": schema.StringAttribute{
@@ -204,12 +229,15 @@ func (t *RedshiftConnectionResource) Schema(ctx context.Context, req resource.Sc
 }
 
 type RedshiftConf struct {
+	Auth_mode                    string `mapstructure:"auth_mode" tfsdk:"auth_mode"`
 	Aws_access_key_id            string `mapstructure:"aws_access_key_id" tfsdk:"aws_access_key_id"`
 	Aws_secret_access_key        string `mapstructure:"aws_secret_access_key" tfsdk:"aws_secret_access_key"`
 	Aws_user                     string `mapstructure:"aws_user" tfsdk:"aws_user"`
 	Bulk_sync_staging_schema     string `mapstructure:"bulk_sync_staging_schema" tfsdk:"bulk_sync_staging_schema"`
 	Database                     string `mapstructure:"database" tfsdk:"database"`
+	External_id                  string `mapstructure:"external_id" tfsdk:"external_id"`
 	Hostname                     string `mapstructure:"hostname" tfsdk:"hostname"`
+	Iam_role_arn                 string `mapstructure:"iam_role_arn" tfsdk:"iam_role_arn"`
 	Password                     string `mapstructure:"password" tfsdk:"password"`
 	Port                         int64  `mapstructure:"port" tfsdk:"port"`
 	S3_bucket_name               string `mapstructure:"s3_bucket_name" tfsdk:"s3_bucket_name"`
@@ -279,12 +307,15 @@ func (r *RedshiftConnectionResource) Create(ctx context.Context, req resource.Cr
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"auth_mode":                    types.StringType,
 		"aws_access_key_id":            types.StringType,
 		"aws_secret_access_key":        types.StringType,
 		"aws_user":                     types.StringType,
 		"bulk_sync_staging_schema":     types.StringType,
 		"database":                     types.StringType,
+		"external_id":                  types.StringType,
 		"hostname":                     types.StringType,
+		"iam_role_arn":                 types.StringType,
 		"password":                     types.StringType,
 		"port":                         types.NumberType,
 		"s3_bucket_name":               types.StringType,
@@ -319,6 +350,10 @@ func (r *RedshiftConnectionResource) Read(ctx context.Context, req resource.Read
 	}
 
 	client, err := r.provider.Client(data.Organization.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddWarning("Error getting client; trying partner client", err.Error())
+		client, err = r.provider.PartnerClient()
+	}
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
@@ -361,12 +396,15 @@ func (r *RedshiftConnectionResource) Read(ctx context.Context, req resource.Read
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"auth_mode":                    types.StringType,
 		"aws_access_key_id":            types.StringType,
 		"aws_secret_access_key":        types.StringType,
 		"aws_user":                     types.StringType,
 		"bulk_sync_staging_schema":     types.StringType,
 		"database":                     types.StringType,
+		"external_id":                  types.StringType,
 		"hostname":                     types.StringType,
+		"iam_role_arn":                 types.StringType,
 		"password":                     types.StringType,
 		"port":                         types.NumberType,
 		"s3_bucket_name":               types.StringType,
@@ -446,12 +484,15 @@ func (r *RedshiftConnectionResource) Update(ctx context.Context, req resource.Up
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"auth_mode":                    types.StringType,
 		"aws_access_key_id":            types.StringType,
 		"aws_secret_access_key":        types.StringType,
 		"aws_user":                     types.StringType,
 		"bulk_sync_staging_schema":     types.StringType,
 		"database":                     types.StringType,
+		"external_id":                  types.StringType,
 		"hostname":                     types.StringType,
+		"iam_role_arn":                 types.StringType,
 		"password":                     types.StringType,
 		"port":                         types.NumberType,
 		"s3_bucket_name":               types.StringType,

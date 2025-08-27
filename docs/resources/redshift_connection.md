@@ -16,6 +16,7 @@ Redshift Connection
 resource "polytomic_redshift_connection" "redshift" {
   name = "example"
   configuration = {
+    auth_mode             = "access_key_and_secret"
     aws_access_key_id     = "AKIAIOSFODNN7EXAMPLE"
     aws_secret_access_key = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
     database              = "mydb"
@@ -62,6 +63,9 @@ state before it will take effect on a destroy operation.
 
 Required:
 
+- `auth_mode` (String) Authentication Method
+
+    How to authenticate with AWS. Defaults to Access Key and Secret
 - `database` (String)
 - `hostname` (String)
 - `password` (String, Sensitive)
@@ -76,6 +80,10 @@ Optional:
 - `aws_secret_access_key` (String, Sensitive) AWS Secret Access Key (destinations only)
 - `aws_user` (String) User ARN
 - `bulk_sync_staging_schema` (String) Staging schema name
+- `external_id` (String) External ID
+
+    External ID for the IAM role
+- `iam_role_arn` (String) IAM Role ARN
 - `s3_bucket_name` (String) S3 Bucket Name (destinations only)
 
     Name of bucket used for staging data load files
