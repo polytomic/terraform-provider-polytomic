@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/polytomic/terraform-provider-polytomic/provider/internal/providerclient"
+	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -64,6 +64,10 @@ func (d *MarketoConnectionDataSource) Schema(ctx context.Context, req datasource
 					},
 					"enforce_api_limits": schema.BoolAttribute{
 						MarkdownDescription: `Enforce API limits`,
+						Computed:            true,
+					},
+					"include_static_lists": schema.BoolAttribute{
+						MarkdownDescription: `Include static list support`,
 						Computed:            true,
 					},
 					"oauth_token_expiry": schema.StringAttribute{
@@ -121,6 +125,9 @@ func (d *MarketoConnectionDataSource) Read(ctx context.Context, req datasource.R
 			),
 			"enforce_api_limits": types.BoolValue(
 				getValueOrEmpty(connection.Data.Configuration["enforce_api_limits"], "bool").(bool),
+			),
+			"include_static_lists": types.BoolValue(
+				getValueOrEmpty(connection.Data.Configuration["include_static_lists"], "bool").(bool),
 			),
 			"oauth_token_expiry": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["oauth_token_expiry"], "string").(string),

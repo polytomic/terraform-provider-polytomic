@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/polytomic/terraform-provider-polytomic/provider/internal/providerclient"
+	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -58,6 +58,10 @@ func (d *HubspotConnectionDataSource) Schema(ctx context.Context, req datasource
 						MarkdownDescription: `HubSpot user`,
 						Computed:            true,
 					},
+					"include_static_list_support": schema.BoolAttribute{
+						MarkdownDescription: `Include static list support`,
+						Computed:            true,
+					},
 				},
 				Optional: true,
 			},
@@ -99,6 +103,9 @@ func (d *HubspotConnectionDataSource) Read(ctx context.Context, req datasource.R
 			),
 			"hub_user": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["hub_user"], "string").(string),
+			),
+			"include_static_list_support": types.BoolValue(
+				getValueOrEmpty(connection.Data.Configuration["include_static_list_support"], "bool").(bool),
 			),
 		},
 	)

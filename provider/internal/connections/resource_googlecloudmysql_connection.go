@@ -23,7 +23,7 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/polytomic-go"
 	ptcore "github.com/polytomic/polytomic-go/core"
-	"github.com/polytomic/terraform-provider-polytomic/provider/internal/providerclient"
+	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -213,6 +213,10 @@ func (r *GooglecloudmysqlConnectionResource) Read(ctx context.Context, req resou
 	}
 
 	client, err := r.provider.Client(data.Organization.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddWarning("Error getting client; trying partner client", err.Error())
+		client, err = r.provider.PartnerClient()
+	}
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return

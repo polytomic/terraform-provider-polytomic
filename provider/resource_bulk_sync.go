@@ -27,7 +27,7 @@ import (
 	"github.com/polytomic/polytomic-go"
 	"github.com/polytomic/polytomic-go/bulksync"
 	ptcore "github.com/polytomic/polytomic-go/core"
-	"github.com/polytomic/terraform-provider-polytomic/provider/internal/providerclient"
+	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces

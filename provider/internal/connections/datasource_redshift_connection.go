@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/polytomic/terraform-provider-polytomic/provider/internal/providerclient"
+	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -50,6 +50,12 @@ func (d *RedshiftConnectionDataSource) Schema(ctx context.Context, req datasourc
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
+					"auth_mode": schema.StringAttribute{
+						MarkdownDescription: `Authentication Method
+
+    How to authenticate with AWS. Defaults to Access Key and Secret`,
+						Computed: true,
+					},
 					"aws_access_key_id": schema.StringAttribute{
 						MarkdownDescription: `AWS Access Key ID (destinations only)
 
@@ -68,8 +74,18 @@ func (d *RedshiftConnectionDataSource) Schema(ctx context.Context, req datasourc
 						MarkdownDescription: ``,
 						Computed:            true,
 					},
+					"external_id": schema.StringAttribute{
+						MarkdownDescription: `External ID
+
+    External ID for the IAM role`,
+						Computed: true,
+					},
 					"hostname": schema.StringAttribute{
 						MarkdownDescription: ``,
+						Computed:            true,
+					},
+					"iam_role_arn": schema.StringAttribute{
+						MarkdownDescription: `IAM Role ARN`,
 						Computed:            true,
 					},
 					"port": schema.Int64Attribute{
@@ -148,6 +164,9 @@ func (d *RedshiftConnectionDataSource) Read(ctx context.Context, req datasource.
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttributeTypes(ctx),
 		map[string]attr.Value{
+			"auth_mode": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["auth_mode"], "string").(string),
+			),
 			"aws_access_key_id": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["aws_access_key_id"], "string").(string),
 			),
@@ -160,8 +179,14 @@ func (d *RedshiftConnectionDataSource) Read(ctx context.Context, req datasource.
 			"database": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["database"], "string").(string),
 			),
+			"external_id": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["external_id"], "string").(string),
+			),
 			"hostname": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["hostname"], "string").(string),
+			),
+			"iam_role_arn": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["iam_role_arn"], "string").(string),
 			),
 			"port": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["port"], "string").(string),

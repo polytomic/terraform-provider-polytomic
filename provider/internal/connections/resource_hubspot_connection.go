@@ -23,7 +23,7 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/polytomic-go"
 	ptcore "github.com/polytomic/polytomic-go/core"
-	"github.com/polytomic/terraform-provider-polytomic/provider/internal/providerclient"
+	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -77,6 +77,13 @@ var HubspotSchema = schema.Schema{
 					Computed:            true,
 					Sensitive:           false,
 				},
+				"include_static_list_support": schema.BoolAttribute{
+					MarkdownDescription: `Include static list support`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
 				"oauth_refresh_token": schema.StringAttribute{
 					MarkdownDescription: ``,
 					Required:            false,
@@ -114,11 +121,12 @@ func (t *HubspotConnectionResource) Schema(ctx context.Context, req resource.Sch
 }
 
 type HubspotConf struct {
-	Client_id           string `mapstructure:"client_id" tfsdk:"client_id"`
-	Client_secret       string `mapstructure:"client_secret" tfsdk:"client_secret"`
-	Hub_domain          string `mapstructure:"hub_domain" tfsdk:"hub_domain"`
-	Hub_user            string `mapstructure:"hub_user" tfsdk:"hub_user"`
-	Oauth_refresh_token string `mapstructure:"oauth_refresh_token" tfsdk:"oauth_refresh_token"`
+	Client_id                   string `mapstructure:"client_id" tfsdk:"client_id"`
+	Client_secret               string `mapstructure:"client_secret" tfsdk:"client_secret"`
+	Hub_domain                  string `mapstructure:"hub_domain" tfsdk:"hub_domain"`
+	Hub_user                    string `mapstructure:"hub_user" tfsdk:"hub_user"`
+	Include_static_list_support bool   `mapstructure:"include_static_list_support" tfsdk:"include_static_list_support"`
+	Oauth_refresh_token         string `mapstructure:"oauth_refresh_token" tfsdk:"oauth_refresh_token"`
 }
 
 type HubspotConnectionResource struct {
@@ -177,11 +185,12 @@ func (r *HubspotConnectionResource) Create(ctx context.Context, req resource.Cre
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"client_id":           types.StringType,
-		"client_secret":       types.StringType,
-		"hub_domain":          types.StringType,
-		"hub_user":            types.StringType,
-		"oauth_refresh_token": types.StringType,
+		"client_id":                   types.StringType,
+		"client_secret":               types.StringType,
+		"hub_domain":                  types.StringType,
+		"hub_user":                    types.StringType,
+		"include_static_list_support": types.BoolType,
+		"oauth_refresh_token":         types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -205,6 +214,10 @@ func (r *HubspotConnectionResource) Read(ctx context.Context, req resource.ReadR
 	}
 
 	client, err := r.provider.Client(data.Organization.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddWarning("Error getting client; trying partner client", err.Error())
+		client, err = r.provider.PartnerClient()
+	}
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
@@ -247,11 +260,12 @@ func (r *HubspotConnectionResource) Read(ctx context.Context, req resource.ReadR
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"client_id":           types.StringType,
-		"client_secret":       types.StringType,
-		"hub_domain":          types.StringType,
-		"hub_user":            types.StringType,
-		"oauth_refresh_token": types.StringType,
+		"client_id":                   types.StringType,
+		"client_secret":               types.StringType,
+		"hub_domain":                  types.StringType,
+		"hub_user":                    types.StringType,
+		"include_static_list_support": types.BoolType,
+		"oauth_refresh_token":         types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -320,11 +334,12 @@ func (r *HubspotConnectionResource) Update(ctx context.Context, req resource.Upd
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"client_id":           types.StringType,
-		"client_secret":       types.StringType,
-		"hub_domain":          types.StringType,
-		"hub_user":            types.StringType,
-		"oauth_refresh_token": types.StringType,
+		"client_id":                   types.StringType,
+		"client_secret":               types.StringType,
+		"hub_domain":                  types.StringType,
+		"hub_user":                    types.StringType,
+		"include_static_list_support": types.BoolType,
+		"oauth_refresh_token":         types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

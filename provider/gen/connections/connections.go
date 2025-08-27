@@ -215,29 +215,35 @@ type Importable struct {
 	ResourceName string
 }
 
-func fetchOrRead[T any, PT *T](ctx context.Context, path string, fetch func(context.Context) (PT, error)) (PT, error) {
+type ConnectionType struct {
+	ID       string `json:"id"`
+	Name     string `json:"name"`
+	UseOAuth bool   `json:"use_oauth"`
+}
+
+func fetchOrRead[T any](ctx context.Context, path string, fetch func(context.Context) (T, error)) (T, error) {
 	data, err := fetch(ctx)
 	if err != nil {
+		// an error occurred fetching; see if we have a cached copy
 		if ct, err := os.Open(path); err == nil {
-			err = json.NewDecoder(ct).Decode(&data)
+			err := json.NewDecoder(ct).Decode(&data)
 			if err != nil {
-				return nil, fmt.Errorf("error reading %s: %w", path, err)
+				return *(new(T)), fmt.Errorf("error reading %s: %w", path, err)
 			}
-		}
-		if data == nil {
+		} else {
 			// couldn't fetch or read
-			return nil, err
+			return *(new(T)), err
 		}
 	} else {
 		// write the fetched data to path
 		f, err := os.Create(path)
 		if err != nil {
-			return nil, fmt.Errorf("error creating %s: %w", path, err)
+			return *(new(T)), fmt.Errorf("error creating %s: %w", path, err)
 		}
 		defer f.Close()
 		err = json.NewEncoder(f).Encode(data)
 		if err != nil {
-			return nil, fmt.Errorf("error encoding %s: %w", path, err)
+			return *(new(T)), fmt.Errorf("error encoding %s: %w", path, err)
 		}
 	}
 	return data, nil
@@ -247,8 +253,22 @@ func GenerateConnections(ctx context.Context) error {
 	client := getPTClient()
 	data, err := fetchOrRead(ctx,
 		connectionTypes,
-		func(ctx context.Context) (*polytomic.ConnectionTypeResponseEnvelope, error) {
-			return client.Connections.GetTypes(ctx)
+		func(ctx context.Context) ([]ConnectionType, error) {
+			connTypes, err := client.Connections.GetTypes(ctx)
+			if err != nil {
+				return nil, err
+			}
+
+			result := make([]ConnectionType, len(connTypes.Data))
+			for i, ct := range connTypes.Data {
+				result[i] = ConnectionType{
+					ID:       pointer.Get(ct.Id),
+					Name:     pointer.Get(ct.Name),
+					UseOAuth: pointer.Get(ct.UseOauth),
+				}
+			}
+
+			return result, nil
 		},
 	)
 	if err != nil {
@@ -258,21 +278,21 @@ func GenerateConnections(ctx context.Context) error {
 	resources := []Importable{}
 	datasources := []Importable{}
 
-	for _, connType := range data.Data {
+	for _, connType := range data {
 		connSchema, err := fetchOrRead(ctx,
-			filepath.Join(jsonschemaPath, fmt.Sprintf("%s.json", pointer.Get(connType.Id))),
+			filepath.Join(jsonschemaPath, fmt.Sprintf("%s.json", connType.ID)),
 			func(ctx context.Context) (*polytomic.JsonschemaSchema, error) {
-				return client.Connections.GetConnectionTypeSchema(ctx, pointer.Get(connType.Id))
+				return client.Connections.GetConnectionTypeSchema(ctx, connType.ID)
 			},
 		)
 		if err != nil {
 			return err
 		}
 		r := Connection{
-			Name:         cmp.Or(pointer.Get(connType.Name), pointer.Get(connType.Id)),
-			ResourceName: pointer.Get(connType.Id),
-			Connection:   pointer.Get(connType.Id),
-			Type:         pointer.Get(connType.Id),
+			Name:         cmp.Or(connType.Name, connType.ID),
+			ResourceName: connType.ID,
+			Connection:   connType.ID,
+			Type:         connType.ID,
 			Datasource:   true,
 		}
 

@@ -60,6 +60,7 @@ Optional:
 - `client_secret` (String, Sensitive)
 - `hub_domain` (String) HubSpot domain
 - `hub_user` (String) HubSpot user
+- `include_static_list_support` (Boolean) Include static list support
 - `oauth_refresh_token` (String, Sensitive)
 
 

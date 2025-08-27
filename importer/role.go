@@ -6,6 +6,7 @@ import (
 	"io"
 
 	"github.com/AlekSi/pointer"
+	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hclwrite"
 	"github.com/polytomic/polytomic-go"
 	ptclient "github.com/polytomic/polytomic-go/client"
@@ -50,6 +51,8 @@ func (r *Roles) Init(ctx context.Context) error {
 		r.Resources[name] = role
 	}
 
+	// Organization variable will be handled centrally
+
 	return nil
 
 }
@@ -61,9 +64,16 @@ func (r *Roles) GenerateTerraformFiles(ctx context.Context, writer io.Writer, re
 		body := hclFile.Body()
 		resourceBlock := body.AppendNewBlock("resource", []string{RoleResource, name})
 		resourceBlock.Body().SetAttributeValue("name", cty.StringVal(pointer.GetString(role.Name)))
-		if role.OrganizationId != nil {
-			resourceBlock.Body().SetAttributeValue("organization", cty.StringVal(pointer.GetString(role.OrganizationId)))
-		}
+		resourceBlock.Body().SetAttributeTraversal("organization",
+			hcl.Traversal{
+				hcl.TraverseRoot{
+					Name: "local",
+				},
+				hcl.TraverseAttr{
+					Name: "organization_id",
+				},
+			},
+		)
 
 		writer.Write(ReplaceRefs(hclFile.Bytes(), refs))
 	}
@@ -89,7 +99,7 @@ func (r *Roles) Filename() string {
 func (r *Roles) ResourceRefs() map[string]string {
 	result := make(map[string]string)
 	for name, role := range r.Resources {
-		result[pointer.GetString(role.Id)] = name
+		result[pointer.GetString(role.Id)] = fmt.Sprintf("polytomic_role.%s.id", name)
 	}
 	return result
 }

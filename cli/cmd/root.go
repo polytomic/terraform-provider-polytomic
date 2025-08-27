@@ -16,22 +16,26 @@ func newRootCmd(version string) *cobra.Command {
 		Short:   "Polytomic importer is a CLI tool to import existing Polytomic resources into Terraform",
 	}
 
-	var apiKey, url string
+	var apiKey, url, partnerKey, deploymentKey string
 	rootCmd.PersistentFlags().StringVar(&apiKey, "api-key", "", "Polytomic API key")
 	viper.BindPFlag("api-key", rootCmd.PersistentFlags().Lookup("api-key"))
+	rootCmd.PersistentFlags().StringVar(&partnerKey, "partner-key", "", "Polytomic partner key (for multi-organization access)")
+	viper.BindPFlag("partner-key", rootCmd.PersistentFlags().Lookup("partner-key"))
+	rootCmd.PersistentFlags().StringVar(&deploymentKey, "deployment-key", "", "Polytomic deployment key (for multi-organization access)")
+	viper.BindPFlag("deployment-key", rootCmd.PersistentFlags().Lookup("deployment-key"))
 	rootCmd.PersistentFlags().StringVar(&url, "url", "app.polytomic.com", "Polytomic API URL")
 	viper.BindPFlag("url", rootCmd.PersistentFlags().Lookup("url"))
 
 	// Run flags
-	var output string
+	var output, organizations string
 	runCmd.PersistentFlags().StringVar(&output, "output", ".", "Output directory for generated files (defaults to current directory)")
+	runCmd.PersistentFlags().StringVar(&organizations, "organizations", "", "Comma-separated list of organization IDs to import (partner-key or deployment-key only)")
 	runCmd.PersistentFlags().Bool("replace", false, "Replace existing files")
 	runCmd.PersistentFlags().Bool("include-permissions", false, "Include permission resources")
-	runCmd.PersistentFlags().Bool("with-api-key", false, "Include API key in provider block")
 	viper.BindPFlag("output", runCmd.PersistentFlags().Lookup("output"))
+	viper.BindPFlag("organizations", runCmd.PersistentFlags().Lookup("organizations"))
 	viper.BindPFlag("replace", runCmd.PersistentFlags().Lookup("replace"))
 	viper.BindPFlag("include-permissions", runCmd.PersistentFlags().Lookup("include-permissions"))
-	viper.BindPFlag("with-api-key", runCmd.PersistentFlags().Lookup("with-api-key"))
 
 	// Register commands
 	rootCmd.AddCommand(runCmd)

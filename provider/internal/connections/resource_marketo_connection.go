@@ -23,7 +23,7 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/polytomic-go"
 	ptcore "github.com/polytomic/polytomic-go/core"
-	"github.com/polytomic/terraform-provider-polytomic/provider/internal/providerclient"
+	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -81,6 +81,13 @@ var MarketoSchema = schema.Schema{
 					Computed:            true,
 					Sensitive:           false,
 				},
+				"include_static_lists": schema.BoolAttribute{
+					MarkdownDescription: `Include static list support`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
 				"oauth_token_expiry": schema.StringAttribute{
 					MarkdownDescription: ``,
 					Required:            false,
@@ -122,13 +129,14 @@ func (t *MarketoConnectionResource) Schema(ctx context.Context, req resource.Sch
 }
 
 type MarketoConf struct {
-	Client_id          string `mapstructure:"client_id" tfsdk:"client_id"`
-	Client_secret      string `mapstructure:"client_secret" tfsdk:"client_secret"`
-	Concurrent_imports int64  `mapstructure:"concurrent_imports" tfsdk:"concurrent_imports"`
-	Daily_api_calls    int64  `mapstructure:"daily_api_calls" tfsdk:"daily_api_calls"`
-	Enforce_api_limits bool   `mapstructure:"enforce_api_limits" tfsdk:"enforce_api_limits"`
-	Oauth_token_expiry string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
-	Rest_endpoint      string `mapstructure:"rest_endpoint" tfsdk:"rest_endpoint"`
+	Client_id            string `mapstructure:"client_id" tfsdk:"client_id"`
+	Client_secret        string `mapstructure:"client_secret" tfsdk:"client_secret"`
+	Concurrent_imports   int64  `mapstructure:"concurrent_imports" tfsdk:"concurrent_imports"`
+	Daily_api_calls      int64  `mapstructure:"daily_api_calls" tfsdk:"daily_api_calls"`
+	Enforce_api_limits   bool   `mapstructure:"enforce_api_limits" tfsdk:"enforce_api_limits"`
+	Include_static_lists bool   `mapstructure:"include_static_lists" tfsdk:"include_static_lists"`
+	Oauth_token_expiry   string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
+	Rest_endpoint        string `mapstructure:"rest_endpoint" tfsdk:"rest_endpoint"`
 }
 
 type MarketoConnectionResource struct {
@@ -187,13 +195,14 @@ func (r *MarketoConnectionResource) Create(ctx context.Context, req resource.Cre
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"client_id":          types.StringType,
-		"client_secret":      types.StringType,
-		"concurrent_imports": types.NumberType,
-		"daily_api_calls":    types.NumberType,
-		"enforce_api_limits": types.BoolType,
-		"oauth_token_expiry": types.StringType,
-		"rest_endpoint":      types.StringType,
+		"client_id":            types.StringType,
+		"client_secret":        types.StringType,
+		"concurrent_imports":   types.NumberType,
+		"daily_api_calls":      types.NumberType,
+		"enforce_api_limits":   types.BoolType,
+		"include_static_lists": types.BoolType,
+		"oauth_token_expiry":   types.StringType,
+		"rest_endpoint":        types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -217,6 +226,10 @@ func (r *MarketoConnectionResource) Read(ctx context.Context, req resource.ReadR
 	}
 
 	client, err := r.provider.Client(data.Organization.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddWarning("Error getting client; trying partner client", err.Error())
+		client, err = r.provider.PartnerClient()
+	}
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
@@ -259,13 +272,14 @@ func (r *MarketoConnectionResource) Read(ctx context.Context, req resource.ReadR
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"client_id":          types.StringType,
-		"client_secret":      types.StringType,
-		"concurrent_imports": types.NumberType,
-		"daily_api_calls":    types.NumberType,
-		"enforce_api_limits": types.BoolType,
-		"oauth_token_expiry": types.StringType,
-		"rest_endpoint":      types.StringType,
+		"client_id":            types.StringType,
+		"client_secret":        types.StringType,
+		"concurrent_imports":   types.NumberType,
+		"daily_api_calls":      types.NumberType,
+		"enforce_api_limits":   types.BoolType,
+		"include_static_lists": types.BoolType,
+		"oauth_token_expiry":   types.StringType,
+		"rest_endpoint":        types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -334,13 +348,14 @@ func (r *MarketoConnectionResource) Update(ctx context.Context, req resource.Upd
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"client_id":          types.StringType,
-		"client_secret":      types.StringType,
-		"concurrent_imports": types.NumberType,
-		"daily_api_calls":    types.NumberType,
-		"enforce_api_limits": types.BoolType,
-		"oauth_token_expiry": types.StringType,
-		"rest_endpoint":      types.StringType,
+		"client_id":            types.StringType,
+		"client_secret":        types.StringType,
+		"concurrent_imports":   types.NumberType,
+		"daily_api_calls":      types.NumberType,
+		"enforce_api_limits":   types.BoolType,
+		"include_static_lists": types.BoolType,
+		"oauth_token_expiry":   types.StringType,
+		"rest_endpoint":        types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

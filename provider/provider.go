@@ -14,20 +14,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 	"github.com/polytomic/terraform-provider-polytomic/provider/internal/connections"
-	"github.com/polytomic/terraform-provider-polytomic/provider/internal/providerclient"
 )
 
 const (
 	// Name is the name of the provider.
 	Name = "polytomic"
-
-	//PolytomicDeploymentKey is the environment variable name for the Polytomic deployment key
-	PolytomicDeploymentKey = "POLYTOMIC_DEPLOYMENT_KEY"
-	//PolytomicAPIKey is the environment variable name for the Polytomic API key
-	PolytomicAPIKey = "POLYTOMIC_API_KEY"
-	//PolytomicDeploymentURL is the environment variable name for the Polytomic deployment URL
-	PolytomicDeploymentURL = "POLYTOMIC_DEPLOYMENT_URL"
 
 	PolytomicDefaultURL = "app.polytomic.com"
 )
@@ -86,7 +79,7 @@ func (p *Provider) Configure(ctx context.Context, req provider.ConfigureRequest,
 
 	deployment := cmp.Or(
 		data.DeploymentUrl.ValueString(),
-		os.Getenv(PolytomicDeploymentURL),
+		os.Getenv(providerclient.PolytomicDeploymentURL),
 		PolytomicDefaultURL,
 	)
 	if !strings.HasPrefix(strings.ToLower(deployment), "http") {
@@ -100,24 +93,24 @@ func (p *Provider) Configure(ctx context.Context, req provider.ConfigureRequest,
 	if deploymentURL.Scheme == "" {
 		deploymentURL.Scheme = "https"
 	}
-	providerOpts := []providerclient.ProviderOpt{
-		providerclient.WithDeploymentURL(deploymentURL.String()),
-		providerclient.WithDeploymentKey(
-			cmp.Or(
-				data.DeploymentKey.ValueString(),
-				os.Getenv(PolytomicDeploymentKey),
-			),
-		),
-		providerclient.WithPartnerKey(data.PartnerKey.ValueString()),
-		providerclient.WithAPIKey(
-			cmp.Or(
-				data.APIKey.ValueString(),
-				os.Getenv(PolytomicAPIKey),
-			),
-		),
-	}
 
-	clientProvider, err := providerclient.NewClientProvider(providerOpts...)
+	clientProvider, err := providerclient.NewClientProvider(
+		providerclient.Options{
+			DeploymentURL: deploymentURL.String(),
+			DeploymentKey: cmp.Or(
+				data.DeploymentKey.ValueString(),
+				os.Getenv(providerclient.PolytomicDeploymentKey),
+			),
+			PartnerKey: cmp.Or(
+				data.PartnerKey.ValueString(),
+				os.Getenv(providerclient.PolytomicPartnerKey),
+			),
+			APIKey: cmp.Or(
+				data.APIKey.ValueString(),
+				os.Getenv(providerclient.PolytomicAPIKey),
+			),
+		},
+	)
 	if err != nil {
 		resp.Diagnostics.AddError("Error configuring provider", err.Error())
 		return

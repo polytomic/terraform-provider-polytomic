@@ -40,6 +40,7 @@ Read-Only:
 - `concurrent_imports` (Number) Concurrent import jobs
 - `daily_api_calls` (Number) Daily call limit
 - `enforce_api_limits` (Boolean) Enforce API limits
+- `include_static_lists` (Boolean) Include static list support
 - `oauth_token_expiry` (String)
 - `rest_endpoint` (String) REST Endpoint
 
