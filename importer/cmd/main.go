@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"runtime"
 	"runtime/debug"
-
-	"github.com/polytomic/terraform-provider-polytomic/cli/cmd"
 )
 
 var (
@@ -16,7 +14,7 @@ var (
 )
 
 func main() {
-	cmd.Execute(buildVersion(version, commit, date, builtBy))
+	Execute(buildVersion(version, commit, date, builtBy))
 }
 
 func buildVersion(version, commit, date, builtBy string) string {
