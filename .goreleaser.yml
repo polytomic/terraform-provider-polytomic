@@ -55,12 +55,12 @@ builds:
         goarch: "386"
     binary: "polytomic_importer_v{{ .Version }}"
 archives:
-  - format: zip
+  - formats: zip
     id: "{{ .ProjectName }}_v{{ .Version }}"
     builds:
       - "{{ .ProjectName }}_v{{ .Version }}"
     name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
-  - format: zip
+  - formats: zip
     id: polytomic_importer
     builds:
       - polytomic_importer
