@@ -34,7 +34,7 @@ builds:
   - env:
       - CGO_ENABLED=0
     id: polytomic_importer
-    main: ./importer/cmd/main.go
+    main: ./importer/cmd
     mod_timestamp: "{{ .CommitTimestamp }}"
     flags:
       - -trimpath
