@@ -4,6 +4,23 @@ const (
 	RedshiftServerlessConnectionType = "redshiftserverless"
 )
 
+// S3Configuration extends the polytomic.S3Configuration with new fields
+type S3Configuration struct {
+	// Existing fields
+	AwsAccessKeyID     string `json:"aws_access_key_id" mapstructure:"aws_access_key_id" tfsdk:"aws_access_key_id"`
+	AwsSecretAccessKey string `json:"aws_secret_access_key" mapstructure:"aws_secret_access_key" tfsdk:"aws_secret_access_key"`
+	S3BucketRegion     string `json:"s3_bucket_region" mapstructure:"s3_bucket_region" tfsdk:"s3_bucket_region"`
+	S3BucketName       string `json:"s3_bucket_name" mapstructure:"s3_bucket_name" tfsdk:"s3_bucket_name"`
+
+	// New fields
+	IsSingleTable         bool   `json:"is_single_table" mapstructure:"is_single_table" tfsdk:"is_single_table"`
+	IsDirectorySnapshot   bool   `json:"is_directory_snapshot" mapstructure:"is_directory_snapshot" tfsdk:"is_directory_snapshot"`
+	DirGlobPattern        string `json:"directory_glob_pattern" mapstructure:"directory_glob_pattern" tfsdk:"directory_glob_pattern"`
+	SingleTableName       string `json:"single_table_name" mapstructure:"single_table_name" tfsdk:"single_table_name"`
+	SingleTableFileFormat string `json:"single_table_file_format" mapstructure:"single_table_file_format" tfsdk:"single_table_file_format"`
+	SkipLines             int    `json:"skip_lines" mapstructure:"skip_lines" tfsdk:"skip_lines"`
+}
+
 type RedshiftServerlessConnectionConfiguration struct {
 	Database  string `json:"database" mapstructure:"database" tfsdk:"database"`
 	Workgroup string `json:"workgroup" mapstructure:"workgroup" tfsdk:"workgroup"`

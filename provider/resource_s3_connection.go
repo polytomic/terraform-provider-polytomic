@@ -15,7 +15,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -69,6 +71,52 @@ func (t *S3ConnectionResource) Schema(ctx context.Context, req resource.SchemaRe
 						Computed:            false,
 						Sensitive:           false,
 					},
+					"is_single_table": schema.BoolAttribute{
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+						Sensitive:           false,
+					},
+					"is_directory_snapshot": schema.BoolAttribute{
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+						Sensitive:           false,
+					},
+					"dir_glob_pattern": schema.StringAttribute{
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+						Sensitive:           false,
+						Default:             stringdefault.StaticString(""),
+					},
+					"single_table_name": schema.StringAttribute{
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+						Sensitive:           false,
+						Default:             stringdefault.StaticString(""),
+					},
+					"single_table_file_format": schema.StringAttribute{
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+						Sensitive:           false,
+						Default:             stringdefault.StaticString(""),
+					},
+					"skip_lines": schema.Int64Attribute{
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+						Sensitive:           false,
+						Default:             int64default.StaticInt64(0),
+					},
 				},
 
 				Required: true,
@@ -111,11 +159,17 @@ func (r *S3ConnectionResource) Create(ctx context.Context, req resource.CreateRe
 			Name:           data.Name.ValueString(),
 			Type:           polytomic.S3ConnectionType,
 			OrganizationId: data.Organization.ValueString(),
-			Configuration: polytomic.S3Configuration{
-				AwsAccessKeyID:     data.Configuration.Attributes()["aws_access_key_id"].(types.String).ValueString(),
-				AwsSecretAccessKey: data.Configuration.Attributes()["aws_secret_access_key"].(types.String).ValueString(),
-				S3BucketRegion:     data.Configuration.Attributes()["s3_bucket_region"].(types.String).ValueString(),
-				S3BucketName:       data.Configuration.Attributes()["s3_bucket_name"].(types.String).ValueString(),
+			Configuration: S3Configuration{
+				AwsAccessKeyID:        data.Configuration.Attributes()["aws_access_key_id"].(types.String).ValueString(),
+				AwsSecretAccessKey:    data.Configuration.Attributes()["aws_secret_access_key"].(types.String).ValueString(),
+				S3BucketRegion:        data.Configuration.Attributes()["s3_bucket_region"].(types.String).ValueString(),
+				S3BucketName:          data.Configuration.Attributes()["s3_bucket_name"].(types.String).ValueString(),
+				IsSingleTable:         data.Configuration.Attributes()["is_single_table"].(types.Bool).ValueBool(),
+				IsDirectorySnapshot:   data.Configuration.Attributes()["is_directory_snapshot"].(types.Bool).ValueBool(),
+				DirGlobPattern:        data.Configuration.Attributes()["dir_glob_pattern"].(types.String).ValueString(),
+				SingleTableName:       data.Configuration.Attributes()["single_table_name"].(types.String).ValueString(),
+				SingleTableFileFormat: data.Configuration.Attributes()["single_table_file_format"].(types.String).ValueString(),
+				SkipLines:             int(data.Configuration.Attributes()["skip_lines"].(types.Int64).ValueInt64()),
 			},
 		},
 		polytomic.WithIdempotencyKey(uuid.NewString()),
@@ -136,10 +190,16 @@ func (r *S3ConnectionResource) Create(ctx context.Context, req resource.CreateRe
 	decoder, _ := mapstructure.NewDecoder(cfg)
 	decoder.Decode(created.Configuration)
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"aws_access_key_id":     types.StringType,
-		"aws_secret_access_key": types.StringType,
-		"s3_bucket_region":      types.StringType,
-		"s3_bucket_name":        types.StringType,
+		"aws_access_key_id":        types.StringType,
+		"aws_secret_access_key":    types.StringType,
+		"s3_bucket_region":         types.StringType,
+		"s3_bucket_name":           types.StringType,
+		"is_single_table":          types.BoolType,
+		"is_directory_snapshot":    types.BoolType,
+		"dir_glob_pattern":         types.StringType,
+		"single_table_name":        types.StringType,
+		"single_table_file_format": types.StringType,
+		"skip_lines":               types.NumberType,
 	}, output)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -186,10 +246,16 @@ func (r *S3ConnectionResource) Read(ctx context.Context, req resource.ReadReques
 	decoder, _ := mapstructure.NewDecoder(cfg)
 	decoder.Decode(connection.Configuration)
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"aws_access_key_id":     types.StringType,
-		"aws_secret_access_key": types.StringType,
-		"s3_bucket_region":      types.StringType,
-		"s3_bucket_name":        types.StringType,
+		"aws_access_key_id":        types.StringType,
+		"aws_secret_access_key":    types.StringType,
+		"s3_bucket_region":         types.StringType,
+		"s3_bucket_name":           types.StringType,
+		"is_single_table":          types.BoolType,
+		"is_directory_snapshot":    types.BoolType,
+		"dir_glob_pattern":         types.StringType,
+		"single_table_name":        types.StringType,
+		"single_table_file_format": types.StringType,
+		"skip_lines":               types.NumberType,
 	}, output)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -215,11 +281,17 @@ func (r *S3ConnectionResource) Update(ctx context.Context, req resource.UpdateRe
 		polytomic.UpdateConnectionMutation{
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueString(),
-			Configuration: polytomic.S3Configuration{
-				AwsAccessKeyID:     data.Configuration.Attributes()["aws_access_key_id"].(types.String).ValueString(),
-				AwsSecretAccessKey: data.Configuration.Attributes()["aws_secret_access_key"].(types.String).ValueString(),
-				S3BucketRegion:     data.Configuration.Attributes()["s3_bucket_region"].(types.String).ValueString(),
-				S3BucketName:       data.Configuration.Attributes()["s3_bucket_name"].(types.String).ValueString(),
+			Configuration: S3Configuration{
+				AwsAccessKeyID:        data.Configuration.Attributes()["aws_access_key_id"].(types.String).ValueString(),
+				AwsSecretAccessKey:    data.Configuration.Attributes()["aws_secret_access_key"].(types.String).ValueString(),
+				S3BucketRegion:        data.Configuration.Attributes()["s3_bucket_region"].(types.String).ValueString(),
+				S3BucketName:          data.Configuration.Attributes()["s3_bucket_name"].(types.String).ValueString(),
+				IsSingleTable:         data.Configuration.Attributes()["is_single_table"].(types.Bool).ValueBool(),
+				IsDirectorySnapshot:   data.Configuration.Attributes()["is_directory_snapshot"].(types.Bool).ValueBool(),
+				DirGlobPattern:        data.Configuration.Attributes()["dir_glob_pattern"].(types.String).ValueString(),
+				SingleTableName:       data.Configuration.Attributes()["single_table_name"].(types.String).ValueString(),
+				SingleTableFileFormat: data.Configuration.Attributes()["single_table_file_format"].(types.String).ValueString(),
+				SkipLines:             int(data.Configuration.Attributes()["skip_lines"].(types.Int64).ValueInt64()),
 			},
 		},
 		polytomic.WithIdempotencyKey(uuid.NewString()),
@@ -241,10 +313,16 @@ func (r *S3ConnectionResource) Update(ctx context.Context, req resource.UpdateRe
 	decoder, _ := mapstructure.NewDecoder(cfg)
 	decoder.Decode(updated.Configuration)
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"aws_access_key_id":     types.StringType,
-		"aws_secret_access_key": types.StringType,
-		"s3_bucket_region":      types.StringType,
-		"s3_bucket_name":        types.StringType,
+		"aws_access_key_id":        types.StringType,
+		"aws_secret_access_key":    types.StringType,
+		"s3_bucket_region":         types.StringType,
+		"s3_bucket_name":           types.StringType,
+		"is_single_table":          types.BoolType,
+		"is_directory_snapshot":    types.BoolType,
+		"dir_glob_pattern":         types.StringType,
+		"single_table_name":        types.StringType,
+		"single_table_file_format": types.StringType,
+		"skip_lines":               types.NumberType,
 	}, output)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

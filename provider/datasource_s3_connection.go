@@ -61,6 +61,48 @@ func (d *S3ConnectionDataSource) Schema(ctx context.Context, req datasource.Sche
 						Computed:            false,
 						Sensitive:           false,
 					},
+					"is_single_table": schema.BoolAttribute{
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+						Sensitive:           false,
+					},
+					"is_directory_snapshot": schema.BoolAttribute{
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+						Sensitive:           false,
+					},
+					"dir_glob_pattern": schema.StringAttribute{
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+						Sensitive:           false,
+					},
+					"single_table_name": schema.StringAttribute{
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+						Sensitive:           false,
+					},
+					"single_table_file_format": schema.StringAttribute{
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+						Sensitive:           false,
+					},
+					"skip_lines": schema.Int64Attribute{
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+						Sensitive:           false,
+					},
 				},
 				Optional: true,
 			},
@@ -114,7 +156,7 @@ func (d *S3ConnectionDataSource) Read(ctx context.Context, req datasource.ReadRe
 	data.Id = types.StringValue(connection.ID)
 	data.Name = types.StringValue(connection.Name)
 	data.Organization = types.StringValue(connection.OrganizationId)
-	var conf polytomic.S3Configuration
+	var conf S3Configuration
 	err = mapstructure.Decode(connection.Configuration, &conf)
 	if err != nil {
 		resp.Diagnostics.AddError("Error decoding connection", err.Error())
@@ -130,6 +172,24 @@ func (d *S3ConnectionDataSource) Read(ctx context.Context, req datasource.ReadRe
 			),
 			"s3_bucket_name": types.StringValue(
 				conf.S3BucketName,
+			),
+			"is_single_table": types.BoolValue(
+				conf.IsSingleTable,
+			),
+			"is_directory_snapshot": types.BoolValue(
+				conf.IsDirectorySnapshot,
+			),
+			"dir_glob_pattern": types.StringValue(
+				conf.DirGlobPattern,
+			),
+			"single_table_name": types.StringValue(
+				conf.SingleTableName,
+			),
+			"single_table_file_format": types.StringValue(
+				conf.SingleTableFileFormat,
+			),
+			"skip_lines": types.Int64Value(
+				int64(conf.SkipLines),
 			),
 		},
 	)

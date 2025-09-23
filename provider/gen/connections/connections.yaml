@@ -163,6 +163,30 @@ connections:
         type: string
         required: true
         example: "my-bucket"
+      - name: IsSingleTable
+        type: bool
+        optional: true
+        example: true
+      - name: IsDirectorySnapshot
+        type: bool
+        optional: true
+        example: true
+      - name: DirGlobPattern
+        type: string
+        optional: true
+        example: "data/tables/*/*.csv"
+      - name: SingleTableName
+        type: string
+        optional: true
+        example: "my_table"
+      - name: SingleTableFileFormat
+        type: string
+        optional: true
+        example: "csv"
+      - name: SkipLines
+        type: int
+        optional: true
+        example: 1
   - connection: sqlserver
     name: SQL Server
     type: polytomic.SQLServerConnectionType

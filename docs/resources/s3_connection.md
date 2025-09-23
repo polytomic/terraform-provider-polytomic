@@ -13,13 +13,44 @@ S3 Connection
 ## Example Usage
 
 ```terraform
-resource "polytomic_s3_connection" "s3" {
-  name = "example"
+resource "polytomic_s3_connection" "s3_basic" {
+  name = "example-basic"
   configuration = {
     aws_access_key_id     = "EXAMPLEACCESSKEYID"
     aws_secret_access_key = "EXAMPLEACCESSKEYSECRET"
     s3_bucket_region      = "us-east-1"
     s3_bucket_name        = "my-bucket"
+  }
+}
+
+# Example with single table configuration
+resource "polytomic_s3_connection" "s3_single_table" {
+  name = "example-single-table"
+  configuration = {
+    aws_access_key_id     = "EXAMPLEACCESSKEYID"
+    aws_secret_access_key = "EXAMPLEACCESSKEYSECRET"
+    s3_bucket_region      = "us-east-1"
+    s3_bucket_name        = "my-bucket"
+
+    is_single_table           = true
+    single_table_name         = "my_data"
+    single_table_file_format  = "parquet"
+    skip_lines                = 1
+  }
+}
+
+# Example with directory snapshot configuration
+resource "polytomic_s3_connection" "s3_directory_snapshot" {
+  name = "example-directory-snapshot"
+  configuration = {
+    aws_access_key_id     = "EXAMPLEACCESSKEYID"
+    aws_secret_access_key = "EXAMPLEACCESSKEYSECRET"
+    s3_bucket_region      = "us-east-1"
+    s3_bucket_name        = "my-bucket"
+
+    is_single_table       = true
+    is_directory_snapshot = true
+    directory_glob_pattern = "data/*/table_*.parquet"
   }
 }
 ```
@@ -50,5 +81,14 @@ Required:
 - `aws_secret_access_key` (String, Sensitive)
 - `s3_bucket_name` (String)
 - `s3_bucket_region` (String)
+
+Optional:
+
+- `directory_glob_pattern` (String) Tables glob path. Required when `is_directory_snapshot` is `true`
+- `is_directory_snapshot` (Boolean) Multi-directory multi-table mode. Default: `false`. Can only be used when `is_single_table` is `true`
+- `is_single_table` (Boolean) Treat the files as a single table (time-based snapshots). Default: `false`
+- `single_table_file_format` (String) File format for single table mode. Valid values: `csv`, `json`, `parquet`, `avro`, `orc`. Default: `csv`. Required when `is_single_table` is `true`
+- `single_table_name` (String) Collection name for single table mode. Required when `is_single_table` is `true` and `is_directory_snapshot` is `false`
+- `skip_lines` (Number) Skip first N lines of each CSV file. Default: `0`. Only applicable when `single_table_file_format` is `csv`
 
 
