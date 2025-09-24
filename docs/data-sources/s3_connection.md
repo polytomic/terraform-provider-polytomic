@@ -37,7 +37,19 @@ data "polytomic_s3_connection" "s3" {
 
 Required:
 
+- `auth_mode` (String) Either `iam_role` or `access_key_and_secret`.
 - `s3_bucket_name` (String)
 - `s3_bucket_region` (String)
+
+Optional:
+
+- `dir_glob_pattern` (String) Tables glob path. Required when `is_directory_snapshot` is `true`.
+- `external_id` (String) The external ID (UUID) to use when assuming the IAM role.
+- `iam_role_arn` (String) The ARN of the IAM role to assume. Required if `auth_mode` is `iam_role`.
+- `is_directory_snapshot` (Boolean) Multi-directory multi-table mode. Default: `false`. Can only be used when `is_single_table` is `true`
+- `is_single_table` (Boolean) Treat the files as a single table (time-based snapshots). Default: `false`.
+- `single_table_file_format` (String) File format for single table mode. Valid values: `csv`, `json`, `parquet`, `avro`, `orc`. Default: `csv`. Required when `is_single_table` is `true`.
+- `single_table_name` (String) Collection name for single table mode. Required when `is_single_table` is `true` and `is_directory_snapshot` is `false`.
+- `skip_lines` (Number) Skip first N lines of each CSV file. Default: `0`. Only applicable when `single_table_file_format` is `csv`.
 
 

@@ -149,25 +149,30 @@ connections:
         type: string
         required: true
         example: iam_role
+        description: "Either `iam_role` or `access_key_and_secret`."
       - name: AwsAccessKeyID
         type: string
-        required: false
+        optional: true
         sensitive: true
         example: "EXAMPLEACCESSKEYID"
+        description: "The AWS access key ID. Required if `auth_mode` is `access_key_and_secret`."
       - name: AwsSecretAccessKey
         type: string
-        required: false
+        optional: true
         sensitive: true
         example: "EXAMPLEACCESSKEYSECRET"
+        description: "The AWS secret access key. Required if `auth_mode` is `access_key_and_secret`."
       - name: IAMRoleARN
         type: string
-        required: false
+        optional: true
         example: "arn:aws:iam::XXXX:role/polytomic-s3"
+        description: "The ARN of the IAM role to assume. Required if `auth_mode` is `iam_role`."
       - name: ExternalID
         type: string
-        required: false
+        optional: true
         sensitive: false
         example: "00000000-0000-0000-0000-000000000000"
+        description: "The external ID (UUID) to use when assuming the IAM role."
       - name: S3BucketRegion
         type: string
         required: true
@@ -180,26 +185,32 @@ connections:
         type: bool
         optional: true
         example: true
+        description: "Treat the files as a single table (time-based snapshots). Default: `false`."
       - name: IsDirectorySnapshot
         type: bool
         optional: true
         example: true
+        description: "Multi-directory multi-table mode. Default: `false`. Can only be used when `is_single_table` is `true`"
       - name: DirGlobPattern
         type: string
         optional: true
         example: "data/tables/*/*.csv"
+        description: "Tables glob path. Required when `is_directory_snapshot` is `true`."
       - name: SingleTableName
         type: string
         optional: true
         example: "my_table"
+        description: " Collection name for single table mode. Required when `is_single_table` is `true` and `is_directory_snapshot` is `false`."
       - name: SingleTableFileFormat
         type: string
         optional: true
         example: "csv"
+        description: "File format for single table mode. Valid values: `csv`, `json`, `parquet`, `avro`, `orc`. Default: `csv`. Required when `is_single_table` is `true`."
       - name: SkipLines
         type: int
         optional: true
         example: 1
+        description: "Skip first N lines of each CSV file. Default: `0`. Only applicable when `single_table_file_format` is `csv`."
   - connection: sqlserver
     name: SQL Server
     type: polytomic.SQLServerConnectionType

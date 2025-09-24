@@ -48,17 +48,24 @@ func (d *S3ConnectionDataSource) Schema(ctx context.Context, req datasource.Sche
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"auth_mode": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: "Either `iam_role` or `access_key_and_secret`.",
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
 						Sensitive:           false,
 					},
 					"iam_role_arn": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: "The ARN of the IAM role to assume. Required if `auth_mode` is `iam_role`.",
 						Required:            false,
-						Optional:            false,
-						Computed:            false,
+						Optional:            true,
+						Computed:            true,
+						Sensitive:           false,
+					},
+					"external_id": schema.StringAttribute{
+						MarkdownDescription: "The external ID (UUID) to use when assuming the IAM role.",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
 						Sensitive:           false,
 					},
 					"s3_bucket_region": schema.StringAttribute{
@@ -76,42 +83,42 @@ func (d *S3ConnectionDataSource) Schema(ctx context.Context, req datasource.Sche
 						Sensitive:           false,
 					},
 					"is_single_table": schema.BoolAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: "Treat the files as a single table (time-based snapshots). Default: `false`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
 					},
 					"is_directory_snapshot": schema.BoolAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: "Multi-directory multi-table mode. Default: `false`. Can only be used when `is_single_table` is `true`",
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
 					},
 					"dir_glob_pattern": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: "Tables glob path. Required when `is_directory_snapshot` is `true`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
 					},
 					"single_table_name": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: " Collection name for single table mode. Required when `is_single_table` is `true` and `is_directory_snapshot` is `false`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
 					},
 					"single_table_file_format": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: "File format for single table mode. Valid values: `csv`, `json`, `parquet`, `avro`, `orc`. Default: `csv`. Required when `is_single_table` is `true`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
 						Sensitive:           false,
 					},
 					"skip_lines": schema.Int64Attribute{
-						MarkdownDescription: "",
+						MarkdownDescription: "Skip first N lines of each CSV file. Default: `0`. Only applicable when `single_table_file_format` is `csv`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            true,
@@ -186,6 +193,9 @@ func (d *S3ConnectionDataSource) Read(ctx context.Context, req datasource.ReadRe
 			),
 			"iam_role_arn": types.StringValue(
 				conf.IAMRoleARN,
+			),
+			"external_id": types.StringValue(
+				conf.ExternalID,
 			),
 			"s3_bucket_region": types.StringValue(
 				conf.S3BucketRegion,

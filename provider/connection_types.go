@@ -1,18 +1,16 @@
 package provider
 
-import "github.com/google/uuid"
-
 const (
 	RedshiftServerlessConnectionType = "redshiftserverless"
 )
 
 // S3Configuration extends the polytomic.S3Configuration with new fields
 type S3Configuration struct {
-	AuthMode           string    `json:"auth_mode"`
-	IAMRoleARN         string    `json:"iam_role_arn,omitempty"`
-	ExternalID         uuid.UUID `json:"external_id,omitempty"`
-	AwsAccessKeyID     string    `json:"aws_access_key_id" mapstructure:"aws_access_key_id" tfsdk:"aws_access_key_id"`
-	AwsSecretAccessKey string    `json:"aws_secret_access_key" mapstructure:"aws_secret_access_key" tfsdk:"aws_secret_access_key"`
+	AuthMode           string `json:"auth_mode"`
+	IAMRoleARN         string `json:"iam_role_arn,omitempty"`
+	ExternalID         string `json:"external_id,omitempty"`
+	AwsAccessKeyID     string `json:"aws_access_key_id" mapstructure:"aws_access_key_id" tfsdk:"aws_access_key_id"`
+	AwsSecretAccessKey string `json:"aws_secret_access_key" mapstructure:"aws_secret_access_key" tfsdk:"aws_secret_access_key"`
 
 	S3BucketRegion string `json:"s3_bucket_region" mapstructure:"s3_bucket_region" tfsdk:"s3_bucket_region"`
 	S3BucketName   string `json:"s3_bucket_name" mapstructure:"s3_bucket_name" tfsdk:"s3_bucket_name"`
