@@ -6,9 +6,9 @@ const (
 
 // S3Configuration extends the polytomic.S3Configuration with new fields
 type S3Configuration struct {
-	AuthMode           string `json:"auth_mode"`
-	IAMRoleARN         string `json:"iam_role_arn,omitempty"`
-	ExternalID         string `json:"external_id,omitempty"`
+	AuthMode           string `json:"auth_mode" mapstructure:"auth_mode" tfsdk:"auth_mode"`
+	IAMRoleARN         string `json:"iam_role_arn,omitempty" mapstructure:"iam_role_arn" tfsdk:"iam_role_arn"`
+	ExternalID         string `json:"external_id,omitempty" mapstructure:"external_id" tfsdk:"external_id"`
 	AwsAccessKeyID     string `json:"aws_access_key_id" mapstructure:"aws_access_key_id" tfsdk:"aws_access_key_id"`
 	AwsSecretAccessKey string `json:"aws_secret_access_key" mapstructure:"aws_secret_access_key" tfsdk:"aws_secret_access_key"`
 
