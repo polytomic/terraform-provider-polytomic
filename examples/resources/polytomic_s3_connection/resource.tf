@@ -10,7 +10,7 @@ resource "polytomic_s3_connection" "s3" {
     s3_bucket_name           = "my-bucket"
     is_single_table          = true
     is_directory_snapshot    = true
-    dir_glob_pattern         = "data/tables/*/*.csv"
+    directory_glob_pattern   = "data/tables/*/*.csv"
     single_table_name        = "my_table"
     single_table_file_format = "csv"
     skip_lines               = 1

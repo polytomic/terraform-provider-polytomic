@@ -17,7 +17,7 @@ type S3Configuration struct {
 
 	IsSingleTable         bool   `json:"is_single_table" mapstructure:"is_single_table" tfsdk:"is_single_table"`
 	IsDirectorySnapshot   bool   `json:"is_directory_snapshot" mapstructure:"is_directory_snapshot" tfsdk:"is_directory_snapshot"`
-	DirGlobPattern        string `json:"directory_glob_pattern" mapstructure:"directory_glob_pattern" tfsdk:"directory_glob_pattern"`
+	DirectoryGlobPattern  string `json:"directory_glob_pattern" mapstructure:"directory_glob_pattern" tfsdk:"directory_glob_pattern"`
 	SingleTableName       string `json:"single_table_name" mapstructure:"single_table_name" tfsdk:"single_table_name"`
 	SingleTableFileFormat string `json:"single_table_file_format" mapstructure:"single_table_file_format" tfsdk:"single_table_file_format"`
 	SkipLines             int    `json:"skip_lines" mapstructure:"skip_lines" tfsdk:"skip_lines"`
