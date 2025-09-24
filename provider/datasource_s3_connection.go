@@ -47,6 +47,20 @@ func (d *S3ConnectionDataSource) Schema(ctx context.Context, req datasource.Sche
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
+					"auth_mode": schema.StringAttribute{
+						MarkdownDescription: "",
+						Required:            true,
+						Optional:            false,
+						Computed:            false,
+						Sensitive:           false,
+					},
+					"iam_role_arn": schema.StringAttribute{
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            false,
+						Computed:            false,
+						Sensitive:           false,
+					},
 					"s3_bucket_region": schema.StringAttribute{
 						MarkdownDescription: "",
 						Required:            true,
@@ -167,6 +181,12 @@ func (d *S3ConnectionDataSource) Read(ctx context.Context, req datasource.ReadRe
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttributeTypes(ctx),
 		map[string]attr.Value{
+			"auth_mode": types.StringValue(
+				conf.AuthMode,
+			),
+			"iam_role_arn": types.StringValue(
+				conf.IAMRoleARN,
+			),
 			"s3_bucket_region": types.StringValue(
 				conf.S3BucketRegion,
 			),

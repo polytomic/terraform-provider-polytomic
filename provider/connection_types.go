@@ -1,18 +1,22 @@
 package provider
 
+import "github.com/google/uuid"
+
 const (
 	RedshiftServerlessConnectionType = "redshiftserverless"
 )
 
 // S3Configuration extends the polytomic.S3Configuration with new fields
 type S3Configuration struct {
-	// Existing fields
-	AwsAccessKeyID     string `json:"aws_access_key_id" mapstructure:"aws_access_key_id" tfsdk:"aws_access_key_id"`
-	AwsSecretAccessKey string `json:"aws_secret_access_key" mapstructure:"aws_secret_access_key" tfsdk:"aws_secret_access_key"`
-	S3BucketRegion     string `json:"s3_bucket_region" mapstructure:"s3_bucket_region" tfsdk:"s3_bucket_region"`
-	S3BucketName       string `json:"s3_bucket_name" mapstructure:"s3_bucket_name" tfsdk:"s3_bucket_name"`
+	AuthMode           string    `json:"auth_mode"`
+	IAMRoleARN         string    `json:"iam_role_arn,omitempty"`
+	ExternalID         uuid.UUID `json:"external_id,omitempty"`
+	AwsAccessKeyID     string    `json:"aws_access_key_id" mapstructure:"aws_access_key_id" tfsdk:"aws_access_key_id"`
+	AwsSecretAccessKey string    `json:"aws_secret_access_key" mapstructure:"aws_secret_access_key" tfsdk:"aws_secret_access_key"`
 
-	// New fields
+	S3BucketRegion string `json:"s3_bucket_region" mapstructure:"s3_bucket_region" tfsdk:"s3_bucket_region"`
+	S3BucketName   string `json:"s3_bucket_name" mapstructure:"s3_bucket_name" tfsdk:"s3_bucket_name"`
+
 	IsSingleTable         bool   `json:"is_single_table" mapstructure:"is_single_table" tfsdk:"is_single_table"`
 	IsDirectorySnapshot   bool   `json:"is_directory_snapshot" mapstructure:"is_directory_snapshot" tfsdk:"is_directory_snapshot"`
 	DirGlobPattern        string `json:"directory_glob_pattern" mapstructure:"directory_glob_pattern" tfsdk:"directory_glob_pattern"`

@@ -145,16 +145,29 @@ connections:
     resource: true
     datasource: true
     attributes:
-      - name: AwsAccessKeyID
+      - name: AuthMode
         type: string
         required: true
+        example: iam_role
+      - name: AwsAccessKeyID
+        type: string
+        required: false
         sensitive: true
         example: "EXAMPLEACCESSKEYID"
       - name: AwsSecretAccessKey
         type: string
-        required: true
+        required: false
         sensitive: true
         example: "EXAMPLEACCESSKEYSECRET"
+      - name: IAMRoleARN
+        type: string
+        required: false
+        example: "arn:aws:iam::XXXX:role/polytomic-s3"
+      - name: ExternalID
+        type: string
+        required: false
+        sensitive: false
+        example: "00000000-0000-0000-0000-000000000000"
       - name: S3BucketRegion
         type: string
         required: true

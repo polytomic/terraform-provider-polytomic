@@ -43,19 +43,44 @@ func (t *S3ConnectionResource) Schema(ctx context.Context, req resource.SchemaRe
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
-					"aws_access_key_id": schema.StringAttribute{
-						MarkdownDescription: "",
+					"auth_mode": schema.StringAttribute{
+						MarkdownDescription: "Either `iam_role` or `access_key_and_secret`.",
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
+						Sensitive:           false,
+					},
+					"aws_access_key_id": schema.StringAttribute{
+						MarkdownDescription: "The AWS access key ID. Required if `auth_mode` is `access_key_and_secret`.",
+						Required:            false,
+						Optional:            false,
+						Computed:            false,
 						Sensitive:           true,
+						Default:             stringdefault.StaticString(""),
 					},
 					"aws_secret_access_key": schema.StringAttribute{
-						MarkdownDescription: "",
-						Required:            true,
+						MarkdownDescription: "The AWS secret access key. Required if `auth_mode` is `access_key_and_secret`.",
+						Required:            false,
 						Optional:            false,
 						Computed:            false,
 						Sensitive:           true,
+						Default:             stringdefault.StaticString(""),
+					},
+					"iam_role_arn": schema.StringAttribute{
+						MarkdownDescription: "The ARN of the IAM role to assume. Required if `auth_mode` is `iam_role`.",
+						Required:            false,
+						Optional:            false,
+						Computed:            false,
+						Sensitive:           false,
+						Default:             stringdefault.StaticString(""),
+					},
+					"external_id": schema.StringAttribute{
+						MarkdownDescription: "The external ID (UUID) to use when assuming the IAM role.",
+						Required:            false,
+						Optional:            false,
+						Computed:            false,
+						Sensitive:           true,
+						Default:             stringdefault.StaticString(""),
 					},
 					"s3_bucket_region": schema.StringAttribute{
 						MarkdownDescription: "",
@@ -154,14 +179,29 @@ func (r *S3ConnectionResource) Create(ctx context.Context, req resource.CreateRe
 		return
 	}
 
+	externalID, err := uuid.Parse(data.Configuration.Attributes()["external_id"].(types.String).ValueString())
+	if err != nil {
+		resp.Diagnostics.AddAttributeWarning(
+			path.Root("configuration").AtName("external_id"), "Invalid external ID",
+			fmt.Sprintf(
+				"The provided external_id %q is not a valid UUID: %s; using %s.",
+				data.Configuration.Attributes()["external_id"].(types.String).ValueString(),
+				err,
+				externalID,
+			),
+		)
+	}
 	created, err := r.client.Connections().Create(ctx,
 		polytomic.CreateConnectionMutation{
 			Name:           data.Name.ValueString(),
 			Type:           polytomic.S3ConnectionType,
 			OrganizationId: data.Organization.ValueString(),
 			Configuration: S3Configuration{
+				AuthMode:              data.Configuration.Attributes()["auth_mode"].(types.String).ValueString(),
 				AwsAccessKeyID:        data.Configuration.Attributes()["aws_access_key_id"].(types.String).ValueString(),
 				AwsSecretAccessKey:    data.Configuration.Attributes()["aws_secret_access_key"].(types.String).ValueString(),
+				IAMRoleARN:            data.Configuration.Attributes()["iam_role_arn"].(types.String).ValueString(),
+				ExternalID:            externalID,
 				S3BucketRegion:        data.Configuration.Attributes()["s3_bucket_region"].(types.String).ValueString(),
 				S3BucketName:          data.Configuration.Attributes()["s3_bucket_name"].(types.String).ValueString(),
 				IsSingleTable:         data.Configuration.Attributes()["is_single_table"].(types.Bool).ValueBool(),
@@ -190,8 +230,11 @@ func (r *S3ConnectionResource) Create(ctx context.Context, req resource.CreateRe
 	decoder, _ := mapstructure.NewDecoder(cfg)
 	decoder.Decode(created.Configuration)
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"auth_mode":                types.StringType,
 		"aws_access_key_id":        types.StringType,
 		"aws_secret_access_key":    types.StringType,
+		"iam_role_arn":             types.StringType,
+		"external_id":              types.StringType,
 		"s3_bucket_region":         types.StringType,
 		"s3_bucket_name":           types.StringType,
 		"is_single_table":          types.BoolType,
@@ -246,8 +289,11 @@ func (r *S3ConnectionResource) Read(ctx context.Context, req resource.ReadReques
 	decoder, _ := mapstructure.NewDecoder(cfg)
 	decoder.Decode(connection.Configuration)
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"auth_mode":                types.StringType,
 		"aws_access_key_id":        types.StringType,
 		"aws_secret_access_key":    types.StringType,
+		"iam_role_arn":             types.StringType,
+		"external_id":              types.StringType,
 		"s3_bucket_region":         types.StringType,
 		"s3_bucket_name":           types.StringType,
 		"is_single_table":          types.BoolType,
@@ -282,8 +328,11 @@ func (r *S3ConnectionResource) Update(ctx context.Context, req resource.UpdateRe
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueString(),
 			Configuration: S3Configuration{
-				AwsAccessKeyID:        data.Configuration.Attributes()["aws_access_key_id"].(types.String).ValueString(),
-				AwsSecretAccessKey:    data.Configuration.Attributes()["aws_secret_access_key"].(types.String).ValueString(),
+				AuthMode:           data.Configuration.Attributes()["auth_mode"].(types.String).ValueString(),
+				AwsAccessKeyID:     data.Configuration.Attributes()["aws_access_key_id"].(types.String).ValueString(),
+				AwsSecretAccessKey: data.Configuration.Attributes()["aws_secret_access_key"].(types.String).ValueString(),
+				IAMRoleARN:         data.Configuration.Attributes()["iam_role_arn"].(types.String).ValueString(),
+				// ExternalID:            data.Configuration.Attributes()["external_id"].(types.String).ValueString(),
 				S3BucketRegion:        data.Configuration.Attributes()["s3_bucket_region"].(types.String).ValueString(),
 				S3BucketName:          data.Configuration.Attributes()["s3_bucket_name"].(types.String).ValueString(),
 				IsSingleTable:         data.Configuration.Attributes()["is_single_table"].(types.Bool).ValueBool(),
@@ -313,8 +362,11 @@ func (r *S3ConnectionResource) Update(ctx context.Context, req resource.UpdateRe
 	decoder, _ := mapstructure.NewDecoder(cfg)
 	decoder.Decode(updated.Configuration)
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"auth_mode":                types.StringType,
 		"aws_access_key_id":        types.StringType,
 		"aws_secret_access_key":    types.StringType,
+		"iam_role_arn":             types.StringType,
+		"external_id":              types.StringType,
 		"s3_bucket_region":         types.StringType,
 		"s3_bucket_name":           types.StringType,
 		"is_single_table":          types.BoolType,
