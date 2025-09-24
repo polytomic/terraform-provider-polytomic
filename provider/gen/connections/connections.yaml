@@ -141,7 +141,7 @@ connections:
         example: my-container
   - connection: s3
     type: polytomic.S3ConnectionType
-    config: polytomic.S3Configuration
+    config: S3Configuration
     resource: true
     datasource: true
     attributes:

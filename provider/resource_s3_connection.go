@@ -179,18 +179,6 @@ func (r *S3ConnectionResource) Create(ctx context.Context, req resource.CreateRe
 		return
 	}
 
-	externalID, err := uuid.Parse(data.Configuration.Attributes()["external_id"].(types.String).ValueString())
-	if err != nil {
-		resp.Diagnostics.AddAttributeWarning(
-			path.Root("configuration").AtName("external_id"), "Invalid external ID",
-			fmt.Sprintf(
-				"The provided external_id %q is not a valid UUID: %s; using %s.",
-				data.Configuration.Attributes()["external_id"].(types.String).ValueString(),
-				err,
-				externalID,
-			),
-		)
-	}
 	created, err := r.client.Connections().Create(ctx,
 		polytomic.CreateConnectionMutation{
 			Name:           data.Name.ValueString(),
@@ -201,7 +189,7 @@ func (r *S3ConnectionResource) Create(ctx context.Context, req resource.CreateRe
 				AwsAccessKeyID:        data.Configuration.Attributes()["aws_access_key_id"].(types.String).ValueString(),
 				AwsSecretAccessKey:    data.Configuration.Attributes()["aws_secret_access_key"].(types.String).ValueString(),
 				IAMRoleARN:            data.Configuration.Attributes()["iam_role_arn"].(types.String).ValueString(),
-				ExternalID:            externalID.String(),
+				ExternalID:            data.Configuration.Attributes()["external_id"].(types.String).ValueString(),
 				S3BucketRegion:        data.Configuration.Attributes()["s3_bucket_region"].(types.String).ValueString(),
 				S3BucketName:          data.Configuration.Attributes()["s3_bucket_name"].(types.String).ValueString(),
 				IsSingleTable:         data.Configuration.Attributes()["is_single_table"].(types.Bool).ValueBool(),
@@ -223,7 +211,7 @@ func (r *S3ConnectionResource) Create(ctx context.Context, req resource.CreateRe
 	data.Name = types.StringValue(created.Name)
 	data.Organization = types.StringValue(created.OrganizationId)
 
-	var output polytomic.S3Configuration
+	var output S3Configuration
 	cfg := &mapstructure.DecoderConfig{
 		Result: &output,
 	}
@@ -282,7 +270,7 @@ func (r *S3ConnectionResource) Read(ctx context.Context, req resource.ReadReques
 	data.Name = types.StringValue(connection.Name)
 	data.Organization = types.StringValue(connection.OrganizationId)
 
-	var output polytomic.S3Configuration
+	var output S3Configuration
 	cfg := &mapstructure.DecoderConfig{
 		Result: &output,
 	}
@@ -327,7 +315,7 @@ func (r *S3ConnectionResource) Update(ctx context.Context, req resource.UpdateRe
 		polytomic.UpdateConnectionMutation{
 			Name:           data.Name.ValueString(),
 			OrganizationId: data.Organization.ValueString(),
-			Configuration: polytomic.S3Configuration{
+			Configuration: S3Configuration{
 				AuthMode:              data.Configuration.Attributes()["auth_mode"].(types.String).ValueString(),
 				AwsAccessKeyID:        data.Configuration.Attributes()["aws_access_key_id"].(types.String).ValueString(),
 				AwsSecretAccessKey:    data.Configuration.Attributes()["aws_secret_access_key"].(types.String).ValueString(),
@@ -355,7 +343,7 @@ func (r *S3ConnectionResource) Update(ctx context.Context, req resource.UpdateRe
 	data.Name = types.StringValue(updated.Name)
 	data.Organization = types.StringValue(updated.OrganizationId)
 
-	var output polytomic.S3Configuration
+	var output S3Configuration
 	cfg := &mapstructure.DecoderConfig{
 		Result: &output,
 	}
