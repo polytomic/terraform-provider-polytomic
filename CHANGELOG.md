@@ -1,3 +1,7 @@
+## 1.0.0 (12 Jan 2026)
+
+- Updates from test deployments.
+
 ## 1.0.0-beta2 (03 Jan 2025)
 
 _This is a pre-release version._
