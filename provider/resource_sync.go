@@ -7,7 +7,9 @@ import (
 	"net/http"
 
 	"github.com/AlekSi/pointer"
+	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -65,11 +67,13 @@ func (r *syncResource) Schema(ctx context.Context, req resource.SchemaRequest, r
 					},
 					"search_values": schema.StringAttribute{
 						MarkdownDescription: "",
+						CustomType:          jsontypes.NormalizedType{},
 						Optional:            true,
 						Computed:            true,
 					},
 					"configuration": schema.StringAttribute{
 						MarkdownDescription: "",
+						CustomType:          jsontypes.NormalizedType{},
 						Optional:            true,
 						Computed:            true,
 						PlanModifiers: []planmodifier.String{
@@ -192,6 +196,7 @@ func (r *syncResource) Schema(ctx context.Context, req resource.SchemaRequest, r
 						},
 						"value": schema.StringAttribute{
 							MarkdownDescription: "",
+							CustomType:          jsontypes.NormalizedType{},
 							Optional:            true,
 						},
 						"label": schema.StringAttribute{
@@ -220,10 +225,12 @@ func (r *syncResource) Schema(ctx context.Context, req resource.SchemaRequest, r
 						},
 						"value": schema.StringAttribute{
 							MarkdownDescription: "",
+							CustomType:          jsontypes.NormalizedType{},
 							Optional:            true,
 						},
 						"override": schema.StringAttribute{
 							MarkdownDescription: "",
+							CustomType:          jsontypes.NormalizedType{},
 							Required:            true,
 						}},
 				},
@@ -401,27 +408,90 @@ type syncResourceResourceData struct {
 }
 
 type Filter struct {
-	FieldID   string  `json:"field_id" tfsdk:"field_id" mapstructure:"field_id"`
-	FieldType string  `json:"field_type" tfsdk:"field_type" mapstructure:"field_type"`
-	Function  string  `json:"function" tfsdk:"function" mapstructure:"function"`
-	Value     *string `json:"value" tfsdk:"value" mapstructure:"value"`
-	Label     string  `json:"label" tfsdk:"label" mapstructure:"label"`
+	FieldID   string               `json:"field_id" tfsdk:"field_id" mapstructure:"field_id"`
+	FieldType string               `json:"field_type" tfsdk:"field_type" mapstructure:"field_type"`
+	Function  string               `json:"function" tfsdk:"function" mapstructure:"function"`
+	Value     jsontypes.Normalized `json:"value" tfsdk:"value" mapstructure:"value"`
+	Label     string               `json:"label" tfsdk:"label" mapstructure:"label"`
+}
+
+func (Filter) AttrTypes() map[string]attr.Type {
+	return map[string]attr.Type{
+		"field_id":   types.StringType,
+		"field_type": types.StringType,
+		"function":   types.StringType,
+		"value":      jsontypes.NormalizedType{},
+		"label":      types.StringType,
+	}
 }
 
 type Target struct {
-	ConnectionID  string  `json:"connection_id" tfsdk:"connection_id" mapstructure:"connection_id"`
-	Object        *string `json:"object" tfsdk:"object" mapstructure:"object"`
-	SearchValues  string  `json:"search_values,omitempty" tfsdk:"search_values" mapstructure:"search_values,omitempty"`
-	Configuration string  `json:"configuration,omitempty" tfsdk:"configuration" mapstructure:"configuration,omitempty"`
-	NewName       *string `json:"new_name,omitempty" tfsdk:"new_name" mapstructure:"new_name"`
-	FilterLogic   *string `json:"filter_logic,omitempty" tfsdk:"filter_logic" mapstructure:"filter_logic"`
+	ConnectionID  string               `json:"connection_id" tfsdk:"connection_id" mapstructure:"connection_id"`
+	Object        *string              `json:"object" tfsdk:"object" mapstructure:"object"`
+	SearchValues  jsontypes.Normalized `json:"search_values,omitempty" tfsdk:"search_values" mapstructure:"search_values,omitempty"`
+	Configuration jsontypes.Normalized `json:"configuration,omitempty" tfsdk:"configuration" mapstructure:"configuration,omitempty"`
+	NewName       *string              `json:"new_name,omitempty" tfsdk:"new_name" mapstructure:"new_name"`
+	FilterLogic   *string              `json:"filter_logic,omitempty" tfsdk:"filter_logic" mapstructure:"filter_logic"`
+}
+
+func (Target) AttrTypes() map[string]attr.Type {
+	return map[string]attr.Type{
+		"connection_id": types.StringType,
+		"object":        types.StringType,
+		"search_values": jsontypes.NormalizedType{},
+		"configuration": jsontypes.NormalizedType{},
+		"new_name":      types.StringType,
+		"filter_logic":  types.StringType,
+	}
 }
 
 type Override struct {
-	FieldID  string  `json:"field_id" tfsdk:"field_id" mapstructure:"field_id"`
-	Function string  `json:"function" tfsdk:"function" mapstructure:"function"`
-	Value    *string `json:"value" tfsdk:"value" mapstructure:"value"`
-	Override *string `json:"override" tfsdk:"override" mapstructure:"override"`
+	FieldID  string               `json:"field_id" tfsdk:"field_id" mapstructure:"field_id"`
+	Function string               `json:"function" tfsdk:"function" mapstructure:"function"`
+	Value    jsontypes.Normalized `json:"value" tfsdk:"value" mapstructure:"value"`
+	Override jsontypes.Normalized `json:"override" tfsdk:"override" mapstructure:"override"`
+}
+
+func (Override) AttrTypes() map[string]attr.Type {
+	return map[string]attr.Type{
+		"field_id": types.StringType,
+		"function": types.StringType,
+		"value":    jsontypes.NormalizedType{},
+		"override": jsontypes.NormalizedType{},
+	}
+}
+
+type Schedule struct {
+	Frequency           string       `tfsdk:"frequency"`
+	DayOfWeek           *string      `tfsdk:"day_of_week"`
+	Hour                *string      `tfsdk:"hour"`
+	Minute              *string      `tfsdk:"minute"`
+	Month               *string      `tfsdk:"month"`
+	DayOfMonth          *string      `tfsdk:"day_of_month"`
+	JobID               *int64       `tfsdk:"job_id"`
+	ConnectionID        *string      `tfsdk:"connection_id"`
+	RunAfter            types.Object `tfsdk:"run_after"`
+	RunAfterSuccessOnly *bool        `tfsdk:"run_after_success_only"`
+}
+
+func (Schedule) AttrTypes() map[string]attr.Type {
+	return map[string]attr.Type{
+		"frequency":     types.StringType,
+		"day_of_week":   types.StringType,
+		"hour":          types.StringType,
+		"minute":        types.StringType,
+		"month":         types.StringType,
+		"day_of_month":  types.StringType,
+		"job_id":        types.Int64Type,
+		"connection_id": types.StringType,
+		"run_after": types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				"sync_ids":      types.SetType{ElemType: types.StringType},
+				"bulk_sync_ids": types.SetType{ElemType: types.StringType},
+			},
+		},
+		"run_after_success_only": types.BoolType,
+	}
 }
 
 type syncResource struct {
@@ -459,11 +529,11 @@ func (r *syncResource) Create(ctx context.Context, req resource.CreateRequest, r
 		FilterLogic:  target.FilterLogic,
 	}
 
-	if target.SearchValues != "" {
-		var searchValues map[string]interface{}
-		err := json.Unmarshal([]byte(target.SearchValues), &searchValues)
-		if err != nil {
-			resp.Diagnostics.AddError("Error unmarshalling search values", err.Error())
+	var searchValues map[string]interface{}
+	if !target.SearchValues.IsNull() && !target.SearchValues.IsUnknown() {
+		diags = target.SearchValues.Unmarshal(&searchValues)
+		if diags.HasError() {
+			resp.Diagnostics.Append(diags...)
 			return
 		}
 		pt.SearchValues = searchValues
@@ -471,16 +541,16 @@ func (r *syncResource) Create(ctx context.Context, req resource.CreateRequest, r
 		pt.SearchValues = make(map[string]interface{})
 	}
 
-	tConf := map[string]interface{}{}
-	if target.Configuration != "" {
-		err := json.Unmarshal([]byte(target.Configuration), &tConf)
-		if err != nil {
-			resp.Diagnostics.AddError("Error unmarshalling configuration", err.Error())
+	var tConf map[string]interface{}
+	if !target.Configuration.IsNull() && !target.Configuration.IsUnknown() {
+		diags = target.Configuration.Unmarshal(&tConf)
+		if diags.HasError() {
+			resp.Diagnostics.Append(diags...)
 			return
 		}
 		pt.Configuration = tConf
 	} else {
-		pt.Configuration = tConf
+		pt.Configuration = make(map[string]interface{})
 	}
 
 	var fields []*polytomic.ModelSyncField
@@ -514,10 +584,10 @@ func (r *syncResource) Create(ctx context.Context, req resource.CreateRequest, r
 		}
 
 		var val interface{}
-		if filter.Value != nil {
-			err := json.Unmarshal([]byte(*filter.Value), &val)
-			if err != nil {
-				resp.Diagnostics.AddError("Failed to unmarshal filter value", err.Error())
+		if !filter.Value.IsNull() && !filter.Value.IsUnknown() {
+			diags = filter.Value.Unmarshal(&val)
+			if diags.HasError() {
+				resp.Diagnostics.Append(diags...)
 				return
 			}
 			f.Value = val
@@ -541,21 +611,27 @@ func (r *syncResource) Create(ctx context.Context, req resource.CreateRequest, r
 		}
 
 		var val interface{}
-		if override.Value != nil {
-			err := json.Unmarshal([]byte(*override.Value), &val)
-			if err != nil {
-				resp.Diagnostics.AddError("Failed to unmarshal override value", err.Error())
+		if !override.Value.IsNull() && !override.Value.IsUnknown() {
+			diags = override.Value.Unmarshal(&val)
+			if diags.HasError() {
+				resp.Diagnostics.Append(diags...)
 				return
 			}
 			o.Value = val
 		}
 
 		var ov interface{}
-		if override.Override != nil {
-			err := json.Unmarshal([]byte(*override.Override), &ov)
-			if err != nil {
-				// if marshalling fails, we assume the override is a string
-				ov = *override.Override
+		if !override.Override.IsNull() && !override.Override.IsUnknown() {
+			diags = override.Override.Unmarshal(&ov)
+			if diags.HasError() {
+				// if unmarshalling fails, try to use as string
+				var ovStr string
+				diags = override.Override.Unmarshal(&ovStr)
+				if diags.HasError() {
+					resp.Diagnostics.Append(diags...)
+					return
+				}
+				ov = ovStr
 			}
 			o.Override = ov
 		}
@@ -625,211 +701,11 @@ func (r *syncResource) Create(ctx context.Context, req resource.CreateRequest, r
 		return
 	}
 
-	data.ID = types.StringPointerValue(sync.Data.Id)
-	data.Organization = types.StringPointerValue(sync.Data.OrganizationId)
-	data.Name = types.StringPointerValue(sync.Data.Name)
-
-	t := Target{
-		ConnectionID: sync.Data.Target.ConnectionId,
-		Object:       sync.Data.Target.Object,
-		NewName:      sync.Data.Target.NewName,
-		FilterLogic:  sync.Data.Target.FilterLogic,
-	}
-
-	sval, err := json.Marshal(sync.Data.Target.SearchValues)
-	if err != nil {
-		resp.Diagnostics.AddError("Error marshaling search values", err.Error())
-		return
-	}
-	t.SearchValues = string(sval)
-
-	tval, err := json.Marshal(tConf)
-	if err != nil {
-		resp.Diagnostics.AddError("Error marshaling configuration", err.Error())
-		return
-	}
-	t.Configuration = string(tval)
-
-	data.Target, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"connection_id": types.StringType,
-		"object":        types.StringType,
-		"search_values": types.StringType,
-		"configuration": types.StringType,
-		"new_name":      types.StringType,
-		"filter_logic":  types.StringType,
-	}, t)
+	data, diags = syncDataFromResponse(ctx, sync.Data)
+	resp.Diagnostics.Append(diags...)
 	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
 		return
 	}
-
-	if string(sval) == "null" {
-		data.Target.Attributes()["search_values"] = types.StringNull()
-	}
-
-	if string(tval) == "null" {
-		data.Target.Attributes()["configuration"] = types.StringNull()
-	}
-
-	data.Mode = types.StringValue(string(pointer.Get(sync.Data.Mode)))
-	data.Fields, diags = types.SetValueFrom(ctx, types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"source": types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					"model_id": types.StringType,
-					"field":    types.StringType,
-				}},
-			"target":         types.StringType,
-			"new":            types.BoolType,
-			"override_value": types.StringType,
-			"sync_mode":      types.StringType,
-		}}, sync.Data.Fields)
-
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
-	data.OverrideFields, diags = types.SetValueFrom(ctx, types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"source": types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					"model_id": types.StringType,
-					"field":    types.StringType,
-				}},
-			"target":         types.StringType,
-			"new":            types.BoolType,
-			"override_value": types.StringType,
-			"sync_mode":      types.StringType,
-		}}, sync.Data.OverrideFields)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
-
-	if sync.Data.FilterLogic != nil {
-		data.FilterLogic = types.StringPointerValue(sync.Data.FilterLogic)
-	}
-
-	var resFilters []Filter
-	for _, f := range sync.Data.Filters {
-		res := Filter{
-			FieldID:   pointer.Get(f.FieldId),
-			Function:  string(f.Function),
-			FieldType: string(pointer.Get(f.FieldType)),
-			Label:     pointer.GetString(f.Label),
-		}
-		val, err := json.Marshal(f.Value)
-		if err != nil {
-			resp.Diagnostics.AddError("Error marshaling filter value", err.Error())
-			return
-		}
-
-		if string(val) == "null" {
-			res.Value = nil
-		} else {
-			res.Value = pointer.ToString(string(val))
-		}
-		resFilters = append(resFilters, res)
-	}
-
-	data.Filters, diags = types.SetValueFrom(ctx, types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"field_id":   types.StringType,
-			"function":   types.StringType,
-			"field_type": types.StringType,
-			"label":      types.StringType,
-			"value":      types.StringType,
-		}}, resFilters)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
-
-	var resOverrides []Override
-	for _, o := range sync.Data.Overrides {
-		res := Override{
-			FieldID:  pointer.Get(o.FieldId),
-			Function: string(pointer.Get(o.Function)),
-		}
-		val, err := json.Marshal(o.Value)
-		if err != nil {
-			resp.Diagnostics.AddError("Error marshaling override value", err.Error())
-			return
-		}
-
-		if string(val) == "null" {
-			res.Value = nil
-		} else {
-			res.Value = pointer.ToString(string(val))
-		}
-		oval, err := json.Marshal(o.Override)
-		if err != nil {
-			resp.Diagnostics.AddError("Error marshaling override override", err.Error())
-			return
-		}
-
-		if string(oval) == "null" {
-			res.Override = nil
-		} else {
-			res.Override = pointer.ToString(string(oval))
-		}
-		resOverrides = append(resOverrides, res)
-	}
-
-	data.Overrides, diags = types.SetValueFrom(ctx, types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"field_id": types.StringType,
-			"function": types.StringType,
-			"value":    types.StringType,
-			"override": types.StringType,
-		}}, resOverrides)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
-
-	data.Schedule, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"connection_id": types.StringType,
-		"frequency":     types.StringType,
-		"day_of_week":   types.StringType,
-		"hour":          types.StringType,
-		"minute":        types.StringType,
-		"month":         types.StringType,
-		"day_of_month":  types.StringType,
-		"job_id":        types.Int64Type,
-		"run_after": types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-				"sync_ids":      types.SetType{ElemType: types.StringType},
-				"bulk_sync_ids": types.SetType{ElemType: types.StringType},
-			},
-		},
-		"run_after_success_only": types.BoolType,
-	}, sync.Data.Schedule)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
-	data.Identity, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"source": types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-				"model_id": types.StringType,
-				"field":    types.StringType,
-			},
-		},
-		"target":               types.StringType,
-		"function":             types.StringType,
-		"remote_field_type_id": types.StringType,
-		"new_field":            types.BoolType,
-	}, sync.Data.Identity)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
-	data.SyncAllRecords = types.BoolPointerValue(sync.Data.SyncAllRecords)
-	data.Active = types.BoolPointerValue(sync.Data.Active)
-
-	data.OnlyEnrichUpdates = types.BoolPointerValue(sync.Data.OnlyEnrichUpdates)
-	data.SkipInitialBackfill = types.BoolPointerValue(sync.Data.SkipInitialBackfill)
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -863,215 +739,11 @@ func (r *syncResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 		return
 	}
 
-	data.ID = types.StringPointerValue(sync.Data.Id)
-	data.Organization = types.StringPointerValue(sync.Data.OrganizationId)
-	data.Name = types.StringPointerValue(sync.Data.Name)
-
-	t := Target{
-		ConnectionID: sync.Data.Target.ConnectionId,
-		Object:       sync.Data.Target.Object,
-		NewName:      sync.Data.Target.NewName,
-		FilterLogic:  sync.Data.Target.FilterLogic,
-	}
-
-	sval, err := json.Marshal(sync.Data.Target.SearchValues)
-	if err != nil {
-		resp.Diagnostics.AddError("Error marshaling search values", err.Error())
-		return
-	}
-	t.SearchValues = string(sval)
-
-	tval, err := json.Marshal(sync.Data.Target.Configuration)
-	if err != nil {
-		resp.Diagnostics.AddError("Error marshaling configuration", err.Error())
-		return
-	}
-	t.Configuration = string(tval)
-
-	data.Target, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"connection_id": types.StringType,
-		"object":        types.StringType,
-		"search_values": types.StringType,
-		"configuration": types.StringType,
-		"new_name":      types.StringType,
-		"filter_logic":  types.StringType,
-	}, t)
-
+	data, diags = syncDataFromResponse(ctx, sync.Data)
+	resp.Diagnostics.Append(diags...)
 	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
 		return
 	}
-
-	if string(sval) == "null" {
-		data.Target.Attributes()["search_values"] = types.StringNull()
-	}
-
-	if string(tval) == "null" {
-		data.Target.Attributes()["configuration"] = types.StringNull()
-	}
-
-	data.Mode = types.StringValue(string(pointer.Get(sync.Data.Mode)))
-	data.Fields, diags = types.SetValueFrom(ctx, types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"source": types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					"model_id": types.StringType,
-					"field":    types.StringType,
-				}},
-			"target":         types.StringType,
-			"new":            types.BoolType,
-			"override_value": types.StringType,
-			"sync_mode":      types.StringType,
-		}}, sync.Data.Fields)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
-	data.OverrideFields, diags = types.SetValueFrom(ctx, types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"source": types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					"model_id": types.StringType,
-					"field":    types.StringType,
-				}},
-			"target":         types.StringType,
-			"new":            types.BoolType,
-			"override_value": types.StringType,
-			"sync_mode":      types.StringType,
-		}}, sync.Data.OverrideFields)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
-
-	if sync.Data.FilterLogic != nil {
-		data.FilterLogic = types.StringPointerValue(sync.Data.FilterLogic)
-	} else {
-		data.FilterLogic = types.StringNull()
-	}
-
-	var resFilters []Filter
-	for _, f := range sync.Data.Filters {
-		res := Filter{
-			FieldID:   pointer.Get(f.FieldId),
-			Function:  string(f.Function),
-			FieldType: string(pointer.Get(f.FieldType)),
-			Label:     pointer.GetString(f.Label),
-		}
-		val, err := json.Marshal(f.Value)
-		if err != nil {
-			resp.Diagnostics.AddError("Error marshaling filter value", err.Error())
-			return
-		}
-
-		if string(val) == "null" {
-			res.Value = nil
-		} else {
-			res.Value = pointer.ToString(string(val))
-		}
-		resFilters = append(resFilters, res)
-	}
-
-	data.Filters, diags = types.SetValueFrom(ctx, types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"field_id":   types.StringType,
-			"function":   types.StringType,
-			"field_type": types.StringType,
-			"label":      types.StringType,
-			"value":      types.StringType,
-		}}, resFilters)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
-
-	var resOverrides []Override
-	for _, o := range sync.Data.Overrides {
-		res := Override{
-			FieldID:  pointer.Get(o.FieldId),
-			Function: string(pointer.Get(o.Function)),
-		}
-		val, err := json.Marshal(o.Value)
-		if err != nil {
-			resp.Diagnostics.AddError("Error marshaling override value", err.Error())
-			return
-		}
-		if string(val) == "null" {
-			res.Value = nil
-		} else {
-			res.Value = pointer.ToString(string(val))
-		}
-		if v, ok := o.Override.(string); !ok {
-			oval, err := json.Marshal(o.Override)
-			if err != nil {
-				resp.Diagnostics.AddError("Error marshaling override override", err.Error())
-				return
-			}
-			if string(oval) == "null" {
-				res.Override = nil
-			} else {
-				res.Override = pointer.ToString(string(oval))
-			}
-		} else {
-			res.Override = pointer.ToString(v)
-		}
-		resOverrides = append(resOverrides, res)
-	}
-
-	data.Overrides, diags = types.SetValueFrom(ctx, types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"field_id": types.StringType,
-			"function": types.StringType,
-			"value":    types.StringType,
-			"override": types.StringType,
-		}}, resOverrides)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
-
-	data.Schedule, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"connection_id": types.StringType,
-		"frequency":     types.StringType,
-		"day_of_week":   types.StringType,
-		"hour":          types.StringType,
-		"minute":        types.StringType,
-		"month":         types.StringType,
-		"day_of_month":  types.StringType,
-		"job_id":        types.Int64Type,
-		"run_after": types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-				"sync_ids":      types.SetType{ElemType: types.StringType},
-				"bulk_sync_ids": types.SetType{ElemType: types.StringType},
-			},
-		},
-		"run_after_success_only": types.BoolType,
-	}, sync.Data.Schedule)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
-	data.Identity, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"source": types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-				"model_id": types.StringType,
-				"field":    types.StringType,
-			},
-		},
-		"target":               types.StringType,
-		"function":             types.StringType,
-		"remote_field_type_id": types.StringType,
-		"new_field":            types.BoolType,
-	}, sync.Data.Identity)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
-	data.SyncAllRecords = types.BoolPointerValue(sync.Data.SyncAllRecords)
-	data.Active = types.BoolPointerValue(sync.Data.Active)
-
-	data.OnlyEnrichUpdates = types.BoolPointerValue(sync.Data.OnlyEnrichUpdates)
-	data.SkipInitialBackfill = types.BoolPointerValue(sync.Data.SkipInitialBackfill)
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -1110,11 +782,11 @@ func (r *syncResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		FilterLogic:  target.FilterLogic,
 	}
 
-	if target.SearchValues != "" {
-		var searchValues map[string]interface{}
-		err := json.Unmarshal([]byte(target.SearchValues), &searchValues)
-		if err != nil {
-			resp.Diagnostics.AddError("Error unmarshalling search values", err.Error())
+	var searchValues map[string]interface{}
+	if !target.SearchValues.IsNull() && !target.SearchValues.IsUnknown() {
+		diags = target.SearchValues.Unmarshal(&searchValues)
+		if diags.HasError() {
+			resp.Diagnostics.Append(diags...)
 			return
 		}
 		pt.SearchValues = searchValues
@@ -1122,16 +794,16 @@ func (r *syncResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		pt.SearchValues = make(map[string]interface{})
 	}
 
-	tConf := map[string]interface{}{}
-	if target.Configuration != "" {
-		err := json.Unmarshal([]byte(target.Configuration), &tConf)
-		if err != nil {
-			resp.Diagnostics.AddError("Error unmarshalling configuration", err.Error())
+	var tConf map[string]interface{}
+	if !target.Configuration.IsNull() && !target.Configuration.IsUnknown() {
+		diags = target.Configuration.Unmarshal(&tConf)
+		if diags.HasError() {
+			resp.Diagnostics.Append(diags...)
 			return
 		}
 		pt.Configuration = tConf
 	} else {
-		pt.Configuration = tConf
+		pt.Configuration = make(map[string]interface{})
 	}
 
 	var fields []*polytomic.ModelSyncField
@@ -1165,10 +837,10 @@ func (r *syncResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		}
 
 		var val interface{}
-		if filter.Value != nil {
-			err := json.Unmarshal([]byte(*filter.Value), &val)
-			if err != nil {
-				resp.Diagnostics.AddError("Failed to unmarshal filter value", err.Error())
+		if !filter.Value.IsNull() && !filter.Value.IsUnknown() {
+			diags = filter.Value.Unmarshal(&val)
+			if diags.HasError() {
+				resp.Diagnostics.Append(diags...)
 				return
 			}
 			f.Value = val
@@ -1192,21 +864,33 @@ func (r *syncResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		}
 
 		var val interface{}
-		if override.Value != nil {
-			err := json.Unmarshal([]byte(*override.Value), &val)
-			if err != nil {
-				// if marshalling fails, we assume the value is a string
-				val = *override.Value
+		if !override.Value.IsNull() && !override.Value.IsUnknown() {
+			diags = override.Value.Unmarshal(&val)
+			if diags.HasError() {
+				// if unmarshalling fails, try to use as string
+				var valStr string
+				diags = override.Value.Unmarshal(&valStr)
+				if diags.HasError() {
+					resp.Diagnostics.Append(diags...)
+					return
+				}
+				val = valStr
 			}
 			o.Value = val
 		}
 
 		var ov interface{}
-		if override.Override != nil {
-			err := json.Unmarshal([]byte(*override.Override), &ov)
-			if err != nil {
-				// if marshalling fails, we assume the override is a string
-				ov = *override.Override
+		if !override.Override.IsNull() && !override.Override.IsUnknown() {
+			diags = override.Override.Unmarshal(&ov)
+			if diags.HasError() {
+				// if unmarshalling fails, try to use as string
+				var ovStr string
+				diags = override.Override.Unmarshal(&ovStr)
+				if diags.HasError() {
+					resp.Diagnostics.Append(diags...)
+					return
+				}
+				ov = ovStr
 			}
 			o.Override = ov
 		}
@@ -1270,219 +954,15 @@ func (r *syncResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	}
 	sync, err := client.ModelSync.Update(ctx, data.ID.ValueString(), request)
 	if err != nil {
-		resp.Diagnostics.AddError("Error creating sync", err.Error())
+		resp.Diagnostics.AddError("Error updating sync", err.Error())
 		return
 	}
 
-	data.ID = types.StringPointerValue(sync.Data.Id)
-	data.Organization = types.StringPointerValue(sync.Data.OrganizationId)
-	data.Name = types.StringPointerValue(sync.Data.Name)
-
-	t := Target{
-		ConnectionID: sync.Data.Target.ConnectionId,
-		Object:       pointer.To(pointer.Get(sync.Data.Target.Object)),
-		NewName:      sync.Data.Target.NewName,
-		FilterLogic:  sync.Data.Target.FilterLogic,
-	}
-
-	sval, err := json.Marshal(sync.Data.Target.SearchValues)
-	if err != nil {
-		resp.Diagnostics.AddError("Error marshalling search values", err.Error())
-		return
-	}
-	t.SearchValues = string(sval)
-
-	tval, err := json.Marshal(tConf)
-	if err != nil {
-		resp.Diagnostics.AddError("Error marshalling target configuration", err.Error())
-		return
-	}
-	t.Configuration = string(tval)
-
-	data.Target, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"connection_id": types.StringType,
-		"object":        types.StringType,
-		"search_values": types.StringType,
-		"configuration": types.StringType,
-		"new_name":      types.StringType,
-		"filter_logic":  types.StringType,
-	}, t)
-
+	data, diags = syncDataFromResponse(ctx, sync.Data)
+	resp.Diagnostics.Append(diags...)
 	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
 		return
 	}
-
-	if string(sval) == "null" {
-		data.Target.Attributes()["search_values"] = types.StringNull()
-	}
-
-	if string(tval) == "null" {
-		data.Target.Attributes()["configuration"] = types.StringNull()
-	}
-
-	data.Mode = types.StringValue(string(pointer.Get(sync.Data.Mode)))
-	data.Fields, diags = types.SetValueFrom(ctx, types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"source": types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					"model_id": types.StringType,
-					"field":    types.StringType,
-				}},
-			"target":         types.StringType,
-			"new":            types.BoolType,
-			"override_value": types.StringType,
-			"sync_mode":      types.StringType,
-		}}, sync.Data.Fields)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
-	data.OverrideFields, diags = types.SetValueFrom(ctx, types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"source": types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					"model_id": types.StringType,
-					"field":    types.StringType,
-				}},
-			"target":         types.StringType,
-			"new":            types.BoolType,
-			"override_value": types.StringType,
-			"sync_mode":      types.StringType,
-		}}, sync.Data.OverrideFields)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
-
-	if configuration.FilterLogic.IsNull() {
-		data.FilterLogic = configuration.FilterLogic
-	} else {
-		data.FilterLogic = types.StringPointerValue(sync.Data.FilterLogic)
-	}
-
-	var resFilters []Filter
-	for _, f := range sync.Data.Filters {
-		res := Filter{
-			FieldID:   pointer.Get(f.FieldId),
-			Function:  string(f.Function),
-			FieldType: string(pointer.Get(f.FieldType)),
-			Label:     pointer.GetString(f.Label),
-		}
-		val, err := json.Marshal(f.Value)
-		if err != nil {
-			resp.Diagnostics.AddError("Error marshaling filter value", err.Error())
-			return
-		}
-
-		if string(val) == "null" {
-			res.Value = nil
-		} else {
-			res.Value = pointer.ToString(string(val))
-		}
-		resFilters = append(resFilters, res)
-	}
-
-	data.Filters, diags = types.SetValueFrom(ctx, types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"field_id":   types.StringType,
-			"function":   types.StringType,
-			"field_type": types.StringType,
-			"label":      types.StringType,
-			"value":      types.StringType,
-		}}, resFilters)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
-
-	var resOverrides []Override
-	for _, o := range sync.Data.Overrides {
-		res := Override{
-			FieldID:  pointer.Get(o.FieldId),
-			Function: string(pointer.Get(o.Function)),
-		}
-		val, err := json.Marshal(o.Value)
-		if err != nil {
-			resp.Diagnostics.AddError("Error marshaling override value", err.Error())
-			return
-		}
-
-		if string(val) == "null" {
-			res.Value = nil
-		} else {
-			res.Value = pointer.ToString(string(val))
-		}
-		if v, ok := o.Override.(string); !ok {
-			oval, err := json.Marshal(o.Override)
-			if err != nil {
-				resp.Diagnostics.AddError("Error marshaling override override", err.Error())
-				return
-			}
-			if string(oval) == "null" {
-				res.Override = nil
-			} else {
-				res.Override = pointer.ToString(string(oval))
-			}
-		} else {
-			res.Override = pointer.ToString(v)
-		}
-		resOverrides = append(resOverrides, res)
-	}
-	data.Overrides, diags = types.SetValueFrom(ctx, types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"field_id": types.StringType,
-			"function": types.StringType,
-			"value":    types.StringType,
-			"override": types.StringType,
-		}}, resOverrides)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
-
-	data.Schedule, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"frequency":     types.StringType,
-		"connection_id": types.StringType,
-		"day_of_week":   types.StringType,
-		"hour":          types.StringType,
-		"minute":        types.StringType,
-		"month":         types.StringType,
-		"day_of_month":  types.StringType,
-		"job_id":        types.Int64Type,
-		"run_after": types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-				"sync_ids":      types.SetType{ElemType: types.StringType},
-				"bulk_sync_ids": types.SetType{ElemType: types.StringType},
-			},
-		},
-		"run_after_success_only": types.BoolType,
-	}, sync.Data.Schedule)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
-	data.Identity, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"source": types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-				"model_id": types.StringType,
-				"field":    types.StringType,
-			},
-		},
-		"target":               types.StringType,
-		"function":             types.StringType,
-		"remote_field_type_id": types.StringType,
-		"new_field":            types.BoolType,
-	}, sync.Data.Identity)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
-	data.SyncAllRecords = types.BoolPointerValue(sync.Data.SyncAllRecords)
-	data.Active = types.BoolPointerValue(sync.Data.Active)
-
-	data.OnlyEnrichUpdates = types.BoolPointerValue(sync.Data.OnlyEnrichUpdates)
-	data.SkipInitialBackfill = types.BoolPointerValue(sync.Data.SkipInitialBackfill)
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -1513,4 +993,199 @@ func (r *syncResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 
 func (r *syncResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+}
+
+// syncDataFromResponse converts a Polytomic API response to Terraform resource data.
+// This is the single source of truth for all CRUD operations.
+func syncDataFromResponse(ctx context.Context, sync *polytomic.ModelSyncResponse) (syncResourceResourceData, diag.Diagnostics) {
+	var data syncResourceResourceData
+	var diags diag.Diagnostics
+
+	// Basic fields
+	data.ID = types.StringPointerValue(sync.Id)
+	data.Organization = types.StringPointerValue(sync.OrganizationId)
+	data.Name = types.StringPointerValue(sync.Name)
+	data.Mode = types.StringValue(string(pointer.Get(sync.Mode)))
+	data.Active = types.BoolPointerValue(sync.Active)
+	data.SyncAllRecords = types.BoolPointerValue(sync.SyncAllRecords)
+	data.OnlyEnrichUpdates = types.BoolPointerValue(sync.OnlyEnrichUpdates)
+	data.SkipInitialBackfill = types.BoolPointerValue(sync.SkipInitialBackfill)
+
+	// Target - using jsontypes for SearchValues and Configuration
+	searchValJSON, err := json.Marshal(sync.Target.SearchValues)
+	if err != nil {
+		diags.AddError("Error marshaling search values", err.Error())
+		return data, diags
+	}
+	confJSON, err := json.Marshal(sync.Target.Configuration)
+	if err != nil {
+		diags.AddError("Error marshaling configuration", err.Error())
+		return data, diags
+	}
+
+	var searchValNormalized jsontypes.Normalized
+	if string(searchValJSON) == "null" {
+		searchValNormalized = jsontypes.NewNormalizedNull()
+	} else {
+		searchValNormalized = jsontypes.NewNormalizedValue(string(searchValJSON))
+	}
+
+	var confNormalized jsontypes.Normalized
+	if string(confJSON) == "null" {
+		confNormalized = jsontypes.NewNormalizedNull()
+	} else {
+		confNormalized = jsontypes.NewNormalizedValue(string(confJSON))
+	}
+
+	targetData := Target{
+		ConnectionID:  sync.Target.ConnectionId,
+		Object:        sync.Target.Object,
+		SearchValues:  searchValNormalized,
+		Configuration: confNormalized,
+		NewName:       sync.Target.NewName,
+		FilterLogic:   sync.Target.FilterLogic,
+	}
+	data.Target, diags = types.ObjectValueFrom(ctx, Target{}.AttrTypes(), targetData)
+	if diags.HasError() {
+		return data, diags
+	}
+
+	// Fields
+	data.Fields, diags = types.SetValueFrom(ctx, types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"source": types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"model_id": types.StringType,
+					"field":    types.StringType,
+				}},
+			"target":             types.StringType,
+			"new":                types.BoolType,
+			"override_value":     types.StringType,
+			"sync_mode":          types.StringType,
+			"encryption_enabled": types.BoolType,
+		}}, sync.Fields)
+	if diags.HasError() {
+		return data, diags
+	}
+
+	// Override Fields
+	data.OverrideFields, diags = types.SetValueFrom(ctx, types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"source": types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"model_id": types.StringType,
+					"field":    types.StringType,
+				}},
+			"target":         types.StringType,
+			"new":            types.BoolType,
+			"override_value": types.StringType,
+			"sync_mode":      types.StringType,
+		}}, sync.OverrideFields)
+	if diags.HasError() {
+		return data, diags
+	}
+
+	// FilterLogic
+	if sync.FilterLogic != nil {
+		data.FilterLogic = types.StringPointerValue(sync.FilterLogic)
+	} else {
+		data.FilterLogic = types.StringNull()
+	}
+
+	// Filters - convert SDK filters to TF filters
+	var tfFilters []Filter
+	for _, f := range sync.Filters {
+		var valNormalized jsontypes.Normalized
+		valJSON, err := json.Marshal(f.Value)
+		if err != nil {
+			diags.AddError("Error marshaling filter value", err.Error())
+			return data, diags
+		}
+		if string(valJSON) == "null" {
+			valNormalized = jsontypes.NewNormalizedNull()
+		} else {
+			valNormalized = jsontypes.NewNormalizedValue(string(valJSON))
+		}
+
+		tfFilters = append(tfFilters, Filter{
+			FieldID:   pointer.Get(f.FieldId),
+			FieldType: string(pointer.Get(f.FieldType)),
+			Function:  string(f.Function),
+			Value:     valNormalized,
+			Label:     pointer.GetString(f.Label),
+		})
+	}
+	data.Filters, diags = types.SetValueFrom(ctx, types.ObjectType{AttrTypes: Filter{}.AttrTypes()}, tfFilters)
+	if diags.HasError() {
+		return data, diags
+	}
+
+	// Overrides - convert SDK overrides to TF overrides
+	var tfOverrides []Override
+	for _, o := range sync.Overrides {
+		var valNormalized jsontypes.Normalized
+		valJSON, err := json.Marshal(o.Value)
+		if err != nil {
+			diags.AddError("Error marshaling override value", err.Error())
+			return data, diags
+		}
+		if string(valJSON) == "null" {
+			valNormalized = jsontypes.NewNormalizedNull()
+		} else {
+			valNormalized = jsontypes.NewNormalizedValue(string(valJSON))
+		}
+
+		var overrideNormalized jsontypes.Normalized
+		// Handle both string and complex override values
+		if v, ok := o.Override.(string); ok {
+			overrideNormalized = jsontypes.NewNormalizedValue(v)
+		} else {
+			overrideJSON, err := json.Marshal(o.Override)
+			if err != nil {
+				diags.AddError("Error marshaling override override", err.Error())
+				return data, diags
+			}
+			if string(overrideJSON) == "null" {
+				overrideNormalized = jsontypes.NewNormalizedNull()
+			} else {
+				overrideNormalized = jsontypes.NewNormalizedValue(string(overrideJSON))
+			}
+		}
+
+		tfOverrides = append(tfOverrides, Override{
+			FieldID:  pointer.Get(o.FieldId),
+			Function: string(pointer.Get(o.Function)),
+			Value:    valNormalized,
+			Override: overrideNormalized,
+		})
+	}
+	data.Overrides, diags = types.SetValueFrom(ctx, types.ObjectType{AttrTypes: Override{}.AttrTypes()}, tfOverrides)
+	if diags.HasError() {
+		return data, diags
+	}
+
+	// Schedule
+	data.Schedule, diags = types.ObjectValueFrom(ctx, Schedule{}.AttrTypes(), sync.Schedule)
+	if diags.HasError() {
+		return data, diags
+	}
+
+	// Identity
+	data.Identity, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"source": types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				"model_id": types.StringType,
+				"field":    types.StringType,
+			},
+		},
+		"target":               types.StringType,
+		"function":             types.StringType,
+		"remote_field_type_id": types.StringType,
+		"new_field":            types.BoolType,
+	}, sync.Identity)
+	if diags.HasError() {
+		return data, diags
+	}
+
+	return data, diags
 }

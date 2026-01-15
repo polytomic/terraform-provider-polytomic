@@ -911,7 +911,6 @@ func bulkSyncDataFromResponse(ctx context.Context, response *polytomic.BulkSyncR
 	data.Schemas = schemaVal
 	data.Policies, _ = types.SetValueFrom(ctx, types.StringType, response.Policies)
 
-	// New fields from SDK v1.12.0
 	if response.ConcurrencyLimit != nil {
 		data.ConcurrencyLimit = types.Int64Value(int64(*response.ConcurrencyLimit))
 	} else {
