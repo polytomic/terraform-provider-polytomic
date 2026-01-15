@@ -23,6 +23,9 @@ var _ resource.ResourceWithImportState = &{{ .Connection }}ConnectionResource{}
 			{{ .TfType | lower }}planmodifier.UseStateForUnknown(),
     	},
 		{{ end -}}
+		{{ if eq .AttrType "schema.MapAttribute" -}}
+		ElementType: types.StringType,
+		{{ end -}}
 		{{ if .Attributes -}}
 			Attributes: map[string]schema.Attribute{
 				{{ range .Attributes }}{{ template "attribute" . }}{{ end }}
@@ -46,6 +49,10 @@ var _ resource.ResourceWithImportState = &{{ .Connection }}ConnectionResource{}
 	{{ if eq .TfType "Object" -}}
 	types.ObjectType{
 		AttrTypes: {{ template "attrTypes" . }},
+	},
+	{{- else if eq .TfType "Map" -}}
+	types.MapType{
+		ElemType: types.StringType,
 	},
 	{{- else -}}
 		{{ .AttrReadType }}

@@ -78,6 +78,14 @@ func unmarshalJSONSchema(input map[string]interface{}) (*jsonschema.Schema, erro
 			return nil, fmt.Errorf("error decoding items: %w", err)
 		}
 	}
+	if rawAdditionalProps, ok := input["additionalProperties"]; ok {
+		if additionalPropsMap, ok := rawAdditionalProps.(map[string]interface{}); ok {
+			a.AdditionalProperties, err = unmarshalJSONSchema(additionalPropsMap)
+			if err != nil {
+				return nil, fmt.Errorf("error decoding additionalProperties: %w", err)
+			}
+		}
+	}
 
 	return &a, nil
 }

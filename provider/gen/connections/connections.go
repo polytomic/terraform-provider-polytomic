@@ -54,6 +54,12 @@ var (
 			ReadAttrType: "types.ObjectType",
 			GoType:       "struct",
 		},
+		"map": {
+			AttrType:     "schema.MapAttribute",
+			TfType:       "Map",
+			ReadAttrType: "types.MapType",
+			GoType:       "map[string]string",
+		},
 		"": {
 			AttrType:     "schema.StringAttribute",
 			TfType:       "String",
@@ -207,7 +213,7 @@ var defaultImports = `
 "github.com/hashicorp/terraform-plugin-log/tflog"
 "github.com/polytomic/polytomic-go"
 ptcore "github.com/polytomic/polytomic-go/core"
-"github.com/polytomic/terraform-provider-polytomic/provider/internal/client"
+"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 `
 
 type Importable struct {
@@ -286,7 +292,8 @@ func GenerateConnections(ctx context.Context) error {
 			},
 		)
 		if err != nil {
-			return err
+			log.Printf("Skipping connection type %s: %v", connType.ID, err)
+			continue
 		}
 		r := Connection{
 			Name:         cmp.Or(connType.Name, connType.ID),
@@ -385,7 +392,20 @@ func attributesForJSONSchema(connSchema *jsonschema.Schema) ([]Attribute, error)
 }
 
 func tfAttr(k string, a *jsonschema.Schema, required []string) (Attribute, error) {
-	t, ok := TypeMap[a.Type]
+	// Check if this is an object with additionalProperties (a map)
+	schemaType := a.Type
+	if a.Type == "object" {
+		// Check if it has additionalProperties of type string
+		if a.AdditionalProperties != nil && a.AdditionalProperties.Type == "string" {
+			// This is a map[string]string
+			schemaType = "map"
+		} else if a.Properties == nil || a.Properties.Len() == 0 {
+			// Object with no properties defined - treat as a flexible map
+			schemaType = "map"
+		}
+	}
+
+	t, ok := TypeMap[schemaType]
 	if !ok {
 		return Attribute{}, fmt.Errorf("type %s not found for %s", a.Type, k)
 	}
@@ -434,11 +454,14 @@ func tfAttr(k string, a *jsonschema.Schema, required []string) (Attribute, error
 		}
 		attr.Elem = &elem
 	case "object":
-		sa, err := attributesForJSONSchema(a)
-		if err != nil {
-			return Attribute{}, fmt.Errorf("error inspecting attributes for %s: %w", k, err)
+		// Only treat as nested object if it has properties (not a map with additionalProperties)
+		if schemaType != "map" {
+			sa, err := attributesForJSONSchema(a)
+			if err != nil {
+				return Attribute{}, fmt.Errorf("error inspecting attributes for %s: %w", k, err)
+			}
+			attr.Attributes = sa
 		}
-		attr.Attributes = sa
 	}
 	attr.Required = slices.Contains(required, k)
 	attr.Optional = !attr.Required

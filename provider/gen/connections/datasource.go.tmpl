@@ -39,22 +39,25 @@ func (d *{{ .Connection }}ConnectionDataSource) Metadata(ctx context.Context, re
 	"{{ .AttrName }}": {{ .AttrType }} {
 		MarkdownDescription: `{{ .Description }}`,
 		Computed: true,
-		{{ if .Attributes -}}
+		{{- if eq .AttrType "schema.MapAttribute" }}
+		ElementType: types.StringType,
+		{{- end }}
+		{{- if .Attributes }}
+		Attributes: map[string]schema.Attribute{
+			{{ range .Attributes }}{{ template "attribute" . }}{{ end }}
+		},
+		{{- end }}
+		{{- if .Elem }}
+		{{ if eq .Elem.TfType "Object" -}}
+		NestedObject: schema.NestedAttributeObject{
 			Attributes: map[string]schema.Attribute{
-				{{ range .Attributes }}{{ template "attribute" . }}{{ end }}
+				{{ range .Elem.Attributes }}{{ template "attribute" . }}{{ end }}
 			},
-		{{ end -}}
-		{{ if .Elem -}}
-			{{ if eq .Elem.TfType "Object" -}}
-			NestedObject: schema.NestedAttributeObject{
-				Attributes: map[string]schema.Attribute{
-					{{ range .Elem.Attributes }}{{ template "attribute" . }}{{ end }}
-				},
-			},
-			{{- else -}}
-			ElementType: {{ .Elem.AttrReadType }},
-			{{ end -}}
-		{{ end }}
+		},
+		{{- else -}}
+		ElementType: {{ .Elem.AttrReadType }},
+		{{- end }}
+		{{- end }}
 	},
 	{{- end }}
 {{ end -}}
