@@ -129,6 +129,10 @@ func (r *syncResource) Schema(ctx context.Context, req resource.SchemaRequest, r
 							MarkdownDescription: "",
 							Optional:            true,
 						},
+						"encryption_enabled": schema.BoolAttribute{
+							MarkdownDescription: "Whether the field should be encrypted",
+							Optional:            true,
+						},
 					},
 				},
 				Required: true,
@@ -352,6 +356,21 @@ func (r *syncResource) Schema(ctx context.Context, req resource.SchemaRequest, r
 				Computed:            true,
 				Default:             booldefault.StaticBool(false),
 			},
+			"encryption_passphrase": schema.StringAttribute{
+				MarkdownDescription: "Passphrase for encrypting sync data",
+				Optional:            true,
+				Sensitive:           true,
+			},
+			"only_enrich_updates": schema.BoolAttribute{
+				MarkdownDescription: "Whether enrichment models only track changes",
+				Optional:            true,
+				Computed:            true,
+			},
+			"skip_initial_backfill": schema.BoolAttribute{
+				MarkdownDescription: "Skip initial backfill, sync only new records",
+				Optional:            true,
+				Computed:            true,
+			},
 		},
 	}
 }
@@ -361,20 +380,24 @@ func (r *syncResource) Metadata(ctx context.Context, req resource.MetadataReques
 }
 
 type syncResourceResourceData struct {
-	ID             types.String `tfsdk:"id"`
-	Organization   types.String `tfsdk:"organization"`
-	Name           types.String `tfsdk:"name"`
-	Target         types.Object `tfsdk:"target"`
-	Mode           types.String `tfsdk:"mode"`
-	Fields         types.Set    `tfsdk:"fields"`
-	OverrideFields types.Set    `tfsdk:"override_fields"`
-	Filters        types.Set    `tfsdk:"filters"`
-	FilterLogic    types.String `tfsdk:"filter_logic"`
-	Overrides      types.Set    `tfsdk:"overrides"`
-	Schedule       types.Object `tfsdk:"schedule"`
-	Identity       types.Object `tfsdk:"identity"`
-	SyncAllRecords types.Bool   `tfsdk:"sync_all_records"`
-	Active         types.Bool   `tfsdk:"active"`
+	ID                   types.String `tfsdk:"id"`
+	Organization         types.String `tfsdk:"organization"`
+	Name                 types.String `tfsdk:"name"`
+	Target               types.Object `tfsdk:"target"`
+	Mode                 types.String `tfsdk:"mode"`
+	Fields               types.Set    `tfsdk:"fields"`
+	OverrideFields       types.Set    `tfsdk:"override_fields"`
+	Filters              types.Set    `tfsdk:"filters"`
+	FilterLogic          types.String `tfsdk:"filter_logic"`
+	Overrides            types.Set    `tfsdk:"overrides"`
+	Schedule             types.Object `tfsdk:"schedule"`
+	Identity             types.Object `tfsdk:"identity"`
+	SyncAllRecords       types.Bool   `tfsdk:"sync_all_records"`
+	Active               types.Bool   `tfsdk:"active"`
+	EncryptionPassphrase types.String `tfsdk:"encryption_passphrase"`
+	OnlyEnrichUpdates    types.Bool   `tfsdk:"only_enrich_updates"`
+	SkipInitialBackfill  types.Bool   `tfsdk:"skip_initial_backfill"`
+	ModelIds             types.Set    `tfsdk:"model_ids"`
 }
 
 type Filter struct {
@@ -431,7 +454,7 @@ func (r *syncResource) Create(ctx context.Context, req resource.CreateRequest, r
 
 	pt := &polytomic.Target{
 		ConnectionId: target.ConnectionID,
-		Object:       pointer.GetString(target.Object),
+		Object:       target.Object,
 		NewName:      target.NewName,
 		FilterLogic:  target.FilterLogic,
 	}
@@ -562,14 +585,17 @@ func (r *syncResource) Create(ctx context.Context, req resource.CreateRequest, r
 	}
 
 	request := &polytomic.CreateModelSyncRequest{
-		Name:           data.Name.ValueString(),
-		Target:         pt,
-		Mode:           data.Mode.ValueString(),
-		Fields:         fields,
-		OverrideFields: overrideFields,
-		Filters:        pfilters,
-		Overrides:      poverrides,
-		Schedule:       &schedule,
+		Name:                 data.Name.ValueString(),
+		Target:               pt,
+		Mode:                 polytomic.ModelSyncMode(data.Mode.ValueString()),
+		Fields:               fields,
+		OverrideFields:       overrideFields,
+		Filters:              pfilters,
+		Overrides:            poverrides,
+		Schedule:             &schedule,
+		EncryptionPassphrase: data.EncryptionPassphrase.ValueStringPointer(),
+		OnlyEnrichUpdates:    data.OnlyEnrichUpdates.ValueBoolPointer(),
+		SkipInitialBackfill:  data.SkipInitialBackfill.ValueBoolPointer(),
 	}
 
 	if !data.Organization.IsNull() {
@@ -605,7 +631,7 @@ func (r *syncResource) Create(ctx context.Context, req resource.CreateRequest, r
 
 	t := Target{
 		ConnectionID: sync.Data.Target.ConnectionId,
-		Object:       &sync.Data.Target.Object,
+		Object:       sync.Data.Target.Object,
 		NewName:      sync.Data.Target.NewName,
 		FilterLogic:  sync.Data.Target.FilterLogic,
 	}
@@ -645,7 +671,7 @@ func (r *syncResource) Create(ctx context.Context, req resource.CreateRequest, r
 		data.Target.Attributes()["configuration"] = types.StringNull()
 	}
 
-	data.Mode = types.StringPointerValue(sync.Data.Mode)
+	data.Mode = types.StringValue(string(pointer.Get(sync.Data.Mode)))
 	data.Fields, diags = types.SetValueFrom(ctx, types.ObjectType{
 		AttrTypes: map[string]attr.Type{
 			"source": types.ObjectType{
@@ -802,6 +828,9 @@ func (r *syncResource) Create(ctx context.Context, req resource.CreateRequest, r
 	data.SyncAllRecords = types.BoolPointerValue(sync.Data.SyncAllRecords)
 	data.Active = types.BoolPointerValue(sync.Data.Active)
 
+	data.OnlyEnrichUpdates = types.BoolPointerValue(sync.Data.OnlyEnrichUpdates)
+	data.SkipInitialBackfill = types.BoolPointerValue(sync.Data.SkipInitialBackfill)
+
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 
@@ -840,7 +869,7 @@ func (r *syncResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 
 	t := Target{
 		ConnectionID: sync.Data.Target.ConnectionId,
-		Object:       &sync.Data.Target.Object,
+		Object:       sync.Data.Target.Object,
 		NewName:      sync.Data.Target.NewName,
 		FilterLogic:  sync.Data.Target.FilterLogic,
 	}
@@ -881,7 +910,7 @@ func (r *syncResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 		data.Target.Attributes()["configuration"] = types.StringNull()
 	}
 
-	data.Mode = types.StringPointerValue(sync.Data.Mode)
+	data.Mode = types.StringValue(string(pointer.Get(sync.Data.Mode)))
 	data.Fields, diags = types.SetValueFrom(ctx, types.ObjectType{
 		AttrTypes: map[string]attr.Type{
 			"source": types.ObjectType{
@@ -1041,6 +1070,9 @@ func (r *syncResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 	data.SyncAllRecords = types.BoolPointerValue(sync.Data.SyncAllRecords)
 	data.Active = types.BoolPointerValue(sync.Data.Active)
 
+	data.OnlyEnrichUpdates = types.BoolPointerValue(sync.Data.OnlyEnrichUpdates)
+	data.SkipInitialBackfill = types.BoolPointerValue(sync.Data.SkipInitialBackfill)
+
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 
@@ -1073,7 +1105,7 @@ func (r *syncResource) Update(ctx context.Context, req resource.UpdateRequest, r
 
 	pt := &polytomic.Target{
 		ConnectionId: target.ConnectionID,
-		Object:       pointer.GetString(target.Object),
+		Object:       pointer.To(pointer.Get(target.Object)),
 		NewName:      target.NewName,
 		FilterLogic:  target.FilterLogic,
 	}
@@ -1204,15 +1236,18 @@ func (r *syncResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	}
 
 	request := &polytomic.UpdateModelSyncRequest{
-		Name:           data.Name.ValueString(),
-		Target:         pt,
-		Mode:           data.Mode.ValueString(),
-		Fields:         fields,
-		OverrideFields: overrideFields,
-		Filters:        pfilters,
-		Overrides:      poverrides,
-		Schedule:       &schedule,
-		Identity:       identity,
+		Name:                 data.Name.ValueString(),
+		Target:               pt,
+		Mode:                 polytomic.ModelSyncMode(data.Mode.ValueString()),
+		Fields:               fields,
+		OverrideFields:       overrideFields,
+		Filters:              pfilters,
+		Overrides:            poverrides,
+		Schedule:             &schedule,
+		Identity:             identity,
+		EncryptionPassphrase: data.EncryptionPassphrase.ValueStringPointer(),
+		OnlyEnrichUpdates:    data.OnlyEnrichUpdates.ValueBoolPointer(),
+		SkipInitialBackfill:  data.SkipInitialBackfill.ValueBoolPointer(),
 	}
 
 	if !data.Organization.IsNull() {
@@ -1245,7 +1280,7 @@ func (r *syncResource) Update(ctx context.Context, req resource.UpdateRequest, r
 
 	t := Target{
 		ConnectionID: sync.Data.Target.ConnectionId,
-		Object:       pointer.ToString(sync.Data.Target.Object),
+		Object:       pointer.To(pointer.Get(sync.Data.Target.Object)),
 		NewName:      sync.Data.Target.NewName,
 		FilterLogic:  sync.Data.Target.FilterLogic,
 	}
@@ -1286,7 +1321,7 @@ func (r *syncResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		data.Target.Attributes()["configuration"] = types.StringNull()
 	}
 
-	data.Mode = types.StringPointerValue(sync.Data.Mode)
+	data.Mode = types.StringValue(string(pointer.Get(sync.Data.Mode)))
 	data.Fields, diags = types.SetValueFrom(ctx, types.ObjectType{
 		AttrTypes: map[string]attr.Type{
 			"source": types.ObjectType{
@@ -1446,9 +1481,11 @@ func (r *syncResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	data.SyncAllRecords = types.BoolPointerValue(sync.Data.SyncAllRecords)
 	data.Active = types.BoolPointerValue(sync.Data.Active)
 
+	data.OnlyEnrichUpdates = types.BoolPointerValue(sync.Data.OnlyEnrichUpdates)
+	data.SkipInitialBackfill = types.BoolPointerValue(sync.Data.SkipInitialBackfill)
+
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
-
 }
 
 func (r *syncResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {

@@ -163,6 +163,21 @@ func (r *bulkSyncResource) Schema(ctx context.Context, req resource.SchemaReques
 				Optional:            true,
 				Computed:            true,
 			},
+			"concurrency_limit": schema.Int64Attribute{
+				MarkdownDescription: "Per-sync concurrency limit override",
+				Optional:            true,
+				Computed:            true,
+			},
+			"resync_concurrency_limit": schema.Int64Attribute{
+				MarkdownDescription: "Per-sync resync concurrency limit override",
+				Optional:            true,
+				Computed:            true,
+			},
+			"normalize_names": schema.StringAttribute{
+				MarkdownDescription: "Name normalization settings",
+				Optional:            true,
+				Computed:            true,
+			},
 		},
 	}
 }
@@ -178,10 +193,9 @@ func (bulkSyncConnection) SchemaAttributes() map[string]schema.Attribute {
 			Required: true,
 		},
 		"configuration": schema.StringAttribute{
-			MarkdownDescription: "Integration-specific configuratino for the connection. Documentation for settings is available in the [Polytomic API documentation](https://apidocs.polytomic.com/2024-02-08/guides/configuring-your-connections/overview)",
+			MarkdownDescription: "Integration-specific configuration for the connection. Documentation for settings is available in the [Polytomic API documentation](https://apidocs.polytomic.com/2024-02-08/guides/configuring-your-connections/overview)",
 			CustomType:          jsontypes.NormalizedType{},
-			Optional:            true,
-			Computed:            true,
+			Required:            true,
 		},
 	}
 }
@@ -331,6 +345,9 @@ type bulkSyncResourceData struct {
 	Schemas                    types.Set         `tfsdk:"schemas"`
 	Policies                   types.Set         `tfsdk:"policies"`
 	DataCutoffTimestamp        timetypes.RFC3339 `tfsdk:"data_cutoff_timestamp"`
+	ConcurrencyLimit           types.Int64       `tfsdk:"concurrency_limit"`
+	ResyncConcurrencyLimit     types.Int64       `tfsdk:"resync_concurrency_limit"`
+	NormalizeNames             types.String      `tfsdk:"normalize_names"`
 }
 
 type bulkSyncResource struct {
@@ -509,13 +526,26 @@ func (r *bulkSyncResource) Create(ctx context.Context, req resource.CreateReques
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+
+	// Convert int64 concurrency limits to int
+	var concurrencyLimit *int
+	if !data.ConcurrencyLimit.IsNull() {
+		val := int(data.ConcurrencyLimit.ValueInt64())
+		concurrencyLimit = &val
+	}
+	var resyncConcurrencyLimit *int
+	if !data.ResyncConcurrencyLimit.IsNull() {
+		val := int(data.ResyncConcurrencyLimit.ValueInt64())
+		resyncConcurrencyLimit = &val
+	}
+
 	created, err := client.BulkSync.Create(ctx,
 		&polytomic.CreateBulkSyncRequest{
 			OrganizationId:             data.Organization.ValueStringPointer(),
 			Name:                       data.Name.ValueString(),
 			DestinationConnectionId:    destination.ConnectionID.ValueString(),
 			SourceConnectionId:         source.ConnectionID.ValueString(),
-			Mode:                       pointer.To(polytomic.SyncMode(data.Mode.ValueString())),
+			Mode:                       pointer.To(polytomic.BulkSyncMode(data.Mode.ValueString())),
 			Active:                     data.Active.ValueBoolPointer(),
 			AutomaticallyAddNewFields:  pointer.To(polytomic.BulkDiscover(data.AutomaticallyAddNewFields.ValueString())),
 			AutomaticallyAddNewObjects: pointer.To(polytomic.BulkDiscover(data.AutomaticallyAddNewObjects.ValueString())),
@@ -524,6 +554,9 @@ func (r *bulkSyncResource) Create(ctx context.Context, req resource.CreateReques
 			Schedule:                   sche,
 			DestinationConfiguration:   destConf,
 			SourceConfiguration:        sourceConf,
+			ConcurrencyLimit:           concurrencyLimit,
+			ResyncConcurrencyLimit:     resyncConcurrencyLimit,
+			NormalizeNames:             pointer.To(polytomic.BulkNormalizeNames(data.NormalizeNames.ValueString())),
 		},
 	)
 	if err != nil {
@@ -719,6 +752,19 @@ func (r *bulkSyncResource) Update(ctx context.Context, req resource.UpdateReques
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+
+	// Convert int64 concurrency limits to int
+	var concurrencyLimit *int
+	if !data.ConcurrencyLimit.IsNull() {
+		val := int(data.ConcurrencyLimit.ValueInt64())
+		concurrencyLimit = &val
+	}
+	var resyncConcurrencyLimit *int
+	if !data.ResyncConcurrencyLimit.IsNull() {
+		val := int(data.ResyncConcurrencyLimit.ValueInt64())
+		resyncConcurrencyLimit = &val
+	}
+
 	updated, err := client.BulkSync.Update(ctx,
 		data.Id.ValueString(),
 		&polytomic.UpdateBulkSyncRequest{
@@ -726,7 +772,7 @@ func (r *bulkSyncResource) Update(ctx context.Context, req resource.UpdateReques
 			Name:                       data.Name.ValueString(),
 			DestinationConnectionId:    destination.ConnectionID.ValueString(),
 			SourceConnectionId:         source.ConnectionID.ValueString(),
-			Mode:                       pointer.To(polytomic.SyncMode(data.Mode.ValueString())),
+			Mode:                       pointer.To(polytomic.BulkSyncMode(data.Mode.ValueString())),
 			Active:                     data.Active.ValueBoolPointer(),
 			AutomaticallyAddNewFields:  pointer.To(polytomic.BulkDiscover(data.AutomaticallyAddNewFields.ValueString())),
 			AutomaticallyAddNewObjects: pointer.To(polytomic.BulkDiscover(data.AutomaticallyAddNewObjects.ValueString())),
@@ -735,6 +781,9 @@ func (r *bulkSyncResource) Update(ctx context.Context, req resource.UpdateReques
 			Schedule:                   sche,
 			DestinationConfiguration:   destConf,
 			SourceConfiguration:        sourceConf,
+			ConcurrencyLimit:           concurrencyLimit,
+			ResyncConcurrencyLimit:     resyncConcurrencyLimit,
+			NormalizeNames:             pointer.To(polytomic.BulkNormalizeNames(data.NormalizeNames.ValueString())),
 		},
 	)
 	if err != nil {
@@ -852,7 +901,7 @@ func bulkSyncDataFromResponse(ctx context.Context, response *polytomic.BulkSyncR
 	data.Id = types.StringPointerValue(response.Id)
 	data.Organization = types.StringPointerValue(response.OrganizationId)
 	data.Name = types.StringPointerValue(response.Name)
-	data.Mode = types.StringPointerValue(response.Mode)
+	data.Mode = types.StringValue(string(pointer.Get(response.Mode)))
 	data.Active = types.BoolPointerValue(response.Active)
 	data.AutomaticallyAddNewFields = types.StringValue(string(pointer.Get((response.AutomaticallyAddNewFields))))
 	data.AutomaticallyAddNewObjects = types.StringValue(string(pointer.Get((response.AutomaticallyAddNewObjects))))
@@ -861,5 +910,23 @@ func bulkSyncDataFromResponse(ctx context.Context, response *polytomic.BulkSyncR
 	data.Schedule = sch
 	data.Schemas = schemaVal
 	data.Policies, _ = types.SetValueFrom(ctx, types.StringType, response.Policies)
+
+	// New fields from SDK v1.12.0
+	if response.ConcurrencyLimit != nil {
+		data.ConcurrencyLimit = types.Int64Value(int64(*response.ConcurrencyLimit))
+	} else {
+		data.ConcurrencyLimit = types.Int64Null()
+	}
+	if response.ResyncConcurrencyLimit != nil {
+		data.ResyncConcurrencyLimit = types.Int64Value(int64(*response.ResyncConcurrencyLimit))
+	} else {
+		data.ResyncConcurrencyLimit = types.Int64Null()
+	}
+	if response.NormalizeNames != nil {
+		data.NormalizeNames = types.StringValue(string(*response.NormalizeNames))
+	} else {
+		data.NormalizeNames = types.StringNull()
+	}
+
 	return data, diags
 }

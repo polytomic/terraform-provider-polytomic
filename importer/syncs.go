@@ -62,7 +62,7 @@ func (s *Syncs) GenerateTerraformFiles(ctx context.Context, writer io.Writer, re
 		resourceBlock := body.AppendNewBlock("resource", []string{SyncResource, name})
 		resourceBlock.Body().SetAttributeValue("name", cty.StringVal(pointer.GetString(sync.Data.Name)))
 		resourceBlock.Body().SetAttributeValue("active", cty.BoolVal(pointer.GetBool(sync.Data.Active)))
-		resourceBlock.Body().SetAttributeValue("mode", cty.StringVal(pointer.GetString(sync.Data.Mode)))
+		resourceBlock.Body().SetAttributeValue("mode", cty.StringVal(string(pointer.Get(sync.Data.Mode))))
 		var schedule map[string]interface{}
 		decoder, err := mapstructure.NewDecoder(
 			&mapstructure.DecoderConfig{

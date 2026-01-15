@@ -74,7 +74,7 @@ func (b *BulkSyncs) GenerateTerraformFiles(ctx context.Context, writer io.Writer
 		resourceBlock.Body().SetAttributeValue("dest_connection_id", cty.StringVal(pointer.GetString(bulkSync.DestinationConnectionId)))
 		resourceBlock.Body().SetAttributeValue("active", cty.BoolVal(pointer.GetBool(bulkSync.Active)))
 		resourceBlock.Body().SetAttributeValue("discover", cty.BoolVal(pointer.GetBool(bulkSync.Discover)))
-		resourceBlock.Body().SetAttributeValue("mode", cty.StringVal(pointer.GetString(bulkSync.Mode)))
+		resourceBlock.Body().SetAttributeValue("mode", cty.StringVal(string(pointer.Get(bulkSync.Mode))))
 
 		dTokens := wrapJSONEncode(bulkSync.DestinationConfiguration, "advanced")
 		resourceBlock.Body().SetAttributeRaw("dest_configuration", dTokens)
