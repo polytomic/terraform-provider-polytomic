@@ -6,7 +6,10 @@ import (
 
 	"github.com/AlekSi/pointer"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
+	"github.com/hashicorp/terraform-plugin-testing/statecheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
 )
 
 func TestAccPolicy(t *testing.T) {
@@ -20,16 +23,36 @@ func TestAccPolicy(t *testing.T) {
 					Name:   name,
 					APIKey: APIKey(),
 				}),
+				ConfigStateChecks: []statecheck.StateCheck{
+					statecheck.ExpectKnownValue(
+						"polytomic_policy.test",
+						tfjsonpath.New("name"),
+						knownvalue.StringExact(name),
+					),
+					statecheck.ExpectKnownValue(
+						"polytomic_policy.test",
+						tfjsonpath.New("id"),
+						knownvalue.NotNull(),
+					),
+					statecheck.ExpectKnownValue(
+						"polytomic_policy.test",
+						tfjsonpath.New("policy_actions"),
+						knownvalue.ListSizeExact(2),
+					),
+					statecheck.ExpectKnownValue(
+						"polytomic_policy.test",
+						tfjsonpath.New("policy_actions").AtSliceIndex(0).AtMapKey("action"),
+						knownvalue.StringExact("apply_policy"),
+					),
+					statecheck.ExpectKnownValue(
+						"polytomic_policy.test",
+						tfjsonpath.New("policy_actions").AtSliceIndex(0).AtMapKey("role_ids"),
+						knownvalue.ListSizeExact(1),
+					),
+				},
 				Check: resource.ComposeTestCheckFunc(
-					// Check if the resource exists
 					testAccPolicyExists(t, name, APIKey()),
-					// Check the name
-					resource.TestCheckResourceAttr("polytomic_policy.test", "name", name),
-					// Number of policy actions
-					resource.TestCheckResourceAttr("polytomic_policy.test", "policy_actions.#", "2"),
-					// Check the first policy action
-					resource.TestCheckResourceAttr("polytomic_policy.test", "policy_actions.0.action", "apply_policy"),
-					resource.TestCheckResourceAttr("polytomic_policy.test", "policy_actions.0.role_ids.#", "1")),
+				),
 			},
 		},
 	})

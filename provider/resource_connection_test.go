@@ -7,8 +7,10 @@ import (
 	"github.com/AlekSi/pointer"
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
+	"github.com/hashicorp/terraform-plugin-testing/statecheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-	"github.com/stretchr/testify/assert"
+	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
 )
 
 func TestAccConnectionResource(t *testing.T) {
@@ -22,11 +24,21 @@ func TestAccConnectionResource(t *testing.T) {
 					Name:   name,
 					APIKey: APIKey(),
 				}),
+				ConfigStateChecks: []statecheck.StateCheck{
+					statecheck.ExpectKnownValue(
+						"polytomic_csv_connection.test",
+						tfjsonpath.New("name"),
+						knownvalue.StringExact(name),
+					),
+					statecheck.ExpectKnownValue(
+						"polytomic_csv_connection.test",
+						tfjsonpath.New("id"),
+						knownvalue.NotNull(),
+					),
+				},
 				Check: resource.ComposeTestCheckFunc(
-					// Check if the resource exists
+					// Verify resource exists in API
 					testAccConnectionExists(t, name, APIKey()),
-					// Check the name
-					resource.TestCheckResourceAttr("polytomic_csv_connection.test", "name", name),
 				),
 			},
 		},
@@ -54,7 +66,10 @@ func testAccConnectionExists(t *testing.T, name string, apiKey bool) resource.Te
 		if err != nil {
 			return err
 		}
-		assert.Equal(t, name, pointer.Get(conn.Data.Name))
+
+		if pointer.Get(conn.Data.Name) != name {
+			return fmt.Errorf("expected connection name %q, got %q", name, pointer.Get(conn.Data.Name))
+		}
 
 		return nil
 	}

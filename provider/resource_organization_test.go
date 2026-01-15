@@ -6,7 +6,10 @@ import (
 
 	"github.com/AlekSi/pointer"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
+	"github.com/hashicorp/terraform-plugin-testing/statecheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
 )
 
 func TestAccOrganization_basic(t *testing.T) {
@@ -25,18 +28,43 @@ func TestAccOrganization_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccOrganizationResource(orgName, ssoDomain, ssoOrgId),
+				ConfigStateChecks: []statecheck.StateCheck{
+					statecheck.ExpectKnownValue(
+						"polytomic_organization.test",
+						tfjsonpath.New("name"),
+						knownvalue.StringExact(orgName),
+					),
+					statecheck.ExpectKnownValue(
+						"polytomic_organization.test",
+						tfjsonpath.New("sso_domain"),
+						knownvalue.StringExact(ssoDomain),
+					),
+					statecheck.ExpectKnownValue(
+						"polytomic_organization.test",
+						tfjsonpath.New("sso_org_id"),
+						knownvalue.StringExact(ssoOrgId),
+					),
+					statecheck.ExpectKnownValue(
+						"polytomic_organization.test",
+						tfjsonpath.New("id"),
+						knownvalue.NotNull(),
+					),
+				},
 				Check: resource.ComposeTestCheckFunc(
 					testAccOrganizationExists(t, orgName),
-					resource.TestCheckResourceAttr("polytomic_organization.test", "name", orgName),
-					resource.TestCheckResourceAttr("polytomic_organization.test", "sso_domain", ssoDomain),
-					resource.TestCheckResourceAttr("polytomic_organization.test", "sso_org_id", ssoOrgId),
 				),
 			},
 			{
 				Config: testAccOrganizationResource(orgName2, ssoDomain, ssoOrgId),
+				ConfigStateChecks: []statecheck.StateCheck{
+					statecheck.ExpectKnownValue(
+						"polytomic_organization.test",
+						tfjsonpath.New("name"),
+						knownvalue.StringExact(orgName2),
+					),
+				},
 				Check: resource.ComposeTestCheckFunc(
 					testAccOrganizationExists(t, orgName2),
-					resource.TestCheckResourceAttr("polytomic_organization.test", "name", orgName2),
 				),
 			},
 		},

@@ -6,7 +6,10 @@ import (
 
 	"github.com/AlekSi/pointer"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
+	"github.com/hashicorp/terraform-plugin-testing/statecheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
 )
 
 func TestAccRole(t *testing.T) {
@@ -16,15 +19,24 @@ func TestAccRole(t *testing.T) {
 		ProtoV6ProviderFactories: TestAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: TestCaseTfResource(t, policyResourceTemplate, TestCaseTfArgs{
+				Config: TestCaseTfResource(t, roleResourceTemplate, TestCaseTfArgs{
 					Name:   name,
 					APIKey: APIKey(),
 				}),
+				ConfigStateChecks: []statecheck.StateCheck{
+					statecheck.ExpectKnownValue(
+						"polytomic_role.test",
+						tfjsonpath.New("name"),
+						knownvalue.StringExact(name),
+					),
+					statecheck.ExpectKnownValue(
+						"polytomic_role.test",
+						tfjsonpath.New("id"),
+						knownvalue.NotNull(),
+					),
+				},
 				Check: resource.ComposeTestCheckFunc(
-					// Check if the resource exists
 					testAccRoleExists(t, name, APIKey()),
-					// Check the name
-					resource.TestCheckResourceAttr("polytomic_role.test", "name", name),
 				),
 			},
 		},

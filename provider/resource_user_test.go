@@ -7,7 +7,10 @@ import (
 
 	"github.com/AlekSi/pointer"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
+	"github.com/hashicorp/terraform-plugin-testing/statecheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
 )
 
 func TestAccUser_basic(t *testing.T) {
@@ -27,12 +30,36 @@ func TestAccUser_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccUserResource(email, role, org),
+				ConfigStateChecks: []statecheck.StateCheck{
+					statecheck.ExpectKnownValue(
+						"polytomic_user.admin",
+						tfjsonpath.New("email"),
+						knownvalue.StringExact(email),
+					),
+					statecheck.ExpectKnownValue(
+						"polytomic_user.admin",
+						tfjsonpath.New("role"),
+						knownvalue.StringExact(role),
+					),
+					statecheck.ExpectKnownValue(
+						"polytomic_user.admin",
+						tfjsonpath.New("id"),
+						knownvalue.NotNull(),
+					),
+				},
 				Check: resource.ComposeTestCheckFunc(
 					testAccUserExists(t, email, APIKey()),
 				),
 			},
 			{
 				Config: testAccUserResource(email2, role, org),
+				ConfigStateChecks: []statecheck.StateCheck{
+					statecheck.ExpectKnownValue(
+						"polytomic_user.admin",
+						tfjsonpath.New("email"),
+						knownvalue.StringExact(email2),
+					),
+				},
 				Check: resource.ComposeTestCheckFunc(
 					testAccUserExists(t, email2, APIKey()),
 				),
