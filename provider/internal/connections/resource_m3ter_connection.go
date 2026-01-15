@@ -99,7 +99,7 @@ func (t *M3terConnectionResource) Schema(ctx context.Context, req resource.Schem
 type M3terConf struct {
 	Client_id     string `mapstructure:"client_id" tfsdk:"client_id"`
 	Client_secret string `mapstructure:"client_secret" tfsdk:"client_secret"`
-	OrgId         string `mapstructure:"orgId" tfsdk:"orgId"`
+	OrgId         string `mapstructure:"orgId" tfsdk:"org_id"`
 }
 
 type M3terConnectionResource struct {

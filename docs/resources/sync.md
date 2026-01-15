@@ -67,6 +67,7 @@ resource "polytomic_sync" "sync" {
 ### Read-Only
 
 - `id` (String) The ID of this resource.
+- `model_ids` (Set of String) Model IDs associated with this sync
 
 <a id="nestedatt--fields"></a>
 ### Nested Schema for `fields`

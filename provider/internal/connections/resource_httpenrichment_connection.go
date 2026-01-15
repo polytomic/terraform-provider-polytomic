@@ -399,7 +399,7 @@ type HttpenrichmentConf struct {
 		Name     string `mapstructure:"name" tfsdk:"name"`
 		Required bool   `mapstructure:"required" tfsdk:"required"`
 		Type     string `mapstructure:"type" tfsdk:"type"`
-	} `mapstructure:"inputMappings" tfsdk:"inputMappings"`
+	} `mapstructure:"inputMappings" tfsdk:"input_mappings"`
 	Method     string `mapstructure:"method" tfsdk:"method"`
 	Parameters []struct {
 		Name  string `mapstructure:"name" tfsdk:"name"`

@@ -123,7 +123,7 @@ func (t *{{ .Connection }}ConnectionResource) Schema(ctx context.Context, req re
 {{ end }}
 
 {{ define "confattr" -}}
-	{{ .CapName }} {{ template "confattrType" . }} `mapstructure:"{{ .Name }}" tfsdk:"{{ .Name }}"`
+	{{ .CapName }} {{ template "confattrType" . }} `mapstructure:"{{ .Name }}" tfsdk:"{{ .AttrName }}"`
 {{ end -}}
 
 

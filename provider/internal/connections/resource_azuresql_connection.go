@@ -186,7 +186,7 @@ func (t *AzuresqlConnectionResource) Schema(ctx context.Context, req resource.Sc
 type AzuresqlConf struct {
 	Access_key      string `mapstructure:"access_key" tfsdk:"access_key"`
 	Account_name    string `mapstructure:"account_name" tfsdk:"account_name"`
-	BlobStore       bool   `mapstructure:"blobStore" tfsdk:"blobStore"`
+	BlobStore       bool   `mapstructure:"blobStore" tfsdk:"blob_store"`
 	Container_name  string `mapstructure:"container_name" tfsdk:"container_name"`
 	Database        string `mapstructure:"database" tfsdk:"database"`
 	Hostname        string `mapstructure:"hostname" tfsdk:"hostname"`

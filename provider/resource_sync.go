@@ -378,6 +378,11 @@ func (r *syncResource) Schema(ctx context.Context, req resource.SchemaRequest, r
 				Optional:            true,
 				Computed:            true,
 			},
+			"model_ids": schema.SetAttribute{
+				MarkdownDescription: "Model IDs associated with this sync",
+				ElementType:         types.StringType,
+				Computed:            true,
+			},
 		},
 	}
 }
@@ -1183,6 +1188,22 @@ func syncDataFromResponse(ctx context.Context, sync *polytomic.ModelSyncResponse
 		"remote_field_type_id": types.StringType,
 		"new_field":            types.BoolType,
 	}, sync.Identity)
+	if diags.HasError() {
+		return data, diags
+	}
+
+	// ModelIds - extract unique model IDs from fields
+	modelIDMap := make(map[string]bool)
+	for _, field := range sync.Fields {
+		if field.Source != nil && field.Source.ModelId != "" {
+			modelIDMap[field.Source.ModelId] = true
+		}
+	}
+	modelIDs := make([]string, 0, len(modelIDMap))
+	for id := range modelIDMap {
+		modelIDs = append(modelIDs, id)
+	}
+	data.ModelIds, diags = types.SetValueFrom(ctx, types.StringType, modelIDs)
 	if diags.HasError() {
 		return data, diags
 	}
