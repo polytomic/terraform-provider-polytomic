@@ -70,6 +70,18 @@ func (d *S3ConnectionDataSource) Schema(ctx context.Context, req datasource.Sche
 						MarkdownDescription: `Tables glob path`,
 						Computed:            true,
 					},
+					"enable_event_notifications": schema.BoolAttribute{
+						MarkdownDescription: `Enable Event Notifications
+
+    Enable S3 Event Notifications to automatically trigger syncs when files are added or changed.`,
+						Computed: true,
+					},
+					"event_queue_arn": schema.StringAttribute{
+						MarkdownDescription: `Event Queue ARN
+
+    ARN of the SQS queue to receive S3 event notifications.`,
+						Computed: true,
+					},
 					"external_id": schema.StringAttribute{
 						MarkdownDescription: `External ID
 
@@ -161,6 +173,12 @@ func (d *S3ConnectionDataSource) Read(ctx context.Context, req datasource.ReadRe
 			),
 			"directory_glob_pattern": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["directory_glob_pattern"], "string").(string),
+			),
+			"enable_event_notifications": types.BoolValue(
+				getValueOrEmpty(connection.Data.Configuration["enable_event_notifications"], "bool").(bool),
+			),
+			"event_queue_arn": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["event_queue_arn"], "string").(string),
 			),
 			"external_id": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["external_id"], "string").(string),

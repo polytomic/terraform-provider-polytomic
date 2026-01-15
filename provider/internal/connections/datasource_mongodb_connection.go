@@ -50,6 +50,10 @@ func (d *MongodbConnectionDataSource) Schema(ctx context.Context, req datasource
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
+					"change_detection": schema.BoolAttribute{
+						MarkdownDescription: `Use change stream for bulk syncs`,
+						Computed:            true,
+					},
 					"database": schema.StringAttribute{
 						MarkdownDescription: `Auth Database`,
 						Computed:            true,
@@ -112,6 +116,9 @@ func (d *MongodbConnectionDataSource) Read(ctx context.Context, req datasource.R
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttributeTypes(ctx),
 		map[string]attr.Value{
+			"change_detection": types.BoolValue(
+				getValueOrEmpty(connection.Data.Configuration["change_detection"], "bool").(bool),
+			),
 			"database": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["database"], "string").(string),
 			),

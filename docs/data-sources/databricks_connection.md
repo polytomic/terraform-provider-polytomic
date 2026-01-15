@@ -36,7 +36,7 @@ data "polytomic_databricks_connection" "databricks" {
 
 Read-Only:
 
-- `auth_mode` (String) Authentication Method
+- `auth_mode` (String) AWS Authentication Method
 
     How to authenticate with AWS. Defaults to Access Key and Secret
 - `aws_access_key_id` (String) AWS Access Key ID (destinations only)
@@ -52,6 +52,7 @@ Read-Only:
 - `container_name` (String) Storage Container Name (destination support only)
 
     The container which we will stage files in
+- `databricks_auth_mode` (String) Authentication Method
 - `deleted_file_retention_days` (Number) Deleted file retention
 - `enable_delta_uniform` (Boolean) Enable Delta UniForm tables
 - `enforce_query_limit` (Boolean) Limit concurrent queries
@@ -69,6 +70,7 @@ Read-Only:
 
     Region of bucket
 - `server_hostname` (String) Server Hostname
+- `service_principal_id` (String) Service Principal ID
 - `set_retention_properties` (Boolean) Configure data retention for tables
 - `storage_credential_name` (String) Storage credential name
 - `unity_catalog_enabled` (Boolean) Unity Catalog enabled

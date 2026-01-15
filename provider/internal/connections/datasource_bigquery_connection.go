@@ -50,6 +50,10 @@ func (d *BigqueryConnectionDataSource) Schema(ctx context.Context, req datasourc
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
+					"bucket": schema.StringAttribute{
+						MarkdownDescription: `Google Cloud Storage bucket`,
+						Computed:            true,
+					},
 					"client_email": schema.StringAttribute{
 						MarkdownDescription: `Service account identity`,
 						Computed:            true,
@@ -70,6 +74,10 @@ func (d *BigqueryConnectionDataSource) Schema(ctx context.Context, req datasourc
 					},
 					"structured_values_as_json": schema.BoolAttribute{
 						MarkdownDescription: `Write object and array values as JSON`,
+						Computed:            true,
+					},
+					"use_extract": schema.BoolAttribute{
+						MarkdownDescription: `Use Extract for bulk sync from BigQuery`,
 						Computed:            true,
 					},
 				},
@@ -108,6 +116,9 @@ func (d *BigqueryConnectionDataSource) Read(ctx context.Context, req datasource.
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttributeTypes(ctx),
 		map[string]attr.Value{
+			"bucket": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["bucket"], "string").(string),
+			),
 			"client_email": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["client_email"], "string").(string),
 			),
@@ -122,6 +133,9 @@ func (d *BigqueryConnectionDataSource) Read(ctx context.Context, req datasource.
 			),
 			"structured_values_as_json": types.BoolValue(
 				getValueOrEmpty(connection.Data.Configuration["structured_values_as_json"], "bool").(bool),
+			),
+			"use_extract": types.BoolValue(
+				getValueOrEmpty(connection.Data.Configuration["use_extract"], "bool").(bool),
 			),
 		},
 	)

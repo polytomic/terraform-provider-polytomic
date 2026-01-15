@@ -43,6 +43,13 @@ var MongodbSchema = schema.Schema{
 		},
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
+				"change_detection": schema.BoolAttribute{
+					MarkdownDescription: `Use change stream for bulk syncs`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
 				"database": schema.StringAttribute{
 					MarkdownDescription: `Auth Database`,
 					Required:            false,
@@ -124,13 +131,14 @@ func (t *MongodbConnectionResource) Schema(ctx context.Context, req resource.Sch
 }
 
 type MongodbConf struct {
-	Database string `mapstructure:"database" tfsdk:"database"`
-	Hosts    string `mapstructure:"hosts" tfsdk:"hosts"`
-	Params   string `mapstructure:"params" tfsdk:"params"`
-	Password string `mapstructure:"password" tfsdk:"password"`
-	Srv      bool   `mapstructure:"srv" tfsdk:"srv"`
-	Ssl      bool   `mapstructure:"ssl" tfsdk:"ssl"`
-	Username string `mapstructure:"username" tfsdk:"username"`
+	Change_detection bool   `mapstructure:"change_detection" tfsdk:"change_detection"`
+	Database         string `mapstructure:"database" tfsdk:"database"`
+	Hosts            string `mapstructure:"hosts" tfsdk:"hosts"`
+	Params           string `mapstructure:"params" tfsdk:"params"`
+	Password         string `mapstructure:"password" tfsdk:"password"`
+	Srv              bool   `mapstructure:"srv" tfsdk:"srv"`
+	Ssl              bool   `mapstructure:"ssl" tfsdk:"ssl"`
+	Username         string `mapstructure:"username" tfsdk:"username"`
 }
 
 type MongodbConnectionResource struct {
@@ -189,13 +197,14 @@ func (r *MongodbConnectionResource) Create(ctx context.Context, req resource.Cre
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"database": types.StringType,
-		"hosts":    types.StringType,
-		"params":   types.StringType,
-		"password": types.StringType,
-		"srv":      types.BoolType,
-		"ssl":      types.BoolType,
-		"username": types.StringType,
+		"change_detection": types.BoolType,
+		"database":         types.StringType,
+		"hosts":            types.StringType,
+		"params":           types.StringType,
+		"password":         types.StringType,
+		"srv":              types.BoolType,
+		"ssl":              types.BoolType,
+		"username":         types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -265,13 +274,14 @@ func (r *MongodbConnectionResource) Read(ctx context.Context, req resource.ReadR
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"database": types.StringType,
-		"hosts":    types.StringType,
-		"params":   types.StringType,
-		"password": types.StringType,
-		"srv":      types.BoolType,
-		"ssl":      types.BoolType,
-		"username": types.StringType,
+		"change_detection": types.BoolType,
+		"database":         types.StringType,
+		"hosts":            types.StringType,
+		"params":           types.StringType,
+		"password":         types.StringType,
+		"srv":              types.BoolType,
+		"ssl":              types.BoolType,
+		"username":         types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -340,13 +350,14 @@ func (r *MongodbConnectionResource) Update(ctx context.Context, req resource.Upd
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"database": types.StringType,
-		"hosts":    types.StringType,
-		"params":   types.StringType,
-		"password": types.StringType,
-		"srv":      types.BoolType,
-		"ssl":      types.BoolType,
-		"username": types.StringType,
+		"change_detection": types.BoolType,
+		"database":         types.StringType,
+		"hosts":            types.StringType,
+		"params":           types.StringType,
+		"password":         types.StringType,
+		"srv":              types.BoolType,
+		"ssl":              types.BoolType,
+		"username":         types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

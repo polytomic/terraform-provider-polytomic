@@ -82,6 +82,12 @@ func (d *SalesforceConnectionDataSource) Schema(ctx context.Context, req datasou
     If true, Polytomic will restrict itself to a fixed daily cap of Salesforce API calls enforced by the number in daily_api_calls.`,
 						Computed: true,
 					},
+					"instance_url_override": schema.StringAttribute{
+						MarkdownDescription: `Instance URL override
+
+    This URL will be used for API requests instead of the one provided by Salesforce during OAuth.`,
+						Computed: true,
+					},
 					"username": schema.StringAttribute{
 						MarkdownDescription: `Salesforce user`,
 						Computed:            true,
@@ -139,6 +145,9 @@ func (d *SalesforceConnectionDataSource) Read(ctx context.Context, req datasourc
 			),
 			"enforce_api_limits": types.BoolValue(
 				getValueOrEmpty(connection.Data.Configuration["enforce_api_limits"], "bool").(bool),
+			),
+			"instance_url_override": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["instance_url_override"], "string").(string),
 			),
 			"username": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["username"], "string").(string),

@@ -54,7 +54,7 @@ var DatabricksSchema = schema.Schema{
 					},
 				},
 				"auth_mode": schema.StringAttribute{
-					MarkdownDescription: `Authentication Method
+					MarkdownDescription: `AWS Authentication Method
 
     How to authenticate with AWS. Defaults to Access Key and Secret`,
 					Required:  true,
@@ -139,6 +139,13 @@ var DatabricksSchema = schema.Schema{
 					Computed:  true,
 					Sensitive: false,
 				},
+				"databricks_auth_mode": schema.StringAttribute{
+					MarkdownDescription: `Authentication Method`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
+				},
 				"deleted_file_retention_days": schema.Int64Attribute{
 					MarkdownDescription: `Deleted file retention`,
 					Required:            false,
@@ -222,6 +229,23 @@ var DatabricksSchema = schema.Schema{
 					Computed:            false,
 					Sensitive:           false,
 				},
+				"service_principal_id": schema.StringAttribute{
+					MarkdownDescription: `Service Principal ID`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
+				},
+				"service_principal_secret": schema.StringAttribute{
+					MarkdownDescription: `Service Principal Secret`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
+					},
+				},
 				"set_retention_properties": schema.BoolAttribute{
 					MarkdownDescription: `Configure data retention for tables`,
 					Required:            false,
@@ -288,6 +312,7 @@ type DatabricksConf struct {
 	Cloud_provider               string `mapstructure:"cloud_provider" tfsdk:"cloud_provider"`
 	Concurrent_queries           int64  `mapstructure:"concurrent_queries" tfsdk:"concurrent_queries"`
 	Container_name               string `mapstructure:"container_name" tfsdk:"container_name"`
+	Databricks_auth_mode         string `mapstructure:"databricks_auth_mode" tfsdk:"databricks_auth_mode"`
 	Deleted_file_retention_days  int64  `mapstructure:"deleted_file_retention_days" tfsdk:"deleted_file_retention_days"`
 	Enable_delta_uniform         bool   `mapstructure:"enable_delta_uniform" tfsdk:"enable_delta_uniform"`
 	Enforce_query_limit          bool   `mapstructure:"enforce_query_limit" tfsdk:"enforce_query_limit"`
@@ -299,6 +324,8 @@ type DatabricksConf struct {
 	S3_bucket_name               string `mapstructure:"s3_bucket_name" tfsdk:"s3_bucket_name"`
 	S3_bucket_region             string `mapstructure:"s3_bucket_region" tfsdk:"s3_bucket_region"`
 	Server_hostname              string `mapstructure:"server_hostname" tfsdk:"server_hostname"`
+	Service_principal_id         string `mapstructure:"service_principal_id" tfsdk:"service_principal_id"`
+	Service_principal_secret     string `mapstructure:"service_principal_secret" tfsdk:"service_principal_secret"`
 	Set_retention_properties     bool   `mapstructure:"set_retention_properties" tfsdk:"set_retention_properties"`
 	Storage_credential_name      string `mapstructure:"storage_credential_name" tfsdk:"storage_credential_name"`
 	Unity_catalog_enabled        bool   `mapstructure:"unity_catalog_enabled" tfsdk:"unity_catalog_enabled"`
@@ -372,6 +399,7 @@ func (r *DatabricksConnectionResource) Create(ctx context.Context, req resource.
 		"cloud_provider":               types.StringType,
 		"concurrent_queries":           types.NumberType,
 		"container_name":               types.StringType,
+		"databricks_auth_mode":         types.StringType,
 		"deleted_file_retention_days":  types.NumberType,
 		"enable_delta_uniform":         types.BoolType,
 		"enforce_query_limit":          types.BoolType,
@@ -383,6 +411,8 @@ func (r *DatabricksConnectionResource) Create(ctx context.Context, req resource.
 		"s3_bucket_name":               types.StringType,
 		"s3_bucket_region":             types.StringType,
 		"server_hostname":              types.StringType,
+		"service_principal_id":         types.StringType,
+		"service_principal_secret":     types.StringType,
 		"set_retention_properties":     types.BoolType,
 		"storage_credential_name":      types.StringType,
 		"unity_catalog_enabled":        types.BoolType,
@@ -467,6 +497,7 @@ func (r *DatabricksConnectionResource) Read(ctx context.Context, req resource.Re
 		"cloud_provider":               types.StringType,
 		"concurrent_queries":           types.NumberType,
 		"container_name":               types.StringType,
+		"databricks_auth_mode":         types.StringType,
 		"deleted_file_retention_days":  types.NumberType,
 		"enable_delta_uniform":         types.BoolType,
 		"enforce_query_limit":          types.BoolType,
@@ -478,6 +509,8 @@ func (r *DatabricksConnectionResource) Read(ctx context.Context, req resource.Re
 		"s3_bucket_name":               types.StringType,
 		"s3_bucket_region":             types.StringType,
 		"server_hostname":              types.StringType,
+		"service_principal_id":         types.StringType,
+		"service_principal_secret":     types.StringType,
 		"set_retention_properties":     types.BoolType,
 		"storage_credential_name":      types.StringType,
 		"unity_catalog_enabled":        types.BoolType,
@@ -561,6 +594,7 @@ func (r *DatabricksConnectionResource) Update(ctx context.Context, req resource.
 		"cloud_provider":               types.StringType,
 		"concurrent_queries":           types.NumberType,
 		"container_name":               types.StringType,
+		"databricks_auth_mode":         types.StringType,
 		"deleted_file_retention_days":  types.NumberType,
 		"enable_delta_uniform":         types.BoolType,
 		"enforce_query_limit":          types.BoolType,
@@ -572,6 +606,8 @@ func (r *DatabricksConnectionResource) Update(ctx context.Context, req resource.
 		"s3_bucket_name":               types.StringType,
 		"s3_bucket_region":             types.StringType,
 		"server_hostname":              types.StringType,
+		"service_principal_id":         types.StringType,
+		"service_principal_secret":     types.StringType,
 		"set_retention_properties":     types.BoolType,
 		"storage_credential_name":      types.StringType,
 		"unity_catalog_enabled":        types.BoolType,

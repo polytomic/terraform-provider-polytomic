@@ -36,6 +36,7 @@ data "polytomic_mongodb_connection" "mongodb" {
 
 Read-Only:
 
+- `change_detection` (Boolean) Use change stream for bulk syncs
 - `database` (String) Auth Database
 - `hosts` (String) Hostname(s)
 - `params` (String) Additional Parameters

@@ -81,6 +81,23 @@ var Zendesk_supportSchema = schema.Schema{
 					Computed:            true,
 					Sensitive:           false,
 				},
+				"oauth_refresh_token": schema.StringAttribute{
+					MarkdownDescription: ``,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
+					},
+				},
+				"oauth_token_expiry": schema.StringAttribute{
+					MarkdownDescription: ``,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
 				"ratelimit_rpm": schema.Int64Attribute{
 					MarkdownDescription: `Maximum requests per minute
 
@@ -117,12 +134,14 @@ func (t *Zendesk_supportConnectionResource) Schema(ctx context.Context, req reso
 }
 
 type Zendesk_supportConf struct {
-	Api_token         string `mapstructure:"api_token" tfsdk:"api_token"`
-	Auth_method       string `mapstructure:"auth_method" tfsdk:"auth_method"`
-	Custom_api_limits bool   `mapstructure:"custom_api_limits" tfsdk:"custom_api_limits"`
-	Domain            string `mapstructure:"domain" tfsdk:"domain"`
-	Email             string `mapstructure:"email" tfsdk:"email"`
-	Ratelimit_rpm     int64  `mapstructure:"ratelimit_rpm" tfsdk:"ratelimit_rpm"`
+	Api_token           string `mapstructure:"api_token" tfsdk:"api_token"`
+	Auth_method         string `mapstructure:"auth_method" tfsdk:"auth_method"`
+	Custom_api_limits   bool   `mapstructure:"custom_api_limits" tfsdk:"custom_api_limits"`
+	Domain              string `mapstructure:"domain" tfsdk:"domain"`
+	Email               string `mapstructure:"email" tfsdk:"email"`
+	Oauth_refresh_token string `mapstructure:"oauth_refresh_token" tfsdk:"oauth_refresh_token"`
+	Oauth_token_expiry  string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
+	Ratelimit_rpm       int64  `mapstructure:"ratelimit_rpm" tfsdk:"ratelimit_rpm"`
 }
 
 type Zendesk_supportConnectionResource struct {
@@ -181,12 +200,14 @@ func (r *Zendesk_supportConnectionResource) Create(ctx context.Context, req reso
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"api_token":         types.StringType,
-		"auth_method":       types.StringType,
-		"custom_api_limits": types.BoolType,
-		"domain":            types.StringType,
-		"email":             types.StringType,
-		"ratelimit_rpm":     types.NumberType,
+		"api_token":           types.StringType,
+		"auth_method":         types.StringType,
+		"custom_api_limits":   types.BoolType,
+		"domain":              types.StringType,
+		"email":               types.StringType,
+		"oauth_refresh_token": types.StringType,
+		"oauth_token_expiry":  types.StringType,
+		"ratelimit_rpm":       types.NumberType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -256,12 +277,14 @@ func (r *Zendesk_supportConnectionResource) Read(ctx context.Context, req resour
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"api_token":         types.StringType,
-		"auth_method":       types.StringType,
-		"custom_api_limits": types.BoolType,
-		"domain":            types.StringType,
-		"email":             types.StringType,
-		"ratelimit_rpm":     types.NumberType,
+		"api_token":           types.StringType,
+		"auth_method":         types.StringType,
+		"custom_api_limits":   types.BoolType,
+		"domain":              types.StringType,
+		"email":               types.StringType,
+		"oauth_refresh_token": types.StringType,
+		"oauth_token_expiry":  types.StringType,
+		"ratelimit_rpm":       types.NumberType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -330,12 +353,14 @@ func (r *Zendesk_supportConnectionResource) Update(ctx context.Context, req reso
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"api_token":         types.StringType,
-		"auth_method":       types.StringType,
-		"custom_api_limits": types.BoolType,
-		"domain":            types.StringType,
-		"email":             types.StringType,
-		"ratelimit_rpm":     types.NumberType,
+		"api_token":           types.StringType,
+		"auth_method":         types.StringType,
+		"custom_api_limits":   types.BoolType,
+		"domain":              types.StringType,
+		"email":               types.StringType,
+		"oauth_refresh_token": types.StringType,
+		"oauth_token_expiry":  types.StringType,
+		"ratelimit_rpm":       types.NumberType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

@@ -77,6 +77,9 @@ Optional:
 - `enforce_api_limits` (Boolean) Enforce API limits
 
     If true, Polytomic will restrict itself to a fixed daily cap of Salesforce API calls enforced by the number in daily_api_calls.
+- `instance_url_override` (String) Instance URL override
+
+    This URL will be used for API requests instead of the one provided by Salesforce during OAuth.
 - `oauth_refresh_token` (String, Sensitive)
 - `username` (String) Salesforce user
 

@@ -16,9 +16,10 @@ SFTP Connection
 resource "polytomic_sftp_connection" "sftp" {
   name = "example"
   configuration = {
-    path     = "/path/to/files"
-    ssh_host = "sftp.example.net"
-    ssh_user = "user"
+    auth_mode = "private_key"
+    path      = "/path/to/files"
+    ssh_host  = "sftp.example.net"
+    ssh_user  = "user"
   }
 }
 ```
@@ -54,6 +55,10 @@ state before it will take effect on a destroy operation.
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
+Required:
+
+- `auth_mode` (String) Authentication Method
+
 Optional:
 
 - `is_single_table` (Boolean) Files are time-based snapshots
@@ -65,6 +70,7 @@ Optional:
 
     Skip first N lines of each CSV file.
 - `ssh_host` (String) Host
+- `ssh_password` (String, Sensitive) Password
 - `ssh_port` (Number) Port
 - `ssh_private_key` (String, Sensitive) Private key
 - `ssh_user` (String) User

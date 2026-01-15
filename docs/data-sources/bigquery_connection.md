@@ -36,6 +36,7 @@ data "polytomic_bigquery_connection" "bigquery" {
 
 Read-Only:
 
+- `bucket` (String) Google Cloud Storage bucket
 - `client_email` (String) Service account identity
 - `location` (String) Region or multi-region for query operations
 - `override_project_id` (String) Override project ID
@@ -43,5 +44,6 @@ Read-Only:
     Override service key's project ID for cross-account access
 - `project_id` (String) Service account project ID
 - `structured_values_as_json` (Boolean) Write object and array values as JSON
+- `use_extract` (Boolean) Use Extract for bulk sync from BigQuery
 
 

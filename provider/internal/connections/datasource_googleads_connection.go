@@ -66,6 +66,12 @@ func (d *GoogleadsConnectionDataSource) Schema(ctx context.Context, req datasour
 							},
 						},
 					},
+					"blanket_user_consent": schema.BoolAttribute{
+						MarkdownDescription: `All transmitted users consented to ad personalization and information sharing with Google Ads
+
+    Causes this connection to send signals to Google Ads indicating that every transmitted user has accepted ad personalization and data sharing policies. This will cause the user to be included in more advertising functions`,
+						Computed: true,
+					},
 					"connected_user": schema.StringAttribute{
 						MarkdownDescription: `Connected user's email`,
 						Computed:            true,
@@ -73,7 +79,7 @@ func (d *GoogleadsConnectionDataSource) Schema(ctx context.Context, req datasour
 					"custom_reports": schema.StringAttribute{
 						MarkdownDescription: `Custom reports
 
-    One report per line. Format is a report name followed by a Google Ads SQL query. e.g. myReport:ad_groups:campaign.id`,
+    One report per line. Format is a report name:ads object:field list. e.g. myReport:ad_groups:campaign.id`,
 						Computed: true,
 					},
 					"oauth_token_expiry": schema.StringAttribute{
@@ -118,6 +124,9 @@ func (d *GoogleadsConnectionDataSource) Read(ctx context.Context, req datasource
 		map[string]attr.Value{
 			"accounts": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["accounts"], "string").(string),
+			),
+			"blanket_user_consent": types.BoolValue(
+				getValueOrEmpty(connection.Data.Configuration["blanket_user_consent"], "bool").(bool),
 			),
 			"connected_user": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["connected_user"], "string").(string),

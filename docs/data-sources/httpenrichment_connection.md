@@ -38,6 +38,12 @@ Read-Only:
 
 - `auth` (Attributes) Authentication method (see [below for nested schema](#nestedatt--configuration--auth))
 - `body` (String) JSON payload
+- `example_body` (String) Example body
+
+    Example body to be saved with the query
+- `example_inputs` (Map of String) Example inputs
+
+    Example inputs to be saved with the connection
 - `fields` (Attributes Set) List of fields to be returned by the enrichment (see [below for nested schema](#nestedatt--configuration--fields))
 - `headers` (Attributes Set) (see [below for nested schema](#nestedatt--configuration--headers))
 - `healthcheck` (String) Health check endpoint

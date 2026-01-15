@@ -57,12 +57,15 @@ state before it will take effect on a destroy operation.
 Optional:
 
 - `accounts` (Attributes Set) (see [below for nested schema](#nestedatt--configuration--accounts))
+- `blanket_user_consent` (Boolean) All transmitted users consented to ad personalization and information sharing with Google Ads
+
+    Causes this connection to send signals to Google Ads indicating that every transmitted user has accepted ad personalization and data sharing policies. This will cause the user to be included in more advertising functions
 - `client_id` (String, Sensitive)
 - `client_secret` (String, Sensitive)
 - `connected_user` (String) Connected user's email
 - `custom_reports` (String) Custom reports
 
-    One report per line. Format is a report name followed by a Google Ads SQL query. e.g. myReport:ad_groups:campaign.id
+    One report per line. Format is a report name:ads object:field list. e.g. myReport:ad_groups:campaign.id
 - `oauth_refresh_token` (String, Sensitive)
 - `oauth_token_expiry` (String)
 

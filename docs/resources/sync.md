@@ -53,12 +53,15 @@ resource "polytomic_sync" "sync" {
 
 ### Optional
 
+- `encryption_passphrase` (String, Sensitive) Passphrase for encrypting sync data
 - `filter_logic` (String)
 - `filters` (Attributes Set) (see [below for nested schema](#nestedatt--filters))
 - `identity` (Attributes) (see [below for nested schema](#nestedatt--identity))
+- `only_enrich_updates` (Boolean) Whether enrichment models only track changes
 - `organization` (String)
 - `override_fields` (Attributes Set) (see [below for nested schema](#nestedatt--override_fields))
 - `overrides` (Attributes Set) (see [below for nested schema](#nestedatt--overrides))
+- `skip_initial_backfill` (Boolean) Skip initial backfill, sync only new records
 - `sync_all_records` (Boolean)
 
 ### Read-Only
@@ -75,6 +78,7 @@ Required:
 
 Optional:
 
+- `encryption_enabled` (Boolean) Whether the field should be encrypted
 - `new` (Boolean)
 - `override_value` (String)
 - `sync_mode` (String)

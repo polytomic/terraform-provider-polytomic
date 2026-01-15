@@ -54,8 +54,24 @@ func (d *AwsathenaConnectionDataSource) Schema(ctx context.Context, req datasour
 						MarkdownDescription: `AWS Access ID`,
 						Computed:            true,
 					},
+					"auth_mode": schema.StringAttribute{
+						MarkdownDescription: `Authentication Method
+
+    How to authenticate with AWS. Defaults to Access Key and Secret`,
+						Computed: true,
+					},
 					"aws_user": schema.StringAttribute{
 						MarkdownDescription: `User ARN`,
+						Computed:            true,
+					},
+					"external_id": schema.StringAttribute{
+						MarkdownDescription: `External ID
+
+    External ID for the IAM role`,
+						Computed: true,
+					},
+					"iam_role_arn": schema.StringAttribute{
+						MarkdownDescription: `IAM Role ARN`,
 						Computed:            true,
 					},
 					"outputbucket": schema.StringAttribute{
@@ -67,6 +83,11 @@ func (d *AwsathenaConnectionDataSource) Schema(ctx context.Context, req datasour
 					"region": schema.StringAttribute{
 						MarkdownDescription: `AWS region`,
 						Computed:            true,
+					},
+					"tags": schema.MapAttribute{
+						MarkdownDescription: `Additional tags to apply during role assumption`,
+						Computed:            true,
+						ElementType:         types.StringType,
 					},
 				},
 				Optional: true,
@@ -107,14 +128,26 @@ func (d *AwsathenaConnectionDataSource) Read(ctx context.Context, req datasource
 			"access_id": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["access_id"], "string").(string),
 			),
+			"auth_mode": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["auth_mode"], "string").(string),
+			),
 			"aws_user": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["aws_user"], "string").(string),
+			),
+			"external_id": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["external_id"], "string").(string),
+			),
+			"iam_role_arn": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["iam_role_arn"], "string").(string),
 			),
 			"outputbucket": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["outputbucket"], "string").(string),
 			),
 			"region": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["region"], "string").(string),
+			),
+			"tags": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["tags"], "string").(string),
 			),
 		},
 	)

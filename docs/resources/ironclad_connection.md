@@ -58,6 +58,7 @@ state before it will take effect on a destroy operation.
 Required:
 
 - `auth_method` (String) Authentication method
+- `environment` (String)
 
 Optional:
 

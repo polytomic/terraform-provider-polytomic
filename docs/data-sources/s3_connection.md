@@ -44,6 +44,12 @@ Read-Only:
     Access Key ID with read/write access to a bucket.
 - `aws_user` (String) User ARN
 - `directory_glob_pattern` (String) Tables glob path
+- `enable_event_notifications` (Boolean) Enable Event Notifications
+
+    Enable S3 Event Notifications to automatically trigger syncs when files are added or changed.
+- `event_queue_arn` (String) Event Queue ARN
+
+    ARN of the SQS queue to receive S3 event notifications.
 - `external_id` (String) External ID
 
     External ID for the IAM role

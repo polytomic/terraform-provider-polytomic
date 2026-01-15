@@ -58,6 +58,10 @@ func (d *OutreachConnectionDataSource) Schema(ctx context.Context, req datasourc
 						MarkdownDescription: ``,
 						Computed:            true,
 					},
+					"use_bulk_upsert": schema.BoolAttribute{
+						MarkdownDescription: `Use bulk API for syncing to Outreach`,
+						Computed:            true,
+					},
 				},
 				Optional: true,
 			},
@@ -99,6 +103,9 @@ func (d *OutreachConnectionDataSource) Read(ctx context.Context, req datasource.
 			),
 			"oauth_token_expiry": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["oauth_token_expiry"], "string").(string),
+			),
+			"use_bulk_upsert": types.BoolValue(
+				getValueOrEmpty(connection.Data.Configuration["use_bulk_upsert"], "bool").(bool),
 			),
 		},
 	)

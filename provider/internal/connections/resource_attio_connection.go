@@ -43,6 +43,13 @@ var AttioSchema = schema.Schema{
 		},
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
+				"disable_list_entry_projection": schema.BoolAttribute{
+					MarkdownDescription: `Skip parent fields when pulling lists`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
 				"enable_webhooks": schema.BoolAttribute{
 					MarkdownDescription: `Enable Attio webhook updates for bulk syncs`,
 					Required:            false,
@@ -84,8 +91,9 @@ func (t *AttioConnectionResource) Schema(ctx context.Context, req resource.Schem
 }
 
 type AttioConf struct {
-	Enable_webhooks bool   `mapstructure:"enable_webhooks" tfsdk:"enable_webhooks"`
-	Workspace_name  string `mapstructure:"workspace_name" tfsdk:"workspace_name"`
+	Disable_list_entry_projection bool   `mapstructure:"disable_list_entry_projection" tfsdk:"disable_list_entry_projection"`
+	Enable_webhooks               bool   `mapstructure:"enable_webhooks" tfsdk:"enable_webhooks"`
+	Workspace_name                string `mapstructure:"workspace_name" tfsdk:"workspace_name"`
 }
 
 type AttioConnectionResource struct {
@@ -144,8 +152,9 @@ func (r *AttioConnectionResource) Create(ctx context.Context, req resource.Creat
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"enable_webhooks": types.BoolType,
-		"workspace_name":  types.StringType,
+		"disable_list_entry_projection": types.BoolType,
+		"enable_webhooks":               types.BoolType,
+		"workspace_name":                types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -215,8 +224,9 @@ func (r *AttioConnectionResource) Read(ctx context.Context, req resource.ReadReq
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"enable_webhooks": types.BoolType,
-		"workspace_name":  types.StringType,
+		"disable_list_entry_projection": types.BoolType,
+		"enable_webhooks":               types.BoolType,
+		"workspace_name":                types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -285,8 +295,9 @@ func (r *AttioConnectionResource) Update(ctx context.Context, req resource.Updat
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"enable_webhooks": types.BoolType,
-		"workspace_name":  types.StringType,
+		"disable_list_entry_projection": types.BoolType,
+		"enable_webhooks":               types.BoolType,
+		"workspace_name":                types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

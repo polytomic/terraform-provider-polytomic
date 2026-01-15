@@ -66,6 +66,10 @@ func (d *Zendesk_supportConnectionDataSource) Schema(ctx context.Context, req da
 						MarkdownDescription: ``,
 						Computed:            true,
 					},
+					"oauth_token_expiry": schema.StringAttribute{
+						MarkdownDescription: ``,
+						Computed:            true,
+					},
 					"ratelimit_rpm": schema.Int64Attribute{
 						MarkdownDescription: `Maximum requests per minute
 
@@ -119,6 +123,9 @@ func (d *Zendesk_supportConnectionDataSource) Read(ctx context.Context, req data
 			),
 			"email": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["email"], "string").(string),
+			),
+			"oauth_token_expiry": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["oauth_token_expiry"], "string").(string),
 			),
 			"ratelimit_rpm": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["ratelimit_rpm"], "string").(string),

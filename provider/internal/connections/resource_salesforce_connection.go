@@ -113,6 +113,15 @@ var SalesforceSchema = schema.Schema{
 					Computed:  true,
 					Sensitive: false,
 				},
+				"instance_url_override": schema.StringAttribute{
+					MarkdownDescription: `Instance URL override
+
+    This URL will be used for API requests instead of the one provided by Salesforce during OAuth.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
+				},
 				"oauth_refresh_token": schema.StringAttribute{
 					MarkdownDescription: ``,
 					Required:            false,
@@ -165,6 +174,7 @@ type SalesforceConf struct {
 	Enable_multicurrency_lookup bool   `mapstructure:"enable_multicurrency_lookup" tfsdk:"enable_multicurrency_lookup"`
 	Enable_tooling              bool   `mapstructure:"enable_tooling" tfsdk:"enable_tooling"`
 	Enforce_api_limits          bool   `mapstructure:"enforce_api_limits" tfsdk:"enforce_api_limits"`
+	Instance_url_override       string `mapstructure:"instance_url_override" tfsdk:"instance_url_override"`
 	Oauth_refresh_token         string `mapstructure:"oauth_refresh_token" tfsdk:"oauth_refresh_token"`
 	Username                    string `mapstructure:"username" tfsdk:"username"`
 }
@@ -233,6 +243,7 @@ func (r *SalesforceConnectionResource) Create(ctx context.Context, req resource.
 		"enable_multicurrency_lookup": types.BoolType,
 		"enable_tooling":              types.BoolType,
 		"enforce_api_limits":          types.BoolType,
+		"instance_url_override":       types.StringType,
 		"oauth_refresh_token":         types.StringType,
 		"username":                    types.StringType,
 	}, conf)
@@ -312,6 +323,7 @@ func (r *SalesforceConnectionResource) Read(ctx context.Context, req resource.Re
 		"enable_multicurrency_lookup": types.BoolType,
 		"enable_tooling":              types.BoolType,
 		"enforce_api_limits":          types.BoolType,
+		"instance_url_override":       types.StringType,
 		"oauth_refresh_token":         types.StringType,
 		"username":                    types.StringType,
 	}, conf)
@@ -390,6 +402,7 @@ func (r *SalesforceConnectionResource) Update(ctx context.Context, req resource.
 		"enable_multicurrency_lookup": types.BoolType,
 		"enable_tooling":              types.BoolType,
 		"enforce_api_limits":          types.BoolType,
+		"instance_url_override":       types.StringType,
 		"oauth_refresh_token":         types.StringType,
 		"username":                    types.StringType,
 	}, conf)

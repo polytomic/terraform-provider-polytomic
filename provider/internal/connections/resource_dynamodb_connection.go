@@ -53,6 +53,15 @@ var DynamodbSchema = schema.Schema{
 						stringplanmodifier.UseStateForUnknown(),
 					},
 				},
+				"auth_mode": schema.StringAttribute{
+					MarkdownDescription: `Authentication Method
+
+    How to authenticate with AWS. Defaults to Access Key and Secret`,
+					Required:  true,
+					Optional:  false,
+					Computed:  false,
+					Sensitive: false,
+				},
 				"aws_user": schema.StringAttribute{
 					MarkdownDescription: `User ARN`,
 					Required:            false,
@@ -62,6 +71,29 @@ var DynamodbSchema = schema.Schema{
 				},
 				"change_detection": schema.BoolAttribute{
 					MarkdownDescription: `Use DynamoDB Streams for bulk syncs`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
+				"external_id": schema.StringAttribute{
+					MarkdownDescription: `External ID
+
+    External ID for the IAM role`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
+				},
+				"iam_role_arn": schema.StringAttribute{
+					MarkdownDescription: `IAM Role ARN`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
+				"managed_streams": schema.BoolAttribute{
+					MarkdownDescription: `Let Polytomic manage DynamoDB Stream settings`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,
@@ -112,8 +144,12 @@ func (t *DynamodbConnectionResource) Schema(ctx context.Context, req resource.Sc
 
 type DynamodbConf struct {
 	Access_id         string `mapstructure:"access_id" tfsdk:"access_id"`
+	Auth_mode         string `mapstructure:"auth_mode" tfsdk:"auth_mode"`
 	Aws_user          string `mapstructure:"aws_user" tfsdk:"aws_user"`
 	Change_detection  bool   `mapstructure:"change_detection" tfsdk:"change_detection"`
+	External_id       string `mapstructure:"external_id" tfsdk:"external_id"`
+	Iam_role_arn      string `mapstructure:"iam_role_arn" tfsdk:"iam_role_arn"`
+	Managed_streams   bool   `mapstructure:"managed_streams" tfsdk:"managed_streams"`
 	Region            string `mapstructure:"region" tfsdk:"region"`
 	Secret_access_key string `mapstructure:"secret_access_key" tfsdk:"secret_access_key"`
 }
@@ -175,8 +211,12 @@ func (r *DynamodbConnectionResource) Create(ctx context.Context, req resource.Cr
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"access_id":         types.StringType,
+		"auth_mode":         types.StringType,
 		"aws_user":          types.StringType,
 		"change_detection":  types.BoolType,
+		"external_id":       types.StringType,
+		"iam_role_arn":      types.StringType,
+		"managed_streams":   types.BoolType,
 		"region":            types.StringType,
 		"secret_access_key": types.StringType,
 	}, conf)
@@ -249,8 +289,12 @@ func (r *DynamodbConnectionResource) Read(ctx context.Context, req resource.Read
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"access_id":         types.StringType,
+		"auth_mode":         types.StringType,
 		"aws_user":          types.StringType,
 		"change_detection":  types.BoolType,
+		"external_id":       types.StringType,
+		"iam_role_arn":      types.StringType,
+		"managed_streams":   types.BoolType,
 		"region":            types.StringType,
 		"secret_access_key": types.StringType,
 	}, conf)
@@ -322,8 +366,12 @@ func (r *DynamodbConnectionResource) Update(ctx context.Context, req resource.Up
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"access_id":         types.StringType,
+		"auth_mode":         types.StringType,
 		"aws_user":          types.StringType,
 		"change_detection":  types.BoolType,
+		"external_id":       types.StringType,
+		"iam_role_arn":      types.StringType,
+		"managed_streams":   types.BoolType,
 		"region":            types.StringType,
 		"secret_access_key": types.StringType,
 	}, conf)

@@ -36,8 +36,16 @@ data "polytomic_dynamodb_connection" "dynamodb" {
 
 Read-Only:
 
+- `auth_mode` (String) Authentication Method
+
+    How to authenticate with AWS. Defaults to Access Key and Secret
 - `aws_user` (String) User ARN
 - `change_detection` (Boolean) Use DynamoDB Streams for bulk syncs
+- `external_id` (String) External ID
+
+    External ID for the IAM role
+- `iam_role_arn` (String) IAM Role ARN
+- `managed_streams` (Boolean) Let Polytomic manage DynamoDB Stream settings
 - `region` (String) AWS region
 
 

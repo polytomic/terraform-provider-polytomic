@@ -62,10 +62,13 @@ resource "polytomic_bulk_sync" "sync" {
 
 - `automatically_add_new_fields` (String)
 - `automatically_add_new_objects` (String)
+- `concurrency_limit` (Number) Per-sync concurrency limit override
 - `data_cutoff_timestamp` (String)
 - `disable_record_timestamps` (Boolean)
+- `normalize_names` (String) Name normalization settings
 - `organization` (String)
 - `policies` (Set of String)
+- `resync_concurrency_limit` (Number) Per-sync resync concurrency limit override
 - `schemas` (Attributes Set) (see [below for nested schema](#nestedatt--schemas))
 
 ### Read-Only
@@ -77,11 +80,8 @@ resource "polytomic_bulk_sync" "sync" {
 
 Required:
 
+- `configuration` (String) Integration-specific configuration for the connection. Documentation for settings is available in the [Polytomic API documentation](https://apidocs.polytomic.com/2024-02-08/guides/configuring-your-connections/overview)
 - `connection_id` (String)
-
-Optional:
-
-- `configuration` (String) Integration-specific configuratino for the connection. Documentation for settings is available in the [Polytomic API documentation](https://apidocs.polytomic.com/2024-02-08/guides/configuring-your-connections/overview)
 
 
 <a id="nestedatt--schedule"></a>
@@ -105,11 +105,8 @@ Optional:
 
 Required:
 
+- `configuration` (String) Integration-specific configuration for the connection. Documentation for settings is available in the [Polytomic API documentation](https://apidocs.polytomic.com/2024-02-08/guides/configuring-your-connections/overview)
 - `connection_id` (String)
-
-Optional:
-
-- `configuration` (String) Integration-specific configuratino for the connection. Documentation for settings is available in the [Polytomic API documentation](https://apidocs.polytomic.com/2024-02-08/guides/configuring-your-connections/overview)
 
 
 <a id="nestedatt--schemas"></a>

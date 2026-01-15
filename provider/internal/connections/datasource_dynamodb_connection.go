@@ -50,12 +50,32 @@ func (d *DynamodbConnectionDataSource) Schema(ctx context.Context, req datasourc
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
+					"auth_mode": schema.StringAttribute{
+						MarkdownDescription: `Authentication Method
+
+    How to authenticate with AWS. Defaults to Access Key and Secret`,
+						Computed: true,
+					},
 					"aws_user": schema.StringAttribute{
 						MarkdownDescription: `User ARN`,
 						Computed:            true,
 					},
 					"change_detection": schema.BoolAttribute{
 						MarkdownDescription: `Use DynamoDB Streams for bulk syncs`,
+						Computed:            true,
+					},
+					"external_id": schema.StringAttribute{
+						MarkdownDescription: `External ID
+
+    External ID for the IAM role`,
+						Computed: true,
+					},
+					"iam_role_arn": schema.StringAttribute{
+						MarkdownDescription: `IAM Role ARN`,
+						Computed:            true,
+					},
+					"managed_streams": schema.BoolAttribute{
+						MarkdownDescription: `Let Polytomic manage DynamoDB Stream settings`,
 						Computed:            true,
 					},
 					"region": schema.StringAttribute{
@@ -98,11 +118,23 @@ func (d *DynamodbConnectionDataSource) Read(ctx context.Context, req datasource.
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttributeTypes(ctx),
 		map[string]attr.Value{
+			"auth_mode": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["auth_mode"], "string").(string),
+			),
 			"aws_user": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["aws_user"], "string").(string),
 			),
 			"change_detection": types.BoolValue(
 				getValueOrEmpty(connection.Data.Configuration["change_detection"], "bool").(bool),
+			),
+			"external_id": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["external_id"], "string").(string),
+			),
+			"iam_role_arn": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["iam_role_arn"], "string").(string),
+			),
+			"managed_streams": types.BoolValue(
+				getValueOrEmpty(connection.Data.Configuration["managed_streams"], "bool").(bool),
 			),
 			"region": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["region"], "string").(string),

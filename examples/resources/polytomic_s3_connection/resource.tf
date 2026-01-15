@@ -4,6 +4,7 @@ resource "polytomic_s3_connection" "s3" {
     auth_mode                = "access_key_and_secret"
     aws_access_key_id        = "AKIAIOSFODNN7EXAMPLE"
     aws_secret_access_key    = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+    event_queue_arn          = "arn:aws:sqs:us-east-1:123456789012:my-queue"
     s3_bucket_name           = "s3://polytomic/dataset"
     s3_bucket_region         = "us-east-1"
     single_table_file_format = "csv"

@@ -61,5 +61,6 @@ Optional:
 - `connected_user` (String) Connected user
 - `oauth_refresh_token` (String, Sensitive)
 - `oauth_token_expiry` (String)
+- `use_bulk_upsert` (Boolean) Use bulk API for syncing to Outreach
 
 

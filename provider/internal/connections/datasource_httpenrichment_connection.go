@@ -131,6 +131,19 @@ func (d *HttpenrichmentConnectionDataSource) Schema(ctx context.Context, req dat
 						MarkdownDescription: `JSON payload`,
 						Computed:            true,
 					},
+					"example_body": schema.StringAttribute{
+						MarkdownDescription: `Example body
+
+    Example body to be saved with the query`,
+						Computed: true,
+					},
+					"example_inputs": schema.MapAttribute{
+						MarkdownDescription: `Example inputs
+
+    Example inputs to be saved with the connection`,
+						Computed:    true,
+						ElementType: types.StringType,
+					},
 					"fields": schema.SetNestedAttribute{
 						MarkdownDescription: `List of fields to be returned by the enrichment`,
 						Computed:            true,
@@ -260,6 +273,12 @@ func (d *HttpenrichmentConnectionDataSource) Read(ctx context.Context, req datas
 			),
 			"body": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["body"], "string").(string),
+			),
+			"example_body": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["example_body"], "string").(string),
+			),
+			"example_inputs": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["example_inputs"], "string").(string),
 			),
 			"fields": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["fields"], "string").(string),

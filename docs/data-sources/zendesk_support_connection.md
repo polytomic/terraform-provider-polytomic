@@ -40,6 +40,7 @@ Read-Only:
 - `custom_api_limits` (Boolean) Enforce custom API limits
 - `domain` (String) Zendesk Subdomain
 - `email` (String)
+- `oauth_token_expiry` (String)
 - `ratelimit_rpm` (Number) Maximum requests per minute
 
     Set a custom maximum request per minute limit.

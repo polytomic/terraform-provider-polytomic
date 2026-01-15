@@ -16,6 +16,7 @@ Google BigQuery Connection
 resource "polytomic_bigquery_connection" "bigquery" {
   name = "example"
   configuration = {
+    bucket   = "my-bucket"
     location = "us-east1"
   }
 }
@@ -54,6 +55,7 @@ state before it will take effect on a destroy operation.
 
 Required:
 
+- `bucket` (String) Google Cloud Storage bucket
 - `service_account` (String, Sensitive) Service account key
 
 Optional:
@@ -65,5 +67,6 @@ Optional:
     Override service key's project ID for cross-account access
 - `project_id` (String) Service account project ID
 - `structured_values_as_json` (Boolean) Write object and array values as JSON
+- `use_extract` (Boolean) Use Extract for bulk sync from BigQuery
 
 

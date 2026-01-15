@@ -43,6 +43,13 @@ var BigquerySchema = schema.Schema{
 		},
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
+				"bucket": schema.StringAttribute{
+					MarkdownDescription: `Google Cloud Storage bucket`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
+				},
 				"client_email": schema.StringAttribute{
 					MarkdownDescription: `Service account identity`,
 					Required:            false,
@@ -90,6 +97,13 @@ var BigquerySchema = schema.Schema{
 					Computed:            true,
 					Sensitive:           false,
 				},
+				"use_extract": schema.BoolAttribute{
+					MarkdownDescription: `Use Extract for bulk sync from BigQuery`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
 			},
 
 			Required: true,
@@ -117,12 +131,14 @@ func (t *BigqueryConnectionResource) Schema(ctx context.Context, req resource.Sc
 }
 
 type BigqueryConf struct {
+	Bucket                    string `mapstructure:"bucket" tfsdk:"bucket"`
 	Client_email              string `mapstructure:"client_email" tfsdk:"client_email"`
 	Location                  string `mapstructure:"location" tfsdk:"location"`
 	Override_project_id       string `mapstructure:"override_project_id" tfsdk:"override_project_id"`
 	Project_id                string `mapstructure:"project_id" tfsdk:"project_id"`
 	Service_account           string `mapstructure:"service_account" tfsdk:"service_account"`
 	Structured_values_as_json bool   `mapstructure:"structured_values_as_json" tfsdk:"structured_values_as_json"`
+	Use_extract               bool   `mapstructure:"use_extract" tfsdk:"use_extract"`
 }
 
 type BigqueryConnectionResource struct {
@@ -181,12 +197,14 @@ func (r *BigqueryConnectionResource) Create(ctx context.Context, req resource.Cr
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"bucket":                    types.StringType,
 		"client_email":              types.StringType,
 		"location":                  types.StringType,
 		"override_project_id":       types.StringType,
 		"project_id":                types.StringType,
 		"service_account":           types.StringType,
 		"structured_values_as_json": types.BoolType,
+		"use_extract":               types.BoolType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -256,12 +274,14 @@ func (r *BigqueryConnectionResource) Read(ctx context.Context, req resource.Read
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"bucket":                    types.StringType,
 		"client_email":              types.StringType,
 		"location":                  types.StringType,
 		"override_project_id":       types.StringType,
 		"project_id":                types.StringType,
 		"service_account":           types.StringType,
 		"structured_values_as_json": types.BoolType,
+		"use_extract":               types.BoolType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -330,12 +350,14 @@ func (r *BigqueryConnectionResource) Update(ctx context.Context, req resource.Up
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"bucket":                    types.StringType,
 		"client_email":              types.StringType,
 		"location":                  types.StringType,
 		"override_project_id":       types.StringType,
 		"project_id":                types.StringType,
 		"service_account":           types.StringType,
 		"structured_values_as_json": types.BoolType,
+		"use_extract":               types.BoolType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

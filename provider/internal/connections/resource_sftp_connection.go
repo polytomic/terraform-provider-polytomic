@@ -43,6 +43,13 @@ var SftpSchema = schema.Schema{
 		},
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
+				"auth_mode": schema.StringAttribute{
+					MarkdownDescription: `Authentication Method`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
+				},
 				"is_single_table": schema.BoolAttribute{
 					MarkdownDescription: `Files are time-based snapshots
 
@@ -81,6 +88,16 @@ var SftpSchema = schema.Schema{
 					Optional:            true,
 					Computed:            true,
 					Sensitive:           false,
+				},
+				"ssh_password": schema.StringAttribute{
+					MarkdownDescription: `Password`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
+					},
 				},
 				"ssh_port": schema.Int64Attribute{
 					MarkdownDescription: `Port`,
@@ -133,11 +150,13 @@ func (t *SftpConnectionResource) Schema(ctx context.Context, req resource.Schema
 }
 
 type SftpConf struct {
+	Auth_mode         string `mapstructure:"auth_mode" tfsdk:"auth_mode"`
 	Is_single_table   bool   `mapstructure:"is_single_table" tfsdk:"is_single_table"`
 	Path              string `mapstructure:"path" tfsdk:"path"`
 	Single_table_name string `mapstructure:"single_table_name" tfsdk:"single_table_name"`
 	Skip_lines        int64  `mapstructure:"skip_lines" tfsdk:"skip_lines"`
 	Ssh_host          string `mapstructure:"ssh_host" tfsdk:"ssh_host"`
+	Ssh_password      string `mapstructure:"ssh_password" tfsdk:"ssh_password"`
 	Ssh_port          int64  `mapstructure:"ssh_port" tfsdk:"ssh_port"`
 	Ssh_private_key   string `mapstructure:"ssh_private_key" tfsdk:"ssh_private_key"`
 	Ssh_user          string `mapstructure:"ssh_user" tfsdk:"ssh_user"`
@@ -199,11 +218,13 @@ func (r *SftpConnectionResource) Create(ctx context.Context, req resource.Create
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"auth_mode":         types.StringType,
 		"is_single_table":   types.BoolType,
 		"path":              types.StringType,
 		"single_table_name": types.StringType,
 		"skip_lines":        types.NumberType,
 		"ssh_host":          types.StringType,
+		"ssh_password":      types.StringType,
 		"ssh_port":          types.NumberType,
 		"ssh_private_key":   types.StringType,
 		"ssh_user":          types.StringType,
@@ -276,11 +297,13 @@ func (r *SftpConnectionResource) Read(ctx context.Context, req resource.ReadRequ
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"auth_mode":         types.StringType,
 		"is_single_table":   types.BoolType,
 		"path":              types.StringType,
 		"single_table_name": types.StringType,
 		"skip_lines":        types.NumberType,
 		"ssh_host":          types.StringType,
+		"ssh_password":      types.StringType,
 		"ssh_port":          types.NumberType,
 		"ssh_private_key":   types.StringType,
 		"ssh_user":          types.StringType,
@@ -352,11 +375,13 @@ func (r *SftpConnectionResource) Update(ctx context.Context, req resource.Update
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"auth_mode":         types.StringType,
 		"is_single_table":   types.BoolType,
 		"path":              types.StringType,
 		"single_table_name": types.StringType,
 		"skip_lines":        types.NumberType,
 		"ssh_host":          types.StringType,
+		"ssh_password":      types.StringType,
 		"ssh_port":          types.NumberType,
 		"ssh_private_key":   types.StringType,
 		"ssh_user":          types.StringType,

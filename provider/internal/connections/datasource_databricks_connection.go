@@ -51,7 +51,7 @@ func (d *DatabricksConnectionDataSource) Schema(ctx context.Context, req datasou
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"auth_mode": schema.StringAttribute{
-						MarkdownDescription: `Authentication Method
+						MarkdownDescription: `AWS Authentication Method
 
     How to authenticate with AWS. Defaults to Access Key and Secret`,
 						Computed: true,
@@ -89,6 +89,10 @@ func (d *DatabricksConnectionDataSource) Schema(ctx context.Context, req datasou
 
     The container which we will stage files in`,
 						Computed: true,
+					},
+					"databricks_auth_mode": schema.StringAttribute{
+						MarkdownDescription: `Authentication Method`,
+						Computed:            true,
 					},
 					"deleted_file_retention_days": schema.Int64Attribute{
 						MarkdownDescription: `Deleted file retention`,
@@ -138,6 +142,10 @@ func (d *DatabricksConnectionDataSource) Schema(ctx context.Context, req datasou
 					},
 					"server_hostname": schema.StringAttribute{
 						MarkdownDescription: `Server Hostname`,
+						Computed:            true,
+					},
+					"service_principal_id": schema.StringAttribute{
+						MarkdownDescription: `Service Principal ID`,
 						Computed:            true,
 					},
 					"set_retention_properties": schema.BoolAttribute{
@@ -216,6 +224,9 @@ func (d *DatabricksConnectionDataSource) Read(ctx context.Context, req datasourc
 			"container_name": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["container_name"], "string").(string),
 			),
+			"databricks_auth_mode": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["databricks_auth_mode"], "string").(string),
+			),
 			"deleted_file_retention_days": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["deleted_file_retention_days"], "string").(string),
 			),
@@ -248,6 +259,9 @@ func (d *DatabricksConnectionDataSource) Read(ctx context.Context, req datasourc
 			),
 			"server_hostname": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["server_hostname"], "string").(string),
+			),
+			"service_principal_id": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["service_principal_id"], "string").(string),
 			),
 			"set_retention_properties": types.BoolValue(
 				getValueOrEmpty(connection.Data.Configuration["set_retention_properties"], "bool").(bool),

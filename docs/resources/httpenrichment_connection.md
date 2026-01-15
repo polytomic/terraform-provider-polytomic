@@ -56,12 +56,19 @@ state before it will take effect on a destroy operation.
 
 Required:
 
+- `method` (String) HTTP Method
 - `url` (String) Base URL
 
 Optional:
 
 - `auth` (Attributes) Authentication method (see [below for nested schema](#nestedatt--configuration--auth))
 - `body` (String) JSON payload
+- `example_body` (String) Example body
+
+    Example body to be saved with the query
+- `example_inputs` (Map of String) Example inputs
+
+    Example inputs to be saved with the connection
 - `fields` (Attributes Set) List of fields to be returned by the enrichment (see [below for nested schema](#nestedatt--configuration--fields))
 - `headers` (Attributes Set) (see [below for nested schema](#nestedatt--configuration--headers))
 - `healthcheck` (String) Health check endpoint
@@ -70,7 +77,6 @@ Optional:
 - `input_mappings` (Attributes Set) Input mappings
 
     List of input mappings to be used in the query. Each mapping should be a valid JSONPath expression. (see [below for nested schema](#nestedatt--configuration--input_mappings))
-- `method` (String) HTTP Method
 - `parameters` (Attributes Set) Query string parameters (see [below for nested schema](#nestedatt--configuration--parameters))
 
 <a id="nestedatt--configuration--auth"></a>

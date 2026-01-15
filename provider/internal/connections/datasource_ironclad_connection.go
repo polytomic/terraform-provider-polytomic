@@ -58,6 +58,10 @@ func (d *IroncladConnectionDataSource) Schema(ctx context.Context, req datasourc
 						MarkdownDescription: `Client ID`,
 						Computed:            true,
 					},
+					"environment": schema.StringAttribute{
+						MarkdownDescription: ``,
+						Computed:            true,
+					},
 					"user_as_email": schema.StringAttribute{
 						MarkdownDescription: `Ironclad user email`,
 						Computed:            true,
@@ -103,6 +107,9 @@ func (d *IroncladConnectionDataSource) Read(ctx context.Context, req datasource.
 			),
 			"client_id": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["client_id"], "string").(string),
+			),
+			"environment": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["environment"], "string").(string),
 			),
 			"user_as_email": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["user_as_email"], "string").(string),

@@ -176,6 +176,25 @@ var HttpenrichmentSchema = schema.Schema{
 					Computed:            true,
 					Sensitive:           false,
 				},
+				"example_body": schema.StringAttribute{
+					MarkdownDescription: `Example body
+
+    Example body to be saved with the query`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
+				},
+				"example_inputs": schema.MapAttribute{
+					MarkdownDescription: `Example inputs
+
+    Example inputs to be saved with the connection`,
+					Required:    false,
+					Optional:    true,
+					Computed:    true,
+					Sensitive:   false,
+					ElementType: types.StringType,
+				},
 				"fields": schema.SetNestedAttribute{
 					MarkdownDescription: `List of fields to be returned by the enrichment`,
 					Required:            false,
@@ -278,9 +297,9 @@ var HttpenrichmentSchema = schema.Schema{
 				},
 				"method": schema.StringAttribute{
 					MarkdownDescription: `HTTP Method`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
 					Sensitive:           false,
 				},
 				"parameters": schema.SetNestedAttribute{
@@ -363,8 +382,10 @@ type HttpenrichmentConf struct {
 			Token_endpoint string   `mapstructure:"token_endpoint" tfsdk:"token_endpoint"`
 		} `mapstructure:"oauth" tfsdk:"oauth"`
 	} `mapstructure:"auth" tfsdk:"auth"`
-	Body   string `mapstructure:"body" tfsdk:"body"`
-	Fields []struct {
+	Body           string            `mapstructure:"body" tfsdk:"body"`
+	Example_body   string            `mapstructure:"example_body" tfsdk:"example_body"`
+	Example_inputs map[string]string `mapstructure:"example_inputs" tfsdk:"example_inputs"`
+	Fields         []struct {
 		Name string `mapstructure:"name" tfsdk:"name"`
 		Path string `mapstructure:"path" tfsdk:"path"`
 		Type string `mapstructure:"type" tfsdk:"type"`
@@ -476,7 +497,10 @@ func (r *HttpenrichmentConnectionResource) Create(ctx context.Context, req resou
 				},
 			},
 		}, "body": types.StringType,
-		"fields": types.SetType{
+		"example_body": types.StringType,
+		"example_inputs": types.MapType{
+			ElemType: types.StringType,
+		}, "fields": types.SetType{
 			ElemType: types.ObjectType{
 				AttrTypes: map[string]attr.Type{
 					"name": types.StringType,
@@ -615,7 +639,10 @@ func (r *HttpenrichmentConnectionResource) Read(ctx context.Context, req resourc
 				},
 			},
 		}, "body": types.StringType,
-		"fields": types.SetType{
+		"example_body": types.StringType,
+		"example_inputs": types.MapType{
+			ElemType: types.StringType,
+		}, "fields": types.SetType{
 			ElemType: types.ObjectType{
 				AttrTypes: map[string]attr.Type{
 					"name": types.StringType,
@@ -753,7 +780,10 @@ func (r *HttpenrichmentConnectionResource) Update(ctx context.Context, req resou
 				},
 			},
 		}, "body": types.StringType,
-		"fields": types.SetType{
+		"example_body": types.StringType,
+		"example_inputs": types.MapType{
+			ElemType: types.StringType,
+		}, "fields": types.SetType{
 			ElemType: types.ObjectType{
 				AttrTypes: map[string]attr.Type{
 					"name": types.StringType,

@@ -50,6 +50,10 @@ func (d *SftpConnectionDataSource) Schema(ctx context.Context, req datasource.Sc
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
+					"auth_mode": schema.StringAttribute{
+						MarkdownDescription: `Authentication Method`,
+						Computed:            true,
+					},
 					"is_single_table": schema.BoolAttribute{
 						MarkdownDescription: `Files are time-based snapshots
 
@@ -118,6 +122,9 @@ func (d *SftpConnectionDataSource) Read(ctx context.Context, req datasource.Read
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttributeTypes(ctx),
 		map[string]attr.Value{
+			"auth_mode": types.StringValue(
+				getValueOrEmpty(connection.Data.Configuration["auth_mode"], "string").(string),
+			),
 			"is_single_table": types.BoolValue(
 				getValueOrEmpty(connection.Data.Configuration["is_single_table"], "bool").(bool),
 			),

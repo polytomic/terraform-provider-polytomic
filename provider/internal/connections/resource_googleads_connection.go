@@ -68,6 +68,15 @@ var GoogleadsSchema = schema.Schema{
 						},
 					},
 				},
+				"blanket_user_consent": schema.BoolAttribute{
+					MarkdownDescription: `All transmitted users consented to ad personalization and information sharing with Google Ads
+
+    Causes this connection to send signals to Google Ads indicating that every transmitted user has accepted ad personalization and data sharing policies. This will cause the user to be included in more advertising functions`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
+				},
 				"client_id": schema.StringAttribute{
 					MarkdownDescription: ``,
 					Required:            false,
@@ -98,7 +107,7 @@ var GoogleadsSchema = schema.Schema{
 				"custom_reports": schema.StringAttribute{
 					MarkdownDescription: `Custom reports
 
-    One report per line. Format is a report name followed by a Google Ads SQL query. e.g. myReport:ad_groups:campaign.id`,
+    One report per line. Format is a report name:ads object:field list. e.g. myReport:ad_groups:campaign.id`,
 					Required:  false,
 					Optional:  true,
 					Computed:  true,
@@ -152,12 +161,13 @@ type GoogleadsConf struct {
 		Label string `mapstructure:"label" tfsdk:"label"`
 		Value string `mapstructure:"value" tfsdk:"value"`
 	} `mapstructure:"accounts" tfsdk:"accounts"`
-	Client_id           string `mapstructure:"client_id" tfsdk:"client_id"`
-	Client_secret       string `mapstructure:"client_secret" tfsdk:"client_secret"`
-	Connected_user      string `mapstructure:"connected_user" tfsdk:"connected_user"`
-	Custom_reports      string `mapstructure:"custom_reports" tfsdk:"custom_reports"`
-	Oauth_refresh_token string `mapstructure:"oauth_refresh_token" tfsdk:"oauth_refresh_token"`
-	Oauth_token_expiry  string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
+	Blanket_user_consent bool   `mapstructure:"blanket_user_consent" tfsdk:"blanket_user_consent"`
+	Client_id            string `mapstructure:"client_id" tfsdk:"client_id"`
+	Client_secret        string `mapstructure:"client_secret" tfsdk:"client_secret"`
+	Connected_user       string `mapstructure:"connected_user" tfsdk:"connected_user"`
+	Custom_reports       string `mapstructure:"custom_reports" tfsdk:"custom_reports"`
+	Oauth_refresh_token  string `mapstructure:"oauth_refresh_token" tfsdk:"oauth_refresh_token"`
+	Oauth_token_expiry   string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
 }
 
 type GoogleadsConnectionResource struct {
@@ -224,12 +234,13 @@ func (r *GoogleadsConnectionResource) Create(ctx context.Context, req resource.C
 				},
 			},
 		},
-		"client_id":           types.StringType,
-		"client_secret":       types.StringType,
-		"connected_user":      types.StringType,
-		"custom_reports":      types.StringType,
-		"oauth_refresh_token": types.StringType,
-		"oauth_token_expiry":  types.StringType,
+		"blanket_user_consent": types.BoolType,
+		"client_id":            types.StringType,
+		"client_secret":        types.StringType,
+		"connected_user":       types.StringType,
+		"custom_reports":       types.StringType,
+		"oauth_refresh_token":  types.StringType,
+		"oauth_token_expiry":   types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -307,12 +318,13 @@ func (r *GoogleadsConnectionResource) Read(ctx context.Context, req resource.Rea
 				},
 			},
 		},
-		"client_id":           types.StringType,
-		"client_secret":       types.StringType,
-		"connected_user":      types.StringType,
-		"custom_reports":      types.StringType,
-		"oauth_refresh_token": types.StringType,
-		"oauth_token_expiry":  types.StringType,
+		"blanket_user_consent": types.BoolType,
+		"client_id":            types.StringType,
+		"client_secret":        types.StringType,
+		"connected_user":       types.StringType,
+		"custom_reports":       types.StringType,
+		"oauth_refresh_token":  types.StringType,
+		"oauth_token_expiry":   types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -389,12 +401,13 @@ func (r *GoogleadsConnectionResource) Update(ctx context.Context, req resource.U
 				},
 			},
 		},
-		"client_id":           types.StringType,
-		"client_secret":       types.StringType,
-		"connected_user":      types.StringType,
-		"custom_reports":      types.StringType,
-		"oauth_refresh_token": types.StringType,
-		"oauth_token_expiry":  types.StringType,
+		"blanket_user_consent": types.BoolType,
+		"client_id":            types.StringType,
+		"client_secret":        types.StringType,
+		"connected_user":       types.StringType,
+		"custom_reports":       types.StringType,
+		"oauth_refresh_token":  types.StringType,
+		"oauth_token_expiry":   types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

@@ -77,6 +77,13 @@ var IroncladSchema = schema.Schema{
 						stringplanmodifier.UseStateForUnknown(),
 					},
 				},
+				"environment": schema.StringAttribute{
+					MarkdownDescription: ``,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
+				},
 				"user_as_email": schema.StringAttribute{
 					MarkdownDescription: `Ironclad user email`,
 					Required:            false,
@@ -115,6 +122,7 @@ type IroncladConf struct {
 	Auth_method   string `mapstructure:"auth_method" tfsdk:"auth_method"`
 	Client_id     string `mapstructure:"client_id" tfsdk:"client_id"`
 	Client_secret string `mapstructure:"client_secret" tfsdk:"client_secret"`
+	Environment   string `mapstructure:"environment" tfsdk:"environment"`
 	User_as_email string `mapstructure:"user_as_email" tfsdk:"user_as_email"`
 }
 
@@ -178,6 +186,7 @@ func (r *IroncladConnectionResource) Create(ctx context.Context, req resource.Cr
 		"auth_method":   types.StringType,
 		"client_id":     types.StringType,
 		"client_secret": types.StringType,
+		"environment":   types.StringType,
 		"user_as_email": types.StringType,
 	}, conf)
 	if diags.HasError() {
@@ -252,6 +261,7 @@ func (r *IroncladConnectionResource) Read(ctx context.Context, req resource.Read
 		"auth_method":   types.StringType,
 		"client_id":     types.StringType,
 		"client_secret": types.StringType,
+		"environment":   types.StringType,
 		"user_as_email": types.StringType,
 	}, conf)
 	if diags.HasError() {
@@ -325,6 +335,7 @@ func (r *IroncladConnectionResource) Update(ctx context.Context, req resource.Up
 		"auth_method":   types.StringType,
 		"client_id":     types.StringType,
 		"client_secret": types.StringType,
+		"environment":   types.StringType,
 		"user_as_email": types.StringType,
 	}, conf)
 	if diags.HasError() {

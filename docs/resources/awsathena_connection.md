@@ -17,6 +17,7 @@ resource "polytomic_awsathena_connection" "awsathena" {
   name = "example"
   configuration = {
     access_id         = "AKIAIOSFODNN7EXAMPLE"
+    auth_mode         = "access_key_and_secret"
     outputbucket      = "s3://polytomic-athena-results/customer-dataset"
     region            = "us-east-1"
     secret_access_key = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
@@ -57,15 +58,23 @@ state before it will take effect on a destroy operation.
 
 Required:
 
-- `access_id` (String) AWS Access ID
+- `auth_mode` (String) Authentication Method
+
+    How to authenticate with AWS. Defaults to Access Key and Secret
 - `outputbucket` (String) AWS S3 output bucket
 
     A pre-existing bucket (folder optional) that AWS can use to store query results. ex: s3://polytomic-athena-results/customer-dataset
 - `region` (String) AWS region
-- `secret_access_key` (String, Sensitive) AWS Secret Access Key
 
 Optional:
 
+- `access_id` (String) AWS Access ID
 - `aws_user` (String) User ARN
+- `external_id` (String) External ID
+
+    External ID for the IAM role
+- `iam_role_arn` (String) IAM Role ARN
+- `secret_access_key` (String, Sensitive) AWS Secret Access Key
+- `tags` (Map of String) Additional tags to apply during role assumption
 
 

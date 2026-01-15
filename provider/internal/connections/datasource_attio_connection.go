@@ -50,6 +50,10 @@ func (d *AttioConnectionDataSource) Schema(ctx context.Context, req datasource.S
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
+					"disable_list_entry_projection": schema.BoolAttribute{
+						MarkdownDescription: `Skip parent fields when pulling lists`,
+						Computed:            true,
+					},
 					"enable_webhooks": schema.BoolAttribute{
 						MarkdownDescription: `Enable Attio webhook updates for bulk syncs`,
 						Computed:            true,
@@ -94,6 +98,9 @@ func (d *AttioConnectionDataSource) Read(ctx context.Context, req datasource.Rea
 	data.Configuration, diags = types.ObjectValue(
 		data.Configuration.AttributeTypes(ctx),
 		map[string]attr.Value{
+			"disable_list_entry_projection": types.BoolValue(
+				getValueOrEmpty(connection.Data.Configuration["disable_list_entry_projection"], "bool").(bool),
+			),
 			"enable_webhooks": types.BoolValue(
 				getValueOrEmpty(connection.Data.Configuration["enable_webhooks"], "bool").(bool),
 			),

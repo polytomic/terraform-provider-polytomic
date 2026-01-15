@@ -38,6 +38,7 @@ Read-Only:
 
 - `auth_method` (String) Authentication method
 - `client_id` (String) Client ID
+- `environment` (String)
 - `user_as_email` (String) Ironclad user email
 
 

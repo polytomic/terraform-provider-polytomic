@@ -45,13 +45,38 @@ var AwsathenaSchema = schema.Schema{
 			Attributes: map[string]schema.Attribute{
 				"access_id": schema.StringAttribute{
 					MarkdownDescription: `AWS Access ID`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
 					Sensitive:           false,
+				},
+				"auth_mode": schema.StringAttribute{
+					MarkdownDescription: `Authentication Method
+
+    How to authenticate with AWS. Defaults to Access Key and Secret`,
+					Required:  true,
+					Optional:  false,
+					Computed:  false,
+					Sensitive: false,
 				},
 				"aws_user": schema.StringAttribute{
 					MarkdownDescription: `User ARN`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
+				"external_id": schema.StringAttribute{
+					MarkdownDescription: `External ID
+
+    External ID for the IAM role`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
+				},
+				"iam_role_arn": schema.StringAttribute{
+					MarkdownDescription: `IAM Role ARN`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,
@@ -75,13 +100,21 @@ var AwsathenaSchema = schema.Schema{
 				},
 				"secret_access_key": schema.StringAttribute{
 					MarkdownDescription: `AWS Secret Access Key`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
 					Sensitive:           true,
 					PlanModifiers: []planmodifier.String{
 						stringplanmodifier.UseStateForUnknown(),
 					},
+				},
+				"tags": schema.MapAttribute{
+					MarkdownDescription: `Additional tags to apply during role assumption`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+					ElementType:         types.StringType,
 				},
 			},
 
@@ -110,11 +143,15 @@ func (t *AwsathenaConnectionResource) Schema(ctx context.Context, req resource.S
 }
 
 type AwsathenaConf struct {
-	Access_id         string `mapstructure:"access_id" tfsdk:"access_id"`
-	Aws_user          string `mapstructure:"aws_user" tfsdk:"aws_user"`
-	Outputbucket      string `mapstructure:"outputbucket" tfsdk:"outputbucket"`
-	Region            string `mapstructure:"region" tfsdk:"region"`
-	Secret_access_key string `mapstructure:"secret_access_key" tfsdk:"secret_access_key"`
+	Access_id         string            `mapstructure:"access_id" tfsdk:"access_id"`
+	Auth_mode         string            `mapstructure:"auth_mode" tfsdk:"auth_mode"`
+	Aws_user          string            `mapstructure:"aws_user" tfsdk:"aws_user"`
+	External_id       string            `mapstructure:"external_id" tfsdk:"external_id"`
+	Iam_role_arn      string            `mapstructure:"iam_role_arn" tfsdk:"iam_role_arn"`
+	Outputbucket      string            `mapstructure:"outputbucket" tfsdk:"outputbucket"`
+	Region            string            `mapstructure:"region" tfsdk:"region"`
+	Secret_access_key string            `mapstructure:"secret_access_key" tfsdk:"secret_access_key"`
+	Tags              map[string]string `mapstructure:"tags" tfsdk:"tags"`
 }
 
 type AwsathenaConnectionResource struct {
@@ -174,10 +211,16 @@ func (r *AwsathenaConnectionResource) Create(ctx context.Context, req resource.C
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"access_id":         types.StringType,
+		"auth_mode":         types.StringType,
 		"aws_user":          types.StringType,
+		"external_id":       types.StringType,
+		"iam_role_arn":      types.StringType,
 		"outputbucket":      types.StringType,
 		"region":            types.StringType,
 		"secret_access_key": types.StringType,
+		"tags": types.MapType{
+			ElemType: types.StringType,
+		},
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -248,10 +291,16 @@ func (r *AwsathenaConnectionResource) Read(ctx context.Context, req resource.Rea
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"access_id":         types.StringType,
+		"auth_mode":         types.StringType,
 		"aws_user":          types.StringType,
+		"external_id":       types.StringType,
+		"iam_role_arn":      types.StringType,
 		"outputbucket":      types.StringType,
 		"region":            types.StringType,
 		"secret_access_key": types.StringType,
+		"tags": types.MapType{
+			ElemType: types.StringType,
+		},
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -321,10 +370,16 @@ func (r *AwsathenaConnectionResource) Update(ctx context.Context, req resource.U
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"access_id":         types.StringType,
+		"auth_mode":         types.StringType,
 		"aws_user":          types.StringType,
+		"external_id":       types.StringType,
+		"iam_role_arn":      types.StringType,
 		"outputbucket":      types.StringType,
 		"region":            types.StringType,
 		"secret_access_key": types.StringType,
+		"tags": types.MapType{
+			ElemType: types.StringType,
+		},
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

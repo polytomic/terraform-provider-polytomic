@@ -1,0 +1,1 @@
+{"$id":"https://github.com/polytomic/app/services/polytomic/backend/highlevel/connection-conf","$schema":"https://json-schema.org/draft/2020-12/schema","properties":{"private_integration_token":{"sensitive":true,"title":"Private integration token","type":"string"}},"type":"object"}

@@ -60,6 +60,7 @@ Required:
 
 Optional:
 
+- `change_detection` (Boolean) Use change stream for bulk syncs
 - `database` (String) Auth Database
 - `params` (String) Additional Parameters
 

@@ -53,6 +53,13 @@ var DatadogSchema = schema.Schema{
 						stringplanmodifier.UseStateForUnknown(),
 					},
 				},
+				"region": schema.StringAttribute{
+					MarkdownDescription: `Site`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
+				},
 			},
 
 			Required: true,
@@ -81,6 +88,7 @@ func (t *DatadogConnectionResource) Schema(ctx context.Context, req resource.Sch
 
 type DatadogConf struct {
 	Api_key string `mapstructure:"api_key" tfsdk:"api_key"`
+	Region  string `mapstructure:"region" tfsdk:"region"`
 }
 
 type DatadogConnectionResource struct {
@@ -140,6 +148,7 @@ func (r *DatadogConnectionResource) Create(ctx context.Context, req resource.Cre
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"api_key": types.StringType,
+		"region":  types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -210,6 +219,7 @@ func (r *DatadogConnectionResource) Read(ctx context.Context, req resource.ReadR
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"api_key": types.StringType,
+		"region":  types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -279,6 +289,7 @@ func (r *DatadogConnectionResource) Update(ctx context.Context, req resource.Upd
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"api_key": types.StringType,
+		"region":  types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

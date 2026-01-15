@@ -1,0 +1,1 @@
+{"$id":"https://github.com/polytomic/app/services/polytomic/backend/docker_hub/connection-conf","$schema":"https://json-schema.org/draft/2020-12/schema","properties":{"namespace":{"title":"Namespace","type":"string"}},"required":["namespace"],"type":"object"}
