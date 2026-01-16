@@ -54,6 +54,9 @@ func (d *ProductboardConnectionDataSource) Schema(ctx context.Context, req datas
 	}
 }
 
+type ProductboardDataSourceConf struct {
+}
+
 func (d *ProductboardConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 

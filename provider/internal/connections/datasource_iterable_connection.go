@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
@@ -73,6 +74,13 @@ func (d *IterableConnectionDataSource) Schema(ctx context.Context, req datasourc
 	}
 }
 
+type IterableDataSourceConf struct {
+	Event_types []struct {
+		Label string `mapstructure:"label" tfsdk:"label"`
+		Value string `mapstructure:"value" tfsdk:"value"`
+	} `mapstructure:"event_types" tfsdk:"event_types"`
+}
+
 func (d *IterableConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 
@@ -98,16 +106,25 @@ func (d *IterableConnectionDataSource) Read(ctx context.Context, req datasource.
 	data.Id = types.StringPointerValue(connection.Data.Id)
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
-	var diags diag.Diagnostics
-	data.Configuration, diags = types.ObjectValue(
-		data.Configuration.AttributeTypes(ctx),
-		map[string]attr.Value{
-			"event_types": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["event_types"], "string").(string),
-			),
-		},
-	)
 
+	conf := IterableDataSourceConf{}
+	err = mapstructure.Decode(connection.Data.Configuration, &conf)
+	if err != nil {
+		resp.Diagnostics.AddError("Error decoding connection configuration", err.Error())
+		return
+	}
+
+	var diags diag.Diagnostics
+	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"event_types": types.SetType{
+			ElemType: types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"label": types.StringType,
+					"value": types.StringType,
+				},
+			},
+		},
+	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return

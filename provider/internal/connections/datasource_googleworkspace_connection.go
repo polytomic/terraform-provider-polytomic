@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
@@ -73,6 +74,13 @@ func (d *GoogleworkspaceConnectionDataSource) Schema(ctx context.Context, req da
 	}
 }
 
+type GoogleworkspaceDataSourceConf struct {
+	Auth_method        string `mapstructure:"auth_method" tfsdk:"auth_method"`
+	Client_email       string `mapstructure:"client_email" tfsdk:"client_email"`
+	Customer_id        string `mapstructure:"customer_id" tfsdk:"customer_id"`
+	Oauth_token_expiry string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
+}
+
 func (d *GoogleworkspaceConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 
@@ -98,25 +106,21 @@ func (d *GoogleworkspaceConnectionDataSource) Read(ctx context.Context, req data
 	data.Id = types.StringPointerValue(connection.Data.Id)
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
-	var diags diag.Diagnostics
-	data.Configuration, diags = types.ObjectValue(
-		data.Configuration.AttributeTypes(ctx),
-		map[string]attr.Value{
-			"auth_method": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["auth_method"], "string").(string),
-			),
-			"client_email": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["client_email"], "string").(string),
-			),
-			"customer_id": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["customer_id"], "string").(string),
-			),
-			"oauth_token_expiry": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["oauth_token_expiry"], "string").(string),
-			),
-		},
-	)
 
+	conf := GoogleworkspaceDataSourceConf{}
+	err = mapstructure.Decode(connection.Data.Configuration, &conf)
+	if err != nil {
+		resp.Diagnostics.AddError("Error decoding connection configuration", err.Error())
+		return
+	}
+
+	var diags diag.Diagnostics
+	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"auth_method":        types.StringType,
+		"client_email":       types.StringType,
+		"customer_id":        types.StringType,
+		"oauth_token_expiry": types.StringType,
+	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return

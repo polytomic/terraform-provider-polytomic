@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
@@ -121,6 +122,22 @@ func (d *S3ConnectionDataSource) Schema(ctx context.Context, req datasource.Sche
 	}
 }
 
+type S3DataSourceConf struct {
+	Auth_mode                string `mapstructure:"auth_mode" tfsdk:"auth_mode"`
+	Aws_access_key_id        string `mapstructure:"aws_access_key_id" tfsdk:"aws_access_key_id"`
+	Aws_user                 string `mapstructure:"aws_user" tfsdk:"aws_user"`
+	Directory_glob_pattern   string `mapstructure:"directory_glob_pattern" tfsdk:"directory_glob_pattern"`
+	External_id              string `mapstructure:"external_id" tfsdk:"external_id"`
+	Iam_role_arn             string `mapstructure:"iam_role_arn" tfsdk:"iam_role_arn"`
+	Is_directory_snapshot    bool   `mapstructure:"is_directory_snapshot" tfsdk:"is_directory_snapshot"`
+	Is_single_table          bool   `mapstructure:"is_single_table" tfsdk:"is_single_table"`
+	S3_bucket_name           string `mapstructure:"s3_bucket_name" tfsdk:"s3_bucket_name"`
+	S3_bucket_region         string `mapstructure:"s3_bucket_region" tfsdk:"s3_bucket_region"`
+	Single_table_file_format string `mapstructure:"single_table_file_format" tfsdk:"single_table_file_format"`
+	Single_table_name        string `mapstructure:"single_table_name" tfsdk:"single_table_name"`
+	Skip_lines               int64  `mapstructure:"skip_lines" tfsdk:"skip_lines"`
+}
+
 func (d *S3ConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 
@@ -146,52 +163,30 @@ func (d *S3ConnectionDataSource) Read(ctx context.Context, req datasource.ReadRe
 	data.Id = types.StringPointerValue(connection.Data.Id)
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
-	var diags diag.Diagnostics
-	data.Configuration, diags = types.ObjectValue(
-		data.Configuration.AttributeTypes(ctx),
-		map[string]attr.Value{
-			"auth_mode": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["auth_mode"], "string").(string),
-			),
-			"aws_access_key_id": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["aws_access_key_id"], "string").(string),
-			),
-			"aws_user": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["aws_user"], "string").(string),
-			),
-			"directory_glob_pattern": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["directory_glob_pattern"], "string").(string),
-			),
-			"external_id": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["external_id"], "string").(string),
-			),
-			"iam_role_arn": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["iam_role_arn"], "string").(string),
-			),
-			"is_directory_snapshot": types.BoolValue(
-				getValueOrEmpty(connection.Data.Configuration["is_directory_snapshot"], "bool").(bool),
-			),
-			"is_single_table": types.BoolValue(
-				getValueOrEmpty(connection.Data.Configuration["is_single_table"], "bool").(bool),
-			),
-			"s3_bucket_name": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["s3_bucket_name"], "string").(string),
-			),
-			"s3_bucket_region": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["s3_bucket_region"], "string").(string),
-			),
-			"single_table_file_format": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["single_table_file_format"], "string").(string),
-			),
-			"single_table_name": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["single_table_name"], "string").(string),
-			),
-			"skip_lines": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["skip_lines"], "string").(string),
-			),
-		},
-	)
 
+	conf := S3DataSourceConf{}
+	err = mapstructure.Decode(connection.Data.Configuration, &conf)
+	if err != nil {
+		resp.Diagnostics.AddError("Error decoding connection configuration", err.Error())
+		return
+	}
+
+	var diags diag.Diagnostics
+	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"auth_mode":                types.StringType,
+		"aws_access_key_id":        types.StringType,
+		"aws_user":                 types.StringType,
+		"directory_glob_pattern":   types.StringType,
+		"external_id":              types.StringType,
+		"iam_role_arn":             types.StringType,
+		"is_directory_snapshot":    types.BoolType,
+		"is_single_table":          types.BoolType,
+		"s3_bucket_name":           types.StringType,
+		"s3_bucket_region":         types.StringType,
+		"single_table_file_format": types.StringType,
+		"single_table_name":        types.StringType,
+		"skip_lines":               types.NumberType,
+	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return

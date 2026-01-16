@@ -54,6 +54,9 @@ func (d *ProfoundConnectionDataSource) Schema(ctx context.Context, req datasourc
 	}
 }
 
+type ProfoundDataSourceConf struct {
+}
+
 func (d *ProfoundConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 

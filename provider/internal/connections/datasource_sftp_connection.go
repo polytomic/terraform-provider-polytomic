@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
@@ -93,6 +94,17 @@ func (d *SftpConnectionDataSource) Schema(ctx context.Context, req datasource.Sc
 	}
 }
 
+type SftpDataSourceConf struct {
+	Auth_mode         string `mapstructure:"auth_mode" tfsdk:"auth_mode"`
+	Is_single_table   bool   `mapstructure:"is_single_table" tfsdk:"is_single_table"`
+	Path              string `mapstructure:"path" tfsdk:"path"`
+	Single_table_name string `mapstructure:"single_table_name" tfsdk:"single_table_name"`
+	Skip_lines        int64  `mapstructure:"skip_lines" tfsdk:"skip_lines"`
+	Ssh_host          string `mapstructure:"ssh_host" tfsdk:"ssh_host"`
+	Ssh_port          int64  `mapstructure:"ssh_port" tfsdk:"ssh_port"`
+	Ssh_user          string `mapstructure:"ssh_user" tfsdk:"ssh_user"`
+}
+
 func (d *SftpConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 
@@ -118,37 +130,25 @@ func (d *SftpConnectionDataSource) Read(ctx context.Context, req datasource.Read
 	data.Id = types.StringPointerValue(connection.Data.Id)
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
-	var diags diag.Diagnostics
-	data.Configuration, diags = types.ObjectValue(
-		data.Configuration.AttributeTypes(ctx),
-		map[string]attr.Value{
-			"auth_mode": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["auth_mode"], "string").(string),
-			),
-			"is_single_table": types.BoolValue(
-				getValueOrEmpty(connection.Data.Configuration["is_single_table"], "bool").(bool),
-			),
-			"path": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["path"], "string").(string),
-			),
-			"single_table_name": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["single_table_name"], "string").(string),
-			),
-			"skip_lines": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["skip_lines"], "string").(string),
-			),
-			"ssh_host": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["ssh_host"], "string").(string),
-			),
-			"ssh_port": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["ssh_port"], "string").(string),
-			),
-			"ssh_user": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["ssh_user"], "string").(string),
-			),
-		},
-	)
 
+	conf := SftpDataSourceConf{}
+	err = mapstructure.Decode(connection.Data.Configuration, &conf)
+	if err != nil {
+		resp.Diagnostics.AddError("Error decoding connection configuration", err.Error())
+		return
+	}
+
+	var diags diag.Diagnostics
+	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"auth_mode":         types.StringType,
+		"is_single_table":   types.BoolType,
+		"path":              types.StringType,
+		"single_table_name": types.StringType,
+		"skip_lines":        types.NumberType,
+		"ssh_host":          types.StringType,
+		"ssh_port":          types.NumberType,
+		"ssh_user":          types.StringType,
+	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return

@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
@@ -73,6 +74,13 @@ func (d *NetsuiteopenairConnectionDataSource) Schema(ctx context.Context, req da
 	}
 }
 
+type NetsuiteopenairDataSourceConf struct {
+	Api_namespace         string `mapstructure:"api_namespace" tfsdk:"api_namespace"`
+	Company_id            string `mapstructure:"company_id" tfsdk:"company_id"`
+	Per_day_rate_limit    int64  `mapstructure:"per_day_rate_limit" tfsdk:"per_day_rate_limit"`
+	Per_minute_rate_limit int64  `mapstructure:"per_minute_rate_limit" tfsdk:"per_minute_rate_limit"`
+}
+
 func (d *NetsuiteopenairConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 
@@ -98,25 +106,21 @@ func (d *NetsuiteopenairConnectionDataSource) Read(ctx context.Context, req data
 	data.Id = types.StringPointerValue(connection.Data.Id)
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
-	var diags diag.Diagnostics
-	data.Configuration, diags = types.ObjectValue(
-		data.Configuration.AttributeTypes(ctx),
-		map[string]attr.Value{
-			"api_namespace": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["api_namespace"], "string").(string),
-			),
-			"company_id": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["company_id"], "string").(string),
-			),
-			"per_day_rate_limit": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["per_day_rate_limit"], "string").(string),
-			),
-			"per_minute_rate_limit": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["per_minute_rate_limit"], "string").(string),
-			),
-		},
-	)
 
+	conf := NetsuiteopenairDataSourceConf{}
+	err = mapstructure.Decode(connection.Data.Configuration, &conf)
+	if err != nil {
+		resp.Diagnostics.AddError("Error decoding connection configuration", err.Error())
+		return
+	}
+
+	var diags diag.Diagnostics
+	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"api_namespace":         types.StringType,
+		"company_id":            types.StringType,
+		"per_day_rate_limit":    types.NumberType,
+		"per_minute_rate_limit": types.NumberType,
+	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return

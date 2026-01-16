@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
@@ -65,6 +66,11 @@ func (d *PaycorConnectionDataSource) Schema(ctx context.Context, req datasource.
 	}
 }
 
+type PaycorDataSourceConf struct {
+	Scopes      string `mapstructure:"scopes" tfsdk:"scopes"`
+	Use_sandbox bool   `mapstructure:"use_sandbox" tfsdk:"use_sandbox"`
+}
+
 func (d *PaycorConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 
@@ -90,19 +96,19 @@ func (d *PaycorConnectionDataSource) Read(ctx context.Context, req datasource.Re
 	data.Id = types.StringPointerValue(connection.Data.Id)
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
-	var diags diag.Diagnostics
-	data.Configuration, diags = types.ObjectValue(
-		data.Configuration.AttributeTypes(ctx),
-		map[string]attr.Value{
-			"scopes": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["scopes"], "string").(string),
-			),
-			"use_sandbox": types.BoolValue(
-				getValueOrEmpty(connection.Data.Configuration["use_sandbox"], "bool").(bool),
-			),
-		},
-	)
 
+	conf := PaycorDataSourceConf{}
+	err = mapstructure.Decode(connection.Data.Configuration, &conf)
+	if err != nil {
+		resp.Diagnostics.AddError("Error decoding connection configuration", err.Error())
+		return
+	}
+
+	var diags diag.Diagnostics
+	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"scopes":      types.StringType,
+		"use_sandbox": types.BoolType,
+	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return

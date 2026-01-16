@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
@@ -89,6 +90,17 @@ func (d *FbaudienceConnectionDataSource) Schema(ctx context.Context, req datasou
 	}
 }
 
+type FbaudienceDataSourceConf struct {
+	Account_id string `mapstructure:"account_id" tfsdk:"account_id"`
+	Accounts   []struct {
+		Label string `mapstructure:"label" tfsdk:"label"`
+		Value string `mapstructure:"value" tfsdk:"value"`
+	} `mapstructure:"accounts" tfsdk:"accounts"`
+	Auth_method       string `mapstructure:"auth_method" tfsdk:"auth_method"`
+	Graph_api_version string `mapstructure:"graph_api_version" tfsdk:"graph_api_version"`
+	User_name         string `mapstructure:"user_name" tfsdk:"user_name"`
+}
+
 func (d *FbaudienceConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 
@@ -114,28 +126,29 @@ func (d *FbaudienceConnectionDataSource) Read(ctx context.Context, req datasourc
 	data.Id = types.StringPointerValue(connection.Data.Id)
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
-	var diags diag.Diagnostics
-	data.Configuration, diags = types.ObjectValue(
-		data.Configuration.AttributeTypes(ctx),
-		map[string]attr.Value{
-			"account_id": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["account_id"], "string").(string),
-			),
-			"accounts": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["accounts"], "string").(string),
-			),
-			"auth_method": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["auth_method"], "string").(string),
-			),
-			"graph_api_version": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["graph_api_version"], "string").(string),
-			),
-			"user_name": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["user_name"], "string").(string),
-			),
-		},
-	)
 
+	conf := FbaudienceDataSourceConf{}
+	err = mapstructure.Decode(connection.Data.Configuration, &conf)
+	if err != nil {
+		resp.Diagnostics.AddError("Error decoding connection configuration", err.Error())
+		return
+	}
+
+	var diags diag.Diagnostics
+	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"account_id": types.StringType,
+		"accounts": types.SetType{
+			ElemType: types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"label": types.StringType,
+					"value": types.StringType,
+				},
+			},
+		},
+		"auth_method":       types.StringType,
+		"graph_api_version": types.StringType,
+		"user_name":         types.StringType,
+	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return

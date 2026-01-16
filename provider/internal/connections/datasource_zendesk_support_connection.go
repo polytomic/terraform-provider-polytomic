@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
@@ -83,6 +84,15 @@ func (d *Zendesk_supportConnectionDataSource) Schema(ctx context.Context, req da
 	}
 }
 
+type Zendesk_supportDataSourceConf struct {
+	Auth_method        string `mapstructure:"auth_method" tfsdk:"auth_method"`
+	Custom_api_limits  bool   `mapstructure:"custom_api_limits" tfsdk:"custom_api_limits"`
+	Domain             string `mapstructure:"domain" tfsdk:"domain"`
+	Email              string `mapstructure:"email" tfsdk:"email"`
+	Oauth_token_expiry string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
+	Ratelimit_rpm      int64  `mapstructure:"ratelimit_rpm" tfsdk:"ratelimit_rpm"`
+}
+
 func (d *Zendesk_supportConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 
@@ -108,31 +118,23 @@ func (d *Zendesk_supportConnectionDataSource) Read(ctx context.Context, req data
 	data.Id = types.StringPointerValue(connection.Data.Id)
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
-	var diags diag.Diagnostics
-	data.Configuration, diags = types.ObjectValue(
-		data.Configuration.AttributeTypes(ctx),
-		map[string]attr.Value{
-			"auth_method": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["auth_method"], "string").(string),
-			),
-			"custom_api_limits": types.BoolValue(
-				getValueOrEmpty(connection.Data.Configuration["custom_api_limits"], "bool").(bool),
-			),
-			"domain": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["domain"], "string").(string),
-			),
-			"email": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["email"], "string").(string),
-			),
-			"oauth_token_expiry": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["oauth_token_expiry"], "string").(string),
-			),
-			"ratelimit_rpm": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["ratelimit_rpm"], "string").(string),
-			),
-		},
-	)
 
+	conf := Zendesk_supportDataSourceConf{}
+	err = mapstructure.Decode(connection.Data.Configuration, &conf)
+	if err != nil {
+		resp.Diagnostics.AddError("Error decoding connection configuration", err.Error())
+		return
+	}
+
+	var diags diag.Diagnostics
+	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"auth_method":        types.StringType,
+		"custom_api_limits":  types.BoolType,
+		"domain":             types.StringType,
+		"email":              types.StringType,
+		"oauth_token_expiry": types.StringType,
+		"ratelimit_rpm":      types.NumberType,
+	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return

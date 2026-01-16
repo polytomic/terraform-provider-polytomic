@@ -54,6 +54,9 @@ func (d *Chili_piperConnectionDataSource) Schema(ctx context.Context, req dataso
 	}
 }
 
+type Chili_piperDataSourceConf struct {
+}
+
 func (d *Chili_piperConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 

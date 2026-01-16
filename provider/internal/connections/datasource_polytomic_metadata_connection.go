@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
@@ -71,6 +72,12 @@ func (d *Polytomic_metadataConnectionDataSource) Schema(ctx context.Context, req
 	}
 }
 
+type Polytomic_metadataDataSourceConf struct {
+	Auth_mode      string `mapstructure:"auth_mode" tfsdk:"auth_mode"`
+	Connected_org  string `mapstructure:"connected_org" tfsdk:"connected_org"`
+	Connected_user string `mapstructure:"connected_user" tfsdk:"connected_user"`
+}
+
 func (d *Polytomic_metadataConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 
@@ -96,22 +103,20 @@ func (d *Polytomic_metadataConnectionDataSource) Read(ctx context.Context, req d
 	data.Id = types.StringPointerValue(connection.Data.Id)
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
-	var diags diag.Diagnostics
-	data.Configuration, diags = types.ObjectValue(
-		data.Configuration.AttributeTypes(ctx),
-		map[string]attr.Value{
-			"auth_mode": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["auth_mode"], "string").(string),
-			),
-			"connected_org": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["connected_org"], "string").(string),
-			),
-			"connected_user": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["connected_user"], "string").(string),
-			),
-		},
-	)
 
+	conf := Polytomic_metadataDataSourceConf{}
+	err = mapstructure.Decode(connection.Data.Configuration, &conf)
+	if err != nil {
+		resp.Diagnostics.AddError("Error decoding connection configuration", err.Error())
+		return
+	}
+
+	var diags diag.Diagnostics
+	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"auth_mode":      types.StringType,
+		"connected_org":  types.StringType,
+		"connected_user": types.StringType,
+	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return

@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
@@ -65,6 +66,11 @@ func (d *DialpadConnectionDataSource) Schema(ctx context.Context, req datasource
 	}
 }
 
+type DialpadDataSourceConf struct {
+	Auth_method        string `mapstructure:"auth_method" tfsdk:"auth_method"`
+	Oauth_token_expiry string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
+}
+
 func (d *DialpadConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 
@@ -90,19 +96,19 @@ func (d *DialpadConnectionDataSource) Read(ctx context.Context, req datasource.R
 	data.Id = types.StringPointerValue(connection.Data.Id)
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
-	var diags diag.Diagnostics
-	data.Configuration, diags = types.ObjectValue(
-		data.Configuration.AttributeTypes(ctx),
-		map[string]attr.Value{
-			"auth_method": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["auth_method"], "string").(string),
-			),
-			"oauth_token_expiry": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["oauth_token_expiry"], "string").(string),
-			),
-		},
-	)
 
+	conf := DialpadDataSourceConf{}
+	err = mapstructure.Decode(connection.Data.Configuration, &conf)
+	if err != nil {
+		resp.Diagnostics.AddError("Error decoding connection configuration", err.Error())
+		return
+	}
+
+	var diags diag.Diagnostics
+	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"auth_method":        types.StringType,
+		"oauth_token_expiry": types.StringType,
+	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return

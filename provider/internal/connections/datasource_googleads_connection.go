@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
@@ -93,6 +94,17 @@ func (d *GoogleadsConnectionDataSource) Schema(ctx context.Context, req datasour
 	}
 }
 
+type GoogleadsDataSourceConf struct {
+	Accounts []struct {
+		Label string `mapstructure:"label" tfsdk:"label"`
+		Value string `mapstructure:"value" tfsdk:"value"`
+	} `mapstructure:"accounts" tfsdk:"accounts"`
+	Blanket_user_consent bool   `mapstructure:"blanket_user_consent" tfsdk:"blanket_user_consent"`
+	Connected_user       string `mapstructure:"connected_user" tfsdk:"connected_user"`
+	Custom_reports       string `mapstructure:"custom_reports" tfsdk:"custom_reports"`
+	Oauth_token_expiry   string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
+}
+
 func (d *GoogleadsConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 
@@ -118,28 +130,29 @@ func (d *GoogleadsConnectionDataSource) Read(ctx context.Context, req datasource
 	data.Id = types.StringPointerValue(connection.Data.Id)
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
-	var diags diag.Diagnostics
-	data.Configuration, diags = types.ObjectValue(
-		data.Configuration.AttributeTypes(ctx),
-		map[string]attr.Value{
-			"accounts": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["accounts"], "string").(string),
-			),
-			"blanket_user_consent": types.BoolValue(
-				getValueOrEmpty(connection.Data.Configuration["blanket_user_consent"], "bool").(bool),
-			),
-			"connected_user": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["connected_user"], "string").(string),
-			),
-			"custom_reports": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["custom_reports"], "string").(string),
-			),
-			"oauth_token_expiry": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["oauth_token_expiry"], "string").(string),
-			),
-		},
-	)
 
+	conf := GoogleadsDataSourceConf{}
+	err = mapstructure.Decode(connection.Data.Configuration, &conf)
+	if err != nil {
+		resp.Diagnostics.AddError("Error decoding connection configuration", err.Error())
+		return
+	}
+
+	var diags diag.Diagnostics
+	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"accounts": types.SetType{
+			ElemType: types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"label": types.StringType,
+					"value": types.StringType,
+				},
+			},
+		},
+		"blanket_user_consent": types.BoolType,
+		"connected_user":       types.StringType,
+		"custom_reports":       types.StringType,
+		"oauth_token_expiry":   types.StringType,
+	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return

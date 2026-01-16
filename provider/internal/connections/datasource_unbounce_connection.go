@@ -54,6 +54,9 @@ func (d *UnbounceConnectionDataSource) Schema(ctx context.Context, req datasourc
 	}
 }
 
+type UnbounceDataSourceConf struct {
+}
+
 func (d *UnbounceConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 

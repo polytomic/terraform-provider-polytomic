@@ -54,6 +54,9 @@ func (d *FathomConnectionDataSource) Schema(ctx context.Context, req datasource.
 	}
 }
 
+type FathomDataSourceConf struct {
+}
+
 func (d *FathomConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 

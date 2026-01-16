@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
@@ -99,6 +100,17 @@ func (d *SalesforceConnectionDataSource) Schema(ctx context.Context, req datasou
 	}
 }
 
+type SalesforceDataSourceConf struct {
+	Connect_mode                string `mapstructure:"connect_mode" tfsdk:"connect_mode"`
+	Daily_api_calls             int64  `mapstructure:"daily_api_calls" tfsdk:"daily_api_calls"`
+	Domain                      string `mapstructure:"domain" tfsdk:"domain"`
+	Enable_multicurrency_lookup bool   `mapstructure:"enable_multicurrency_lookup" tfsdk:"enable_multicurrency_lookup"`
+	Enable_tooling              bool   `mapstructure:"enable_tooling" tfsdk:"enable_tooling"`
+	Enforce_api_limits          bool   `mapstructure:"enforce_api_limits" tfsdk:"enforce_api_limits"`
+	Instance_url_override       string `mapstructure:"instance_url_override" tfsdk:"instance_url_override"`
+	Username                    string `mapstructure:"username" tfsdk:"username"`
+}
+
 func (d *SalesforceConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 
@@ -124,37 +136,25 @@ func (d *SalesforceConnectionDataSource) Read(ctx context.Context, req datasourc
 	data.Id = types.StringPointerValue(connection.Data.Id)
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
-	var diags diag.Diagnostics
-	data.Configuration, diags = types.ObjectValue(
-		data.Configuration.AttributeTypes(ctx),
-		map[string]attr.Value{
-			"connect_mode": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["connect_mode"], "string").(string),
-			),
-			"daily_api_calls": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["daily_api_calls"], "string").(string),
-			),
-			"domain": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["domain"], "string").(string),
-			),
-			"enable_multicurrency_lookup": types.BoolValue(
-				getValueOrEmpty(connection.Data.Configuration["enable_multicurrency_lookup"], "bool").(bool),
-			),
-			"enable_tooling": types.BoolValue(
-				getValueOrEmpty(connection.Data.Configuration["enable_tooling"], "bool").(bool),
-			),
-			"enforce_api_limits": types.BoolValue(
-				getValueOrEmpty(connection.Data.Configuration["enforce_api_limits"], "bool").(bool),
-			),
-			"instance_url_override": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["instance_url_override"], "string").(string),
-			),
-			"username": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["username"], "string").(string),
-			),
-		},
-	)
 
+	conf := SalesforceDataSourceConf{}
+	err = mapstructure.Decode(connection.Data.Configuration, &conf)
+	if err != nil {
+		resp.Diagnostics.AddError("Error decoding connection configuration", err.Error())
+		return
+	}
+
+	var diags diag.Diagnostics
+	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"connect_mode":                types.StringType,
+		"daily_api_calls":             types.NumberType,
+		"domain":                      types.StringType,
+		"enable_multicurrency_lookup": types.BoolType,
+		"enable_tooling":              types.BoolType,
+		"enforce_api_limits":          types.BoolType,
+		"instance_url_override":       types.StringType,
+		"username":                    types.StringType,
+	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return

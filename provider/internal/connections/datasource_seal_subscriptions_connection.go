@@ -54,6 +54,9 @@ func (d *Seal_subscriptionsConnectionDataSource) Schema(ctx context.Context, req
 	}
 }
 
+type Seal_subscriptionsDataSourceConf struct {
+}
+
 func (d *Seal_subscriptionsConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 

@@ -54,6 +54,9 @@ func (d *ShipbobConnectionDataSource) Schema(ctx context.Context, req datasource
 	}
 }
 
+type ShipbobDataSourceConf struct {
+}
+
 func (d *ShipbobConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 

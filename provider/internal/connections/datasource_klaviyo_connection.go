@@ -54,6 +54,9 @@ func (d *KlaviyoConnectionDataSource) Schema(ctx context.Context, req datasource
 	}
 }
 
+type KlaviyoDataSourceConf struct {
+}
+
 func (d *KlaviyoConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 

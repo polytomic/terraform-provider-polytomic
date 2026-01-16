@@ -54,6 +54,9 @@ func (d *AscendConnectionDataSource) Schema(ctx context.Context, req datasource.
 	}
 }
 
+type AscendDataSourceConf struct {
+}
+
 func (d *AscendConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 

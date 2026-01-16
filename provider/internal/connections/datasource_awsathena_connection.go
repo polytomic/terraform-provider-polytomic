@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
@@ -96,6 +97,17 @@ func (d *AwsathenaConnectionDataSource) Schema(ctx context.Context, req datasour
 	}
 }
 
+type AwsathenaDataSourceConf struct {
+	Access_id    string            `mapstructure:"access_id" tfsdk:"access_id"`
+	Auth_mode    string            `mapstructure:"auth_mode" tfsdk:"auth_mode"`
+	Aws_user     string            `mapstructure:"aws_user" tfsdk:"aws_user"`
+	External_id  string            `mapstructure:"external_id" tfsdk:"external_id"`
+	Iam_role_arn string            `mapstructure:"iam_role_arn" tfsdk:"iam_role_arn"`
+	Outputbucket string            `mapstructure:"outputbucket" tfsdk:"outputbucket"`
+	Region       string            `mapstructure:"region" tfsdk:"region"`
+	Tags         map[string]string `mapstructure:"tags" tfsdk:"tags"`
+}
+
 func (d *AwsathenaConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 
@@ -121,54 +133,27 @@ func (d *AwsathenaConnectionDataSource) Read(ctx context.Context, req datasource
 	data.Id = types.StringPointerValue(connection.Data.Id)
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
-	var diags diag.Diagnostics
-	data.Configuration, diags = types.ObjectValue(
-		data.Configuration.AttributeTypes(ctx),
-		map[string]attr.Value{
-			"access_id": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["access_id"], "string").(string),
-			),
-			"auth_mode": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["auth_mode"], "string").(string),
-			),
-			"aws_user": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["aws_user"], "string").(string),
-			),
-			"external_id": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["external_id"], "string").(string),
-			),
-			"iam_role_arn": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["iam_role_arn"], "string").(string),
-			),
-			"outputbucket": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["outputbucket"], "string").(string),
-			),
-			"region": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["region"], "string").(string),
-			),
-			"tags": func() types.Map {
-				rawMap := getValueOrEmpty(connection.Data.Configuration["tags"], "map")
-				if rawMap == nil {
-					m, _ := types.MapValue(types.StringType, map[string]attr.Value{})
-					return m
-				}
-				mapVal, ok := rawMap.(map[string]interface{})
-				if !ok {
-					m, _ := types.MapValue(types.StringType, map[string]attr.Value{})
-					return m
-				}
-				elements := make(map[string]attr.Value)
-				for k, v := range mapVal {
-					if strVal, ok := v.(string); ok {
-						elements[k] = types.StringValue(strVal)
-					}
-				}
-				m, _ := types.MapValue(types.StringType, elements)
-				return m
-			}(),
-		},
-	)
 
+	conf := AwsathenaDataSourceConf{}
+	err = mapstructure.Decode(connection.Data.Configuration, &conf)
+	if err != nil {
+		resp.Diagnostics.AddError("Error decoding connection configuration", err.Error())
+		return
+	}
+
+	var diags diag.Diagnostics
+	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"access_id":    types.StringType,
+		"auth_mode":    types.StringType,
+		"aws_user":     types.StringType,
+		"external_id":  types.StringType,
+		"iam_role_arn": types.StringType,
+		"outputbucket": types.StringType,
+		"region":       types.StringType,
+		"tags": types.MapType{
+			ElemType: types.StringType,
+		},
+	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return

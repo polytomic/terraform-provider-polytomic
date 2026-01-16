@@ -54,6 +54,9 @@ func (d *CallrailConnectionDataSource) Schema(ctx context.Context, req datasourc
 	}
 }
 
+type CallrailDataSourceConf struct {
+}
+
 func (d *CallrailConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 

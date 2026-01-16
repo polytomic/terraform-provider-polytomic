@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
@@ -73,6 +74,13 @@ func (d *GongConnectionDataSource) Schema(ctx context.Context, req datasource.Sc
 	}
 }
 
+type GongDataSourceConf struct {
+	Access_key         string `mapstructure:"access_key" tfsdk:"access_key"`
+	Auth_method        string `mapstructure:"auth_method" tfsdk:"auth_method"`
+	Oauth_token_expiry string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
+	Subdomain          string `mapstructure:"subdomain" tfsdk:"subdomain"`
+}
+
 func (d *GongConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 
@@ -98,25 +106,21 @@ func (d *GongConnectionDataSource) Read(ctx context.Context, req datasource.Read
 	data.Id = types.StringPointerValue(connection.Data.Id)
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
-	var diags diag.Diagnostics
-	data.Configuration, diags = types.ObjectValue(
-		data.Configuration.AttributeTypes(ctx),
-		map[string]attr.Value{
-			"access_key": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["access_key"], "string").(string),
-			),
-			"auth_method": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["auth_method"], "string").(string),
-			),
-			"oauth_token_expiry": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["oauth_token_expiry"], "string").(string),
-			),
-			"subdomain": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["subdomain"], "string").(string),
-			),
-		},
-	)
 
+	conf := GongDataSourceConf{}
+	err = mapstructure.Decode(connection.Data.Configuration, &conf)
+	if err != nil {
+		resp.Diagnostics.AddError("Error decoding connection configuration", err.Error())
+		return
+	}
+
+	var diags diag.Diagnostics
+	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"access_key":         types.StringType,
+		"auth_method":        types.StringType,
+		"oauth_token_expiry": types.StringType,
+		"subdomain":          types.StringType,
+	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return

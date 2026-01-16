@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
@@ -73,6 +74,13 @@ func (d *AwsopensearchConnectionDataSource) Schema(ctx context.Context, req data
 	}
 }
 
+type AwsopensearchDataSourceConf struct {
+	Aws_access_key_id string `mapstructure:"aws_access_key_id" tfsdk:"aws_access_key_id"`
+	Aws_user          string `mapstructure:"aws_user" tfsdk:"aws_user"`
+	Endpoint          string `mapstructure:"endpoint" tfsdk:"endpoint"`
+	Region            string `mapstructure:"region" tfsdk:"region"`
+}
+
 func (d *AwsopensearchConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 
@@ -98,25 +106,21 @@ func (d *AwsopensearchConnectionDataSource) Read(ctx context.Context, req dataso
 	data.Id = types.StringPointerValue(connection.Data.Id)
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
-	var diags diag.Diagnostics
-	data.Configuration, diags = types.ObjectValue(
-		data.Configuration.AttributeTypes(ctx),
-		map[string]attr.Value{
-			"aws_access_key_id": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["aws_access_key_id"], "string").(string),
-			),
-			"aws_user": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["aws_user"], "string").(string),
-			),
-			"endpoint": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["endpoint"], "string").(string),
-			),
-			"region": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["region"], "string").(string),
-			),
-		},
-	)
 
+	conf := AwsopensearchDataSourceConf{}
+	err = mapstructure.Decode(connection.Data.Configuration, &conf)
+	if err != nil {
+		resp.Diagnostics.AddError("Error decoding connection configuration", err.Error())
+		return
+	}
+
+	var diags diag.Diagnostics
+	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"aws_access_key_id": types.StringType,
+		"aws_user":          types.StringType,
+		"endpoint":          types.StringType,
+		"region":            types.StringType,
+	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return

@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
@@ -91,6 +92,17 @@ func (d *GoogleanalyticsConnectionDataSource) Schema(ctx context.Context, req da
 	}
 }
 
+type GoogleanalyticsDataSourceConf struct {
+	Auth_method        string `mapstructure:"auth_method" tfsdk:"auth_method"`
+	Custom_reports     string `mapstructure:"custom_reports" tfsdk:"custom_reports"`
+	Oauth_token_expiry string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
+	Properties         []struct {
+		Label string `mapstructure:"label" tfsdk:"label"`
+		Value string `mapstructure:"value" tfsdk:"value"`
+	} `mapstructure:"properties" tfsdk:"properties"`
+	User_email string `mapstructure:"user_email" tfsdk:"user_email"`
+}
+
 func (d *GoogleanalyticsConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 
@@ -116,28 +128,29 @@ func (d *GoogleanalyticsConnectionDataSource) Read(ctx context.Context, req data
 	data.Id = types.StringPointerValue(connection.Data.Id)
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
-	var diags diag.Diagnostics
-	data.Configuration, diags = types.ObjectValue(
-		data.Configuration.AttributeTypes(ctx),
-		map[string]attr.Value{
-			"auth_method": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["auth_method"], "string").(string),
-			),
-			"custom_reports": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["custom_reports"], "string").(string),
-			),
-			"oauth_token_expiry": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["oauth_token_expiry"], "string").(string),
-			),
-			"properties": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["properties"], "string").(string),
-			),
-			"user_email": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["user_email"], "string").(string),
-			),
-		},
-	)
 
+	conf := GoogleanalyticsDataSourceConf{}
+	err = mapstructure.Decode(connection.Data.Configuration, &conf)
+	if err != nil {
+		resp.Diagnostics.AddError("Error decoding connection configuration", err.Error())
+		return
+	}
+
+	var diags diag.Diagnostics
+	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"auth_method":        types.StringType,
+		"custom_reports":     types.StringType,
+		"oauth_token_expiry": types.StringType,
+		"properties": types.SetType{
+			ElemType: types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"label": types.StringType,
+					"value": types.StringType,
+				},
+			},
+		},
+		"user_email": types.StringType,
+	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return

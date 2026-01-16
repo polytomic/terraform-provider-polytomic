@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
@@ -77,6 +78,14 @@ func (d *WebhookConnectionDataSource) Schema(ctx context.Context, req datasource
 	}
 }
 
+type WebhookDataSourceConf struct {
+	Headers []struct {
+		Name  string `mapstructure:"name" tfsdk:"name"`
+		Value string `mapstructure:"value" tfsdk:"value"`
+	} `mapstructure:"headers" tfsdk:"headers"`
+	Url string `mapstructure:"url" tfsdk:"url"`
+}
+
 func (d *WebhookConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 
@@ -102,19 +111,26 @@ func (d *WebhookConnectionDataSource) Read(ctx context.Context, req datasource.R
 	data.Id = types.StringPointerValue(connection.Data.Id)
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
-	var diags diag.Diagnostics
-	data.Configuration, diags = types.ObjectValue(
-		data.Configuration.AttributeTypes(ctx),
-		map[string]attr.Value{
-			"headers": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["headers"], "string").(string),
-			),
-			"url": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["url"], "string").(string),
-			),
-		},
-	)
 
+	conf := WebhookDataSourceConf{}
+	err = mapstructure.Decode(connection.Data.Configuration, &conf)
+	if err != nil {
+		resp.Diagnostics.AddError("Error decoding connection configuration", err.Error())
+		return
+	}
+
+	var diags diag.Diagnostics
+	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"headers": types.SetType{
+			ElemType: types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"name":  types.StringType,
+					"value": types.StringType,
+				},
+			},
+		},
+		"url": types.StringType,
+	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return

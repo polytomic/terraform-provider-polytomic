@@ -54,6 +54,9 @@ func (d *MailercheckConnectionDataSource) Schema(ctx context.Context, req dataso
 	}
 }
 
+type MailercheckDataSourceConf struct {
+}
+
 func (d *MailercheckConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 

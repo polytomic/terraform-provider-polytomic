@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
@@ -171,6 +172,34 @@ func (d *DatabricksConnectionDataSource) Schema(ctx context.Context, req datasou
 	}
 }
 
+type DatabricksDataSourceConf struct {
+	Auth_mode                    string `mapstructure:"auth_mode" tfsdk:"auth_mode"`
+	Aws_access_key_id            string `mapstructure:"aws_access_key_id" tfsdk:"aws_access_key_id"`
+	Aws_user                     string `mapstructure:"aws_user" tfsdk:"aws_user"`
+	Azure_account_name           string `mapstructure:"azure_account_name" tfsdk:"azure_account_name"`
+	Bulk_sync_staging_schema     string `mapstructure:"bulk_sync_staging_schema" tfsdk:"bulk_sync_staging_schema"`
+	Cloud_provider               string `mapstructure:"cloud_provider" tfsdk:"cloud_provider"`
+	Concurrent_queries           int64  `mapstructure:"concurrent_queries" tfsdk:"concurrent_queries"`
+	Container_name               string `mapstructure:"container_name" tfsdk:"container_name"`
+	Databricks_auth_mode         string `mapstructure:"databricks_auth_mode" tfsdk:"databricks_auth_mode"`
+	Deleted_file_retention_days  int64  `mapstructure:"deleted_file_retention_days" tfsdk:"deleted_file_retention_days"`
+	Enable_delta_uniform         bool   `mapstructure:"enable_delta_uniform" tfsdk:"enable_delta_uniform"`
+	Enforce_query_limit          bool   `mapstructure:"enforce_query_limit" tfsdk:"enforce_query_limit"`
+	External_id                  string `mapstructure:"external_id" tfsdk:"external_id"`
+	Http_path                    string `mapstructure:"http_path" tfsdk:"http_path"`
+	Iam_role_arn                 string `mapstructure:"iam_role_arn" tfsdk:"iam_role_arn"`
+	Log_file_retention_days      int64  `mapstructure:"log_file_retention_days" tfsdk:"log_file_retention_days"`
+	Port                         int64  `mapstructure:"port" tfsdk:"port"`
+	S3_bucket_name               string `mapstructure:"s3_bucket_name" tfsdk:"s3_bucket_name"`
+	S3_bucket_region             string `mapstructure:"s3_bucket_region" tfsdk:"s3_bucket_region"`
+	Server_hostname              string `mapstructure:"server_hostname" tfsdk:"server_hostname"`
+	Service_principal_id         string `mapstructure:"service_principal_id" tfsdk:"service_principal_id"`
+	Set_retention_properties     bool   `mapstructure:"set_retention_properties" tfsdk:"set_retention_properties"`
+	Storage_credential_name      string `mapstructure:"storage_credential_name" tfsdk:"storage_credential_name"`
+	Unity_catalog_enabled        bool   `mapstructure:"unity_catalog_enabled" tfsdk:"unity_catalog_enabled"`
+	Use_bulk_sync_staging_schema bool   `mapstructure:"use_bulk_sync_staging_schema" tfsdk:"use_bulk_sync_staging_schema"`
+}
+
 func (d *DatabricksConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 
@@ -196,88 +225,42 @@ func (d *DatabricksConnectionDataSource) Read(ctx context.Context, req datasourc
 	data.Id = types.StringPointerValue(connection.Data.Id)
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
-	var diags diag.Diagnostics
-	data.Configuration, diags = types.ObjectValue(
-		data.Configuration.AttributeTypes(ctx),
-		map[string]attr.Value{
-			"auth_mode": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["auth_mode"], "string").(string),
-			),
-			"aws_access_key_id": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["aws_access_key_id"], "string").(string),
-			),
-			"aws_user": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["aws_user"], "string").(string),
-			),
-			"azure_account_name": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["azure_account_name"], "string").(string),
-			),
-			"bulk_sync_staging_schema": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["bulk_sync_staging_schema"], "string").(string),
-			),
-			"cloud_provider": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["cloud_provider"], "string").(string),
-			),
-			"concurrent_queries": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["concurrent_queries"], "string").(string),
-			),
-			"container_name": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["container_name"], "string").(string),
-			),
-			"databricks_auth_mode": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["databricks_auth_mode"], "string").(string),
-			),
-			"deleted_file_retention_days": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["deleted_file_retention_days"], "string").(string),
-			),
-			"enable_delta_uniform": types.BoolValue(
-				getValueOrEmpty(connection.Data.Configuration["enable_delta_uniform"], "bool").(bool),
-			),
-			"enforce_query_limit": types.BoolValue(
-				getValueOrEmpty(connection.Data.Configuration["enforce_query_limit"], "bool").(bool),
-			),
-			"external_id": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["external_id"], "string").(string),
-			),
-			"http_path": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["http_path"], "string").(string),
-			),
-			"iam_role_arn": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["iam_role_arn"], "string").(string),
-			),
-			"log_file_retention_days": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["log_file_retention_days"], "string").(string),
-			),
-			"port": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["port"], "string").(string),
-			),
-			"s3_bucket_name": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["s3_bucket_name"], "string").(string),
-			),
-			"s3_bucket_region": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["s3_bucket_region"], "string").(string),
-			),
-			"server_hostname": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["server_hostname"], "string").(string),
-			),
-			"service_principal_id": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["service_principal_id"], "string").(string),
-			),
-			"set_retention_properties": types.BoolValue(
-				getValueOrEmpty(connection.Data.Configuration["set_retention_properties"], "bool").(bool),
-			),
-			"storage_credential_name": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["storage_credential_name"], "string").(string),
-			),
-			"unity_catalog_enabled": types.BoolValue(
-				getValueOrEmpty(connection.Data.Configuration["unity_catalog_enabled"], "bool").(bool),
-			),
-			"use_bulk_sync_staging_schema": types.BoolValue(
-				getValueOrEmpty(connection.Data.Configuration["use_bulk_sync_staging_schema"], "bool").(bool),
-			),
-		},
-	)
 
+	conf := DatabricksDataSourceConf{}
+	err = mapstructure.Decode(connection.Data.Configuration, &conf)
+	if err != nil {
+		resp.Diagnostics.AddError("Error decoding connection configuration", err.Error())
+		return
+	}
+
+	var diags diag.Diagnostics
+	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"auth_mode":                    types.StringType,
+		"aws_access_key_id":            types.StringType,
+		"aws_user":                     types.StringType,
+		"azure_account_name":           types.StringType,
+		"bulk_sync_staging_schema":     types.StringType,
+		"cloud_provider":               types.StringType,
+		"concurrent_queries":           types.NumberType,
+		"container_name":               types.StringType,
+		"databricks_auth_mode":         types.StringType,
+		"deleted_file_retention_days":  types.NumberType,
+		"enable_delta_uniform":         types.BoolType,
+		"enforce_query_limit":          types.BoolType,
+		"external_id":                  types.StringType,
+		"http_path":                    types.StringType,
+		"iam_role_arn":                 types.StringType,
+		"log_file_retention_days":      types.NumberType,
+		"port":                         types.NumberType,
+		"s3_bucket_name":               types.StringType,
+		"s3_bucket_region":             types.StringType,
+		"server_hostname":              types.StringType,
+		"service_principal_id":         types.StringType,
+		"set_retention_properties":     types.BoolType,
+		"storage_credential_name":      types.StringType,
+		"unity_catalog_enabled":        types.BoolType,
+		"use_bulk_sync_staging_schema": types.BoolType,
+	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return

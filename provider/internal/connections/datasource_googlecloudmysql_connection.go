@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
@@ -75,6 +76,13 @@ func (d *GooglecloudmysqlConnectionDataSource) Schema(ctx context.Context, req d
 	}
 }
 
+type GooglecloudmysqlDataSourceConf struct {
+	Change_detection bool   `mapstructure:"change_detection" tfsdk:"change_detection"`
+	Connection_name  string `mapstructure:"connection_name" tfsdk:"connection_name"`
+	Database         string `mapstructure:"database" tfsdk:"database"`
+	Username         string `mapstructure:"username" tfsdk:"username"`
+}
+
 func (d *GooglecloudmysqlConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 
@@ -100,25 +108,21 @@ func (d *GooglecloudmysqlConnectionDataSource) Read(ctx context.Context, req dat
 	data.Id = types.StringPointerValue(connection.Data.Id)
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
-	var diags diag.Diagnostics
-	data.Configuration, diags = types.ObjectValue(
-		data.Configuration.AttributeTypes(ctx),
-		map[string]attr.Value{
-			"change_detection": types.BoolValue(
-				getValueOrEmpty(connection.Data.Configuration["change_detection"], "bool").(bool),
-			),
-			"connection_name": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["connection_name"], "string").(string),
-			),
-			"database": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["database"], "string").(string),
-			),
-			"username": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["username"], "string").(string),
-			),
-		},
-	)
 
+	conf := GooglecloudmysqlDataSourceConf{}
+	err = mapstructure.Decode(connection.Data.Configuration, &conf)
+	if err != nil {
+		resp.Diagnostics.AddError("Error decoding connection configuration", err.Error())
+		return
+	}
+
+	var diags diag.Diagnostics
+	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"change_detection": types.BoolType,
+		"connection_name":  types.StringType,
+		"database":         types.StringType,
+		"username":         types.StringType,
+	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return

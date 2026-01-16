@@ -54,6 +54,9 @@ func (d *RipplingConnectionDataSource) Schema(ctx context.Context, req datasourc
 	}
 }
 
+type RipplingDataSourceConf struct {
+}
+
 func (d *RipplingConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 

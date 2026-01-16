@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
@@ -81,6 +82,14 @@ func (d *MotherduckConnectionDataSource) Schema(ctx context.Context, req datasou
 	}
 }
 
+type MotherduckDataSourceConf struct {
+	Aws_access_key_id string `mapstructure:"aws_access_key_id" tfsdk:"aws_access_key_id"`
+	Aws_user          string `mapstructure:"aws_user" tfsdk:"aws_user"`
+	Database          string `mapstructure:"database" tfsdk:"database"`
+	S3_bucket_name    string `mapstructure:"s3_bucket_name" tfsdk:"s3_bucket_name"`
+	S3_bucket_region  string `mapstructure:"s3_bucket_region" tfsdk:"s3_bucket_region"`
+}
+
 func (d *MotherduckConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 
@@ -106,28 +115,22 @@ func (d *MotherduckConnectionDataSource) Read(ctx context.Context, req datasourc
 	data.Id = types.StringPointerValue(connection.Data.Id)
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
-	var diags diag.Diagnostics
-	data.Configuration, diags = types.ObjectValue(
-		data.Configuration.AttributeTypes(ctx),
-		map[string]attr.Value{
-			"aws_access_key_id": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["aws_access_key_id"], "string").(string),
-			),
-			"aws_user": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["aws_user"], "string").(string),
-			),
-			"database": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["database"], "string").(string),
-			),
-			"s3_bucket_name": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["s3_bucket_name"], "string").(string),
-			),
-			"s3_bucket_region": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["s3_bucket_region"], "string").(string),
-			),
-		},
-	)
 
+	conf := MotherduckDataSourceConf{}
+	err = mapstructure.Decode(connection.Data.Configuration, &conf)
+	if err != nil {
+		resp.Diagnostics.AddError("Error decoding connection configuration", err.Error())
+		return
+	}
+
+	var diags diag.Diagnostics
+	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"aws_access_key_id": types.StringType,
+		"aws_user":          types.StringType,
+		"database":          types.StringType,
+		"s3_bucket_name":    types.StringType,
+		"s3_bucket_region":  types.StringType,
+	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return

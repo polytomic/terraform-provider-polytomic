@@ -54,6 +54,9 @@ func (d *AsanaConnectionDataSource) Schema(ctx context.Context, req datasource.S
 	}
 }
 
+type AsanaDataSourceConf struct {
+}
+
 func (d *AsanaConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 

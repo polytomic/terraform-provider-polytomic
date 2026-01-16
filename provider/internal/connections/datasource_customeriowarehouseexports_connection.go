@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
@@ -93,6 +94,16 @@ func (d *CustomeriowarehouseexportsConnectionDataSource) Schema(ctx context.Cont
 	}
 }
 
+type CustomeriowarehouseexportsDataSourceConf struct {
+	Auth_mode         string `mapstructure:"auth_mode" tfsdk:"auth_mode"`
+	Aws_access_key_id string `mapstructure:"aws_access_key_id" tfsdk:"aws_access_key_id"`
+	Aws_user          string `mapstructure:"aws_user" tfsdk:"aws_user"`
+	External_id       string `mapstructure:"external_id" tfsdk:"external_id"`
+	Iam_role_arn      string `mapstructure:"iam_role_arn" tfsdk:"iam_role_arn"`
+	S3_bucket_name    string `mapstructure:"s3_bucket_name" tfsdk:"s3_bucket_name"`
+	S3_bucket_region  string `mapstructure:"s3_bucket_region" tfsdk:"s3_bucket_region"`
+}
+
 func (d *CustomeriowarehouseexportsConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 
@@ -118,34 +129,24 @@ func (d *CustomeriowarehouseexportsConnectionDataSource) Read(ctx context.Contex
 	data.Id = types.StringPointerValue(connection.Data.Id)
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
-	var diags diag.Diagnostics
-	data.Configuration, diags = types.ObjectValue(
-		data.Configuration.AttributeTypes(ctx),
-		map[string]attr.Value{
-			"auth_mode": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["auth_mode"], "string").(string),
-			),
-			"aws_access_key_id": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["aws_access_key_id"], "string").(string),
-			),
-			"aws_user": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["aws_user"], "string").(string),
-			),
-			"external_id": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["external_id"], "string").(string),
-			),
-			"iam_role_arn": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["iam_role_arn"], "string").(string),
-			),
-			"s3_bucket_name": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["s3_bucket_name"], "string").(string),
-			),
-			"s3_bucket_region": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["s3_bucket_region"], "string").(string),
-			),
-		},
-	)
 
+	conf := CustomeriowarehouseexportsDataSourceConf{}
+	err = mapstructure.Decode(connection.Data.Configuration, &conf)
+	if err != nil {
+		resp.Diagnostics.AddError("Error decoding connection configuration", err.Error())
+		return
+	}
+
+	var diags diag.Diagnostics
+	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"auth_mode":         types.StringType,
+		"aws_access_key_id": types.StringType,
+		"aws_user":          types.StringType,
+		"external_id":       types.StringType,
+		"iam_role_arn":      types.StringType,
+		"s3_bucket_name":    types.StringType,
+		"s3_bucket_region":  types.StringType,
+	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return

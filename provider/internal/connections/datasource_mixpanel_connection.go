@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
@@ -69,6 +70,12 @@ func (d *MixpanelConnectionDataSource) Schema(ctx context.Context, req datasourc
 	}
 }
 
+type MixpanelDataSourceConf struct {
+	Project_id               int64  `mapstructure:"project_id" tfsdk:"project_id"`
+	Region                   string `mapstructure:"region" tfsdk:"region"`
+	Service_account_username string `mapstructure:"service_account_username" tfsdk:"service_account_username"`
+}
+
 func (d *MixpanelConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 
@@ -94,22 +101,20 @@ func (d *MixpanelConnectionDataSource) Read(ctx context.Context, req datasource.
 	data.Id = types.StringPointerValue(connection.Data.Id)
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
-	var diags diag.Diagnostics
-	data.Configuration, diags = types.ObjectValue(
-		data.Configuration.AttributeTypes(ctx),
-		map[string]attr.Value{
-			"project_id": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["project_id"], "string").(string),
-			),
-			"region": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["region"], "string").(string),
-			),
-			"service_account_username": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["service_account_username"], "string").(string),
-			),
-		},
-	)
 
+	conf := MixpanelDataSourceConf{}
+	err = mapstructure.Decode(connection.Data.Configuration, &conf)
+	if err != nil {
+		resp.Diagnostics.AddError("Error decoding connection configuration", err.Error())
+		return
+	}
+
+	var diags diag.Diagnostics
+	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"project_id":               types.NumberType,
+		"region":                   types.StringType,
+		"service_account_username": types.StringType,
+	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return

@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
@@ -65,6 +66,11 @@ func (d *NorthbeamConnectionDataSource) Schema(ctx context.Context, req datasour
 	}
 }
 
+type NorthbeamDataSourceConf struct {
+	Data_client_id string `mapstructure:"data_client_id" tfsdk:"data_client_id"`
+	Instance       string `mapstructure:"instance" tfsdk:"instance"`
+}
+
 func (d *NorthbeamConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 
@@ -90,19 +96,19 @@ func (d *NorthbeamConnectionDataSource) Read(ctx context.Context, req datasource
 	data.Id = types.StringPointerValue(connection.Data.Id)
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
-	var diags diag.Diagnostics
-	data.Configuration, diags = types.ObjectValue(
-		data.Configuration.AttributeTypes(ctx),
-		map[string]attr.Value{
-			"data_client_id": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["data_client_id"], "string").(string),
-			),
-			"instance": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["instance"], "string").(string),
-			),
-		},
-	)
 
+	conf := NorthbeamDataSourceConf{}
+	err = mapstructure.Decode(connection.Data.Configuration, &conf)
+	if err != nil {
+		resp.Diagnostics.AddError("Error decoding connection configuration", err.Error())
+		return
+	}
+
+	var diags diag.Diagnostics
+	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"data_client_id": types.StringType,
+		"instance":       types.StringType,
+	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return

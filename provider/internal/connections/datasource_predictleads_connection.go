@@ -54,6 +54,9 @@ func (d *PredictleadsConnectionDataSource) Schema(ctx context.Context, req datas
 	}
 }
 
+type PredictleadsDataSourceConf struct {
+}
+
 func (d *PredictleadsConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 

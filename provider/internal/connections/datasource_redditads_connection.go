@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
@@ -87,6 +88,16 @@ func (d *RedditadsConnectionDataSource) Schema(ctx context.Context, req datasour
 	}
 }
 
+type RedditadsDataSourceConf struct {
+	Accounts []struct {
+		Label string `mapstructure:"label" tfsdk:"label"`
+		Value string `mapstructure:"value" tfsdk:"value"`
+	} `mapstructure:"accounts" tfsdk:"accounts"`
+	Connected_user     string `mapstructure:"connected_user" tfsdk:"connected_user"`
+	Oauth_token_expiry string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
+	Pixel_id           string `mapstructure:"pixel_id" tfsdk:"pixel_id"`
+}
+
 func (d *RedditadsConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 
@@ -112,25 +123,28 @@ func (d *RedditadsConnectionDataSource) Read(ctx context.Context, req datasource
 	data.Id = types.StringPointerValue(connection.Data.Id)
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
-	var diags diag.Diagnostics
-	data.Configuration, diags = types.ObjectValue(
-		data.Configuration.AttributeTypes(ctx),
-		map[string]attr.Value{
-			"accounts": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["accounts"], "string").(string),
-			),
-			"connected_user": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["connected_user"], "string").(string),
-			),
-			"oauth_token_expiry": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["oauth_token_expiry"], "string").(string),
-			),
-			"pixel_id": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["pixel_id"], "string").(string),
-			),
-		},
-	)
 
+	conf := RedditadsDataSourceConf{}
+	err = mapstructure.Decode(connection.Data.Configuration, &conf)
+	if err != nil {
+		resp.Diagnostics.AddError("Error decoding connection configuration", err.Error())
+		return
+	}
+
+	var diags diag.Diagnostics
+	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"accounts": types.SetType{
+			ElemType: types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"label": types.StringType,
+					"value": types.StringType,
+				},
+			},
+		},
+		"connected_user":     types.StringType,
+		"oauth_token_expiry": types.StringType,
+		"pixel_id":           types.StringType,
+	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return

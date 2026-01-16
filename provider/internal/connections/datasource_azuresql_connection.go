@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
@@ -105,6 +106,21 @@ func (d *AzuresqlConnectionDataSource) Schema(ctx context.Context, req datasourc
 	}
 }
 
+type AzuresqlDataSourceConf struct {
+	Account_name   string `mapstructure:"account_name" tfsdk:"account_name"`
+	BlobStore      bool   `mapstructure:"blobStore" tfsdk:"blob_store"`
+	Container_name string `mapstructure:"container_name" tfsdk:"container_name"`
+	Database       string `mapstructure:"database" tfsdk:"database"`
+	Hostname       string `mapstructure:"hostname" tfsdk:"hostname"`
+	Port           int64  `mapstructure:"port" tfsdk:"port"`
+	Ssh            bool   `mapstructure:"ssh" tfsdk:"ssh"`
+	Ssh_host       string `mapstructure:"ssh_host" tfsdk:"ssh_host"`
+	Ssh_port       int64  `mapstructure:"ssh_port" tfsdk:"ssh_port"`
+	Ssh_user       string `mapstructure:"ssh_user" tfsdk:"ssh_user"`
+	Ssl            bool   `mapstructure:"ssl" tfsdk:"ssl"`
+	Username       string `mapstructure:"username" tfsdk:"username"`
+}
+
 func (d *AzuresqlConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 
@@ -130,49 +146,29 @@ func (d *AzuresqlConnectionDataSource) Read(ctx context.Context, req datasource.
 	data.Id = types.StringPointerValue(connection.Data.Id)
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
-	var diags diag.Diagnostics
-	data.Configuration, diags = types.ObjectValue(
-		data.Configuration.AttributeTypes(ctx),
-		map[string]attr.Value{
-			"account_name": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["account_name"], "string").(string),
-			),
-			"blob_store": types.BoolValue(
-				getValueOrEmpty(connection.Data.Configuration["blobStore"], "bool").(bool),
-			),
-			"container_name": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["container_name"], "string").(string),
-			),
-			"database": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["database"], "string").(string),
-			),
-			"hostname": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["hostname"], "string").(string),
-			),
-			"port": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["port"], "string").(string),
-			),
-			"ssh": types.BoolValue(
-				getValueOrEmpty(connection.Data.Configuration["ssh"], "bool").(bool),
-			),
-			"ssh_host": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["ssh_host"], "string").(string),
-			),
-			"ssh_port": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["ssh_port"], "string").(string),
-			),
-			"ssh_user": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["ssh_user"], "string").(string),
-			),
-			"ssl": types.BoolValue(
-				getValueOrEmpty(connection.Data.Configuration["ssl"], "bool").(bool),
-			),
-			"username": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["username"], "string").(string),
-			),
-		},
-	)
 
+	conf := AzuresqlDataSourceConf{}
+	err = mapstructure.Decode(connection.Data.Configuration, &conf)
+	if err != nil {
+		resp.Diagnostics.AddError("Error decoding connection configuration", err.Error())
+		return
+	}
+
+	var diags diag.Diagnostics
+	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"account_name":   types.StringType,
+		"blob_store":     types.BoolType,
+		"container_name": types.StringType,
+		"database":       types.StringType,
+		"hostname":       types.StringType,
+		"port":           types.NumberType,
+		"ssh":            types.BoolType,
+		"ssh_host":       types.StringType,
+		"ssh_port":       types.NumberType,
+		"ssh_user":       types.StringType,
+		"ssl":            types.BoolType,
+		"username":       types.StringType,
+	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return

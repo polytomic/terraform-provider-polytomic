@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
@@ -87,6 +88,17 @@ func (d *GsheetsConnectionDataSource) Schema(ctx context.Context, req datasource
 	}
 }
 
+type GsheetsDataSourceConf struct {
+	Connect_mode       string `mapstructure:"connect_mode" tfsdk:"connect_mode"`
+	Has_headers        bool   `mapstructure:"has_headers" tfsdk:"has_headers"`
+	Oauth_token_expiry string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
+	Spreadsheet_id     struct {
+		Label string `mapstructure:"label" tfsdk:"label"`
+		Value string `mapstructure:"value" tfsdk:"value"`
+	} `mapstructure:"spreadsheet_id" tfsdk:"spreadsheet_id"`
+	User_email string `mapstructure:"user_email" tfsdk:"user_email"`
+}
+
 func (d *GsheetsConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 
@@ -112,28 +124,26 @@ func (d *GsheetsConnectionDataSource) Read(ctx context.Context, req datasource.R
 	data.Id = types.StringPointerValue(connection.Data.Id)
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
-	var diags diag.Diagnostics
-	data.Configuration, diags = types.ObjectValue(
-		data.Configuration.AttributeTypes(ctx),
-		map[string]attr.Value{
-			"connect_mode": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["connect_mode"], "string").(string),
-			),
-			"has_headers": types.BoolValue(
-				getValueOrEmpty(connection.Data.Configuration["has_headers"], "bool").(bool),
-			),
-			"oauth_token_expiry": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["oauth_token_expiry"], "string").(string),
-			),
-			"spreadsheet_id": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["spreadsheet_id"], "string").(string),
-			),
-			"user_email": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["user_email"], "string").(string),
-			),
-		},
-	)
 
+	conf := GsheetsDataSourceConf{}
+	err = mapstructure.Decode(connection.Data.Configuration, &conf)
+	if err != nil {
+		resp.Diagnostics.AddError("Error decoding connection configuration", err.Error())
+		return
+	}
+
+	var diags diag.Diagnostics
+	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"connect_mode":       types.StringType,
+		"has_headers":        types.BoolType,
+		"oauth_token_expiry": types.StringType,
+		"spreadsheet_id": types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				"label": types.StringType,
+				"value": types.StringType,
+			},
+		}, "user_email": types.StringType,
+	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return

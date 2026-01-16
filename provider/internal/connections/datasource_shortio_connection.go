@@ -54,6 +54,9 @@ func (d *ShortioConnectionDataSource) Schema(ctx context.Context, req datasource
 	}
 }
 
+type ShortioDataSourceConf struct {
+}
+
 func (d *ShortioConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 

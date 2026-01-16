@@ -54,6 +54,9 @@ func (d *ApolloConnectionDataSource) Schema(ctx context.Context, req datasource.
 	}
 }
 
+type ApolloDataSourceConf struct {
+}
+
 func (d *ApolloConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 

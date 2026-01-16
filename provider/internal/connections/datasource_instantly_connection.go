@@ -54,6 +54,9 @@ func (d *InstantlyConnectionDataSource) Schema(ctx context.Context, req datasour
 	}
 }
 
+type InstantlyDataSourceConf struct {
+}
+
 func (d *InstantlyConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 

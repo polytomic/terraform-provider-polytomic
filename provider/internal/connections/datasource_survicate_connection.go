@@ -54,6 +54,9 @@ func (d *SurvicateConnectionDataSource) Schema(ctx context.Context, req datasour
 	}
 }
 
+type SurvicateDataSourceConf struct {
+}
+
 func (d *SurvicateConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 

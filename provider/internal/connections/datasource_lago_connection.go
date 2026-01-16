@@ -54,6 +54,9 @@ func (d *LagoConnectionDataSource) Schema(ctx context.Context, req datasource.Sc
 	}
 }
 
+type LagoDataSourceConf struct {
+}
+
 func (d *LagoConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 

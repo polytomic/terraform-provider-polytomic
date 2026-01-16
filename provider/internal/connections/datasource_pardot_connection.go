@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
@@ -77,6 +78,14 @@ func (d *PardotConnectionDataSource) Schema(ctx context.Context, req datasource.
 	}
 }
 
+type PardotDataSourceConf struct {
+	Account_type       string `mapstructure:"account_type" tfsdk:"account_type"`
+	Business_unit_id   string `mapstructure:"business_unit_id" tfsdk:"business_unit_id"`
+	Daily_api_calls    int64  `mapstructure:"daily_api_calls" tfsdk:"daily_api_calls"`
+	Enforce_api_limits bool   `mapstructure:"enforce_api_limits" tfsdk:"enforce_api_limits"`
+	Username           string `mapstructure:"username" tfsdk:"username"`
+}
+
 func (d *PardotConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 
@@ -102,28 +111,22 @@ func (d *PardotConnectionDataSource) Read(ctx context.Context, req datasource.Re
 	data.Id = types.StringPointerValue(connection.Data.Id)
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
-	var diags diag.Diagnostics
-	data.Configuration, diags = types.ObjectValue(
-		data.Configuration.AttributeTypes(ctx),
-		map[string]attr.Value{
-			"account_type": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["account_type"], "string").(string),
-			),
-			"business_unit_id": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["business_unit_id"], "string").(string),
-			),
-			"daily_api_calls": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["daily_api_calls"], "string").(string),
-			),
-			"enforce_api_limits": types.BoolValue(
-				getValueOrEmpty(connection.Data.Configuration["enforce_api_limits"], "bool").(bool),
-			),
-			"username": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["username"], "string").(string),
-			),
-		},
-	)
 
+	conf := PardotDataSourceConf{}
+	err = mapstructure.Decode(connection.Data.Configuration, &conf)
+	if err != nil {
+		resp.Diagnostics.AddError("Error decoding connection configuration", err.Error())
+		return
+	}
+
+	var diags diag.Diagnostics
+	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"account_type":       types.StringType,
+		"business_unit_id":   types.StringType,
+		"daily_api_calls":    types.NumberType,
+		"enforce_api_limits": types.BoolType,
+		"username":           types.StringType,
+	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return

@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
@@ -71,6 +72,12 @@ func (d *YoutubeanalyticsConnectionDataSource) Schema(ctx context.Context, req d
 	}
 }
 
+type YoutubeanalyticsDataSourceConf struct {
+	Content_owner_id   string `mapstructure:"content_owner_id" tfsdk:"content_owner_id"`
+	Oauth_token_expiry string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
+	User_email         string `mapstructure:"user_email" tfsdk:"user_email"`
+}
+
 func (d *YoutubeanalyticsConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 
@@ -96,22 +103,20 @@ func (d *YoutubeanalyticsConnectionDataSource) Read(ctx context.Context, req dat
 	data.Id = types.StringPointerValue(connection.Data.Id)
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
-	var diags diag.Diagnostics
-	data.Configuration, diags = types.ObjectValue(
-		data.Configuration.AttributeTypes(ctx),
-		map[string]attr.Value{
-			"content_owner_id": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["content_owner_id"], "string").(string),
-			),
-			"oauth_token_expiry": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["oauth_token_expiry"], "string").(string),
-			),
-			"user_email": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["user_email"], "string").(string),
-			),
-		},
-	)
 
+	conf := YoutubeanalyticsDataSourceConf{}
+	err = mapstructure.Decode(connection.Data.Configuration, &conf)
+	if err != nil {
+		resp.Diagnostics.AddError("Error decoding connection configuration", err.Error())
+		return
+	}
+
+	var diags diag.Diagnostics
+	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"content_owner_id":   types.StringType,
+		"oauth_token_expiry": types.StringType,
+		"user_email":         types.StringType,
+	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return

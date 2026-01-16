@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
@@ -73,6 +74,13 @@ func (d *IroncladConnectionDataSource) Schema(ctx context.Context, req datasourc
 	}
 }
 
+type IroncladDataSourceConf struct {
+	Auth_method   string `mapstructure:"auth_method" tfsdk:"auth_method"`
+	Client_id     string `mapstructure:"client_id" tfsdk:"client_id"`
+	Environment   string `mapstructure:"environment" tfsdk:"environment"`
+	User_as_email string `mapstructure:"user_as_email" tfsdk:"user_as_email"`
+}
+
 func (d *IroncladConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 
@@ -98,25 +106,21 @@ func (d *IroncladConnectionDataSource) Read(ctx context.Context, req datasource.
 	data.Id = types.StringPointerValue(connection.Data.Id)
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
-	var diags diag.Diagnostics
-	data.Configuration, diags = types.ObjectValue(
-		data.Configuration.AttributeTypes(ctx),
-		map[string]attr.Value{
-			"auth_method": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["auth_method"], "string").(string),
-			),
-			"client_id": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["client_id"], "string").(string),
-			),
-			"environment": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["environment"], "string").(string),
-			),
-			"user_as_email": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["user_as_email"], "string").(string),
-			),
-		},
-	)
 
+	conf := IroncladDataSourceConf{}
+	err = mapstructure.Decode(connection.Data.Configuration, &conf)
+	if err != nil {
+		resp.Diagnostics.AddError("Error decoding connection configuration", err.Error())
+		return
+	}
+
+	var diags diag.Diagnostics
+	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"auth_method":   types.StringType,
+		"client_id":     types.StringType,
+		"environment":   types.StringType,
+		"user_as_email": types.StringType,
+	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return

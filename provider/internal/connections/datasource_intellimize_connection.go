@@ -54,6 +54,9 @@ func (d *IntellimizeConnectionDataSource) Schema(ctx context.Context, req dataso
 	}
 }
 
+type IntellimizeDataSourceConf struct {
+}
+
 func (d *IntellimizeConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 

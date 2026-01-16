@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
@@ -93,6 +94,18 @@ func (d *DbtprojectrepositoryConnectionDataSource) Schema(ctx context.Context, r
 	}
 }
 
+type DbtprojectrepositoryDataSourceConf struct {
+	Branch           string `mapstructure:"branch" tfsdk:"branch"`
+	Commit_exposures bool   `mapstructure:"commit_exposures" tfsdk:"commit_exposures"`
+	Connected_user   string `mapstructure:"connected_user" tfsdk:"connected_user"`
+	Latest_commit    struct {
+		Href string `mapstructure:"href" tfsdk:"href"`
+		Text string `mapstructure:"text" tfsdk:"text"`
+	} `mapstructure:"latest_commit" tfsdk:"latest_commit"`
+	Oauth_token_expiry string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
+	Repository         string `mapstructure:"repository" tfsdk:"repository"`
+}
+
 func (d *DbtprojectrepositoryConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 
@@ -118,31 +131,27 @@ func (d *DbtprojectrepositoryConnectionDataSource) Read(ctx context.Context, req
 	data.Id = types.StringPointerValue(connection.Data.Id)
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
-	var diags diag.Diagnostics
-	data.Configuration, diags = types.ObjectValue(
-		data.Configuration.AttributeTypes(ctx),
-		map[string]attr.Value{
-			"branch": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["branch"], "string").(string),
-			),
-			"commit_exposures": types.BoolValue(
-				getValueOrEmpty(connection.Data.Configuration["commit_exposures"], "bool").(bool),
-			),
-			"connected_user": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["connected_user"], "string").(string),
-			),
-			"latest_commit": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["latest_commit"], "string").(string),
-			),
-			"oauth_token_expiry": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["oauth_token_expiry"], "string").(string),
-			),
-			"repository": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["repository"], "string").(string),
-			),
-		},
-	)
 
+	conf := DbtprojectrepositoryDataSourceConf{}
+	err = mapstructure.Decode(connection.Data.Configuration, &conf)
+	if err != nil {
+		resp.Diagnostics.AddError("Error decoding connection configuration", err.Error())
+		return
+	}
+
+	var diags diag.Diagnostics
+	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"branch":           types.StringType,
+		"commit_exposures": types.BoolType,
+		"connected_user":   types.StringType,
+		"latest_commit": types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				"href": types.StringType,
+				"text": types.StringType,
+			},
+		}, "oauth_token_expiry": types.StringType,
+		"repository": types.StringType,
+	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return

@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
@@ -89,6 +90,16 @@ func (d *DynamodbConnectionDataSource) Schema(ctx context.Context, req datasourc
 	}
 }
 
+type DynamodbDataSourceConf struct {
+	Auth_mode        string `mapstructure:"auth_mode" tfsdk:"auth_mode"`
+	Aws_user         string `mapstructure:"aws_user" tfsdk:"aws_user"`
+	Change_detection bool   `mapstructure:"change_detection" tfsdk:"change_detection"`
+	External_id      string `mapstructure:"external_id" tfsdk:"external_id"`
+	Iam_role_arn     string `mapstructure:"iam_role_arn" tfsdk:"iam_role_arn"`
+	Managed_streams  bool   `mapstructure:"managed_streams" tfsdk:"managed_streams"`
+	Region           string `mapstructure:"region" tfsdk:"region"`
+}
+
 func (d *DynamodbConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 
@@ -114,34 +125,24 @@ func (d *DynamodbConnectionDataSource) Read(ctx context.Context, req datasource.
 	data.Id = types.StringPointerValue(connection.Data.Id)
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
-	var diags diag.Diagnostics
-	data.Configuration, diags = types.ObjectValue(
-		data.Configuration.AttributeTypes(ctx),
-		map[string]attr.Value{
-			"auth_mode": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["auth_mode"], "string").(string),
-			),
-			"aws_user": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["aws_user"], "string").(string),
-			),
-			"change_detection": types.BoolValue(
-				getValueOrEmpty(connection.Data.Configuration["change_detection"], "bool").(bool),
-			),
-			"external_id": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["external_id"], "string").(string),
-			),
-			"iam_role_arn": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["iam_role_arn"], "string").(string),
-			),
-			"managed_streams": types.BoolValue(
-				getValueOrEmpty(connection.Data.Configuration["managed_streams"], "bool").(bool),
-			),
-			"region": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["region"], "string").(string),
-			),
-		},
-	)
 
+	conf := DynamodbDataSourceConf{}
+	err = mapstructure.Decode(connection.Data.Configuration, &conf)
+	if err != nil {
+		resp.Diagnostics.AddError("Error decoding connection configuration", err.Error())
+		return
+	}
+
+	var diags diag.Diagnostics
+	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"auth_mode":        types.StringType,
+		"aws_user":         types.StringType,
+		"change_detection": types.BoolType,
+		"external_id":      types.StringType,
+		"iam_role_arn":     types.StringType,
+		"managed_streams":  types.BoolType,
+		"region":           types.StringType,
+	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return

@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
@@ -87,6 +88,16 @@ func (d *MongodbConnectionDataSource) Schema(ctx context.Context, req datasource
 	}
 }
 
+type MongodbDataSourceConf struct {
+	Change_detection bool   `mapstructure:"change_detection" tfsdk:"change_detection"`
+	Database         string `mapstructure:"database" tfsdk:"database"`
+	Hosts            string `mapstructure:"hosts" tfsdk:"hosts"`
+	Params           string `mapstructure:"params" tfsdk:"params"`
+	Srv              bool   `mapstructure:"srv" tfsdk:"srv"`
+	Ssl              bool   `mapstructure:"ssl" tfsdk:"ssl"`
+	Username         string `mapstructure:"username" tfsdk:"username"`
+}
+
 func (d *MongodbConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 
@@ -112,34 +123,24 @@ func (d *MongodbConnectionDataSource) Read(ctx context.Context, req datasource.R
 	data.Id = types.StringPointerValue(connection.Data.Id)
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
-	var diags diag.Diagnostics
-	data.Configuration, diags = types.ObjectValue(
-		data.Configuration.AttributeTypes(ctx),
-		map[string]attr.Value{
-			"change_detection": types.BoolValue(
-				getValueOrEmpty(connection.Data.Configuration["change_detection"], "bool").(bool),
-			),
-			"database": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["database"], "string").(string),
-			),
-			"hosts": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["hosts"], "string").(string),
-			),
-			"params": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["params"], "string").(string),
-			),
-			"srv": types.BoolValue(
-				getValueOrEmpty(connection.Data.Configuration["srv"], "bool").(bool),
-			),
-			"ssl": types.BoolValue(
-				getValueOrEmpty(connection.Data.Configuration["ssl"], "bool").(bool),
-			),
-			"username": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["username"], "string").(string),
-			),
-		},
-	)
 
+	conf := MongodbDataSourceConf{}
+	err = mapstructure.Decode(connection.Data.Configuration, &conf)
+	if err != nil {
+		resp.Diagnostics.AddError("Error decoding connection configuration", err.Error())
+		return
+	}
+
+	var diags diag.Diagnostics
+	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"change_detection": types.BoolType,
+		"database":         types.StringType,
+		"hosts":            types.StringType,
+		"params":           types.StringType,
+		"srv":              types.BoolType,
+		"ssl":              types.BoolType,
+		"username":         types.StringType,
+	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return

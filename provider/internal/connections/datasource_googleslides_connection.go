@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
@@ -87,6 +88,17 @@ func (d *GoogleslidesConnectionDataSource) Schema(ctx context.Context, req datas
 	}
 }
 
+type GoogleslidesDataSourceConf struct {
+	Connect_mode string `mapstructure:"connect_mode" tfsdk:"connect_mode"`
+	Folder_id    struct {
+		Label string `mapstructure:"label" tfsdk:"label"`
+		Value string `mapstructure:"value" tfsdk:"value"`
+	} `mapstructure:"folder_id" tfsdk:"folder_id"`
+	Include_subdirectories bool   `mapstructure:"include_subdirectories" tfsdk:"include_subdirectories"`
+	Oauth_token_expiry     string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
+	User_email             string `mapstructure:"user_email" tfsdk:"user_email"`
+}
+
 func (d *GoogleslidesConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 
@@ -112,28 +124,26 @@ func (d *GoogleslidesConnectionDataSource) Read(ctx context.Context, req datasou
 	data.Id = types.StringPointerValue(connection.Data.Id)
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
-	var diags diag.Diagnostics
-	data.Configuration, diags = types.ObjectValue(
-		data.Configuration.AttributeTypes(ctx),
-		map[string]attr.Value{
-			"connect_mode": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["connect_mode"], "string").(string),
-			),
-			"folder_id": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["folder_id"], "string").(string),
-			),
-			"include_subdirectories": types.BoolValue(
-				getValueOrEmpty(connection.Data.Configuration["include_subdirectories"], "bool").(bool),
-			),
-			"oauth_token_expiry": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["oauth_token_expiry"], "string").(string),
-			),
-			"user_email": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["user_email"], "string").(string),
-			),
-		},
-	)
 
+	conf := GoogleslidesDataSourceConf{}
+	err = mapstructure.Decode(connection.Data.Configuration, &conf)
+	if err != nil {
+		resp.Diagnostics.AddError("Error decoding connection configuration", err.Error())
+		return
+	}
+
+	var diags diag.Diagnostics
+	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"connect_mode": types.StringType,
+		"folder_id": types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				"label": types.StringType,
+				"value": types.StringType,
+			},
+		}, "include_subdirectories": types.BoolType,
+		"oauth_token_expiry": types.StringType,
+		"user_email":         types.StringType,
+	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return

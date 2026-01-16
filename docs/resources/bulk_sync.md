@@ -135,10 +135,6 @@ Optional:
 - `tracking_field` (String)
 - `user_output_name` (String) User-specified override for the output table name
 
-Read-Only:
-
-- `name` (String) Schema name
-
 <a id="nestedatt--schemas--fields"></a>
 ### Nested Schema for `schemas.fields`
 

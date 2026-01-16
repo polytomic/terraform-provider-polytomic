@@ -54,6 +54,9 @@ func (d *PartnerpageConnectionDataSource) Schema(ctx context.Context, req dataso
 	}
 }
 
+type PartnerpageDataSourceConf struct {
+}
+
 func (d *PartnerpageConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 

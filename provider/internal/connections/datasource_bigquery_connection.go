@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
@@ -87,6 +88,16 @@ func (d *BigqueryConnectionDataSource) Schema(ctx context.Context, req datasourc
 	}
 }
 
+type BigqueryDataSourceConf struct {
+	Bucket                    string `mapstructure:"bucket" tfsdk:"bucket"`
+	Client_email              string `mapstructure:"client_email" tfsdk:"client_email"`
+	Location                  string `mapstructure:"location" tfsdk:"location"`
+	Override_project_id       string `mapstructure:"override_project_id" tfsdk:"override_project_id"`
+	Project_id                string `mapstructure:"project_id" tfsdk:"project_id"`
+	Structured_values_as_json bool   `mapstructure:"structured_values_as_json" tfsdk:"structured_values_as_json"`
+	Use_extract               bool   `mapstructure:"use_extract" tfsdk:"use_extract"`
+}
+
 func (d *BigqueryConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 
@@ -112,34 +123,24 @@ func (d *BigqueryConnectionDataSource) Read(ctx context.Context, req datasource.
 	data.Id = types.StringPointerValue(connection.Data.Id)
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
-	var diags diag.Diagnostics
-	data.Configuration, diags = types.ObjectValue(
-		data.Configuration.AttributeTypes(ctx),
-		map[string]attr.Value{
-			"bucket": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["bucket"], "string").(string),
-			),
-			"client_email": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["client_email"], "string").(string),
-			),
-			"location": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["location"], "string").(string),
-			),
-			"override_project_id": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["override_project_id"], "string").(string),
-			),
-			"project_id": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["project_id"], "string").(string),
-			),
-			"structured_values_as_json": types.BoolValue(
-				getValueOrEmpty(connection.Data.Configuration["structured_values_as_json"], "bool").(bool),
-			),
-			"use_extract": types.BoolValue(
-				getValueOrEmpty(connection.Data.Configuration["use_extract"], "bool").(bool),
-			),
-		},
-	)
 
+	conf := BigqueryDataSourceConf{}
+	err = mapstructure.Decode(connection.Data.Configuration, &conf)
+	if err != nil {
+		resp.Diagnostics.AddError("Error decoding connection configuration", err.Error())
+		return
+	}
+
+	var diags diag.Diagnostics
+	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"bucket":                    types.StringType,
+		"client_email":              types.StringType,
+		"location":                  types.StringType,
+		"override_project_id":       types.StringType,
+		"project_id":                types.StringType,
+		"structured_values_as_json": types.BoolType,
+		"use_extract":               types.BoolType,
+	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return

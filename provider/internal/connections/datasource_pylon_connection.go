@@ -54,6 +54,9 @@ func (d *PylonConnectionDataSource) Schema(ctx context.Context, req datasource.S
 	}
 }
 
+type PylonDataSourceConf struct {
+}
+
 func (d *PylonConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 

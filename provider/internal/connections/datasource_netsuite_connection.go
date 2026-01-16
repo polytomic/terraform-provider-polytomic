@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
@@ -69,6 +70,12 @@ func (d *NetsuiteConnectionDataSource) Schema(ctx context.Context, req datasourc
 	}
 }
 
+type NetsuiteDataSourceConf struct {
+	Account_id   string `mapstructure:"account_id" tfsdk:"account_id"`
+	Consumer_key string `mapstructure:"consumer_key" tfsdk:"consumer_key"`
+	Token        string `mapstructure:"token" tfsdk:"token"`
+}
+
 func (d *NetsuiteConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 
@@ -94,22 +101,20 @@ func (d *NetsuiteConnectionDataSource) Read(ctx context.Context, req datasource.
 	data.Id = types.StringPointerValue(connection.Data.Id)
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
-	var diags diag.Diagnostics
-	data.Configuration, diags = types.ObjectValue(
-		data.Configuration.AttributeTypes(ctx),
-		map[string]attr.Value{
-			"account_id": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["account_id"], "string").(string),
-			),
-			"consumer_key": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["consumer_key"], "string").(string),
-			),
-			"token": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["token"], "string").(string),
-			),
-		},
-	)
 
+	conf := NetsuiteDataSourceConf{}
+	err = mapstructure.Decode(connection.Data.Configuration, &conf)
+	if err != nil {
+		resp.Diagnostics.AddError("Error decoding connection configuration", err.Error())
+		return
+	}
+
+	var diags diag.Diagnostics
+	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"account_id":   types.StringType,
+		"consumer_key": types.StringType,
+		"token":        types.StringType,
+	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return

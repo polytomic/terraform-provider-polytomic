@@ -54,6 +54,9 @@ func (d *ReplyioConnectionDataSource) Schema(ctx context.Context, req datasource
 	}
 }
 
+type ReplyioDataSourceConf struct {
+}
+
 func (d *ReplyioConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 

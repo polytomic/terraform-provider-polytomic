@@ -54,6 +54,9 @@ func (d *SmartleadConnectionDataSource) Schema(ctx context.Context, req datasour
 	}
 }
 
+type SmartleadDataSourceConf struct {
+}
+
 func (d *SmartleadConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 

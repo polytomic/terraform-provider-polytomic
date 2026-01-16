@@ -54,6 +54,9 @@ func (d *HeyreachConnectionDataSource) Schema(ctx context.Context, req datasourc
 	}
 }
 
+type HeyreachDataSourceConf struct {
+}
+
 func (d *HeyreachConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 

@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
@@ -105,6 +106,21 @@ func (d *PostgresqlConnectionDataSource) Schema(ctx context.Context, req datasou
 	}
 }
 
+type PostgresqlDataSourceConf struct {
+	Change_detection bool   `mapstructure:"change_detection" tfsdk:"change_detection"`
+	Client_certs     bool   `mapstructure:"client_certs" tfsdk:"client_certs"`
+	Database         string `mapstructure:"database" tfsdk:"database"`
+	Hostname         string `mapstructure:"hostname" tfsdk:"hostname"`
+	Port             int64  `mapstructure:"port" tfsdk:"port"`
+	Publication      string `mapstructure:"publication" tfsdk:"publication"`
+	Ssh              bool   `mapstructure:"ssh" tfsdk:"ssh"`
+	Ssh_host         string `mapstructure:"ssh_host" tfsdk:"ssh_host"`
+	Ssh_port         int64  `mapstructure:"ssh_port" tfsdk:"ssh_port"`
+	Ssh_user         string `mapstructure:"ssh_user" tfsdk:"ssh_user"`
+	Ssl              bool   `mapstructure:"ssl" tfsdk:"ssl"`
+	Username         string `mapstructure:"username" tfsdk:"username"`
+}
+
 func (d *PostgresqlConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 
@@ -130,49 +146,29 @@ func (d *PostgresqlConnectionDataSource) Read(ctx context.Context, req datasourc
 	data.Id = types.StringPointerValue(connection.Data.Id)
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
-	var diags diag.Diagnostics
-	data.Configuration, diags = types.ObjectValue(
-		data.Configuration.AttributeTypes(ctx),
-		map[string]attr.Value{
-			"change_detection": types.BoolValue(
-				getValueOrEmpty(connection.Data.Configuration["change_detection"], "bool").(bool),
-			),
-			"client_certs": types.BoolValue(
-				getValueOrEmpty(connection.Data.Configuration["client_certs"], "bool").(bool),
-			),
-			"database": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["database"], "string").(string),
-			),
-			"hostname": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["hostname"], "string").(string),
-			),
-			"port": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["port"], "string").(string),
-			),
-			"publication": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["publication"], "string").(string),
-			),
-			"ssh": types.BoolValue(
-				getValueOrEmpty(connection.Data.Configuration["ssh"], "bool").(bool),
-			),
-			"ssh_host": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["ssh_host"], "string").(string),
-			),
-			"ssh_port": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["ssh_port"], "string").(string),
-			),
-			"ssh_user": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["ssh_user"], "string").(string),
-			),
-			"ssl": types.BoolValue(
-				getValueOrEmpty(connection.Data.Configuration["ssl"], "bool").(bool),
-			),
-			"username": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["username"], "string").(string),
-			),
-		},
-	)
 
+	conf := PostgresqlDataSourceConf{}
+	err = mapstructure.Decode(connection.Data.Configuration, &conf)
+	if err != nil {
+		resp.Diagnostics.AddError("Error decoding connection configuration", err.Error())
+		return
+	}
+
+	var diags diag.Diagnostics
+	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"change_detection": types.BoolType,
+		"client_certs":     types.BoolType,
+		"database":         types.StringType,
+		"hostname":         types.StringType,
+		"port":             types.NumberType,
+		"publication":      types.StringType,
+		"ssh":              types.BoolType,
+		"ssh_host":         types.StringType,
+		"ssh_port":         types.NumberType,
+		"ssh_user":         types.StringType,
+		"ssl":              types.BoolType,
+		"username":         types.StringType,
+	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return

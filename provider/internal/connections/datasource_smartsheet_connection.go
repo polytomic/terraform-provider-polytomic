@@ -54,6 +54,9 @@ func (d *SmartsheetConnectionDataSource) Schema(ctx context.Context, req datasou
 	}
 }
 
+type SmartsheetDataSourceConf struct {
+}
+
 func (d *SmartsheetConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 

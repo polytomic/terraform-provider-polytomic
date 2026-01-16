@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
@@ -93,6 +94,17 @@ func (d *SnowflakeConnectionDataSource) Schema(ctx context.Context, req datasour
 	}
 }
 
+type SnowflakeDataSourceConf struct {
+	Account                      string `mapstructure:"account" tfsdk:"account"`
+	Bulk_sync_staging_schema     string `mapstructure:"bulk_sync_staging_schema" tfsdk:"bulk_sync_staging_schema"`
+	Dbname                       string `mapstructure:"dbname" tfsdk:"dbname"`
+	Key_pair_auth                bool   `mapstructure:"key_pair_auth" tfsdk:"key_pair_auth"`
+	Params                       string `mapstructure:"params" tfsdk:"params"`
+	Use_bulk_sync_staging_schema bool   `mapstructure:"use_bulk_sync_staging_schema" tfsdk:"use_bulk_sync_staging_schema"`
+	Username                     string `mapstructure:"username" tfsdk:"username"`
+	Warehouse                    string `mapstructure:"warehouse" tfsdk:"warehouse"`
+}
+
 func (d *SnowflakeConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 
@@ -118,37 +130,25 @@ func (d *SnowflakeConnectionDataSource) Read(ctx context.Context, req datasource
 	data.Id = types.StringPointerValue(connection.Data.Id)
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
-	var diags diag.Diagnostics
-	data.Configuration, diags = types.ObjectValue(
-		data.Configuration.AttributeTypes(ctx),
-		map[string]attr.Value{
-			"account": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["account"], "string").(string),
-			),
-			"bulk_sync_staging_schema": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["bulk_sync_staging_schema"], "string").(string),
-			),
-			"dbname": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["dbname"], "string").(string),
-			),
-			"key_pair_auth": types.BoolValue(
-				getValueOrEmpty(connection.Data.Configuration["key_pair_auth"], "bool").(bool),
-			),
-			"params": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["params"], "string").(string),
-			),
-			"use_bulk_sync_staging_schema": types.BoolValue(
-				getValueOrEmpty(connection.Data.Configuration["use_bulk_sync_staging_schema"], "bool").(bool),
-			),
-			"username": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["username"], "string").(string),
-			),
-			"warehouse": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["warehouse"], "string").(string),
-			),
-		},
-	)
 
+	conf := SnowflakeDataSourceConf{}
+	err = mapstructure.Decode(connection.Data.Configuration, &conf)
+	if err != nil {
+		resp.Diagnostics.AddError("Error decoding connection configuration", err.Error())
+		return
+	}
+
+	var diags diag.Diagnostics
+	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"account":                      types.StringType,
+		"bulk_sync_staging_schema":     types.StringType,
+		"dbname":                       types.StringType,
+		"key_pair_auth":                types.BoolType,
+		"params":                       types.StringType,
+		"use_bulk_sync_staging_schema": types.BoolType,
+		"username":                     types.StringType,
+		"warehouse":                    types.StringType,
+	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return

@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
@@ -172,6 +173,39 @@ func (d *CsvConnectionDataSource) Schema(ctx context.Context, req datasource.Sch
 	}
 }
 
+type CsvDataSourceConf struct {
+	Auth struct {
+		Basic struct {
+			Password string `mapstructure:"password" tfsdk:"password"`
+			Username string `mapstructure:"username" tfsdk:"username"`
+		} `mapstructure:"basic" tfsdk:"basic"`
+		Header struct {
+			Name  string `mapstructure:"name" tfsdk:"name"`
+			Value string `mapstructure:"value" tfsdk:"value"`
+		} `mapstructure:"header" tfsdk:"header"`
+		Oauth struct {
+			Auth_style      int64  `mapstructure:"auth_style" tfsdk:"auth_style"`
+			Client_id       string `mapstructure:"client_id" tfsdk:"client_id"`
+			Client_secret   string `mapstructure:"client_secret" tfsdk:"client_secret"`
+			Extra_form_data []struct {
+				Name  string `mapstructure:"name" tfsdk:"name"`
+				Value string `mapstructure:"value" tfsdk:"value"`
+			} `mapstructure:"extra_form_data" tfsdk:"extra_form_data"`
+			Scopes         []string `mapstructure:"scopes" tfsdk:"scopes"`
+			Token_endpoint string   `mapstructure:"token_endpoint" tfsdk:"token_endpoint"`
+		} `mapstructure:"oauth" tfsdk:"oauth"`
+	} `mapstructure:"auth" tfsdk:"auth"`
+	Headers []struct {
+		Name  string `mapstructure:"name" tfsdk:"name"`
+		Value string `mapstructure:"value" tfsdk:"value"`
+	} `mapstructure:"headers" tfsdk:"headers"`
+	Parameters []struct {
+		Name  string `mapstructure:"name" tfsdk:"name"`
+		Value string `mapstructure:"value" tfsdk:"value"`
+	} `mapstructure:"parameters" tfsdk:"parameters"`
+	Url string `mapstructure:"url" tfsdk:"url"`
+}
+
 func (d *CsvConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 
@@ -197,25 +231,66 @@ func (d *CsvConnectionDataSource) Read(ctx context.Context, req datasource.ReadR
 	data.Id = types.StringPointerValue(connection.Data.Id)
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
-	var diags diag.Diagnostics
-	data.Configuration, diags = types.ObjectValue(
-		data.Configuration.AttributeTypes(ctx),
-		map[string]attr.Value{
-			"auth": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["auth"], "string").(string),
-			),
-			"headers": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["headers"], "string").(string),
-			),
-			"parameters": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["parameters"], "string").(string),
-			),
-			"url": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["url"], "string").(string),
-			),
-		},
-	)
 
+	conf := CsvDataSourceConf{}
+	err = mapstructure.Decode(connection.Data.Configuration, &conf)
+	if err != nil {
+		resp.Diagnostics.AddError("Error decoding connection configuration", err.Error())
+		return
+	}
+
+	var diags diag.Diagnostics
+	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"auth": types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				"basic": types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						"password": types.StringType,
+						"username": types.StringType,
+					},
+				}, "header": types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						"name":  types.StringType,
+						"value": types.StringType,
+					},
+				}, "oauth": types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						"auth_style":    types.NumberType,
+						"client_id":     types.StringType,
+						"client_secret": types.StringType,
+						"extra_form_data": types.SetType{
+							ElemType: types.ObjectType{
+								AttrTypes: map[string]attr.Type{
+									"name":  types.StringType,
+									"value": types.StringType,
+								},
+							},
+						},
+						"scopes": types.SetType{
+							ElemType: types.StringType,
+						},
+						"token_endpoint": types.StringType,
+					},
+				},
+			},
+		}, "headers": types.SetType{
+			ElemType: types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"name":  types.StringType,
+					"value": types.StringType,
+				},
+			},
+		},
+		"parameters": types.SetType{
+			ElemType: types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"name":  types.StringType,
+					"value": types.StringType,
+				},
+			},
+		},
+		"url": types.StringType,
+	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return

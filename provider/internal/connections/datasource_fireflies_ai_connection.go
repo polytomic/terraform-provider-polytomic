@@ -54,6 +54,9 @@ func (d *Fireflies_aiConnectionDataSource) Schema(ctx context.Context, req datas
 	}
 }
 
+type Fireflies_aiDataSourceConf struct {
+}
+
 func (d *Fireflies_aiConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 

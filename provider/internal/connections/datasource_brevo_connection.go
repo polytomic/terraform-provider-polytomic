@@ -54,6 +54,9 @@ func (d *BrevoConnectionDataSource) Schema(ctx context.Context, req datasource.S
 	}
 }
 
+type BrevoDataSourceConf struct {
+}
+
 func (d *BrevoConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 

@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
@@ -69,6 +70,12 @@ func (d *DayforceConnectionDataSource) Schema(ctx context.Context, req datasourc
 	}
 }
 
+type DayforceDataSourceConf struct {
+	Client_name string `mapstructure:"client_name" tfsdk:"client_name"`
+	Company_id  string `mapstructure:"company_id" tfsdk:"company_id"`
+	Username    string `mapstructure:"username" tfsdk:"username"`
+}
+
 func (d *DayforceConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 
@@ -94,22 +101,20 @@ func (d *DayforceConnectionDataSource) Read(ctx context.Context, req datasource.
 	data.Id = types.StringPointerValue(connection.Data.Id)
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
-	var diags diag.Diagnostics
-	data.Configuration, diags = types.ObjectValue(
-		data.Configuration.AttributeTypes(ctx),
-		map[string]attr.Value{
-			"client_name": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["client_name"], "string").(string),
-			),
-			"company_id": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["company_id"], "string").(string),
-			),
-			"username": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["username"], "string").(string),
-			),
-		},
-	)
 
+	conf := DayforceDataSourceConf{}
+	err = mapstructure.Decode(connection.Data.Configuration, &conf)
+	if err != nil {
+		resp.Diagnostics.AddError("Error decoding connection configuration", err.Error())
+		return
+	}
+
+	var diags diag.Diagnostics
+	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"client_name": types.StringType,
+		"company_id":  types.StringType,
+		"username":    types.StringType,
+	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return

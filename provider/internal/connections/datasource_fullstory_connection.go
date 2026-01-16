@@ -54,6 +54,9 @@ func (d *FullstoryConnectionDataSource) Schema(ctx context.Context, req datasour
 	}
 }
 
+type FullstoryDataSourceConf struct {
+}
+
 func (d *FullstoryConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 

@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
@@ -71,6 +72,12 @@ func (d *Zendesk_chatConnectionDataSource) Schema(ctx context.Context, req datas
 	}
 }
 
+type Zendesk_chatDataSourceConf struct {
+	Custom_api_limits bool   `mapstructure:"custom_api_limits" tfsdk:"custom_api_limits"`
+	Domain            string `mapstructure:"domain" tfsdk:"domain"`
+	Ratelimit_rpm     int64  `mapstructure:"ratelimit_rpm" tfsdk:"ratelimit_rpm"`
+}
+
 func (d *Zendesk_chatConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 
@@ -96,22 +103,20 @@ func (d *Zendesk_chatConnectionDataSource) Read(ctx context.Context, req datasou
 	data.Id = types.StringPointerValue(connection.Data.Id)
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
-	var diags diag.Diagnostics
-	data.Configuration, diags = types.ObjectValue(
-		data.Configuration.AttributeTypes(ctx),
-		map[string]attr.Value{
-			"custom_api_limits": types.BoolValue(
-				getValueOrEmpty(connection.Data.Configuration["custom_api_limits"], "bool").(bool),
-			),
-			"domain": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["domain"], "string").(string),
-			),
-			"ratelimit_rpm": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["ratelimit_rpm"], "string").(string),
-			),
-		},
-	)
 
+	conf := Zendesk_chatDataSourceConf{}
+	err = mapstructure.Decode(connection.Data.Configuration, &conf)
+	if err != nil {
+		resp.Diagnostics.AddError("Error decoding connection configuration", err.Error())
+		return
+	}
+
+	var diags diag.Diagnostics
+	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"custom_api_limits": types.BoolType,
+		"domain":            types.StringType,
+		"ratelimit_rpm":     types.NumberType,
+	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return

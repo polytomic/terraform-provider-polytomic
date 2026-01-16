@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
@@ -73,6 +74,13 @@ func (d *NetsuitesaconnectConnectionDataSource) Schema(ctx context.Context, req 
 	}
 }
 
+type NetsuitesaconnectDataSourceConf struct {
+	Account_id     string `mapstructure:"account_id" tfsdk:"account_id"`
+	Certificate_id string `mapstructure:"certificate_id" tfsdk:"certificate_id"`
+	Client_id      string `mapstructure:"client_id" tfsdk:"client_id"`
+	Role_id        string `mapstructure:"role_id" tfsdk:"role_id"`
+}
+
 func (d *NetsuitesaconnectConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 
@@ -98,25 +106,21 @@ func (d *NetsuitesaconnectConnectionDataSource) Read(ctx context.Context, req da
 	data.Id = types.StringPointerValue(connection.Data.Id)
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
-	var diags diag.Diagnostics
-	data.Configuration, diags = types.ObjectValue(
-		data.Configuration.AttributeTypes(ctx),
-		map[string]attr.Value{
-			"account_id": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["account_id"], "string").(string),
-			),
-			"certificate_id": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["certificate_id"], "string").(string),
-			),
-			"client_id": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["client_id"], "string").(string),
-			),
-			"role_id": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["role_id"], "string").(string),
-			),
-		},
-	)
 
+	conf := NetsuitesaconnectDataSourceConf{}
+	err = mapstructure.Decode(connection.Data.Configuration, &conf)
+	if err != nil {
+		resp.Diagnostics.AddError("Error decoding connection configuration", err.Error())
+		return
+	}
+
+	var diags diag.Diagnostics
+	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"account_id":     types.StringType,
+		"certificate_id": types.StringType,
+		"client_id":      types.StringType,
+		"role_id":        types.StringType,
+	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return

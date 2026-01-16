@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
@@ -97,6 +98,18 @@ func (d *GcsConnectionDataSource) Schema(ctx context.Context, req datasource.Sch
 	}
 }
 
+type GcsDataSourceConf struct {
+	Bucket                   string `mapstructure:"bucket" tfsdk:"bucket"`
+	Client_email             string `mapstructure:"client_email" tfsdk:"client_email"`
+	Directory_glob_pattern   string `mapstructure:"directory_glob_pattern" tfsdk:"directory_glob_pattern"`
+	Is_directory_snapshot    bool   `mapstructure:"is_directory_snapshot" tfsdk:"is_directory_snapshot"`
+	Is_single_table          bool   `mapstructure:"is_single_table" tfsdk:"is_single_table"`
+	Project_id               string `mapstructure:"project_id" tfsdk:"project_id"`
+	Single_table_file_format string `mapstructure:"single_table_file_format" tfsdk:"single_table_file_format"`
+	Single_table_name        string `mapstructure:"single_table_name" tfsdk:"single_table_name"`
+	Skip_lines               int64  `mapstructure:"skip_lines" tfsdk:"skip_lines"`
+}
+
 func (d *GcsConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 
@@ -122,40 +135,26 @@ func (d *GcsConnectionDataSource) Read(ctx context.Context, req datasource.ReadR
 	data.Id = types.StringPointerValue(connection.Data.Id)
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
-	var diags diag.Diagnostics
-	data.Configuration, diags = types.ObjectValue(
-		data.Configuration.AttributeTypes(ctx),
-		map[string]attr.Value{
-			"bucket": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["bucket"], "string").(string),
-			),
-			"client_email": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["client_email"], "string").(string),
-			),
-			"directory_glob_pattern": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["directory_glob_pattern"], "string").(string),
-			),
-			"is_directory_snapshot": types.BoolValue(
-				getValueOrEmpty(connection.Data.Configuration["is_directory_snapshot"], "bool").(bool),
-			),
-			"is_single_table": types.BoolValue(
-				getValueOrEmpty(connection.Data.Configuration["is_single_table"], "bool").(bool),
-			),
-			"project_id": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["project_id"], "string").(string),
-			),
-			"single_table_file_format": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["single_table_file_format"], "string").(string),
-			),
-			"single_table_name": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["single_table_name"], "string").(string),
-			),
-			"skip_lines": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["skip_lines"], "string").(string),
-			),
-		},
-	)
 
+	conf := GcsDataSourceConf{}
+	err = mapstructure.Decode(connection.Data.Configuration, &conf)
+	if err != nil {
+		resp.Diagnostics.AddError("Error decoding connection configuration", err.Error())
+		return
+	}
+
+	var diags diag.Diagnostics
+	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"bucket":                   types.StringType,
+		"client_email":             types.StringType,
+		"directory_glob_pattern":   types.StringType,
+		"is_directory_snapshot":    types.BoolType,
+		"is_single_table":          types.BoolType,
+		"project_id":               types.StringType,
+		"single_table_file_format": types.StringType,
+		"single_table_name":        types.StringType,
+		"skip_lines":               types.NumberType,
+	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return

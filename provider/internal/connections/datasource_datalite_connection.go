@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
@@ -85,6 +86,16 @@ func (d *DataliteConnectionDataSource) Schema(ctx context.Context, req datasourc
 	}
 }
 
+type DataliteDataSourceConf struct {
+	Schemas []struct {
+		Alias           string `mapstructure:"alias" tfsdk:"alias"`
+		Connection_id   string `mapstructure:"connection_id" tfsdk:"connection_id"`
+		Connection_name string `mapstructure:"connection_name" tfsdk:"connection_name"`
+		Connection_type string `mapstructure:"connection_type" tfsdk:"connection_type"`
+		Schema_id       string `mapstructure:"schema_id" tfsdk:"schema_id"`
+	} `mapstructure:"schemas" tfsdk:"schemas"`
+}
+
 func (d *DataliteConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 
@@ -110,16 +121,28 @@ func (d *DataliteConnectionDataSource) Read(ctx context.Context, req datasource.
 	data.Id = types.StringPointerValue(connection.Data.Id)
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
-	var diags diag.Diagnostics
-	data.Configuration, diags = types.ObjectValue(
-		data.Configuration.AttributeTypes(ctx),
-		map[string]attr.Value{
-			"schemas": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["schemas"], "string").(string),
-			),
-		},
-	)
 
+	conf := DataliteDataSourceConf{}
+	err = mapstructure.Decode(connection.Data.Configuration, &conf)
+	if err != nil {
+		resp.Diagnostics.AddError("Error decoding connection configuration", err.Error())
+		return
+	}
+
+	var diags diag.Diagnostics
+	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"schemas": types.SetType{
+			ElemType: types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"alias":           types.StringType,
+					"connection_id":   types.StringType,
+					"connection_name": types.StringType,
+					"connection_type": types.StringType,
+					"schema_id":       types.StringType,
+				},
+			},
+		},
+	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return

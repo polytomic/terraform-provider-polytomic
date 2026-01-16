@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
@@ -73,6 +74,12 @@ func (d *Cloudflare_logsConnectionDataSource) Schema(ctx context.Context, req da
 	}
 }
 
+type Cloudflare_logsDataSourceConf struct {
+	Account_id        string `mapstructure:"account_id" tfsdk:"account_id"`
+	Aws_access_key_id string `mapstructure:"aws_access_key_id" tfsdk:"aws_access_key_id"`
+	Bucket_name       string `mapstructure:"bucket_name" tfsdk:"bucket_name"`
+}
+
 func (d *Cloudflare_logsConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 
@@ -98,22 +105,20 @@ func (d *Cloudflare_logsConnectionDataSource) Read(ctx context.Context, req data
 	data.Id = types.StringPointerValue(connection.Data.Id)
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
-	var diags diag.Diagnostics
-	data.Configuration, diags = types.ObjectValue(
-		data.Configuration.AttributeTypes(ctx),
-		map[string]attr.Value{
-			"account_id": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["account_id"], "string").(string),
-			),
-			"aws_access_key_id": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["aws_access_key_id"], "string").(string),
-			),
-			"bucket_name": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["bucket_name"], "string").(string),
-			),
-		},
-	)
 
+	conf := Cloudflare_logsDataSourceConf{}
+	err = mapstructure.Decode(connection.Data.Configuration, &conf)
+	if err != nil {
+		resp.Diagnostics.AddError("Error decoding connection configuration", err.Error())
+		return
+	}
+
+	var diags diag.Diagnostics
+	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"account_id":        types.StringType,
+		"aws_access_key_id": types.StringType,
+		"bucket_name":       types.StringType,
+	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return

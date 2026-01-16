@@ -54,6 +54,9 @@ func (d *IntercomConnectionDataSource) Schema(ctx context.Context, req datasourc
 	}
 }
 
+type IntercomDataSourceConf struct {
+}
+
 func (d *IntercomConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 

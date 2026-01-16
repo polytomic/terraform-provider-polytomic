@@ -54,6 +54,9 @@ func (d *SurveymonkeyConnectionDataSource) Schema(ctx context.Context, req datas
 	}
 }
 
+type SurveymonkeyDataSourceConf struct {
+}
+
 func (d *SurveymonkeyConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 

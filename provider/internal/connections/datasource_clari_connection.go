@@ -54,6 +54,9 @@ func (d *ClariConnectionDataSource) Schema(ctx context.Context, req datasource.S
 	}
 }
 
+type ClariDataSourceConf struct {
+}
+
 func (d *ClariConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 

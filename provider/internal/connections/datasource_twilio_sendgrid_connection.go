@@ -54,6 +54,9 @@ func (d *Twilio_sendgridConnectionDataSource) Schema(ctx context.Context, req da
 	}
 }
 
+type Twilio_sendgridDataSourceConf struct {
+}
+
 func (d *Twilio_sendgridConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 

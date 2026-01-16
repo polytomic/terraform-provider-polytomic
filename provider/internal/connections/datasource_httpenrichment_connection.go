@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
@@ -239,6 +240,54 @@ func (d *HttpenrichmentConnectionDataSource) Schema(ctx context.Context, req dat
 	}
 }
 
+type HttpenrichmentDataSourceConf struct {
+	Auth struct {
+		Basic struct {
+			Password string `mapstructure:"password" tfsdk:"password"`
+			Username string `mapstructure:"username" tfsdk:"username"`
+		} `mapstructure:"basic" tfsdk:"basic"`
+		Header struct {
+			Name  string `mapstructure:"name" tfsdk:"name"`
+			Value string `mapstructure:"value" tfsdk:"value"`
+		} `mapstructure:"header" tfsdk:"header"`
+		Oauth struct {
+			Auth_style      int64  `mapstructure:"auth_style" tfsdk:"auth_style"`
+			Client_id       string `mapstructure:"client_id" tfsdk:"client_id"`
+			Client_secret   string `mapstructure:"client_secret" tfsdk:"client_secret"`
+			Extra_form_data []struct {
+				Name  string `mapstructure:"name" tfsdk:"name"`
+				Value string `mapstructure:"value" tfsdk:"value"`
+			} `mapstructure:"extra_form_data" tfsdk:"extra_form_data"`
+			Scopes         []string `mapstructure:"scopes" tfsdk:"scopes"`
+			Token_endpoint string   `mapstructure:"token_endpoint" tfsdk:"token_endpoint"`
+		} `mapstructure:"oauth" tfsdk:"oauth"`
+	} `mapstructure:"auth" tfsdk:"auth"`
+	Body           string            `mapstructure:"body" tfsdk:"body"`
+	Example_body   string            `mapstructure:"example_body" tfsdk:"example_body"`
+	Example_inputs map[string]string `mapstructure:"example_inputs" tfsdk:"example_inputs"`
+	Fields         []struct {
+		Name string `mapstructure:"name" tfsdk:"name"`
+		Path string `mapstructure:"path" tfsdk:"path"`
+		Type string `mapstructure:"type" tfsdk:"type"`
+	} `mapstructure:"fields" tfsdk:"fields"`
+	Headers []struct {
+		Name  string `mapstructure:"name" tfsdk:"name"`
+		Value string `mapstructure:"value" tfsdk:"value"`
+	} `mapstructure:"headers" tfsdk:"headers"`
+	Healthcheck   string `mapstructure:"healthcheck" tfsdk:"healthcheck"`
+	InputMappings []struct {
+		Name     string `mapstructure:"name" tfsdk:"name"`
+		Required bool   `mapstructure:"required" tfsdk:"required"`
+		Type     string `mapstructure:"type" tfsdk:"type"`
+	} `mapstructure:"inputMappings" tfsdk:"input_mappings"`
+	Method     string `mapstructure:"method" tfsdk:"method"`
+	Parameters []struct {
+		Name  string `mapstructure:"name" tfsdk:"name"`
+		Value string `mapstructure:"value" tfsdk:"value"`
+	} `mapstructure:"parameters" tfsdk:"parameters"`
+	Url string `mapstructure:"url" tfsdk:"url"`
+}
+
 func (d *HttpenrichmentConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 
@@ -264,63 +313,90 @@ func (d *HttpenrichmentConnectionDataSource) Read(ctx context.Context, req datas
 	data.Id = types.StringPointerValue(connection.Data.Id)
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
-	var diags diag.Diagnostics
-	data.Configuration, diags = types.ObjectValue(
-		data.Configuration.AttributeTypes(ctx),
-		map[string]attr.Value{
-			"auth": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["auth"], "string").(string),
-			),
-			"body": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["body"], "string").(string),
-			),
-			"example_body": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["example_body"], "string").(string),
-			),
-			"example_inputs": func() types.Map {
-				rawMap := getValueOrEmpty(connection.Data.Configuration["example_inputs"], "map")
-				if rawMap == nil {
-					m, _ := types.MapValue(types.StringType, map[string]attr.Value{})
-					return m
-				}
-				mapVal, ok := rawMap.(map[string]interface{})
-				if !ok {
-					m, _ := types.MapValue(types.StringType, map[string]attr.Value{})
-					return m
-				}
-				elements := make(map[string]attr.Value)
-				for k, v := range mapVal {
-					if strVal, ok := v.(string); ok {
-						elements[k] = types.StringValue(strVal)
-					}
-				}
-				m, _ := types.MapValue(types.StringType, elements)
-				return m
-			}(),
-			"fields": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["fields"], "string").(string),
-			),
-			"headers": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["headers"], "string").(string),
-			),
-			"healthcheck": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["healthcheck"], "string").(string),
-			),
-			"input_mappings": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["inputMappings"], "string").(string),
-			),
-			"method": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["method"], "string").(string),
-			),
-			"parameters": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["parameters"], "string").(string),
-			),
-			"url": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["url"], "string").(string),
-			),
-		},
-	)
 
+	conf := HttpenrichmentDataSourceConf{}
+	err = mapstructure.Decode(connection.Data.Configuration, &conf)
+	if err != nil {
+		resp.Diagnostics.AddError("Error decoding connection configuration", err.Error())
+		return
+	}
+
+	var diags diag.Diagnostics
+	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"auth": types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				"basic": types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						"password": types.StringType,
+						"username": types.StringType,
+					},
+				}, "header": types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						"name":  types.StringType,
+						"value": types.StringType,
+					},
+				}, "oauth": types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						"auth_style":    types.NumberType,
+						"client_id":     types.StringType,
+						"client_secret": types.StringType,
+						"extra_form_data": types.SetType{
+							ElemType: types.ObjectType{
+								AttrTypes: map[string]attr.Type{
+									"name":  types.StringType,
+									"value": types.StringType,
+								},
+							},
+						},
+						"scopes": types.SetType{
+							ElemType: types.StringType,
+						},
+						"token_endpoint": types.StringType,
+					},
+				},
+			},
+		}, "body": types.StringType,
+		"example_body": types.StringType,
+		"example_inputs": types.MapType{
+			ElemType: types.StringType,
+		}, "fields": types.SetType{
+			ElemType: types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"name": types.StringType,
+					"path": types.StringType,
+					"type": types.StringType,
+				},
+			},
+		},
+		"headers": types.SetType{
+			ElemType: types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"name":  types.StringType,
+					"value": types.StringType,
+				},
+			},
+		},
+		"healthcheck": types.StringType,
+		"input_mappings": types.SetType{
+			ElemType: types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"name":     types.StringType,
+					"required": types.BoolType,
+					"type":     types.StringType,
+				},
+			},
+		},
+		"method": types.StringType,
+		"parameters": types.SetType{
+			ElemType: types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"name":  types.StringType,
+					"value": types.StringType,
+				},
+			},
+		},
+		"url": types.StringType,
+	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return

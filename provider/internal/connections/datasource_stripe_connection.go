@@ -54,6 +54,9 @@ func (d *StripeConnectionDataSource) Schema(ctx context.Context, req datasource.
 	}
 }
 
+type StripeDataSourceConf struct {
+}
+
 func (d *StripeConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 

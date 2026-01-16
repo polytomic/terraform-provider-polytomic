@@ -54,6 +54,9 @@ func (d *StatsigConnectionDataSource) Schema(ctx context.Context, req datasource
 	}
 }
 
+type StatsigDataSourceConf struct {
+}
+
 func (d *StatsigConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 

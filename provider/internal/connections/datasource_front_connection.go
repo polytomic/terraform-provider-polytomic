@@ -54,6 +54,9 @@ func (d *FrontConnectionDataSource) Schema(ctx context.Context, req datasource.S
 	}
 }
 
+type FrontDataSourceConf struct {
+}
+
 func (d *FrontConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 

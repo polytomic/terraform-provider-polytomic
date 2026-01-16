@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
@@ -69,6 +70,12 @@ func (d *HubspotConnectionDataSource) Schema(ctx context.Context, req datasource
 	}
 }
 
+type HubspotDataSourceConf struct {
+	Hub_domain                  string `mapstructure:"hub_domain" tfsdk:"hub_domain"`
+	Hub_user                    string `mapstructure:"hub_user" tfsdk:"hub_user"`
+	Include_static_list_support bool   `mapstructure:"include_static_list_support" tfsdk:"include_static_list_support"`
+}
+
 func (d *HubspotConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 
@@ -94,22 +101,20 @@ func (d *HubspotConnectionDataSource) Read(ctx context.Context, req datasource.R
 	data.Id = types.StringPointerValue(connection.Data.Id)
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
-	var diags diag.Diagnostics
-	data.Configuration, diags = types.ObjectValue(
-		data.Configuration.AttributeTypes(ctx),
-		map[string]attr.Value{
-			"hub_domain": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["hub_domain"], "string").(string),
-			),
-			"hub_user": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["hub_user"], "string").(string),
-			),
-			"include_static_list_support": types.BoolValue(
-				getValueOrEmpty(connection.Data.Configuration["include_static_list_support"], "bool").(bool),
-			),
-		},
-	)
 
+	conf := HubspotDataSourceConf{}
+	err = mapstructure.Decode(connection.Data.Configuration, &conf)
+	if err != nil {
+		resp.Diagnostics.AddError("Error decoding connection configuration", err.Error())
+		return
+	}
+
+	var diags diag.Diagnostics
+	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"hub_domain":                  types.StringType,
+		"hub_user":                    types.StringType,
+		"include_static_list_support": types.BoolType,
+	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return

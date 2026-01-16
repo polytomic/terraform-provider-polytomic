@@ -54,6 +54,9 @@ func (d *TowbookConnectionDataSource) Schema(ctx context.Context, req datasource
 	}
 }
 
+type TowbookDataSourceConf struct {
+}
+
 func (d *TowbookConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 

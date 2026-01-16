@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
@@ -65,6 +66,11 @@ func (d *XeroConnectionDataSource) Schema(ctx context.Context, req datasource.Sc
 	}
 }
 
+type XeroDataSourceConf struct {
+	Tenant_name string `mapstructure:"tenant_name" tfsdk:"tenant_name"`
+	Tenant_type string `mapstructure:"tenant_type" tfsdk:"tenant_type"`
+}
+
 func (d *XeroConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 
@@ -90,19 +96,19 @@ func (d *XeroConnectionDataSource) Read(ctx context.Context, req datasource.Read
 	data.Id = types.StringPointerValue(connection.Data.Id)
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
-	var diags diag.Diagnostics
-	data.Configuration, diags = types.ObjectValue(
-		data.Configuration.AttributeTypes(ctx),
-		map[string]attr.Value{
-			"tenant_name": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["tenant_name"], "string").(string),
-			),
-			"tenant_type": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["tenant_type"], "string").(string),
-			),
-		},
-	)
 
+	conf := XeroDataSourceConf{}
+	err = mapstructure.Decode(connection.Data.Configuration, &conf)
+	if err != nil {
+		resp.Diagnostics.AddError("Error decoding connection configuration", err.Error())
+		return
+	}
+
+	var diags diag.Diagnostics
+	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"tenant_name": types.StringType,
+		"tenant_type": types.StringType,
+	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return

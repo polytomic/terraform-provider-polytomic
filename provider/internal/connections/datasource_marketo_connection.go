@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
@@ -85,6 +86,16 @@ func (d *MarketoConnectionDataSource) Schema(ctx context.Context, req datasource
 	}
 }
 
+type MarketoDataSourceConf struct {
+	Client_id            string `mapstructure:"client_id" tfsdk:"client_id"`
+	Concurrent_imports   int64  `mapstructure:"concurrent_imports" tfsdk:"concurrent_imports"`
+	Daily_api_calls      int64  `mapstructure:"daily_api_calls" tfsdk:"daily_api_calls"`
+	Enforce_api_limits   bool   `mapstructure:"enforce_api_limits" tfsdk:"enforce_api_limits"`
+	Include_static_lists bool   `mapstructure:"include_static_lists" tfsdk:"include_static_lists"`
+	Oauth_token_expiry   string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
+	Rest_endpoint        string `mapstructure:"rest_endpoint" tfsdk:"rest_endpoint"`
+}
+
 func (d *MarketoConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 
@@ -110,34 +121,24 @@ func (d *MarketoConnectionDataSource) Read(ctx context.Context, req datasource.R
 	data.Id = types.StringPointerValue(connection.Data.Id)
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
-	var diags diag.Diagnostics
-	data.Configuration, diags = types.ObjectValue(
-		data.Configuration.AttributeTypes(ctx),
-		map[string]attr.Value{
-			"client_id": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["client_id"], "string").(string),
-			),
-			"concurrent_imports": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["concurrent_imports"], "string").(string),
-			),
-			"daily_api_calls": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["daily_api_calls"], "string").(string),
-			),
-			"enforce_api_limits": types.BoolValue(
-				getValueOrEmpty(connection.Data.Configuration["enforce_api_limits"], "bool").(bool),
-			),
-			"include_static_lists": types.BoolValue(
-				getValueOrEmpty(connection.Data.Configuration["include_static_lists"], "bool").(bool),
-			),
-			"oauth_token_expiry": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["oauth_token_expiry"], "string").(string),
-			),
-			"rest_endpoint": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["rest_endpoint"], "string").(string),
-			),
-		},
-	)
 
+	conf := MarketoDataSourceConf{}
+	err = mapstructure.Decode(connection.Data.Configuration, &conf)
+	if err != nil {
+		resp.Diagnostics.AddError("Error decoding connection configuration", err.Error())
+		return
+	}
+
+	var diags diag.Diagnostics
+	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"client_id":            types.StringType,
+		"concurrent_imports":   types.NumberType,
+		"daily_api_calls":      types.NumberType,
+		"enforce_api_limits":   types.BoolType,
+		"include_static_lists": types.BoolType,
+		"oauth_token_expiry":   types.StringType,
+		"rest_endpoint":        types.StringType,
+	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return

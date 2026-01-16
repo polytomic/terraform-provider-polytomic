@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
@@ -115,6 +116,23 @@ func (d *RedshiftserverlessConnectionDataSource) Schema(ctx context.Context, req
 	}
 }
 
+type RedshiftserverlessDataSourceConf struct {
+	Bulk_sync_staging_schema     string `mapstructure:"bulk_sync_staging_schema" tfsdk:"bulk_sync_staging_schema"`
+	Connection_method            string `mapstructure:"connection_method" tfsdk:"connection_method"`
+	Data_api_endpoint            string `mapstructure:"data_api_endpoint" tfsdk:"data_api_endpoint"`
+	Database                     string `mapstructure:"database" tfsdk:"database"`
+	Endpoint                     string `mapstructure:"endpoint" tfsdk:"endpoint"`
+	External_id                  string `mapstructure:"external_id" tfsdk:"external_id"`
+	Iam_role_arn                 string `mapstructure:"iam_role_arn" tfsdk:"iam_role_arn"`
+	Override_endpoint            bool   `mapstructure:"override_endpoint" tfsdk:"override_endpoint"`
+	Region                       string `mapstructure:"region" tfsdk:"region"`
+	S3_bucket_name               string `mapstructure:"s3_bucket_name" tfsdk:"s3_bucket_name"`
+	S3_bucket_region             string `mapstructure:"s3_bucket_region" tfsdk:"s3_bucket_region"`
+	Use_bulk_sync_staging_schema bool   `mapstructure:"use_bulk_sync_staging_schema" tfsdk:"use_bulk_sync_staging_schema"`
+	Use_unload                   bool   `mapstructure:"use_unload" tfsdk:"use_unload"`
+	Workgroup                    string `mapstructure:"workgroup" tfsdk:"workgroup"`
+}
+
 func (d *RedshiftserverlessConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 
@@ -140,55 +158,31 @@ func (d *RedshiftserverlessConnectionDataSource) Read(ctx context.Context, req d
 	data.Id = types.StringPointerValue(connection.Data.Id)
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
-	var diags diag.Diagnostics
-	data.Configuration, diags = types.ObjectValue(
-		data.Configuration.AttributeTypes(ctx),
-		map[string]attr.Value{
-			"bulk_sync_staging_schema": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["bulk_sync_staging_schema"], "string").(string),
-			),
-			"connection_method": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["connection_method"], "string").(string),
-			),
-			"data_api_endpoint": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["data_api_endpoint"], "string").(string),
-			),
-			"database": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["database"], "string").(string),
-			),
-			"endpoint": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["endpoint"], "string").(string),
-			),
-			"external_id": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["external_id"], "string").(string),
-			),
-			"iam_role_arn": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["iam_role_arn"], "string").(string),
-			),
-			"override_endpoint": types.BoolValue(
-				getValueOrEmpty(connection.Data.Configuration["override_endpoint"], "bool").(bool),
-			),
-			"region": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["region"], "string").(string),
-			),
-			"s3_bucket_name": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["s3_bucket_name"], "string").(string),
-			),
-			"s3_bucket_region": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["s3_bucket_region"], "string").(string),
-			),
-			"use_bulk_sync_staging_schema": types.BoolValue(
-				getValueOrEmpty(connection.Data.Configuration["use_bulk_sync_staging_schema"], "bool").(bool),
-			),
-			"use_unload": types.BoolValue(
-				getValueOrEmpty(connection.Data.Configuration["use_unload"], "bool").(bool),
-			),
-			"workgroup": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["workgroup"], "string").(string),
-			),
-		},
-	)
 
+	conf := RedshiftserverlessDataSourceConf{}
+	err = mapstructure.Decode(connection.Data.Configuration, &conf)
+	if err != nil {
+		resp.Diagnostics.AddError("Error decoding connection configuration", err.Error())
+		return
+	}
+
+	var diags diag.Diagnostics
+	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"bulk_sync_staging_schema":     types.StringType,
+		"connection_method":            types.StringType,
+		"data_api_endpoint":            types.StringType,
+		"database":                     types.StringType,
+		"endpoint":                     types.StringType,
+		"external_id":                  types.StringType,
+		"iam_role_arn":                 types.StringType,
+		"override_endpoint":            types.BoolType,
+		"region":                       types.StringType,
+		"s3_bucket_name":               types.StringType,
+		"s3_bucket_region":             types.StringType,
+		"use_bulk_sync_staging_schema": types.BoolType,
+		"use_unload":                   types.BoolType,
+		"workgroup":                    types.StringType,
+	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return

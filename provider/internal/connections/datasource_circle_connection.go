@@ -54,6 +54,9 @@ func (d *CircleConnectionDataSource) Schema(ctx context.Context, req datasource.
 	}
 }
 
+type CircleDataSourceConf struct {
+}
+
 func (d *CircleConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 

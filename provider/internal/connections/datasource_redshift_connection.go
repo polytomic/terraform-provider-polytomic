@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
@@ -135,6 +136,26 @@ func (d *RedshiftConnectionDataSource) Schema(ctx context.Context, req datasourc
 	}
 }
 
+type RedshiftDataSourceConf struct {
+	Auth_mode                    string `mapstructure:"auth_mode" tfsdk:"auth_mode"`
+	Aws_access_key_id            string `mapstructure:"aws_access_key_id" tfsdk:"aws_access_key_id"`
+	Aws_user                     string `mapstructure:"aws_user" tfsdk:"aws_user"`
+	Bulk_sync_staging_schema     string `mapstructure:"bulk_sync_staging_schema" tfsdk:"bulk_sync_staging_schema"`
+	Database                     string `mapstructure:"database" tfsdk:"database"`
+	External_id                  string `mapstructure:"external_id" tfsdk:"external_id"`
+	Hostname                     string `mapstructure:"hostname" tfsdk:"hostname"`
+	Iam_role_arn                 string `mapstructure:"iam_role_arn" tfsdk:"iam_role_arn"`
+	Port                         int64  `mapstructure:"port" tfsdk:"port"`
+	S3_bucket_name               string `mapstructure:"s3_bucket_name" tfsdk:"s3_bucket_name"`
+	S3_bucket_region             string `mapstructure:"s3_bucket_region" tfsdk:"s3_bucket_region"`
+	Ssh                          bool   `mapstructure:"ssh" tfsdk:"ssh"`
+	Ssh_host                     string `mapstructure:"ssh_host" tfsdk:"ssh_host"`
+	Ssh_port                     int64  `mapstructure:"ssh_port" tfsdk:"ssh_port"`
+	Ssh_user                     string `mapstructure:"ssh_user" tfsdk:"ssh_user"`
+	Use_bulk_sync_staging_schema bool   `mapstructure:"use_bulk_sync_staging_schema" tfsdk:"use_bulk_sync_staging_schema"`
+	Username                     string `mapstructure:"username" tfsdk:"username"`
+}
+
 func (d *RedshiftConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 
@@ -160,64 +181,34 @@ func (d *RedshiftConnectionDataSource) Read(ctx context.Context, req datasource.
 	data.Id = types.StringPointerValue(connection.Data.Id)
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
-	var diags diag.Diagnostics
-	data.Configuration, diags = types.ObjectValue(
-		data.Configuration.AttributeTypes(ctx),
-		map[string]attr.Value{
-			"auth_mode": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["auth_mode"], "string").(string),
-			),
-			"aws_access_key_id": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["aws_access_key_id"], "string").(string),
-			),
-			"aws_user": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["aws_user"], "string").(string),
-			),
-			"bulk_sync_staging_schema": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["bulk_sync_staging_schema"], "string").(string),
-			),
-			"database": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["database"], "string").(string),
-			),
-			"external_id": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["external_id"], "string").(string),
-			),
-			"hostname": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["hostname"], "string").(string),
-			),
-			"iam_role_arn": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["iam_role_arn"], "string").(string),
-			),
-			"port": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["port"], "string").(string),
-			),
-			"s3_bucket_name": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["s3_bucket_name"], "string").(string),
-			),
-			"s3_bucket_region": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["s3_bucket_region"], "string").(string),
-			),
-			"ssh": types.BoolValue(
-				getValueOrEmpty(connection.Data.Configuration["ssh"], "bool").(bool),
-			),
-			"ssh_host": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["ssh_host"], "string").(string),
-			),
-			"ssh_port": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["ssh_port"], "string").(string),
-			),
-			"ssh_user": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["ssh_user"], "string").(string),
-			),
-			"use_bulk_sync_staging_schema": types.BoolValue(
-				getValueOrEmpty(connection.Data.Configuration["use_bulk_sync_staging_schema"], "bool").(bool),
-			),
-			"username": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["username"], "string").(string),
-			),
-		},
-	)
 
+	conf := RedshiftDataSourceConf{}
+	err = mapstructure.Decode(connection.Data.Configuration, &conf)
+	if err != nil {
+		resp.Diagnostics.AddError("Error decoding connection configuration", err.Error())
+		return
+	}
+
+	var diags diag.Diagnostics
+	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"auth_mode":                    types.StringType,
+		"aws_access_key_id":            types.StringType,
+		"aws_user":                     types.StringType,
+		"bulk_sync_staging_schema":     types.StringType,
+		"database":                     types.StringType,
+		"external_id":                  types.StringType,
+		"hostname":                     types.StringType,
+		"iam_role_arn":                 types.StringType,
+		"port":                         types.NumberType,
+		"s3_bucket_name":               types.StringType,
+		"s3_bucket_region":             types.StringType,
+		"ssh":                          types.BoolType,
+		"ssh_host":                     types.StringType,
+		"ssh_port":                     types.NumberType,
+		"ssh_user":                     types.StringType,
+		"use_bulk_sync_staging_schema": types.BoolType,
+		"username":                     types.StringType,
+	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return

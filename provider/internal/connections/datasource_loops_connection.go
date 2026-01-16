@@ -54,6 +54,9 @@ func (d *LoopsConnectionDataSource) Schema(ctx context.Context, req datasource.S
 	}
 }
 
+type LoopsDataSourceConf struct {
+}
+
 func (d *LoopsConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 

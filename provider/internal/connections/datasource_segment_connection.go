@@ -54,6 +54,9 @@ func (d *SegmentConnectionDataSource) Schema(ctx context.Context, req datasource
 	}
 }
 
+type SegmentDataSourceConf struct {
+}
+
 func (d *SegmentConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 

@@ -54,6 +54,9 @@ func (d *HerondataConnectionDataSource) Schema(ctx context.Context, req datasour
 	}
 }
 
+type HerondataDataSourceConf struct {
+}
+
 func (d *HerondataConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 
