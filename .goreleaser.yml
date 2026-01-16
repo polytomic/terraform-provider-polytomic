@@ -57,12 +57,12 @@ builds:
 archives:
   - formats: zip
     id: "{{ .ProjectName }}_v{{ .Version }}"
-    builds:
+    ids:
       - "{{ .ProjectName }}_v{{ .Version }}"
     name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
   - formats: zip
     id: polytomic_importer
-    builds:
+    ids:
       - polytomic_importer
     name_template: "polytomic_importer_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
 checksum:
