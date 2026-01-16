@@ -13,6 +13,7 @@ import (
 	{{- if .Attributes }}
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/mitchellh/mapstructure"
 	{{- end }}
 )
 
@@ -33,6 +34,29 @@ func (d *{{ .Connection }}ConnectionDataSource) Configure(ctx context.Context, r
 func (d *{{ .Connection }}ConnectionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_{{ .ResourceName }}_connection"
 }
+
+{{ define "readAttribute" -}}
+	{{ if eq .TfType "Object" -}}
+	types.ObjectType{
+		AttrTypes: {{ template "attrTypes" . }},
+	},
+	{{- else if eq .TfType "Map" -}}
+	types.MapType{
+		ElemType: types.StringType,
+	},
+	{{- else -}}
+		{{ .AttrReadType }}
+		{{- if .Elem }}{
+			ElemType: {{ template "readAttribute" .Elem }}
+		}{{ end -}},
+	{{ end -}}
+{{ end -}}
+
+{{ define "attrTypes" -}}
+	map[string]attr.Type{
+		{{ range .Attributes }}{{- if not .Sensitive }}"{{ .AttrName }}": {{ template "readAttribute" . }}{{ end }}{{ end }}
+	}
+{{- end -}}
 
 {{ define "attribute" -}}
 	{{- if not .Sensitive -}}
@@ -88,6 +112,27 @@ func (d *{{ .Connection }}ConnectionDataSource) Schema(ctx context.Context, req 
 	}
 }
 
+{{ define "datasourceConfattrType" -}}
+{{ .Type  }}
+	{{- if .Attributes -}}
+	{
+		{{ range .Attributes }}{{ template "datasourceConfattr" . }}{{ end }}
+	}
+	{{- else if .Elem -}}
+		{{ template "datasourceConfattrType" .Elem }}
+	{{- end -}}
+{{ end }}
+
+{{ define "datasourceConfattr" -}}
+{{- if not .Sensitive }}
+	{{ .CapName }} {{ template "datasourceConfattrType" . }} `mapstructure:"{{ .Name }}" tfsdk:"{{ .AttrName }}"`
+{{- end -}}
+{{ end }}
+
+type {{ .Connection }}DataSourceConf struct {
+{{ range .Attributes -}}{{ template "datasourceConfattr" . }}{{ end }}
+}
+
 func (d *{{ .Connection }}ConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 
@@ -113,53 +158,17 @@ func (d *{{ .Connection }}ConnectionDataSource) Read(ctx context.Context, req da
 	data.Id = types.StringPointerValue(connection.Data.Id)
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
+	{{- if .Attributes }}
 
-    {{- if .Attributes }}
+	conf := {{ .Connection }}DataSourceConf{}
+	err = mapstructure.Decode(connection.Data.Configuration, &conf)
+	if err != nil {
+		resp.Diagnostics.AddError("Error decoding connection configuration", err.Error())
+		return
+	}
+
 	var diags diag.Diagnostics
-	data.Configuration, diags = types.ObjectValue(
-		data.Configuration.AttributeTypes(ctx),
-		map[string]attr.Value{
-			{{- range .Attributes }}
-			{{- if not .Sensitive }}
-			{{- if eq .Type "int" }}
-			"{{ .AttrName }}": types.Int64Value(
-				getValueOrEmpty(connection.Data.Configuration["{{ .Name }}"], "int64").(int64),
-			),
-			{{- else if eq .Type "bool" }}
-			"{{ .AttrName }}": types.BoolValue(
-				getValueOrEmpty(connection.Data.Configuration["{{ .Name }}"], "bool").(bool),
-			),
-			{{- else if eq .Type "map[string]string" }}
-			"{{ .AttrName }}": func() types.Map {
-				rawMap := getValueOrEmpty(connection.Data.Configuration["{{ .Name }}"], "map")
-				if rawMap == nil {
-					m, _ := types.MapValue(types.StringType, map[string]attr.Value{})
-					return m
-				}
-				mapVal, ok := rawMap.(map[string]interface{})
-				if !ok {
-					m, _ := types.MapValue(types.StringType, map[string]attr.Value{})
-					return m
-				}
-				elements := make(map[string]attr.Value)
-				for k, v := range mapVal {
-					if strVal, ok := v.(string); ok {
-						elements[k] = types.StringValue(strVal)
-					}
-				}
-				m, _ := types.MapValue(types.StringType, elements)
-				return m
-			}(),
-			{{- else }}
-			"{{ .AttrName }}": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["{{ .Name }}"], "string").(string),
-			),
-			{{- end }}
-			{{- end }}
-			{{- end }}
-		},
-	)
-
+	data.Configuration, diags = types.ObjectValueFrom(ctx, {{ template "attrTypes" . }}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return

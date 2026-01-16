@@ -84,8 +84,11 @@ resource "polytomic_bulk_sync" "sync" {
 
 Required:
 
-- `configuration` (String) Integration-specific configuration for the connection. Documentation for settings is available in the [Polytomic API documentation](https://apidocs.polytomic.com/2024-02-08/guides/configuring-your-connections/overview)
 - `connection_id` (String)
+
+Optional:
+
+- `configuration` (String) Integration-specific configuration for the connection. Documentation for settings is available in the [Polytomic API documentation](https://apidocs.polytomic.com/2024-02-08/guides/configuring-your-connections/overview)
 
 
 <a id="nestedatt--schedule"></a>
@@ -109,8 +112,11 @@ Optional:
 
 Required:
 
-- `configuration` (String) Integration-specific configuration for the connection. Documentation for settings is available in the [Polytomic API documentation](https://apidocs.polytomic.com/2024-02-08/guides/configuring-your-connections/overview)
 - `connection_id` (String)
+
+Optional:
+
+- `configuration` (String) Integration-specific configuration for the connection. Documentation for settings is available in the [Polytomic API documentation](https://apidocs.polytomic.com/2024-02-08/guides/configuring-your-connections/overview)
 
 
 <a id="nestedatt--schemas"></a>

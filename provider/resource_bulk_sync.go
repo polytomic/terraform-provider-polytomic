@@ -221,7 +221,7 @@ func (bulkSyncConnection) SchemaAttributes() map[string]schema.Attribute {
 		"configuration": schema.StringAttribute{
 			MarkdownDescription: "Integration-specific configuration for the connection. Documentation for settings is available in the [Polytomic API documentation](https://apidocs.polytomic.com/2024-02-08/guides/configuring-your-connections/overview)",
 			CustomType:          jsontypes.NormalizedType{},
-			Required:            true,
+			Optional:            true,
 		},
 	}
 }
