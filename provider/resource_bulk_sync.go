@@ -282,7 +282,6 @@ type bulkSyncSchema struct {
 	Enabled             types.Bool        `tfsdk:"enabled"`
 	PartitionKey        types.String      `tfsdk:"partition_key"`
 	TrackingField       types.String      `tfsdk:"tracking_field"`
-	Name                types.String      `tfsdk:"name"`
 	OutputName          types.String      `tfsdk:"output_name"`
 	UserOutputName      types.String      `tfsdk:"user_output_name"`
 	Fields              types.Set         `tfsdk:"fields"`
@@ -316,10 +315,6 @@ func (bulkSyncSchema) SchemaAttributes() map[string]schema.Attribute {
 		"tracking_field": schema.StringAttribute{
 			Optional: true,
 			Computed: true,
-		},
-		"name": schema.StringAttribute{
-			MarkdownDescription: "Schema name",
-			Computed:            true,
 		},
 		"output_name": schema.StringAttribute{
 			Optional: true,
@@ -379,7 +374,6 @@ func (bulkSyncSchema) AttrTypes() map[string]attr.Type {
 		"disable_data_cutoff":   types.BoolType,
 		"partition_key":         types.StringType,
 		"tracking_field":        types.StringType,
-		"name":                  types.StringType,
 		"output_name":           types.StringType,
 		"user_output_name":      types.StringType,
 	}
@@ -550,7 +544,7 @@ func (r *bulkSyncResource) Create(ctx context.Context, req resource.CreateReques
 		return
 	}
 	var destConf map[string]interface{}
-	if !destination.Configuration.IsUnknown() {
+	if !destination.Configuration.IsUnknown() && !destination.Configuration.IsNull() {
 		dc := make(map[string]interface{})
 		diags = destination.Configuration.Unmarshal(&dc)
 		if diags.HasError() {
@@ -571,7 +565,7 @@ func (r *bulkSyncResource) Create(ctx context.Context, req resource.CreateReques
 		return
 	}
 	var sourceConf map[string]interface{}
-	if !source.Configuration.IsUnknown() {
+	if !source.Configuration.IsUnknown() && !source.Configuration.IsNull() {
 		sc := make(map[string]interface{})
 		diags = source.Configuration.Unmarshal(&sc)
 		if diags.HasError() {
@@ -598,9 +592,19 @@ func (r *bulkSyncResource) Create(ctx context.Context, req resource.CreateReques
 		resyncConcurrencyLimit = &val
 	}
 
+	var normalizeNames *polytomic.BulkNormalizeNames
+	if !data.NormalizeNames.IsNull() && data.NormalizeNames.ValueString() != "" {
+		normalizeNames = pointer.To(polytomic.BulkNormalizeNames(data.NormalizeNames.ValueString()))
+	}
+
+	var orgID *string
+	if !data.Organization.IsNull() && data.Organization.ValueString() != "" {
+		orgID = data.Organization.ValueStringPointer()
+	}
+
 	created, err := client.BulkSync.Create(ctx,
 		&polytomic.CreateBulkSyncRequest{
-			OrganizationId:             data.Organization.ValueStringPointer(),
+			OrganizationId:             orgID,
 			Name:                       data.Name.ValueString(),
 			DestinationConnectionId:    destination.ConnectionID.ValueString(),
 			SourceConnectionId:         source.ConnectionID.ValueString(),
@@ -615,7 +619,7 @@ func (r *bulkSyncResource) Create(ctx context.Context, req resource.CreateReques
 			SourceConfiguration:        sourceConf,
 			ConcurrencyLimit:           concurrencyLimit,
 			ResyncConcurrencyLimit:     resyncConcurrencyLimit,
-			NormalizeNames:             pointer.To(polytomic.BulkNormalizeNames(data.NormalizeNames.ValueString())),
+			NormalizeNames:             normalizeNames,
 		},
 	)
 	if err != nil {
@@ -627,7 +631,7 @@ func (r *bulkSyncResource) Create(ctx context.Context, req resource.CreateReques
 		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error reading bulk sync schemas: %s", err))
 		return
 	}
-	data, diags = bulkSyncDataFromResponse(ctx, created.Data, createdSchemas.Data)
+	data, diags = bulkSyncDataFromResponse(ctx, created.Data, createdSchemas.Data, &data)
 	resp.Diagnostics.Append(diags...)
 	if diags.HasError() {
 		return
@@ -668,7 +672,7 @@ func (r *bulkSyncResource) Read(ctx context.Context, req resource.ReadRequest, r
 		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error reading bulk sync schemas: %s", err))
 		return
 	}
-	data, diags = bulkSyncDataFromResponse(ctx, bulkSync.Data, schemas.Data)
+	data, diags = bulkSyncDataFromResponse(ctx, bulkSync.Data, schemas.Data, &data)
 	resp.Diagnostics.Append(diags...)
 	if diags.HasError() {
 		return
@@ -782,11 +786,15 @@ func (r *bulkSyncResource) Update(ctx context.Context, req resource.UpdateReques
 		resp.Diagnostics.Append(diags...)
 		return
 	}
-	destConf := make(map[string]interface{})
-	diags = destination.Configuration.Unmarshal(&destConf)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
+	var destConf map[string]interface{}
+	if !destination.Configuration.IsUnknown() && !destination.Configuration.IsNull() {
+		dc := make(map[string]interface{})
+		diags = destination.Configuration.Unmarshal(&dc)
+		if diags.HasError() {
+			resp.Diagnostics.Append(diags...)
+			return
+		}
+		destConf = dc
 	}
 
 	// source connection
@@ -799,11 +807,15 @@ func (r *bulkSyncResource) Update(ctx context.Context, req resource.UpdateReques
 		resp.Diagnostics.Append(diags...)
 		return
 	}
-	sourceConf := make(map[string]interface{})
-	diags = source.Configuration.Unmarshal(&sourceConf)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
+	var sourceConf map[string]interface{}
+	if !source.Configuration.IsUnknown() && !source.Configuration.IsNull() {
+		sc := make(map[string]interface{})
+		diags = source.Configuration.Unmarshal(&sc)
+		if diags.HasError() {
+			resp.Diagnostics.Append(diags...)
+			return
+		}
+		sourceConf = sc
 	}
 
 	client, err := r.provider.Client(data.Organization.ValueString())
@@ -824,10 +836,20 @@ func (r *bulkSyncResource) Update(ctx context.Context, req resource.UpdateReques
 		resyncConcurrencyLimit = &val
 	}
 
+	var normalizeNames *polytomic.BulkNormalizeNames
+	if !data.NormalizeNames.IsNull() && data.NormalizeNames.ValueString() != "" {
+		normalizeNames = pointer.To(polytomic.BulkNormalizeNames(data.NormalizeNames.ValueString()))
+	}
+
+	var orgID *string
+	if !data.Organization.IsNull() && data.Organization.ValueString() != "" {
+		orgID = data.Organization.ValueStringPointer()
+	}
+
 	updated, err := client.BulkSync.Update(ctx,
 		data.Id.ValueString(),
 		&polytomic.UpdateBulkSyncRequest{
-			OrganizationId:             data.Organization.ValueStringPointer(),
+			OrganizationId:             orgID,
 			Name:                       data.Name.ValueString(),
 			DestinationConnectionId:    destination.ConnectionID.ValueString(),
 			SourceConnectionId:         source.ConnectionID.ValueString(),
@@ -842,7 +864,7 @@ func (r *bulkSyncResource) Update(ctx context.Context, req resource.UpdateReques
 			SourceConfiguration:        sourceConf,
 			ConcurrencyLimit:           concurrencyLimit,
 			ResyncConcurrencyLimit:     resyncConcurrencyLimit,
-			NormalizeNames:             pointer.To(polytomic.BulkNormalizeNames(data.NormalizeNames.ValueString())),
+			NormalizeNames:             normalizeNames,
 		},
 	)
 	if err != nil {
@@ -855,7 +877,7 @@ func (r *bulkSyncResource) Update(ctx context.Context, req resource.UpdateReques
 		return
 	}
 
-	data, diags = bulkSyncDataFromResponse(ctx, updated.Data, updatedSchemas.Data)
+	data, diags = bulkSyncDataFromResponse(ctx, updated.Data, updatedSchemas.Data, &data)
 	resp.Diagnostics.Append(diags...)
 	if diags.HasError() {
 		return
@@ -893,8 +915,9 @@ func (r *bulkSyncResource) ImportState(ctx context.Context, req resource.ImportS
 }
 
 // bulkSyncDataFromResponse returns the Terraform data for the response from the
-// Polytomic API.
-func bulkSyncDataFromResponse(ctx context.Context, response *polytomic.BulkSyncResponse, schemas []*polytomic.BulkSchema) (bulkSyncResourceData, diag.Diagnostics) {
+// Polytomic API. If planData is provided, it will preserve the source and destination
+// configurations from the plan to avoid state inconsistencies from API-added defaults.
+func bulkSyncDataFromResponse(ctx context.Context, response *polytomic.BulkSyncResponse, schemas []*polytomic.BulkSchema, planData *bulkSyncResourceData) (bulkSyncResourceData, diag.Diagnostics) {
 	var data bulkSyncResourceData
 	// schedule result
 	sch, diags := types.ObjectValueFrom(ctx, map[string]attr.Type{
@@ -917,21 +940,85 @@ func bulkSyncDataFromResponse(ctx context.Context, response *polytomic.BulkSyncR
 	}
 
 	// schemas result
-	schemaVal, diags := types.SetValueFrom(ctx, types.ObjectType{AttrTypes: bulkSyncSchema{}.AttrTypes()}, schemas)
-	if diags.HasError() {
-		return data, diags
+	// If planData is provided, merge plan schemas with API response to:
+	// 1. Preserve user-specified values (id, enabled, etc.)
+	// 2. Populate computed fields with API values (output_name, fields, etc.)
+	var schemaVal basetypes.SetValue
+	if planData != nil && !planData.Schemas.IsNull() {
+		filterType := types.ObjectType{AttrTypes: map[string]attr.Type{
+			"field_id": types.StringType,
+			"function": types.StringType,
+			"value":    types.StringType,
+		}}
+		fieldType := types.ObjectType{AttrTypes: bulkSyncSchemaField{}.AttrTypes()}
+
+		schemaVal, diags = MergeSetElements(
+			ctx,
+			planData.Schemas,
+			schemas,
+			types.ObjectType{AttrTypes: bulkSyncSchema{}.AttrTypes()},
+			func(s bulkSyncSchema) string { return s.Id.ValueString() },
+			func(s *polytomic.BulkSchema) string { return pointer.GetString(s.Id) },
+			func(ctx context.Context, plan bulkSyncSchema, api *polytomic.BulkSchema) (bulkSyncSchema, diag.Diagnostics) {
+				var mergeDiags diag.Diagnostics
+				merged := plan
+
+				// Populate computed string fields
+				merged.OutputName = PopulateUnknownString(merged.OutputName, api.OutputName)
+				merged.UserOutputName = PopulateUnknownString(merged.UserOutputName, api.UserOutputName)
+				merged.PartitionKey = PopulateUnknownString(merged.PartitionKey, api.PartitionKey)
+				merged.TrackingField = PopulateUnknownString(merged.TrackingField, api.TrackingField)
+
+				// Populate computed bool fields
+				merged.DisableDataCutoff = PopulateUnknownBool(merged.DisableDataCutoff, api.DisableDataCutoff)
+
+				// Populate computed set fields
+				merged.Fields, mergeDiags = PopulateUnknownSet(ctx, merged.Fields, api.Fields, fieldType)
+				if mergeDiags.HasError() {
+					return merged, mergeDiags
+				}
+
+				merged.Filters, mergeDiags = PopulateUnknownSet(ctx, merged.Filters, api.Filters, filterType)
+				return merged, mergeDiags
+			},
+		)
+		if diags.HasError() {
+			return data, diags
+		}
+	} else {
+		// No plan data (e.g., during import), use API response
+		schemaVal, diags = types.SetValueFrom(ctx, types.ObjectType{AttrTypes: bulkSyncSchema{}.AttrTypes()}, schemas)
+		if diags.HasError() {
+			return data, diags
+		}
 	}
 
 	// source connection result
-	sourceConfVal, err := json.Marshal(response.SourceConfiguration)
-	if err != nil {
-		diags.AddError("Error reading source configuration", err.Error())
-		return data, diags
+	// If planData is provided, preserve the configuration from the plan to avoid
+	// state inconsistencies from API-added defaults
+	var sourceConf jsontypes.Normalized
+	if planData != nil && !planData.Source.IsNull() {
+		var planSource bulkSyncConnection
+		diags = planData.Source.As(ctx, &planSource, basetypes.ObjectAsOptions{})
+		if diags.HasError() {
+			return data, diags
+		}
+		sourceConf = planSource.Configuration
+	} else if response.SourceConfiguration != nil {
+		sourceConfVal, err := json.Marshal(response.SourceConfiguration)
+		if err != nil {
+			diags.AddError("Error reading source configuration", err.Error())
+			return data, diags
+		}
+		sourceConf = jsontypes.NewNormalizedValue(string(sourceConfVal))
+	} else {
+		sourceConf = jsontypes.NewNormalizedNull()
 	}
+
 	sourceVal, diags := types.ObjectValueFrom(ctx, bulkSyncConnection{}.AttrTypes(),
 		bulkSyncConnection{
 			ConnectionID:  types.StringPointerValue(response.SourceConnectionId),
-			Configuration: jsontypes.NewNormalizedValue(string(sourceConfVal)),
+			Configuration: sourceConf,
 		},
 	)
 	if diags.HasError() {
@@ -939,18 +1026,34 @@ func bulkSyncDataFromResponse(ctx context.Context, response *polytomic.BulkSyncR
 	}
 
 	// destination connection result
-	destConfVal, err := json.Marshal(response.DestinationConfiguration)
-	if err != nil {
-		diags.AddError("Error reading source configuration", err.Error())
-		return data, diags
+	// If planData is provided, preserve the configuration from the plan to avoid
+	// state inconsistencies from API-added defaults
+	var destConf jsontypes.Normalized
+	if planData != nil && !planData.Destination.IsNull() {
+		var planDest bulkSyncConnection
+		diags = planData.Destination.As(ctx, &planDest, basetypes.ObjectAsOptions{})
+		if diags.HasError() {
+			return data, diags
+		}
+		destConf = planDest.Configuration
+	} else if response.DestinationConfiguration != nil {
+		destConfVal, err := json.Marshal(response.DestinationConfiguration)
+		if err != nil {
+			diags.AddError("Error reading destination configuration", err.Error())
+			return data, diags
+		}
+		destConf = jsontypes.NewNormalizedValue(string(destConfVal))
+	} else {
+		destConf = jsontypes.NewNormalizedNull()
 	}
+
 	destVal, diags := types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"connection_id": types.StringType,
 		"configuration": jsontypes.NormalizedType{},
 	},
 		bulkSyncConnection{
 			ConnectionID:  types.StringPointerValue(response.DestinationConnectionId),
-			Configuration: jsontypes.NewNormalizedValue(string(destConfVal)),
+			Configuration: destConf,
 		},
 	)
 	if diags.HasError() {
