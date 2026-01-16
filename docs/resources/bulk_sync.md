@@ -112,10 +112,6 @@ Required:
 <a id="nestedatt--schemas"></a>
 ### Nested Schema for `schemas`
 
-Required:
-
-- `id` (String)
-
 Optional:
 
 - `data_cutoff_timestamp` (String)
@@ -123,23 +119,18 @@ Optional:
 - `enabled` (Boolean)
 - `fields` (Attributes Set) (see [below for nested schema](#nestedatt--schemas--fields))
 - `filters` (Attributes Set) (see [below for nested schema](#nestedatt--schemas--filters))
+- `id` (String)
+- `output_name` (String)
 - `partition_key` (String)
 - `tracking_field` (String)
-
-Read-Only:
-
-- `output_name` (String)
 
 <a id="nestedatt--schemas--fields"></a>
 ### Nested Schema for `schemas.fields`
 
-Required:
-
-- `id` (String)
-
 Optional:
 
 - `enabled` (Boolean)
+- `id` (String)
 - `obfuscate` (Boolean)
 
 
@@ -148,8 +139,11 @@ Optional:
 
 Required:
 
-- `field_id` (String)
 - `function` (String)
+
+Optional:
+
+- `field_id` (String)
 - `value` (String)
 
 

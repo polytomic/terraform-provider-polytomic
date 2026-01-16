@@ -35,12 +35,12 @@ resource "polytomic_model" "model" {
 
 ### Optional
 
-- `additional_fields` (Set of Object) (see [below for nested schema](#nestedatt--additional_fields))
+- `additional_fields` (Attributes Set) (see [below for nested schema](#nestedatt--additional_fields))
 - `configuration` (String)
 - `fields` (Set of String)
 - `identifier` (String)
 - `organization` (String)
-- `relations` (Set of Object) (see [below for nested schema](#nestedatt--relations))
+- `relations` (Attributes Set) (see [below for nested schema](#nestedatt--relations))
 - `tracking_columns` (Set of String)
 
 ### Read-Only
@@ -52,7 +52,7 @@ resource "polytomic_model" "model" {
 <a id="nestedatt--additional_fields"></a>
 ### Nested Schema for `additional_fields`
 
-Optional:
+Required:
 
 - `label` (String)
 - `name` (String)
@@ -65,9 +65,9 @@ Optional:
 Optional:
 
 - `from` (String)
-- `to` (Object) (see [below for nested schema](#nestedobjatt--relations--to))
+- `to` (Attributes) (see [below for nested schema](#nestedatt--relations--to))
 
-<a id="nestedobjatt--relations--to"></a>
+<a id="nestedatt--relations--to"></a>
 ### Nested Schema for `relations.to`
 
 Optional:

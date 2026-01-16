@@ -74,7 +74,6 @@ resource "polytomic_sync" "sync" {
 
 Required:
 
-- `source` (Attributes) (see [below for nested schema](#nestedatt--fields--source))
 - `target` (String)
 
 Optional:
@@ -82,6 +81,7 @@ Optional:
 - `encryption_enabled` (Boolean) Whether the field should be encrypted
 - `new` (Boolean)
 - `override_value` (String)
+- `source` (Attributes) (see [below for nested schema](#nestedatt--fields--source))
 - `sync_mode` (String)
 
 <a id="nestedatt--fields--source"></a>
@@ -186,13 +186,13 @@ Required:
 
 Required:
 
-- `source` (Attributes) (see [below for nested schema](#nestedatt--override_fields--source))
 - `target` (String)
 
 Optional:
 
 - `new` (Boolean)
 - `override_value` (String)
+- `source` (Attributes) (see [below for nested schema](#nestedatt--override_fields--source))
 - `sync_mode` (String)
 
 <a id="nestedatt--override_fields--source"></a>

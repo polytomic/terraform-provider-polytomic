@@ -40,6 +40,13 @@ const (
 	exampleDatasourceOutputPath  = "./examples/data-sources"
 )
 
+// blocklist contains backend IDs that should not have resources or data sources generated
+var blocklist = map[string]bool{
+	// Add backend IDs to exclude here
+	"fakedata":    true,
+	"localsqlite": true,
+}
+
 var (
 	TypeMap = map[string]Typer{
 		"array": {
@@ -287,6 +294,12 @@ func GenerateConnections(ctx context.Context) error {
 	datasources := []Importable{}
 
 	for _, connType := range data {
+		// Skip blocklisted connection types
+		if blocklist[connType.ID] {
+			log.Printf("Skipping blocklisted connection type: %s", connType.ID)
+			continue
+		}
+
 		connSchema, err := fetchOrRead(ctx,
 			filepath.Join(jsonschemaPath, fmt.Sprintf("%s.json", connType.ID)),
 			func(ctx context.Context) (*polytomic.JsonschemaSchema, error) {
