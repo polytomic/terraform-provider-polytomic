@@ -3,9 +3,7 @@ package provider
 import (
 	"cmp"
 	"context"
-	"net/url"
 	"os"
-	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/providervalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -77,26 +75,13 @@ func (p *Provider) Configure(ctx context.Context, req provider.ConfigureRequest,
 		return
 	}
 
-	deployment := cmp.Or(
-		data.DeploymentUrl.ValueString(),
-		os.Getenv(providerclient.PolytomicDeploymentURL),
-		PolytomicDefaultURL,
-	)
-	if !strings.HasPrefix(strings.ToLower(deployment), "http") {
-		deployment = "https://" + deployment
-	}
-	deploymentURL, err := url.Parse(deployment)
-	if err != nil {
-		resp.Diagnostics.AddError("Error parsing deployment URL", err.Error())
-		return
-	}
-	if deploymentURL.Scheme == "" {
-		deploymentURL.Scheme = "https"
-	}
-
 	clientProvider, err := providerclient.NewClientProvider(
 		providerclient.Options{
-			DeploymentURL: deploymentURL.String(),
+			DeploymentURL: cmp.Or(
+				data.DeploymentUrl.ValueString(),
+				os.Getenv(providerclient.PolytomicDeploymentURL),
+				PolytomicDefaultURL,
+			),
 			DeploymentKey: cmp.Or(
 				data.DeploymentKey.ValueString(),
 				os.Getenv(providerclient.PolytomicDeploymentKey),

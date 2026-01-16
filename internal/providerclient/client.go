@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
 	"os"
 	"strings"
 	"sync"
@@ -68,10 +69,29 @@ type Provider struct {
 }
 
 func NewClientProvider(opts Options) (*Provider, error) {
-	// Normalize deployment URL to remove trailing slashes
-	if opts.DeploymentURL != "" {
-		opts.DeploymentURL = strings.TrimSuffix(opts.DeploymentURL, "/")
+	// Normalize deployment URL
+	if opts.DeploymentURL == "" {
+		opts.DeploymentURL = "app.polytomic.com"
 	}
+
+	// Add https:// scheme if no scheme is present
+	if !strings.HasPrefix(strings.ToLower(opts.DeploymentURL), "http") {
+		opts.DeploymentURL = "https://" + opts.DeploymentURL
+	}
+
+	// Parse and validate the URL
+	deploymentURL, err := url.Parse(opts.DeploymentURL)
+	if err != nil {
+		return nil, fmt.Errorf("invalid deployment URL: %w", err)
+	}
+
+	// Ensure scheme is set (redundant but defensive)
+	if deploymentURL.Scheme == "" {
+		deploymentURL.Scheme = "https"
+	}
+
+	// Remove all trailing slashes from the full URL
+	opts.DeploymentURL = strings.TrimRight(deploymentURL.String(), "/")
 
 	p := &Provider{
 		opts:    opts,

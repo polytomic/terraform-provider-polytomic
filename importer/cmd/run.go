@@ -32,9 +32,7 @@ var runCmd = &cobra.Command{
 		if url != "" {
 			clientOpts.DeploymentURL = url
 		}
-		if clientOpts.DeploymentURL == "" {
-			clientOpts.DeploymentURL = "https://app.polytomic.com"
-		}
+		// Note: Default URL is handled by NewClientProvider if empty
 		if apiKey != "" {
 			clientOpts.APIKey = apiKey
 		}
