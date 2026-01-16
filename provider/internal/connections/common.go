@@ -49,6 +49,9 @@ func getValueOrEmpty(v any, typ string) any {
 			return int64(0)
 		}
 		return v.(int64)
+	case "map":
+		// Return nil for maps, let the caller handle empty map creation
+		return v
 	default:
 		panic(fmt.Sprintf("unsupported type %s", typ))
 	}
@@ -92,6 +95,17 @@ func attrValue(ctx context.Context, val attr.Value) (interface{}, error) {
 		return tv.ValueString(), nil
 	case types.Object:
 		return objectMapValue(ctx, tv)
+	case types.Map:
+		// Convert map to map[string]interface{}
+		result := make(map[string]interface{})
+		for k, v := range tv.Elements() {
+			val, err := attrValue(ctx, v)
+			if err != nil {
+				return nil, fmt.Errorf("error converting map element %s: %w", k, err)
+			}
+			result[k] = val
+		}
+		return result, nil
 	case types.Set:
 		elemsIn := tv.Elements()
 		elemsOut := make([]interface{}, len(elemsIn))

@@ -277,9 +277,26 @@ func (d *HttpenrichmentConnectionDataSource) Read(ctx context.Context, req datas
 			"example_body": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["example_body"], "string").(string),
 			),
-			"example_inputs": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["example_inputs"], "string").(string),
-			),
+			"example_inputs": func() types.Map {
+				rawMap := getValueOrEmpty(connection.Data.Configuration["example_inputs"], "map")
+				if rawMap == nil {
+					m, _ := types.MapValue(types.StringType, map[string]attr.Value{})
+					return m
+				}
+				mapVal, ok := rawMap.(map[string]interface{})
+				if !ok {
+					m, _ := types.MapValue(types.StringType, map[string]attr.Value{})
+					return m
+				}
+				elements := make(map[string]attr.Value)
+				for k, v := range mapVal {
+					if strVal, ok := v.(string); ok {
+						elements[k] = types.StringValue(strVal)
+					}
+				}
+				m, _ := types.MapValue(types.StringType, elements)
+				return m
+			}(),
 			"fields": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["fields"], "string").(string),
 			),

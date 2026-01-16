@@ -30,6 +30,12 @@ import (
 var _ resource.Resource = &syncResource{}
 var _ resource.ResourceWithImportState = &syncResource{}
 
+// NewSyncResourceForSchemaIntrospection returns a sync resource instance
+// for schema introspection. This is used by the importer to validate field mappings.
+func NewSyncResourceForSchemaIntrospection() resource.Resource {
+	return &syncResource{}
+}
+
 func (r *syncResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		MarkdownDescription: ":meta:subcategory:Syncs: Sync",
@@ -115,7 +121,7 @@ func (r *syncResource) Schema(ctx context.Context, req resource.SchemaRequest, r
 									Required:            true,
 								},
 							},
-							Required: true,
+							Optional: true,
 						},
 						"target": schema.StringAttribute{
 							MarkdownDescription: "",
@@ -157,7 +163,7 @@ func (r *syncResource) Schema(ctx context.Context, req resource.SchemaRequest, r
 									Required:            true,
 								},
 							},
-							Required: true,
+							Optional: true,
 						},
 						"target": schema.StringAttribute{
 							MarkdownDescription: "",

@@ -146,9 +146,26 @@ func (d *AwsathenaConnectionDataSource) Read(ctx context.Context, req datasource
 			"region": types.StringValue(
 				getValueOrEmpty(connection.Data.Configuration["region"], "string").(string),
 			),
-			"tags": types.StringValue(
-				getValueOrEmpty(connection.Data.Configuration["tags"], "string").(string),
-			),
+			"tags": func() types.Map {
+				rawMap := getValueOrEmpty(connection.Data.Configuration["tags"], "map")
+				if rawMap == nil {
+					m, _ := types.MapValue(types.StringType, map[string]attr.Value{})
+					return m
+				}
+				mapVal, ok := rawMap.(map[string]interface{})
+				if !ok {
+					m, _ := types.MapValue(types.StringType, map[string]attr.Value{})
+					return m
+				}
+				elements := make(map[string]attr.Value)
+				for k, v := range mapVal {
+					if strVal, ok := v.(string); ok {
+						elements[k] = types.StringValue(strVal)
+					}
+				}
+				m, _ := types.MapValue(types.StringType, elements)
+				return m
+			}(),
 		},
 	)
 

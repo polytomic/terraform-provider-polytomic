@@ -80,29 +80,45 @@ func (r *modelResource) Schema(ctx context.Context, req resource.SchemaRequest, 
 				Optional:            true,
 				Computed:            true,
 			},
-			"additional_fields": schema.SetAttribute{
+			"additional_fields": schema.SetNestedAttribute{
 				MarkdownDescription: "",
-				ElementType: types.ObjectType{
-					AttrTypes: map[string]attr.Type{
-						"name":  types.StringType,
-						"type":  types.StringType,
-						"label": types.StringType,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"name": schema.StringAttribute{
+							MarkdownDescription: "",
+							Required:            true,
+						},
+						"type": schema.StringAttribute{
+							MarkdownDescription: "",
+							Required:            true,
+						},
+						"label": schema.StringAttribute{
+							MarkdownDescription: "",
+							Required:            true,
+						},
 					},
 				},
 				Optional: true,
 				Computed: true,
 			},
-			"relations": schema.SetAttribute{
+			"relations": schema.SetNestedAttribute{
 				MarkdownDescription: "",
-				ElementType: types.ObjectType{
-					AttrTypes: map[string]attr.Type{
-						"to": types.ObjectType{
-							AttrTypes: map[string]attr.Type{
-								"model_id": types.StringType,
-								"field":    types.StringType,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"to": schema.SingleNestedAttribute{
+							Attributes: map[string]schema.Attribute{
+								"model_id": schema.StringAttribute{
+									Optional: true,
+								},
+								"field": schema.StringAttribute{
+									Optional: true,
+								},
 							},
+							Optional: true,
 						},
-						"from": types.StringType,
+						"from": schema.StringAttribute{
+							Optional: true,
+						},
 					},
 				},
 				Optional: true,

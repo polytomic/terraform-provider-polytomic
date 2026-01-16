@@ -34,6 +34,12 @@ import (
 var _ resource.Resource = &bulkSyncResource{}
 var _ resource.ResourceWithImportState = &bulkSyncResource{}
 
+// NewBulkSyncResourceForSchemaIntrospection returns a bulk sync resource instance
+// for schema introspection. This is used by the importer to validate field mappings.
+func NewBulkSyncResourceForSchemaIntrospection() resource.Resource {
+	return &bulkSyncResource{}
+}
+
 func (r *bulkSyncResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		MarkdownDescription: ":meta:subcategory:Bulk Syncs: Bulk Sync",
@@ -216,7 +222,8 @@ type bulkSyncSchemaField struct {
 func (bulkSyncSchemaField) SchemaAttributes() map[string]schema.Attribute {
 	return map[string]schema.Attribute{
 		"id": schema.StringAttribute{
-			Required: true,
+			Optional: true,
+			Computed: true,
 		},
 		"enabled": schema.BoolAttribute{
 			Optional: true,
@@ -252,7 +259,8 @@ type bulkSyncSchema struct {
 func (bulkSyncSchema) SchemaAttributes() map[string]schema.Attribute {
 	return map[string]schema.Attribute{
 		"id": schema.StringAttribute{
-			Required: true,
+			Optional: true,
+			Computed: true,
 		},
 		"enabled": schema.BoolAttribute{
 			Optional: true,
@@ -275,6 +283,7 @@ func (bulkSyncSchema) SchemaAttributes() map[string]schema.Attribute {
 			Computed: true,
 		},
 		"output_name": schema.StringAttribute{
+			Optional: true,
 			Computed: true,
 		},
 		"fields": schema.SetNestedAttribute{
@@ -290,13 +299,13 @@ func (bulkSyncSchema) SchemaAttributes() map[string]schema.Attribute {
 			NestedObject: schema.NestedAttributeObject{
 				Attributes: map[string]schema.Attribute{
 					"field_id": schema.StringAttribute{
-						Required: true,
+						Optional: true,
 					},
 					"function": schema.StringAttribute{
 						Required: true,
 					},
 					"value": schema.StringAttribute{
-						Required: true,
+						Optional: true,
 					},
 				},
 			},

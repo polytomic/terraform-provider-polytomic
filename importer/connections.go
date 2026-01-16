@@ -72,16 +72,67 @@ func (c *Connections) Init(ctx context.Context) error {
 				return err
 			}
 
+			// Normalize configuration keys to snake_case to match schema
+			config = normalizeConfigKeys(config)
+
 			configSchema, ok := schemaResp.Schema.Attributes["configuration"].(schema.SingleNestedAttribute)
 			if !ok {
 				return fmt.Errorf("not single nested attribute %s", resp.TypeName)
 			}
-			for k, v := range configSchema.Attributes {
-				if _, ok := config[k]; ok {
-					if v.IsSensitive() {
-						delete(config, k)
+
+			// Filter config to only include fields that exist in the schema
+			// and remove sensitive fields
+			filteredConfig := make(map[string]interface{})
+			missingRequiredFields := []string{}
+			for k, v := range config {
+				if attr, exists := configSchema.Attributes[k]; exists {
+					if !attr.IsSensitive() {
+						filteredConfig[k] = v
 					}
 				}
+			}
+
+			// Check if any required fields are missing after filtering
+			for fieldName, attr := range configSchema.Attributes {
+				if attr.IsRequired() {
+					if _, exists := filteredConfig[fieldName]; !exists {
+						if attr.IsSensitive() {
+							missingRequiredFields = append(missingRequiredFields, fieldName)
+						}
+					}
+				}
+			}
+
+			// Skip OAuth connections that have required sensitive fields
+			// These cannot be imported because the credentials are not readable from the API
+			if len(missingRequiredFields) > 0 {
+				log.Warn().
+					Str("connection", pointer.GetString(conn.Name)).
+					Str("type", resp.TypeName).
+					Strs("missing_fields", missingRequiredFields).
+					Msg("skipping connection with required sensitive fields (OAuth connections cannot be imported)")
+				continue
+			}
+
+			config = filteredConfig
+
+			// Validate the connection resource schema
+			validator, err := NewSchemaValidator(ctx, r)
+			if err != nil {
+				return fmt.Errorf("failed to create schema validator for %s: %w", resp.TypeName, err)
+			}
+
+			// Build field mapping for this connection
+			mapping := map[string]interface{}{
+				"name":          pointer.GetString(conn.Name),
+				"organization":  pointer.GetString(conn.OrganizationId),
+				"configuration": config,
+			}
+
+			// Validate the mapping
+			if err := validator.ValidateMapping(mapping); err != nil {
+				return fmt.Errorf("schema validation failed for connection '%s' (%s): %w",
+					pointer.GetString(conn.Name), resp.TypeName, err)
 			}
 
 			c.Resources[name] = Connection{
@@ -97,6 +148,26 @@ func (c *Connections) Init(ctx context.Context) error {
 			d.Metadata(ctx, datasource.MetadataRequest{
 				ProviderTypeName: provider.Name,
 			}, resp)
+
+			// Get datasource schema for validation
+			schemaReq := datasource.SchemaRequest{}
+			schemaResp := &datasource.SchemaResponse{}
+			d.Schema(ctx, schemaReq, schemaResp)
+
+			// Build field mapping for this datasource
+			mapping := map[string]interface{}{
+				"id":           pointer.GetString(conn.Id),
+				"name":         pointer.GetString(conn.Name),
+				"organization": pointer.GetString(conn.OrganizationId),
+			}
+
+			// Validate datasource schema by checking that required fields exist
+			for fieldName := range mapping {
+				if _, exists := schemaResp.Schema.Attributes[fieldName]; !exists {
+					log.Warn().Msgf("datasource %s missing expected field '%s'", resp.TypeName, fieldName)
+				}
+			}
+
 			c.Datasources[name] = Connection{
 				ID:           conn.Id,
 				Resource:     resp.TypeName,
@@ -202,4 +273,36 @@ func (c *Connections) DatasourceRefs() map[string]string {
 
 func (c *Connections) Variables() []Variable {
 	return nil
+}
+
+// normalizeConfigKeys converts configuration keys from camelCase to snake_case
+// to match the Terraform provider schema expectations
+func normalizeConfigKeys(config map[string]interface{}) map[string]interface{} {
+	normalized := make(map[string]interface{})
+	for k, v := range config {
+		// Only convert if the key contains uppercase letters (is camelCase)
+		// If already snake_case, leave it alone to avoid double conversion
+		snakeKey := k
+		if containsUpperCase(k) {
+			snakeKey = provider.ToSnakeCase(k)
+		}
+
+		// Recursively normalize nested maps
+		if nestedMap, ok := v.(map[string]interface{}); ok {
+			normalized[snakeKey] = normalizeConfigKeys(nestedMap)
+		} else {
+			normalized[snakeKey] = v
+		}
+	}
+	return normalized
+}
+
+// containsUpperCase checks if a string contains any uppercase letters
+func containsUpperCase(s string) bool {
+	for _, c := range s {
+		if c >= 'A' && c <= 'Z' {
+			return true
+		}
+	}
+	return false
 }
