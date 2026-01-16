@@ -84,7 +84,7 @@ func (d *Zendesk_supportConnectionDataSource) Schema(ctx context.Context, req da
 }
 
 func (d *Zendesk_supportConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var data connectionData
+	var data connectionDataSourceData
 
 	// Read Terraform configuration data into the model
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)

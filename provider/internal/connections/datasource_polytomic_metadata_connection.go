@@ -72,7 +72,7 @@ func (d *Polytomic_metadataConnectionDataSource) Schema(ctx context.Context, req
 }
 
 func (d *Polytomic_metadataConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var data connectionData
+	var data connectionDataSourceData
 
 	// Read Terraform configuration data into the model
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)

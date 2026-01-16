@@ -122,7 +122,7 @@ func (d *S3ConnectionDataSource) Schema(ctx context.Context, req datasource.Sche
 }
 
 func (d *S3ConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var data connectionData
+	var data connectionDataSourceData
 
 	// Read Terraform configuration data into the model
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)

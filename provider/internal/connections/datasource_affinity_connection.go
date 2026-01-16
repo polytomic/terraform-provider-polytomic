@@ -62,7 +62,7 @@ func (d *AffinityConnectionDataSource) Schema(ctx context.Context, req datasourc
 }
 
 func (d *AffinityConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var data connectionData
+	var data connectionDataSourceData
 
 	// Read Terraform configuration data into the model
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)

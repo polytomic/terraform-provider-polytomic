@@ -55,7 +55,7 @@ func (d *LagoConnectionDataSource) Schema(ctx context.Context, req datasource.Sc
 }
 
 func (d *LagoConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var data connectionData
+	var data connectionDataSourceData
 
 	// Read Terraform configuration data into the model
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
