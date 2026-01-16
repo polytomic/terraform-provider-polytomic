@@ -8,6 +8,7 @@ import (
 
 	"github.com/AlekSi/pointer"
 	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
+	"github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -389,6 +390,31 @@ func (r *syncResource) Schema(ctx context.Context, req resource.SchemaRequest, r
 				ElementType:         types.StringType,
 				Computed:            true,
 			},
+			"policies": schema.SetAttribute{
+				MarkdownDescription: "Policy IDs attached to this sync",
+				ElementType:         types.StringType,
+				Computed:            true,
+			},
+			"created_at": schema.StringAttribute{
+				MarkdownDescription: "Timestamp when the sync was created",
+				Computed:            true,
+				CustomType:          timetypes.RFC3339Type{},
+			},
+			"created_by": schema.SingleNestedAttribute{
+				MarkdownDescription: "Actor who created this sync",
+				Computed:            true,
+				Attributes:          actorAttributes(),
+			},
+			"updated_at": schema.StringAttribute{
+				MarkdownDescription: "Timestamp when the sync was last updated",
+				Computed:            true,
+				CustomType:          timetypes.RFC3339Type{},
+			},
+			"updated_by": schema.SingleNestedAttribute{
+				MarkdownDescription: "Actor who last updated this sync",
+				Computed:            true,
+				Attributes:          actorAttributes(),
+			},
 		},
 	}
 }
@@ -398,24 +424,29 @@ func (r *syncResource) Metadata(ctx context.Context, req resource.MetadataReques
 }
 
 type syncResourceResourceData struct {
-	ID                   types.String `tfsdk:"id"`
-	Organization         types.String `tfsdk:"organization"`
-	Name                 types.String `tfsdk:"name"`
-	Target               types.Object `tfsdk:"target"`
-	Mode                 types.String `tfsdk:"mode"`
-	Fields               types.Set    `tfsdk:"fields"`
-	OverrideFields       types.Set    `tfsdk:"override_fields"`
-	Filters              types.Set    `tfsdk:"filters"`
-	FilterLogic          types.String `tfsdk:"filter_logic"`
-	Overrides            types.Set    `tfsdk:"overrides"`
-	Schedule             types.Object `tfsdk:"schedule"`
-	Identity             types.Object `tfsdk:"identity"`
-	SyncAllRecords       types.Bool   `tfsdk:"sync_all_records"`
-	Active               types.Bool   `tfsdk:"active"`
-	EncryptionPassphrase types.String `tfsdk:"encryption_passphrase"`
-	OnlyEnrichUpdates    types.Bool   `tfsdk:"only_enrich_updates"`
-	SkipInitialBackfill  types.Bool   `tfsdk:"skip_initial_backfill"`
-	ModelIds             types.Set    `tfsdk:"model_ids"`
+	ID                   types.String      `tfsdk:"id"`
+	Organization         types.String      `tfsdk:"organization"`
+	Name                 types.String      `tfsdk:"name"`
+	Target               types.Object      `tfsdk:"target"`
+	Mode                 types.String      `tfsdk:"mode"`
+	Fields               types.Set         `tfsdk:"fields"`
+	OverrideFields       types.Set         `tfsdk:"override_fields"`
+	Filters              types.Set         `tfsdk:"filters"`
+	FilterLogic          types.String      `tfsdk:"filter_logic"`
+	Overrides            types.Set         `tfsdk:"overrides"`
+	Schedule             types.Object      `tfsdk:"schedule"`
+	Identity             types.Object      `tfsdk:"identity"`
+	SyncAllRecords       types.Bool        `tfsdk:"sync_all_records"`
+	Active               types.Bool        `tfsdk:"active"`
+	EncryptionPassphrase types.String      `tfsdk:"encryption_passphrase"`
+	OnlyEnrichUpdates    types.Bool        `tfsdk:"only_enrich_updates"`
+	SkipInitialBackfill  types.Bool        `tfsdk:"skip_initial_backfill"`
+	ModelIds             types.Set         `tfsdk:"model_ids"`
+	Policies             types.Set         `tfsdk:"policies"`
+	CreatedAt            timetypes.RFC3339 `tfsdk:"created_at"`
+	CreatedBy            types.Object      `tfsdk:"created_by"`
+	UpdatedAt            timetypes.RFC3339 `tfsdk:"updated_at"`
+	UpdatedBy            types.Object      `tfsdk:"updated_by"`
 }
 
 type Filter struct {
@@ -1212,6 +1243,32 @@ func syncDataFromResponse(ctx context.Context, sync *polytomic.ModelSyncResponse
 	data.ModelIds, diags = types.SetValueFrom(ctx, types.StringType, modelIDs)
 	if diags.HasError() {
 		return data, diags
+	}
+
+	// Policies
+	data.Policies, diags = types.SetValueFrom(ctx, types.StringType, sync.Policies)
+	if diags.HasError() {
+		return data, diags
+	}
+
+	// Audit fields
+	if sync.CreatedAt != nil {
+		data.CreatedAt = timetypes.NewRFC3339TimeValue(*sync.CreatedAt)
+	}
+	if sync.CreatedBy != nil {
+		data.CreatedBy, diags = types.ObjectValueFrom(ctx, actorAttrTypes(), sync.CreatedBy)
+		if diags.HasError() {
+			return data, diags
+		}
+	}
+	if sync.UpdatedAt != nil {
+		data.UpdatedAt = timetypes.NewRFC3339TimeValue(*sync.UpdatedAt)
+	}
+	if sync.UpdatedBy != nil {
+		data.UpdatedBy, diags = types.ObjectValueFrom(ctx, actorAttrTypes(), sync.UpdatedBy)
+		if diags.HasError() {
+			return data, diags
+		}
 	}
 
 	return data, diags

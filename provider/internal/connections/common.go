@@ -14,12 +14,21 @@ import (
 //go:embed force_destroy.md
 var forceDestroyMessage string
 
+// connectionData is used by resources (which support force_destroy for deletion)
 type connectionData struct {
 	Organization  types.String `tfsdk:"organization"`
 	Name          types.String `tfsdk:"name"`
 	Id            types.String `tfsdk:"id"`
 	Configuration types.Object `tfsdk:"configuration"`
 	ForceDestroy  types.Bool   `tfsdk:"force_destroy"`
+}
+
+// connectionDataSourceData is used by data sources (read-only, no force_destroy)
+type connectionDataSourceData struct {
+	Organization  types.String `tfsdk:"organization"`
+	Name          types.String `tfsdk:"name"`
+	Id            types.String `tfsdk:"id"`
+	Configuration types.Object `tfsdk:"configuration"`
 }
 
 func getValueOrEmpty(v any, typ string) any {

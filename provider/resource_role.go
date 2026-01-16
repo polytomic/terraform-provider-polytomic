@@ -39,6 +39,10 @@ func (r *roleResource) Schema(ctx context.Context, req resource.SchemaRequest, r
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
+			"system": schema.BoolAttribute{
+				MarkdownDescription: "Whether this is a system-managed role (read-only)",
+				Computed:            true,
+			},
 		},
 	}
 }
@@ -51,6 +55,7 @@ type roleResourceData struct {
 	Organization types.String `tfsdk:"organization"`
 	Name         types.String `tfsdk:"name"`
 	Id           types.String `tfsdk:"id"`
+	System       types.Bool   `tfsdk:"system"`
 }
 
 type roleResource struct {
@@ -92,6 +97,7 @@ func (r *roleResource) Create(ctx context.Context, req resource.CreateRequest, r
 	data.Id = types.StringPointerValue(role.Data.Id)
 	data.Name = types.StringPointerValue(role.Data.Name)
 	data.Organization = types.StringPointerValue(role.Data.OrganizationId)
+	data.System = types.BoolPointerValue(role.Data.System)
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -128,6 +134,7 @@ func (r *roleResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 	data.Id = types.StringPointerValue(role.Data.Id)
 	data.Name = types.StringPointerValue(role.Data.Name)
 	data.Organization = types.StringPointerValue(role.Data.OrganizationId)
+	data.System = types.BoolPointerValue(role.Data.System)
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -164,6 +171,7 @@ func (r *roleResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	data.Id = types.StringPointerValue(role.Data.Id)
 	data.Name = types.StringPointerValue(role.Data.Name)
 	data.Organization = types.StringPointerValue(role.Data.OrganizationId)
+	data.System = types.BoolPointerValue(role.Data.System)
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)

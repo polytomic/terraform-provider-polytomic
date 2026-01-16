@@ -73,7 +73,11 @@ resource "polytomic_bulk_sync" "sync" {
 
 ### Read-Only
 
+- `created_at` (String) Timestamp when the bulk sync was created
+- `created_by` (Attributes) Actor who created this bulk sync (see [below for nested schema](#nestedatt--created_by))
 - `id` (String) The ID of this resource.
+- `updated_at` (String) Timestamp when the bulk sync was last updated
+- `updated_by` (Attributes) Actor who last updated this bulk sync (see [below for nested schema](#nestedatt--updated_by))
 
 <a id="nestedatt--destination"></a>
 ### Nested Schema for `destination`
@@ -123,6 +127,11 @@ Optional:
 - `output_name` (String)
 - `partition_key` (String)
 - `tracking_field` (String)
+- `user_output_name` (String) User-specified override for the output table name
+
+Read-Only:
+
+- `name` (String) Schema name
 
 <a id="nestedatt--schemas--fields"></a>
 ### Nested Schema for `schemas.fields`
@@ -132,6 +141,11 @@ Optional:
 - `enabled` (Boolean)
 - `id` (String)
 - `obfuscate` (Boolean)
+- `user_output_name` (String) User-specified override for output column name
+
+Read-Only:
+
+- `output_name` (String) Computed output column name
 
 
 <a id="nestedatt--schemas--filters"></a>
@@ -145,5 +159,26 @@ Optional:
 
 - `field_id` (String)
 - `value` (String)
+
+
+
+<a id="nestedatt--created_by"></a>
+### Nested Schema for `created_by`
+
+Read-Only:
+
+- `id` (String) Actor ID
+- `name` (String) Actor name
+- `type` (String) Actor type (user, system, organization, partner)
+
+
+<a id="nestedatt--updated_by"></a>
+### Nested Schema for `updated_by`
+
+Read-Only:
+
+- `id` (String) Actor ID
+- `name` (String) Actor name
+- `type` (String) Actor type (user, system, organization, partner)
 
 

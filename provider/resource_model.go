@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/AlekSi/pointer"
+	"github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -142,23 +143,53 @@ func (r *modelResource) Schema(ctx context.Context, req resource.SchemaRequest, 
 					setplanmodifier.UseStateForUnknown(),
 				},
 			},
+			"policies": schema.SetAttribute{
+				MarkdownDescription: "Policy IDs attached to this model",
+				ElementType:         types.StringType,
+				Computed:            true,
+			},
+			"created_at": schema.StringAttribute{
+				MarkdownDescription: "Timestamp when the model was created",
+				Computed:            true,
+				CustomType:          timetypes.RFC3339Type{},
+			},
+			"created_by": schema.SingleNestedAttribute{
+				MarkdownDescription: "Actor who created this model",
+				Computed:            true,
+				Attributes:          actorAttributes(),
+			},
+			"updated_at": schema.StringAttribute{
+				MarkdownDescription: "Timestamp when the model was last updated",
+				Computed:            true,
+				CustomType:          timetypes.RFC3339Type{},
+			},
+			"updated_by": schema.SingleNestedAttribute{
+				MarkdownDescription: "Actor who last updated this model",
+				Computed:            true,
+				Attributes:          actorAttributes(),
+			},
 		},
 	}
 }
 
 type modelResourceResourceData struct {
-	ID               types.String `tfsdk:"id"`
-	Organization     types.String `tfsdk:"organization"`
-	Name             types.String `tfsdk:"name"`
-	Type             types.String `tfsdk:"type"`
-	Version          types.Int64  `tfsdk:"version"`
-	ConnectionID     types.String `tfsdk:"connection_id"`
-	Configuration    types.String `tfsdk:"configuration"`
-	Fields           types.Set    `tfsdk:"fields"`
-	AdditionalFields types.Set    `tfsdk:"additional_fields"`
-	Relations        types.Set    `tfsdk:"relations"`
-	Identifier       types.String `tfsdk:"identifier"`
-	TrackingColumns  types.Set    `tfsdk:"tracking_columns"`
+	ID               types.String      `tfsdk:"id"`
+	Organization     types.String      `tfsdk:"organization"`
+	Name             types.String      `tfsdk:"name"`
+	Type             types.String      `tfsdk:"type"`
+	Version          types.Int64       `tfsdk:"version"`
+	ConnectionID     types.String      `tfsdk:"connection_id"`
+	Configuration    types.String      `tfsdk:"configuration"`
+	Fields           types.Set         `tfsdk:"fields"`
+	AdditionalFields types.Set         `tfsdk:"additional_fields"`
+	Relations        types.Set         `tfsdk:"relations"`
+	Identifier       types.String      `tfsdk:"identifier"`
+	TrackingColumns  types.Set         `tfsdk:"tracking_columns"`
+	Policies         types.Set         `tfsdk:"policies"`
+	CreatedAt        timetypes.RFC3339 `tfsdk:"created_at"`
+	CreatedBy        types.Object      `tfsdk:"created_by"`
+	UpdatedAt        timetypes.RFC3339 `tfsdk:"updated_at"`
+	UpdatedBy        types.Object      `tfsdk:"updated_by"`
 }
 
 type modelResource struct {
@@ -377,6 +408,35 @@ func (r *modelResource) Create(ctx context.Context, req resource.CreateRequest, 
 	data.TrackingColumns = trackingColumns
 	data.AdditionalFields = additionalFields
 
+	// Policies
+	data.Policies, diags = types.SetValueFrom(ctx, types.StringType, model.Data.Policies)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
+	// Audit fields
+	if model.Data.CreatedAt != nil {
+		data.CreatedAt = timetypes.NewRFC3339TimeValue(*model.Data.CreatedAt)
+	}
+	if model.Data.CreatedBy != nil {
+		data.CreatedBy, diags = types.ObjectValueFrom(ctx, actorAttrTypes(), model.Data.CreatedBy)
+		if diags.HasError() {
+			resp.Diagnostics.Append(diags...)
+			return
+		}
+	}
+	if model.Data.UpdatedAt != nil {
+		data.UpdatedAt = timetypes.NewRFC3339TimeValue(*model.Data.UpdatedAt)
+	}
+	if model.Data.UpdatedBy != nil {
+		data.UpdatedBy, diags = types.ObjectValueFrom(ctx, actorAttrTypes(), model.Data.UpdatedBy)
+		if diags.HasError() {
+			resp.Diagnostics.Append(diags...)
+			return
+		}
+	}
+
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -538,6 +598,35 @@ func (r *modelResource) Read(ctx context.Context, req resource.ReadRequest, resp
 	data.Identifier = types.StringValue(pointer.Get(model.Data.Identifier))
 	data.TrackingColumns = trackingColumns
 	data.AdditionalFields = additionalFields
+
+	// Policies
+	data.Policies, diags = types.SetValueFrom(ctx, types.StringType, model.Data.Policies)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
+	// Audit fields
+	if model.Data.CreatedAt != nil {
+		data.CreatedAt = timetypes.NewRFC3339TimeValue(*model.Data.CreatedAt)
+	}
+	if model.Data.CreatedBy != nil {
+		data.CreatedBy, diags = types.ObjectValueFrom(ctx, actorAttrTypes(), model.Data.CreatedBy)
+		if diags.HasError() {
+			resp.Diagnostics.Append(diags...)
+			return
+		}
+	}
+	if model.Data.UpdatedAt != nil {
+		data.UpdatedAt = timetypes.NewRFC3339TimeValue(*model.Data.UpdatedAt)
+	}
+	if model.Data.UpdatedBy != nil {
+		data.UpdatedBy, diags = types.ObjectValueFrom(ctx, actorAttrTypes(), model.Data.UpdatedBy)
+		if diags.HasError() {
+			resp.Diagnostics.Append(diags...)
+			return
+		}
+	}
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -747,6 +836,35 @@ func (r *modelResource) Update(ctx context.Context, req resource.UpdateRequest, 
 	data.Identifier = types.StringValue(pointer.Get(model.Data.Identifier))
 	data.TrackingColumns = trackingColumns
 	data.AdditionalFields = additionalFields
+
+	// Policies
+	data.Policies, diags = types.SetValueFrom(ctx, types.StringType, model.Data.Policies)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
+	// Audit fields
+	if model.Data.CreatedAt != nil {
+		data.CreatedAt = timetypes.NewRFC3339TimeValue(*model.Data.CreatedAt)
+	}
+	if model.Data.CreatedBy != nil {
+		data.CreatedBy, diags = types.ObjectValueFrom(ctx, actorAttrTypes(), model.Data.CreatedBy)
+		if diags.HasError() {
+			resp.Diagnostics.Append(diags...)
+			return
+		}
+	}
+	if model.Data.UpdatedAt != nil {
+		data.UpdatedAt = timetypes.NewRFC3339TimeValue(*model.Data.UpdatedAt)
+	}
+	if model.Data.UpdatedBy != nil {
+		data.UpdatedBy, diags = types.ObjectValueFrom(ctx, actorAttrTypes(), model.Data.UpdatedBy)
+		if diags.HasError() {
+			resp.Diagnostics.Append(diags...)
+			return
+		}
+	}
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)

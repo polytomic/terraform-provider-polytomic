@@ -34,5 +34,6 @@ resource "polytomic_organization" "acme-sso" {
 ### Read-Only
 
 - `id` (String) Organization identifier
+- `issuer` (String) SSO issuer identifier
 
 

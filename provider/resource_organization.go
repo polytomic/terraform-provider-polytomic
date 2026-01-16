@@ -46,6 +46,10 @@ func (r *organizationResource) Schema(ctx context.Context, req resource.SchemaRe
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
+			"issuer": schema.StringAttribute{
+				MarkdownDescription: "SSO issuer identifier",
+				Computed:            true,
+			},
 		},
 	}
 }
@@ -55,6 +59,7 @@ type organizationResourceData struct {
 	Id        types.String `tfsdk:"id"`
 	SSODomain types.String `tfsdk:"sso_domain"`
 	SSOOrgId  types.String `tfsdk:"sso_org_id"`
+	Issuer    types.String `tfsdk:"issuer"`
 }
 
 type organizationResource struct {
@@ -99,6 +104,7 @@ func (r *organizationResource) Create(ctx context.Context, req resource.CreateRe
 		return
 	}
 	data.Id = types.StringPointerValue(created.Data.Id)
+	data.Issuer = types.StringPointerValue(created.Data.Issuer)
 	tflog.Trace(ctx, "created a organization")
 
 	diags = resp.State.Set(ctx, &data)
@@ -132,6 +138,9 @@ func (r *organizationResource) Read(ctx context.Context, req resource.ReadReques
 
 	data.Id = types.StringPointerValue(organization.Data.Id)
 	data.Name = types.StringPointerValue(organization.Data.Name)
+	data.SSODomain = types.StringPointerValue(organization.Data.SsoDomain)
+	data.SSOOrgId = types.StringPointerValue(organization.Data.SsoOrgId)
+	data.Issuer = types.StringPointerValue(organization.Data.Issuer)
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -160,6 +169,7 @@ func (r *organizationResource) Update(ctx context.Context, req resource.UpdateRe
 	}
 
 	data.Name = types.StringPointerValue(updated.Data.Name)
+	data.Issuer = types.StringPointerValue(updated.Data.Issuer)
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }

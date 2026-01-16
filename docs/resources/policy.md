@@ -47,6 +47,7 @@ resource "polytomic_policy" "example" {
 ### Read-Only
 
 - `id` (String) The ID of this resource.
+- `system` (Boolean) Whether this is a system-managed policy (read-only)
 
 <a id="nestedatt--policy_actions"></a>
 ### Nested Schema for `policy_actions`

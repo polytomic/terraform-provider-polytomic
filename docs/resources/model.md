@@ -45,8 +45,13 @@ resource "polytomic_model" "model" {
 
 ### Read-Only
 
+- `created_at` (String) Timestamp when the model was created
+- `created_by` (Attributes) Actor who created this model (see [below for nested schema](#nestedatt--created_by))
 - `id` (String) The ID of this resource.
+- `policies` (Set of String) Policy IDs attached to this model
 - `type` (String)
+- `updated_at` (String) Timestamp when the model was last updated
+- `updated_by` (Attributes) Actor who last updated this model (see [below for nested schema](#nestedatt--updated_by))
 - `version` (Number)
 
 <a id="nestedatt--additional_fields"></a>
@@ -74,5 +79,26 @@ Optional:
 
 - `field` (String)
 - `model_id` (String)
+
+
+
+<a id="nestedatt--created_by"></a>
+### Nested Schema for `created_by`
+
+Read-Only:
+
+- `id` (String) Actor ID
+- `name` (String) Actor name
+- `type` (String) Actor type (user, system, organization, partner)
+
+
+<a id="nestedatt--updated_by"></a>
+### Nested Schema for `updated_by`
+
+Read-Only:
+
+- `id` (String) Actor ID
+- `name` (String) Actor name
+- `type` (String) Actor type (user, system, organization, partner)
 
 

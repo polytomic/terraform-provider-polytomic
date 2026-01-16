@@ -32,5 +32,6 @@ resource "polytomic_role" "example" {
 ### Read-Only
 
 - `id` (String) The ID of this resource.
+- `system` (Boolean) Whether this is a system-managed role (read-only)
 
 

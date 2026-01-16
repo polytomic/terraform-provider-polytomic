@@ -61,6 +61,10 @@ func (r *policyResource) Schema(ctx context.Context, req resource.SchemaRequest,
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
+			"system": schema.BoolAttribute{
+				MarkdownDescription: "Whether this is a system-managed policy (read-only)",
+				Computed:            true,
+			},
 		},
 	}
 }
@@ -74,6 +78,7 @@ type policyResourceData struct {
 	Name          types.String `tfsdk:"name"`
 	Id            types.String `tfsdk:"id"`
 	PolicyActions types.Set    `tfsdk:"policy_actions"`
+	System        types.Bool   `tfsdk:"system"`
 }
 
 type policyResource struct {
@@ -158,6 +163,7 @@ func (r *policyResource) Create(ctx context.Context, req resource.CreateRequest,
 	data.Name = types.StringPointerValue(policy.Data.Name)
 	data.Organization = types.StringPointerValue(policy.Data.OrganizationId)
 	data.PolicyActions = resultPolicies
+	data.System = types.BoolPointerValue(policy.Data.System)
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -236,6 +242,7 @@ func (r *policyResource) Read(ctx context.Context, req resource.ReadRequest, res
 	data.Name = types.StringPointerValue(policy.Data.Name)
 	data.Organization = types.StringPointerValue(policy.Data.OrganizationId)
 	data.PolicyActions = resultPolicies
+	data.System = types.BoolPointerValue(policy.Data.System)
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -314,6 +321,7 @@ func (r *policyResource) Update(ctx context.Context, req resource.UpdateRequest,
 	data.Name = types.StringPointerValue(policy.Data.Name)
 	data.Organization = types.StringPointerValue(policy.Data.OrganizationId)
 	data.PolicyActions = resultPolicies
+	data.System = types.BoolPointerValue(policy.Data.System)
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)

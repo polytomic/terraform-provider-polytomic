@@ -66,8 +66,13 @@ resource "polytomic_sync" "sync" {
 
 ### Read-Only
 
+- `created_at` (String) Timestamp when the sync was created
+- `created_by` (Attributes) Actor who created this sync (see [below for nested schema](#nestedatt--created_by))
 - `id` (String) The ID of this resource.
 - `model_ids` (Set of String) Model IDs associated with this sync
+- `policies` (Set of String) Policy IDs attached to this sync
+- `updated_at` (String) Timestamp when the sync was last updated
+- `updated_by` (Attributes) Actor who last updated this sync (see [below for nested schema](#nestedatt--updated_by))
 
 <a id="nestedatt--fields"></a>
 ### Nested Schema for `fields`
@@ -217,5 +222,25 @@ Required:
 Optional:
 
 - `value` (String)
+
+
+<a id="nestedatt--created_by"></a>
+### Nested Schema for `created_by`
+
+Read-Only:
+
+- `id` (String) Actor ID
+- `name` (String) Actor name
+- `type` (String) Actor type (user, system, organization, partner)
+
+
+<a id="nestedatt--updated_by"></a>
+### Nested Schema for `updated_by`
+
+Read-Only:
+
+- `id` (String) Actor ID
+- `name` (String) Actor name
+- `type` (String) Actor type (user, system, organization, partner)
 
 

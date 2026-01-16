@@ -184,6 +184,26 @@ func (r *bulkSyncResource) Schema(ctx context.Context, req resource.SchemaReques
 				Optional:            true,
 				Computed:            true,
 			},
+			"created_at": schema.StringAttribute{
+				MarkdownDescription: "Timestamp when the bulk sync was created",
+				Computed:            true,
+				CustomType:          timetypes.RFC3339Type{},
+			},
+			"created_by": schema.SingleNestedAttribute{
+				MarkdownDescription: "Actor who created this bulk sync",
+				Computed:            true,
+				Attributes:          actorAttributes(),
+			},
+			"updated_at": schema.StringAttribute{
+				MarkdownDescription: "Timestamp when the bulk sync was last updated",
+				Computed:            true,
+				CustomType:          timetypes.RFC3339Type{},
+			},
+			"updated_by": schema.SingleNestedAttribute{
+				MarkdownDescription: "Actor who last updated this bulk sync",
+				Computed:            true,
+				Attributes:          actorAttributes(),
+			},
 		},
 	}
 }
@@ -214,9 +234,11 @@ func (bulkSyncConnection) AttrTypes() map[string]attr.Type {
 }
 
 type bulkSyncSchemaField struct {
-	Id        types.String `tfsdk:"id"`
-	Enabled   types.Bool   `tfsdk:"enabled"`
-	Obfuscate types.Bool   `tfsdk:"obfuscate"`
+	Id             types.String `tfsdk:"id"`
+	Enabled        types.Bool   `tfsdk:"enabled"`
+	Obfuscate      types.Bool   `tfsdk:"obfuscate"`
+	OutputName     types.String `tfsdk:"output_name"`
+	UserOutputName types.String `tfsdk:"user_output_name"`
 }
 
 func (bulkSyncSchemaField) SchemaAttributes() map[string]schema.Attribute {
@@ -233,14 +255,25 @@ func (bulkSyncSchemaField) SchemaAttributes() map[string]schema.Attribute {
 			Optional: true,
 			Computed: true,
 		},
+		"output_name": schema.StringAttribute{
+			MarkdownDescription: "Computed output column name",
+			Computed:            true,
+		},
+		"user_output_name": schema.StringAttribute{
+			MarkdownDescription: "User-specified override for output column name",
+			Optional:            true,
+			Computed:            true,
+		},
 	}
 }
 
 func (bulkSyncSchemaField) AttrTypes() map[string]attr.Type {
 	return map[string]attr.Type{
-		"id":        types.StringType,
-		"enabled":   types.BoolType,
-		"obfuscate": types.BoolType,
+		"id":               types.StringType,
+		"enabled":          types.BoolType,
+		"obfuscate":        types.BoolType,
+		"output_name":      types.StringType,
+		"user_output_name": types.StringType,
 	}
 }
 
@@ -249,7 +282,9 @@ type bulkSyncSchema struct {
 	Enabled             types.Bool        `tfsdk:"enabled"`
 	PartitionKey        types.String      `tfsdk:"partition_key"`
 	TrackingField       types.String      `tfsdk:"tracking_field"`
+	Name                types.String      `tfsdk:"name"`
 	OutputName          types.String      `tfsdk:"output_name"`
+	UserOutputName      types.String      `tfsdk:"user_output_name"`
 	Fields              types.Set         `tfsdk:"fields"`
 	Filters             types.Set         `tfsdk:"filters"`
 	DataCutoffTimestamp timetypes.RFC3339 `tfsdk:"data_cutoff_timestamp"`
@@ -282,9 +317,18 @@ func (bulkSyncSchema) SchemaAttributes() map[string]schema.Attribute {
 			Optional: true,
 			Computed: true,
 		},
+		"name": schema.StringAttribute{
+			MarkdownDescription: "Schema name",
+			Computed:            true,
+		},
 		"output_name": schema.StringAttribute{
 			Optional: true,
 			Computed: true,
+		},
+		"user_output_name": schema.StringAttribute{
+			MarkdownDescription: "User-specified override for the output table name",
+			Optional:            true,
+			Computed:            true,
 		},
 		"fields": schema.SetNestedAttribute{
 			Optional: true,
@@ -335,7 +379,9 @@ func (bulkSyncSchema) AttrTypes() map[string]attr.Type {
 		"disable_data_cutoff":   types.BoolType,
 		"partition_key":         types.StringType,
 		"tracking_field":        types.StringType,
+		"name":                  types.StringType,
 		"output_name":           types.StringType,
+		"user_output_name":      types.StringType,
 	}
 }
 
@@ -357,6 +403,10 @@ type bulkSyncResourceData struct {
 	ConcurrencyLimit           types.Int64       `tfsdk:"concurrency_limit"`
 	ResyncConcurrencyLimit     types.Int64       `tfsdk:"resync_concurrency_limit"`
 	NormalizeNames             types.String      `tfsdk:"normalize_names"`
+	CreatedAt                  timetypes.RFC3339 `tfsdk:"created_at"`
+	CreatedBy                  types.Object      `tfsdk:"created_by"`
+	UpdatedAt                  timetypes.RFC3339 `tfsdk:"updated_at"`
+	UpdatedBy                  types.Object      `tfsdk:"updated_by"`
 }
 
 type bulkSyncResource struct {
@@ -934,6 +984,26 @@ func bulkSyncDataFromResponse(ctx context.Context, response *polytomic.BulkSyncR
 		data.NormalizeNames = types.StringValue(string(*response.NormalizeNames))
 	} else {
 		data.NormalizeNames = types.StringNull()
+	}
+
+	// Audit fields
+	if response.CreatedAt != nil {
+		data.CreatedAt = timetypes.NewRFC3339TimeValue(*response.CreatedAt)
+	}
+	if response.CreatedBy != nil {
+		data.CreatedBy, diags = types.ObjectValueFrom(ctx, actorAttrTypes(), response.CreatedBy)
+		if diags.HasError() {
+			return data, diags
+		}
+	}
+	if response.UpdatedAt != nil {
+		data.UpdatedAt = timetypes.NewRFC3339TimeValue(*response.UpdatedAt)
+	}
+	if response.UpdatedBy != nil {
+		data.UpdatedBy, diags = types.ObjectValueFrom(ctx, actorAttrTypes(), response.UpdatedBy)
+		if diags.HasError() {
+			return data, diags
+		}
 	}
 
 	return data, diags
