@@ -32,6 +32,9 @@ var runCmd = &cobra.Command{
 		if url != "" {
 			clientOpts.DeploymentURL = url
 		}
+		if clientOpts.DeploymentURL == "" {
+			clientOpts.DeploymentURL = "https://app.polytomic.com"
+		}
 		if apiKey != "" {
 			clientOpts.APIKey = apiKey
 		}
@@ -41,7 +44,6 @@ var runCmd = &cobra.Command{
 		if deploymentKey != "" {
 			clientOpts.DeploymentKey = deploymentKey
 		}
-
 		clientProvider, err := providerclient.NewClientProvider(clientOpts)
 		if err != nil {
 			log.Fatal().Err(err).Msg("failed to create client provider")

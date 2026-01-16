@@ -23,7 +23,7 @@ func newRootCmd(version string) *cobra.Command {
 	viper.BindPFlag("partner-key", rootCmd.PersistentFlags().Lookup("partner-key"))
 	rootCmd.PersistentFlags().StringVar(&deploymentKey, "deployment-key", "", "Polytomic deployment key (for multi-organization access)")
 	viper.BindPFlag("deployment-key", rootCmd.PersistentFlags().Lookup("deployment-key"))
-	rootCmd.PersistentFlags().StringVar(&url, "url", "app.polytomic.com", "Polytomic API URL")
+	rootCmd.PersistentFlags().StringVar(&url, "url", "", "Polytomic API URL")
 	viper.BindPFlag("url", rootCmd.PersistentFlags().Lookup("url"))
 
 	// Run flags
