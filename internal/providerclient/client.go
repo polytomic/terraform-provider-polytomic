@@ -68,6 +68,11 @@ type Provider struct {
 }
 
 func NewClientProvider(opts Options) (*Provider, error) {
+	// Normalize deployment URL to remove trailing slashes
+	if opts.DeploymentURL != "" {
+		opts.DeploymentURL = strings.TrimSuffix(opts.DeploymentURL, "/")
+	}
+
 	p := &Provider{
 		opts:    opts,
 		clients: map[uuid.UUID]*ptclient.Client{},
