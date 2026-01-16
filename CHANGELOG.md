@@ -1,3 +1,11 @@
+## 1.1.1 (16 Jan 2026)
+
+- Fixed bugs with state/response drift when managing bulk syncs.
+- Fixed bugs with connection datasources erroring due to missing fields.
+- Fixed normalization of deployment URL to avoid redirects.
+- Added support for new connection types:
+- Hightouch
+
 ## 1.1.0 (15 Jan 2026)
 
 - Updated Polytomic Go SDK to v1.12.0.
