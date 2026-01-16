@@ -1,3 +1,41 @@
+## 1.1.0 (15 Jan 2026)
+
+- Updated Polytomic Go SDK to v1.12.0.
+- Added support for configuring bulk sync concurrency.
+- Added support for new connection types:
+  - Amplemarket
+  - Appsflyer
+  - Brevo
+  - CallRail
+  - Chili Piper
+  - Cloudflare Logs
+  - Docker Hub
+  - Fathom
+  - Fireflies AI
+  - Gainsight CS
+  - Gladly
+  - Gmail
+  - Google Slides
+  - HighLevel
+  - IBM Db2
+  - Instantly
+  - M3ter
+  - MotherDuck
+  - Paycor
+  - Profound
+  - Pylon
+  - Rippling
+  - Seismic
+  - Showpad
+  - Standard Metrics
+  - TikTok Ads
+  - Twilio SendGrid
+  - Upfluence
+  - Work OS
+  - Xero
+  - Zoho CRM
+  - Zoho Desk
+
 ## 1.0.0 (12 Jan 2026)
 
 - Updates from test deployments.
