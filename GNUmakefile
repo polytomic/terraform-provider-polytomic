@@ -1,4 +1,4 @@
-POLYTOMIC_DEPLOYMENT_URL ?= https://app.polytomic-local.com:8443
+POLYTOMIC_DEPLOYMENT_URL ?= https://app.polytomic-local.com
 TESTARGS ?= -count=1
 
 default: testacc

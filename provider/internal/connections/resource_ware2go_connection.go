@@ -27,11 +27,11 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
-var _ resource.Resource = &HighspotConnectionResource{}
-var _ resource.ResourceWithImportState = &HighspotConnectionResource{}
+var _ resource.Resource = &Ware2goConnectionResource{}
+var _ resource.ResourceWithImportState = &Ware2goConnectionResource{}
 
-var HighspotSchema = schema.Schema{
-	MarkdownDescription: ":meta:subcategory:Connections: Highspot Connection",
+var Ware2goSchema = schema.Schema{
+	MarkdownDescription: ":meta:subcategory:Connections: Ware2Go Connection",
 	Attributes: map[string]schema.Attribute{
 		"organization": schema.StringAttribute{
 			MarkdownDescription: "Organization ID",
@@ -43,15 +43,8 @@ var HighspotSchema = schema.Schema{
 		},
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
-				"api_key": schema.StringAttribute{
-					MarkdownDescription: `API Key`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
-					Sensitive:           false,
-				},
-				"secret": schema.StringAttribute{
-					MarkdownDescription: ``,
+				"client_id": schema.StringAttribute{
+					MarkdownDescription: `API User Name`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
@@ -59,6 +52,27 @@ var HighspotSchema = schema.Schema{
 					PlanModifiers: []planmodifier.String{
 						stringplanmodifier.UseStateForUnknown(),
 					},
+				},
+				"client_secret": schema.StringAttribute{
+					MarkdownDescription: `API Secret`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
+				},
+				"merchant_id": schema.StringAttribute{
+					MarkdownDescription: `Merchant ID`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
+				},
+				"staging": schema.BoolAttribute{
+					MarkdownDescription: `Use Staging Environment`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
 				},
 			},
 
@@ -74,7 +88,7 @@ var HighspotSchema = schema.Schema{
 		},
 		"id": schema.StringAttribute{
 			Computed:            true,
-			MarkdownDescription: "Highspot Connection identifier",
+			MarkdownDescription: "Ware2Go Connection identifier",
 			PlanModifiers: []planmodifier.String{
 				stringplanmodifier.UseStateForUnknown(),
 			},
@@ -82,30 +96,32 @@ var HighspotSchema = schema.Schema{
 	},
 }
 
-func (t *HighspotConnectionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = HighspotSchema
+func (t *Ware2goConnectionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = Ware2goSchema
 }
 
-type HighspotConf struct {
-	Api_key string `mapstructure:"api_key" tfsdk:"api_key"`
-	Secret  string `mapstructure:"secret" tfsdk:"secret"`
+type Ware2goConf struct {
+	Client_id     string `mapstructure:"client_id" tfsdk:"client_id"`
+	Client_secret string `mapstructure:"client_secret" tfsdk:"client_secret"`
+	Merchant_id   string `mapstructure:"merchant_id" tfsdk:"merchant_id"`
+	Staging       bool   `mapstructure:"staging" tfsdk:"staging"`
 }
 
-type HighspotConnectionResource struct {
+type Ware2goConnectionResource struct {
 	provider *providerclient.Provider
 }
 
-func (r *HighspotConnectionResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *Ware2goConnectionResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if provider := providerclient.GetProvider(req.ProviderData, resp.Diagnostics); provider != nil {
 		r.provider = provider
 	}
 }
 
-func (r *HighspotConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_highspot_connection"
+func (r *Ware2goConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_ware2go_connection"
 }
 
-func (r *HighspotConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *Ware2goConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data connectionData
 
 	diags := req.Config.Get(ctx, &data)
@@ -127,7 +143,7 @@ func (r *HighspotConnectionResource) Create(ctx context.Context, req resource.Cr
 	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
-		Type:           "highspot",
+		Type:           "ware2go",
 		OrganizationId: data.Organization.ValueStringPointer(),
 		Configuration:  connConf,
 		Validate:       pointer.ToBool(false),
@@ -140,28 +156,30 @@ func (r *HighspotConnectionResource) Create(ctx context.Context, req resource.Cr
 	data.Name = types.StringPointerValue(created.Data.Name)
 	data.Organization = types.StringPointerValue(created.Data.OrganizationId)
 
-	conf := HighspotConf{}
+	conf := Ware2goConf{}
 	err = mapstructure.Decode(created.Data.Configuration, &conf)
 	if err != nil {
 		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error decoding connection configuration: %s", err))
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"api_key": types.StringType,
-		"secret":  types.StringType,
+		"client_id":     types.StringType,
+		"client_secret": types.StringType,
+		"merchant_id":   types.StringType,
+		"staging":       types.BoolType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Highspot", "id": created.Data.Id})
+	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Ware2go", "id": created.Data.Id})
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r *HighspotConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *Ware2goConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data connectionData
 
 	diags := req.State.Get(ctx, &data)
@@ -196,7 +214,7 @@ func (r *HighspotConnectionResource) Read(ctx context.Context, req resource.Read
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
 
-	configAttributes, ok := getConfigAttributes(HighspotSchema)
+	configAttributes, ok := getConfigAttributes(Ware2goSchema)
 	if !ok {
 		resp.Diagnostics.AddError("Error getting connection configuration attributes", "Could not get configuration attributes")
 		return
@@ -211,15 +229,17 @@ func (r *HighspotConnectionResource) Read(ctx context.Context, req resource.Read
 	// reset sensitive values so terraform doesn't think we have changes
 	connection.Data.Configuration = resetSensitiveValues(configAttributes, originalConfData, connection.Data.Configuration)
 
-	conf := HighspotConf{}
+	conf := Ware2goConf{}
 	err = mapstructure.Decode(connection.Data.Configuration, &conf)
 	if err != nil {
 		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error decoding connection configuration: %s", err))
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"api_key": types.StringType,
-		"secret":  types.StringType,
+		"client_id":     types.StringType,
+		"client_secret": types.StringType,
+		"merchant_id":   types.StringType,
+		"staging":       types.BoolType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -230,7 +250,7 @@ func (r *HighspotConnectionResource) Read(ctx context.Context, req resource.Read
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r *HighspotConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *Ware2goConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var data connectionData
 
 	diags := req.Plan.Get(ctx, &data)
@@ -251,7 +271,7 @@ func (r *HighspotConnectionResource) Update(ctx context.Context, req resource.Up
 		return
 	}
 
-	configAttributes, ok := getConfigAttributes(HighspotSchema)
+	configAttributes, ok := getConfigAttributes(Ware2goSchema)
 	if !ok {
 		resp.Diagnostics.AddError("Error getting connection configuration attributes", "Could not get configuration attributes")
 		return
@@ -281,15 +301,17 @@ func (r *HighspotConnectionResource) Update(ctx context.Context, req resource.Up
 	data.Name = types.StringPointerValue(updated.Data.Name)
 	data.Organization = types.StringPointerValue(updated.Data.OrganizationId)
 
-	conf := HighspotConf{}
+	conf := Ware2goConf{}
 	err = mapstructure.Decode(updated.Data.Configuration, &conf)
 	if err != nil {
 		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error decoding connection configuration: %s", err))
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"api_key": types.StringType,
-		"secret":  types.StringType,
+		"client_id":     types.StringType,
+		"client_secret": types.StringType,
+		"merchant_id":   types.StringType,
+		"staging":       types.BoolType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -299,7 +321,7 @@ func (r *HighspotConnectionResource) Update(ctx context.Context, req resource.Up
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r *HighspotConnectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *Ware2goConnectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var data connectionData
 
 	diags := req.State.Get(ctx, &data)
@@ -362,6 +384,6 @@ func (r *HighspotConnectionResource) Delete(ctx context.Context, req resource.De
 	}
 }
 
-func (r *HighspotConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *Ware2goConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

@@ -6,36 +6,33 @@ package connections
 import (
 	"context"
 
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
-var _ datasource.DataSource = &HighspotConnectionDataSource{}
+var _ datasource.DataSource = &AshbyConnectionDataSource{}
 
 // ExampleDataSource defines the data source implementation.
-type HighspotConnectionDataSource struct {
+type AshbyConnectionDataSource struct {
 	provider *providerclient.Provider
 }
 
-func (d *HighspotConnectionDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *AshbyConnectionDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	if provider := providerclient.GetProvider(req.ProviderData, resp.Diagnostics); provider != nil {
 		d.provider = provider
 	}
 }
 
-func (d *HighspotConnectionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_highspot_connection"
+func (d *AshbyConnectionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_ashby_connection"
 }
 
-func (d *HighspotConnectionDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+func (d *AshbyConnectionDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: ":meta:subcategory:Connections: Highspot Connection",
+		MarkdownDescription: ":meta:subcategory:Connections: Ashby Connection",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				MarkdownDescription: "",
@@ -50,23 +47,17 @@ func (d *HighspotConnectionDataSource) Schema(ctx context.Context, req datasourc
 				Computed:            true,
 			},
 			"configuration": schema.SingleNestedAttribute{
-				Attributes: map[string]schema.Attribute{
-					"api_key": schema.StringAttribute{
-						MarkdownDescription: `API Key`,
-						Computed:            true,
-					},
-				},
-				Optional: true,
+				Attributes: map[string]schema.Attribute{},
+				Optional:   true,
 			},
 		},
 	}
 }
 
-type HighspotDataSourceConf struct {
-	Api_key string `mapstructure:"api_key" tfsdk:"api_key"`
+type AshbyDataSourceConf struct {
 }
 
-func (d *HighspotConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+func (d *AshbyConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 
 	// Read Terraform configuration data into the model
@@ -91,22 +82,6 @@ func (d *HighspotConnectionDataSource) Read(ctx context.Context, req datasource.
 	data.Id = types.StringPointerValue(connection.Data.Id)
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
-
-	conf := HighspotDataSourceConf{}
-	err = mapstructure.Decode(connection.Data.Configuration, &conf)
-	if err != nil {
-		resp.Diagnostics.AddError("Error decoding connection configuration", err.Error())
-		return
-	}
-
-	var diags diag.Diagnostics
-	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"api_key": types.StringType,
-	}, conf)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
 
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)

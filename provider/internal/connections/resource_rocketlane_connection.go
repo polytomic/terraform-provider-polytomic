@@ -27,11 +27,11 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
-var _ resource.Resource = &HighspotConnectionResource{}
-var _ resource.ResourceWithImportState = &HighspotConnectionResource{}
+var _ resource.Resource = &RocketlaneConnectionResource{}
+var _ resource.ResourceWithImportState = &RocketlaneConnectionResource{}
 
-var HighspotSchema = schema.Schema{
-	MarkdownDescription: ":meta:subcategory:Connections: Highspot Connection",
+var RocketlaneSchema = schema.Schema{
+	MarkdownDescription: ":meta:subcategory:Connections: Rocketlane Connection",
 	Attributes: map[string]schema.Attribute{
 		"organization": schema.StringAttribute{
 			MarkdownDescription: "Organization ID",
@@ -45,13 +45,6 @@ var HighspotSchema = schema.Schema{
 			Attributes: map[string]schema.Attribute{
 				"api_key": schema.StringAttribute{
 					MarkdownDescription: `API Key`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
-					Sensitive:           false,
-				},
-				"secret": schema.StringAttribute{
-					MarkdownDescription: ``,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
@@ -74,7 +67,7 @@ var HighspotSchema = schema.Schema{
 		},
 		"id": schema.StringAttribute{
 			Computed:            true,
-			MarkdownDescription: "Highspot Connection identifier",
+			MarkdownDescription: "Rocketlane Connection identifier",
 			PlanModifiers: []planmodifier.String{
 				stringplanmodifier.UseStateForUnknown(),
 			},
@@ -82,30 +75,29 @@ var HighspotSchema = schema.Schema{
 	},
 }
 
-func (t *HighspotConnectionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = HighspotSchema
+func (t *RocketlaneConnectionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = RocketlaneSchema
 }
 
-type HighspotConf struct {
+type RocketlaneConf struct {
 	Api_key string `mapstructure:"api_key" tfsdk:"api_key"`
-	Secret  string `mapstructure:"secret" tfsdk:"secret"`
 }
 
-type HighspotConnectionResource struct {
+type RocketlaneConnectionResource struct {
 	provider *providerclient.Provider
 }
 
-func (r *HighspotConnectionResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *RocketlaneConnectionResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if provider := providerclient.GetProvider(req.ProviderData, resp.Diagnostics); provider != nil {
 		r.provider = provider
 	}
 }
 
-func (r *HighspotConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_highspot_connection"
+func (r *RocketlaneConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_rocketlane_connection"
 }
 
-func (r *HighspotConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *RocketlaneConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data connectionData
 
 	diags := req.Config.Get(ctx, &data)
@@ -127,7 +119,7 @@ func (r *HighspotConnectionResource) Create(ctx context.Context, req resource.Cr
 	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
-		Type:           "highspot",
+		Type:           "rocketlane",
 		OrganizationId: data.Organization.ValueStringPointer(),
 		Configuration:  connConf,
 		Validate:       pointer.ToBool(false),
@@ -140,7 +132,7 @@ func (r *HighspotConnectionResource) Create(ctx context.Context, req resource.Cr
 	data.Name = types.StringPointerValue(created.Data.Name)
 	data.Organization = types.StringPointerValue(created.Data.OrganizationId)
 
-	conf := HighspotConf{}
+	conf := RocketlaneConf{}
 	err = mapstructure.Decode(created.Data.Configuration, &conf)
 	if err != nil {
 		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error decoding connection configuration: %s", err))
@@ -148,20 +140,19 @@ func (r *HighspotConnectionResource) Create(ctx context.Context, req resource.Cr
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"api_key": types.StringType,
-		"secret":  types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Highspot", "id": created.Data.Id})
+	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Rocketlane", "id": created.Data.Id})
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r *HighspotConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *RocketlaneConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data connectionData
 
 	diags := req.State.Get(ctx, &data)
@@ -196,7 +187,7 @@ func (r *HighspotConnectionResource) Read(ctx context.Context, req resource.Read
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
 
-	configAttributes, ok := getConfigAttributes(HighspotSchema)
+	configAttributes, ok := getConfigAttributes(RocketlaneSchema)
 	if !ok {
 		resp.Diagnostics.AddError("Error getting connection configuration attributes", "Could not get configuration attributes")
 		return
@@ -211,7 +202,7 @@ func (r *HighspotConnectionResource) Read(ctx context.Context, req resource.Read
 	// reset sensitive values so terraform doesn't think we have changes
 	connection.Data.Configuration = resetSensitiveValues(configAttributes, originalConfData, connection.Data.Configuration)
 
-	conf := HighspotConf{}
+	conf := RocketlaneConf{}
 	err = mapstructure.Decode(connection.Data.Configuration, &conf)
 	if err != nil {
 		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error decoding connection configuration: %s", err))
@@ -219,7 +210,6 @@ func (r *HighspotConnectionResource) Read(ctx context.Context, req resource.Read
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"api_key": types.StringType,
-		"secret":  types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -230,7 +220,7 @@ func (r *HighspotConnectionResource) Read(ctx context.Context, req resource.Read
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r *HighspotConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *RocketlaneConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var data connectionData
 
 	diags := req.Plan.Get(ctx, &data)
@@ -251,7 +241,7 @@ func (r *HighspotConnectionResource) Update(ctx context.Context, req resource.Up
 		return
 	}
 
-	configAttributes, ok := getConfigAttributes(HighspotSchema)
+	configAttributes, ok := getConfigAttributes(RocketlaneSchema)
 	if !ok {
 		resp.Diagnostics.AddError("Error getting connection configuration attributes", "Could not get configuration attributes")
 		return
@@ -281,7 +271,7 @@ func (r *HighspotConnectionResource) Update(ctx context.Context, req resource.Up
 	data.Name = types.StringPointerValue(updated.Data.Name)
 	data.Organization = types.StringPointerValue(updated.Data.OrganizationId)
 
-	conf := HighspotConf{}
+	conf := RocketlaneConf{}
 	err = mapstructure.Decode(updated.Data.Configuration, &conf)
 	if err != nil {
 		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error decoding connection configuration: %s", err))
@@ -289,7 +279,6 @@ func (r *HighspotConnectionResource) Update(ctx context.Context, req resource.Up
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"api_key": types.StringType,
-		"secret":  types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -299,7 +288,7 @@ func (r *HighspotConnectionResource) Update(ctx context.Context, req resource.Up
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r *HighspotConnectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *RocketlaneConnectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var data connectionData
 
 	diags := req.State.Get(ctx, &data)
@@ -362,6 +351,6 @@ func (r *HighspotConnectionResource) Delete(ctx context.Context, req resource.De
 	}
 }
 
-func (r *HighspotConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *RocketlaneConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

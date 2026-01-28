@@ -1,0 +1,1 @@
+{"$id":"https://github.com/polytomic/app/services/polytomic/backend/g2/connection-conf","$schema":"https://json-schema.org/draft/2020-12/schema","properties":{"api_key":{"sensitive":true,"title":"API Key","type":"string"}},"required":["api_key"],"type":"object"}

@@ -16,26 +16,26 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
-var _ datasource.DataSource = &HighspotConnectionDataSource{}
+var _ datasource.DataSource = &Ware2goConnectionDataSource{}
 
 // ExampleDataSource defines the data source implementation.
-type HighspotConnectionDataSource struct {
+type Ware2goConnectionDataSource struct {
 	provider *providerclient.Provider
 }
 
-func (d *HighspotConnectionDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *Ware2goConnectionDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	if provider := providerclient.GetProvider(req.ProviderData, resp.Diagnostics); provider != nil {
 		d.provider = provider
 	}
 }
 
-func (d *HighspotConnectionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_highspot_connection"
+func (d *Ware2goConnectionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_ware2go_connection"
 }
 
-func (d *HighspotConnectionDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+func (d *Ware2goConnectionDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: ":meta:subcategory:Connections: Highspot Connection",
+		MarkdownDescription: ":meta:subcategory:Connections: Ware2Go Connection",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				MarkdownDescription: "",
@@ -51,8 +51,16 @@ func (d *HighspotConnectionDataSource) Schema(ctx context.Context, req datasourc
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
-					"api_key": schema.StringAttribute{
-						MarkdownDescription: `API Key`,
+					"client_secret": schema.StringAttribute{
+						MarkdownDescription: `API Secret`,
+						Computed:            true,
+					},
+					"merchant_id": schema.StringAttribute{
+						MarkdownDescription: `Merchant ID`,
+						Computed:            true,
+					},
+					"staging": schema.BoolAttribute{
+						MarkdownDescription: `Use Staging Environment`,
 						Computed:            true,
 					},
 				},
@@ -62,11 +70,13 @@ func (d *HighspotConnectionDataSource) Schema(ctx context.Context, req datasourc
 	}
 }
 
-type HighspotDataSourceConf struct {
-	Api_key string `mapstructure:"api_key" tfsdk:"api_key"`
+type Ware2goDataSourceConf struct {
+	Client_secret string `mapstructure:"client_secret" tfsdk:"client_secret"`
+	Merchant_id   string `mapstructure:"merchant_id" tfsdk:"merchant_id"`
+	Staging       bool   `mapstructure:"staging" tfsdk:"staging"`
 }
 
-func (d *HighspotConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+func (d *Ware2goConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 
 	// Read Terraform configuration data into the model
@@ -92,7 +102,7 @@ func (d *HighspotConnectionDataSource) Read(ctx context.Context, req datasource.
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
 
-	conf := HighspotDataSourceConf{}
+	conf := Ware2goDataSourceConf{}
 	err = mapstructure.Decode(connection.Data.Configuration, &conf)
 	if err != nil {
 		resp.Diagnostics.AddError("Error decoding connection configuration", err.Error())
@@ -101,7 +111,9 @@ func (d *HighspotConnectionDataSource) Read(ctx context.Context, req datasource.
 
 	var diags diag.Diagnostics
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"api_key": types.StringType,
+		"client_secret": types.StringType,
+		"merchant_id":   types.StringType,
+		"staging":       types.BoolType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
