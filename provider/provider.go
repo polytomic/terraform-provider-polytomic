@@ -114,6 +114,7 @@ func (p *Provider) Resources(ctx context.Context) []func() resource.Resource {
 		func() resource.Resource { return &modelResource{} },
 		func() resource.Resource { return &bulkSyncResource{} },
 		func() resource.Resource { return &syncResource{} },
+		NewConnectionSchemaPrimaryKeysResource,
 	}
 	all := append(connections.Resources, resourceList...)
 	return all
@@ -124,6 +125,7 @@ func (p *Provider) DataSources(ctx context.Context) []func() datasource.DataSour
 		func() datasource.DataSource { return &bulkSourceDatasource{} },
 		func() datasource.DataSource { return &bulkDestinationDatasource{} },
 		func() datasource.DataSource { return &identityDatasource{} },
+		NewConnectionSchemaDataSource,
 	}
 	all := append(connections.Datasources, datasources...)
 	return all
