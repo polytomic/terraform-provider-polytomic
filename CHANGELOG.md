@@ -1,3 +1,16 @@
+## 1.2.0 (28 Jan 2026)
+
+- Added connection schema data source for inspecting connected data.
+- Added schema primary keys resource for setting unique keys.
+- Added support for new connection types:
+  - Ashby
+  - Chameleon
+  - G2
+  - Rocketlane
+  - Tabs
+  - Thrive
+  - Ware2Go
+
 ## 1.1.1 (16 Jan 2026)
 
 - Fixed bugs with state/response drift when managing bulk syncs.
