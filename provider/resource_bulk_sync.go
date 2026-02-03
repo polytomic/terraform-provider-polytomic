@@ -1072,6 +1072,11 @@ func bulkSyncDataFromResponse(ctx context.Context, response *polytomic.BulkSyncR
 	data.Schedule = sch
 	data.Schemas = schemaVal
 	data.Policies, _ = types.SetValueFrom(ctx, types.StringType, response.Policies)
+	data.DisableRecordTimestamps = types.BoolPointerValue(response.DisableRecordTimestamps)
+
+	if response.DataCutoffTimestamp != nil {
+		data.DataCutoffTimestamp = timetypes.NewRFC3339TimeValue(*response.DataCutoffTimestamp)
+	}
 
 	if response.ConcurrencyLimit != nil {
 		data.ConcurrencyLimit = types.Int64Value(int64(*response.ConcurrencyLimit))
