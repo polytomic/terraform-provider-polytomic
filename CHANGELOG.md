@@ -1,3 +1,7 @@
+## 1.2.1 (2 Feb 2026)
+
+- Fixed bugs with state/response drift when managing bulk syncs.
+
 ## 1.2.0 (28 Jan 2026)
 
 - Added connection schema data source for inspecting connected data.
