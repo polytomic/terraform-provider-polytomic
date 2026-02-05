@@ -34,3 +34,5 @@ resource "polytomic_global_error_subscribers" "example" {
 ### Read-Only
 
 - `id` (String) Resource identifier
+
+
