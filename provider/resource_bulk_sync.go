@@ -714,25 +714,36 @@ func (r *bulkSyncResource) Update(ctx context.Context, req resource.UpdateReques
 		}
 
 		// fields
-		var fields []polytomic.FieldConfiguration
-		diags = s.Fields.ElementsAs(ctx, &fields, false)
-		if diags.HasError() {
-			resp.Diagnostics.Append(diags...)
-			return
+		var fieldData []bulkSyncSchemaField
+		if !s.Fields.IsUnknown() {
+			diags = s.Fields.ElementsAs(ctx, &fieldData, false)
+			if diags.HasError() {
+				resp.Diagnostics.Append(diags...)
+				return
+			}
+			slices.SortFunc(fieldData, func(a, b bulkSyncSchemaField) int {
+				return cmp.Compare(a.Id.String(), b.Id.String())
+			})
 		}
-		fieldConfs := make([]*polytomic.V2SchemaConfigurationFieldsItem, len(fields))
-		for i, f := range fields {
+		fieldConfs := make([]*polytomic.V2SchemaConfigurationFieldsItem, len(fieldData))
+		for i, f := range fieldData {
 			fieldConfs[i] = &polytomic.V2SchemaConfigurationFieldsItem{
-				FieldConfiguration: &f,
+				FieldConfiguration: &polytomic.FieldConfiguration{
+					Id:        f.Id.ValueStringPointer(),
+					Enabled:   f.Enabled.ValueBoolPointer(),
+					Obfuscate: f.Obfuscate.ValueBoolPointer(),
+				},
 			}
 		}
 
 		// filters
 		var filters []*polytomic.BulkFilter
-		diags = s.Filters.ElementsAs(ctx, &filters, false)
-		if diags.HasError() {
-			resp.Diagnostics.Append(diags...)
-			return
+		if !s.Filters.IsUnknown() {
+			diags = s.Filters.ElementsAs(ctx, &filters, false)
+			if diags.HasError() {
+				resp.Diagnostics.Append(diags...)
+				return
+			}
 		}
 
 		schemas[i] = &polytomic.V2UpdateBulkSyncRequestSchemasItem{
@@ -750,10 +761,12 @@ func (r *bulkSyncResource) Update(ctx context.Context, req resource.UpdateReques
 
 	// policies
 	var policies []string
-	diags = data.Policies.ElementsAs(ctx, &policies, false)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
+	if !(data.Policies.IsUnknown() || data.Policies.IsNull()) {
+		diags = data.Policies.ElementsAs(ctx, &policies, false)
+		if diags.HasError() {
+			resp.Diagnostics.Append(diags...)
+			return
+		}
 	}
 
 	// schedule
@@ -970,6 +983,7 @@ func bulkSyncDataFromResponse(ctx context.Context, response *polytomic.BulkSyncR
 				merged.TrackingField = PopulateUnknownString(merged.TrackingField, api.TrackingField)
 
 				// Populate computed bool fields
+				merged.Enabled = PopulateUnknownBool(merged.Enabled, api.Enabled)
 				merged.DisableDataCutoff = PopulateUnknownBool(merged.DisableDataCutoff, api.DisableDataCutoff)
 
 				// Populate computed set fields
