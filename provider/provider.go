@@ -111,6 +111,7 @@ func (p *Provider) Resources(ctx context.Context) []func() resource.Resource {
 		func() resource.Resource { return &userResource{} },
 		func() resource.Resource { return &roleResource{} },
 		func() resource.Resource { return &policyResource{} },
+		func() resource.Resource { return &globalErrorSubscribersResource{} },
 		func() resource.Resource { return &modelResource{} },
 		func() resource.Resource { return &bulkSyncResource{} },
 		func() resource.Resource { return &syncResource{} },

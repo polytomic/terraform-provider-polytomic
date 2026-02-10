@@ -40,18 +40,37 @@ the provider binary in the `$GOPATH/bin` directory.
 
 To generate or update documentation, run `go generate`.
 
-In order to run the full suite of Acceptance tests, run `make testacc`.
+### Acceptance Tests
 
-_Note:_ Acceptance tests create real resources, and often cost money to run.
+Acceptance tests are written to run against a real Polytomic deployment (often a local stack).
+
+The `GNUmakefile` `testacc` target defaults `POLYTOMIC_DEPLOYMENT_URL` to `https://app.polytomic-local.com`:
 
 ```shell
 make testacc
 ```
 
-Acceptance tests should be run with one of the following set in the environment:
+You can override the URL and pass through additional `go test` flags via `TESTARGS`:
 
-- `POLYTOMIC_API_KEY`
-- `POLYTOMIC_DEPLOYMENT_KEY`
+```shell
+POLYTOMIC_DEPLOYMENT_URL=https://app.polytomic-local.com \
+  make testacc TESTARGS='-run TestAccConnectionResource -count=1 -v'
+```
+
+Environment variables required for acceptance tests:
+
+- `POLYTOMIC_DEPLOYMENT_URL` (e.g. `https://app.polytomic-local.com`)
+- One of:
+  - `POLYTOMIC_API_KEY` (org-scoped)
+  - `POLYTOMIC_DEPLOYMENT_KEY` (deployment/partner scoped; tests will create an org and pass `organization = ...`)
+
+If you prefer to run an individual package directly:
+
+```shell
+TF_ACC=1 \
+  POLYTOMIC_DEPLOYMENT_URL=https://app.polytomic-local.com \
+  go test ./provider/... -run TestAccGlobalErrorSubscribersResource -count=1 -v
+```
 
 ### Requirements
 

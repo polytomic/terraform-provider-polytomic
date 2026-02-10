@@ -106,6 +106,7 @@ func importOrganization(ctx context.Context, org *polytomic.Organization, c *ptc
 
 	importables := []Importable{
 		NewMain(org, orgResource),
+		NewGlobalErrorSubscribers(c),
 		NewConnections(c),
 		NewModels(c),
 		NewBulkSyncs(c),
