@@ -19,6 +19,7 @@ resource "polytomic_s3_connection" "s3" {
     auth_mode                = "access_key_and_secret"
     aws_access_key_id        = "AKIAIOSFODNN7EXAMPLE"
     aws_secret_access_key    = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+    event_queue_arn          = "arn:aws:sqs:us-east-1:123456789012:my-queue"
     s3_bucket_name           = "s3://polytomic/dataset"
     s3_bucket_region         = "us-east-1"
     single_table_file_format = "csv"
@@ -75,7 +76,16 @@ Optional:
     Access Key ID with read/write access to a bucket.
 - `aws_secret_access_key` (String, Sensitive) AWS Secret Access Key
 - `aws_user` (String) User ARN
+- `csv_has_headers` (Boolean) CSV files have headers
+
+    Whether CSV files have a header row with field names.
 - `directory_glob_pattern` (String) Tables glob path
+- `enable_event_notifications` (Boolean) Enable Event Notifications
+
+    Enable S3 event notifications for incremental sync
+- `event_queue_arn` (String) Event Queue ARN
+
+    ARN of the SQS queue receiving S3 event notifications
 - `external_id` (String) External ID
 
     External ID for the IAM role
@@ -85,6 +95,9 @@ Optional:
 
     Treat the files as a single table.
 - `single_table_file_format` (String) File format
+- `single_table_file_formats` (Set of String) File formats
+
+    File formats that may be present across different tables
 - `single_table_name` (String) Collection name
 - `skip_lines` (Number) Skip first lines
 

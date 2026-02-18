@@ -69,12 +69,18 @@ Required:
 
 Optional:
 
+- `csv_has_headers` (Boolean) CSV files have headers
+
+    Whether CSV files have a header row with field names.
 - `directory_glob_pattern` (String) Tables glob path
 - `is_directory_snapshot` (Boolean) Multi-directory multi-table
 - `is_single_table` (Boolean) Files are time-based snapshots
 
     Treat the files as a single table.
 - `single_table_file_format` (String) File format
+- `single_table_file_formats` (Set of String) File formats
+
+    File formats that may be present across different tables
 - `single_table_name` (String) Collection name
 - `skip_lines` (Number) Skip first lines
 

@@ -78,6 +78,15 @@ var Cloudflare_r2Schema = schema.Schema{
 					Computed:  false,
 					Sensitive: false,
 				},
+				"csv_has_headers": schema.BoolAttribute{
+					MarkdownDescription: `CSV files have headers
+
+    Whether CSV files have a header row with field names.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
+				},
 				"directory_glob_pattern": schema.StringAttribute{
 					MarkdownDescription: `Tables glob path`,
 					Required:            false,
@@ -107,6 +116,17 @@ var Cloudflare_r2Schema = schema.Schema{
 					Optional:            true,
 					Computed:            true,
 					Sensitive:           false,
+				},
+				"single_table_file_formats": schema.SetAttribute{
+					MarkdownDescription: `File formats
+
+    File formats that may be present across different tables`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
+
+					ElementType: types.StringType,
 				},
 				"single_table_name": schema.StringAttribute{
 					MarkdownDescription: `Collection name`,
@@ -151,16 +171,18 @@ func (t *Cloudflare_r2ConnectionResource) Schema(ctx context.Context, req resour
 }
 
 type Cloudflare_r2Conf struct {
-	Account_id               string `mapstructure:"account_id" tfsdk:"account_id"`
-	Aws_access_key_id        string `mapstructure:"aws_access_key_id" tfsdk:"aws_access_key_id"`
-	Aws_secret_access_key    string `mapstructure:"aws_secret_access_key" tfsdk:"aws_secret_access_key"`
-	Bucket_name              string `mapstructure:"bucket_name" tfsdk:"bucket_name"`
-	Directory_glob_pattern   string `mapstructure:"directory_glob_pattern" tfsdk:"directory_glob_pattern"`
-	Is_directory_snapshot    bool   `mapstructure:"is_directory_snapshot" tfsdk:"is_directory_snapshot"`
-	Is_single_table          bool   `mapstructure:"is_single_table" tfsdk:"is_single_table"`
-	Single_table_file_format string `mapstructure:"single_table_file_format" tfsdk:"single_table_file_format"`
-	Single_table_name        string `mapstructure:"single_table_name" tfsdk:"single_table_name"`
-	Skip_lines               int64  `mapstructure:"skip_lines" tfsdk:"skip_lines"`
+	Account_id                string   `mapstructure:"account_id" tfsdk:"account_id"`
+	Aws_access_key_id         string   `mapstructure:"aws_access_key_id" tfsdk:"aws_access_key_id"`
+	Aws_secret_access_key     string   `mapstructure:"aws_secret_access_key" tfsdk:"aws_secret_access_key"`
+	Bucket_name               string   `mapstructure:"bucket_name" tfsdk:"bucket_name"`
+	Csv_has_headers           bool     `mapstructure:"csv_has_headers" tfsdk:"csv_has_headers"`
+	Directory_glob_pattern    string   `mapstructure:"directory_glob_pattern" tfsdk:"directory_glob_pattern"`
+	Is_directory_snapshot     bool     `mapstructure:"is_directory_snapshot" tfsdk:"is_directory_snapshot"`
+	Is_single_table           bool     `mapstructure:"is_single_table" tfsdk:"is_single_table"`
+	Single_table_file_format  string   `mapstructure:"single_table_file_format" tfsdk:"single_table_file_format"`
+	Single_table_file_formats []string `mapstructure:"single_table_file_formats" tfsdk:"single_table_file_formats"`
+	Single_table_name         string   `mapstructure:"single_table_name" tfsdk:"single_table_name"`
+	Skip_lines                int64    `mapstructure:"skip_lines" tfsdk:"skip_lines"`
 }
 
 type Cloudflare_r2ConnectionResource struct {
@@ -223,12 +245,16 @@ func (r *Cloudflare_r2ConnectionResource) Create(ctx context.Context, req resour
 		"aws_access_key_id":        types.StringType,
 		"aws_secret_access_key":    types.StringType,
 		"bucket_name":              types.StringType,
+		"csv_has_headers":          types.BoolType,
 		"directory_glob_pattern":   types.StringType,
 		"is_directory_snapshot":    types.BoolType,
 		"is_single_table":          types.BoolType,
 		"single_table_file_format": types.StringType,
-		"single_table_name":        types.StringType,
-		"skip_lines":               types.NumberType,
+		"single_table_file_formats": types.SetType{
+			ElemType: types.StringType,
+		},
+		"single_table_name": types.StringType,
+		"skip_lines":        types.NumberType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -302,12 +328,16 @@ func (r *Cloudflare_r2ConnectionResource) Read(ctx context.Context, req resource
 		"aws_access_key_id":        types.StringType,
 		"aws_secret_access_key":    types.StringType,
 		"bucket_name":              types.StringType,
+		"csv_has_headers":          types.BoolType,
 		"directory_glob_pattern":   types.StringType,
 		"is_directory_snapshot":    types.BoolType,
 		"is_single_table":          types.BoolType,
 		"single_table_file_format": types.StringType,
-		"single_table_name":        types.StringType,
-		"skip_lines":               types.NumberType,
+		"single_table_file_formats": types.SetType{
+			ElemType: types.StringType,
+		},
+		"single_table_name": types.StringType,
+		"skip_lines":        types.NumberType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -380,12 +410,16 @@ func (r *Cloudflare_r2ConnectionResource) Update(ctx context.Context, req resour
 		"aws_access_key_id":        types.StringType,
 		"aws_secret_access_key":    types.StringType,
 		"bucket_name":              types.StringType,
+		"csv_has_headers":          types.BoolType,
 		"directory_glob_pattern":   types.StringType,
 		"is_directory_snapshot":    types.BoolType,
 		"is_single_table":          types.BoolType,
 		"single_table_file_format": types.StringType,
-		"single_table_name":        types.StringType,
-		"skip_lines":               types.NumberType,
+		"single_table_file_formats": types.SetType{
+			ElemType: types.StringType,
+		},
+		"single_table_name": types.StringType,
+		"skip_lines":        types.NumberType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

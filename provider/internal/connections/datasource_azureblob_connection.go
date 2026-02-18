@@ -67,6 +67,12 @@ func (d *AzureblobConnectionDataSource) Schema(ctx context.Context, req datasour
 						MarkdownDescription: `Container Name`,
 						Computed:            true,
 					},
+					"csv_has_headers": schema.BoolAttribute{
+						MarkdownDescription: `CSV files have headers
+
+    Whether CSV files have a header row with field names.`,
+						Computed: true,
+					},
 					"directory_glob_pattern": schema.StringAttribute{
 						MarkdownDescription: `Tables glob path`,
 						Computed:            true,
@@ -84,6 +90,13 @@ func (d *AzureblobConnectionDataSource) Schema(ctx context.Context, req datasour
 					"single_table_file_format": schema.StringAttribute{
 						MarkdownDescription: `File format`,
 						Computed:            true,
+					},
+					"single_table_file_formats": schema.SetAttribute{
+						MarkdownDescription: `File formats
+
+    File formats that may be present across different tables`,
+						Computed:    true,
+						ElementType: types.StringType,
 					},
 					"single_table_name": schema.StringAttribute{
 						MarkdownDescription: `Collection name`,
@@ -107,17 +120,19 @@ func (d *AzureblobConnectionDataSource) Schema(ctx context.Context, req datasour
 }
 
 type AzureblobDataSourceConf struct {
-	Account_name             string `mapstructure:"account_name" tfsdk:"account_name"`
-	Auth_method              string `mapstructure:"auth_method" tfsdk:"auth_method"`
-	Client_id                string `mapstructure:"client_id" tfsdk:"client_id"`
-	Container_name           string `mapstructure:"container_name" tfsdk:"container_name"`
-	Directory_glob_pattern   string `mapstructure:"directory_glob_pattern" tfsdk:"directory_glob_pattern"`
-	Is_directory_snapshot    bool   `mapstructure:"is_directory_snapshot" tfsdk:"is_directory_snapshot"`
-	Is_single_table          bool   `mapstructure:"is_single_table" tfsdk:"is_single_table"`
-	Single_table_file_format string `mapstructure:"single_table_file_format" tfsdk:"single_table_file_format"`
-	Single_table_name        string `mapstructure:"single_table_name" tfsdk:"single_table_name"`
-	Skip_lines               int64  `mapstructure:"skip_lines" tfsdk:"skip_lines"`
-	Tenant_id                string `mapstructure:"tenant_id" tfsdk:"tenant_id"`
+	Account_name              string   `mapstructure:"account_name" tfsdk:"account_name"`
+	Auth_method               string   `mapstructure:"auth_method" tfsdk:"auth_method"`
+	Client_id                 string   `mapstructure:"client_id" tfsdk:"client_id"`
+	Container_name            string   `mapstructure:"container_name" tfsdk:"container_name"`
+	Csv_has_headers           bool     `mapstructure:"csv_has_headers" tfsdk:"csv_has_headers"`
+	Directory_glob_pattern    string   `mapstructure:"directory_glob_pattern" tfsdk:"directory_glob_pattern"`
+	Is_directory_snapshot     bool     `mapstructure:"is_directory_snapshot" tfsdk:"is_directory_snapshot"`
+	Is_single_table           bool     `mapstructure:"is_single_table" tfsdk:"is_single_table"`
+	Single_table_file_format  string   `mapstructure:"single_table_file_format" tfsdk:"single_table_file_format"`
+	Single_table_file_formats []string `mapstructure:"single_table_file_formats" tfsdk:"single_table_file_formats"`
+	Single_table_name         string   `mapstructure:"single_table_name" tfsdk:"single_table_name"`
+	Skip_lines                int64    `mapstructure:"skip_lines" tfsdk:"skip_lines"`
+	Tenant_id                 string   `mapstructure:"tenant_id" tfsdk:"tenant_id"`
 }
 
 func (d *AzureblobConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
@@ -159,13 +174,17 @@ func (d *AzureblobConnectionDataSource) Read(ctx context.Context, req datasource
 		"auth_method":              types.StringType,
 		"client_id":                types.StringType,
 		"container_name":           types.StringType,
+		"csv_has_headers":          types.BoolType,
 		"directory_glob_pattern":   types.StringType,
 		"is_directory_snapshot":    types.BoolType,
 		"is_single_table":          types.BoolType,
 		"single_table_file_format": types.StringType,
-		"single_table_name":        types.StringType,
-		"skip_lines":               types.NumberType,
-		"tenant_id":                types.StringType,
+		"single_table_file_formats": types.SetType{
+			ElemType: types.StringType,
+		},
+		"single_table_name": types.StringType,
+		"skip_lines":        types.NumberType,
+		"tenant_id":         types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

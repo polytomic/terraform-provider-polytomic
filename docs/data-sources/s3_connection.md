@@ -43,7 +43,16 @@ Read-Only:
 
     Access Key ID with read/write access to a bucket.
 - `aws_user` (String) User ARN
+- `csv_has_headers` (Boolean) CSV files have headers
+
+    Whether CSV files have a header row with field names.
 - `directory_glob_pattern` (String) Tables glob path
+- `enable_event_notifications` (Boolean) Enable Event Notifications
+
+    Enable S3 event notifications for incremental sync
+- `event_queue_arn` (String) Event Queue ARN
+
+    ARN of the SQS queue receiving S3 event notifications
 - `external_id` (String) External ID
 
     External ID for the IAM role
@@ -57,6 +66,9 @@ Read-Only:
     Bucket name (folder optional); ex: s3://polytomic/dataset
 - `s3_bucket_region` (String) S3 Bucket Region
 - `single_table_file_format` (String) File format
+- `single_table_file_formats` (Set of String) File formats
+
+    File formats that may be present across different tables
 - `single_table_name` (String) Collection name
 - `skip_lines` (Number) Skip first lines
 

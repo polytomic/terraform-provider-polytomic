@@ -78,12 +78,39 @@ var S3Schema = schema.Schema{
 					Computed:            true,
 					Sensitive:           false,
 				},
+				"csv_has_headers": schema.BoolAttribute{
+					MarkdownDescription: `CSV files have headers
+
+    Whether CSV files have a header row with field names.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
+				},
 				"directory_glob_pattern": schema.StringAttribute{
 					MarkdownDescription: `Tables glob path`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,
 					Sensitive:           false,
+				},
+				"enable_event_notifications": schema.BoolAttribute{
+					MarkdownDescription: `Enable Event Notifications
+
+    Enable S3 event notifications for incremental sync`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
+				},
+				"event_queue_arn": schema.StringAttribute{
+					MarkdownDescription: `Event Queue ARN
+
+    ARN of the SQS queue receiving S3 event notifications`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
 				},
 				"external_id": schema.StringAttribute{
 					MarkdownDescription: `External ID
@@ -140,6 +167,17 @@ var S3Schema = schema.Schema{
 					Computed:            true,
 					Sensitive:           false,
 				},
+				"single_table_file_formats": schema.SetAttribute{
+					MarkdownDescription: `File formats
+
+    File formats that may be present across different tables`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
+
+					ElementType: types.StringType,
+				},
 				"single_table_name": schema.StringAttribute{
 					MarkdownDescription: `Collection name`,
 					Required:            false,
@@ -183,20 +221,24 @@ func (t *S3ConnectionResource) Schema(ctx context.Context, req resource.SchemaRe
 }
 
 type S3Conf struct {
-	Auth_mode                string `mapstructure:"auth_mode" tfsdk:"auth_mode"`
-	Aws_access_key_id        string `mapstructure:"aws_access_key_id" tfsdk:"aws_access_key_id"`
-	Aws_secret_access_key    string `mapstructure:"aws_secret_access_key" tfsdk:"aws_secret_access_key"`
-	Aws_user                 string `mapstructure:"aws_user" tfsdk:"aws_user"`
-	Directory_glob_pattern   string `mapstructure:"directory_glob_pattern" tfsdk:"directory_glob_pattern"`
-	External_id              string `mapstructure:"external_id" tfsdk:"external_id"`
-	Iam_role_arn             string `mapstructure:"iam_role_arn" tfsdk:"iam_role_arn"`
-	Is_directory_snapshot    bool   `mapstructure:"is_directory_snapshot" tfsdk:"is_directory_snapshot"`
-	Is_single_table          bool   `mapstructure:"is_single_table" tfsdk:"is_single_table"`
-	S3_bucket_name           string `mapstructure:"s3_bucket_name" tfsdk:"s3_bucket_name"`
-	S3_bucket_region         string `mapstructure:"s3_bucket_region" tfsdk:"s3_bucket_region"`
-	Single_table_file_format string `mapstructure:"single_table_file_format" tfsdk:"single_table_file_format"`
-	Single_table_name        string `mapstructure:"single_table_name" tfsdk:"single_table_name"`
-	Skip_lines               int64  `mapstructure:"skip_lines" tfsdk:"skip_lines"`
+	Auth_mode                  string   `mapstructure:"auth_mode" tfsdk:"auth_mode"`
+	Aws_access_key_id          string   `mapstructure:"aws_access_key_id" tfsdk:"aws_access_key_id"`
+	Aws_secret_access_key      string   `mapstructure:"aws_secret_access_key" tfsdk:"aws_secret_access_key"`
+	Aws_user                   string   `mapstructure:"aws_user" tfsdk:"aws_user"`
+	Csv_has_headers            bool     `mapstructure:"csv_has_headers" tfsdk:"csv_has_headers"`
+	Directory_glob_pattern     string   `mapstructure:"directory_glob_pattern" tfsdk:"directory_glob_pattern"`
+	Enable_event_notifications bool     `mapstructure:"enable_event_notifications" tfsdk:"enable_event_notifications"`
+	Event_queue_arn            string   `mapstructure:"event_queue_arn" tfsdk:"event_queue_arn"`
+	External_id                string   `mapstructure:"external_id" tfsdk:"external_id"`
+	Iam_role_arn               string   `mapstructure:"iam_role_arn" tfsdk:"iam_role_arn"`
+	Is_directory_snapshot      bool     `mapstructure:"is_directory_snapshot" tfsdk:"is_directory_snapshot"`
+	Is_single_table            bool     `mapstructure:"is_single_table" tfsdk:"is_single_table"`
+	S3_bucket_name             string   `mapstructure:"s3_bucket_name" tfsdk:"s3_bucket_name"`
+	S3_bucket_region           string   `mapstructure:"s3_bucket_region" tfsdk:"s3_bucket_region"`
+	Single_table_file_format   string   `mapstructure:"single_table_file_format" tfsdk:"single_table_file_format"`
+	Single_table_file_formats  []string `mapstructure:"single_table_file_formats" tfsdk:"single_table_file_formats"`
+	Single_table_name          string   `mapstructure:"single_table_name" tfsdk:"single_table_name"`
+	Skip_lines                 int64    `mapstructure:"skip_lines" tfsdk:"skip_lines"`
 }
 
 type S3ConnectionResource struct {
@@ -255,20 +297,26 @@ func (r *S3ConnectionResource) Create(ctx context.Context, req resource.CreateRe
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"auth_mode":                types.StringType,
-		"aws_access_key_id":        types.StringType,
-		"aws_secret_access_key":    types.StringType,
-		"aws_user":                 types.StringType,
-		"directory_glob_pattern":   types.StringType,
-		"external_id":              types.StringType,
-		"iam_role_arn":             types.StringType,
-		"is_directory_snapshot":    types.BoolType,
-		"is_single_table":          types.BoolType,
-		"s3_bucket_name":           types.StringType,
-		"s3_bucket_region":         types.StringType,
-		"single_table_file_format": types.StringType,
-		"single_table_name":        types.StringType,
-		"skip_lines":               types.NumberType,
+		"auth_mode":                  types.StringType,
+		"aws_access_key_id":          types.StringType,
+		"aws_secret_access_key":      types.StringType,
+		"aws_user":                   types.StringType,
+		"csv_has_headers":            types.BoolType,
+		"directory_glob_pattern":     types.StringType,
+		"enable_event_notifications": types.BoolType,
+		"event_queue_arn":            types.StringType,
+		"external_id":                types.StringType,
+		"iam_role_arn":               types.StringType,
+		"is_directory_snapshot":      types.BoolType,
+		"is_single_table":            types.BoolType,
+		"s3_bucket_name":             types.StringType,
+		"s3_bucket_region":           types.StringType,
+		"single_table_file_format":   types.StringType,
+		"single_table_file_formats": types.SetType{
+			ElemType: types.StringType,
+		},
+		"single_table_name": types.StringType,
+		"skip_lines":        types.NumberType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -338,20 +386,26 @@ func (r *S3ConnectionResource) Read(ctx context.Context, req resource.ReadReques
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"auth_mode":                types.StringType,
-		"aws_access_key_id":        types.StringType,
-		"aws_secret_access_key":    types.StringType,
-		"aws_user":                 types.StringType,
-		"directory_glob_pattern":   types.StringType,
-		"external_id":              types.StringType,
-		"iam_role_arn":             types.StringType,
-		"is_directory_snapshot":    types.BoolType,
-		"is_single_table":          types.BoolType,
-		"s3_bucket_name":           types.StringType,
-		"s3_bucket_region":         types.StringType,
-		"single_table_file_format": types.StringType,
-		"single_table_name":        types.StringType,
-		"skip_lines":               types.NumberType,
+		"auth_mode":                  types.StringType,
+		"aws_access_key_id":          types.StringType,
+		"aws_secret_access_key":      types.StringType,
+		"aws_user":                   types.StringType,
+		"csv_has_headers":            types.BoolType,
+		"directory_glob_pattern":     types.StringType,
+		"enable_event_notifications": types.BoolType,
+		"event_queue_arn":            types.StringType,
+		"external_id":                types.StringType,
+		"iam_role_arn":               types.StringType,
+		"is_directory_snapshot":      types.BoolType,
+		"is_single_table":            types.BoolType,
+		"s3_bucket_name":             types.StringType,
+		"s3_bucket_region":           types.StringType,
+		"single_table_file_format":   types.StringType,
+		"single_table_file_formats": types.SetType{
+			ElemType: types.StringType,
+		},
+		"single_table_name": types.StringType,
+		"skip_lines":        types.NumberType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -420,20 +474,26 @@ func (r *S3ConnectionResource) Update(ctx context.Context, req resource.UpdateRe
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"auth_mode":                types.StringType,
-		"aws_access_key_id":        types.StringType,
-		"aws_secret_access_key":    types.StringType,
-		"aws_user":                 types.StringType,
-		"directory_glob_pattern":   types.StringType,
-		"external_id":              types.StringType,
-		"iam_role_arn":             types.StringType,
-		"is_directory_snapshot":    types.BoolType,
-		"is_single_table":          types.BoolType,
-		"s3_bucket_name":           types.StringType,
-		"s3_bucket_region":         types.StringType,
-		"single_table_file_format": types.StringType,
-		"single_table_name":        types.StringType,
-		"skip_lines":               types.NumberType,
+		"auth_mode":                  types.StringType,
+		"aws_access_key_id":          types.StringType,
+		"aws_secret_access_key":      types.StringType,
+		"aws_user":                   types.StringType,
+		"csv_has_headers":            types.BoolType,
+		"directory_glob_pattern":     types.StringType,
+		"enable_event_notifications": types.BoolType,
+		"event_queue_arn":            types.StringType,
+		"external_id":                types.StringType,
+		"iam_role_arn":               types.StringType,
+		"is_directory_snapshot":      types.BoolType,
+		"is_single_table":            types.BoolType,
+		"s3_bucket_name":             types.StringType,
+		"s3_bucket_region":           types.StringType,
+		"single_table_file_format":   types.StringType,
+		"single_table_file_formats": types.SetType{
+			ElemType: types.StringType,
+		},
+		"single_table_name": types.StringType,
+		"skip_lines":        types.NumberType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

@@ -55,6 +55,12 @@ func (d *DropboxConnectionDataSource) Schema(ctx context.Context, req datasource
 						MarkdownDescription: `Folder`,
 						Computed:            true,
 					},
+					"csv_has_headers": schema.BoolAttribute{
+						MarkdownDescription: `CSV files have headers
+
+    Whether CSV files have a header row with field names.`,
+						Computed: true,
+					},
 					"directory_glob_pattern": schema.StringAttribute{
 						MarkdownDescription: `Tables glob path`,
 						Computed:            true,
@@ -77,6 +83,13 @@ func (d *DropboxConnectionDataSource) Schema(ctx context.Context, req datasource
 						MarkdownDescription: `File format`,
 						Computed:            true,
 					},
+					"single_table_file_formats": schema.SetAttribute{
+						MarkdownDescription: `File formats
+
+    File formats that may be present across different tables`,
+						Computed:    true,
+						ElementType: types.StringType,
+					},
 					"single_table_name": schema.StringAttribute{
 						MarkdownDescription: `Collection name`,
 						Computed:            true,
@@ -95,14 +108,16 @@ func (d *DropboxConnectionDataSource) Schema(ctx context.Context, req datasource
 }
 
 type DropboxDataSourceConf struct {
-	Bucket                   string `mapstructure:"bucket" tfsdk:"bucket"`
-	Directory_glob_pattern   string `mapstructure:"directory_glob_pattern" tfsdk:"directory_glob_pattern"`
-	Is_directory_snapshot    bool   `mapstructure:"is_directory_snapshot" tfsdk:"is_directory_snapshot"`
-	Is_single_table          bool   `mapstructure:"is_single_table" tfsdk:"is_single_table"`
-	Oauth_token_expiry       string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
-	Single_table_file_format string `mapstructure:"single_table_file_format" tfsdk:"single_table_file_format"`
-	Single_table_name        string `mapstructure:"single_table_name" tfsdk:"single_table_name"`
-	Skip_lines               int64  `mapstructure:"skip_lines" tfsdk:"skip_lines"`
+	Bucket                    string   `mapstructure:"bucket" tfsdk:"bucket"`
+	Csv_has_headers           bool     `mapstructure:"csv_has_headers" tfsdk:"csv_has_headers"`
+	Directory_glob_pattern    string   `mapstructure:"directory_glob_pattern" tfsdk:"directory_glob_pattern"`
+	Is_directory_snapshot     bool     `mapstructure:"is_directory_snapshot" tfsdk:"is_directory_snapshot"`
+	Is_single_table           bool     `mapstructure:"is_single_table" tfsdk:"is_single_table"`
+	Oauth_token_expiry        string   `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
+	Single_table_file_format  string   `mapstructure:"single_table_file_format" tfsdk:"single_table_file_format"`
+	Single_table_file_formats []string `mapstructure:"single_table_file_formats" tfsdk:"single_table_file_formats"`
+	Single_table_name         string   `mapstructure:"single_table_name" tfsdk:"single_table_name"`
+	Skip_lines                int64    `mapstructure:"skip_lines" tfsdk:"skip_lines"`
 }
 
 func (d *DropboxConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
@@ -141,13 +156,17 @@ func (d *DropboxConnectionDataSource) Read(ctx context.Context, req datasource.R
 	var diags diag.Diagnostics
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"bucket":                   types.StringType,
+		"csv_has_headers":          types.BoolType,
 		"directory_glob_pattern":   types.StringType,
 		"is_directory_snapshot":    types.BoolType,
 		"is_single_table":          types.BoolType,
 		"oauth_token_expiry":       types.StringType,
 		"single_table_file_format": types.StringType,
-		"single_table_name":        types.StringType,
-		"skip_lines":               types.NumberType,
+		"single_table_file_formats": types.SetType{
+			ElemType: types.StringType,
+		},
+		"single_table_name": types.StringType,
+		"skip_lines":        types.NumberType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

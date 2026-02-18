@@ -91,6 +91,15 @@ var AzureblobSchema = schema.Schema{
 					Computed:            false,
 					Sensitive:           false,
 				},
+				"csv_has_headers": schema.BoolAttribute{
+					MarkdownDescription: `CSV files have headers
+
+    Whether CSV files have a header row with field names.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
+				},
 				"directory_glob_pattern": schema.StringAttribute{
 					MarkdownDescription: `Tables glob path`,
 					Required:            false,
@@ -130,6 +139,17 @@ var AzureblobSchema = schema.Schema{
 					Optional:            true,
 					Computed:            true,
 					Sensitive:           false,
+				},
+				"single_table_file_formats": schema.SetAttribute{
+					MarkdownDescription: `File formats
+
+    File formats that may be present across different tables`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
+
+					ElementType: types.StringType,
 				},
 				"single_table_name": schema.StringAttribute{
 					MarkdownDescription: `Collection name`,
@@ -181,20 +201,22 @@ func (t *AzureblobConnectionResource) Schema(ctx context.Context, req resource.S
 }
 
 type AzureblobConf struct {
-	Access_key               string `mapstructure:"access_key" tfsdk:"access_key"`
-	Account_name             string `mapstructure:"account_name" tfsdk:"account_name"`
-	Auth_method              string `mapstructure:"auth_method" tfsdk:"auth_method"`
-	Client_id                string `mapstructure:"client_id" tfsdk:"client_id"`
-	Client_secret            string `mapstructure:"client_secret" tfsdk:"client_secret"`
-	Container_name           string `mapstructure:"container_name" tfsdk:"container_name"`
-	Directory_glob_pattern   string `mapstructure:"directory_glob_pattern" tfsdk:"directory_glob_pattern"`
-	Is_directory_snapshot    bool   `mapstructure:"is_directory_snapshot" tfsdk:"is_directory_snapshot"`
-	Is_single_table          bool   `mapstructure:"is_single_table" tfsdk:"is_single_table"`
-	Oauth_refresh_token      string `mapstructure:"oauth_refresh_token" tfsdk:"oauth_refresh_token"`
-	Single_table_file_format string `mapstructure:"single_table_file_format" tfsdk:"single_table_file_format"`
-	Single_table_name        string `mapstructure:"single_table_name" tfsdk:"single_table_name"`
-	Skip_lines               int64  `mapstructure:"skip_lines" tfsdk:"skip_lines"`
-	Tenant_id                string `mapstructure:"tenant_id" tfsdk:"tenant_id"`
+	Access_key                string   `mapstructure:"access_key" tfsdk:"access_key"`
+	Account_name              string   `mapstructure:"account_name" tfsdk:"account_name"`
+	Auth_method               string   `mapstructure:"auth_method" tfsdk:"auth_method"`
+	Client_id                 string   `mapstructure:"client_id" tfsdk:"client_id"`
+	Client_secret             string   `mapstructure:"client_secret" tfsdk:"client_secret"`
+	Container_name            string   `mapstructure:"container_name" tfsdk:"container_name"`
+	Csv_has_headers           bool     `mapstructure:"csv_has_headers" tfsdk:"csv_has_headers"`
+	Directory_glob_pattern    string   `mapstructure:"directory_glob_pattern" tfsdk:"directory_glob_pattern"`
+	Is_directory_snapshot     bool     `mapstructure:"is_directory_snapshot" tfsdk:"is_directory_snapshot"`
+	Is_single_table           bool     `mapstructure:"is_single_table" tfsdk:"is_single_table"`
+	Oauth_refresh_token       string   `mapstructure:"oauth_refresh_token" tfsdk:"oauth_refresh_token"`
+	Single_table_file_format  string   `mapstructure:"single_table_file_format" tfsdk:"single_table_file_format"`
+	Single_table_file_formats []string `mapstructure:"single_table_file_formats" tfsdk:"single_table_file_formats"`
+	Single_table_name         string   `mapstructure:"single_table_name" tfsdk:"single_table_name"`
+	Skip_lines                int64    `mapstructure:"skip_lines" tfsdk:"skip_lines"`
+	Tenant_id                 string   `mapstructure:"tenant_id" tfsdk:"tenant_id"`
 }
 
 type AzureblobConnectionResource struct {
@@ -259,14 +281,18 @@ func (r *AzureblobConnectionResource) Create(ctx context.Context, req resource.C
 		"client_id":                types.StringType,
 		"client_secret":            types.StringType,
 		"container_name":           types.StringType,
+		"csv_has_headers":          types.BoolType,
 		"directory_glob_pattern":   types.StringType,
 		"is_directory_snapshot":    types.BoolType,
 		"is_single_table":          types.BoolType,
 		"oauth_refresh_token":      types.StringType,
 		"single_table_file_format": types.StringType,
-		"single_table_name":        types.StringType,
-		"skip_lines":               types.NumberType,
-		"tenant_id":                types.StringType,
+		"single_table_file_formats": types.SetType{
+			ElemType: types.StringType,
+		},
+		"single_table_name": types.StringType,
+		"skip_lines":        types.NumberType,
+		"tenant_id":         types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -342,14 +368,18 @@ func (r *AzureblobConnectionResource) Read(ctx context.Context, req resource.Rea
 		"client_id":                types.StringType,
 		"client_secret":            types.StringType,
 		"container_name":           types.StringType,
+		"csv_has_headers":          types.BoolType,
 		"directory_glob_pattern":   types.StringType,
 		"is_directory_snapshot":    types.BoolType,
 		"is_single_table":          types.BoolType,
 		"oauth_refresh_token":      types.StringType,
 		"single_table_file_format": types.StringType,
-		"single_table_name":        types.StringType,
-		"skip_lines":               types.NumberType,
-		"tenant_id":                types.StringType,
+		"single_table_file_formats": types.SetType{
+			ElemType: types.StringType,
+		},
+		"single_table_name": types.StringType,
+		"skip_lines":        types.NumberType,
+		"tenant_id":         types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -424,14 +454,18 @@ func (r *AzureblobConnectionResource) Update(ctx context.Context, req resource.U
 		"client_id":                types.StringType,
 		"client_secret":            types.StringType,
 		"container_name":           types.StringType,
+		"csv_has_headers":          types.BoolType,
 		"directory_glob_pattern":   types.StringType,
 		"is_directory_snapshot":    types.BoolType,
 		"is_single_table":          types.BoolType,
 		"oauth_refresh_token":      types.StringType,
 		"single_table_file_format": types.StringType,
-		"single_table_name":        types.StringType,
-		"skip_lines":               types.NumberType,
-		"tenant_id":                types.StringType,
+		"single_table_file_formats": types.SetType{
+			ElemType: types.StringType,
+		},
+		"single_table_name": types.StringType,
+		"skip_lines":        types.NumberType,
+		"tenant_id":         types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
