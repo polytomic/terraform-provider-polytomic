@@ -1,3 +1,19 @@
+## 1.3.1 (18 Feb 2026)
+
+- Allow non-partner keys to manage user resources
+- Support importing users by email address rather than ID
+- Added support for new connection types:
+  - ClickHouse
+  - Gorgias
+  - LearnWorlds
+  - Qualtrics
+  - Stord
+
+## 1.3.0 (10 Feb 2026)
+
+- Fix type conversion error when adding new schemas to bulk syncs
+- Notifications: Add global error subscribers resource
+
 ## 1.2.1 (2 Feb 2026)
 
 - Fixed bugs with state/response drift when managing bulk syncs.
