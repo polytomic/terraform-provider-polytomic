@@ -59,10 +59,6 @@ func (p *Provider) ConfigValidators(context.Context) []provider.ConfigValidator 
 			path.MatchRoot("api_key"),
 			path.MatchRoot("partner_key"),
 		),
-		providervalidator.RequiredTogether(
-			path.MatchRoot("deployment_api_key"),
-			path.MatchRoot("deployment_url"),
-		),
 	}
 }
 

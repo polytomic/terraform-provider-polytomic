@@ -16,7 +16,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/polytomic/polytomic-go"
-	ptclient "github.com/polytomic/polytomic-go/client"
 	ptcore "github.com/polytomic/polytomic-go/core"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
@@ -72,18 +71,11 @@ type userResourceData struct {
 
 type userResource struct {
 	provider *providerclient.Provider
-	client   *ptclient.Client
 }
 
 func (r *userResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if provider := providerclient.GetProvider(req.ProviderData, resp.Diagnostics); provider != nil {
 		r.provider = provider
-		if client, err := provider.PartnerClient(); err == nil {
-			r.client = client
-		} else {
-			resp.Diagnostics.AddError("Error configuring user resource", err.Error())
-			return
-		}
 	}
 }
 
@@ -100,8 +92,12 @@ func (r *userResource) Create(ctx context.Context, req resource.CreateRequest, r
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
-	created, err := r.client.Users.Create(ctx,
+	client, err := r.provider.Client(data.Organization.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting client", err.Error())
+		return
+	}
+	created, err := client.Users.Create(ctx,
 		data.Organization.ValueString(),
 		&polytomic.CreateUserRequestSchema{
 			Email: data.Email.ValueString(),
@@ -129,7 +125,13 @@ func (r *userResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 		return
 	}
 
-	user, err := r.client.Users.Get(ctx, data.Id.ValueString(), data.Organization.ValueString())
+	orgID := data.Organization.ValueString()
+	client, err := r.provider.Client(orgID)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting client", err.Error())
+		return
+	}
+	user, err := client.Users.Get(ctx, data.Id.ValueString(), orgID)
 	if err != nil {
 		pErr := &ptcore.APIError{}
 		if errors.As(err, &pErr) {
@@ -170,7 +172,13 @@ func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		return
 	}
 
-	user, err := r.client.Users.Update(ctx,
+	client, err := r.provider.Client(data.Organization.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting client", err.Error())
+		return
+	}
+
+	user, err := client.Users.Update(ctx,
 		data.Id.ValueString(),
 		data.Organization.ValueString(),
 		&polytomic.UpdateUserRequestSchema{
@@ -205,8 +213,12 @@ func (r *userResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
-	_, err := r.client.Users.Remove(ctx, data.Id.ValueString(), data.Organization.ValueString())
+	client, err := r.provider.Client(data.Organization.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting client", err.Error())
+		return
+	}
+	_, err = client.Users.Remove(ctx, data.Id.ValueString(), data.Organization.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error deleting user: %s", err))
 		return
@@ -214,5 +226,109 @@ func (r *userResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 }
 
 func (r *userResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+	var organizationID, identifier string
+
+	// Parse import ID format
+	parts := strings.Split(req.ID, "/")
+	if len(parts) == 2 {
+		// Compound format: org_id/identifier (identifier can be user_id or email)
+		organizationID = parts[0]
+		identifier = parts[1]
+	} else if len(parts) == 1 {
+		// Simple format: just identifier, auto-detect organization from caller identity
+		identifier = req.ID
+
+		client, err := r.provider.Client("")
+		if err != nil {
+			resp.Diagnostics.AddError("Error getting client", err.Error())
+			return
+		}
+
+		identity, err := client.Identity.Get(ctx)
+		if err != nil {
+			resp.Diagnostics.AddError("Error getting caller identity", fmt.Sprintf("Unable to determine organization from API key: %s", err))
+			return
+		}
+
+		if identity.Data.OrganizationId == nil {
+			resp.Diagnostics.AddError("Error getting organization", "Caller identity does not have an organization ID")
+			return
+		}
+
+		organizationID = *identity.Data.OrganizationId
+	} else {
+		resp.Diagnostics.AddError(
+			"Invalid import ID format",
+			fmt.Sprintf("Expected import ID in format 'identifier' or 'org_id/identifier' where identifier is a user ID or email address, got: %s", req.ID),
+		)
+		return
+	}
+
+	// Determine if identifier is an email address or user ID
+	var userID string
+	if strings.Contains(identifier, "@") {
+		// Identifier is an email address - look up the user ID
+		tflog.Debug(ctx, "Importing user by email address", map[string]any{
+			"org_id": organizationID,
+			"email":  identifier,
+		})
+
+		client, err := r.provider.Client(organizationID)
+		if err != nil {
+			resp.Diagnostics.AddError("Error getting client", err.Error())
+			return
+		}
+
+		// List all users in the organization
+		users, err := client.Users.List(ctx, organizationID)
+		if err != nil {
+			resp.Diagnostics.AddError(
+				"Error listing users",
+				fmt.Sprintf("Failed to list users in organization %s: %s", organizationID, err),
+			)
+			return
+		}
+
+		// Find user by email (case-insensitive comparison)
+		var foundUser *polytomic.User
+		for _, user := range users.Data {
+			if user.Email != nil && strings.EqualFold(*user.Email, identifier) {
+				foundUser = user
+				break
+			}
+		}
+
+		if foundUser == nil {
+			resp.Diagnostics.AddError(
+				"User not found",
+				fmt.Sprintf("No user with email address %s found in organization %s", identifier, organizationID),
+			)
+			return
+		}
+
+		if foundUser.Id == nil {
+			resp.Diagnostics.AddError(
+				"Invalid user data",
+				fmt.Sprintf("User with email %s has no ID", identifier),
+			)
+			return
+		}
+
+		userID = *foundUser.Id
+		tflog.Debug(ctx, "Found user by email", map[string]any{
+			"email":   identifier,
+			"user_id": userID,
+		})
+	} else {
+		// Identifier is a user ID
+		userID = identifier
+		tflog.Debug(ctx, "Importing user by ID", map[string]any{
+			"org_id":  organizationID,
+			"user_id": userID,
+		})
+	}
+
+	// Set both the ID and organization in the state
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), userID)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("organization"), organizationID)...)
 }
