@@ -1,3 +1,12 @@
+## 1.3.2 (25 Feb 2026)
+
+- Added support for new connection types:
+  - Clazar
+  - Google Search Console
+  - n8n
+- Added Databricks SSH tunnel configuration fields.
+- Added `use_search_api` option for HubSpot connections.
+
 ## 1.3.1 (18 Feb 2026)
 
 - Allow non-partner keys to manage user resources
