@@ -1,0 +1,1 @@
+{"$id":"https://github.com/polytomic/app/services/polytomic/backend/clazar/connection-conf","$schema":"https://json-schema.org/draft/2020-12/schema","properties":{"client_id":{"title":"Client ID","type":"string"},"client_secret":{"sensitive":true,"title":"Client Secret","type":"string"}},"required":["client_id","client_secret"],"type":"object"}

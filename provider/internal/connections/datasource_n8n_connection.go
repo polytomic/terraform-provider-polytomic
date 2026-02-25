@@ -16,26 +16,26 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
-var _ datasource.DataSource = &NetsuitesaconnectConnectionDataSource{}
+var _ datasource.DataSource = &N8nConnectionDataSource{}
 
 // ExampleDataSource defines the data source implementation.
-type NetsuitesaconnectConnectionDataSource struct {
+type N8nConnectionDataSource struct {
 	provider *providerclient.Provider
 }
 
-func (d *NetsuitesaconnectConnectionDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *N8nConnectionDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	if provider := providerclient.GetProvider(req.ProviderData, resp.Diagnostics); provider != nil {
 		d.provider = provider
 	}
 }
 
-func (d *NetsuitesaconnectConnectionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_netsuitesaconnect_connection"
+func (d *N8nConnectionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_n8n_connection"
 }
 
-func (d *NetsuitesaconnectConnectionDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+func (d *N8nConnectionDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: ":meta:subcategory:Connections: NetSuite SuiteAnalytics Connection",
+		MarkdownDescription: ":meta:subcategory:Connections: n8n Connection",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				MarkdownDescription: "",
@@ -51,21 +51,11 @@ func (d *NetsuitesaconnectConnectionDataSource) Schema(ctx context.Context, req 
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
-					"account_id": schema.StringAttribute{
-						MarkdownDescription: `Account ID`,
-						Computed:            true,
-					},
-					"certificate_id": schema.StringAttribute{
-						MarkdownDescription: `Certificate ID`,
-						Computed:            true,
-					},
-					"client_id": schema.StringAttribute{
-						MarkdownDescription: `Client ID`,
-						Computed:            true,
-					},
-					"role_id": schema.StringAttribute{
-						MarkdownDescription: `Role ID`,
-						Computed:            true,
+					"url": schema.StringAttribute{
+						MarkdownDescription: `n8n URL
+
+    Base URL for your n8n instance (for example https://your-instance.app.n8n.cloud)`,
+						Computed: true,
 					},
 				},
 				Optional: true,
@@ -74,14 +64,11 @@ func (d *NetsuitesaconnectConnectionDataSource) Schema(ctx context.Context, req 
 	}
 }
 
-type NetsuitesaconnectDataSourceConf struct {
-	Account_id     string `mapstructure:"account_id" tfsdk:"account_id"`
-	Certificate_id string `mapstructure:"certificate_id" tfsdk:"certificate_id"`
-	Client_id      string `mapstructure:"client_id" tfsdk:"client_id"`
-	Role_id        string `mapstructure:"role_id" tfsdk:"role_id"`
+type N8nDataSourceConf struct {
+	Url string `mapstructure:"url" tfsdk:"url"`
 }
 
-func (d *NetsuitesaconnectConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+func (d *N8nConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 
 	// Read Terraform configuration data into the model
@@ -107,7 +94,7 @@ func (d *NetsuitesaconnectConnectionDataSource) Read(ctx context.Context, req da
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
 
-	conf := NetsuitesaconnectDataSourceConf{}
+	conf := N8nDataSourceConf{}
 	err = mapstructure.Decode(connection.Data.Configuration, &conf)
 	if err != nil {
 		resp.Diagnostics.AddError("Error decoding connection configuration", err.Error())
@@ -116,10 +103,7 @@ func (d *NetsuitesaconnectConnectionDataSource) Read(ctx context.Context, req da
 
 	var diags diag.Diagnostics
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"account_id":     types.StringType,
-		"certificate_id": types.StringType,
-		"client_id":      types.StringType,
-		"role_id":        types.StringType,
+		"url": types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

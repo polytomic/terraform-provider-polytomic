@@ -253,6 +253,44 @@ var DatabricksSchema = schema.Schema{
 					Computed:            true,
 					Sensitive:           false,
 				},
+				"ssh": schema.BoolAttribute{
+					MarkdownDescription: `Connect over SSH tunnel`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
+				"ssh_host": schema.StringAttribute{
+					MarkdownDescription: `SSH host`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
+				"ssh_port": schema.Int64Attribute{
+					MarkdownDescription: `SSH port`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
+				"ssh_private_key": schema.StringAttribute{
+					MarkdownDescription: `Private key`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
+					},
+				},
+				"ssh_user": schema.StringAttribute{
+					MarkdownDescription: `SSH user`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
 				"storage_credential_name": schema.StringAttribute{
 					MarkdownDescription: `Storage credential name`,
 					Required:            false,
@@ -327,6 +365,11 @@ type DatabricksConf struct {
 	Service_principal_id         string `mapstructure:"service_principal_id" tfsdk:"service_principal_id"`
 	Service_principal_secret     string `mapstructure:"service_principal_secret" tfsdk:"service_principal_secret"`
 	Set_retention_properties     bool   `mapstructure:"set_retention_properties" tfsdk:"set_retention_properties"`
+	Ssh                          bool   `mapstructure:"ssh" tfsdk:"ssh"`
+	Ssh_host                     string `mapstructure:"ssh_host" tfsdk:"ssh_host"`
+	Ssh_port                     int64  `mapstructure:"ssh_port" tfsdk:"ssh_port"`
+	Ssh_private_key              string `mapstructure:"ssh_private_key" tfsdk:"ssh_private_key"`
+	Ssh_user                     string `mapstructure:"ssh_user" tfsdk:"ssh_user"`
 	Storage_credential_name      string `mapstructure:"storage_credential_name" tfsdk:"storage_credential_name"`
 	Unity_catalog_enabled        bool   `mapstructure:"unity_catalog_enabled" tfsdk:"unity_catalog_enabled"`
 	Use_bulk_sync_staging_schema bool   `mapstructure:"use_bulk_sync_staging_schema" tfsdk:"use_bulk_sync_staging_schema"`
@@ -414,6 +457,11 @@ func (r *DatabricksConnectionResource) Create(ctx context.Context, req resource.
 		"service_principal_id":         types.StringType,
 		"service_principal_secret":     types.StringType,
 		"set_retention_properties":     types.BoolType,
+		"ssh":                          types.BoolType,
+		"ssh_host":                     types.StringType,
+		"ssh_port":                     types.NumberType,
+		"ssh_private_key":              types.StringType,
+		"ssh_user":                     types.StringType,
 		"storage_credential_name":      types.StringType,
 		"unity_catalog_enabled":        types.BoolType,
 		"use_bulk_sync_staging_schema": types.BoolType,
@@ -512,6 +560,11 @@ func (r *DatabricksConnectionResource) Read(ctx context.Context, req resource.Re
 		"service_principal_id":         types.StringType,
 		"service_principal_secret":     types.StringType,
 		"set_retention_properties":     types.BoolType,
+		"ssh":                          types.BoolType,
+		"ssh_host":                     types.StringType,
+		"ssh_port":                     types.NumberType,
+		"ssh_private_key":              types.StringType,
+		"ssh_user":                     types.StringType,
 		"storage_credential_name":      types.StringType,
 		"unity_catalog_enabled":        types.BoolType,
 		"use_bulk_sync_staging_schema": types.BoolType,
@@ -609,6 +662,11 @@ func (r *DatabricksConnectionResource) Update(ctx context.Context, req resource.
 		"service_principal_id":         types.StringType,
 		"service_principal_secret":     types.StringType,
 		"set_retention_properties":     types.BoolType,
+		"ssh":                          types.BoolType,
+		"ssh_host":                     types.StringType,
+		"ssh_port":                     types.NumberType,
+		"ssh_private_key":              types.StringType,
+		"ssh_user":                     types.StringType,
 		"storage_credential_name":      types.StringType,
 		"unity_catalog_enabled":        types.BoolType,
 		"use_bulk_sync_staging_schema": types.BoolType,

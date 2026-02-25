@@ -63,6 +63,10 @@ func (d *HubspotConnectionDataSource) Schema(ctx context.Context, req datasource
 						MarkdownDescription: `Include static list support`,
 						Computed:            true,
 					},
+					"use_search_api": schema.BoolAttribute{
+						MarkdownDescription: `Use HubSpot incremental API for bulk syncs`,
+						Computed:            true,
+					},
 				},
 				Optional: true,
 			},
@@ -74,6 +78,7 @@ type HubspotDataSourceConf struct {
 	Hub_domain                  string `mapstructure:"hub_domain" tfsdk:"hub_domain"`
 	Hub_user                    string `mapstructure:"hub_user" tfsdk:"hub_user"`
 	Include_static_list_support bool   `mapstructure:"include_static_list_support" tfsdk:"include_static_list_support"`
+	Use_search_api              bool   `mapstructure:"use_search_api" tfsdk:"use_search_api"`
 }
 
 func (d *HubspotConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
@@ -114,6 +119,7 @@ func (d *HubspotConnectionDataSource) Read(ctx context.Context, req datasource.R
 		"hub_domain":                  types.StringType,
 		"hub_user":                    types.StringType,
 		"include_static_list_support": types.BoolType,
+		"use_search_api":              types.BoolType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

@@ -31,6 +31,7 @@ resource "polytomic_databricks_connection" "databricks" {
     server_hostname          = "dbc-1234dsafas-d0001.cloud.databricks.com"
     service_principal_id     = "sp-1234abcd"
     service_principal_secret = "abcdefghijklmnopqrstuvwxyz0123456789/+ABCDEabcdefghijklmnopqrstuvwxyz0123456789/+ABCDE=="
+    ssh_host                 = "bastion.example.com"
   }
 }
 ```
@@ -113,6 +114,11 @@ Optional:
 
     Region of bucket
 - `set_retention_properties` (Boolean) Configure data retention for tables
+- `ssh` (Boolean) Connect over SSH tunnel
+- `ssh_host` (String) SSH host
+- `ssh_port` (Number) SSH port
+- `ssh_private_key` (String, Sensitive) Private key
+- `ssh_user` (String) SSH user
 - `storage_credential_name` (String) Storage credential name
 - `unity_catalog_enabled` (Boolean) Unity Catalog enabled
 - `use_bulk_sync_staging_schema` (Boolean) Use custom bulk sync staging schema

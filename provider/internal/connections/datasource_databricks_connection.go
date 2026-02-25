@@ -153,6 +153,22 @@ func (d *DatabricksConnectionDataSource) Schema(ctx context.Context, req datasou
 						MarkdownDescription: `Configure data retention for tables`,
 						Computed:            true,
 					},
+					"ssh": schema.BoolAttribute{
+						MarkdownDescription: `Connect over SSH tunnel`,
+						Computed:            true,
+					},
+					"ssh_host": schema.StringAttribute{
+						MarkdownDescription: `SSH host`,
+						Computed:            true,
+					},
+					"ssh_port": schema.Int64Attribute{
+						MarkdownDescription: `SSH port`,
+						Computed:            true,
+					},
+					"ssh_user": schema.StringAttribute{
+						MarkdownDescription: `SSH user`,
+						Computed:            true,
+					},
 					"storage_credential_name": schema.StringAttribute{
 						MarkdownDescription: `Storage credential name`,
 						Computed:            true,
@@ -195,6 +211,10 @@ type DatabricksDataSourceConf struct {
 	Server_hostname              string `mapstructure:"server_hostname" tfsdk:"server_hostname"`
 	Service_principal_id         string `mapstructure:"service_principal_id" tfsdk:"service_principal_id"`
 	Set_retention_properties     bool   `mapstructure:"set_retention_properties" tfsdk:"set_retention_properties"`
+	Ssh                          bool   `mapstructure:"ssh" tfsdk:"ssh"`
+	Ssh_host                     string `mapstructure:"ssh_host" tfsdk:"ssh_host"`
+	Ssh_port                     int64  `mapstructure:"ssh_port" tfsdk:"ssh_port"`
+	Ssh_user                     string `mapstructure:"ssh_user" tfsdk:"ssh_user"`
 	Storage_credential_name      string `mapstructure:"storage_credential_name" tfsdk:"storage_credential_name"`
 	Unity_catalog_enabled        bool   `mapstructure:"unity_catalog_enabled" tfsdk:"unity_catalog_enabled"`
 	Use_bulk_sync_staging_schema bool   `mapstructure:"use_bulk_sync_staging_schema" tfsdk:"use_bulk_sync_staging_schema"`
@@ -257,6 +277,10 @@ func (d *DatabricksConnectionDataSource) Read(ctx context.Context, req datasourc
 		"server_hostname":              types.StringType,
 		"service_principal_id":         types.StringType,
 		"set_retention_properties":     types.BoolType,
+		"ssh":                          types.BoolType,
+		"ssh_host":                     types.StringType,
+		"ssh_port":                     types.NumberType,
+		"ssh_user":                     types.StringType,
 		"storage_credential_name":      types.StringType,
 		"unity_catalog_enabled":        types.BoolType,
 		"use_bulk_sync_staging_schema": types.BoolType,

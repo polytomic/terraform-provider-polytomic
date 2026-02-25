@@ -94,6 +94,13 @@ var HubspotSchema = schema.Schema{
 						stringplanmodifier.UseStateForUnknown(),
 					},
 				},
+				"use_search_api": schema.BoolAttribute{
+					MarkdownDescription: `Use HubSpot incremental API for bulk syncs`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
 			},
 
 			Required: true,
@@ -127,6 +134,7 @@ type HubspotConf struct {
 	Hub_user                    string `mapstructure:"hub_user" tfsdk:"hub_user"`
 	Include_static_list_support bool   `mapstructure:"include_static_list_support" tfsdk:"include_static_list_support"`
 	Oauth_refresh_token         string `mapstructure:"oauth_refresh_token" tfsdk:"oauth_refresh_token"`
+	Use_search_api              bool   `mapstructure:"use_search_api" tfsdk:"use_search_api"`
 }
 
 type HubspotConnectionResource struct {
@@ -191,6 +199,7 @@ func (r *HubspotConnectionResource) Create(ctx context.Context, req resource.Cre
 		"hub_user":                    types.StringType,
 		"include_static_list_support": types.BoolType,
 		"oauth_refresh_token":         types.StringType,
+		"use_search_api":              types.BoolType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -266,6 +275,7 @@ func (r *HubspotConnectionResource) Read(ctx context.Context, req resource.ReadR
 		"hub_user":                    types.StringType,
 		"include_static_list_support": types.BoolType,
 		"oauth_refresh_token":         types.StringType,
+		"use_search_api":              types.BoolType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -340,6 +350,7 @@ func (r *HubspotConnectionResource) Update(ctx context.Context, req resource.Upd
 		"hub_user":                    types.StringType,
 		"include_static_list_support": types.BoolType,
 		"oauth_refresh_token":         types.StringType,
+		"use_search_api":              types.BoolType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

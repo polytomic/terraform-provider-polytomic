@@ -72,6 +72,10 @@ Read-Only:
 - `server_hostname` (String) Server Hostname
 - `service_principal_id` (String) Service Principal ID
 - `set_retention_properties` (Boolean) Configure data retention for tables
+- `ssh` (Boolean) Connect over SSH tunnel
+- `ssh_host` (String) SSH host
+- `ssh_port` (Number) SSH port
+- `ssh_user` (String) SSH user
 - `storage_credential_name` (String) Storage credential name
 - `unity_catalog_enabled` (Boolean) Unity Catalog enabled
 - `use_bulk_sync_staging_schema` (Boolean) Use custom bulk sync staging schema

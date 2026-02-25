@@ -27,11 +27,11 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
-var _ resource.Resource = &NetsuitesaconnectConnectionResource{}
-var _ resource.ResourceWithImportState = &NetsuitesaconnectConnectionResource{}
+var _ resource.Resource = &N8nConnectionResource{}
+var _ resource.ResourceWithImportState = &N8nConnectionResource{}
 
-var NetsuitesaconnectSchema = schema.Schema{
-	MarkdownDescription: ":meta:subcategory:Connections: NetSuite SuiteAnalytics Connection",
+var N8nSchema = schema.Schema{
+	MarkdownDescription: ":meta:subcategory:Connections: n8n Connection",
 	Attributes: map[string]schema.Attribute{
 		"organization": schema.StringAttribute{
 			MarkdownDescription: "Organization ID",
@@ -43,29 +43,8 @@ var NetsuitesaconnectSchema = schema.Schema{
 		},
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
-				"account_id": schema.StringAttribute{
-					MarkdownDescription: `Account ID`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
-					Sensitive:           false,
-				},
-				"certificate_id": schema.StringAttribute{
-					MarkdownDescription: `Certificate ID`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
-					Sensitive:           false,
-				},
-				"client_id": schema.StringAttribute{
-					MarkdownDescription: `Client ID`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
-					Sensitive:           false,
-				},
-				"private_key": schema.StringAttribute{
-					MarkdownDescription: `Private key`,
+				"api_key": schema.StringAttribute{
+					MarkdownDescription: `API Key`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
@@ -74,12 +53,14 @@ var NetsuitesaconnectSchema = schema.Schema{
 						stringplanmodifier.UseStateForUnknown(),
 					},
 				},
-				"role_id": schema.StringAttribute{
-					MarkdownDescription: `Role ID`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
-					Sensitive:           false,
+				"url": schema.StringAttribute{
+					MarkdownDescription: `n8n URL
+
+    Base URL for your n8n instance (for example https://your-instance.app.n8n.cloud)`,
+					Required:  true,
+					Optional:  false,
+					Computed:  false,
+					Sensitive: false,
 				},
 			},
 
@@ -95,7 +76,7 @@ var NetsuitesaconnectSchema = schema.Schema{
 		},
 		"id": schema.StringAttribute{
 			Computed:            true,
-			MarkdownDescription: "NetSuite SuiteAnalytics Connection identifier",
+			MarkdownDescription: "n8n Connection identifier",
 			PlanModifiers: []planmodifier.String{
 				stringplanmodifier.UseStateForUnknown(),
 			},
@@ -103,33 +84,30 @@ var NetsuitesaconnectSchema = schema.Schema{
 	},
 }
 
-func (t *NetsuitesaconnectConnectionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = NetsuitesaconnectSchema
+func (t *N8nConnectionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = N8nSchema
 }
 
-type NetsuitesaconnectConf struct {
-	Account_id     string `mapstructure:"account_id" tfsdk:"account_id"`
-	Certificate_id string `mapstructure:"certificate_id" tfsdk:"certificate_id"`
-	Client_id      string `mapstructure:"client_id" tfsdk:"client_id"`
-	Private_key    string `mapstructure:"private_key" tfsdk:"private_key"`
-	Role_id        string `mapstructure:"role_id" tfsdk:"role_id"`
+type N8nConf struct {
+	Api_key string `mapstructure:"api_key" tfsdk:"api_key"`
+	Url     string `mapstructure:"url" tfsdk:"url"`
 }
 
-type NetsuitesaconnectConnectionResource struct {
+type N8nConnectionResource struct {
 	provider *providerclient.Provider
 }
 
-func (r *NetsuitesaconnectConnectionResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *N8nConnectionResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if provider := providerclient.GetProvider(req.ProviderData, resp.Diagnostics); provider != nil {
 		r.provider = provider
 	}
 }
 
-func (r *NetsuitesaconnectConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_netsuitesaconnect_connection"
+func (r *N8nConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_n8n_connection"
 }
 
-func (r *NetsuitesaconnectConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *N8nConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data connectionData
 
 	diags := req.Config.Get(ctx, &data)
@@ -151,7 +129,7 @@ func (r *NetsuitesaconnectConnectionResource) Create(ctx context.Context, req re
 	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
-		Type:           "netsuitesaconnect",
+		Type:           "n8n",
 		OrganizationId: data.Organization.ValueStringPointer(),
 		Configuration:  connConf,
 		Validate:       pointer.ToBool(false),
@@ -164,31 +142,28 @@ func (r *NetsuitesaconnectConnectionResource) Create(ctx context.Context, req re
 	data.Name = types.StringPointerValue(created.Data.Name)
 	data.Organization = types.StringPointerValue(created.Data.OrganizationId)
 
-	conf := NetsuitesaconnectConf{}
+	conf := N8nConf{}
 	err = mapstructure.Decode(created.Data.Configuration, &conf)
 	if err != nil {
 		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error decoding connection configuration: %s", err))
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"account_id":     types.StringType,
-		"certificate_id": types.StringType,
-		"client_id":      types.StringType,
-		"private_key":    types.StringType,
-		"role_id":        types.StringType,
+		"api_key": types.StringType,
+		"url":     types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Netsuitesaconnect", "id": created.Data.Id})
+	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "N8n", "id": created.Data.Id})
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r *NetsuitesaconnectConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *N8nConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data connectionData
 
 	diags := req.State.Get(ctx, &data)
@@ -223,7 +198,7 @@ func (r *NetsuitesaconnectConnectionResource) Read(ctx context.Context, req reso
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
 
-	configAttributes, ok := getConfigAttributes(NetsuitesaconnectSchema)
+	configAttributes, ok := getConfigAttributes(N8nSchema)
 	if !ok {
 		resp.Diagnostics.AddError("Error getting connection configuration attributes", "Could not get configuration attributes")
 		return
@@ -238,18 +213,15 @@ func (r *NetsuitesaconnectConnectionResource) Read(ctx context.Context, req reso
 	// reset sensitive values so terraform doesn't think we have changes
 	connection.Data.Configuration = resetSensitiveValues(configAttributes, originalConfData, connection.Data.Configuration)
 
-	conf := NetsuitesaconnectConf{}
+	conf := N8nConf{}
 	err = mapstructure.Decode(connection.Data.Configuration, &conf)
 	if err != nil {
 		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error decoding connection configuration: %s", err))
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"account_id":     types.StringType,
-		"certificate_id": types.StringType,
-		"client_id":      types.StringType,
-		"private_key":    types.StringType,
-		"role_id":        types.StringType,
+		"api_key": types.StringType,
+		"url":     types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -260,7 +232,7 @@ func (r *NetsuitesaconnectConnectionResource) Read(ctx context.Context, req reso
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r *NetsuitesaconnectConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *N8nConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var data connectionData
 
 	diags := req.Plan.Get(ctx, &data)
@@ -281,7 +253,7 @@ func (r *NetsuitesaconnectConnectionResource) Update(ctx context.Context, req re
 		return
 	}
 
-	configAttributes, ok := getConfigAttributes(NetsuitesaconnectSchema)
+	configAttributes, ok := getConfigAttributes(N8nSchema)
 	if !ok {
 		resp.Diagnostics.AddError("Error getting connection configuration attributes", "Could not get configuration attributes")
 		return
@@ -311,18 +283,15 @@ func (r *NetsuitesaconnectConnectionResource) Update(ctx context.Context, req re
 	data.Name = types.StringPointerValue(updated.Data.Name)
 	data.Organization = types.StringPointerValue(updated.Data.OrganizationId)
 
-	conf := NetsuitesaconnectConf{}
+	conf := N8nConf{}
 	err = mapstructure.Decode(updated.Data.Configuration, &conf)
 	if err != nil {
 		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error decoding connection configuration: %s", err))
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"account_id":     types.StringType,
-		"certificate_id": types.StringType,
-		"client_id":      types.StringType,
-		"private_key":    types.StringType,
-		"role_id":        types.StringType,
+		"api_key": types.StringType,
+		"url":     types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -332,7 +301,7 @@ func (r *NetsuitesaconnectConnectionResource) Update(ctx context.Context, req re
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r *NetsuitesaconnectConnectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *N8nConnectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var data connectionData
 
 	diags := req.State.Get(ctx, &data)
@@ -395,6 +364,6 @@ func (r *NetsuitesaconnectConnectionResource) Delete(ctx context.Context, req re
 	}
 }
 
-func (r *NetsuitesaconnectConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *N8nConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

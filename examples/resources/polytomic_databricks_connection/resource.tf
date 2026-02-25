@@ -16,6 +16,7 @@ resource "polytomic_databricks_connection" "databricks" {
     server_hostname          = "dbc-1234dsafas-d0001.cloud.databricks.com"
     service_principal_id     = "sp-1234abcd"
     service_principal_secret = "abcdefghijklmnopqrstuvwxyz0123456789/+ABCDEabcdefghijklmnopqrstuvwxyz0123456789/+ABCDE=="
+    ssh_host                 = "bastion.example.com"
   }
 }
 

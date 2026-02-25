@@ -3,12 +3,12 @@
 page_title: "polytomic_netsuitesaconnect_connection Data Source - terraform-provider-polytomic"
 subcategory: "Connections"
 description: |-
-  Netsuite SuiteAnalytics Connection
+  NetSuite SuiteAnalytics Connection
 ---
 
 # polytomic_netsuitesaconnect_connection (Data Source)
 
-Netsuite SuiteAnalytics Connection
+NetSuite SuiteAnalytics Connection
 
 ## Example Usage
 
