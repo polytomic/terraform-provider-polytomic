@@ -1,4 +1,4 @@
-## 1.3.3 (9 Mar 2026)
+## 1.3.4 (9 Mar 2026)
 
 - Added support for new connection types:
   - Campfire
