@@ -115,6 +115,7 @@ Optional:
     Region of bucket
 - `set_retention_properties` (Boolean) Configure data retention for tables
 - `ssh` (Boolean) Connect over SSH tunnel
+- `ssh_blob_storage` (Boolean) Use SSH for cloud storage bucket
 - `ssh_host` (String) SSH host
 - `ssh_port` (Number) SSH port
 - `ssh_private_key` (String, Sensitive) Private key

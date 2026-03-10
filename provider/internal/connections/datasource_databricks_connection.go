@@ -157,6 +157,10 @@ func (d *DatabricksConnectionDataSource) Schema(ctx context.Context, req datasou
 						MarkdownDescription: `Connect over SSH tunnel`,
 						Computed:            true,
 					},
+					"ssh_blob_storage": schema.BoolAttribute{
+						MarkdownDescription: `Use SSH for cloud storage bucket`,
+						Computed:            true,
+					},
 					"ssh_host": schema.StringAttribute{
 						MarkdownDescription: `SSH host`,
 						Computed:            true,
@@ -212,6 +216,7 @@ type DatabricksDataSourceConf struct {
 	Service_principal_id         string `mapstructure:"service_principal_id" tfsdk:"service_principal_id"`
 	Set_retention_properties     bool   `mapstructure:"set_retention_properties" tfsdk:"set_retention_properties"`
 	Ssh                          bool   `mapstructure:"ssh" tfsdk:"ssh"`
+	Ssh_blob_storage             bool   `mapstructure:"ssh_blob_storage" tfsdk:"ssh_blob_storage"`
 	Ssh_host                     string `mapstructure:"ssh_host" tfsdk:"ssh_host"`
 	Ssh_port                     int64  `mapstructure:"ssh_port" tfsdk:"ssh_port"`
 	Ssh_user                     string `mapstructure:"ssh_user" tfsdk:"ssh_user"`
@@ -278,6 +283,7 @@ func (d *DatabricksConnectionDataSource) Read(ctx context.Context, req datasourc
 		"service_principal_id":         types.StringType,
 		"set_retention_properties":     types.BoolType,
 		"ssh":                          types.BoolType,
+		"ssh_blob_storage":             types.BoolType,
 		"ssh_host":                     types.StringType,
 		"ssh_port":                     types.NumberType,
 		"ssh_user":                     types.StringType,

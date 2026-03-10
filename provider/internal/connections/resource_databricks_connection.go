@@ -260,6 +260,13 @@ var DatabricksSchema = schema.Schema{
 					Computed:            true,
 					Sensitive:           false,
 				},
+				"ssh_blob_storage": schema.BoolAttribute{
+					MarkdownDescription: `Use SSH for cloud storage bucket`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
 				"ssh_host": schema.StringAttribute{
 					MarkdownDescription: `SSH host`,
 					Required:            false,
@@ -366,6 +373,7 @@ type DatabricksConf struct {
 	Service_principal_secret     string `mapstructure:"service_principal_secret" tfsdk:"service_principal_secret"`
 	Set_retention_properties     bool   `mapstructure:"set_retention_properties" tfsdk:"set_retention_properties"`
 	Ssh                          bool   `mapstructure:"ssh" tfsdk:"ssh"`
+	Ssh_blob_storage             bool   `mapstructure:"ssh_blob_storage" tfsdk:"ssh_blob_storage"`
 	Ssh_host                     string `mapstructure:"ssh_host" tfsdk:"ssh_host"`
 	Ssh_port                     int64  `mapstructure:"ssh_port" tfsdk:"ssh_port"`
 	Ssh_private_key              string `mapstructure:"ssh_private_key" tfsdk:"ssh_private_key"`
@@ -458,6 +466,7 @@ func (r *DatabricksConnectionResource) Create(ctx context.Context, req resource.
 		"service_principal_secret":     types.StringType,
 		"set_retention_properties":     types.BoolType,
 		"ssh":                          types.BoolType,
+		"ssh_blob_storage":             types.BoolType,
 		"ssh_host":                     types.StringType,
 		"ssh_port":                     types.NumberType,
 		"ssh_private_key":              types.StringType,
@@ -561,6 +570,7 @@ func (r *DatabricksConnectionResource) Read(ctx context.Context, req resource.Re
 		"service_principal_secret":     types.StringType,
 		"set_retention_properties":     types.BoolType,
 		"ssh":                          types.BoolType,
+		"ssh_blob_storage":             types.BoolType,
 		"ssh_host":                     types.StringType,
 		"ssh_port":                     types.NumberType,
 		"ssh_private_key":              types.StringType,
@@ -663,6 +673,7 @@ func (r *DatabricksConnectionResource) Update(ctx context.Context, req resource.
 		"service_principal_secret":     types.StringType,
 		"set_retention_properties":     types.BoolType,
 		"ssh":                          types.BoolType,
+		"ssh_blob_storage":             types.BoolType,
 		"ssh_host":                     types.StringType,
 		"ssh_port":                     types.NumberType,
 		"ssh_private_key":              types.StringType,

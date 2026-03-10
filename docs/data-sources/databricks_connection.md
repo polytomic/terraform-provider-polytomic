@@ -73,6 +73,7 @@ Read-Only:
 - `service_principal_id` (String) Service Principal ID
 - `set_retention_properties` (Boolean) Configure data retention for tables
 - `ssh` (Boolean) Connect over SSH tunnel
+- `ssh_blob_storage` (Boolean) Use SSH for cloud storage bucket
 - `ssh_host` (String) SSH host
 - `ssh_port` (Number) SSH port
 - `ssh_user` (String) SSH user

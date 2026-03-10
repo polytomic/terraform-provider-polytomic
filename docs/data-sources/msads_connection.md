@@ -37,6 +37,7 @@ data "polytomic_msads_connection" "msads" {
 Read-Only:
 
 - `accounts` (Attributes Set) (see [below for nested schema](#nestedatt--configuration--accounts))
+- `auth_method` (String) Authentication method
 - `oauth_token_expiry` (String)
 - `username` (String) Connected user
 

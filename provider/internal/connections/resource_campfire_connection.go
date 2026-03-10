@@ -27,11 +27,11 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
-var _ resource.Resource = &MsadsConnectionResource{}
-var _ resource.ResourceWithImportState = &MsadsConnectionResource{}
+var _ resource.Resource = &CampfireConnectionResource{}
+var _ resource.ResourceWithImportState = &CampfireConnectionResource{}
 
-var MsadsSchema = schema.Schema{
-	MarkdownDescription: ":meta:subcategory:Connections: Microsoft Ads Connection",
+var CampfireSchema = schema.Schema{
+	MarkdownDescription: ":meta:subcategory:Connections: Campfire Connection",
 	Attributes: map[string]schema.Attribute{
 		"organization": schema.StringAttribute{
 			MarkdownDescription: "Organization ID",
@@ -43,81 +43,15 @@ var MsadsSchema = schema.Schema{
 		},
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
-				"accounts": schema.SetNestedAttribute{
-					MarkdownDescription: ``,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
-					NestedObject: schema.NestedAttributeObject{
-						Attributes: map[string]schema.Attribute{
-							"label": schema.StringAttribute{
-								MarkdownDescription: ``,
-								Required:            false,
-								Optional:            true,
-								Computed:            true,
-								Sensitive:           false,
-							},
-							"value": schema.StringAttribute{
-								MarkdownDescription: ``,
-								Required:            false,
-								Optional:            true,
-								Computed:            true,
-								Sensitive:           false,
-							},
-						},
-					},
-				},
-				"auth_method": schema.StringAttribute{
-					MarkdownDescription: `Authentication method`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
-				},
-				"client_id": schema.StringAttribute{
-					MarkdownDescription: ``,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
+				"api_key": schema.StringAttribute{
+					MarkdownDescription: `API Key`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
 					Sensitive:           true,
 					PlanModifiers: []planmodifier.String{
 						stringplanmodifier.UseStateForUnknown(),
 					},
-				},
-				"client_secret": schema.StringAttribute{
-					MarkdownDescription: ``,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           true,
-					PlanModifiers: []planmodifier.String{
-						stringplanmodifier.UseStateForUnknown(),
-					},
-				},
-				"oauth_refresh_token": schema.StringAttribute{
-					MarkdownDescription: ``,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           true,
-					PlanModifiers: []planmodifier.String{
-						stringplanmodifier.UseStateForUnknown(),
-					},
-				},
-				"oauth_token_expiry": schema.StringAttribute{
-					MarkdownDescription: ``,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
-				},
-				"username": schema.StringAttribute{
-					MarkdownDescription: `Connected user`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
 				},
 			},
 
@@ -133,7 +67,7 @@ var MsadsSchema = schema.Schema{
 		},
 		"id": schema.StringAttribute{
 			Computed:            true,
-			MarkdownDescription: "Microsoft Ads Connection identifier",
+			MarkdownDescription: "Campfire Connection identifier",
 			PlanModifiers: []planmodifier.String{
 				stringplanmodifier.UseStateForUnknown(),
 			},
@@ -141,38 +75,29 @@ var MsadsSchema = schema.Schema{
 	},
 }
 
-func (t *MsadsConnectionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = MsadsSchema
+func (t *CampfireConnectionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = CampfireSchema
 }
 
-type MsadsConf struct {
-	Accounts []struct {
-		Label string `mapstructure:"label" tfsdk:"label"`
-		Value string `mapstructure:"value" tfsdk:"value"`
-	} `mapstructure:"accounts" tfsdk:"accounts"`
-	Auth_method         string `mapstructure:"auth_method" tfsdk:"auth_method"`
-	Client_id           string `mapstructure:"client_id" tfsdk:"client_id"`
-	Client_secret       string `mapstructure:"client_secret" tfsdk:"client_secret"`
-	Oauth_refresh_token string `mapstructure:"oauth_refresh_token" tfsdk:"oauth_refresh_token"`
-	Oauth_token_expiry  string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
-	Username            string `mapstructure:"username" tfsdk:"username"`
+type CampfireConf struct {
+	Api_key string `mapstructure:"api_key" tfsdk:"api_key"`
 }
 
-type MsadsConnectionResource struct {
+type CampfireConnectionResource struct {
 	provider *providerclient.Provider
 }
 
-func (r *MsadsConnectionResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *CampfireConnectionResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if provider := providerclient.GetProvider(req.ProviderData, resp.Diagnostics); provider != nil {
 		r.provider = provider
 	}
 }
 
-func (r *MsadsConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_msads_connection"
+func (r *CampfireConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_campfire_connection"
 }
 
-func (r *MsadsConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *CampfireConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data connectionData
 
 	diags := req.Config.Get(ctx, &data)
@@ -187,14 +112,14 @@ func (r *MsadsConnectionResource) Create(ctx context.Context, req resource.Creat
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
-	connConf, err := objectMapValue(ctx, data.Configuration, getOptionalFields(MsadsSchema))
+	connConf, err := objectMapValue(ctx, data.Configuration, getOptionalFields(CampfireSchema))
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
-		Type:           "msads",
+		Type:           "campfire",
 		OrganizationId: data.Organization.ValueStringPointer(),
 		Configuration:  connConf,
 		Validate:       pointer.ToBool(false),
@@ -207,40 +132,27 @@ func (r *MsadsConnectionResource) Create(ctx context.Context, req resource.Creat
 	data.Name = types.StringPointerValue(created.Data.Name)
 	data.Organization = types.StringPointerValue(created.Data.OrganizationId)
 
-	conf := MsadsConf{}
+	conf := CampfireConf{}
 	err = mapstructure.Decode(created.Data.Configuration, &conf)
 	if err != nil {
 		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error decoding connection configuration: %s", err))
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"accounts": types.SetType{
-			ElemType: types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					"label": types.StringType,
-					"value": types.StringType,
-				},
-			},
-		},
-		"auth_method":         types.StringType,
-		"client_id":           types.StringType,
-		"client_secret":       types.StringType,
-		"oauth_refresh_token": types.StringType,
-		"oauth_token_expiry":  types.StringType,
-		"username":            types.StringType,
+		"api_key": types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Msads", "id": created.Data.Id})
+	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Campfire", "id": created.Data.Id})
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r *MsadsConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *CampfireConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data connectionData
 
 	diags := req.State.Get(ctx, &data)
@@ -275,7 +187,7 @@ func (r *MsadsConnectionResource) Read(ctx context.Context, req resource.ReadReq
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
 
-	configAttributes, ok := getConfigAttributes(MsadsSchema)
+	configAttributes, ok := getConfigAttributes(CampfireSchema)
 	if !ok {
 		resp.Diagnostics.AddError("Error getting connection configuration attributes", "Could not get configuration attributes")
 		return
@@ -290,27 +202,14 @@ func (r *MsadsConnectionResource) Read(ctx context.Context, req resource.ReadReq
 	// reset sensitive values so terraform doesn't think we have changes
 	connection.Data.Configuration = resetSensitiveValues(configAttributes, originalConfData, connection.Data.Configuration)
 
-	conf := MsadsConf{}
+	conf := CampfireConf{}
 	err = mapstructure.Decode(connection.Data.Configuration, &conf)
 	if err != nil {
 		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error decoding connection configuration: %s", err))
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"accounts": types.SetType{
-			ElemType: types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					"label": types.StringType,
-					"value": types.StringType,
-				},
-			},
-		},
-		"auth_method":         types.StringType,
-		"client_id":           types.StringType,
-		"client_secret":       types.StringType,
-		"oauth_refresh_token": types.StringType,
-		"oauth_token_expiry":  types.StringType,
-		"username":            types.StringType,
+		"api_key": types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -321,7 +220,7 @@ func (r *MsadsConnectionResource) Read(ctx context.Context, req resource.ReadReq
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r *MsadsConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *CampfireConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var data connectionData
 
 	diags := req.Plan.Get(ctx, &data)
@@ -336,13 +235,13 @@ func (r *MsadsConnectionResource) Update(ctx context.Context, req resource.Updat
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
-	connConf, err := objectMapValue(ctx, data.Configuration, getOptionalFields(MsadsSchema))
+	connConf, err := objectMapValue(ctx, data.Configuration, getOptionalFields(CampfireSchema))
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
 
-	configAttributes, ok := getConfigAttributes(MsadsSchema)
+	configAttributes, ok := getConfigAttributes(CampfireSchema)
 	if !ok {
 		resp.Diagnostics.AddError("Error getting connection configuration attributes", "Could not get configuration attributes")
 		return
@@ -372,27 +271,14 @@ func (r *MsadsConnectionResource) Update(ctx context.Context, req resource.Updat
 	data.Name = types.StringPointerValue(updated.Data.Name)
 	data.Organization = types.StringPointerValue(updated.Data.OrganizationId)
 
-	conf := MsadsConf{}
+	conf := CampfireConf{}
 	err = mapstructure.Decode(updated.Data.Configuration, &conf)
 	if err != nil {
 		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error decoding connection configuration: %s", err))
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"accounts": types.SetType{
-			ElemType: types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					"label": types.StringType,
-					"value": types.StringType,
-				},
-			},
-		},
-		"auth_method":         types.StringType,
-		"client_id":           types.StringType,
-		"client_secret":       types.StringType,
-		"oauth_refresh_token": types.StringType,
-		"oauth_token_expiry":  types.StringType,
-		"username":            types.StringType,
+		"api_key": types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -402,7 +288,7 @@ func (r *MsadsConnectionResource) Update(ctx context.Context, req resource.Updat
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r *MsadsConnectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *CampfireConnectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var data connectionData
 
 	diags := req.State.Get(ctx, &data)
@@ -465,6 +351,6 @@ func (r *MsadsConnectionResource) Delete(ctx context.Context, req resource.Delet
 	}
 }
 
-func (r *MsadsConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *CampfireConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
