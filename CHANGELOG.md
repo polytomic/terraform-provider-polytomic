@@ -1,3 +1,10 @@
+## 1.3.3 (9 Mar 2026)
+
+- Added support for new connection types:
+  - Campfire
+- Added support for accessing Databricks blob storage via SSH tunnel.
+- Omit optional, unspecified fields from connection creation requests.
+
 ## 1.3.2 (25 Feb 2026)
 
 - Added support for new connection types:
