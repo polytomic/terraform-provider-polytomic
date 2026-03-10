@@ -144,7 +144,7 @@ func (r *AwsopensearchConnectionResource) Create(ctx context.Context, req resour
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
-	connConf, err := objectMapValue(ctx, data.Configuration)
+	connConf, err := objectMapValue(ctx, data.Configuration, getOptionalFields(AwsopensearchSchema))
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
@@ -275,7 +275,7 @@ func (r *AwsopensearchConnectionResource) Update(ctx context.Context, req resour
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
-	connConf, err := objectMapValue(ctx, data.Configuration)
+	connConf, err := objectMapValue(ctx, data.Configuration, getOptionalFields(AwsopensearchSchema))
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return

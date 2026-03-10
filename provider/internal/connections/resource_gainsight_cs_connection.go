@@ -122,7 +122,7 @@ func (r *Gainsight_csConnectionResource) Create(ctx context.Context, req resourc
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
-	connConf, err := objectMapValue(ctx, data.Configuration)
+	connConf, err := objectMapValue(ctx, data.Configuration, getOptionalFields(Gainsight_csSchema))
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
@@ -247,7 +247,7 @@ func (r *Gainsight_csConnectionResource) Update(ctx context.Context, req resourc
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
-	connConf, err := objectMapValue(ctx, data.Configuration)
+	connConf, err := objectMapValue(ctx, data.Configuration, getOptionalFields(Gainsight_csSchema))
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return

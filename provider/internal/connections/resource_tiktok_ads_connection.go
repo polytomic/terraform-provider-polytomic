@@ -160,7 +160,7 @@ func (r *Tiktok_adsConnectionResource) Create(ctx context.Context, req resource.
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
-	connConf, err := objectMapValue(ctx, data.Configuration)
+	connConf, err := objectMapValue(ctx, data.Configuration, getOptionalFields(Tiktok_adsSchema))
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
@@ -303,7 +303,7 @@ func (r *Tiktok_adsConnectionResource) Update(ctx context.Context, req resource.
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
-	connConf, err := objectMapValue(ctx, data.Configuration)
+	connConf, err := objectMapValue(ctx, data.Configuration, getOptionalFields(Tiktok_adsSchema))
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return

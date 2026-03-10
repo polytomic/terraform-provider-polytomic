@@ -144,7 +144,7 @@ func (r *NetsuitesaconnectConnectionResource) Create(ctx context.Context, req re
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
-	connConf, err := objectMapValue(ctx, data.Configuration)
+	connConf, err := objectMapValue(ctx, data.Configuration, getOptionalFields(NetsuitesaconnectSchema))
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
@@ -275,7 +275,7 @@ func (r *NetsuitesaconnectConnectionResource) Update(ctx context.Context, req re
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
-	connConf, err := objectMapValue(ctx, data.Configuration)
+	connConf, err := objectMapValue(ctx, data.Configuration, getOptionalFields(NetsuitesaconnectSchema))
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return

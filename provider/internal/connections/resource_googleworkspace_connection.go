@@ -166,7 +166,7 @@ func (r *GoogleworkspaceConnectionResource) Create(ctx context.Context, req reso
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
-	connConf, err := objectMapValue(ctx, data.Configuration)
+	connConf, err := objectMapValue(ctx, data.Configuration, getOptionalFields(GoogleworkspaceSchema))
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
@@ -301,7 +301,7 @@ func (r *GoogleworkspaceConnectionResource) Update(ctx context.Context, req reso
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
-	connConf, err := objectMapValue(ctx, data.Configuration)
+	connConf, err := objectMapValue(ctx, data.Configuration, getOptionalFields(GoogleworkspaceSchema))
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return

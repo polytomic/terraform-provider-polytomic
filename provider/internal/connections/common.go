@@ -66,12 +66,23 @@ func getValueOrEmpty(v any, typ string) any {
 	}
 }
 
-func objectMapValue(ctx context.Context, value types.Object) (map[string]interface{}, error) {
+func objectMapValue(ctx context.Context, value types.Object, optionalFields ...map[string]bool) (map[string]interface{}, error) {
 	out := make(map[string]interface{})
+
+	var optional map[string]bool
+	if len(optionalFields) > 0 {
+		optional = optionalFields[0]
+	}
 
 	for k, v := range value.Attributes() {
 		if v.IsUnknown() {
 			// don't want to write unknown values
+			continue
+		}
+		if v.IsNull() && optional != nil && optional[k] {
+			// skip null values for optional fields;
+			// this avoids sending zero values (empty string, false, 0)
+			// for fields the user didn't set
 			continue
 		}
 
@@ -204,6 +215,20 @@ func resetSensitiveValues(attrs map[string]schema.Attribute, state, read map[str
 	}
 
 	return read
+}
+
+func getOptionalFields(s schema.Schema) map[string]bool {
+	attrs, ok := getConfigAttributes(s)
+	if !ok {
+		return nil
+	}
+	optional := make(map[string]bool)
+	for k, a := range attrs {
+		if a.IsOptional() {
+			optional[k] = true
+		}
+	}
+	return optional
 }
 
 func getConfigAttributes(s schema.Schema) (map[string]schema.Attribute, bool) {
