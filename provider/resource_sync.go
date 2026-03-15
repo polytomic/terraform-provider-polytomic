@@ -39,17 +39,17 @@ func NewSyncResourceForSchemaIntrospection() resource.Resource {
 
 func (r *syncResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: ":meta:subcategory:Syncs: Sync",
+		MarkdownDescription: ":meta:subcategory:Model Syncs: Model Sync",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
-				MarkdownDescription: "",
+				MarkdownDescription: "Identifier for the sync.",
 				Computed:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"organization": schema.StringAttribute{
-				MarkdownDescription: "",
+				MarkdownDescription: "Organization ID for the sync. Required when using a deployment or partner key.",
 				Optional:            true,
 				Computed:            true,
 				PlanModifiers: []planmodifier.String{
@@ -57,29 +57,29 @@ func (r *syncResource) Schema(ctx context.Context, req resource.SchemaRequest, r
 				},
 			},
 			"name": schema.StringAttribute{
-				MarkdownDescription: "",
+				MarkdownDescription: "Display name for the sync.",
 				Required:            true,
 			},
 			"target": schema.SingleNestedAttribute{
-				MarkdownDescription: "",
+				MarkdownDescription: "Destination configuration for the sync.",
 				Attributes: map[string]schema.Attribute{
 					"connection_id": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: "Destination connection identifier.",
 						Required:            true,
 					},
 					"object": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: "Existing target object name in the destination connection. Mutually exclusive with `create`.",
 						Optional:            true,
 						Computed:            true,
 					},
 					"search_values": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: "Search criteria for targets, as a JSON object.",
 						CustomType:          jsontypes.NormalizedType{},
 						Optional:            true,
 						Computed:            true,
 					},
 					"configuration": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: "Connection-specific target options, as a JSON object.",
 						CustomType:          jsontypes.NormalizedType{},
 						Optional:            true,
 						Computed:            true,
@@ -88,7 +88,7 @@ func (r *syncResource) Schema(ctx context.Context, req resource.SchemaRequest, r
 						},
 					},
 					"new_name": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: "Name for a new target object to create in the destination.",
 						Optional:            true,
 					},
 					"create": schema.MapAttribute{
@@ -97,52 +97,52 @@ func (r *syncResource) Schema(ctx context.Context, req resource.SchemaRequest, r
 						Optional:            true,
 					},
 					"filter_logic": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: "Logical expression to combine target-level filters (e.g. `1 AND 2`).",
 						Optional:            true,
 					},
 				},
 				Required: true,
 			},
 			"active": schema.BoolAttribute{
-				MarkdownDescription: "",
+				MarkdownDescription: "Whether the sync is enabled.",
 				Required:            true,
 			},
 			"mode": schema.StringAttribute{
-				MarkdownDescription: "",
+				MarkdownDescription: "Sync operation mode. One of `create`, `update`, `updateOrCreate`, `replace`, `append`, or `remove`.",
 				Required:            true,
 			},
 			"fields": schema.SetNestedAttribute{
-				MarkdownDescription: "",
+				MarkdownDescription: "Fields to sync from source to destination.",
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						"source": schema.SingleNestedAttribute{
-							MarkdownDescription: "",
+							MarkdownDescription: "Source model field reference. Required unless `override_value` is set.",
 							Attributes: map[string]schema.Attribute{
 								"model_id": schema.StringAttribute{
-									MarkdownDescription: "",
+									MarkdownDescription: "Source model identifier.",
 									Required:            true,
 								},
 								"field": schema.StringAttribute{
-									MarkdownDescription: "",
+									MarkdownDescription: "Source field name.",
 									Required:            true,
 								},
 							},
 							Optional: true,
 						},
 						"target": schema.StringAttribute{
-							MarkdownDescription: "",
+							MarkdownDescription: "Target field identifier that the source value will be written to.",
 							Required:            true,
 						},
 						"new": schema.BoolAttribute{
-							MarkdownDescription: "",
+							MarkdownDescription: "Set to `true` if the target field should be created by Polytomic.",
 							Optional:            true,
 						},
 						"override_value": schema.StringAttribute{
-							MarkdownDescription: "",
+							MarkdownDescription: "Static value to set in the target field. When provided, `source` is ignored.",
 							Optional:            true,
 						},
 						"sync_mode": schema.StringAttribute{
-							MarkdownDescription: "",
+							MarkdownDescription: "Field-level sync mode. Defaults to the sync's `mode`.",
 							Optional:            true,
 						},
 						"encryption_enabled": schema.BoolAttribute{
@@ -154,65 +154,65 @@ func (r *syncResource) Schema(ctx context.Context, req resource.SchemaRequest, r
 				Required: true,
 			},
 			"override_fields": schema.SetNestedAttribute{
-				MarkdownDescription: "",
+				MarkdownDescription: "Fields whose values are set unconditionally in the target, regardless of source data.",
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						"source": schema.SingleNestedAttribute{
-							MarkdownDescription: "",
+							MarkdownDescription: "Source model field reference. Required unless `override_value` is set.",
 							Attributes: map[string]schema.Attribute{
 								"model_id": schema.StringAttribute{
-									MarkdownDescription: "",
+									MarkdownDescription: "Source model identifier.",
 									Required:            true,
 								},
 								"field": schema.StringAttribute{
-									MarkdownDescription: "",
+									MarkdownDescription: "Source field name.",
 									Required:            true,
 								},
 							},
 							Optional: true,
 						},
 						"target": schema.StringAttribute{
-							MarkdownDescription: "",
+							MarkdownDescription: "Target field identifier that the value will be written to.",
 							Required:            true,
 						},
 						"new": schema.BoolAttribute{
-							MarkdownDescription: "",
+							MarkdownDescription: "Set to `true` if the target field should be created by Polytomic.",
 							Optional:            true,
 						},
 						"override_value": schema.StringAttribute{
-							MarkdownDescription: "",
+							MarkdownDescription: "Static value to set in the target field. When provided, `source` is ignored.",
 							Optional:            true,
 						},
 						"sync_mode": schema.StringAttribute{
-							MarkdownDescription: "",
+							MarkdownDescription: "Field-level sync mode.",
 							Optional:            true,
 						},
 					}},
 				Optional: true,
 			},
 			"filters": schema.SetNestedAttribute{
-				MarkdownDescription: "",
+				MarkdownDescription: "Filters to apply to source data before syncing. Use `filter_logic` to combine multiple filters.",
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						"field_id": schema.StringAttribute{
-							MarkdownDescription: "",
+							MarkdownDescription: "Model or target field name to filter on.",
 							Required:            true,
 						},
 						"field_type": schema.StringAttribute{
-							MarkdownDescription: "",
+							MarkdownDescription: "Reference type for the field. One of `model` or `target`.",
 							Required:            true,
 						},
 						"function": schema.StringAttribute{
-							MarkdownDescription: "",
+							MarkdownDescription: "Filter function to apply (e.g. `Equality`, `Inequality`, `IsNull`, `IsNotNull`, `True`, `False`, `OnOrAfter`, `OnOrBefore`).",
 							Required:            true,
 						},
 						"value": schema.StringAttribute{
-							MarkdownDescription: "",
+							MarkdownDescription: "Comparison value for the filter, as a JSON value.",
 							CustomType:          jsontypes.NormalizedType{},
 							Optional:            true,
 						},
 						"label": schema.StringAttribute{
-							MarkdownDescription: "",
+							MarkdownDescription: "Display name for the filter.",
 							Optional:            true,
 							Computed:            true,
 						},
@@ -220,28 +220,28 @@ func (r *syncResource) Schema(ctx context.Context, req resource.SchemaRequest, r
 				Optional: true,
 			},
 			"filter_logic": schema.StringAttribute{
-				MarkdownDescription: "",
+				MarkdownDescription: "Logical expression to combine filters (e.g. `1 AND 2`, `1 OR (2 AND 3)`).",
 				Optional:            true,
 			},
 			"overrides": schema.SetNestedAttribute{
-				MarkdownDescription: "",
+				MarkdownDescription: "Conditional value replacements. When a record matches the condition, the override value is used instead of the source value.",
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						"field_id": schema.StringAttribute{
-							MarkdownDescription: "",
+							MarkdownDescription: "Model field identifier to evaluate the condition against.",
 							Required:            true,
 						},
 						"function": schema.StringAttribute{
-							MarkdownDescription: "",
+							MarkdownDescription: "Condition function (e.g. `Equality`, `Inequality`, `IsNull`).",
 							Required:            true,
 						},
 						"value": schema.StringAttribute{
-							MarkdownDescription: "",
+							MarkdownDescription: "Condition value to compare against, as a JSON value.",
 							CustomType:          jsontypes.NormalizedType{},
 							Optional:            true,
 						},
 						"override": schema.StringAttribute{
-							MarkdownDescription: "",
+							MarkdownDescription: "Replacement value to use when the condition matches, as a JSON value.",
 							CustomType:          jsontypes.NormalizedType{},
 							Required:            true,
 						}},
@@ -249,68 +249,71 @@ func (r *syncResource) Schema(ctx context.Context, req resource.SchemaRequest, r
 				Optional: true,
 			},
 			"schedule": schema.SingleNestedAttribute{
+				MarkdownDescription: "Execution schedule for the sync.",
 				Attributes: map[string]schema.Attribute{
 					"frequency": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: "Schedule frequency. One of `manual`, `continuous`, `hourly`, `daily`, `weekly`, `custom`, `builder`, `runafter`, `multi`, or `dbtcloud`.",
 						Required:            true,
 					},
 					"day_of_week": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: "Day of the week for weekly schedules.",
 						Optional:            true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
 					},
 					"hour": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: "Hour for scheduled execution (UTC).",
 						Optional:            true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
 					},
 					"minute": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: "Minute for scheduled execution.",
 						Optional:            true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
 					},
 					"month": schema.StringAttribute{
-						Optional: true,
+						MarkdownDescription: "Month for yearly schedules.",
+						Optional:            true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
 					},
 					"day_of_month": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: "Day of the month for monthly schedules.",
 						Optional:            true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
 					},
 					"job_id": schema.Int64Attribute{
-						MarkdownDescription: "",
+						MarkdownDescription: "External job identifier (e.g. for dbt Cloud schedules).",
 						Optional:            true,
 						PlanModifiers: []planmodifier.Int64{
 							int64planmodifier.UseStateForUnknown(),
 						},
 					},
 					"connection_id": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: "Connection identifier for connection-triggered schedules.",
 						Optional:            true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
 					},
 					"run_after": schema.SingleNestedAttribute{
+						MarkdownDescription: "Configure this sync to run after other syncs complete. Used with `runafter` frequency.",
 						Attributes: map[string]schema.Attribute{
 							"sync_ids": schema.SetAttribute{
-								MarkdownDescription: "",
+								MarkdownDescription: "Sync identifiers that must complete before this sync runs.",
 								ElementType:         types.StringType,
 								Optional:            true,
 							},
 							"bulk_sync_ids": schema.SetAttribute{
-								MarkdownDescription: "",
+								MarkdownDescription: "Bulk sync identifiers that must complete before this sync runs.",
 								ElementType:         types.StringType,
 								Optional:            true,
 							},
@@ -321,45 +324,46 @@ func (r *syncResource) Schema(ctx context.Context, req resource.SchemaRequest, r
 						},
 					},
 					"run_after_success_only": schema.BoolAttribute{
-						Optional: true,
+						MarkdownDescription: "If `true`, this sync only runs when all dependent syncs complete successfully.",
+						Optional:            true,
 					},
 				},
 				Required: true,
 			},
 			"identity": schema.SingleNestedAttribute{
-				MarkdownDescription: "",
+				MarkdownDescription: "Record matching configuration. Defines how source records are matched to existing target records for update and upsert modes.",
 				Attributes: map[string]schema.Attribute{
 					"source": schema.SingleNestedAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: "Source field used for record matching.",
 						Attributes: map[string]schema.Attribute{
 							"model_id": schema.StringAttribute{
-								MarkdownDescription: "",
+								MarkdownDescription: "Source model identifier.",
 								Required:            true,
 							},
 							"field": schema.StringAttribute{
-								MarkdownDescription: "",
+								MarkdownDescription: "Source field name.",
 								Required:            true,
 							},
 						},
 						Required: true,
 					},
 					"target": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: "Target field used for record matching.",
 						Required:            true,
 					},
 					"function": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: "Match function. One of `Equality`, `ISubstring`, `OneOf`, `DomainMatch`, or `HostnameMatch`.",
 						Required:            true,
 					},
 					"remote_field_type_id": schema.StringAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: "Target field type identifier.",
 						Computed:            true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
 					},
 					"new_field": schema.BoolAttribute{
-						MarkdownDescription: "",
+						MarkdownDescription: "Whether to create the target identity field if it does not exist.",
 						Optional:            true,
 						Computed:            true,
 						PlanModifiers: []planmodifier.Bool{
@@ -370,7 +374,7 @@ func (r *syncResource) Schema(ctx context.Context, req resource.SchemaRequest, r
 				Optional: true,
 			},
 			"sync_all_records": schema.BoolAttribute{
-				MarkdownDescription: "",
+				MarkdownDescription: "Whether to sync all records from the source on every execution, regardless of whether they have changed.",
 				Optional:            true,
 				Computed:            true,
 				Default:             booldefault.StaticBool(false),

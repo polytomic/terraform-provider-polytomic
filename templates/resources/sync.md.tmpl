@@ -1,0 +1,55 @@
+---
+page_title: "{{.Name}} {{.Type}} - {{.ProviderName}}"
+subcategory: "Model Syncs"
+description: |-
+{{ .Description | plainmarkdown | trimspace | prefixlines "  " }}
+---
+
+# {{.Name}} ({{.Type}})
+
+A model sync moves data from one or more [source models](../resources/model) to a target (destination) object in a connection. Syncs define _what_ data to move, _how_ to match and write records, and _when_ to execute.
+
+## Key Concepts
+
+### Modes
+
+The `mode` attribute controls how records are written to the target:
+
+| Mode | Behavior |
+|------|----------|
+| `create` | Insert new records only; existing records are not modified. |
+| `update` | Update existing records only; new records are not created. |
+| `updateOrCreate` | Update existing records or create new ones (upsert). |
+| `replace` | Replace all records in the target with the source data. |
+| `append` | Append records to the target without checking for duplicates. |
+| `remove` | Remove records from the target that match the source data. |
+
+### Identity
+
+For `update`, `updateOrCreate`, and `remove` modes you must configure an `identity` block that tells Polytomic how to match source records to target records. The `function` attribute specifies the matching strategy (e.g. `Equality`, `ISubstring`).
+
+### Target
+
+The `target` block specifies _where_ data is written. Provide either `object` (an existing target object) or `create` (to have Polytomic create a new object). Connection-specific options can be passed via `configuration` as a JSON object.
+
+### Fields and Override Fields
+
+Each entry in `fields` maps a source model field to a target field. Use `override_fields` for fields whose values should be set unconditionally (e.g. a constant label or timestamp).
+
+If you need to set a static value instead of reading from a source field, use `override_value` and omit `source`.
+
+### Filters and Overrides
+
+`filters` restrict which source records are synced. Combine multiple filters with `filter_logic` (e.g. `1 AND 2`, `1 OR (2 AND 3)`).
+
+`overrides` provide conditional value replacement: when a record matches a condition, the override value is substituted for the source value.
+
+### Scheduling
+
+The `schedule` block controls when the sync runs. Common frequencies include `manual`, `continuous`, `hourly`, `daily`, and `weekly`. Use `runafter` with the `run_after` block to chain syncs so one runs after another completes.
+
+## Example Usage
+
+{{ tffile .ExampleFile }}
+
+{{ .SchemaMarkdown | trimspace }}
