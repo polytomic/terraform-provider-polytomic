@@ -91,6 +91,11 @@ func (r *syncResource) Schema(ctx context.Context, req resource.SchemaRequest, r
 						MarkdownDescription: "",
 						Optional:            true,
 					},
+					"create": schema.MapAttribute{
+						MarkdownDescription: "Create a new target object with these properties",
+						ElementType:         types.StringType,
+						Optional:            true,
+					},
 					"filter_logic": schema.StringAttribute{
 						MarkdownDescription: "",
 						Optional:            true,
@@ -473,6 +478,7 @@ type Target struct {
 	SearchValues  jsontypes.Normalized `json:"search_values,omitempty" tfsdk:"search_values" mapstructure:"search_values,omitempty"`
 	Configuration jsontypes.Normalized `json:"configuration,omitempty" tfsdk:"configuration" mapstructure:"configuration,omitempty"`
 	NewName       *string              `json:"new_name,omitempty" tfsdk:"new_name" mapstructure:"new_name"`
+	Create        map[string]string    `json:"create,omitempty" tfsdk:"create" mapstructure:"create,omitempty"`
 	FilterLogic   *string              `json:"filter_logic,omitempty" tfsdk:"filter_logic" mapstructure:"filter_logic"`
 }
 
@@ -483,6 +489,7 @@ func (Target) AttrTypes() map[string]attr.Type {
 		"search_values": jsontypes.NormalizedType{},
 		"configuration": jsontypes.NormalizedType{},
 		"new_name":      types.StringType,
+		"create":        types.MapType{ElemType: types.StringType},
 		"filter_logic":  types.StringType,
 	}
 }
@@ -568,6 +575,7 @@ func (r *syncResource) Create(ctx context.Context, req resource.CreateRequest, r
 		ConnectionId: target.ConnectionID,
 		Object:       target.Object,
 		NewName:      target.NewName,
+		Create:       target.Create,
 		FilterLogic:  target.FilterLogic,
 	}
 
@@ -729,7 +737,7 @@ func (r *syncResource) Create(ctx context.Context, req resource.CreateRequest, r
 		request.Active = data.Active.ValueBoolPointer()
 	}
 
-	if identity.Source.ModelId != "" && identity.Source.Field != "" {
+	if identity.Source != nil && identity.Source.ModelId != "" && identity.Source.Field != "" {
 		request.Identity = &identity
 	}
 	client, err := r.provider.Client(data.Organization.ValueString())
@@ -737,6 +745,8 @@ func (r *syncResource) Create(ctx context.Context, req resource.CreateRequest, r
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	configTarget := data.Target
+
 	sync, err := client.ModelSync.Create(ctx, request)
 	if err != nil {
 		resp.Diagnostics.AddError("Error creating sync", err.Error())
@@ -744,6 +754,12 @@ func (r *syncResource) Create(ctx context.Context, req resource.CreateRequest, r
 	}
 
 	data, diags = syncDataFromResponse(ctx, sync.Data)
+	resp.Diagnostics.Append(diags...)
+	if diags.HasError() {
+		return
+	}
+
+	diags = preserveTargetCreate(&data, configTarget)
 	resp.Diagnostics.Append(diags...)
 	if diags.HasError() {
 		return
@@ -768,6 +784,8 @@ func (r *syncResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	priorTarget := data.Target
+
 	sync, err := client.ModelSync.Get(ctx, data.ID.ValueString())
 	if err != nil {
 		pErr := &ptcore.APIError{}
@@ -782,6 +800,12 @@ func (r *syncResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 	}
 
 	data, diags = syncDataFromResponse(ctx, sync.Data)
+	resp.Diagnostics.Append(diags...)
+	if diags.HasError() {
+		return
+	}
+
+	diags = preserveTargetCreate(&data, priorTarget)
 	resp.Diagnostics.Append(diags...)
 	if diags.HasError() {
 		return
@@ -821,6 +845,7 @@ func (r *syncResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		ConnectionId: target.ConnectionID,
 		Object:       pointer.To(pointer.Get(target.Object)),
 		NewName:      target.NewName,
+		Create:       target.Create,
 		FilterLogic:  target.FilterLogic,
 	}
 
@@ -989,6 +1014,8 @@ func (r *syncResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		request.Active = data.Active.ValueBoolPointer()
 	}
 
+	planTarget := data.Target
+
 	client, err := r.provider.Client(data.Organization.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting client", err.Error())
@@ -1001,6 +1028,12 @@ func (r *syncResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	}
 
 	data, diags = syncDataFromResponse(ctx, sync.Data)
+	resp.Diagnostics.Append(diags...)
+	if diags.HasError() {
+		return
+	}
+
+	diags = preserveTargetCreate(&data, planTarget)
 	resp.Diagnostics.Append(diags...)
 	if diags.HasError() {
 		return
@@ -1035,6 +1068,29 @@ func (r *syncResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 
 func (r *syncResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+}
+
+// preserveTargetCreate copies the "create" attribute from priorTarget into data.Target,
+// since the API never returns "create" in responses (it's a write-only field).
+func preserveTargetCreate(data *syncResourceResourceData, priorTarget types.Object) diag.Diagnostics {
+	if priorTarget.IsNull() || priorTarget.IsUnknown() {
+		return nil
+	}
+	priorAttrs := priorTarget.Attributes()
+	createVal, ok := priorAttrs["create"]
+	if !ok || createVal.IsNull() || createVal.IsUnknown() {
+		return nil
+	}
+
+	// Rebuild data.Target with the create value from the prior target
+	targetAttrs := data.Target.Attributes()
+	targetAttrs["create"] = createVal
+	newTarget, diags := types.ObjectValue(Target{}.AttrTypes(), targetAttrs)
+	if diags.HasError() {
+		return diags
+	}
+	data.Target = newTarget
+	return nil
 }
 
 // syncDataFromResponse converts a Polytomic API response to Terraform resource data.
@@ -1085,6 +1141,7 @@ func syncDataFromResponse(ctx context.Context, sync *polytomic.ModelSyncResponse
 		SearchValues:  searchValNormalized,
 		Configuration: confNormalized,
 		NewName:       sync.Target.NewName,
+		Create:        sync.Target.Create,
 		FilterLogic:   sync.Target.FilterLogic,
 	}
 	data.Target, diags = types.ObjectValueFrom(ctx, Target{}.AttrTypes(), targetData)
