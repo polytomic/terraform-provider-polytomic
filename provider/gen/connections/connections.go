@@ -30,9 +30,11 @@ const (
 	jsonschemaPath  = "./provider/gen/connections/connectiontypes"
 
 	// Resources
-	connectionResourceTemplate = "./provider/gen/connections/resource.go.tmpl"
-	exampleResourceTemplate    = "./provider/gen/connections/resource.tf.go.tmpl"
-	exampleResourceOutputPath  = "./examples/resources"
+	connectionResourceTemplate    = "./provider/gen/connections/resource.go.tmpl"
+	connectionResourceDocTemplate = "./provider/gen/connections/resource_doc.md.tmpl"
+	exampleResourceTemplate       = "./provider/gen/connections/resource.tf.go.tmpl"
+	exampleResourceOutputPath     = "./examples/resources"
+	docTemplateOutputPath         = "./templates/resources"
 
 	// Datasources
 	connectionDataSourceTemplate = "./provider/gen/connections/datasource.go.tmpl"
@@ -367,6 +369,13 @@ func GenerateConnections(ctx context.Context) error {
 			return err
 		}
 
+		if r.Resource {
+			err = writeConnectionDocTemplate(r)
+			if err != nil {
+				return err
+			}
+		}
+
 	}
 
 	err = writeExports(datasources, resources)
@@ -663,6 +672,24 @@ func writeConnectionResource(r Connection) error {
 
 	_, err = f.Write(p)
 	return err
+}
+
+func writeConnectionDocTemplate(r Connection) error {
+	tmpl, err := template.New("resource_doc.md.tmpl").ParseFiles(connectionResourceDocTemplate)
+	if err != nil {
+		return fmt.Errorf("error parsing doc template: %w", err)
+	}
+	var buf bytes.Buffer
+	err = tmpl.Execute(&buf, Connection{
+		Name:         r.Name,
+		ResourceName: r.ResourceName,
+	})
+	if err != nil {
+		return fmt.Errorf("error executing doc template for %s: %w", r.Connection, err)
+	}
+
+	outputFile := filepath.Join(docTemplateOutputPath, fmt.Sprintf("%s_connection.md.tmpl", r.ResourceName))
+	return os.WriteFile(outputFile, buf.Bytes(), 0644)
 }
 
 func writeConnectionDataSource(r Connection) error {

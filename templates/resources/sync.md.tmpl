@@ -30,7 +30,7 @@ For `update`, `updateOrCreate`, and `remove` modes you must configure an `identi
 
 ### Target
 
-The `target` block specifies _where_ data is written. Provide either `object` (an existing target object) or `create` (to have Polytomic create a new object). Connection-specific options can be passed via `configuration` as a JSON object.
+The `target` block specifies _where_ data is written. Provide either `object` (an existing target object) or `create` (to have Polytomic create a new object). Connection-specific options can be passed via `configuration` as a JSON object. For connection-specific target configuration details, see the [Polytomic connection guides](https://apidocs.polytomic.com/guides/configuring-your-connections).
 
 ### Fields and Override Fields
 

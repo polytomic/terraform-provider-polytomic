@@ -1,0 +1,18 @@
+---
+page_title: "{{.Name}} {{.Type}} - {{.ProviderName}}"
+subcategory: "Models"
+description: |-
+{{ .Description | plainmarkdown | trimspace | prefixlines "  " }}
+---
+
+# {{.Name}} ({{.Type}})
+
+A model defines a view of data in a source connection. Models are used as the data source for [syncs](../resources/sync) and can be related to other models to enrich data before syncing.
+
+For connection-specific model configuration details, see the [Polytomic connection guides](https://apidocs.polytomic.com/guides/configuring-your-connections).
+
+## Example Usage
+
+{{ tffile .ExampleFile }}
+
+{{ .SchemaMarkdown | trimspace }}
