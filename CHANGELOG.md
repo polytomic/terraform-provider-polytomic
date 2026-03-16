@@ -1,3 +1,7 @@
+## 1.3.6 (16 Mar 2026)
+
+- Updated documentation for `force_destroy` in connection resources.
+
 ## 1.3.5 (15 Mar 2026)
 
 - Fixed issue with state handling when creating a new sync target.
