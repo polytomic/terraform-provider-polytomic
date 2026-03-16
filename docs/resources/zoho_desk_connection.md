@@ -34,8 +34,8 @@ resource "polytomic_zoho_desk_connection" "zoho_desk" {
 
 ### Optional
 
-- `force_destroy` (Boolean) Indicates whether dependent models, syncs, and bulk syncs should be cascade
-deleted when this connection is destroy.
+- `force_destroy` (Boolean) Indicates whether dependent models, syncs, and bulk syncs should be
+cascade-deleted when this connection is destroyed.
 
   This only deletes other resources when the connection is destroyed, not when
 setting this parameter to `true`. Once this parameter is set to `true`, there
