@@ -1,3 +1,7 @@
+## 1.3.5 (15 Mar 2026)
+
+- Fixed issue with state handling when creating a new sync target.
+
 ## 1.3.4 (9 Mar 2026)
 
 - Added support for new connection types:
