@@ -30,7 +30,7 @@ resource "polytomic_user" "admin" {
 
 ### Optional
 
-- `role` (String) Role; one of `user` or `admin`.
+- `role` (String) Role name or ID. Defaults to `user`.
 
 ### Read-Only
 

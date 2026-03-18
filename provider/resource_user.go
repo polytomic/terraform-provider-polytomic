@@ -48,8 +48,12 @@ func (r *userResource) Schema(ctx context.Context, req resource.SchemaRequest, r
 				},
 			},
 			"role": schema.StringAttribute{
-				MarkdownDescription: "Role; one of `user` or `admin`.",
+				MarkdownDescription: "Role name or ID. Defaults to `user`.",
 				Optional:            true,
+				Computed:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"id": schema.StringAttribute{
 				Computed:            true,
@@ -150,7 +154,11 @@ func (r *userResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 
 	data.Id = types.StringPointerValue(user.Data.Id)
 	data.Organization = types.StringPointerValue(user.Data.OrganizationId)
-	data.Role = types.StringPointerValue(user.Data.Role)
+	// Our backend normalizes role names (e.g. "Admin" → "admin"). Only
+	// update state if the values differ case-insensitively to avoid drift.
+	if user.Data.Role != nil && !strings.EqualFold(data.Role.ValueString(), *user.Data.Role) {
+		data.Role = types.StringPointerValue(user.Data.Role)
+	}
 
 	// Our backend normalizes email addresses to lowercase. As a result,
 	// we need to do the same here to ensure that the state is consistent
@@ -193,7 +201,10 @@ func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, r
 
 	data.Id = types.StringPointerValue(user.Data.Id)
 	data.Organization = types.StringPointerValue(user.Data.OrganizationId)
-	data.Role = types.StringPointerValue(user.Data.Role)
+	// Only update role in state if it differs case-insensitively to avoid drift.
+	if user.Data.Role != nil && !strings.EqualFold(data.Role.ValueString(), *user.Data.Role) {
+		data.Role = types.StringPointerValue(user.Data.Role)
+	}
 	// Our backend normalizes email addresses to lowercase. As a result we do
 	// not set the email here to prevent Terraform errors about inconsistent
 	// state.
