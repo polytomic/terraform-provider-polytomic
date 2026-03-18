@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -48,11 +49,18 @@ func (r *userResource) Schema(ctx context.Context, req resource.SchemaRequest, r
 				},
 			},
 			"role": schema.StringAttribute{
-				MarkdownDescription: "Role name or ID. Defaults to `user`.",
+				MarkdownDescription: "Role; one of `user` or `admin`.",
+				DeprecationMessage:  "Use role_ids instead. This attribute will be removed in a future version.",
 				Optional:            true,
 				Computed:            true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
+			},
+			"role_ids": schema.ListAttribute{
+				MarkdownDescription: "List of role IDs to assign to the user.",
+				Optional:            true,
+				Computed:            true,
+				ElementType:         types.StringType,
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"id": schema.StringAttribute{
@@ -70,6 +78,7 @@ type userResourceData struct {
 	Organization types.String `tfsdk:"organization"`
 	Email        types.String `tfsdk:"email"`
 	Role         types.String `tfsdk:"role"`
+	RoleIDs      types.List   `tfsdk:"role_ids"`
 	Id           types.String `tfsdk:"id"`
 }
 
@@ -101,18 +110,32 @@ func (r *userResource) Create(ctx context.Context, req resource.CreateRequest, r
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
+	createReq := &polytomic.CreateUserRequestSchema{
+		Email: data.Email.ValueString(),
+	}
+	if !data.RoleIDs.IsNull() && !data.RoleIDs.IsUnknown() {
+		var roleIDs []string
+		diags = data.RoleIDs.ElementsAs(ctx, &roleIDs, false)
+		resp.Diagnostics.Append(diags...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+		createReq.RoleIds = roleIDs
+	} else {
+		createReq.Role = data.Role.ValueStringPointer()
+	}
+
 	created, err := client.Users.Create(ctx,
 		data.Organization.ValueString(),
-		&polytomic.CreateUserRequestSchema{
-			Email: data.Email.ValueString(),
-			Role:  data.Role.ValueStringPointer(),
-		},
+		createReq,
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error creating user: %s", err))
 		return
 	}
 	data.Id = types.StringPointerValue(created.Data.Id)
+	data.RoleIDs, diags = types.ListValueFrom(ctx, types.StringType, created.Data.RoleIds)
+	resp.Diagnostics.Append(diags...)
 	tflog.Trace(ctx, "created a user")
 
 	diags = resp.State.Set(ctx, &data)
@@ -159,6 +182,8 @@ func (r *userResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 	if user.Data.Role != nil && !strings.EqualFold(data.Role.ValueString(), *user.Data.Role) {
 		data.Role = types.StringPointerValue(user.Data.Role)
 	}
+	data.RoleIDs, diags = types.ListValueFrom(ctx, types.StringType, user.Data.RoleIds)
+	resp.Diagnostics.Append(diags...)
 
 	// Our backend normalizes email addresses to lowercase. As a result,
 	// we need to do the same here to ensure that the state is consistent
@@ -186,13 +211,25 @@ func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		return
 	}
 
+	updateReq := &polytomic.UpdateUserRequestSchema{
+		Email: data.Email.ValueString(),
+	}
+	if !data.RoleIDs.IsNull() && !data.RoleIDs.IsUnknown() {
+		var roleIDs []string
+		diags = data.RoleIDs.ElementsAs(ctx, &roleIDs, false)
+		resp.Diagnostics.Append(diags...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+		updateReq.RoleIds = roleIDs
+	} else {
+		updateReq.Role = data.Role.ValueStringPointer()
+	}
+
 	user, err := client.Users.Update(ctx,
 		data.Id.ValueString(),
 		data.Organization.ValueString(),
-		&polytomic.UpdateUserRequestSchema{
-			Email: data.Email.ValueString(),
-			Role:  data.Role.ValueStringPointer(),
-		},
+		updateReq,
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error updating user: %s", err))
@@ -205,11 +242,8 @@ func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	if user.Data.Role != nil && !strings.EqualFold(data.Role.ValueString(), *user.Data.Role) {
 		data.Role = types.StringPointerValue(user.Data.Role)
 	}
-	// Our backend normalizes email addresses to lowercase. As a result we do
-	// not set the email here to prevent Terraform errors about inconsistent
-	// state.
-
-	// data.Email = types.String{Value: user.Email}
+	data.RoleIDs, diags = types.ListValueFrom(ctx, types.StringType, user.Data.RoleIds)
+	resp.Diagnostics.Append(diags...)
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
