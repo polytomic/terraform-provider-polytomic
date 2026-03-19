@@ -211,10 +211,21 @@ func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		return
 	}
 
+	// Read the user's config (not plan) to determine which field they
+	// actually wrote. The plan includes computed state values (e.g.
+	// role_ids from UseStateForUnknown), which would silently override
+	// a role change.
+	var configData userResourceData
+	diags = req.Config.Get(ctx, &configData)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	updateReq := &polytomic.UpdateUserRequestSchema{
 		Email: data.Email.ValueString(),
 	}
-	if !data.RoleIDs.IsNull() && !data.RoleIDs.IsUnknown() {
+	if !configData.RoleIDs.IsNull() {
 		var roleIDs []string
 		diags = data.RoleIDs.ElementsAs(ctx, &roleIDs, false)
 		resp.Diagnostics.Append(diags...)
