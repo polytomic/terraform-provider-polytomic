@@ -30,7 +30,8 @@ resource "polytomic_user" "admin" {
 
 ### Optional
 
-- `role` (String) Role; one of `user` or `admin`.
+- `role` (String, Deprecated) Role; one of `user` or `admin`.
+- `role_ids` (List of String) List of role IDs to assign to the user.
 
 ### Read-Only
 
