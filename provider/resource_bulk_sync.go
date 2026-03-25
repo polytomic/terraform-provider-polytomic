@@ -13,7 +13,9 @@ import (
 	"github.com/AlekSi/pointer"
 	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
 	"github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -278,47 +280,123 @@ func (bulkSyncSchemaField) AttrTypes() map[string]attr.Type {
 }
 
 type bulkSyncFilter struct {
-	FieldId  types.String `tfsdk:"field_id"`
-	Function types.String `tfsdk:"function"`
-	Value    types.String `tfsdk:"value"`
+	FieldId   types.String `tfsdk:"field_id"`
+	Function  types.String `tfsdk:"function"`
+	Value     types.String `tfsdk:"value"`
+	ValueJSON types.String `tfsdk:"value_json"`
 }
 
 func (bulkSyncFilter) AttrTypes() map[string]attr.Type {
 	return map[string]attr.Type{
-		"field_id": types.StringType,
-		"function": types.StringType,
-		"value":    types.StringType,
+		"field_id":   types.StringType,
+		"function":   types.StringType,
+		"value":      types.StringType,
+		"value_json": types.StringType,
 	}
 }
 
-func bulkSyncFiltersToSDK(filters []bulkSyncFilter) []*polytomic.BulkFilter {
+func bulkSyncFiltersToSDK(filters []bulkSyncFilter) ([]*polytomic.BulkFilter, error) {
 	result := make([]*polytomic.BulkFilter, len(filters))
 	for i, f := range filters {
 		result[i] = &polytomic.BulkFilter{
 			FieldId:  f.FieldId.ValueStringPointer(),
 			Function: polytomic.FilterFunction(f.Function.ValueString()),
 		}
-		if !f.Value.IsNull() && !f.Value.IsUnknown() {
+		if !f.ValueJSON.IsNull() && !f.ValueJSON.IsUnknown() {
+			var val interface{}
+			if err := json.Unmarshal([]byte(f.ValueJSON.ValueString()), &val); err != nil {
+				return nil, fmt.Errorf("invalid JSON in value_json for filter %q: %w", f.FieldId.ValueString(), err)
+			}
+			result[i].Value = val
+		} else if !f.Value.IsNull() && !f.Value.IsUnknown() {
 			result[i].Value = f.Value.ValueString()
 		}
 	}
-	return result
+	return result, nil
 }
 
-func bulkSyncFiltersFromSDK(filters []*polytomic.BulkFilter) []bulkSyncFilter {
+func bulkSyncFiltersFromSDK(filters []*polytomic.BulkFilter) ([]bulkSyncFilter, error) {
 	result := make([]bulkSyncFilter, len(filters))
 	for i, f := range filters {
 		result[i] = bulkSyncFilter{
-			FieldId:  types.StringPointerValue(f.FieldId),
-			Function: types.StringValue(string(f.Function)),
+			FieldId:   types.StringPointerValue(f.FieldId),
+			Function:  types.StringValue(string(f.Function)),
+			Value:     types.StringNull(),
+			ValueJSON: types.StringNull(),
 		}
 		if f.Value != nil {
-			result[i].Value = types.StringValue(fmt.Sprintf("%v", f.Value))
-		} else {
-			result[i].Value = types.StringNull()
+			switch v := f.Value.(type) {
+			case string:
+				result[i].Value = types.StringValue(v)
+			default:
+				valJSON, err := json.Marshal(f.Value)
+				if err != nil {
+					return nil, fmt.Errorf("error marshaling filter value: %w", err)
+				}
+				result[i].ValueJSON = types.StringValue(string(valJSON))
+			}
 		}
 	}
-	return result
+	return result, nil
+}
+
+func bulkSyncSchemasFromSDK(ctx context.Context, schemas []*polytomic.BulkSchema) ([]bulkSyncSchema, diag.Diagnostics) {
+	var diags diag.Diagnostics
+	filterType := types.ObjectType{AttrTypes: bulkSyncFilter{}.AttrTypes()}
+	fieldType := types.ObjectType{AttrTypes: bulkSyncSchemaField{}.AttrTypes()}
+
+	result := make([]bulkSyncSchema, len(schemas))
+	for i, s := range schemas {
+		result[i] = bulkSyncSchema{
+			Id:                types.StringPointerValue(s.Id),
+			Enabled:           types.BoolPointerValue(s.Enabled),
+			PartitionKey:      types.StringPointerValue(s.PartitionKey),
+			TrackingField:     types.StringPointerValue(s.TrackingField),
+			OutputName:        types.StringPointerValue(s.OutputName),
+			UserOutputName:    types.StringPointerValue(s.UserOutputName),
+			DisableDataCutoff: types.BoolPointerValue(s.DisableDataCutoff),
+		}
+
+		if s.DataCutoffTimestamp != nil {
+			result[i].DataCutoffTimestamp = timetypes.NewRFC3339TimeValue(*s.DataCutoffTimestamp)
+		} else {
+			result[i].DataCutoffTimestamp = timetypes.NewRFC3339Null()
+		}
+
+		if len(s.Fields) > 0 {
+			tfFields := make([]bulkSyncSchemaField, len(s.Fields))
+			for j, f := range s.Fields {
+				tfFields[j] = bulkSyncSchemaField{
+					Id:             types.StringPointerValue(f.Id),
+					Enabled:        types.BoolPointerValue(f.Enabled),
+					Obfuscate:      types.BoolPointerValue(f.Obfuscated),
+					OutputName:     types.StringPointerValue(f.OutputName),
+					UserOutputName: types.StringPointerValue(f.UserOutputName),
+				}
+			}
+			result[i].Fields, diags = types.SetValueFrom(ctx, fieldType, tfFields)
+			if diags.HasError() {
+				return nil, diags
+			}
+		} else {
+			result[i].Fields = types.SetNull(fieldType)
+		}
+
+		if len(s.Filters) > 0 {
+			tfFilters, err := bulkSyncFiltersFromSDK(s.Filters)
+			if err != nil {
+				diags.AddError("Error reading filters", err.Error())
+				return nil, diags
+			}
+			result[i].Filters, diags = types.SetValueFrom(ctx, filterType, tfFilters)
+			if diags.HasError() {
+				return nil, diags
+			}
+		} else {
+			result[i].Filters = types.SetNull(filterType)
+		}
+	}
+	return result, diags
 }
 
 type bulkSyncSchema struct {
@@ -389,6 +467,15 @@ func (bulkSyncSchema) SchemaAttributes() map[string]schema.Attribute {
 					},
 					"value": schema.StringAttribute{
 						Optional: true,
+						Validators: []validator.String{
+							stringvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("value_json")),
+						},
+					},
+					"value_json": schema.StringAttribute{
+						Optional: true,
+						Validators: []validator.String{
+							stringvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("value")),
+						},
 					},
 				},
 			},
@@ -529,7 +616,12 @@ func (r *bulkSyncResource) Create(ctx context.Context, req resource.CreateReques
 				resp.Diagnostics.Append(diags...)
 				return
 			}
-			sdkFilters = bulkSyncFiltersToSDK(tfFilters)
+			var err error
+			sdkFilters, err = bulkSyncFiltersToSDK(tfFilters)
+			if err != nil {
+				resp.Diagnostics.AddError("Error converting filters", err.Error())
+				return
+			}
 		}
 
 		schemas[i] = &polytomic.V2CreateBulkSyncRequestSchemasItem{
@@ -787,7 +879,12 @@ func (r *bulkSyncResource) Update(ctx context.Context, req resource.UpdateReques
 				resp.Diagnostics.Append(diags...)
 				return
 			}
-			sdkFilters = bulkSyncFiltersToSDK(tfFilters)
+			var err error
+			sdkFilters, err = bulkSyncFiltersToSDK(tfFilters)
+			if err != nil {
+				resp.Diagnostics.AddError("Error converting filters", err.Error())
+				return
+			}
 		}
 
 		schemas[i] = &polytomic.V2UpdateBulkSyncRequestSchemasItem{
@@ -1034,7 +1131,11 @@ func bulkSyncDataFromResponse(ctx context.Context, response *polytomic.BulkSyncR
 
 				if merged.Filters.IsUnknown() {
 					if len(api.Filters) > 0 {
-						tfFilters := bulkSyncFiltersFromSDK(api.Filters)
+						tfFilters, err := bulkSyncFiltersFromSDK(api.Filters)
+						if err != nil {
+							mergeDiags.AddError("Error reading filters", err.Error())
+							return merged, mergeDiags
+						}
 						merged.Filters, mergeDiags = types.SetValueFrom(ctx, filterType, tfFilters)
 					} else {
 						merged.Filters = types.SetNull(filterType)
@@ -1048,7 +1149,12 @@ func bulkSyncDataFromResponse(ctx context.Context, response *polytomic.BulkSyncR
 		}
 	} else {
 		// No plan data (e.g., during import), use API response
-		schemaVal, diags = types.SetValueFrom(ctx, types.ObjectType{AttrTypes: bulkSyncSchema{}.AttrTypes()}, schemas)
+		tfSchemas, convDiags := bulkSyncSchemasFromSDK(ctx, schemas)
+		diags.Append(convDiags...)
+		if diags.HasError() {
+			return data, diags
+		}
+		schemaVal, diags = types.SetValueFrom(ctx, types.ObjectType{AttrTypes: bulkSyncSchema{}.AttrTypes()}, tfSchemas)
 		if diags.HasError() {
 			return data, diags
 		}
