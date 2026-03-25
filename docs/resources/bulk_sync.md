@@ -162,6 +162,7 @@ Optional:
 
 - `field_id` (String)
 - `value` (String)
+- `value_json` (String)
 
 
 
