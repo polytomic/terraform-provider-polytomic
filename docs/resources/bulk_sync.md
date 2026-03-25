@@ -161,8 +161,8 @@ Required:
 Optional:
 
 - `field_id` (String)
-- `value` (String)
-- `value_json` (String)
+- `value` (String) String filter value, e.g. `"48 hours ago"` for a RelativeOnOrAfter filter. Cannot be used with `value_json`.
+- `value_json` (String) JSON-encoded filter value for non-string types, e.g. `jsonencode(["active", "pending"])` for a StringOneOf filter. Cannot be used with `value`.
 
 
 

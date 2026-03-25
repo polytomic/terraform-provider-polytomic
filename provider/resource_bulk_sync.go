@@ -466,13 +466,15 @@ func (bulkSyncSchema) SchemaAttributes() map[string]schema.Attribute {
 						Required: true,
 					},
 					"value": schema.StringAttribute{
-						Optional: true,
+						MarkdownDescription: "String filter value, e.g. `\"48 hours ago\"` for a RelativeOnOrAfter filter. Cannot be used with `value_json`.",
+						Optional:            true,
 						Validators: []validator.String{
 							stringvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("value_json")),
 						},
 					},
 					"value_json": schema.StringAttribute{
-						Optional: true,
+						MarkdownDescription: "JSON-encoded filter value for non-string types, e.g. `jsonencode([\"active\", \"pending\"])` for a StringOneOf filter. Cannot be used with `value`.",
+						Optional:            true,
 						Validators: []validator.String{
 							stringvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("value")),
 						},
