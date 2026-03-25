@@ -277,6 +277,50 @@ func (bulkSyncSchemaField) AttrTypes() map[string]attr.Type {
 	}
 }
 
+type bulkSyncFilter struct {
+	FieldId  types.String `tfsdk:"field_id"`
+	Function types.String `tfsdk:"function"`
+	Value    types.String `tfsdk:"value"`
+}
+
+func (bulkSyncFilter) AttrTypes() map[string]attr.Type {
+	return map[string]attr.Type{
+		"field_id": types.StringType,
+		"function": types.StringType,
+		"value":    types.StringType,
+	}
+}
+
+func bulkSyncFiltersToSDK(filters []bulkSyncFilter) []*polytomic.BulkFilter {
+	result := make([]*polytomic.BulkFilter, len(filters))
+	for i, f := range filters {
+		result[i] = &polytomic.BulkFilter{
+			FieldId:  f.FieldId.ValueStringPointer(),
+			Function: polytomic.FilterFunction(f.Function.ValueString()),
+		}
+		if !f.Value.IsNull() && !f.Value.IsUnknown() {
+			result[i].Value = f.Value.ValueString()
+		}
+	}
+	return result
+}
+
+func bulkSyncFiltersFromSDK(filters []*polytomic.BulkFilter) []bulkSyncFilter {
+	result := make([]bulkSyncFilter, len(filters))
+	for i, f := range filters {
+		result[i] = bulkSyncFilter{
+			FieldId:  types.StringPointerValue(f.FieldId),
+			Function: types.StringValue(string(f.Function)),
+		}
+		if f.Value != nil {
+			result[i].Value = types.StringValue(fmt.Sprintf("%v", f.Value))
+		} else {
+			result[i].Value = types.StringNull()
+		}
+	}
+	return result
+}
+
 type bulkSyncSchema struct {
 	Id                  types.String      `tfsdk:"id"`
 	Enabled             types.Bool        `tfsdk:"enabled"`
@@ -363,11 +407,7 @@ func (bulkSyncSchema) AttrTypes() map[string]attr.Type {
 		},
 		"filters": types.SetType{
 			ElemType: types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					"field_id": types.StringType,
-					"function": types.StringType,
-					"value":    types.StringType,
-				},
+				AttrTypes: bulkSyncFilter{}.AttrTypes(),
 			},
 		},
 		"data_cutoff_timestamp": timetypes.RFC3339Type{},
@@ -481,13 +521,15 @@ func (r *bulkSyncResource) Create(ctx context.Context, req resource.CreateReques
 		}
 
 		// filters
-		var filters []*polytomic.BulkFilter
-		if !s.Filters.IsUnknown() {
-			diags = s.Filters.ElementsAs(ctx, &filters, false)
+		var sdkFilters []*polytomic.BulkFilter
+		if !s.Filters.IsUnknown() && !s.Filters.IsNull() {
+			var tfFilters []bulkSyncFilter
+			diags = s.Filters.ElementsAs(ctx, &tfFilters, false)
 			if diags.HasError() {
 				resp.Diagnostics.Append(diags...)
 				return
 			}
+			sdkFilters = bulkSyncFiltersToSDK(tfFilters)
 		}
 
 		schemas[i] = &polytomic.V2CreateBulkSyncRequestSchemasItem{
@@ -498,7 +540,7 @@ func (r *bulkSyncResource) Create(ctx context.Context, req resource.CreateReques
 				DataCutoffTimestamp: cutoff,
 				DisableDataCutoff:   s.DisableDataCutoff.ValueBoolPointer(),
 				Fields:              fieldConfs,
-				Filters:             filters,
+				Filters:             sdkFilters,
 			},
 		}
 	}
@@ -737,13 +779,15 @@ func (r *bulkSyncResource) Update(ctx context.Context, req resource.UpdateReques
 		}
 
 		// filters
-		var filters []*polytomic.BulkFilter
-		if !s.Filters.IsUnknown() {
-			diags = s.Filters.ElementsAs(ctx, &filters, false)
+		var sdkFilters []*polytomic.BulkFilter
+		if !s.Filters.IsUnknown() && !s.Filters.IsNull() {
+			var tfFilters []bulkSyncFilter
+			diags = s.Filters.ElementsAs(ctx, &tfFilters, false)
 			if diags.HasError() {
 				resp.Diagnostics.Append(diags...)
 				return
 			}
+			sdkFilters = bulkSyncFiltersToSDK(tfFilters)
 		}
 
 		schemas[i] = &polytomic.V2UpdateBulkSyncRequestSchemasItem{
@@ -754,7 +798,7 @@ func (r *bulkSyncResource) Update(ctx context.Context, req resource.UpdateReques
 				DataCutoffTimestamp: cutoff,
 				DisableDataCutoff:   s.DisableDataCutoff.ValueBoolPointer(),
 				Fields:              fieldConfs,
-				Filters:             filters,
+				Filters:             sdkFilters,
 			},
 		}
 	}
@@ -958,11 +1002,7 @@ func bulkSyncDataFromResponse(ctx context.Context, response *polytomic.BulkSyncR
 	// 2. Populate computed fields with API values (output_name, fields, etc.)
 	var schemaVal basetypes.SetValue
 	if planData != nil && !planData.Schemas.IsNull() {
-		filterType := types.ObjectType{AttrTypes: map[string]attr.Type{
-			"field_id": types.StringType,
-			"function": types.StringType,
-			"value":    types.StringType,
-		}}
+		filterType := types.ObjectType{AttrTypes: bulkSyncFilter{}.AttrTypes()}
 		fieldType := types.ObjectType{AttrTypes: bulkSyncSchemaField{}.AttrTypes()}
 
 		schemaVal, diags = MergeSetElements(
@@ -992,7 +1032,14 @@ func bulkSyncDataFromResponse(ctx context.Context, response *polytomic.BulkSyncR
 					return merged, mergeDiags
 				}
 
-				merged.Filters, mergeDiags = PopulateUnknownSet(ctx, merged.Filters, api.Filters, filterType)
+				if merged.Filters.IsUnknown() {
+					if len(api.Filters) > 0 {
+						tfFilters := bulkSyncFiltersFromSDK(api.Filters)
+						merged.Filters, mergeDiags = types.SetValueFrom(ctx, filterType, tfFilters)
+					} else {
+						merged.Filters = types.SetNull(filterType)
+					}
+				}
 				return merged, mergeDiags
 			},
 		)
