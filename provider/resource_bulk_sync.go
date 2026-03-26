@@ -278,9 +278,9 @@ func (bulkSyncSchemaField) AttrTypes() map[string]attr.Type {
 }
 
 type bulkSyncFilter struct {
-	FieldId  types.String          `tfsdk:"field_id"`
-	Function types.String          `tfsdk:"function"`
-	Value    jsontypes.Normalized  `tfsdk:"value"`
+	FieldId  types.String         `tfsdk:"field_id"`
+	Function types.String         `tfsdk:"function"`
+	Value    jsontypes.Normalized `tfsdk:"value"`
 }
 
 func (bulkSyncFilter) AttrTypes() map[string]attr.Type {
