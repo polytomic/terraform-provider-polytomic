@@ -13,7 +13,6 @@ import (
 	"github.com/AlekSi/pointer"
 	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
 	"github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes"
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -23,7 +22,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/polytomic/polytomic-go"
@@ -280,61 +278,58 @@ func (bulkSyncSchemaField) AttrTypes() map[string]attr.Type {
 }
 
 type bulkSyncFilter struct {
-	FieldId   types.String `tfsdk:"field_id"`
-	Function  types.String `tfsdk:"function"`
-	Value     types.String `tfsdk:"value"`
-	ValueJSON types.String `tfsdk:"value_json"`
+	FieldId  types.String          `tfsdk:"field_id"`
+	Function types.String          `tfsdk:"function"`
+	Value    jsontypes.Normalized  `tfsdk:"value"`
 }
 
 func (bulkSyncFilter) AttrTypes() map[string]attr.Type {
 	return map[string]attr.Type{
-		"field_id":   types.StringType,
-		"function":   types.StringType,
-		"value":      types.StringType,
-		"value_json": types.StringType,
+		"field_id": types.StringType,
+		"function": types.StringType,
+		"value":    jsontypes.NormalizedType{},
 	}
 }
 
-func bulkSyncFiltersToSDK(filters []bulkSyncFilter) ([]*polytomic.BulkFilter, error) {
+func bulkSyncFiltersToSDK(filters []bulkSyncFilter) ([]*polytomic.BulkFilter, diag.Diagnostics) {
+	var diags diag.Diagnostics
 	result := make([]*polytomic.BulkFilter, len(filters))
 	for i, f := range filters {
 		result[i] = &polytomic.BulkFilter{
 			FieldId:  f.FieldId.ValueStringPointer(),
 			Function: polytomic.FilterFunction(f.Function.ValueString()),
 		}
-		if !f.ValueJSON.IsNull() && !f.ValueJSON.IsUnknown() {
+		if !f.Value.IsNull() && !f.Value.IsUnknown() {
 			var val interface{}
-			if err := json.Unmarshal([]byte(f.ValueJSON.ValueString()), &val); err != nil {
-				return nil, fmt.Errorf("invalid JSON in value_json for filter %q: %w", f.FieldId.ValueString(), err)
+			diags.Append(f.Value.Unmarshal(&val)...)
+			if diags.HasError() {
+				return nil, diags
 			}
 			result[i].Value = val
-		} else if !f.Value.IsNull() && !f.Value.IsUnknown() {
-			result[i].Value = f.Value.ValueString()
 		}
 	}
-	return result, nil
+	return result, diags
 }
 
 func bulkSyncFiltersFromSDK(filters []*polytomic.BulkFilter) ([]bulkSyncFilter, error) {
 	result := make([]bulkSyncFilter, len(filters))
 	for i, f := range filters {
 		result[i] = bulkSyncFilter{
-			FieldId:   types.StringPointerValue(f.FieldId),
-			Function:  types.StringValue(string(f.Function)),
-			Value:     types.StringNull(),
-			ValueJSON: types.StringNull(),
+			FieldId:  types.StringPointerValue(f.FieldId),
+			Function: types.StringValue(string(f.Function)),
 		}
 		if f.Value != nil {
-			switch v := f.Value.(type) {
-			case string:
-				result[i].Value = types.StringValue(v)
-			default:
-				valJSON, err := json.Marshal(f.Value)
-				if err != nil {
-					return nil, fmt.Errorf("error marshaling filter value: %w", err)
-				}
-				result[i].ValueJSON = types.StringValue(string(valJSON))
+			valJSON, err := json.Marshal(f.Value)
+			if err != nil {
+				return nil, fmt.Errorf("error marshaling filter value: %w", err)
 			}
+			if string(valJSON) == "null" {
+				result[i].Value = jsontypes.NewNormalizedNull()
+			} else {
+				result[i].Value = jsontypes.NewNormalizedValue(string(valJSON))
+			}
+		} else {
+			result[i].Value = jsontypes.NewNormalizedNull()
 		}
 	}
 	return result, nil
@@ -466,18 +461,9 @@ func (bulkSyncSchema) SchemaAttributes() map[string]schema.Attribute {
 						Required: true,
 					},
 					"value": schema.StringAttribute{
-						MarkdownDescription: "String filter value, e.g. `\"48 hours ago\"` for a RelativeOnOrAfter filter. Cannot be used with `value_json`.",
+						MarkdownDescription: "Filter value as JSON, e.g. `jsonencode(\"48 hours ago\")` for a RelativeOnOrAfter filter or `jsonencode([\"active\", \"pending\"])` for a StringOneOf filter.",
 						Optional:            true,
-						Validators: []validator.String{
-							stringvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("value_json")),
-						},
-					},
-					"value_json": schema.StringAttribute{
-						MarkdownDescription: "JSON-encoded filter value for non-string types, e.g. `jsonencode([\"active\", \"pending\"])` for a StringOneOf filter. Cannot be used with `value`.",
-						Optional:            true,
-						Validators: []validator.String{
-							stringvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("value")),
-						},
+						CustomType:          jsontypes.NormalizedType{},
 					},
 				},
 			},
@@ -618,10 +604,9 @@ func (r *bulkSyncResource) Create(ctx context.Context, req resource.CreateReques
 				resp.Diagnostics.Append(diags...)
 				return
 			}
-			var err error
-			sdkFilters, err = bulkSyncFiltersToSDK(tfFilters)
-			if err != nil {
-				resp.Diagnostics.AddError("Error converting filters", err.Error())
+			sdkFilters, diags = bulkSyncFiltersToSDK(tfFilters)
+			if diags.HasError() {
+				resp.Diagnostics.Append(diags...)
 				return
 			}
 		}
@@ -881,10 +866,9 @@ func (r *bulkSyncResource) Update(ctx context.Context, req resource.UpdateReques
 				resp.Diagnostics.Append(diags...)
 				return
 			}
-			var err error
-			sdkFilters, err = bulkSyncFiltersToSDK(tfFilters)
-			if err != nil {
-				resp.Diagnostics.AddError("Error converting filters", err.Error())
+			sdkFilters, diags = bulkSyncFiltersToSDK(tfFilters)
+			if diags.HasError() {
+				resp.Diagnostics.Append(diags...)
 				return
 			}
 		}

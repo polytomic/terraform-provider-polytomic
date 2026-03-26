@@ -7,6 +7,7 @@ import (
 
 	"github.com/AlekSi/pointer"
 	"github.com/google/uuid"
+	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
@@ -24,13 +25,12 @@ func TestBulkSyncFiltersToSDK(t *testing.T) {
 		expected    []*polytomic.BulkFilter
 		expectError bool
 	}{
-		"plain string value": {
+		"string value": {
 			input: []bulkSyncFilter{
 				{
-					FieldId:   types.StringValue("createdAt"),
-					Function:  types.StringValue("RelativeOnOrAfter"),
-					Value:     types.StringValue("48 hours ago"),
-					ValueJSON: types.StringNull(),
+					FieldId:  types.StringValue("createdAt"),
+					Function: types.StringValue("RelativeOnOrAfter"),
+					Value:    jsontypes.NewNormalizedValue(`"48 hours ago"`),
 				},
 			},
 			expected: []*polytomic.BulkFilter{
@@ -41,30 +41,12 @@ func TestBulkSyncFiltersToSDK(t *testing.T) {
 				},
 			},
 		},
-		"string that looks like a number stays a string": {
-			input: []bulkSyncFilter{
-				{
-					FieldId:   types.StringValue("code"),
-					Function:  types.StringValue("Equality"),
-					Value:     types.StringValue("42"),
-					ValueJSON: types.StringNull(),
-				},
-			},
-			expected: []*polytomic.BulkFilter{
-				{
-					FieldId:  pointer.ToString("code"),
-					Function: polytomic.FilterFunction("Equality"),
-					Value:    "42",
-				},
-			},
-		},
 		"null value": {
 			input: []bulkSyncFilter{
 				{
-					FieldId:   types.StringValue("status"),
-					Function:  types.StringValue("IsNull"),
-					Value:     types.StringNull(),
-					ValueJSON: types.StringNull(),
+					FieldId:  types.StringValue("status"),
+					Function: types.StringValue("IsNull"),
+					Value:    jsontypes.NewNormalizedNull(),
 				},
 			},
 			expected: []*polytomic.BulkFilter{
@@ -75,13 +57,12 @@ func TestBulkSyncFiltersToSDK(t *testing.T) {
 				},
 			},
 		},
-		"array via value_json": {
+		"array value": {
 			input: []bulkSyncFilter{
 				{
-					FieldId:   types.StringValue("amount"),
-					Function:  types.StringValue("Between"),
-					Value:     types.StringNull(),
-					ValueJSON: types.StringValue(`[100,200]`),
+					FieldId:  types.StringValue("amount"),
+					Function: types.StringValue("Between"),
+					Value:    jsontypes.NewNormalizedValue(`[100,200]`),
 				},
 			},
 			expected: []*polytomic.BulkFilter{
@@ -92,13 +73,12 @@ func TestBulkSyncFiltersToSDK(t *testing.T) {
 				},
 			},
 		},
-		"number via value_json": {
+		"number value": {
 			input: []bulkSyncFilter{
 				{
-					FieldId:   types.StringValue("count"),
-					Function:  types.StringValue("GreaterThan"),
-					Value:     types.StringNull(),
-					ValueJSON: types.StringValue("42"),
+					FieldId:  types.StringValue("count"),
+					Function: types.StringValue("GreaterThan"),
+					Value:    jsontypes.NewNormalizedValue(`42`),
 				},
 			},
 			expected: []*polytomic.BulkFilter{
@@ -109,17 +89,6 @@ func TestBulkSyncFiltersToSDK(t *testing.T) {
 				},
 			},
 		},
-		"invalid value_json": {
-			input: []bulkSyncFilter{
-				{
-					FieldId:   types.StringValue("bad"),
-					Function:  types.StringValue("Equality"),
-					Value:     types.StringNull(),
-					ValueJSON: types.StringValue("not json"),
-				},
-			},
-			expectError: true,
-		},
 		"empty input": {
 			input:    []bulkSyncFilter{},
 			expected: []*polytomic.BulkFilter{},
@@ -128,12 +97,12 @@ func TestBulkSyncFiltersToSDK(t *testing.T) {
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			result, err := bulkSyncFiltersToSDK(tc.input)
+			result, diags := bulkSyncFiltersToSDK(tc.input)
 			if tc.expectError {
-				require.Error(t, err)
+				require.True(t, diags.HasError())
 				return
 			}
-			require.NoError(t, err)
+			require.False(t, diags.HasError(), "unexpected diagnostics: %v", diags)
 			require.Equal(t, len(tc.expected), len(result))
 			for i := range tc.expected {
 				assert.Equal(t, tc.expected[i].FieldId, result[i].FieldId)
@@ -146,11 +115,10 @@ func TestBulkSyncFiltersToSDK(t *testing.T) {
 
 func TestBulkSyncFiltersFromSDK(t *testing.T) {
 	tests := map[string]struct {
-		input             []*polytomic.BulkFilter
-		expectedValue     []types.String
-		expectedValueJSON []types.String
+		input         []*polytomic.BulkFilter
+		expectedValue []jsontypes.Normalized
 	}{
-		"string value populates value field": {
+		"string value": {
 			input: []*polytomic.BulkFilter{
 				{
 					FieldId:  pointer.ToString("createdAt"),
@@ -158,11 +126,8 @@ func TestBulkSyncFiltersFromSDK(t *testing.T) {
 					Value:    "48 hours ago",
 				},
 			},
-			expectedValue: []types.String{
-				types.StringValue("48 hours ago"),
-			},
-			expectedValueJSON: []types.String{
-				types.StringNull(),
+			expectedValue: []jsontypes.Normalized{
+				jsontypes.NewNormalizedValue(`"48 hours ago"`),
 			},
 		},
 		"nil value": {
@@ -173,14 +138,11 @@ func TestBulkSyncFiltersFromSDK(t *testing.T) {
 					Value:    nil,
 				},
 			},
-			expectedValue: []types.String{
-				types.StringNull(),
-			},
-			expectedValueJSON: []types.String{
-				types.StringNull(),
+			expectedValue: []jsontypes.Normalized{
+				jsontypes.NewNormalizedNull(),
 			},
 		},
-		"array value populates value_json field": {
+		"array value": {
 			input: []*polytomic.BulkFilter{
 				{
 					FieldId:  pointer.ToString("amount"),
@@ -188,14 +150,11 @@ func TestBulkSyncFiltersFromSDK(t *testing.T) {
 					Value:    []interface{}{float64(100), float64(200)},
 				},
 			},
-			expectedValue: []types.String{
-				types.StringNull(),
-			},
-			expectedValueJSON: []types.String{
-				types.StringValue("[100,200]"),
+			expectedValue: []jsontypes.Normalized{
+				jsontypes.NewNormalizedValue(`[100,200]`),
 			},
 		},
-		"number value populates value_json field": {
+		"number value": {
 			input: []*polytomic.BulkFilter{
 				{
 					FieldId:  pointer.ToString("count"),
@@ -203,17 +162,13 @@ func TestBulkSyncFiltersFromSDK(t *testing.T) {
 					Value:    42,
 				},
 			},
-			expectedValue: []types.String{
-				types.StringNull(),
-			},
-			expectedValueJSON: []types.String{
-				types.StringValue("42"),
+			expectedValue: []jsontypes.Normalized{
+				jsontypes.NewNormalizedValue(`42`),
 			},
 		},
 		"empty input": {
-			input:             []*polytomic.BulkFilter{},
-			expectedValue:     []types.String{},
-			expectedValueJSON: []types.String{},
+			input:         []*polytomic.BulkFilter{},
+			expectedValue: []jsontypes.Normalized{},
 		},
 	}
 
@@ -224,7 +179,6 @@ func TestBulkSyncFiltersFromSDK(t *testing.T) {
 			require.Equal(t, len(tc.expectedValue), len(result))
 			for i := range tc.expectedValue {
 				assert.Equal(t, tc.expectedValue[i], result[i].Value)
-				assert.Equal(t, tc.expectedValueJSON[i], result[i].ValueJSON)
 			}
 		})
 	}
@@ -252,8 +206,8 @@ func TestBulkSyncFiltersRoundTrip(t *testing.T) {
 	tfFilters, err := bulkSyncFiltersFromSDK(sdkFilters)
 	require.NoError(t, err)
 
-	roundTripped, err := bulkSyncFiltersToSDK(tfFilters)
-	require.NoError(t, err)
+	roundTripped, diags := bulkSyncFiltersToSDK(tfFilters)
+	require.False(t, diags.HasError())
 
 	require.Equal(t, len(sdkFilters), len(roundTripped))
 	for i := range sdkFilters {
@@ -537,7 +491,7 @@ resource "polytomic_bulk_sync" "test" {
     filters = [{
       field_id = "created_at"
       function = "OnOrAfter"
-      value    = "2024-01-01"
+      value    = jsonencode("2024-01-01")
     }]
   }]
 
