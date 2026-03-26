@@ -1,3 +1,12 @@
+## 1.3.8 (25 Mar 2026)
+
+- Fixed bulk sync filter values to accept any JSON type (strings, arrays, objects) via `jsonencode()`.
+
+## 1.3.7 (18 Mar 2026)
+
+- Added `polytomic_role` data source for looking up roles.
+- Added `role_ids` field to user resource for assigning multiple/custom roles. The existing `role` field is now deprecated.
+
 ## 1.3.6 (16 Mar 2026)
 
 - Updated documentation for `force_destroy` in connection resources.
