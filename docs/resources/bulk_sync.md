@@ -161,7 +161,7 @@ Required:
 Optional:
 
 - `field_id` (String)
-- `value` (String)
+- `value` (String) Filter value as JSON, e.g. `jsonencode("48 hours ago")` for a RelativeOnOrAfter filter or `jsonencode(["active", "pending"])` for a StringOneOf filter.
 
 
 
