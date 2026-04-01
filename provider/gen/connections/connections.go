@@ -239,30 +239,41 @@ type ConnectionType struct {
 	UseOAuth bool   `json:"use_oauth"`
 }
 
+var useCache = os.Getenv("POLYTOMIC_USE_CACHE") != ""
+
+func readCached[T any](path string) (T, error) {
+	var data T
+	ct, err := os.Open(path)
+	if err != nil {
+		return data, fmt.Errorf("error opening cached %s: %w", path, err)
+	}
+	defer ct.Close()
+	if err := json.NewDecoder(ct).Decode(&data); err != nil {
+		return data, fmt.Errorf("error reading %s: %w", path, err)
+	}
+	return data, nil
+}
+
 func fetchOrRead[T any](ctx context.Context, path string, fetch func(context.Context) (T, error)) (T, error) {
+	if useCache {
+		return readCached[T](path)
+	}
+
 	data, err := fetch(ctx)
 	if err != nil {
 		// an error occurred fetching; see if we have a cached copy
-		if ct, err := os.Open(path); err == nil {
-			err := json.NewDecoder(ct).Decode(&data)
-			if err != nil {
-				return *(new(T)), fmt.Errorf("error reading %s: %w", path, err)
-			}
-		} else {
-			// couldn't fetch or read
-			return *(new(T)), err
-		}
-	} else {
-		// write the fetched data to path
-		f, err := os.Create(path)
-		if err != nil {
-			return *(new(T)), fmt.Errorf("error creating %s: %w", path, err)
-		}
-		defer f.Close()
-		err = json.NewEncoder(f).Encode(data)
-		if err != nil {
-			return *(new(T)), fmt.Errorf("error encoding %s: %w", path, err)
-		}
+		return readCached[T](path)
+	}
+
+	// write the fetched data to path
+	f, err := os.Create(path)
+	if err != nil {
+		return *(new(T)), fmt.Errorf("error creating %s: %w", path, err)
+	}
+	defer f.Close()
+	err = json.NewEncoder(f).Encode(data)
+	if err != nil {
+		return *(new(T)), fmt.Errorf("error encoding %s: %w", path, err)
 	}
 	return data, nil
 }

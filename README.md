@@ -32,13 +32,28 @@ If you wish to work on the provider, you'll first need
 [Go](http://www.golang.org) installed on your machine (see
 [Requirements](#requirements) above).
 
-Connections can be added by editing `provider/gen/connections/connections.yaml`
-and running `go generate`
-
 To compile the provider, run `go install`. This will build the provider and put
 the provider binary in the `$GOPATH/bin` directory.
 
 To generate or update documentation, run `go generate`.
+
+### Code Generation
+
+Connection resources and data sources are generated from Polytomic API schemas.
+Running `go generate` will fetch the latest schemas from the API and regenerate
+the connection code. The following environment variables control this behavior:
+
+| Variable | Description |
+|---|---|
+| `POLYTOMIC_DEPLOYMENT_URL` | API base URL. Defaults to production if unset. |
+| `POLYTOMIC_API_KEY` | API key for fetching connection schemas. If unset or invalid, cached schemas are used as a fallback. |
+| `POLYTOMIC_USE_CACHE` | Set to any non-empty value to skip API calls entirely and generate from cached JSON schemas in `provider/gen/connections/`. |
+
+To regenerate using only cached schemas (no network access required):
+
+```shell
+POLYTOMIC_USE_CACHE=1 go generate
+```
 
 ### Acceptance Tests
 
