@@ -51,11 +51,13 @@ var Zendesk_chatSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"domain": schema.StringAttribute{
-					MarkdownDescription: `Zendesk Support Subdomain`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
-					Sensitive:           false,
+					MarkdownDescription: `Zendesk Support Subdomain
+
+Example: polytomic.zendesk.com.`,
+					Required:  true,
+					Optional:  false,
+					Computed:  false,
+					Sensitive: false,
 				},
 				"ratelimit_rpm": schema.Int64Attribute{
 					MarkdownDescription: `Maximum requests per minute

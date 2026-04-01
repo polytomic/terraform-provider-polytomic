@@ -199,6 +199,7 @@ type Attribute struct {
 	AttrName     string       `yaml:"-"`
 	Default      DefaultValue `yaml:"-"`
 	EnumValues   []string     `yaml:"-"` // valid values for string enums
+	EnumLabels   []string     `yaml:"-"` // human-readable labels for enum values (parallel to EnumValues)
 	Attributes   []Attribute
 	Elem         *Attribute
 }
@@ -574,11 +575,58 @@ func tfAttr(k string, a *jsonschema.Schema, required []string) (Attribute, error
 		switch v := e.(type) {
 		case string:
 			attr.EnumValues = append(attr.EnumValues, v)
+			attr.EnumLabels = append(attr.EnumLabels, "")
 		case map[string]interface{}:
 			if val, ok := v["value"].(string); ok {
 				attr.EnumValues = append(attr.EnumValues, val)
+				label, _ := v["label"].(string)
+				attr.EnumLabels = append(attr.EnumLabels, label)
 			}
 		}
+	}
+	if len(attr.EnumValues) > 0 {
+		hasLabels := false
+		for _, l := range attr.EnumLabels {
+			if l != "" {
+				hasLabels = true
+				break
+			}
+		}
+		if hasLabels {
+			entries := make([]string, len(attr.EnumValues))
+			for i, v := range attr.EnumValues {
+				if attr.EnumLabels[i] != "" {
+					entries[i] = fmt.Sprintf("  - %q - %s", v, attr.EnumLabels[i])
+				} else {
+					entries[i] = fmt.Sprintf("  - %q", v)
+				}
+			}
+			attr.Description += fmt.Sprintf("\n\nValid values:\n%s", strings.Join(entries, "\n"))
+		} else {
+			quoted := make([]string, len(attr.EnumValues))
+			for i, v := range attr.EnumValues {
+				quoted[i] = fmt.Sprintf("%q", v)
+			}
+			attr.Description += fmt.Sprintf("\n\nValid values: %s.", strings.Join(quoted, ", "))
+		}
+		attr.Description = strings.TrimSpace(attr.Description)
+	}
+
+	// Add default value to description when present.
+	if a.Default != nil {
+		attr.Description += fmt.Sprintf("\n\nDefault: %v.", a.Default)
+		attr.Description = strings.TrimSpace(attr.Description)
+	}
+
+	// Add examples to description when present and not already used as
+	// the attribute example value (which only captures the first).
+	if len(a.Examples) > 0 && !attr.Sensitive {
+		examples := make([]string, 0, len(a.Examples))
+		for _, e := range a.Examples {
+			examples = append(examples, fmt.Sprintf("%v", e))
+		}
+		attr.Description += fmt.Sprintf("\n\nExample: %s.", strings.Join(examples, ", "))
+		attr.Description = strings.TrimSpace(attr.Description)
 	}
 
 	attr.Required = slices.Contains(required, k)

@@ -56,8 +56,12 @@ func (d *MixpanelConnectionDataSource) Schema(ctx context.Context, req datasourc
 						Computed:            true,
 					},
 					"region": schema.StringAttribute{
-						MarkdownDescription: `Server`,
-						Computed:            true,
+						MarkdownDescription: `Server
+
+Valid values:
+  - "mixpanel.com" - Mixpanel
+  - "eu.mixpanel.com" - Mixpanel (EU)`,
+						Computed: true,
 					},
 					"service_account_username": schema.StringAttribute{
 						MarkdownDescription: `Service account username`,

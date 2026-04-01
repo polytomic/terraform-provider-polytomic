@@ -52,25 +52,29 @@ func (d *GooglecloudsqlConnectionDataSource) Schema(ctx context.Context, req dat
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"change_detection": schema.BoolAttribute{
-						MarkdownDescription: `Use logical replication for bulk syncs`,
-						Computed:            true,
+						MarkdownDescription: `Use logical replication for bulk syncs
+
+Default: false.`,
+						Computed: true,
 					},
 					"connection_name": schema.StringAttribute{
 						MarkdownDescription: `Cloud SQL connection name
 
-    Takes the form of project:region:instance`,
+    Takes the form of project:region:instance
+
+Example: project:region:instance.`,
 						Computed: true,
 					},
 					"database": schema.StringAttribute{
-						MarkdownDescription: ``,
+						MarkdownDescription: `Example: sampledb.`,
 						Computed:            true,
 					},
 					"publication": schema.StringAttribute{
-						MarkdownDescription: ``,
+						MarkdownDescription: `Example: polytomic.`,
 						Computed:            true,
 					},
 					"username": schema.StringAttribute{
-						MarkdownDescription: ``,
+						MarkdownDescription: `Example: cloudsql.`,
 						Computed:            true,
 					},
 				},

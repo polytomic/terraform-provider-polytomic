@@ -52,7 +52,7 @@ func (d *PipedriveConnectionDataSource) Schema(ctx context.Context, req datasour
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"domain": schema.StringAttribute{
-						MarkdownDescription: ``,
+						MarkdownDescription: `Example: polytomic.`,
 						Computed:            true,
 					},
 				},

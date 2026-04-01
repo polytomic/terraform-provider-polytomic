@@ -51,6 +51,16 @@ func (d *XeroConnectionDataSource) Schema(ctx context.Context, req datasource.Sc
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
+					"connect_mode": schema.StringAttribute{
+						MarkdownDescription: `Default: browser. Select client credentials to use a Xero custom connection.
+
+Valid values:
+  - "browser" - OAuth
+  - "clientcredentials" - Client credentials
+
+Default: browser.`,
+						Computed: true,
+					},
 					"tenant_name": schema.StringAttribute{
 						MarkdownDescription: `Organization Name`,
 						Computed:            true,
@@ -67,8 +77,9 @@ func (d *XeroConnectionDataSource) Schema(ctx context.Context, req datasource.Sc
 }
 
 type XeroDataSourceConf struct {
-	Tenant_name string `mapstructure:"tenant_name" tfsdk:"tenant_name"`
-	Tenant_type string `mapstructure:"tenant_type" tfsdk:"tenant_type"`
+	Connect_mode string `mapstructure:"connect_mode" tfsdk:"connect_mode"`
+	Tenant_name  string `mapstructure:"tenant_name" tfsdk:"tenant_name"`
+	Tenant_type  string `mapstructure:"tenant_type" tfsdk:"tenant_type"`
 }
 
 func (d *XeroConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
@@ -106,8 +117,9 @@ func (d *XeroConnectionDataSource) Read(ctx context.Context, req datasource.Read
 
 	var diags diag.Diagnostics
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"tenant_name": types.StringType,
-		"tenant_type": types.StringType,
+		"connect_mode": types.StringType,
+		"tenant_name":  types.StringType,
+		"tenant_type":  types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

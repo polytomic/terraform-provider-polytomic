@@ -54,11 +54,13 @@ var GleanSchema = schema.Schema{
 					},
 				},
 				"domain": schema.StringAttribute{
-					MarkdownDescription: `https://{domain}-be.glean.com`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
-					Sensitive:           false,
+					MarkdownDescription: `https://{domain}-be.glean.com
+
+Example: customer.`,
+					Required:  true,
+					Optional:  false,
+					Computed:  false,
+					Sensitive: false,
 				},
 			},
 

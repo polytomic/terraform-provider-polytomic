@@ -54,11 +54,13 @@ var ShowpadSchema = schema.Schema{
 					},
 				},
 				"subdomain": schema.StringAttribute{
-					MarkdownDescription: `e.g. 'acme' if your Showpad URL is https://acme.api.showpad.com`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
-					Sensitive:           false,
+					MarkdownDescription: `e.g. 'acme' if your Showpad URL is https://acme.api.showpad.com
+
+Example: acme.`,
+					Required:  true,
+					Optional:  false,
+					Computed:  false,
+					Sensitive: false,
 				},
 			},
 

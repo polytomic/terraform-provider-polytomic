@@ -58,19 +58,25 @@ func (d *Cloudflare_r2ConnectionDataSource) Schema(ctx context.Context, req data
 					"aws_access_key_id": schema.StringAttribute{
 						MarkdownDescription: `Access Key ID
 
-    Access Key ID with read/write access to a bucket.`,
+    Access Key ID with read/write access to a bucket.
+
+Example: AKIAIOSFODNN7EXAMPLE.`,
 						Computed: true,
 					},
 					"bucket_name": schema.StringAttribute{
 						MarkdownDescription: `Bucket Name
 
-    Bucket name (folder optional); ex: polytomic/dataset`,
+    Bucket name (folder optional); ex: polytomic/dataset
+
+Example: polytomic/dataset.`,
 						Computed: true,
 					},
 					"csv_has_headers": schema.BoolAttribute{
 						MarkdownDescription: `CSV files have headers
 
-    Whether CSV files have a header row with field names.`,
+    Whether CSV files have a header row with field names.
+
+Default: true.`,
 						Computed: true,
 					},
 					"directory_glob_pattern": schema.StringAttribute{
@@ -78,34 +84,53 @@ func (d *Cloudflare_r2ConnectionDataSource) Schema(ctx context.Context, req data
 						Computed:            true,
 					},
 					"is_directory_snapshot": schema.BoolAttribute{
-						MarkdownDescription: `Multi-directory multi-table`,
-						Computed:            true,
+						MarkdownDescription: `Multi-directory multi-table
+
+Default: false.`,
+						Computed: true,
 					},
 					"is_single_table": schema.BoolAttribute{
 						MarkdownDescription: `Files are time-based snapshots
 
-    Treat the files as a single table.`,
+    Treat the files as a single table.
+
+Default: false.`,
 						Computed: true,
 					},
 					"single_table_file_format": schema.StringAttribute{
-						MarkdownDescription: `File format`,
-						Computed:            true,
+						MarkdownDescription: `File format
+
+Valid values:
+  - "csv" - CSV
+  - "json" - JSON
+  - "parquet" - Parquet
+
+Default: csv.
+
+Example: csv.`,
+						Computed: true,
 					},
 					"single_table_file_formats": schema.SetAttribute{
 						MarkdownDescription: `File formats
 
-    File formats that may be present across different tables`,
+    File formats that may be present across different tables
+
+Default: [[csv]].`,
 						Computed:    true,
 						ElementType: types.StringType,
 					},
 					"single_table_name": schema.StringAttribute{
-						MarkdownDescription: `Collection name`,
-						Computed:            true,
+						MarkdownDescription: `Collection name
+
+Example: collection.`,
+						Computed: true,
 					},
 					"skip_lines": schema.Int64Attribute{
 						MarkdownDescription: `Skip first lines
 
-    Skip first N lines of each CSV file.`,
+    Skip first N lines of each CSV file.
+
+Default: 0.`,
 						Computed: true,
 					},
 				},

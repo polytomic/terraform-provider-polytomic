@@ -24,6 +24,9 @@ import (
 	"github.com/polytomic/polytomic-go"
 	ptcore "github.com/polytomic/polytomic-go/core"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
+
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -44,23 +47,39 @@ var XeroSchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"client_id": schema.StringAttribute{
-					MarkdownDescription: ``,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
+					MarkdownDescription: `Client ID`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
 					Sensitive:           true,
 					PlanModifiers: []planmodifier.String{
 						stringplanmodifier.UseStateForUnknown(),
 					},
 				},
 				"client_secret": schema.StringAttribute{
-					MarkdownDescription: ``,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
+					MarkdownDescription: `Client Secret`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
 					Sensitive:           true,
 					PlanModifiers: []planmodifier.String{
 						stringplanmodifier.UseStateForUnknown(),
+					},
+				},
+				"connect_mode": schema.StringAttribute{
+					MarkdownDescription: `Default: browser. Select client credentials to use a Xero custom connection.
+
+Valid values:
+  - "browser" - OAuth
+  - "clientcredentials" - Client credentials
+
+Default: browser.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
+					Validators: []validator.String{
+						stringvalidator.OneOf("browser", "clientcredentials"),
 					},
 				},
 				"tenant_name": schema.StringAttribute{
@@ -106,6 +125,7 @@ func (t *XeroConnectionResource) Schema(ctx context.Context, req resource.Schema
 type XeroConf struct {
 	Client_id     string `mapstructure:"client_id" tfsdk:"client_id"`
 	Client_secret string `mapstructure:"client_secret" tfsdk:"client_secret"`
+	Connect_mode  string `mapstructure:"connect_mode" tfsdk:"connect_mode"`
 	Tenant_name   string `mapstructure:"tenant_name" tfsdk:"tenant_name"`
 	Tenant_type   string `mapstructure:"tenant_type" tfsdk:"tenant_type"`
 }
@@ -168,6 +188,7 @@ func (r *XeroConnectionResource) Create(ctx context.Context, req resource.Create
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"client_id":     types.StringType,
 		"client_secret": types.StringType,
+		"connect_mode":  types.StringType,
 		"tenant_name":   types.StringType,
 		"tenant_type":   types.StringType,
 	}, conf)
@@ -241,6 +262,7 @@ func (r *XeroConnectionResource) Read(ctx context.Context, req resource.ReadRequ
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"client_id":     types.StringType,
 		"client_secret": types.StringType,
+		"connect_mode":  types.StringType,
 		"tenant_name":   types.StringType,
 		"tenant_type":   types.StringType,
 	}, conf)
@@ -313,6 +335,7 @@ func (r *XeroConnectionResource) Update(ctx context.Context, req resource.Update
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"client_id":     types.StringType,
 		"client_secret": types.StringType,
+		"connect_mode":  types.StringType,
 		"tenant_name":   types.StringType,
 		"tenant_type":   types.StringType,
 	}, conf)

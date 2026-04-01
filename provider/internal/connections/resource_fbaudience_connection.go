@@ -24,6 +24,9 @@ import (
 	"github.com/polytomic/polytomic-go"
 	ptcore "github.com/polytomic/polytomic-go/core"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
+
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -43,13 +46,6 @@ var FbaudienceSchema = schema.Schema{
 		},
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
-				"account_id": schema.StringAttribute{
-					MarkdownDescription: `Account ID`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
-				},
 				"accounts": schema.SetNestedAttribute{
 					MarkdownDescription: ``,
 					Required:            false,
@@ -76,11 +72,22 @@ var FbaudienceSchema = schema.Schema{
 					},
 				},
 				"auth_method": schema.StringAttribute{
-					MarkdownDescription: `Authentication Method`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
-					Sensitive:           false,
+					MarkdownDescription: `Authentication Method
+
+Valid values:
+  - "oauth" - Oauth
+  - "token" - Token
+
+Default: oauth.
+
+Example: token.`,
+					Required:  true,
+					Optional:  false,
+					Computed:  false,
+					Sensitive: false,
+					Validators: []validator.String{
+						stringvalidator.OneOf("oauth", "token"),
+					},
 				},
 				"byo_app_token": schema.StringAttribute{
 					MarkdownDescription: `Token`,
@@ -93,11 +100,15 @@ var FbaudienceSchema = schema.Schema{
 					},
 				},
 				"graph_api_version": schema.StringAttribute{
-					MarkdownDescription: `Graph API version`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
+					MarkdownDescription: `Graph API version
+
+Default: v24.0.
+
+Example: v24.0.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
 				},
 				"user_name": schema.StringAttribute{
 					MarkdownDescription: `Connected as`,
@@ -133,8 +144,7 @@ func (t *FbaudienceConnectionResource) Schema(ctx context.Context, req resource.
 }
 
 type FbaudienceConf struct {
-	Account_id string `mapstructure:"account_id" tfsdk:"account_id"`
-	Accounts   []struct {
+	Accounts []struct {
 		Label string `mapstructure:"label" tfsdk:"label"`
 		Value string `mapstructure:"value" tfsdk:"value"`
 	} `mapstructure:"accounts" tfsdk:"accounts"`
@@ -200,7 +210,6 @@ func (r *FbaudienceConnectionResource) Create(ctx context.Context, req resource.
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"account_id": types.StringType,
 		"accounts": types.SetType{
 			ElemType: types.ObjectType{
 				AttrTypes: map[string]attr.Type{
@@ -282,7 +291,6 @@ func (r *FbaudienceConnectionResource) Read(ctx context.Context, req resource.Re
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"account_id": types.StringType,
 		"accounts": types.SetType{
 			ElemType: types.ObjectType{
 				AttrTypes: map[string]attr.Type{
@@ -363,7 +371,6 @@ func (r *FbaudienceConnectionResource) Update(ctx context.Context, req resource.
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"account_id": types.StringType,
 		"accounts": types.SetType{
 			ElemType: types.ObjectType{
 				AttrTypes: map[string]attr.Type{

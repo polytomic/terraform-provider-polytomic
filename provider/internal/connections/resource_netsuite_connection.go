@@ -44,18 +44,22 @@ var NetsuiteSchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"account_id": schema.StringAttribute{
-					MarkdownDescription: `Account ID`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
-					Sensitive:           false,
+					MarkdownDescription: `Account ID
+
+Example: 1234567_SB1.`,
+					Required:  true,
+					Optional:  false,
+					Computed:  false,
+					Sensitive: false,
 				},
 				"consumer_key": schema.StringAttribute{
-					MarkdownDescription: `Consumer Key`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
-					Sensitive:           false,
+					MarkdownDescription: `Consumer Key
+
+Example: ac3nougotfs7ict684hnbomxmcn496nqdo27b8myvkc19uhmxno8gx6o2g264kim2ivkaona2chyje5k2pcb904iuw.`,
+					Required:  true,
+					Optional:  false,
+					Computed:  false,
+					Sensitive: false,
 				},
 				"consumer_secret": schema.StringAttribute{
 					MarkdownDescription: `Consumer Secret`,
@@ -68,11 +72,13 @@ var NetsuiteSchema = schema.Schema{
 					},
 				},
 				"token": schema.StringAttribute{
-					MarkdownDescription: `Token ID`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
-					Sensitive:           false,
+					MarkdownDescription: `Token ID
+
+Example: rgzq4xk3nz3huuwanngu9k1z7s8ogyr6haa7u7rg63qpxx5cn36ddxswhjse1dgwabqin1q9aay9nvfgkfjglgvtqv.`,
+					Required:  true,
+					Optional:  false,
+					Computed:  false,
+					Sensitive: false,
 				},
 				"token_secret": schema.StringAttribute{
 					MarkdownDescription: `Token Secret`,

@@ -54,11 +54,13 @@ var FreshdeskSchema = schema.Schema{
 					},
 				},
 				"subdomain": schema.StringAttribute{
-					MarkdownDescription: `e.g. 'polytomic' if your helpdesk is at https://polytomic.freshdesk.com`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
-					Sensitive:           false,
+					MarkdownDescription: `e.g. 'polytomic' if your helpdesk is at https://polytomic.freshdesk.com
+
+Example: polytomic.`,
+					Required:  true,
+					Optional:  false,
+					Computed:  false,
+					Sensitive: false,
 				},
 			},
 

@@ -56,8 +56,10 @@ func (d *LearnworldsConnectionDataSource) Schema(ctx context.Context, req dataso
 						Computed:            true,
 					},
 					"school_url": schema.StringAttribute{
-						MarkdownDescription: `School URL`,
-						Computed:            true,
+						MarkdownDescription: `School URL
+
+Example: https://my-school.learnworlds.com.`,
+						Computed: true,
 					},
 				},
 				Optional: true,

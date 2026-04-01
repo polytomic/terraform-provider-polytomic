@@ -56,7 +56,9 @@ var N8nSchema = schema.Schema{
 				"url": schema.StringAttribute{
 					MarkdownDescription: `n8n URL
 
-    Base URL for your n8n instance (for example https://your-instance.app.n8n.cloud)`,
+    Base URL for your n8n instance (for example https://your-instance.app.n8n.cloud)
+
+Example: https://your-instance.app.n8n.cloud.`,
 					Required:  true,
 					Optional:  false,
 					Computed:  false,

@@ -57,7 +57,7 @@ func (d *WebhookConnectionDataSource) Schema(ctx context.Context, req datasource
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 								"name": schema.StringAttribute{
-									MarkdownDescription: ``,
+									MarkdownDescription: `Example: foo.`,
 									Computed:            true,
 								},
 								"value": schema.StringAttribute{
@@ -68,8 +68,10 @@ func (d *WebhookConnectionDataSource) Schema(ctx context.Context, req datasource
 						},
 					},
 					"url": schema.StringAttribute{
-						MarkdownDescription: `Webhook URL`,
-						Computed:            true,
+						MarkdownDescription: `Webhook URL
+
+Example: https://example.com/webhook.`,
+						Computed: true,
 					},
 				},
 				Optional: true,

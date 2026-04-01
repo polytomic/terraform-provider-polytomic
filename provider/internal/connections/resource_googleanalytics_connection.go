@@ -24,6 +24,9 @@ import (
 	"github.com/polytomic/polytomic-go"
 	ptcore "github.com/polytomic/polytomic-go/core"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
+
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -44,11 +47,20 @@ var GoogleanalyticsSchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"auth_method": schema.StringAttribute{
-					MarkdownDescription: `Authentication method`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
-					Sensitive:           false,
+					MarkdownDescription: `Authentication method
+
+Valid values:
+  - "oauth" - OAuth
+  - "jwt" - Service Account
+
+Default: oauth.`,
+					Required:  true,
+					Optional:  false,
+					Computed:  false,
+					Sensitive: false,
+					Validators: []validator.String{
+						stringvalidator.OneOf("oauth", "jwt"),
+					},
 				},
 				"client_id": schema.StringAttribute{
 					MarkdownDescription: ``,

@@ -54,7 +54,15 @@ func (d *DynamodbConnectionDataSource) Schema(ctx context.Context, req datasourc
 					"auth_mode": schema.StringAttribute{
 						MarkdownDescription: `Authentication Method
 
-    How to authenticate with AWS. Defaults to Access Key and Secret`,
+    How to authenticate with AWS. Defaults to Access Key and Secret
+
+Valid values:
+  - "access_key_and_secret" - Access Key and Secret
+  - "iam_role" - IAM role
+
+Default: access_key_and_secret.
+
+Example: access_key_and_secret.`,
 						Computed: true,
 					},
 					"aws_user": schema.StringAttribute{
@@ -62,8 +70,10 @@ func (d *DynamodbConnectionDataSource) Schema(ctx context.Context, req datasourc
 						Computed:            true,
 					},
 					"change_detection": schema.BoolAttribute{
-						MarkdownDescription: `Use DynamoDB Streams for bulk syncs`,
-						Computed:            true,
+						MarkdownDescription: `Use DynamoDB Streams for bulk syncs
+
+Default: false.`,
+						Computed: true,
 					},
 					"external_id": schema.StringAttribute{
 						MarkdownDescription: `External ID
@@ -80,8 +90,10 @@ func (d *DynamodbConnectionDataSource) Schema(ctx context.Context, req datasourc
 						Computed:            true,
 					},
 					"region": schema.StringAttribute{
-						MarkdownDescription: `AWS region`,
-						Computed:            true,
+						MarkdownDescription: `AWS region
+
+Example: us-east-1.`,
+						Computed: true,
 					},
 				},
 				Optional: true,

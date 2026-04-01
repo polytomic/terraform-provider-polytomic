@@ -56,8 +56,19 @@ func (d *Zoho_crmConnectionDataSource) Schema(ctx context.Context, req datasourc
 						Computed:            true,
 					},
 					"region": schema.StringAttribute{
-						MarkdownDescription: `Data center region`,
-						Computed:            true,
+						MarkdownDescription: `Data center region
+
+Valid values:
+  - "usa" - USA
+  - "europe" - Europe
+  - "australia" - Australia
+  - "canada" - Canada
+  - "china" - China
+  - "japan" - Japan
+  - "saudi_arabia" - Saudi Arabia
+
+Default: usa.`,
+						Computed: true,
 					},
 				},
 				Optional: true,

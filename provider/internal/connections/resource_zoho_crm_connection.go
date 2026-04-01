@@ -24,6 +24,9 @@ import (
 	"github.com/polytomic/polytomic-go"
 	ptcore "github.com/polytomic/polytomic-go/core"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
+
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -71,11 +74,25 @@ var Zoho_crmSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"region": schema.StringAttribute{
-					MarkdownDescription: `Data center region`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
-					Sensitive:           false,
+					MarkdownDescription: `Data center region
+
+Valid values:
+  - "usa" - USA
+  - "europe" - Europe
+  - "australia" - Australia
+  - "canada" - Canada
+  - "china" - China
+  - "japan" - Japan
+  - "saudi_arabia" - Saudi Arabia
+
+Default: usa.`,
+					Required:  true,
+					Optional:  false,
+					Computed:  false,
+					Sensitive: false,
+					Validators: []validator.String{
+						stringvalidator.OneOf("usa", "europe", "australia", "canada", "china", "japan", "saudi_arabia"),
+					},
 				},
 			},
 

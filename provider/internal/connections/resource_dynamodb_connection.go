@@ -24,6 +24,9 @@ import (
 	"github.com/polytomic/polytomic-go"
 	ptcore "github.com/polytomic/polytomic-go/core"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
+
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -56,11 +59,22 @@ var DynamodbSchema = schema.Schema{
 				"auth_mode": schema.StringAttribute{
 					MarkdownDescription: `Authentication Method
 
-    How to authenticate with AWS. Defaults to Access Key and Secret`,
+    How to authenticate with AWS. Defaults to Access Key and Secret
+
+Valid values:
+  - "access_key_and_secret" - Access Key and Secret
+  - "iam_role" - IAM role
+
+Default: access_key_and_secret.
+
+Example: access_key_and_secret.`,
 					Required:  true,
 					Optional:  false,
 					Computed:  false,
 					Sensitive: false,
+					Validators: []validator.String{
+						stringvalidator.OneOf("access_key_and_secret", "iam_role"),
+					},
 				},
 				"aws_user": schema.StringAttribute{
 					MarkdownDescription: `User ARN`,
@@ -70,11 +84,13 @@ var DynamodbSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"change_detection": schema.BoolAttribute{
-					MarkdownDescription: `Use DynamoDB Streams for bulk syncs`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
+					MarkdownDescription: `Use DynamoDB Streams for bulk syncs
+
+Default: false.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
 				},
 				"external_id": schema.StringAttribute{
 					MarkdownDescription: `External ID
@@ -100,11 +116,13 @@ var DynamodbSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"region": schema.StringAttribute{
-					MarkdownDescription: `AWS region`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
-					Sensitive:           false,
+					MarkdownDescription: `AWS region
+
+Example: us-east-1.`,
+					Required:  true,
+					Optional:  false,
+					Computed:  false,
+					Sensitive: false,
 				},
 				"secret_access_key": schema.StringAttribute{
 					MarkdownDescription: `AWS Secret Access Key`,

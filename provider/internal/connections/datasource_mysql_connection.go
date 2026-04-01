@@ -52,44 +52,62 @@ func (d *MysqlConnectionDataSource) Schema(ctx context.Context, req datasource.S
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"account": schema.StringAttribute{
-						MarkdownDescription: `Username`,
-						Computed:            true,
+						MarkdownDescription: `Username
+
+Example: admin.`,
+						Computed: true,
 					},
 					"change_detection": schema.BoolAttribute{
-						MarkdownDescription: `Use replication for bulk syncs`,
-						Computed:            true,
+						MarkdownDescription: `Use replication for bulk syncs
+
+Default: false.`,
+						Computed: true,
 					},
 					"dbname": schema.StringAttribute{
-						MarkdownDescription: `Database`,
-						Computed:            true,
+						MarkdownDescription: `Database
+
+Example: mydb.`,
+						Computed: true,
 					},
 					"hostname": schema.StringAttribute{
-						MarkdownDescription: ``,
+						MarkdownDescription: `Example: database.example.com.`,
 						Computed:            true,
 					},
 					"port": schema.Int64Attribute{
-						MarkdownDescription: ``,
-						Computed:            true,
+						MarkdownDescription: `Default: 3306.
+
+Example: 3306.`,
+						Computed: true,
 					},
 					"ssh": schema.BoolAttribute{
 						MarkdownDescription: `Connect over SSH tunnel`,
 						Computed:            true,
 					},
 					"ssh_host": schema.StringAttribute{
-						MarkdownDescription: `SSH host`,
-						Computed:            true,
+						MarkdownDescription: `SSH host
+
+Example: bastion.example.com.`,
+						Computed: true,
 					},
 					"ssh_port": schema.Int64Attribute{
-						MarkdownDescription: `SSH port`,
-						Computed:            true,
+						MarkdownDescription: `SSH port
+
+Default: 22.
+
+Example: 22.`,
+						Computed: true,
 					},
 					"ssh_user": schema.StringAttribute{
-						MarkdownDescription: `SSH user`,
-						Computed:            true,
+						MarkdownDescription: `SSH user
+
+Default: root.`,
+						Computed: true,
 					},
 					"ssl": schema.BoolAttribute{
-						MarkdownDescription: `Use SSL`,
-						Computed:            true,
+						MarkdownDescription: `Use SSL
+
+Default: true.`,
+						Computed: true,
 					},
 				},
 				Optional: true,

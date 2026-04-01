@@ -24,6 +24,9 @@ import (
 	"github.com/polytomic/polytomic-go"
 	ptcore "github.com/polytomic/polytomic-go/core"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
+
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -56,16 +59,29 @@ var DatabricksSchema = schema.Schema{
 				"auth_mode": schema.StringAttribute{
 					MarkdownDescription: `AWS Authentication Method
 
-    How to authenticate with AWS. Defaults to Access Key and Secret`,
+    How to authenticate with AWS. Defaults to Access Key and Secret
+
+Valid values:
+  - "access_key_and_secret" - Access Key and Secret
+  - "iam_role" - IAM role
+
+Default: access_key_and_secret.
+
+Example: access_key_and_secret.`,
 					Required:  true,
 					Optional:  false,
 					Computed:  false,
 					Sensitive: false,
+					Validators: []validator.String{
+						stringvalidator.OneOf("access_key_and_secret", "iam_role"),
+					},
 				},
 				"aws_access_key_id": schema.StringAttribute{
 					MarkdownDescription: `AWS Access Key ID (destinations only)
 
-    See https://docs.polytomic.com/docs/databricks-connections#writing-to-databricks`,
+    See https://docs.polytomic.com/docs/databricks-connections#writing-to-databricks
+
+Example: AKIAIOSFODNN7EXAMPLE.`,
 					Required:  false,
 					Optional:  true,
 					Computed:  true,
@@ -103,7 +119,9 @@ var DatabricksSchema = schema.Schema{
 				"azure_account_name": schema.StringAttribute{
 					MarkdownDescription: `Storage Account Name (destination support only)
 
-    The account name of the storage account`,
+    The account name of the storage account
+
+Example: account.`,
 					Required:  false,
 					Optional:  true,
 					Computed:  true,
@@ -117,11 +135,20 @@ var DatabricksSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"cloud_provider": schema.StringAttribute{
-					MarkdownDescription: `Cloud Provider (destination support only)`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
+					MarkdownDescription: `Cloud Provider (destination support only)
+
+Valid values:
+  - "aws" - AWS
+  - "azure" - Azure
+
+Example: aws.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
+					Validators: []validator.String{
+						stringvalidator.OneOf("aws", "azure"),
+					},
 				},
 				"concurrent_queries": schema.Int64Attribute{
 					MarkdownDescription: `Concurrent query limit`,
@@ -133,18 +160,31 @@ var DatabricksSchema = schema.Schema{
 				"container_name": schema.StringAttribute{
 					MarkdownDescription: `Storage Container Name (destination support only)
 
-    The container which we will stage files in`,
+    The container which we will stage files in
+
+Example: container.`,
 					Required:  false,
 					Optional:  true,
 					Computed:  true,
 					Sensitive: false,
 				},
 				"databricks_auth_mode": schema.StringAttribute{
-					MarkdownDescription: `Authentication Method`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
-					Sensitive:           false,
+					MarkdownDescription: `Authentication Method
+
+Valid values:
+  - "access_token" - Access Token
+  - "oauth_service_principal" - OAuth Service Principal
+
+Default: access_token.
+
+Example: access_token.`,
+					Required:  true,
+					Optional:  false,
+					Computed:  false,
+					Sensitive: false,
+					Validators: []validator.String{
+						stringvalidator.OneOf("access_token", "oauth_service_principal"),
+					},
 				},
 				"deleted_file_retention_days": schema.Int64Attribute{
 					MarkdownDescription: `Deleted file retention`,
@@ -154,18 +194,22 @@ var DatabricksSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"enable_delta_uniform": schema.BoolAttribute{
-					MarkdownDescription: `Enable Delta UniForm tables`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
+					MarkdownDescription: `Enable Delta UniForm tables
+
+Default: false.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
 				},
 				"enforce_query_limit": schema.BoolAttribute{
-					MarkdownDescription: `Limit concurrent queries`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
+					MarkdownDescription: `Limit concurrent queries
+
+Default: false.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
 				},
 				"external_id": schema.StringAttribute{
 					MarkdownDescription: `External ID
@@ -177,11 +221,15 @@ var DatabricksSchema = schema.Schema{
 					Sensitive: false,
 				},
 				"http_path": schema.StringAttribute{
-					MarkdownDescription: `HTTP Path`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
-					Sensitive:           false,
+					MarkdownDescription: `HTTP Path
+
+Default: /sql.
+
+Example: /sql.`,
+					Required:  true,
+					Optional:  false,
+					Computed:  false,
+					Sensitive: false,
 				},
 				"iam_role_arn": schema.StringAttribute{
 					MarkdownDescription: `IAM Role ARN`,
@@ -198,16 +246,20 @@ var DatabricksSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"port": schema.Int64Attribute{
-					MarkdownDescription: ``,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
-					Sensitive:           false,
+					MarkdownDescription: `Default: 443.
+
+Example: 443.`,
+					Required:  true,
+					Optional:  false,
+					Computed:  false,
+					Sensitive: false,
 				},
 				"s3_bucket_name": schema.StringAttribute{
 					MarkdownDescription: `S3 Bucket Name (destinations only)
 
-    Name of bucket used for staging data load files`,
+    Name of bucket used for staging data load files
+
+Example: s3://polytomic-databricks-results/customer-dataset.`,
 					Required:  false,
 					Optional:  true,
 					Computed:  true,
@@ -216,25 +268,31 @@ var DatabricksSchema = schema.Schema{
 				"s3_bucket_region": schema.StringAttribute{
 					MarkdownDescription: `S3 Bucket Region (destinations only)
 
-    Region of bucket`,
+    Region of bucket
+
+Example: us-east-1.`,
 					Required:  false,
 					Optional:  true,
 					Computed:  true,
 					Sensitive: false,
 				},
 				"server_hostname": schema.StringAttribute{
-					MarkdownDescription: `Server Hostname`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
-					Sensitive:           false,
+					MarkdownDescription: `Server Hostname
+
+Example: dbc-1234dsafas-d0001.cloud.databricks.com.`,
+					Required:  true,
+					Optional:  false,
+					Computed:  false,
+					Sensitive: false,
 				},
 				"service_principal_id": schema.StringAttribute{
-					MarkdownDescription: `Service Principal ID`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
-					Sensitive:           false,
+					MarkdownDescription: `Service Principal ID
+
+Example: sp-1234abcd.`,
+					Required:  true,
+					Optional:  false,
+					Computed:  false,
+					Sensitive: false,
 				},
 				"service_principal_secret": schema.StringAttribute{
 					MarkdownDescription: `Service Principal Secret`,
@@ -261,25 +319,33 @@ var DatabricksSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"ssh_blob_storage": schema.BoolAttribute{
-					MarkdownDescription: `Use SSH for cloud storage bucket`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
+					MarkdownDescription: `Use SSH for cloud storage bucket
+
+Default: false.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
 				},
 				"ssh_host": schema.StringAttribute{
-					MarkdownDescription: `SSH host`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
+					MarkdownDescription: `SSH host
+
+Example: bastion.example.com.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
 				},
 				"ssh_port": schema.Int64Attribute{
-					MarkdownDescription: `SSH port`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
+					MarkdownDescription: `SSH port
+
+Default: 22.
+
+Example: 22.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
 				},
 				"ssh_private_key": schema.StringAttribute{
 					MarkdownDescription: `Private key`,
@@ -292,11 +358,13 @@ var DatabricksSchema = schema.Schema{
 					},
 				},
 				"ssh_user": schema.StringAttribute{
-					MarkdownDescription: `SSH user`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
+					MarkdownDescription: `SSH user
+
+Default: root.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
 				},
 				"storage_credential_name": schema.StringAttribute{
 					MarkdownDescription: `Storage credential name`,
@@ -306,18 +374,22 @@ var DatabricksSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"unity_catalog_enabled": schema.BoolAttribute{
-					MarkdownDescription: `Unity Catalog enabled`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
+					MarkdownDescription: `Unity Catalog enabled
+
+Default: true.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
 				},
 				"use_bulk_sync_staging_schema": schema.BoolAttribute{
-					MarkdownDescription: `Use custom bulk sync staging schema`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
+					MarkdownDescription: `Use custom bulk sync staging schema
+
+Default: false.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
 				},
 			},
 

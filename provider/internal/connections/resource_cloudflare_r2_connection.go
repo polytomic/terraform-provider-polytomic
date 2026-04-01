@@ -24,6 +24,9 @@ import (
 	"github.com/polytomic/polytomic-go"
 	ptcore "github.com/polytomic/polytomic-go/core"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
+
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -53,7 +56,9 @@ var Cloudflare_r2Schema = schema.Schema{
 				"aws_access_key_id": schema.StringAttribute{
 					MarkdownDescription: `Access Key ID
 
-    Access Key ID with read/write access to a bucket.`,
+    Access Key ID with read/write access to a bucket.
+
+Example: AKIAIOSFODNN7EXAMPLE.`,
 					Required:  true,
 					Optional:  false,
 					Computed:  false,
@@ -72,7 +77,9 @@ var Cloudflare_r2Schema = schema.Schema{
 				"bucket_name": schema.StringAttribute{
 					MarkdownDescription: `Bucket Name
 
-    Bucket name (folder optional); ex: polytomic/dataset`,
+    Bucket name (folder optional); ex: polytomic/dataset
+
+Example: polytomic/dataset.`,
 					Required:  true,
 					Optional:  false,
 					Computed:  false,
@@ -81,7 +88,9 @@ var Cloudflare_r2Schema = schema.Schema{
 				"csv_has_headers": schema.BoolAttribute{
 					MarkdownDescription: `CSV files have headers
 
-    Whether CSV files have a header row with field names.`,
+    Whether CSV files have a header row with field names.
+
+Default: true.`,
 					Required:  false,
 					Optional:  true,
 					Computed:  true,
@@ -95,32 +104,50 @@ var Cloudflare_r2Schema = schema.Schema{
 					Sensitive:           false,
 				},
 				"is_directory_snapshot": schema.BoolAttribute{
-					MarkdownDescription: `Multi-directory multi-table`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
+					MarkdownDescription: `Multi-directory multi-table
+
+Default: false.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
 				},
 				"is_single_table": schema.BoolAttribute{
 					MarkdownDescription: `Files are time-based snapshots
 
-    Treat the files as a single table.`,
+    Treat the files as a single table.
+
+Default: false.`,
 					Required:  false,
 					Optional:  true,
 					Computed:  true,
 					Sensitive: false,
 				},
 				"single_table_file_format": schema.StringAttribute{
-					MarkdownDescription: `File format`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
+					MarkdownDescription: `File format
+
+Valid values:
+  - "csv" - CSV
+  - "json" - JSON
+  - "parquet" - Parquet
+
+Default: csv.
+
+Example: csv.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
+					Validators: []validator.String{
+						stringvalidator.OneOf("csv", "json", "parquet"),
+					},
 				},
 				"single_table_file_formats": schema.SetAttribute{
 					MarkdownDescription: `File formats
 
-    File formats that may be present across different tables`,
+    File formats that may be present across different tables
+
+Default: [[csv]].`,
 					Required:  false,
 					Optional:  true,
 					Computed:  true,
@@ -129,16 +156,20 @@ var Cloudflare_r2Schema = schema.Schema{
 					ElementType: types.StringType,
 				},
 				"single_table_name": schema.StringAttribute{
-					MarkdownDescription: `Collection name`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
+					MarkdownDescription: `Collection name
+
+Example: collection.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
 				},
 				"skip_lines": schema.Int64Attribute{
 					MarkdownDescription: `Skip first lines
 
-    Skip first N lines of each CSV file.`,
+    Skip first N lines of each CSV file.
+
+Default: 0.`,
 					Required:  false,
 					Optional:  true,
 					Computed:  true,

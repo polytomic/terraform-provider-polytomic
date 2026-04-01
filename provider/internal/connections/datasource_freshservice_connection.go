@@ -56,8 +56,10 @@ func (d *FreshserviceConnectionDataSource) Schema(ctx context.Context, req datas
 						Computed:            true,
 					},
 					"subdomain": schema.StringAttribute{
-						MarkdownDescription: `Your Freshservice helpdesk subdomain; e.g. 'polytomic' if your helpdesk is at https://polytomic.freshdesk.com`,
-						Computed:            true,
+						MarkdownDescription: `Your Freshservice helpdesk subdomain; e.g. 'polytomic' if your helpdesk is at https://polytomic.freshdesk.com
+
+Example: polytomic.`,
+						Computed: true,
 					},
 				},
 				Optional: true,

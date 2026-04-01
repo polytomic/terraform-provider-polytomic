@@ -24,6 +24,9 @@ import (
 	"github.com/polytomic/polytomic-go"
 	ptcore "github.com/polytomic/polytomic-go/core"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
+
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -46,16 +49,29 @@ var CustomeriowarehouseexportsSchema = schema.Schema{
 				"auth_mode": schema.StringAttribute{
 					MarkdownDescription: `Authentication Method
 
-    How to authenticate with AWS. Defaults to Access Key and Secret`,
+    How to authenticate with AWS. Defaults to Access Key and Secret
+
+Valid values:
+  - "access_key_and_secret" - Access Key and Secret
+  - "iam_role" - IAM role
+
+Default: access_key_and_secret.
+
+Example: access_key_and_secret.`,
 					Required:  true,
 					Optional:  false,
 					Computed:  false,
 					Sensitive: false,
+					Validators: []validator.String{
+						stringvalidator.OneOf("access_key_and_secret", "iam_role"),
+					},
 				},
 				"aws_access_key_id": schema.StringAttribute{
 					MarkdownDescription: `AWS Access Key ID
 
-    Access Key ID with read/write access to a bucket.`,
+    Access Key ID with read/write access to a bucket.
+
+Example: AKIAIOSFODNN7EXAMPLE.`,
 					Required:  false,
 					Optional:  true,
 					Computed:  true,
@@ -97,18 +113,22 @@ var CustomeriowarehouseexportsSchema = schema.Schema{
 				"s3_bucket_name": schema.StringAttribute{
 					MarkdownDescription: `S3 Bucket Name
 
-    Bucket name (folder optional); ex: s3://polytomic/dataset`,
+    Bucket name (folder optional); ex: s3://polytomic/dataset
+
+Example: s3://polytomic/dataset.`,
 					Required:  true,
 					Optional:  false,
 					Computed:  false,
 					Sensitive: false,
 				},
 				"s3_bucket_region": schema.StringAttribute{
-					MarkdownDescription: `S3 Bucket Region`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
-					Sensitive:           false,
+					MarkdownDescription: `S3 Bucket Region
+
+Example: us-east-1.`,
+					Required:  true,
+					Optional:  false,
+					Computed:  false,
+					Sensitive: false,
 				},
 			},
 

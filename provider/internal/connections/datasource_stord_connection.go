@@ -52,12 +52,16 @@ func (d *StordConnectionDataSource) Schema(ctx context.Context, req datasource.S
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"network_id": schema.StringAttribute{
-						MarkdownDescription: `Network ID`,
-						Computed:            true,
+						MarkdownDescription: `Network ID
+
+Example: 12345.`,
+						Computed: true,
 					},
 					"organization_id": schema.StringAttribute{
-						MarkdownDescription: `Organization ID`,
-						Computed:            true,
+						MarkdownDescription: `Organization ID
+
+Example: 67890.`,
+						Computed: true,
 					},
 				},
 				Optional: true,

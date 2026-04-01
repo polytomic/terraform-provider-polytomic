@@ -54,11 +54,13 @@ var UservoiceSchema = schema.Schema{
 					},
 				},
 				"domain": schema.StringAttribute{
-					MarkdownDescription: `Subdomain`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
-					Sensitive:           false,
+					MarkdownDescription: `Subdomain
+
+Example: polytomic.`,
+					Required:  true,
+					Optional:  false,
+					Computed:  false,
+					Sensitive: false,
 				},
 			},
 

@@ -24,6 +24,9 @@ import (
 	"github.com/polytomic/polytomic-go"
 	ptcore "github.com/polytomic/polytomic-go/core"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
+
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -64,18 +67,31 @@ var JiraSchema = schema.Schema{
 					},
 				},
 				"auth_method": schema.StringAttribute{
-					MarkdownDescription: `Authentication method`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
-					Sensitive:           false,
+					MarkdownDescription: `Authentication method
+
+Valid values:
+  - "apikey" - API token
+  - "pat" - Personal access token
+
+Default: apikey.
+
+Example: pat.`,
+					Required:  true,
+					Optional:  false,
+					Computed:  false,
+					Sensitive: false,
+					Validators: []validator.String{
+						stringvalidator.OneOf("apikey", "pat"),
+					},
 				},
 				"url": schema.StringAttribute{
-					MarkdownDescription: `Jira URL`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
-					Sensitive:           false,
+					MarkdownDescription: `Jira URL
+
+Example: https://jira.mycompany.com/.`,
+					Required:  true,
+					Optional:  false,
+					Computed:  false,
+					Sensitive: false,
 				},
 				"username": schema.StringAttribute{
 					MarkdownDescription: ``,

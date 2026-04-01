@@ -58,14 +58,14 @@ var CsvSchema = schema.Schema{
 							Sensitive:           false,
 							Attributes: map[string]schema.Attribute{
 								"password": schema.StringAttribute{
-									MarkdownDescription: ``,
+									MarkdownDescription: `Example: secret.`,
 									Required:            false,
 									Optional:            true,
 									Computed:            true,
 									Sensitive:           false,
 								},
 								"username": schema.StringAttribute{
-									MarkdownDescription: ``,
+									MarkdownDescription: `Example: user@example.com.`,
 									Required:            false,
 									Optional:            true,
 									Computed:            true,
@@ -81,7 +81,7 @@ var CsvSchema = schema.Schema{
 							Sensitive:           false,
 							Attributes: map[string]schema.Attribute{
 								"name": schema.StringAttribute{
-									MarkdownDescription: ``,
+									MarkdownDescription: `Example: foo.`,
 									Required:            false,
 									Optional:            true,
 									Computed:            true,
@@ -111,18 +111,22 @@ var CsvSchema = schema.Schema{
 									Sensitive:           false,
 								},
 								"client_id": schema.StringAttribute{
-									MarkdownDescription: `Client ID`,
-									Required:            false,
-									Optional:            true,
-									Computed:            true,
-									Sensitive:           false,
+									MarkdownDescription: `Client ID
+
+Example: client_id.`,
+									Required:  false,
+									Optional:  true,
+									Computed:  true,
+									Sensitive: false,
 								},
 								"client_secret": schema.StringAttribute{
-									MarkdownDescription: `Client secret`,
-									Required:            false,
-									Optional:            true,
-									Computed:            true,
-									Sensitive:           false,
+									MarkdownDescription: `Client secret
+
+Example: client_secret.`,
+									Required:  false,
+									Optional:  true,
+									Computed:  true,
+									Sensitive: false,
 								},
 								"extra_form_data": schema.SetNestedAttribute{
 									MarkdownDescription: `Extra form data`,
@@ -133,7 +137,7 @@ var CsvSchema = schema.Schema{
 									NestedObject: schema.NestedAttributeObject{
 										Attributes: map[string]schema.Attribute{
 											"name": schema.StringAttribute{
-												MarkdownDescription: ``,
+												MarkdownDescription: `Example: foo.`,
 												Required:            false,
 												Optional:            true,
 												Computed:            true,
@@ -159,11 +163,13 @@ var CsvSchema = schema.Schema{
 									ElementType: types.StringType,
 								},
 								"token_endpoint": schema.StringAttribute{
-									MarkdownDescription: `Token endpoint`,
-									Required:            false,
-									Optional:            true,
-									Computed:            true,
-									Sensitive:           false,
+									MarkdownDescription: `Token endpoint
+
+Example: https://example.com/oauth/token.`,
+									Required:  false,
+									Optional:  true,
+									Computed:  true,
+									Sensitive: false,
 								},
 							},
 						},
@@ -178,7 +184,7 @@ var CsvSchema = schema.Schema{
 					NestedObject: schema.NestedAttributeObject{
 						Attributes: map[string]schema.Attribute{
 							"name": schema.StringAttribute{
-								MarkdownDescription: ``,
+								MarkdownDescription: `Example: foo.`,
 								Required:            false,
 								Optional:            true,
 								Computed:            true,
@@ -203,7 +209,7 @@ var CsvSchema = schema.Schema{
 					NestedObject: schema.NestedAttributeObject{
 						Attributes: map[string]schema.Attribute{
 							"name": schema.StringAttribute{
-								MarkdownDescription: ``,
+								MarkdownDescription: `Example: foo.`,
 								Required:            false,
 								Optional:            true,
 								Computed:            true,

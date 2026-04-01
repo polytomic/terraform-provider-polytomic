@@ -52,32 +52,46 @@ func (d *MarketoConnectionDataSource) Schema(ctx context.Context, req datasource
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"client_id": schema.StringAttribute{
-						MarkdownDescription: `Client ID`,
-						Computed:            true,
+						MarkdownDescription: `Client ID
+
+Example: 629b6d74-f602-47f4-8fef-388485343d85.`,
+						Computed: true,
 					},
 					"concurrent_imports": schema.Int64Attribute{
-						MarkdownDescription: `Concurrent import jobs`,
-						Computed:            true,
+						MarkdownDescription: `Concurrent import jobs
+
+Default: 5.
+
+Example: 5.`,
+						Computed: true,
 					},
 					"daily_api_calls": schema.Int64Attribute{
-						MarkdownDescription: `Daily call limit`,
-						Computed:            true,
+						MarkdownDescription: `Daily call limit
+
+Default: 37500.
+
+Example: 37500.`,
+						Computed: true,
 					},
 					"enforce_api_limits": schema.BoolAttribute{
 						MarkdownDescription: `Enforce API limits`,
 						Computed:            true,
 					},
 					"include_static_lists": schema.BoolAttribute{
-						MarkdownDescription: `Include static list support`,
-						Computed:            true,
+						MarkdownDescription: `Include static list support
+
+Default: true.`,
+						Computed: true,
 					},
 					"oauth_token_expiry": schema.StringAttribute{
 						MarkdownDescription: ``,
 						Computed:            true,
 					},
 					"rest_endpoint": schema.StringAttribute{
-						MarkdownDescription: `REST Endpoint`,
-						Computed:            true,
+						MarkdownDescription: `REST Endpoint
+
+Example: https://123-ABC-999.mktorest.com/rest.`,
+						Computed: true,
 					},
 				},
 				Optional: true,

@@ -52,8 +52,10 @@ func (d *Gainsight_csConnectionDataSource) Schema(ctx context.Context, req datas
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"domain": schema.StringAttribute{
-						MarkdownDescription: `Your Gainsight CS domain`,
-						Computed:            true,
+						MarkdownDescription: `Your Gainsight CS domain
+
+Example: company.gainsightcloud.com.`,
+						Computed: true,
 					},
 				},
 				Optional: true,

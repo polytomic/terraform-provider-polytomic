@@ -44,14 +44,14 @@ var ClickhouseSchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"database": schema.StringAttribute{
-					MarkdownDescription: ``,
+					MarkdownDescription: `Example: default.`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,
 					Sensitive:           false,
 				},
 				"hostname": schema.StringAttribute{
-					MarkdownDescription: ``,
+					MarkdownDescription: `Example: clickhouse.example.com.`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
@@ -68,18 +68,20 @@ var ClickhouseSchema = schema.Schema{
 					},
 				},
 				"port": schema.Int64Attribute{
-					MarkdownDescription: ``,
+					MarkdownDescription: `Default: 9440.`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
 					Sensitive:           false,
 				},
 				"skip_verify": schema.BoolAttribute{
-					MarkdownDescription: `Skip certificate verification`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
+					MarkdownDescription: `Skip certificate verification
+
+Default: true.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
 				},
 				"ssh": schema.BoolAttribute{
 					MarkdownDescription: `Connect over SSH tunnel`,
@@ -89,18 +91,24 @@ var ClickhouseSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"ssh_host": schema.StringAttribute{
-					MarkdownDescription: `SSH host`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
+					MarkdownDescription: `SSH host
+
+Example: bastion.example.com.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
 				},
 				"ssh_port": schema.Int64Attribute{
-					MarkdownDescription: `SSH port`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
+					MarkdownDescription: `SSH port
+
+Default: 22.
+
+Example: 22.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
 				},
 				"ssh_private_key": schema.StringAttribute{
 					MarkdownDescription: `Private key`,
@@ -113,21 +121,25 @@ var ClickhouseSchema = schema.Schema{
 					},
 				},
 				"ssh_user": schema.StringAttribute{
-					MarkdownDescription: `SSH user`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
+					MarkdownDescription: `SSH user
+
+Default: root.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
 				},
 				"ssl": schema.BoolAttribute{
-					MarkdownDescription: `Use SSL`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
+					MarkdownDescription: `Use SSL
+
+Default: true.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
 				},
 				"username": schema.StringAttribute{
-					MarkdownDescription: ``,
+					MarkdownDescription: `Example: default.`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,

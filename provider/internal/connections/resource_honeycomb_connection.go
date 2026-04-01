@@ -54,7 +54,7 @@ var HoneycombSchema = schema.Schema{
 					},
 				},
 				"dataset": schema.StringAttribute{
-					MarkdownDescription: ``,
+					MarkdownDescription: `Example: dataset.`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,

@@ -52,8 +52,22 @@ func (d *QualtricsConnectionDataSource) Schema(ctx context.Context, req datasour
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"data_center": schema.StringAttribute{
-						MarkdownDescription: `Data Center`,
-						Computed:            true,
+						MarkdownDescription: `Data Center
+
+Valid values:
+  - "portland" - Portland, Oregon, USA
+  - "washington_dc" - Washington, DC, USA
+  - "arizona" - Arizona, USA (az1)
+  - "us_government" - US Government
+  - "canada" - Canada
+  - "eu" - EU
+  - "london" - London, UK
+  - "singapore" - Singapore
+  - "sydney" - Sydney, Australia
+  - "tokyo" - Tokyo, Japan
+
+Default: portland.`,
+						Computed: true,
 					},
 				},
 				Optional: true,

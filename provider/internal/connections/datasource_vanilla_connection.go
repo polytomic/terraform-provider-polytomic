@@ -52,7 +52,7 @@ func (d *VanillaConnectionDataSource) Schema(ctx context.Context, req datasource
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"domain": schema.StringAttribute{
-						MarkdownDescription: ``,
+						MarkdownDescription: `Example: yourcompany.vanillacommunities.com.`,
 						Computed:            true,
 					},
 				},

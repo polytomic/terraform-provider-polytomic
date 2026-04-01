@@ -24,6 +24,9 @@ import (
 	"github.com/polytomic/polytomic-go"
 	ptcore "github.com/polytomic/polytomic-go/core"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
+
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -54,11 +57,28 @@ var QualtricsSchema = schema.Schema{
 					},
 				},
 				"data_center": schema.StringAttribute{
-					MarkdownDescription: `Data Center`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
-					Sensitive:           false,
+					MarkdownDescription: `Data Center
+
+Valid values:
+  - "portland" - Portland, Oregon, USA
+  - "washington_dc" - Washington, DC, USA
+  - "arizona" - Arizona, USA (az1)
+  - "us_government" - US Government
+  - "canada" - Canada
+  - "eu" - EU
+  - "london" - London, UK
+  - "singapore" - Singapore
+  - "sydney" - Sydney, Australia
+  - "tokyo" - Tokyo, Japan
+
+Default: portland.`,
+					Required:  true,
+					Optional:  false,
+					Computed:  false,
+					Sensitive: false,
+					Validators: []validator.String{
+						stringvalidator.OneOf("portland", "washington_dc", "arizona", "us_government", "canada", "eu", "london", "singapore", "sydney", "tokyo"),
+					},
 				},
 			},
 

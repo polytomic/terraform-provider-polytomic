@@ -84,7 +84,7 @@ var Sharepoint_excelSchema = schema.Schema{
 					},
 				},
 				"oauth_token_expiry": schema.StringAttribute{
-					MarkdownDescription: ``,
+					MarkdownDescription: `Example: 2023-11-21T21:48:51Z.`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,

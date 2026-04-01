@@ -44,11 +44,13 @@ var MongodbSchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"change_detection": schema.BoolAttribute{
-					MarkdownDescription: `Use change stream for bulk syncs`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
+					MarkdownDescription: `Use change stream for bulk syncs
+
+Default: false.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
 				},
 				"database": schema.StringAttribute{
 					MarkdownDescription: `Auth Database`,
@@ -58,11 +60,13 @@ var MongodbSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"hosts": schema.StringAttribute{
-					MarkdownDescription: `Hostname(s)`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
-					Sensitive:           false,
+					MarkdownDescription: `Hostname(s)
+
+Example: mongodb.example.net.`,
+					Required:  true,
+					Optional:  false,
+					Computed:  false,
+					Sensitive: false,
 				},
 				"params": schema.StringAttribute{
 					MarkdownDescription: `Additional Parameters
@@ -91,14 +95,16 @@ var MongodbSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"ssl": schema.BoolAttribute{
-					MarkdownDescription: `Use TLS/SSL`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
+					MarkdownDescription: `Use TLS/SSL
+
+Default: true.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
 				},
 				"username": schema.StringAttribute{
-					MarkdownDescription: ``,
+					MarkdownDescription: `Example: admin.`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,

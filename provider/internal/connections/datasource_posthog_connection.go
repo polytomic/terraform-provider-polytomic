@@ -56,8 +56,14 @@ func (d *PosthogConnectionDataSource) Schema(ctx context.Context, req datasource
 						Computed:            true,
 					},
 					"location": schema.StringAttribute{
-						MarkdownDescription: ``,
-						Computed:            true,
+						MarkdownDescription: `Valid values:
+  - "us" - US
+  - "eu" - EU
+
+Default: us.
+
+Example: us.`,
+						Computed: true,
 					},
 					"project": schema.StringAttribute{
 						MarkdownDescription: ``,

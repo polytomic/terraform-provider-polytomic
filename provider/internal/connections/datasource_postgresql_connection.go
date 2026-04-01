@@ -52,27 +52,33 @@ func (d *PostgresqlConnectionDataSource) Schema(ctx context.Context, req datasou
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"change_detection": schema.BoolAttribute{
-						MarkdownDescription: `Use logical replication for bulk syncs`,
-						Computed:            true,
+						MarkdownDescription: `Use logical replication for bulk syncs
+
+Default: false.`,
+						Computed: true,
 					},
 					"client_certs": schema.BoolAttribute{
-						MarkdownDescription: `Use client certificates`,
-						Computed:            true,
+						MarkdownDescription: `Use client certificates
+
+Default: false.`,
+						Computed: true,
 					},
 					"database": schema.StringAttribute{
-						MarkdownDescription: ``,
+						MarkdownDescription: `Example: sampledb.`,
 						Computed:            true,
 					},
 					"hostname": schema.StringAttribute{
-						MarkdownDescription: ``,
+						MarkdownDescription: `Example: database.example.com.`,
 						Computed:            true,
 					},
 					"port": schema.Int64Attribute{
-						MarkdownDescription: ``,
-						Computed:            true,
+						MarkdownDescription: `Default: 5432.
+
+Example: 5432.`,
+						Computed: true,
 					},
 					"publication": schema.StringAttribute{
-						MarkdownDescription: ``,
+						MarkdownDescription: `Example: polytomic.`,
 						Computed:            true,
 					},
 					"ssh": schema.BoolAttribute{
@@ -80,23 +86,33 @@ func (d *PostgresqlConnectionDataSource) Schema(ctx context.Context, req datasou
 						Computed:            true,
 					},
 					"ssh_host": schema.StringAttribute{
-						MarkdownDescription: `SSH host`,
-						Computed:            true,
+						MarkdownDescription: `SSH host
+
+Example: bastion.example.com.`,
+						Computed: true,
 					},
 					"ssh_port": schema.Int64Attribute{
-						MarkdownDescription: `SSH port`,
-						Computed:            true,
+						MarkdownDescription: `SSH port
+
+Default: 22.
+
+Example: 22.`,
+						Computed: true,
 					},
 					"ssh_user": schema.StringAttribute{
-						MarkdownDescription: `SSH user`,
-						Computed:            true,
+						MarkdownDescription: `SSH user
+
+Default: root.`,
+						Computed: true,
 					},
 					"ssl": schema.BoolAttribute{
-						MarkdownDescription: `Use SSL`,
-						Computed:            true,
+						MarkdownDescription: `Use SSL
+
+Default: true.`,
+						Computed: true,
 					},
 					"username": schema.StringAttribute{
-						MarkdownDescription: ``,
+						MarkdownDescription: `Example: postgres.`,
 						Computed:            true,
 					},
 				},

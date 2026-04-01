@@ -44,11 +44,13 @@ var AwsopensearchSchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"aws_access_key_id": schema.StringAttribute{
-					MarkdownDescription: `AWS Access Key ID`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
-					Sensitive:           false,
+					MarkdownDescription: `AWS Access Key ID
+
+Example: AKIAIOSFODNN7EXAMPLE.`,
+					Required:  true,
+					Optional:  false,
+					Computed:  false,
+					Sensitive: false,
 				},
 				"aws_secret_access_key": schema.StringAttribute{
 					MarkdownDescription: `AWS Secret Access Key`,
@@ -68,14 +70,16 @@ var AwsopensearchSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"endpoint": schema.StringAttribute{
-					MarkdownDescription: `Endpoint(s)`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
-					Sensitive:           false,
+					MarkdownDescription: `Endpoint(s)
+
+Example: es.us-east-2.amazonaws.com.`,
+					Required:  true,
+					Optional:  false,
+					Computed:  false,
+					Sensitive: false,
 				},
 				"region": schema.StringAttribute{
-					MarkdownDescription: ``,
+					MarkdownDescription: `Example: us-east-1.`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,

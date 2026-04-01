@@ -56,16 +56,24 @@ func (d *GongConnectionDataSource) Schema(ctx context.Context, req datasource.Sc
 						Computed:            true,
 					},
 					"auth_method": schema.StringAttribute{
-						MarkdownDescription: `Authentication method`,
-						Computed:            true,
+						MarkdownDescription: `Authentication method
+
+Valid values:
+  - "token" - Access key and secret
+  - "oauth" - OAuth
+
+Default: token.`,
+						Computed: true,
 					},
 					"oauth_token_expiry": schema.StringAttribute{
 						MarkdownDescription: ``,
 						Computed:            true,
 					},
 					"subdomain": schema.StringAttribute{
-						MarkdownDescription: `Gong subdomain i.e. company-17 if you access Gong via https://company-17.app.gong.io`,
-						Computed:            true,
+						MarkdownDescription: `Gong subdomain i.e. company-17 if you access Gong via https://company-17.app.gong.io
+
+Example: company-123.`,
+						Computed: true,
 					},
 				},
 				Optional: true,

@@ -24,6 +24,9 @@ import (
 	"github.com/polytomic/polytomic-go"
 	ptcore "github.com/polytomic/polytomic-go/core"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
+
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -51,11 +54,18 @@ var MixpanelSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"region": schema.StringAttribute{
-					MarkdownDescription: `Server`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
-					Sensitive:           false,
+					MarkdownDescription: `Server
+
+Valid values:
+  - "mixpanel.com" - Mixpanel
+  - "eu.mixpanel.com" - Mixpanel (EU)`,
+					Required:  true,
+					Optional:  false,
+					Computed:  false,
+					Sensitive: false,
+					Validators: []validator.String{
+						stringvalidator.OneOf("mixpanel.com", "eu.mixpanel.com"),
+					},
 				},
 				"service_account_secret": schema.StringAttribute{
 					MarkdownDescription: `Service account secret`,

@@ -52,12 +52,16 @@ func (d *Ware2goConnectionDataSource) Schema(ctx context.Context, req datasource
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"client_secret": schema.StringAttribute{
-						MarkdownDescription: `API Secret`,
-						Computed:            true,
+						MarkdownDescription: `API Secret
+
+Example: your-client-secret.`,
+						Computed: true,
 					},
 					"merchant_id": schema.StringAttribute{
-						MarkdownDescription: `Merchant ID`,
-						Computed:            true,
+						MarkdownDescription: `Merchant ID
+
+Example: your-merchant-id.`,
+						Computed: true,
 					},
 					"staging": schema.BoolAttribute{
 						MarkdownDescription: `Use Staging Environment`,

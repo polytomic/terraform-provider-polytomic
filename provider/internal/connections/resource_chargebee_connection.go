@@ -24,6 +24,9 @@ import (
 	"github.com/polytomic/polytomic-go"
 	ptcore "github.com/polytomic/polytomic-go/core"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
+
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -54,11 +57,20 @@ var ChargebeeSchema = schema.Schema{
 					},
 				},
 				"product_catalog": schema.StringAttribute{
-					MarkdownDescription: `Product Catalog version`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
-					Sensitive:           false,
+					MarkdownDescription: `Product Catalog version
+
+Valid values:
+  - "1.0" - 1.0
+  - "2.0" - 2.0
+
+Example: 2.0.`,
+					Required:  true,
+					Optional:  false,
+					Computed:  false,
+					Sensitive: false,
+					Validators: []validator.String{
+						stringvalidator.OneOf("1.0", "2.0"),
+					},
 				},
 				"ratelimit_rpm": schema.Int64Attribute{
 					MarkdownDescription: `Maximum Requests Per Minute
@@ -72,7 +84,9 @@ var ChargebeeSchema = schema.Schema{
 				"site": schema.StringAttribute{
 					MarkdownDescription: `Chargebee site
 
-    https://{site}.chargebee.com`,
+    https://{site}.chargebee.com
+
+Example: https://example.chargebee.com.`,
 					Required:  true,
 					Optional:  false,
 					Computed:  false,

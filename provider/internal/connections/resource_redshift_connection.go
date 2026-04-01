@@ -24,6 +24,9 @@ import (
 	"github.com/polytomic/polytomic-go"
 	ptcore "github.com/polytomic/polytomic-go/core"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
+
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -46,16 +49,29 @@ var RedshiftSchema = schema.Schema{
 				"auth_mode": schema.StringAttribute{
 					MarkdownDescription: `Authentication Method
 
-    How to authenticate with AWS. Defaults to Access Key and Secret`,
+    How to authenticate with AWS. Defaults to Access Key and Secret
+
+Valid values:
+  - "access_key_and_secret" - Access Key and Secret
+  - "iam_role" - IAM role
+
+Default: access_key_and_secret.
+
+Example: access_key_and_secret.`,
 					Required:  true,
 					Optional:  false,
 					Computed:  false,
 					Sensitive: false,
+					Validators: []validator.String{
+						stringvalidator.OneOf("access_key_and_secret", "iam_role"),
+					},
 				},
 				"aws_access_key_id": schema.StringAttribute{
 					MarkdownDescription: `AWS Access Key ID (destinations only)
 
-    Access Key ID with read/write access to a bucket. More info: https://docs.polytomic.com/docs/redshift`,
+    Access Key ID with read/write access to a bucket. More info: https://docs.polytomic.com/docs/redshift
+
+Example: AKIAIOSFODNN7EXAMPLE.`,
 					Required:  false,
 					Optional:  true,
 					Computed:  true,
@@ -86,7 +102,7 @@ var RedshiftSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"database": schema.StringAttribute{
-					MarkdownDescription: ``,
+					MarkdownDescription: `Example: mydb.`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
@@ -102,7 +118,7 @@ var RedshiftSchema = schema.Schema{
 					Sensitive: false,
 				},
 				"hostname": schema.StringAttribute{
-					MarkdownDescription: ``,
+					MarkdownDescription: `Example: mycluster.us-west-2.redshift.amazonaws.com.`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
@@ -126,16 +142,20 @@ var RedshiftSchema = schema.Schema{
 					},
 				},
 				"port": schema.Int64Attribute{
-					MarkdownDescription: ``,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
-					Sensitive:           false,
+					MarkdownDescription: `Default: 5439.
+
+Example: 5439.`,
+					Required:  true,
+					Optional:  false,
+					Computed:  false,
+					Sensitive: false,
 				},
 				"s3_bucket_name": schema.StringAttribute{
 					MarkdownDescription: `S3 Bucket Name (destinations only)
 
-    Name of bucket used for staging data load files`,
+    Name of bucket used for staging data load files
+
+Example: my-bucket.`,
 					Required:  false,
 					Optional:  true,
 					Computed:  true,
@@ -144,7 +164,9 @@ var RedshiftSchema = schema.Schema{
 				"s3_bucket_region": schema.StringAttribute{
 					MarkdownDescription: `S3 Bucket Region (destinations only)
 
-    Region of bucket. Note: must match region of redshift server`,
+    Region of bucket. Note: must match region of redshift server
+
+Example: us-west-2.`,
 					Required:  false,
 					Optional:  true,
 					Computed:  true,
@@ -158,18 +180,24 @@ var RedshiftSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"ssh_host": schema.StringAttribute{
-					MarkdownDescription: `SSH host`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
+					MarkdownDescription: `SSH host
+
+Example: bastion.example.com.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
 				},
 				"ssh_port": schema.Int64Attribute{
-					MarkdownDescription: `SSH port`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
+					MarkdownDescription: `SSH port
+
+Default: 22.
+
+Example: 22.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
 				},
 				"ssh_private_key": schema.StringAttribute{
 					MarkdownDescription: `Private key`,
@@ -182,21 +210,25 @@ var RedshiftSchema = schema.Schema{
 					},
 				},
 				"ssh_user": schema.StringAttribute{
-					MarkdownDescription: `SSH user`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
+					MarkdownDescription: `SSH user
+
+Default: root.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
 				},
 				"use_bulk_sync_staging_schema": schema.BoolAttribute{
-					MarkdownDescription: `Use custom bulk sync staging schema`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
+					MarkdownDescription: `Use custom bulk sync staging schema
+
+Default: false.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
 				},
 				"username": schema.StringAttribute{
-					MarkdownDescription: ``,
+					MarkdownDescription: `Example: redshift_user.`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,

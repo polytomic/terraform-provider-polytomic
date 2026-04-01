@@ -24,6 +24,9 @@ import (
 	"github.com/polytomic/polytomic-go"
 	ptcore "github.com/polytomic/polytomic-go/core"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
+
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -54,11 +57,22 @@ var Zendesk_supportSchema = schema.Schema{
 					},
 				},
 				"auth_method": schema.StringAttribute{
-					MarkdownDescription: `Authentication method`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
-					Sensitive:           false,
+					MarkdownDescription: `Authentication method
+
+Valid values:
+  - "apitoken" - API token
+  - "oauth" - OAuth
+
+Default: oauth.
+
+Example: apitoken.`,
+					Required:  true,
+					Optional:  false,
+					Computed:  false,
+					Sensitive: false,
+					Validators: []validator.String{
+						stringvalidator.OneOf("apitoken", "oauth"),
+					},
 				},
 				"custom_api_limits": schema.BoolAttribute{
 					MarkdownDescription: `Enforce custom API limits`,
@@ -68,14 +82,16 @@ var Zendesk_supportSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"domain": schema.StringAttribute{
-					MarkdownDescription: `Zendesk Subdomain`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
-					Sensitive:           false,
+					MarkdownDescription: `Zendesk Subdomain
+
+Example: polytomic.zendesk.com.`,
+					Required:  true,
+					Optional:  false,
+					Computed:  false,
+					Sensitive: false,
 				},
 				"email": schema.StringAttribute{
-					MarkdownDescription: ``,
+					MarkdownDescription: `Example: user@example.com.`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,

@@ -52,8 +52,12 @@ func (d *GoogleworkspaceConnectionDataSource) Schema(ctx context.Context, req da
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"auth_method": schema.StringAttribute{
-						MarkdownDescription: `Default: browser`,
-						Computed:            true,
+						MarkdownDescription: `Default: browser
+
+Valid values:
+  - "oauth" - OAuth
+  - "service_account" - Service Account`,
+						Computed: true,
 					},
 					"client_email": schema.StringAttribute{
 						MarkdownDescription: `Connected Account`,

@@ -56,8 +56,14 @@ func (d *RedshiftserverlessConnectionDataSource) Schema(ctx context.Context, req
 						Computed:            true,
 					},
 					"connection_method": schema.StringAttribute{
-						MarkdownDescription: `Connection method`,
-						Computed:            true,
+						MarkdownDescription: `Connection method
+
+Valid values:
+  - "data_api" - Redshift Data API
+  - "endpoint" - Redshift Serverless Endpoint
+
+Example: data_api.`,
+						Computed: true,
 					},
 					"data_api_endpoint": schema.StringAttribute{
 						MarkdownDescription: `Redshift Data API endpoint
@@ -66,47 +72,57 @@ func (d *RedshiftserverlessConnectionDataSource) Schema(ctx context.Context, req
 						Computed: true,
 					},
 					"database": schema.StringAttribute{
-						MarkdownDescription: ``,
+						MarkdownDescription: `Example: users.`,
 						Computed:            true,
 					},
 					"endpoint": schema.StringAttribute{
-						MarkdownDescription: `Redshift Serverless endpoint`,
-						Computed:            true,
+						MarkdownDescription: `Redshift Serverless endpoint
+
+Example: acme.12345.us-west-2.redshift-serverless.amazonaws.com:5439.`,
+						Computed: true,
 					},
 					"external_id": schema.StringAttribute{
 						MarkdownDescription: `External ID`,
 						Computed:            true,
 					},
 					"iam_role_arn": schema.StringAttribute{
-						MarkdownDescription: `IAM Role ARN`,
-						Computed:            true,
+						MarkdownDescription: `IAM Role ARN
+
+Example: arn:aws:iam::012345678910:role/role.`,
+						Computed: true,
 					},
 					"override_endpoint": schema.BoolAttribute{
 						MarkdownDescription: `Override Redshift Data API endpoint`,
 						Computed:            true,
 					},
 					"region": schema.StringAttribute{
-						MarkdownDescription: ``,
+						MarkdownDescription: `Example: us-west-2.`,
 						Computed:            true,
 					},
 					"s3_bucket_name": schema.StringAttribute{
-						MarkdownDescription: `S3 bucket name (destination/unload support only)`,
-						Computed:            true,
+						MarkdownDescription: `S3 bucket name (destination/unload support only)
+
+Example: my-bucket.`,
+						Computed: true,
 					},
 					"s3_bucket_region": schema.StringAttribute{
-						MarkdownDescription: `S3 bucket region (destination/unload support only)`,
-						Computed:            true,
+						MarkdownDescription: `S3 bucket region (destination/unload support only)
+
+Example: us-west-2.`,
+						Computed: true,
 					},
 					"use_bulk_sync_staging_schema": schema.BoolAttribute{
-						MarkdownDescription: `Use custom bulk sync staging schema`,
-						Computed:            true,
+						MarkdownDescription: `Use custom bulk sync staging schema
+
+Default: false.`,
+						Computed: true,
 					},
 					"use_unload": schema.BoolAttribute{
 						MarkdownDescription: `Read data using Unload`,
 						Computed:            true,
 					},
 					"workgroup": schema.StringAttribute{
-						MarkdownDescription: ``,
+						MarkdownDescription: `Example: default.`,
 						Computed:            true,
 					},
 				},

@@ -56,8 +56,10 @@ func (d *QuickbooksConnectionDataSource) Schema(ctx context.Context, req datasou
 						Computed:            true,
 					},
 					"realm_id": schema.StringAttribute{
-						MarkdownDescription: `Company ID`,
-						Computed:            true,
+						MarkdownDescription: `Company ID
+
+Example: 12345678.`,
+						Computed: true,
 					},
 				},
 				Optional: true,

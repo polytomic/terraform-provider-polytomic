@@ -16,26 +16,26 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
-var _ datasource.DataSource = &DataliteConnectionDataSource{}
+var _ datasource.DataSource = &TestrailConnectionDataSource{}
 
 // ExampleDataSource defines the data source implementation.
-type DataliteConnectionDataSource struct {
+type TestrailConnectionDataSource struct {
 	provider *providerclient.Provider
 }
 
-func (d *DataliteConnectionDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *TestrailConnectionDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	if provider := providerclient.GetProvider(req.ProviderData, resp.Diagnostics); provider != nil {
 		d.provider = provider
 	}
 }
 
-func (d *DataliteConnectionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_datalite_connection"
+func (d *TestrailConnectionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_testrail_connection"
 }
 
-func (d *DataliteConnectionDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+func (d *TestrailConnectionDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: ":meta:subcategory:Connections: Polytomic Connection",
+		MarkdownDescription: ":meta:subcategory:Connections: TestRail Connection",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				MarkdownDescription: "",
@@ -51,33 +51,13 @@ func (d *DataliteConnectionDataSource) Schema(ctx context.Context, req datasourc
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
-					"schemas": schema.SetNestedAttribute{
+					"hostname": schema.StringAttribute{
+						MarkdownDescription: `Example: https://example.testrail.io.`,
+						Computed:            true,
+					},
+					"username": schema.StringAttribute{
 						MarkdownDescription: ``,
 						Computed:            true,
-						NestedObject: schema.NestedAttributeObject{
-							Attributes: map[string]schema.Attribute{
-								"alias": schema.StringAttribute{
-									MarkdownDescription: ``,
-									Computed:            true,
-								},
-								"connection_id": schema.StringAttribute{
-									MarkdownDescription: ``,
-									Computed:            true,
-								},
-								"connection_name": schema.StringAttribute{
-									MarkdownDescription: ``,
-									Computed:            true,
-								},
-								"connection_type": schema.StringAttribute{
-									MarkdownDescription: ``,
-									Computed:            true,
-								},
-								"schema_id": schema.StringAttribute{
-									MarkdownDescription: ``,
-									Computed:            true,
-								},
-							},
-						},
 					},
 				},
 				Optional: true,
@@ -86,17 +66,12 @@ func (d *DataliteConnectionDataSource) Schema(ctx context.Context, req datasourc
 	}
 }
 
-type DataliteDataSourceConf struct {
-	Schemas []struct {
-		Alias           string `mapstructure:"alias" tfsdk:"alias"`
-		Connection_id   string `mapstructure:"connection_id" tfsdk:"connection_id"`
-		Connection_name string `mapstructure:"connection_name" tfsdk:"connection_name"`
-		Connection_type string `mapstructure:"connection_type" tfsdk:"connection_type"`
-		Schema_id       string `mapstructure:"schema_id" tfsdk:"schema_id"`
-	} `mapstructure:"schemas" tfsdk:"schemas"`
+type TestrailDataSourceConf struct {
+	Hostname string `mapstructure:"hostname" tfsdk:"hostname"`
+	Username string `mapstructure:"username" tfsdk:"username"`
 }
 
-func (d *DataliteConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+func (d *TestrailConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 
 	// Read Terraform configuration data into the model
@@ -122,7 +97,7 @@ func (d *DataliteConnectionDataSource) Read(ctx context.Context, req datasource.
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
 
-	conf := DataliteDataSourceConf{}
+	conf := TestrailDataSourceConf{}
 	err = mapstructure.Decode(connection.Data.Configuration, &conf)
 	if err != nil {
 		resp.Diagnostics.AddError("Error decoding connection configuration", err.Error())
@@ -131,17 +106,8 @@ func (d *DataliteConnectionDataSource) Read(ctx context.Context, req datasource.
 
 	var diags diag.Diagnostics
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"schemas": types.SetType{
-			ElemType: types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					"alias":           types.StringType,
-					"connection_id":   types.StringType,
-					"connection_name": types.StringType,
-					"connection_type": types.StringType,
-					"schema_id":       types.StringType,
-				},
-			},
-		},
+		"hostname": types.StringType,
+		"username": types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

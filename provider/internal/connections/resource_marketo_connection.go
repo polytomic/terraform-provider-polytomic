@@ -44,11 +44,13 @@ var MarketoSchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"client_id": schema.StringAttribute{
-					MarkdownDescription: `Client ID`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
-					Sensitive:           false,
+					MarkdownDescription: `Client ID
+
+Example: 629b6d74-f602-47f4-8fef-388485343d85.`,
+					Required:  true,
+					Optional:  false,
+					Computed:  false,
+					Sensitive: false,
 				},
 				"client_secret": schema.StringAttribute{
 					MarkdownDescription: `Client Secret`,
@@ -61,18 +63,26 @@ var MarketoSchema = schema.Schema{
 					},
 				},
 				"concurrent_imports": schema.Int64Attribute{
-					MarkdownDescription: `Concurrent import jobs`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
+					MarkdownDescription: `Concurrent import jobs
+
+Default: 5.
+
+Example: 5.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
 				},
 				"daily_api_calls": schema.Int64Attribute{
-					MarkdownDescription: `Daily call limit`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
+					MarkdownDescription: `Daily call limit
+
+Default: 37500.
+
+Example: 37500.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
 				},
 				"enforce_api_limits": schema.BoolAttribute{
 					MarkdownDescription: `Enforce API limits`,
@@ -82,11 +92,13 @@ var MarketoSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"include_static_lists": schema.BoolAttribute{
-					MarkdownDescription: `Include static list support`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
+					MarkdownDescription: `Include static list support
+
+Default: true.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
 				},
 				"oauth_token_expiry": schema.StringAttribute{
 					MarkdownDescription: ``,
@@ -96,11 +108,13 @@ var MarketoSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"rest_endpoint": schema.StringAttribute{
-					MarkdownDescription: `REST Endpoint`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
-					Sensitive:           false,
+					MarkdownDescription: `REST Endpoint
+
+Example: https://123-ABC-999.mktorest.com/rest.`,
+					Required:  true,
+					Optional:  false,
+					Computed:  false,
+					Sensitive: false,
 				},
 			},
 

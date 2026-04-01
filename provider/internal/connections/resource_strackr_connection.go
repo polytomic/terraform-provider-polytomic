@@ -25,6 +25,9 @@ import (
 	"github.com/polytomic/polytomic-go"
 	ptcore "github.com/polytomic/polytomic-go/core"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
+
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -65,11 +68,20 @@ var StrackrSchema = schema.Schema{
 					},
 				},
 				"currency_type": schema.StringAttribute{
-					MarkdownDescription: `Currency Type`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
-					Sensitive:           false,
+					MarkdownDescription: `Currency Type
+
+Valid values: "EUR", "USD", "CAD", "GBP", "RUB", "SEK", "AUD", "INR", "NOK", "DKK".
+
+Default: USD.
+
+Example: USD.`,
+					Required:  true,
+					Optional:  false,
+					Computed:  false,
+					Sensitive: false,
+					Validators: []validator.String{
+						stringvalidator.OneOf("EUR", "USD", "CAD", "GBP", "RUB", "SEK", "AUD", "INR", "NOK", "DKK"),
+					},
 				},
 				"linkbuilder_customs_text": schema.StringAttribute{
 					MarkdownDescription: `Linkbuilder Customs Text`,

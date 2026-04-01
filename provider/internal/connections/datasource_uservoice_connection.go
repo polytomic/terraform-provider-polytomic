@@ -52,8 +52,10 @@ func (d *UservoiceConnectionDataSource) Schema(ctx context.Context, req datasour
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"domain": schema.StringAttribute{
-						MarkdownDescription: `Subdomain`,
-						Computed:            true,
+						MarkdownDescription: `Subdomain
+
+Example: polytomic.`,
+						Computed: true,
 					},
 				},
 				Optional: true,

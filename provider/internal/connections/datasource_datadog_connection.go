@@ -52,8 +52,19 @@ func (d *DatadogConnectionDataSource) Schema(ctx context.Context, req datasource
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"region": schema.StringAttribute{
-						MarkdownDescription: `Site`,
-						Computed:            true,
+						MarkdownDescription: `Site
+
+Valid values:
+  - "US1" - US1
+  - "US3" - US3
+  - "US5" - US5
+  - "EU1" - EU1
+  - "US1-FED" - US1-FED
+  - "AP1" - AP1
+  - "AP2" - AP2
+
+Default: US1.`,
+						Computed: true,
 					},
 				},
 				Optional: true,

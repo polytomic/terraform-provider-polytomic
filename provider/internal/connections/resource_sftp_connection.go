@@ -24,6 +24,9 @@ import (
 	"github.com/polytomic/polytomic-go"
 	ptcore "github.com/polytomic/polytomic-go/core"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
+
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -44,11 +47,22 @@ var SftpSchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"auth_mode": schema.StringAttribute{
-					MarkdownDescription: `Authentication Method`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
-					Sensitive:           false,
+					MarkdownDescription: `Authentication Method
+
+Valid values:
+  - "private_key" - Private key
+  - "password" - Password
+
+Default: private_key.
+
+Example: private_key.`,
+					Required:  true,
+					Optional:  false,
+					Computed:  false,
+					Sensitive: false,
+					Validators: []validator.String{
+						stringvalidator.OneOf("private_key", "password"),
+					},
 				},
 				"is_single_table": schema.BoolAttribute{
 					MarkdownDescription: `Files are time-based snapshots
@@ -60,11 +74,13 @@ var SftpSchema = schema.Schema{
 					Sensitive: false,
 				},
 				"path": schema.StringAttribute{
-					MarkdownDescription: `The path to the directory on the SFTP server containing the files.`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
+					MarkdownDescription: `The path to the directory on the SFTP server containing the files.
+
+Example: /path/to/files.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
 				},
 				"single_table_name": schema.StringAttribute{
 					MarkdownDescription: `Collection name`,
@@ -76,18 +92,22 @@ var SftpSchema = schema.Schema{
 				"skip_lines": schema.Int64Attribute{
 					MarkdownDescription: `Skip first lines
 
-    Skip first N lines of each CSV file.`,
+    Skip first N lines of each CSV file.
+
+Default: 0.`,
 					Required:  false,
 					Optional:  true,
 					Computed:  true,
 					Sensitive: false,
 				},
 				"ssh_host": schema.StringAttribute{
-					MarkdownDescription: `Host`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
+					MarkdownDescription: `Host
+
+Example: sftp.example.net.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
 				},
 				"ssh_password": schema.StringAttribute{
 					MarkdownDescription: `Password`,
@@ -100,11 +120,15 @@ var SftpSchema = schema.Schema{
 					},
 				},
 				"ssh_port": schema.Int64Attribute{
-					MarkdownDescription: `Port`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
+					MarkdownDescription: `Port
+
+Default: 22.
+
+Example: 22.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
 				},
 				"ssh_private_key": schema.StringAttribute{
 					MarkdownDescription: `Private key`,
@@ -117,11 +141,13 @@ var SftpSchema = schema.Schema{
 					},
 				},
 				"ssh_user": schema.StringAttribute{
-					MarkdownDescription: `User`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
+					MarkdownDescription: `User
+
+Example: user.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
 				},
 			},
 

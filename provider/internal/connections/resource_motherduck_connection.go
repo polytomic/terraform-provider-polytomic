@@ -56,7 +56,9 @@ var MotherduckSchema = schema.Schema{
 				"aws_access_key_id": schema.StringAttribute{
 					MarkdownDescription: `AWS Access Key ID (destinations only)
 
-    Access Key ID with read/write access to a bucket.`,
+    Access Key ID with read/write access to a bucket.
+
+Example: AKIAIOSFODNN7EXAMPLE.`,
 					Required:  false,
 					Optional:  true,
 					Computed:  true,
@@ -80,7 +82,7 @@ var MotherduckSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"database": schema.StringAttribute{
-					MarkdownDescription: ``,
+					MarkdownDescription: `Example: my_db.`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
@@ -89,18 +91,22 @@ var MotherduckSchema = schema.Schema{
 				"s3_bucket_name": schema.StringAttribute{
 					MarkdownDescription: `S3 Bucket Name (destinations only)
 
-    Bucket name (folder optional); ex: s3://polytomic/dataset`,
+    Bucket name (folder optional); ex: s3://polytomic/dataset
+
+Example: s3://polytomic/dataset.`,
 					Required:  false,
 					Optional:  true,
 					Computed:  true,
 					Sensitive: false,
 				},
 				"s3_bucket_region": schema.StringAttribute{
-					MarkdownDescription: `S3 Bucket Region (destinations only)`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
+					MarkdownDescription: `S3 Bucket Region (destinations only)
+
+Example: us-east-1.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
 				},
 			},
 

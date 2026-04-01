@@ -52,7 +52,7 @@ func (d *ConstructionwireConnectionDataSource) Schema(ctx context.Context, req d
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"email": schema.StringAttribute{
-						MarkdownDescription: ``,
+						MarkdownDescription: `Example: user@example.com.`,
 						Computed:            true,
 					},
 				},

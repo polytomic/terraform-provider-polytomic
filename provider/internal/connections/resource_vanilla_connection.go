@@ -54,7 +54,7 @@ var VanillaSchema = schema.Schema{
 					},
 				},
 				"domain": schema.StringAttribute{
-					MarkdownDescription: ``,
+					MarkdownDescription: `Example: yourcompany.vanillacommunities.com.`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,

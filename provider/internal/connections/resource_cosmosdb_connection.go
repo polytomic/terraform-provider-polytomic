@@ -54,7 +54,7 @@ var CosmosdbSchema = schema.Schema{
 					},
 				},
 				"uri": schema.StringAttribute{
-					MarkdownDescription: ``,
+					MarkdownDescription: `Example: https://contosomarketing.documents.azure.com.`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,

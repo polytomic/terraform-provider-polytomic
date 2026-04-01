@@ -56,8 +56,12 @@ func (d *NorthbeamConnectionDataSource) Schema(ctx context.Context, req datasour
 						Computed:            true,
 					},
 					"instance": schema.StringAttribute{
-						MarkdownDescription: ``,
-						Computed:            true,
+						MarkdownDescription: `Valid values:
+  - "prod" - Production
+  - "test" - Test
+
+Default: prod.`,
+						Computed: true,
 					},
 				},
 				Optional: true,

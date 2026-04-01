@@ -44,11 +44,13 @@ var NetsuitesaconnectSchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"account_id": schema.StringAttribute{
-					MarkdownDescription: `Account ID`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
-					Sensitive:           false,
+					MarkdownDescription: `Account ID
+
+Example: 1234567_SB1.`,
+					Required:  true,
+					Optional:  false,
+					Computed:  false,
+					Sensitive: false,
 				},
 				"certificate_id": schema.StringAttribute{
 					MarkdownDescription: `Certificate ID`,

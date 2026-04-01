@@ -51,10 +51,6 @@ func (d *FbaudienceConnectionDataSource) Schema(ctx context.Context, req datasou
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
-					"account_id": schema.StringAttribute{
-						MarkdownDescription: `Account ID`,
-						Computed:            true,
-					},
 					"accounts": schema.SetNestedAttribute{
 						MarkdownDescription: ``,
 						Computed:            true,
@@ -72,12 +68,24 @@ func (d *FbaudienceConnectionDataSource) Schema(ctx context.Context, req datasou
 						},
 					},
 					"auth_method": schema.StringAttribute{
-						MarkdownDescription: `Authentication Method`,
-						Computed:            true,
+						MarkdownDescription: `Authentication Method
+
+Valid values:
+  - "oauth" - Oauth
+  - "token" - Token
+
+Default: oauth.
+
+Example: token.`,
+						Computed: true,
 					},
 					"graph_api_version": schema.StringAttribute{
-						MarkdownDescription: `Graph API version`,
-						Computed:            true,
+						MarkdownDescription: `Graph API version
+
+Default: v24.0.
+
+Example: v24.0.`,
+						Computed: true,
 					},
 					"user_name": schema.StringAttribute{
 						MarkdownDescription: `Connected as`,
@@ -91,8 +99,7 @@ func (d *FbaudienceConnectionDataSource) Schema(ctx context.Context, req datasou
 }
 
 type FbaudienceDataSourceConf struct {
-	Account_id string `mapstructure:"account_id" tfsdk:"account_id"`
-	Accounts   []struct {
+	Accounts []struct {
 		Label string `mapstructure:"label" tfsdk:"label"`
 		Value string `mapstructure:"value" tfsdk:"value"`
 	} `mapstructure:"accounts" tfsdk:"accounts"`
@@ -136,7 +143,6 @@ func (d *FbaudienceConnectionDataSource) Read(ctx context.Context, req datasourc
 
 	var diags diag.Diagnostics
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"account_id": types.StringType,
 		"accounts": types.SetType{
 			ElemType: types.ObjectType{
 				AttrTypes: map[string]attr.Type{

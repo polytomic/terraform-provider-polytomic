@@ -54,11 +54,13 @@ var AzuresqlSchema = schema.Schema{
 					},
 				},
 				"account_name": schema.StringAttribute{
-					MarkdownDescription: `Storage account name (destination only)`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
+					MarkdownDescription: `Storage account name (destination only)
+
+Example: account.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
 				},
 				"blob_store": schema.BoolAttribute{
 					MarkdownDescription: `Use Azure blob storage for faster bulk loading (destination only)`,
@@ -68,25 +70,29 @@ var AzuresqlSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"container_name": schema.StringAttribute{
-					MarkdownDescription: `Storage container name (destination only)`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
+					MarkdownDescription: `Storage container name (destination only)
+
+Example: container.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
 				},
 				"database": schema.StringAttribute{
-					MarkdownDescription: ``,
+					MarkdownDescription: `Example: sampledb.`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
 					Sensitive:           false,
 				},
 				"hostname": schema.StringAttribute{
-					MarkdownDescription: `Server`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
-					Sensitive:           false,
+					MarkdownDescription: `Server
+
+Example: example.database.windows.net.`,
+					Required:  true,
+					Optional:  false,
+					Computed:  false,
+					Sensitive: false,
 				},
 				"password": schema.StringAttribute{
 					MarkdownDescription: ``,
@@ -99,11 +105,13 @@ var AzuresqlSchema = schema.Schema{
 					},
 				},
 				"port": schema.Int64Attribute{
-					MarkdownDescription: ``,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
-					Sensitive:           false,
+					MarkdownDescription: `Default: 1433.
+
+Example: 1433.`,
+					Required:  true,
+					Optional:  false,
+					Computed:  false,
+					Sensitive: false,
 				},
 				"ssh": schema.BoolAttribute{
 					MarkdownDescription: `Connect over SSH tunnel`,
@@ -113,18 +121,24 @@ var AzuresqlSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"ssh_host": schema.StringAttribute{
-					MarkdownDescription: `SSH host`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
+					MarkdownDescription: `SSH host
+
+Example: bastion.example.com.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
 				},
 				"ssh_port": schema.Int64Attribute{
-					MarkdownDescription: `SSH port`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
+					MarkdownDescription: `SSH port
+
+Default: 22.
+
+Example: 22.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
 				},
 				"ssh_private_key": schema.StringAttribute{
 					MarkdownDescription: `Private key`,
@@ -137,21 +151,25 @@ var AzuresqlSchema = schema.Schema{
 					},
 				},
 				"ssh_user": schema.StringAttribute{
-					MarkdownDescription: `SSH user`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
+					MarkdownDescription: `SSH user
+
+Default: root.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
 				},
 				"ssl": schema.BoolAttribute{
-					MarkdownDescription: `Use SSL`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
+					MarkdownDescription: `Use SSL
+
+Default: true.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
 				},
 				"username": schema.StringAttribute{
-					MarkdownDescription: ``,
+					MarkdownDescription: `Example: user.`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,

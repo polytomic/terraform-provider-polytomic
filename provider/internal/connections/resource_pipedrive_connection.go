@@ -54,7 +54,7 @@ var PipedriveSchema = schema.Schema{
 					},
 				},
 				"domain": schema.StringAttribute{
-					MarkdownDescription: ``,
+					MarkdownDescription: `Example: polytomic.`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,

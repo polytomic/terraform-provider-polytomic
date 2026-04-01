@@ -54,18 +54,22 @@ var StordSchema = schema.Schema{
 					},
 				},
 				"network_id": schema.StringAttribute{
-					MarkdownDescription: `Network ID`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
-					Sensitive:           false,
+					MarkdownDescription: `Network ID
+
+Example: 12345.`,
+					Required:  true,
+					Optional:  false,
+					Computed:  false,
+					Sensitive: false,
 				},
 				"organization_id": schema.StringAttribute{
-					MarkdownDescription: `Organization ID`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
-					Sensitive:           false,
+					MarkdownDescription: `Organization ID
+
+Example: 67890.`,
+					Required:  true,
+					Optional:  false,
+					Computed:  false,
+					Sensitive: false,
 				},
 			},
 

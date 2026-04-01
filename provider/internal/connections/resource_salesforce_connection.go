@@ -24,6 +24,9 @@ import (
 	"github.com/polytomic/polytomic-go"
 	ptcore "github.com/polytomic/polytomic-go/core"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
+
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -64,11 +67,20 @@ var SalesforceSchema = schema.Schema{
 					},
 				},
 				"connect_mode": schema.StringAttribute{
-					MarkdownDescription: `Default: browser (i.e. oauth through Polytomic). If 'code' is specified, the response will include an auth_code for the user to enter when completing authorization. NOTE: when supplying client_id and client_secret the connect mode must be 'api'.`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
+					MarkdownDescription: `Default: browser (i.e. oauth through Polytomic). If 'code' is specified, the response will include an auth_code for the user to enter when completing authorization. NOTE: when supplying client_id and client_secret the connect mode must be 'api'.
+
+Valid values: "browser", "clientcredentials", "code", "api".
+
+Default: browser.
+
+Example: api.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
+					Validators: []validator.String{
+						stringvalidator.OneOf("browser", "clientcredentials", "code", "api"),
+					},
 				},
 				"daily_api_calls": schema.Int64Attribute{
 					MarkdownDescription: `Daily call limit
@@ -80,11 +92,13 @@ var SalesforceSchema = schema.Schema{
 					Sensitive: false,
 				},
 				"domain": schema.StringAttribute{
-					MarkdownDescription: `The Salesforce instance's login domain, e.g. acmecorp.my.salesforce.com`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
-					Sensitive:           false,
+					MarkdownDescription: `The Salesforce instance's login domain, e.g. acmecorp.my.salesforce.com
+
+Example: http://instance.my.salesforce.com.`,
+					Required:  true,
+					Optional:  false,
+					Computed:  false,
+					Sensitive: false,
 				},
 				"enable_multicurrency_lookup": schema.BoolAttribute{
 					MarkdownDescription: `Enable multicurrency source field support

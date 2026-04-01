@@ -24,6 +24,9 @@ import (
 	"github.com/polytomic/polytomic-go"
 	ptcore "github.com/polytomic/polytomic-go/core"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
+
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -46,11 +49,22 @@ var Polytomic_metadataSchema = schema.Schema{
 				"auth_mode": schema.StringAttribute{
 					MarkdownDescription: `Authentication Method
 
-    Type of API key to use for authentication`,
+    Type of API key to use for authentication
+
+Valid values:
+  - "personal_api_key" - Personal API Key
+  - "partner_api_key" - Partner API Key
+
+Default: personal_api_key.
+
+Example: personal_api_key.`,
 					Required:  true,
 					Optional:  false,
 					Computed:  false,
 					Sensitive: false,
+					Validators: []validator.String{
+						stringvalidator.OneOf("personal_api_key", "partner_api_key"),
+					},
 				},
 				"connected_org": schema.StringAttribute{
 					MarkdownDescription: `Connected organization`,

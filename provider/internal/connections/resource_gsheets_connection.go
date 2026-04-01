@@ -24,6 +24,9 @@ import (
 	"github.com/polytomic/polytomic-go"
 	ptcore "github.com/polytomic/polytomic-go/core"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
+
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -64,11 +67,18 @@ var GsheetsSchema = schema.Schema{
 					},
 				},
 				"connect_mode": schema.StringAttribute{
-					MarkdownDescription: `Default: browser`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
+					MarkdownDescription: `Default: browser
+
+Valid values: "browser", "jwt".
+
+Default: browser.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
+					Validators: []validator.String{
+						stringvalidator.OneOf("browser", "jwt"),
+					},
 				},
 				"has_headers": schema.BoolAttribute{
 					MarkdownDescription: `Columns have headers`,

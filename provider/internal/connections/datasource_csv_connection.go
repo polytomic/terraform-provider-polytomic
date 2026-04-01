@@ -60,11 +60,11 @@ func (d *CsvConnectionDataSource) Schema(ctx context.Context, req datasource.Sch
 								Computed:            true,
 								Attributes: map[string]schema.Attribute{
 									"password": schema.StringAttribute{
-										MarkdownDescription: ``,
+										MarkdownDescription: `Example: secret.`,
 										Computed:            true,
 									},
 									"username": schema.StringAttribute{
-										MarkdownDescription: ``,
+										MarkdownDescription: `Example: user@example.com.`,
 										Computed:            true,
 									},
 								},
@@ -74,7 +74,7 @@ func (d *CsvConnectionDataSource) Schema(ctx context.Context, req datasource.Sch
 								Computed:            true,
 								Attributes: map[string]schema.Attribute{
 									"name": schema.StringAttribute{
-										MarkdownDescription: ``,
+										MarkdownDescription: `Example: foo.`,
 										Computed:            true,
 									},
 									"value": schema.StringAttribute{
@@ -92,12 +92,16 @@ func (d *CsvConnectionDataSource) Schema(ctx context.Context, req datasource.Sch
 										Computed:            true,
 									},
 									"client_id": schema.StringAttribute{
-										MarkdownDescription: `Client ID`,
-										Computed:            true,
+										MarkdownDescription: `Client ID
+
+Example: client_id.`,
+										Computed: true,
 									},
 									"client_secret": schema.StringAttribute{
-										MarkdownDescription: `Client secret`,
-										Computed:            true,
+										MarkdownDescription: `Client secret
+
+Example: client_secret.`,
+										Computed: true,
 									},
 									"extra_form_data": schema.SetNestedAttribute{
 										MarkdownDescription: `Extra form data`,
@@ -105,7 +109,7 @@ func (d *CsvConnectionDataSource) Schema(ctx context.Context, req datasource.Sch
 										NestedObject: schema.NestedAttributeObject{
 											Attributes: map[string]schema.Attribute{
 												"name": schema.StringAttribute{
-													MarkdownDescription: ``,
+													MarkdownDescription: `Example: foo.`,
 													Computed:            true,
 												},
 												"value": schema.StringAttribute{
@@ -121,8 +125,10 @@ func (d *CsvConnectionDataSource) Schema(ctx context.Context, req datasource.Sch
 										ElementType:         types.StringType,
 									},
 									"token_endpoint": schema.StringAttribute{
-										MarkdownDescription: `Token endpoint`,
-										Computed:            true,
+										MarkdownDescription: `Token endpoint
+
+Example: https://example.com/oauth/token.`,
+										Computed: true,
 									},
 								},
 							},
@@ -134,7 +140,7 @@ func (d *CsvConnectionDataSource) Schema(ctx context.Context, req datasource.Sch
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 								"name": schema.StringAttribute{
-									MarkdownDescription: ``,
+									MarkdownDescription: `Example: foo.`,
 									Computed:            true,
 								},
 								"value": schema.StringAttribute{
@@ -150,7 +156,7 @@ func (d *CsvConnectionDataSource) Schema(ctx context.Context, req datasource.Sch
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 								"name": schema.StringAttribute{
-									MarkdownDescription: ``,
+									MarkdownDescription: `Example: foo.`,
 									Computed:            true,
 								},
 								"value": schema.StringAttribute{

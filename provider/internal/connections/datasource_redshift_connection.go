@@ -54,13 +54,23 @@ func (d *RedshiftConnectionDataSource) Schema(ctx context.Context, req datasourc
 					"auth_mode": schema.StringAttribute{
 						MarkdownDescription: `Authentication Method
 
-    How to authenticate with AWS. Defaults to Access Key and Secret`,
+    How to authenticate with AWS. Defaults to Access Key and Secret
+
+Valid values:
+  - "access_key_and_secret" - Access Key and Secret
+  - "iam_role" - IAM role
+
+Default: access_key_and_secret.
+
+Example: access_key_and_secret.`,
 						Computed: true,
 					},
 					"aws_access_key_id": schema.StringAttribute{
 						MarkdownDescription: `AWS Access Key ID (destinations only)
 
-    Access Key ID with read/write access to a bucket. More info: https://docs.polytomic.com/docs/redshift`,
+    Access Key ID with read/write access to a bucket. More info: https://docs.polytomic.com/docs/redshift
+
+Example: AKIAIOSFODNN7EXAMPLE.`,
 						Computed: true,
 					},
 					"aws_user": schema.StringAttribute{
@@ -72,7 +82,7 @@ func (d *RedshiftConnectionDataSource) Schema(ctx context.Context, req datasourc
 						Computed:            true,
 					},
 					"database": schema.StringAttribute{
-						MarkdownDescription: ``,
+						MarkdownDescription: `Example: mydb.`,
 						Computed:            true,
 					},
 					"external_id": schema.StringAttribute{
@@ -82,7 +92,7 @@ func (d *RedshiftConnectionDataSource) Schema(ctx context.Context, req datasourc
 						Computed: true,
 					},
 					"hostname": schema.StringAttribute{
-						MarkdownDescription: ``,
+						MarkdownDescription: `Example: mycluster.us-west-2.redshift.amazonaws.com.`,
 						Computed:            true,
 					},
 					"iam_role_arn": schema.StringAttribute{
@@ -90,19 +100,25 @@ func (d *RedshiftConnectionDataSource) Schema(ctx context.Context, req datasourc
 						Computed:            true,
 					},
 					"port": schema.Int64Attribute{
-						MarkdownDescription: ``,
-						Computed:            true,
+						MarkdownDescription: `Default: 5439.
+
+Example: 5439.`,
+						Computed: true,
 					},
 					"s3_bucket_name": schema.StringAttribute{
 						MarkdownDescription: `S3 Bucket Name (destinations only)
 
-    Name of bucket used for staging data load files`,
+    Name of bucket used for staging data load files
+
+Example: my-bucket.`,
 						Computed: true,
 					},
 					"s3_bucket_region": schema.StringAttribute{
 						MarkdownDescription: `S3 Bucket Region (destinations only)
 
-    Region of bucket. Note: must match region of redshift server`,
+    Region of bucket. Note: must match region of redshift server
+
+Example: us-west-2.`,
 						Computed: true,
 					},
 					"ssh": schema.BoolAttribute{
@@ -110,23 +126,33 @@ func (d *RedshiftConnectionDataSource) Schema(ctx context.Context, req datasourc
 						Computed:            true,
 					},
 					"ssh_host": schema.StringAttribute{
-						MarkdownDescription: `SSH host`,
-						Computed:            true,
+						MarkdownDescription: `SSH host
+
+Example: bastion.example.com.`,
+						Computed: true,
 					},
 					"ssh_port": schema.Int64Attribute{
-						MarkdownDescription: `SSH port`,
-						Computed:            true,
+						MarkdownDescription: `SSH port
+
+Default: 22.
+
+Example: 22.`,
+						Computed: true,
 					},
 					"ssh_user": schema.StringAttribute{
-						MarkdownDescription: `SSH user`,
-						Computed:            true,
+						MarkdownDescription: `SSH user
+
+Default: root.`,
+						Computed: true,
 					},
 					"use_bulk_sync_staging_schema": schema.BoolAttribute{
-						MarkdownDescription: `Use custom bulk sync staging schema`,
-						Computed:            true,
+						MarkdownDescription: `Use custom bulk sync staging schema
+
+Default: false.`,
+						Computed: true,
 					},
 					"username": schema.StringAttribute{
-						MarkdownDescription: ``,
+						MarkdownDescription: `Example: redshift_user.`,
 						Computed:            true,
 					},
 				},

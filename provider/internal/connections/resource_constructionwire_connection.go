@@ -44,7 +44,7 @@ var ConstructionwireSchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"email": schema.StringAttribute{
-					MarkdownDescription: ``,
+					MarkdownDescription: `Example: user@example.com.`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,

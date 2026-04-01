@@ -24,6 +24,9 @@ import (
 	"github.com/polytomic/polytomic-go"
 	ptcore "github.com/polytomic/polytomic-go/core"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
+
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -61,11 +64,20 @@ var GongSchema = schema.Schema{
 					},
 				},
 				"auth_method": schema.StringAttribute{
-					MarkdownDescription: `Authentication method`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
-					Sensitive:           false,
+					MarkdownDescription: `Authentication method
+
+Valid values:
+  - "token" - Access key and secret
+  - "oauth" - OAuth
+
+Default: token.`,
+					Required:  true,
+					Optional:  false,
+					Computed:  false,
+					Sensitive: false,
+					Validators: []validator.String{
+						stringvalidator.OneOf("token", "oauth"),
+					},
 				},
 				"client_id": schema.StringAttribute{
 					MarkdownDescription: ``,
@@ -105,11 +117,13 @@ var GongSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"subdomain": schema.StringAttribute{
-					MarkdownDescription: `Gong subdomain i.e. company-17 if you access Gong via https://company-17.app.gong.io`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
+					MarkdownDescription: `Gong subdomain i.e. company-17 if you access Gong via https://company-17.app.gong.io
+
+Example: company-123.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
 				},
 			},
 

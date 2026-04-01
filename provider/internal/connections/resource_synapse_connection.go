@@ -44,18 +44,20 @@ var SynapseSchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"database": schema.StringAttribute{
-					MarkdownDescription: ``,
+					MarkdownDescription: `Example: yourdatabase.`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
 					Sensitive:           false,
 				},
 				"hostname": schema.StringAttribute{
-					MarkdownDescription: `Server`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
-					Sensitive:           false,
+					MarkdownDescription: `Server
+
+Example: yourserver.sql.azuresynapse.net.`,
+					Required:  true,
+					Optional:  false,
+					Computed:  false,
+					Sensitive: false,
 				},
 				"password": schema.StringAttribute{
 					MarkdownDescription: ``,
@@ -68,14 +70,16 @@ var SynapseSchema = schema.Schema{
 					},
 				},
 				"port": schema.Int64Attribute{
-					MarkdownDescription: ``,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
-					Sensitive:           false,
+					MarkdownDescription: `Default: 1433.
+
+Example: 1433.`,
+					Required:  true,
+					Optional:  false,
+					Computed:  false,
+					Sensitive: false,
 				},
 				"username": schema.StringAttribute{
-					MarkdownDescription: ``,
+					MarkdownDescription: `Example: user.`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,

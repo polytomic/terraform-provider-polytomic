@@ -52,8 +52,10 @@ func (d *M3terConnectionDataSource) Schema(ctx context.Context, req datasource.S
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"org_id": schema.StringAttribute{
-						MarkdownDescription: `Organization ID`,
-						Computed:            true,
+						MarkdownDescription: `Organization ID
+
+Example: your-org-id-uuid.`,
+						Computed: true,
 					},
 				},
 				Optional: true,

@@ -52,43 +52,55 @@ func (d *ClickhouseConnectionDataSource) Schema(ctx context.Context, req datasou
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"database": schema.StringAttribute{
-						MarkdownDescription: ``,
+						MarkdownDescription: `Example: default.`,
 						Computed:            true,
 					},
 					"hostname": schema.StringAttribute{
-						MarkdownDescription: ``,
+						MarkdownDescription: `Example: clickhouse.example.com.`,
 						Computed:            true,
 					},
 					"port": schema.Int64Attribute{
-						MarkdownDescription: ``,
+						MarkdownDescription: `Default: 9440.`,
 						Computed:            true,
 					},
 					"skip_verify": schema.BoolAttribute{
-						MarkdownDescription: `Skip certificate verification`,
-						Computed:            true,
+						MarkdownDescription: `Skip certificate verification
+
+Default: true.`,
+						Computed: true,
 					},
 					"ssh": schema.BoolAttribute{
 						MarkdownDescription: `Connect over SSH tunnel`,
 						Computed:            true,
 					},
 					"ssh_host": schema.StringAttribute{
-						MarkdownDescription: `SSH host`,
-						Computed:            true,
+						MarkdownDescription: `SSH host
+
+Example: bastion.example.com.`,
+						Computed: true,
 					},
 					"ssh_port": schema.Int64Attribute{
-						MarkdownDescription: `SSH port`,
-						Computed:            true,
+						MarkdownDescription: `SSH port
+
+Default: 22.
+
+Example: 22.`,
+						Computed: true,
 					},
 					"ssh_user": schema.StringAttribute{
-						MarkdownDescription: `SSH user`,
-						Computed:            true,
+						MarkdownDescription: `SSH user
+
+Default: root.`,
+						Computed: true,
 					},
 					"ssl": schema.BoolAttribute{
-						MarkdownDescription: `Use SSL`,
-						Computed:            true,
+						MarkdownDescription: `Use SSL
+
+Default: true.`,
+						Computed: true,
 					},
 					"username": schema.StringAttribute{
-						MarkdownDescription: ``,
+						MarkdownDescription: `Example: default.`,
 						Computed:            true,
 					},
 				},

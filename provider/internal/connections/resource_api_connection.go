@@ -58,14 +58,14 @@ var ApiSchema = schema.Schema{
 							Sensitive:           false,
 							Attributes: map[string]schema.Attribute{
 								"password": schema.StringAttribute{
-									MarkdownDescription: ``,
+									MarkdownDescription: `Example: secret.`,
 									Required:            false,
 									Optional:            true,
 									Computed:            true,
 									Sensitive:           false,
 								},
 								"username": schema.StringAttribute{
-									MarkdownDescription: ``,
+									MarkdownDescription: `Example: user@example.com.`,
 									Required:            false,
 									Optional:            true,
 									Computed:            true,
@@ -81,7 +81,7 @@ var ApiSchema = schema.Schema{
 							Sensitive:           false,
 							Attributes: map[string]schema.Attribute{
 								"name": schema.StringAttribute{
-									MarkdownDescription: ``,
+									MarkdownDescription: `Example: foo.`,
 									Required:            false,
 									Optional:            true,
 									Computed:            true,
@@ -111,18 +111,22 @@ var ApiSchema = schema.Schema{
 									Sensitive:           false,
 								},
 								"client_id": schema.StringAttribute{
-									MarkdownDescription: `Client ID`,
-									Required:            false,
-									Optional:            true,
-									Computed:            true,
-									Sensitive:           false,
+									MarkdownDescription: `Client ID
+
+Example: client_id.`,
+									Required:  false,
+									Optional:  true,
+									Computed:  true,
+									Sensitive: false,
 								},
 								"client_secret": schema.StringAttribute{
-									MarkdownDescription: `Client secret`,
-									Required:            false,
-									Optional:            true,
-									Computed:            true,
-									Sensitive:           false,
+									MarkdownDescription: `Client secret
+
+Example: client_secret.`,
+									Required:  false,
+									Optional:  true,
+									Computed:  true,
+									Sensitive: false,
 								},
 								"extra_form_data": schema.SetNestedAttribute{
 									MarkdownDescription: `Extra form data`,
@@ -133,7 +137,7 @@ var ApiSchema = schema.Schema{
 									NestedObject: schema.NestedAttributeObject{
 										Attributes: map[string]schema.Attribute{
 											"name": schema.StringAttribute{
-												MarkdownDescription: ``,
+												MarkdownDescription: `Example: foo.`,
 												Required:            false,
 												Optional:            true,
 												Computed:            true,
@@ -159,22 +163,26 @@ var ApiSchema = schema.Schema{
 									ElementType: types.StringType,
 								},
 								"token_endpoint": schema.StringAttribute{
-									MarkdownDescription: `Token endpoint`,
-									Required:            false,
-									Optional:            true,
-									Computed:            true,
-									Sensitive:           false,
+									MarkdownDescription: `Token endpoint
+
+Example: https://example.com/oauth/token.`,
+									Required:  false,
+									Optional:  true,
+									Computed:  true,
+									Sensitive: false,
 								},
 							},
 						},
 					},
 				},
 				"body": schema.StringAttribute{
-					MarkdownDescription: `JSON payload`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
+					MarkdownDescription: `JSON payload
+
+Example: {"key":"value"}.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
 				},
 				"headers": schema.SetNestedAttribute{
 					MarkdownDescription: ``,
@@ -185,7 +193,7 @@ var ApiSchema = schema.Schema{
 					NestedObject: schema.NestedAttributeObject{
 						Attributes: map[string]schema.Attribute{
 							"name": schema.StringAttribute{
-								MarkdownDescription: ``,
+								MarkdownDescription: `Example: foo.`,
 								Required:            false,
 								Optional:            true,
 								Computed:            true,
@@ -204,7 +212,9 @@ var ApiSchema = schema.Schema{
 				"healthcheck": schema.StringAttribute{
 					MarkdownDescription: `Health check endpoint
 
-    Path to request when checking the health of this connection. No health check will be performed if left empty.`,
+    Path to request when checking the health of this connection. No health check will be performed if left empty.
+
+Example: https://example.com/healthz.`,
 					Required:  false,
 					Optional:  true,
 					Computed:  true,
@@ -219,7 +229,7 @@ var ApiSchema = schema.Schema{
 					NestedObject: schema.NestedAttributeObject{
 						Attributes: map[string]schema.Attribute{
 							"name": schema.StringAttribute{
-								MarkdownDescription: ``,
+								MarkdownDescription: `Example: foo.`,
 								Required:            false,
 								Optional:            true,
 								Computed:            true,
@@ -236,11 +246,13 @@ var ApiSchema = schema.Schema{
 					},
 				},
 				"url": schema.StringAttribute{
-					MarkdownDescription: `Base URL`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
-					Sensitive:           false,
+					MarkdownDescription: `Base URL
+
+Example: https://example.com.`,
+					Required:  true,
+					Optional:  false,
+					Computed:  false,
+					Sensitive: false,
 				},
 			},
 

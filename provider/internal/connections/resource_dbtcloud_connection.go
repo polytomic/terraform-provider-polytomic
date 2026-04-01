@@ -54,11 +54,13 @@ var DbtcloudSchema = schema.Schema{
 					},
 				},
 				"url": schema.StringAttribute{
-					MarkdownDescription: `URL of dbt Cloud instance e.g. https://cloud.getdbt.com`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
-					Sensitive:           false,
+					MarkdownDescription: `URL of dbt Cloud instance e.g. https://cloud.getdbt.com
+
+Example: https://cloud.getdbt.com.`,
+					Required:  true,
+					Optional:  false,
+					Computed:  false,
+					Sensitive: false,
 				},
 			},
 

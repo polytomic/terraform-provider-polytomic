@@ -24,6 +24,9 @@ import (
 	"github.com/polytomic/polytomic-go"
 	ptcore "github.com/polytomic/polytomic-go/core"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
+
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -51,11 +54,20 @@ var RedshiftserverlessSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"connection_method": schema.StringAttribute{
-					MarkdownDescription: `Connection method`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
-					Sensitive:           false,
+					MarkdownDescription: `Connection method
+
+Valid values:
+  - "data_api" - Redshift Data API
+  - "endpoint" - Redshift Serverless Endpoint
+
+Example: data_api.`,
+					Required:  true,
+					Optional:  false,
+					Computed:  false,
+					Sensitive: false,
+					Validators: []validator.String{
+						stringvalidator.OneOf("data_api", "endpoint"),
+					},
 				},
 				"data_api_endpoint": schema.StringAttribute{
 					MarkdownDescription: `Redshift Data API endpoint
@@ -67,18 +79,20 @@ var RedshiftserverlessSchema = schema.Schema{
 					Sensitive: false,
 				},
 				"database": schema.StringAttribute{
-					MarkdownDescription: ``,
+					MarkdownDescription: `Example: users.`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
 					Sensitive:           false,
 				},
 				"endpoint": schema.StringAttribute{
-					MarkdownDescription: `Redshift Serverless endpoint`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
+					MarkdownDescription: `Redshift Serverless endpoint
+
+Example: acme.12345.us-west-2.redshift-serverless.amazonaws.com:5439.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
 				},
 				"external_id": schema.StringAttribute{
 					MarkdownDescription: `External ID`,
@@ -88,11 +102,13 @@ var RedshiftserverlessSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"iam_role_arn": schema.StringAttribute{
-					MarkdownDescription: `IAM Role ARN`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
-					Sensitive:           false,
+					MarkdownDescription: `IAM Role ARN
+
+Example: arn:aws:iam::012345678910:role/role.`,
+					Required:  true,
+					Optional:  false,
+					Computed:  false,
+					Sensitive: false,
 				},
 				"override_endpoint": schema.BoolAttribute{
 					MarkdownDescription: `Override Redshift Data API endpoint`,
@@ -102,32 +118,38 @@ var RedshiftserverlessSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"region": schema.StringAttribute{
-					MarkdownDescription: ``,
+					MarkdownDescription: `Example: us-west-2.`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,
 					Sensitive:           false,
 				},
 				"s3_bucket_name": schema.StringAttribute{
-					MarkdownDescription: `S3 bucket name (destination/unload support only)`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
+					MarkdownDescription: `S3 bucket name (destination/unload support only)
+
+Example: my-bucket.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
 				},
 				"s3_bucket_region": schema.StringAttribute{
-					MarkdownDescription: `S3 bucket region (destination/unload support only)`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
+					MarkdownDescription: `S3 bucket region (destination/unload support only)
+
+Example: us-west-2.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
 				},
 				"use_bulk_sync_staging_schema": schema.BoolAttribute{
-					MarkdownDescription: `Use custom bulk sync staging schema`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
+					MarkdownDescription: `Use custom bulk sync staging schema
+
+Default: false.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
 				},
 				"use_unload": schema.BoolAttribute{
 					MarkdownDescription: `Read data using Unload`,
@@ -137,7 +159,7 @@ var RedshiftserverlessSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"workgroup": schema.StringAttribute{
-					MarkdownDescription: ``,
+					MarkdownDescription: `Example: default.`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,

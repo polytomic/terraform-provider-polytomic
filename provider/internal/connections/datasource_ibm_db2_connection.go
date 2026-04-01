@@ -52,20 +52,24 @@ func (d *Ibm_db2ConnectionDataSource) Schema(ctx context.Context, req datasource
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"account": schema.StringAttribute{
-						MarkdownDescription: `Username`,
-						Computed:            true,
+						MarkdownDescription: `Username
+
+Example: db2admin.`,
+						Computed: true,
 					},
 					"database": schema.StringAttribute{
-						MarkdownDescription: ``,
+						MarkdownDescription: `Example: SAMPLE.`,
 						Computed:            true,
 					},
 					"hostname": schema.StringAttribute{
-						MarkdownDescription: ``,
+						MarkdownDescription: `Example: db2.example.com.`,
 						Computed:            true,
 					},
 					"ssl": schema.BoolAttribute{
-						MarkdownDescription: `Use SSL`,
-						Computed:            true,
+						MarkdownDescription: `Use SSL
+
+Default: true.`,
+						Computed: true,
 					},
 				},
 				Optional: true,

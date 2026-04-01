@@ -27,11 +27,11 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
-var _ resource.Resource = &DataliteConnectionResource{}
-var _ resource.ResourceWithImportState = &DataliteConnectionResource{}
+var _ resource.Resource = &Construct_connectConnectionResource{}
+var _ resource.ResourceWithImportState = &Construct_connectConnectionResource{}
 
-var DataliteSchema = schema.Schema{
-	MarkdownDescription: ":meta:subcategory:Connections: Polytomic Connection",
+var Construct_connectSchema = schema.Schema{
+	MarkdownDescription: ":meta:subcategory:Connections: Construct Connect Connection",
 	Attributes: map[string]schema.Attribute{
 		"organization": schema.StringAttribute{
 			MarkdownDescription: "Organization ID",
@@ -43,50 +43,14 @@ var DataliteSchema = schema.Schema{
 		},
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
-				"schemas": schema.SetNestedAttribute{
-					MarkdownDescription: ``,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
-					NestedObject: schema.NestedAttributeObject{
-						Attributes: map[string]schema.Attribute{
-							"alias": schema.StringAttribute{
-								MarkdownDescription: ``,
-								Required:            false,
-								Optional:            true,
-								Computed:            true,
-								Sensitive:           false,
-							},
-							"connection_id": schema.StringAttribute{
-								MarkdownDescription: ``,
-								Required:            false,
-								Optional:            true,
-								Computed:            true,
-								Sensitive:           false,
-							},
-							"connection_name": schema.StringAttribute{
-								MarkdownDescription: ``,
-								Required:            false,
-								Optional:            true,
-								Computed:            true,
-								Sensitive:           false,
-							},
-							"connection_type": schema.StringAttribute{
-								MarkdownDescription: ``,
-								Required:            false,
-								Optional:            true,
-								Computed:            true,
-								Sensitive:           false,
-							},
-							"schema_id": schema.StringAttribute{
-								MarkdownDescription: ``,
-								Required:            false,
-								Optional:            true,
-								Computed:            true,
-								Sensitive:           false,
-							},
-						},
+				"api_key": schema.StringAttribute{
+					MarkdownDescription: `API Key`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
 					},
 				},
 			},
@@ -103,7 +67,7 @@ var DataliteSchema = schema.Schema{
 		},
 		"id": schema.StringAttribute{
 			Computed:            true,
-			MarkdownDescription: "Polytomic Connection identifier",
+			MarkdownDescription: "Construct Connect Connection identifier",
 			PlanModifiers: []planmodifier.String{
 				stringplanmodifier.UseStateForUnknown(),
 			},
@@ -111,35 +75,29 @@ var DataliteSchema = schema.Schema{
 	},
 }
 
-func (t *DataliteConnectionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = DataliteSchema
+func (t *Construct_connectConnectionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = Construct_connectSchema
 }
 
-type DataliteConf struct {
-	Schemas []struct {
-		Alias           string `mapstructure:"alias" tfsdk:"alias"`
-		Connection_id   string `mapstructure:"connection_id" tfsdk:"connection_id"`
-		Connection_name string `mapstructure:"connection_name" tfsdk:"connection_name"`
-		Connection_type string `mapstructure:"connection_type" tfsdk:"connection_type"`
-		Schema_id       string `mapstructure:"schema_id" tfsdk:"schema_id"`
-	} `mapstructure:"schemas" tfsdk:"schemas"`
+type Construct_connectConf struct {
+	Api_key string `mapstructure:"api_key" tfsdk:"api_key"`
 }
 
-type DataliteConnectionResource struct {
+type Construct_connectConnectionResource struct {
 	provider *providerclient.Provider
 }
 
-func (r *DataliteConnectionResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *Construct_connectConnectionResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if provider := providerclient.GetProvider(req.ProviderData, resp.Diagnostics); provider != nil {
 		r.provider = provider
 	}
 }
 
-func (r *DataliteConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_datalite_connection"
+func (r *Construct_connectConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_construct_connect_connection"
 }
 
-func (r *DataliteConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *Construct_connectConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data connectionData
 
 	diags := req.Config.Get(ctx, &data)
@@ -154,14 +112,14 @@ func (r *DataliteConnectionResource) Create(ctx context.Context, req resource.Cr
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
-	connConf, err := objectMapValue(ctx, data.Configuration, getOptionalFields(DataliteSchema))
+	connConf, err := objectMapValue(ctx, data.Configuration, getOptionalFields(Construct_connectSchema))
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
-		Type:           "datalite",
+		Type:           "construct_connect",
 		OrganizationId: data.Organization.ValueStringPointer(),
 		Configuration:  connConf,
 		Validate:       pointer.ToBool(false),
@@ -174,37 +132,27 @@ func (r *DataliteConnectionResource) Create(ctx context.Context, req resource.Cr
 	data.Name = types.StringPointerValue(created.Data.Name)
 	data.Organization = types.StringPointerValue(created.Data.OrganizationId)
 
-	conf := DataliteConf{}
+	conf := Construct_connectConf{}
 	err = mapstructure.Decode(created.Data.Configuration, &conf)
 	if err != nil {
 		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error decoding connection configuration: %s", err))
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"schemas": types.SetType{
-			ElemType: types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					"alias":           types.StringType,
-					"connection_id":   types.StringType,
-					"connection_name": types.StringType,
-					"connection_type": types.StringType,
-					"schema_id":       types.StringType,
-				},
-			},
-		},
+		"api_key": types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Datalite", "id": created.Data.Id})
+	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Construct_connect", "id": created.Data.Id})
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r *DataliteConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *Construct_connectConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data connectionData
 
 	diags := req.State.Get(ctx, &data)
@@ -239,7 +187,7 @@ func (r *DataliteConnectionResource) Read(ctx context.Context, req resource.Read
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
 
-	configAttributes, ok := getConfigAttributes(DataliteSchema)
+	configAttributes, ok := getConfigAttributes(Construct_connectSchema)
 	if !ok {
 		resp.Diagnostics.AddError("Error getting connection configuration attributes", "Could not get configuration attributes")
 		return
@@ -254,24 +202,14 @@ func (r *DataliteConnectionResource) Read(ctx context.Context, req resource.Read
 	// reset sensitive values so terraform doesn't think we have changes
 	connection.Data.Configuration = resetSensitiveValues(configAttributes, originalConfData, connection.Data.Configuration)
 
-	conf := DataliteConf{}
+	conf := Construct_connectConf{}
 	err = mapstructure.Decode(connection.Data.Configuration, &conf)
 	if err != nil {
 		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error decoding connection configuration: %s", err))
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"schemas": types.SetType{
-			ElemType: types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					"alias":           types.StringType,
-					"connection_id":   types.StringType,
-					"connection_name": types.StringType,
-					"connection_type": types.StringType,
-					"schema_id":       types.StringType,
-				},
-			},
-		},
+		"api_key": types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -282,7 +220,7 @@ func (r *DataliteConnectionResource) Read(ctx context.Context, req resource.Read
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r *DataliteConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *Construct_connectConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var data connectionData
 
 	diags := req.Plan.Get(ctx, &data)
@@ -297,13 +235,13 @@ func (r *DataliteConnectionResource) Update(ctx context.Context, req resource.Up
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
-	connConf, err := objectMapValue(ctx, data.Configuration, getOptionalFields(DataliteSchema))
+	connConf, err := objectMapValue(ctx, data.Configuration, getOptionalFields(Construct_connectSchema))
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
 
-	configAttributes, ok := getConfigAttributes(DataliteSchema)
+	configAttributes, ok := getConfigAttributes(Construct_connectSchema)
 	if !ok {
 		resp.Diagnostics.AddError("Error getting connection configuration attributes", "Could not get configuration attributes")
 		return
@@ -333,24 +271,14 @@ func (r *DataliteConnectionResource) Update(ctx context.Context, req resource.Up
 	data.Name = types.StringPointerValue(updated.Data.Name)
 	data.Organization = types.StringPointerValue(updated.Data.OrganizationId)
 
-	conf := DataliteConf{}
+	conf := Construct_connectConf{}
 	err = mapstructure.Decode(updated.Data.Configuration, &conf)
 	if err != nil {
 		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error decoding connection configuration: %s", err))
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"schemas": types.SetType{
-			ElemType: types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					"alias":           types.StringType,
-					"connection_id":   types.StringType,
-					"connection_name": types.StringType,
-					"connection_type": types.StringType,
-					"schema_id":       types.StringType,
-				},
-			},
-		},
+		"api_key": types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -360,7 +288,7 @@ func (r *DataliteConnectionResource) Update(ctx context.Context, req resource.Up
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r *DataliteConnectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *Construct_connectConnectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var data connectionData
 
 	diags := req.State.Get(ctx, &data)
@@ -423,6 +351,6 @@ func (r *DataliteConnectionResource) Delete(ctx context.Context, req resource.De
 	}
 }
 
-func (r *DataliteConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *Construct_connectConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

@@ -44,21 +44,23 @@ var Ibm_db2Schema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"account": schema.StringAttribute{
-					MarkdownDescription: `Username`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
-					Sensitive:           false,
+					MarkdownDescription: `Username
+
+Example: db2admin.`,
+					Required:  true,
+					Optional:  false,
+					Computed:  false,
+					Sensitive: false,
 				},
 				"database": schema.StringAttribute{
-					MarkdownDescription: ``,
+					MarkdownDescription: `Example: SAMPLE.`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
 					Sensitive:           false,
 				},
 				"hostname": schema.StringAttribute{
-					MarkdownDescription: ``,
+					MarkdownDescription: `Example: db2.example.com.`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
@@ -75,11 +77,13 @@ var Ibm_db2Schema = schema.Schema{
 					},
 				},
 				"ssl": schema.BoolAttribute{
-					MarkdownDescription: `Use SSL`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
+					MarkdownDescription: `Use SSL
+
+Default: true.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
 				},
 			},
 

@@ -52,43 +52,59 @@ func (d *MssqlConnectionDataSource) Schema(ctx context.Context, req datasource.S
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"change_detection": schema.BoolAttribute{
-						MarkdownDescription: `Use change data capture for bulk syncs`,
-						Computed:            true,
+						MarkdownDescription: `Use change data capture for bulk syncs
+
+Default: false.`,
+						Computed: true,
 					},
 					"database": schema.StringAttribute{
-						MarkdownDescription: ``,
+						MarkdownDescription: `Example: sampledb.`,
 						Computed:            true,
 					},
 					"hostname": schema.StringAttribute{
-						MarkdownDescription: `Server`,
-						Computed:            true,
+						MarkdownDescription: `Server
+
+Example: example.database.windows.net.`,
+						Computed: true,
 					},
 					"port": schema.Int64Attribute{
-						MarkdownDescription: ``,
-						Computed:            true,
+						MarkdownDescription: `Default: 1433.
+
+Example: 1433.`,
+						Computed: true,
 					},
 					"ssh": schema.BoolAttribute{
 						MarkdownDescription: `Connect over SSH tunnel`,
 						Computed:            true,
 					},
 					"ssh_host": schema.StringAttribute{
-						MarkdownDescription: `SSH host`,
-						Computed:            true,
+						MarkdownDescription: `SSH host
+
+Example: bastion.example.com.`,
+						Computed: true,
 					},
 					"ssh_port": schema.Int64Attribute{
-						MarkdownDescription: `SSH port`,
-						Computed:            true,
+						MarkdownDescription: `SSH port
+
+Default: 22.
+
+Example: 22.`,
+						Computed: true,
 					},
 					"ssh_user": schema.StringAttribute{
-						MarkdownDescription: `SSH user`,
-						Computed:            true,
+						MarkdownDescription: `SSH user
+
+Default: root.`,
+						Computed: true,
 					},
 					"ssl": schema.BoolAttribute{
-						MarkdownDescription: `Use SSL`,
-						Computed:            true,
+						MarkdownDescription: `Use SSL
+
+Default: true.`,
+						Computed: true,
 					},
 					"username": schema.StringAttribute{
-						MarkdownDescription: ``,
+						MarkdownDescription: `Example: user.`,
 						Computed:            true,
 					},
 				},

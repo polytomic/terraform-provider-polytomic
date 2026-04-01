@@ -52,51 +52,69 @@ func (d *AzuresqlConnectionDataSource) Schema(ctx context.Context, req datasourc
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"account_name": schema.StringAttribute{
-						MarkdownDescription: `Storage account name (destination only)`,
-						Computed:            true,
+						MarkdownDescription: `Storage account name (destination only)
+
+Example: account.`,
+						Computed: true,
 					},
 					"blob_store": schema.BoolAttribute{
 						MarkdownDescription: `Use Azure blob storage for faster bulk loading (destination only)`,
 						Computed:            true,
 					},
 					"container_name": schema.StringAttribute{
-						MarkdownDescription: `Storage container name (destination only)`,
-						Computed:            true,
+						MarkdownDescription: `Storage container name (destination only)
+
+Example: container.`,
+						Computed: true,
 					},
 					"database": schema.StringAttribute{
-						MarkdownDescription: ``,
+						MarkdownDescription: `Example: sampledb.`,
 						Computed:            true,
 					},
 					"hostname": schema.StringAttribute{
-						MarkdownDescription: `Server`,
-						Computed:            true,
+						MarkdownDescription: `Server
+
+Example: example.database.windows.net.`,
+						Computed: true,
 					},
 					"port": schema.Int64Attribute{
-						MarkdownDescription: ``,
-						Computed:            true,
+						MarkdownDescription: `Default: 1433.
+
+Example: 1433.`,
+						Computed: true,
 					},
 					"ssh": schema.BoolAttribute{
 						MarkdownDescription: `Connect over SSH tunnel`,
 						Computed:            true,
 					},
 					"ssh_host": schema.StringAttribute{
-						MarkdownDescription: `SSH host`,
-						Computed:            true,
+						MarkdownDescription: `SSH host
+
+Example: bastion.example.com.`,
+						Computed: true,
 					},
 					"ssh_port": schema.Int64Attribute{
-						MarkdownDescription: `SSH port`,
-						Computed:            true,
+						MarkdownDescription: `SSH port
+
+Default: 22.
+
+Example: 22.`,
+						Computed: true,
 					},
 					"ssh_user": schema.StringAttribute{
-						MarkdownDescription: `SSH user`,
-						Computed:            true,
+						MarkdownDescription: `SSH user
+
+Default: root.`,
+						Computed: true,
 					},
 					"ssl": schema.BoolAttribute{
-						MarkdownDescription: `Use SSL`,
-						Computed:            true,
+						MarkdownDescription: `Use SSL
+
+Default: true.`,
+						Computed: true,
 					},
 					"username": schema.StringAttribute{
-						MarkdownDescription: ``,
+						MarkdownDescription: `Example: user.`,
 						Computed:            true,
 					},
 				},

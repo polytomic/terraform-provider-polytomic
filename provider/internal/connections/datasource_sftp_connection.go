@@ -52,8 +52,16 @@ func (d *SftpConnectionDataSource) Schema(ctx context.Context, req datasource.Sc
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"auth_mode": schema.StringAttribute{
-						MarkdownDescription: `Authentication Method`,
-						Computed:            true,
+						MarkdownDescription: `Authentication Method
+
+Valid values:
+  - "private_key" - Private key
+  - "password" - Password
+
+Default: private_key.
+
+Example: private_key.`,
+						Computed: true,
 					},
 					"is_single_table": schema.BoolAttribute{
 						MarkdownDescription: `Files are time-based snapshots
@@ -62,8 +70,10 @@ func (d *SftpConnectionDataSource) Schema(ctx context.Context, req datasource.Sc
 						Computed: true,
 					},
 					"path": schema.StringAttribute{
-						MarkdownDescription: `The path to the directory on the SFTP server containing the files.`,
-						Computed:            true,
+						MarkdownDescription: `The path to the directory on the SFTP server containing the files.
+
+Example: /path/to/files.`,
+						Computed: true,
 					},
 					"single_table_name": schema.StringAttribute{
 						MarkdownDescription: `Collection name`,
@@ -72,20 +82,30 @@ func (d *SftpConnectionDataSource) Schema(ctx context.Context, req datasource.Sc
 					"skip_lines": schema.Int64Attribute{
 						MarkdownDescription: `Skip first lines
 
-    Skip first N lines of each CSV file.`,
+    Skip first N lines of each CSV file.
+
+Default: 0.`,
 						Computed: true,
 					},
 					"ssh_host": schema.StringAttribute{
-						MarkdownDescription: `Host`,
-						Computed:            true,
+						MarkdownDescription: `Host
+
+Example: sftp.example.net.`,
+						Computed: true,
 					},
 					"ssh_port": schema.Int64Attribute{
-						MarkdownDescription: `Port`,
-						Computed:            true,
+						MarkdownDescription: `Port
+
+Default: 22.
+
+Example: 22.`,
+						Computed: true,
 					},
 					"ssh_user": schema.StringAttribute{
-						MarkdownDescription: `User`,
-						Computed:            true,
+						MarkdownDescription: `User
+
+Example: user.`,
+						Computed: true,
 					},
 				},
 				Optional: true,
