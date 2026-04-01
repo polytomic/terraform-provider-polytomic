@@ -87,6 +87,73 @@ func unmarshalJSONSchema(input map[string]interface{}) (*jsonschema.Schema, erro
 		}
 	}
 
+	// Unmarshal conditional/composition keywords so that dependentSchemas,
+	// oneOf, allOf, if/then/else are available for dependency extraction.
+	if rawDepSchemas, ok := input["dependentSchemas"].(map[string]interface{}); ok {
+		a.DependentSchemas = make(map[string]*jsonschema.Schema, len(rawDepSchemas))
+		for k, v := range rawDepSchemas {
+			if m, ok := v.(map[string]interface{}); ok {
+				s, err := unmarshalJSONSchema(m)
+				if err != nil {
+					return nil, fmt.Errorf("error decoding dependentSchemas[%s]: %w", k, err)
+				}
+				a.DependentSchemas[k] = s
+			}
+		}
+	}
+	if rawOneOf, ok := input["oneOf"].([]interface{}); ok {
+		a.OneOf = make([]*jsonschema.Schema, 0, len(rawOneOf))
+		for i, v := range rawOneOf {
+			if m, ok := v.(map[string]interface{}); ok {
+				s, err := unmarshalJSONSchema(m)
+				if err != nil {
+					return nil, fmt.Errorf("error decoding oneOf[%d]: %w", i, err)
+				}
+				a.OneOf = append(a.OneOf, s)
+			}
+		}
+	}
+	if rawAllOf, ok := input["allOf"].([]interface{}); ok {
+		a.AllOf = make([]*jsonschema.Schema, 0, len(rawAllOf))
+		for i, v := range rawAllOf {
+			if m, ok := v.(map[string]interface{}); ok {
+				s, err := unmarshalJSONSchema(m)
+				if err != nil {
+					return nil, fmt.Errorf("error decoding allOf[%d]: %w", i, err)
+				}
+				a.AllOf = append(a.AllOf, s)
+			}
+		}
+	}
+	if rawIf, ok := input["if"].(map[string]interface{}); ok {
+		a.If, err = unmarshalJSONSchema(rawIf)
+		if err != nil {
+			return nil, fmt.Errorf("error decoding if: %w", err)
+		}
+	}
+	if rawThen, ok := input["then"].(map[string]interface{}); ok {
+		a.Then, err = unmarshalJSONSchema(rawThen)
+		if err != nil {
+			return nil, fmt.Errorf("error decoding then: %w", err)
+		}
+	}
+	if rawElse, ok := input["else"].(map[string]interface{}); ok {
+		a.Else, err = unmarshalJSONSchema(rawElse)
+		if err != nil {
+			return nil, fmt.Errorf("error decoding else: %w", err)
+		}
+	}
+	if rawContains, ok := input["contains"].(map[string]interface{}); ok {
+		a.Contains, err = unmarshalJSONSchema(rawContains)
+		if err != nil {
+			return nil, fmt.Errorf("error decoding contains: %w", err)
+		}
+	}
+	// Preserve const value if present (mapstructure may skip it).
+	if rawConst, ok := input["const"]; ok {
+		a.Const = rawConst
+	}
+
 	return &a, nil
 }
 

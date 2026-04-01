@@ -180,6 +180,17 @@ type Connection struct {
 	Imports      string          `yaml:"-"`
 }
 
+// AttrCondition describes when an attribute is applicable, based on
+// the value of another field in the same configuration block.
+type AttrCondition struct {
+	// Field is the name of the field this condition depends on.
+	Field string
+	// Value is the value that Field must have. Nil means "any value" (presence check).
+	Value interface{}
+	// Required indicates the attribute is required (not just visible) under this condition.
+	Required bool
+}
+
 type Attribute struct {
 	Name                string `yaml:"name"`
 	CapName             string `yaml:"-"`
@@ -200,6 +211,7 @@ type Attribute struct {
 	Default      DefaultValue `yaml:"-"`
 	EnumValues   []string     `yaml:"-"` // valid values for string enums
 	EnumLabels   []string     `yaml:"-"` // human-readable labels for enum values (parallel to EnumValues)
+	Conditions   []AttrCondition `yaml:"-"` // conditions under which this attribute applies
 	Attributes   []Attribute
 	Elem         *Attribute
 }
@@ -486,14 +498,212 @@ func getPTClient() *ptclient.Client {
 
 func attributesForJSONSchema(connSchema *jsonschema.Schema) ([]Attribute, error) {
 	attrs := []Attribute{}
+	// Track which attribute names we've already seen (by index) so
+	// dependentSchemas doesn't introduce duplicates and conditions merge.
+	seen := map[string]int{}
 	for pair := connSchema.Properties.Oldest(); pair != nil; pair = pair.Next() {
 		attr, err := tfAttr(pair.Key, pair.Value, connSchema.Required)
 		if err != nil {
 			return attrs, err
 		}
-
+		seen[pair.Key] = len(attrs)
 		attrs = append(attrs, attr)
 	}
+
+	// Extract conditional attributes from dependentSchemas.
+	// The same attribute may appear under multiple conditions (e.g., a field
+	// shown for two different enum values), so we merge conditions.
+	depAttrs, err := attributesFromDependentSchemas(connSchema)
+	if err != nil {
+		return attrs, err
+	}
+	for _, attr := range depAttrs {
+		if idx, ok := seen[attr.Name]; ok {
+			// Merge conditions into the existing attribute.
+			attrs[idx].Conditions = append(attrs[idx].Conditions, attr.Conditions...)
+		} else {
+			seen[attr.Name] = len(attrs)
+			attrs = append(attrs, attr)
+		}
+	}
+
+	// Annotate descriptions with condition info now that all conditions
+	// have been merged.
+	for i := range attrs {
+		annotateConditionDescription(&attrs[i])
+	}
+
+	return attrs, nil
+}
+
+// annotateConditionDescription appends a human-readable note to the attribute
+// description when the attribute has conditions attached.
+func annotateConditionDescription(attr *Attribute) {
+	if len(attr.Conditions) == 0 {
+		return
+	}
+	// Group conditions by field for cleaner output.
+	byField := map[string][]AttrCondition{}
+	var fieldOrder []string
+	for _, c := range attr.Conditions {
+		if _, ok := byField[c.Field]; !ok {
+			fieldOrder = append(fieldOrder, c.Field)
+		}
+		byField[c.Field] = append(byField[c.Field], c)
+	}
+
+	var parts []string
+	for _, field := range fieldOrder {
+		conds := byField[field]
+		values := []string{}
+		for _, c := range conds {
+			if c.Value != nil {
+				values = append(values, fmt.Sprintf("%q", c.Value))
+			}
+		}
+		if len(values) == 0 {
+			parts = append(parts, fmt.Sprintf("%q has a value", field))
+		} else if len(values) == 1 {
+			parts = append(parts, fmt.Sprintf("%q is %s", field, values[0]))
+		} else {
+			parts = append(parts, fmt.Sprintf("%q is one of %s", field, strings.Join(values, ", ")))
+		}
+	}
+
+	attr.Description += fmt.Sprintf("\n\nOnly applicable when %s.", strings.Join(parts, " and "))
+	attr.Description = strings.TrimSpace(attr.Description)
+}
+
+// attributesFromDependentSchemas extracts attributes that are conditionally
+// visible based on another field's value. The dependentSchemas map keys are
+// the "trigger" field names; values use oneOf, if/then, or allOf to describe
+// which attributes appear under which conditions.
+func attributesFromDependentSchemas(connSchema *jsonschema.Schema) ([]Attribute, error) {
+	if len(connSchema.DependentSchemas) == 0 {
+		return nil, nil
+	}
+	var attrs []Attribute
+	for triggerField, depSchema := range connSchema.DependentSchemas {
+		extracted, err := extractConditionalAttrs(triggerField, depSchema)
+		if err != nil {
+			return nil, fmt.Errorf("dependentSchemas[%s]: %w", triggerField, err)
+		}
+		attrs = append(attrs, extracted...)
+	}
+	return attrs, nil
+}
+
+// extractConditionalAttrs handles oneOf, if/then, and allOf structures within
+// a single dependentSchemas entry for a given trigger field.
+func extractConditionalAttrs(triggerField string, schema *jsonschema.Schema) ([]Attribute, error) {
+	var attrs []Attribute
+
+	// oneOf: each entry has properties with the trigger field enum value
+	// plus the dependent fields.
+	if len(schema.OneOf) > 0 {
+		for _, branch := range schema.OneOf {
+			if branch.Properties == nil {
+				continue
+			}
+			// Determine the condition value from the trigger field property.
+			var condValue interface{}
+			if triggerProp, ok := branch.Properties.Get(triggerField); ok {
+				if len(triggerProp.Enum) == 1 {
+					condValue = triggerProp.Enum[0]
+				}
+			}
+			for pair := branch.Properties.Oldest(); pair != nil; pair = pair.Next() {
+				if pair.Key == triggerField {
+					continue
+				}
+				attr, err := tfAttr(pair.Key, pair.Value, branch.Required)
+				if err != nil {
+					return nil, err
+				}
+				attr.Conditions = append(attr.Conditions, AttrCondition{
+					Field:    triggerField,
+					Value:    condValue,
+					Required: slices.Contains(branch.Required, pair.Key),
+				})
+				// Conditional fields are always optional/computed in Terraform.
+				attr.Required = false
+				attr.Optional = true
+				attr.Computed = true
+				attrs = append(attrs, attr)
+			}
+		}
+	}
+
+	// if/then: condition on trigger field, then-clause has dependent fields.
+	if schema.If != nil && schema.Then != nil {
+		condAttrs, err := extractIfThenAttrs(triggerField, schema.If, schema.Then)
+		if err != nil {
+			return nil, err
+		}
+		attrs = append(attrs, condAttrs...)
+	}
+
+	// allOf: multiple independent if/then conditions.
+	for _, entry := range schema.AllOf {
+		if entry.If != nil && entry.Then != nil {
+			condAttrs, err := extractIfThenAttrs(triggerField, entry.If, entry.Then)
+			if err != nil {
+				return nil, err
+			}
+			attrs = append(attrs, condAttrs...)
+		}
+	}
+
+	return attrs, nil
+}
+
+// extractIfThenAttrs handles a single if/then pair, extracting the condition
+// value from the if-clause and the dependent fields from the then-clause.
+func extractIfThenAttrs(triggerField string, ifSchema, thenSchema *jsonschema.Schema) ([]Attribute, error) {
+	var attrs []Attribute
+
+	// Determine condition: could be const-based or contains-based.
+	var condValue interface{}
+	if ifSchema.Properties != nil {
+		if triggerProp, ok := ifSchema.Properties.Get(triggerField); ok {
+			if triggerProp.Const != nil {
+				condValue = triggerProp.Const
+			} else if triggerProp.Contains != nil && triggerProp.Contains.Const != nil {
+				condValue = triggerProp.Contains.Const
+			}
+		}
+	}
+
+	if thenSchema.Properties != nil {
+		for pair := thenSchema.Properties.Oldest(); pair != nil; pair = pair.Next() {
+			if pair.Key == triggerField {
+				continue
+			}
+			attr, err := tfAttr(pair.Key, pair.Value, thenSchema.Required)
+			if err != nil {
+				return nil, err
+			}
+			attr.Conditions = append(attr.Conditions, AttrCondition{
+				Field:    triggerField,
+				Value:    condValue,
+				Required: slices.Contains(thenSchema.Required, pair.Key),
+			})
+			attr.Required = false
+			attr.Optional = true
+			attr.Computed = true
+			attrs = append(attrs, attr)
+		}
+	}
+
+	// Handle nested if/then within then-clause (multi-condition AND).
+	if thenSchema.If != nil && thenSchema.Then != nil {
+		nested, err := extractIfThenAttrs(triggerField, thenSchema.If, thenSchema.Then)
+		if err != nil {
+			return nil, err
+		}
+		attrs = append(attrs, nested...)
+	}
+
 	return attrs, nil
 }
 
