@@ -198,6 +198,7 @@ type Attribute struct {
 	AttrReadType string       `yaml:"-"`
 	AttrName     string       `yaml:"-"`
 	Default      DefaultValue `yaml:"-"`
+	EnumValues   []string     `yaml:"-"` // valid values for string enums
 	Attributes   []Attribute
 	Elem         *Attribute
 }
@@ -333,6 +334,10 @@ func GenerateConnections(ctx context.Context) error {
 			if a.Default.Import != "" {
 				r.ExtraImports[a.Default.Import] = true
 			}
+			if len(a.EnumValues) > 0 {
+				r.ExtraImports["github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"] = true
+				r.ExtraImports["github.com/hashicorp/terraform-plugin-framework/schema/validator"] = true
+			}
 		}
 		r.Attributes = append(r.Attributes, attrs...)
 		r.Resource = len(r.Attributes) > 0
@@ -383,6 +388,71 @@ func GenerateConnections(ctx context.Context) error {
 		return err
 	}
 
+	// Build the set of connection IDs that were generated so we can
+	// remove orphaned artifacts from previous runs.
+	generated := make(map[string]bool, len(data))
+	for _, ct := range data {
+		if !blocklist[ct.ID] {
+			generated[ct.ID] = true
+		}
+	}
+	if err := cleanupOrphanedConnections(generated); err != nil {
+		return fmt.Errorf("error cleaning up orphaned connections: %w", err)
+	}
+
+	return nil
+}
+
+// cleanupOrphanedConnections removes generated files for connection types
+// that no longer exist in the API response.
+func cleanupOrphanedConnections(generated map[string]bool) error {
+	// Each entry maps a directory to a pattern that extracts the connection ID
+	// from the filename. We only touch files that match the connection naming
+	// convention so hand-written files are never deleted.
+	type cleanupTarget struct {
+		dir    string
+		prefix string // filename prefix before the connection ID
+		suffix string // filename suffix after the connection ID
+		isDir  bool   // true if the artifact is a directory, not a file
+	}
+
+	targets := []cleanupTarget{
+		{dir: outputPath, prefix: "resource_", suffix: "_connection.go"},
+		{dir: outputPath, prefix: "datasource_", suffix: "_connection.go"},
+		{dir: docTemplateOutputPath, prefix: "", suffix: "_connection.md.tmpl"},
+		{dir: jsonschemaPath, prefix: "", suffix: ".json"},
+		{dir: exampleResourceOutputPath, prefix: "polytomic_", suffix: "_connection", isDir: true},
+		{dir: exampleDatasourceOutputPath, prefix: "polytomic_", suffix: "_connection", isDir: true},
+	}
+
+	for _, t := range targets {
+		entries, err := os.ReadDir(t.dir)
+		if err != nil {
+			if os.IsNotExist(err) {
+				continue
+			}
+			return err
+		}
+		for _, e := range entries {
+			name := e.Name()
+			if !strings.HasPrefix(name, t.prefix) || !strings.HasSuffix(name, t.suffix) {
+				continue
+			}
+			connID := strings.TrimPrefix(name, t.prefix)
+			connID = strings.TrimSuffix(connID, t.suffix)
+			if connID == "" {
+				continue
+			}
+			if generated[connID] {
+				continue
+			}
+			path := filepath.Join(t.dir, name)
+			log.Printf("Removing orphaned artifact: %s", path)
+			if err := os.RemoveAll(path); err != nil {
+				return fmt.Errorf("error removing %s: %w", path, err)
+			}
+		}
+	}
 	return nil
 }
 
@@ -487,6 +557,19 @@ func tfAttr(k string, a *jsonschema.Schema, required []string) (Attribute, error
 			attr.Attributes = sa
 		}
 	}
+	// Extract enum values. The API returns enums as either plain strings
+	// or objects with "value"/"label" keys.
+	for _, e := range a.Enum {
+		switch v := e.(type) {
+		case string:
+			attr.EnumValues = append(attr.EnumValues, v)
+		case map[string]interface{}:
+			if val, ok := v["value"].(string); ok {
+				attr.EnumValues = append(attr.EnumValues, val)
+			}
+		}
+	}
+
 	attr.Required = slices.Contains(required, k)
 	attr.Optional = !attr.Required
 	attr.Computed = a.ReadOnly || attr.Optional

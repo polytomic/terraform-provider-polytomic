@@ -23,6 +23,11 @@ var _ resource.ResourceWithImportState = &{{ .Connection }}ConnectionResource{}
 			{{ .TfType | lower }}planmodifier.UseStateForUnknown(),
     	},
 		{{ end -}}
+		{{ if .EnumValues -}}
+		Validators: []validator.String{
+			stringvalidator.OneOf({{ range $i, $v := .EnumValues }}{{ if $i }}, {{ end }}"{{ $v }}"{{ end }}),
+		},
+		{{ end -}}
 		{{ if eq .AttrType "schema.MapAttribute" -}}
 		ElementType: types.StringType,
 		{{ end -}}
