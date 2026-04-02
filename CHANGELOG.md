@@ -1,3 +1,17 @@
+## 1.3.9 (2 April 2026)
+
+- Added support for new connection types:
+  - Amazon Selling Partner
+  - Construct Connect
+  - Dub
+  - Greenhouse
+  - Hyperline
+  - Juro
+  - Pinterest Ads
+  - Testrail
+  - Walmart Marketplace
+- Configuration errors could be masked and mis-reported due to HTTP retries.
+
 ## 1.3.8 (25 Mar 2026)
 
 - Fixed bulk sync filter values to accept any JSON type (strings, arrays, objects) via `jsonencode()`.
