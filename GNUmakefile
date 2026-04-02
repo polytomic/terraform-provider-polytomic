@@ -12,7 +12,7 @@ testacc:
 
 .PHONY: generate-local
 generate-local:
-	POLYTOMIC_DEPLOYMENT_URL=$(POLYTOMIC_DEPLOYMENT_URL) go generate ./...
+	POLYTOMIC_DEPLOYMENT_URL=$(POLYTOMIC_DEPLOYMENT_URL) go generate main.go
 
 .PHONY: dev
 dev:
