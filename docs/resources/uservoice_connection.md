@@ -58,3 +58,5 @@ Required:
 
 - `api_key` (String, Sensitive) API key
 - `domain` (String) Subdomain
+
+Example: polytomic.

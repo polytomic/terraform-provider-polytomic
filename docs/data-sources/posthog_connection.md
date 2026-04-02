@@ -37,7 +37,13 @@ data "polytomic_posthog_connection" "posthog" {
 Read-Only:
 
 - `authenticated_as` (String) Connected as
-- `location` (String)
+- `location` (String) Valid values:
+  - "us" - US
+  - "eu" - EU
+
+Default: us.
+
+Example: us.
 - `project` (String)
 
 

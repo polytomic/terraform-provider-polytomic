@@ -56,16 +56,33 @@ state before it will take effect on a destroy operation.
 
 Required:
 
+- `auth_method` (String) Authentication method
+
+Valid values:
+  - "service_account_key" - Service Account Key
+  - "workload_identity_federation" - Workload Identity Federation
+
+Default: service_account_key.
 - `bucket` (String) Google Cloud Storage bucket
-- `service_account` (String, Sensitive) Service account key
+
+Example: my-bucket.
 
 Optional:
 
 - `client_email` (String) Service account identity
+- `credential_config` (String, Sensitive) Credential configuration
+
+    Credential configuration JSON file downloaded from Google Cloud
 - `location` (String) Region or multi-region for query operations
+
+Example: us-east1.
 - `override_project_id` (String) Override project ID
 
     Override service key's project ID for cross-account access
 - `project_id` (String) Service account project ID
+- `service_account` (String, Sensitive) Service account key
 - `structured_values_as_json` (Boolean) Write object and array values as JSON
+
+Default: false.
 - `use_extract` (Boolean) Use Extract for bulk sync from BigQuery
+- `wif_project_id` (String) Google Cloud project ID

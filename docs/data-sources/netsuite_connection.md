@@ -37,7 +37,13 @@ data "polytomic_netsuite_connection" "netsuite" {
 Read-Only:
 
 - `account_id` (String) Account ID
+
+Example: 1234567_SB1.
 - `consumer_key` (String) Consumer Key
+
+Example: ac3nougotfs7ict684hnbomxmcn496nqdo27b8myvkc19uhmxno8gx6o2g264kim2ivkaona2chyje5k2pcb904iuw.
 - `token` (String) Token ID
+
+Example: rgzq4xk3nz3huuwanngu9k1z7s8ogyr6haa7u7rg63qpxx5cn36ddxswhjse1dgwabqin1q9aay9nvfgkfjglgvtqv.
 
 

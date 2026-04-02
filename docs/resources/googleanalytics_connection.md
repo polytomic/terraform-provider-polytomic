@@ -59,6 +59,12 @@ Required:
 
 - `auth_method` (String) Authentication method
 
+Valid values:
+  - "oauth" - OAuth
+  - "jwt" - Service Account
+
+Default: oauth.
+
 Optional:
 
 - `client_id` (String, Sensitive)

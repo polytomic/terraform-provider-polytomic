@@ -62,12 +62,16 @@ Required:
 - `connection_name` (String) Cloud SQL connection name
 
     Takes the form of project:region:instance
+
+Example: project:region:instance.
 - `credentials` (String, Sensitive) Service account key
-- `database` (String)
+- `database` (String) Example: sampledb.
 
 Optional:
 
 - `change_detection` (Boolean) Use logical replication for bulk syncs
+
+Default: false.
 - `password` (String, Sensitive) May be omitted when authenticating to Postgres using the service account key.
-- `publication` (String)
-- `username` (String)
+- `publication` (String) Example: polytomic.
+- `username` (String) Example: cloudsql.

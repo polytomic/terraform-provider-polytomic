@@ -57,4 +57,6 @@ state before it will take effect on a destroy operation.
 Required:
 
 - `url` (String) Dittofeed URL
+
+Example: https://demo.dittofeed.com/.
 - `write_key` (String, Sensitive) Write Key

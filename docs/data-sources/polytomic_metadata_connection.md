@@ -39,6 +39,14 @@ Read-Only:
 - `auth_mode` (String) Authentication Method
 
     Type of API key to use for authentication
+
+Valid values:
+  - "personal_api_key" - Personal API Key
+  - "partner_api_key" - Partner API Key
+
+Default: personal_api_key.
+
+Example: personal_api_key.
 - `connected_org` (String) Connected organization
 - `connected_user` (String) Connected user
 

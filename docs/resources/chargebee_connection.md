@@ -59,9 +59,17 @@ Required:
 
 - `api_key` (String, Sensitive) API key
 - `product_catalog` (String) Product Catalog version
+
+Valid values:
+  - "1.0" - 1.0
+  - "2.0" - 2.0
+
+Example: 2.0.
 - `site` (String) Chargebee site
 
     https://{site}.chargebee.com
+
+Example: https://example.chargebee.com.
 
 Optional:
 

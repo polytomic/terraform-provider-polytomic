@@ -37,8 +37,12 @@ data "polytomic_ibm_db2_connection" "ibm_db2" {
 Read-Only:
 
 - `account` (String) Username
-- `database` (String)
-- `hostname` (String)
+
+Example: db2admin.
+- `database` (String) Example: SAMPLE.
+- `hostname` (String) Example: db2.example.com.
 - `ssl` (Boolean) Use SSL
+
+Default: true.
 
 

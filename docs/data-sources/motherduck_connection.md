@@ -39,11 +39,17 @@ Read-Only:
 - `aws_access_key_id` (String) AWS Access Key ID (destinations only)
 
     Access Key ID with read/write access to a bucket.
+
+Example: AKIAIOSFODNN7EXAMPLE.
 - `aws_user` (String) User ARN
-- `database` (String)
+- `database` (String) Example: my_db.
 - `s3_bucket_name` (String) S3 Bucket Name (destinations only)
 
     Bucket name (folder optional); ex: s3://polytomic/dataset
+
+Example: s3://polytomic/dataset.
 - `s3_bucket_region` (String) S3 Bucket Region (destinations only)
+
+Example: us-east-1.
 
 

@@ -57,8 +57,8 @@ Read-Only:
 
 Read-Only:
 
-- `password` (String)
-- `username` (String)
+- `password` (String) Example: secret.
+- `username` (String) Example: user@example.com.
 
 
 <a id="nestedatt--configuration--auth--header"></a>
@@ -66,7 +66,7 @@ Read-Only:
 
 Read-Only:
 
-- `name` (String)
+- `name` (String) Example: foo.
 - `value` (String)
 
 
@@ -77,17 +77,23 @@ Read-Only:
 
 - `auth_style` (Number) Auth style
 - `client_id` (String) Client ID
+
+Example: client_id.
 - `client_secret` (String) Client secret
+
+Example: client_secret.
 - `extra_form_data` (Attributes Set) Extra form data (see [below for nested schema](#nestedatt--configuration--auth--oauth--extra_form_data))
 - `scopes` (Set of String)
 - `token_endpoint` (String) Token endpoint
+
+Example: https://example.com/oauth/token.
 
 <a id="nestedatt--configuration--auth--oauth--extra_form_data"></a>
 ### Nested Schema for `configuration.auth.oauth.token_endpoint`
 
 Read-Only:
 
-- `name` (String)
+- `name` (String) Example: foo.
 - `value` (String)
 
 
@@ -98,7 +104,7 @@ Read-Only:
 
 Read-Only:
 
-- `name` (String)
+- `name` (String) Example: foo.
 - `value` (String)
 
 
@@ -107,7 +113,7 @@ Read-Only:
 
 Read-Only:
 
-- `name` (String)
+- `name` (String) Example: foo.
 - `value` (String)
 
 

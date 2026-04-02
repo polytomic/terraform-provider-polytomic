@@ -60,3 +60,5 @@ Required:
 - `client_id` (String, Sensitive) Access key ID
 - `client_secret` (String, Sensitive) API secret
 - `org_id` (String) Organization ID
+
+Example: your-org-id-uuid.

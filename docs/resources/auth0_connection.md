@@ -58,5 +58,9 @@ state before it will take effect on a destroy operation.
 Required:
 
 - `client_id` (String) App Client ID
+
+Example: jI2Zem1Yzxy8s8s....
 - `client_secret` (String, Sensitive) App Client Secret
 - `domain` (String) The domain of the Auth0 instance
+
+Example: dev-g1ce1rt9.us.auth0.com.

@@ -37,10 +37,18 @@ data "polytomic_salesforce_connection" "salesforce" {
 Read-Only:
 
 - `connect_mode` (String) Default: browser (i.e. oauth through Polytomic). If 'code' is specified, the response will include an auth_code for the user to enter when completing authorization. NOTE: when supplying client_id and client_secret the connect mode must be 'api'.
+
+Valid values: "browser", "clientcredentials", "code", "api".
+
+Default: browser.
+
+Example: api.
 - `daily_api_calls` (Number) Daily call limit
 
     The daily Salesforce API call cap that Polytomic should adhere to.
 - `domain` (String) The Salesforce instance's login domain, e.g. acmecorp.my.salesforce.com
+
+Example: http://instance.my.salesforce.com.
 - `enable_multicurrency_lookup` (Boolean) Enable multicurrency source field support
 
     If incremental mode for bulk-syncing from Salesforce formula fields is enabled, setting this to true extends support to accurate currency conversions.

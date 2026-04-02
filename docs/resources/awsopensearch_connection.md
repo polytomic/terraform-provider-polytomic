@@ -59,9 +59,13 @@ state before it will take effect on a destroy operation.
 Required:
 
 - `aws_access_key_id` (String) AWS Access Key ID
+
+Example: AKIAIOSFODNN7EXAMPLE.
 - `aws_secret_access_key` (String, Sensitive) AWS Secret Access Key
 - `endpoint` (String) Endpoint(s)
-- `region` (String)
+
+Example: es.us-east-2.amazonaws.com.
+- `region` (String) Example: us-east-1.
 
 Optional:
 

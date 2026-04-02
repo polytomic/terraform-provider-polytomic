@@ -57,3 +57,17 @@ Required:
 
 - `api_key` (String, Sensitive) API Token
 - `data_center` (String) Data Center
+
+Valid values:
+  - "portland" - Portland, Oregon, USA
+  - "washington_dc" - Washington, DC, USA
+  - "arizona" - Arizona, USA (az1)
+  - "us_government" - US Government
+  - "canada" - Canada
+  - "eu" - EU
+  - "london" - London, UK
+  - "singapore" - Singapore
+  - "sydney" - Sydney, Australia
+  - "tokyo" - Tokyo, Japan
+
+Default: portland.

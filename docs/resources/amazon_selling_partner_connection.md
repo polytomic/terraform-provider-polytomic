@@ -1,20 +1,20 @@
 ---
-page_title: "polytomic_datalite_connection Resource - terraform-provider-polytomic"
+page_title: "polytomic_amazon_selling_partner_connection Resource - terraform-provider-polytomic"
 subcategory: "Connections"
 description: |-
-  Polytomic Connection
+  Amazon Selling Partner Connection
 ---
 
-# polytomic_datalite_connection (Resource)
+# polytomic_amazon_selling_partner_connection (Resource)
 
-Polytomic Connection
+Amazon Selling Partner Connection
 
-For detailed configuration guidance, see the [Polytomic connection guide](https://apidocs.polytomic.com/guides/configuring-your-connections/connections/datalite).
+For detailed configuration guidance, see the [Amazon Selling Partner connection guide](https://apidocs.polytomic.com/guides/configuring-your-connections/connections/amazon_selling_partner).
 
 ## Example Usage
 
 ```terraform
-resource "polytomic_datalite_connection" "datalite" {
+resource "polytomic_amazon_selling_partner_connection" "amazon_selling_partner" {
   name = "example"
   configuration = {
   }
@@ -47,22 +47,18 @@ state before it will take effect on a destroy operation.
 
 ### Read-Only
 
-- `id` (String) Polytomic Connection identifier
+- `id` (String) Amazon Selling Partner Connection identifier
 
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
-Optional:
+Required:
 
-- `schemas` (Attributes Set) (see [below for nested schema](#nestedatt--configuration--schemas))
-
-<a id="nestedatt--configuration--schemas"></a>
-### Nested Schema for `configuration.schemas`
-
-Optional:
-
-- `alias` (String)
-- `connection_id` (String)
-- `connection_name` (String)
-- `connection_type` (String)
-- `schema_id` (String)
+- `client_id` (String) Client ID
+- `client_secret` (String, Sensitive) Client Secret
+- `merchant_token` (String) Merchant Token
+- `refresh_token` (String, Sensitive) Refresh Token
+- `region` (String) Valid values:
+  - "na" - North America
+  - "eu" - Europe
+  - "fe" - Far East

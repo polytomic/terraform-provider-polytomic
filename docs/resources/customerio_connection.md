@@ -59,6 +59,8 @@ Required:
 
 - `app_api_key` (String, Sensitive) App API Key
 - `site_id` (String) Site ID
+
+Example: osh853chlrhick8w7qyz.
 - `tracking_api_key` (String, Sensitive) Tracking API Key
 
 Optional:

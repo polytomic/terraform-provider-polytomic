@@ -56,5 +56,5 @@ state before it will take effect on a destroy operation.
 
 Required:
 
-- `email` (String)
+- `email` (String) Example: user@example.com.
 - `password` (String, Sensitive)

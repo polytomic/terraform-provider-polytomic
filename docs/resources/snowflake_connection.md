@@ -62,13 +62,19 @@ Required:
 - `account` (String) Account identifier
 
     e.g. FRXJLEC-UJA94780
+
+Example: FRXJLEC-UJA94780.
 - `dbname` (String) Database
-- `username` (String)
+
+Example: database_name.
+- `username` (String) Example: user.
 
 Optional:
 
 - `bulk_sync_staging_schema` (String) Staging schema name
 - `key_pair_auth` (Boolean) Use key pair authentication
+
+Default: false.
 - `params` (String) Additional parameters
 
     Additional connection parameters, formatted as a query string
@@ -76,4 +82,8 @@ Optional:
 - `private_key` (String, Sensitive) Private key
 - `private_key_passphrase` (String, Sensitive) Private key passphrase
 - `use_bulk_sync_staging_schema` (Boolean) Use custom bulk sync staging schema
+
+Default: false.
 - `warehouse` (String) Compute warehouse
+
+Example: warehouse.

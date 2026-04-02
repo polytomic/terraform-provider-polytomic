@@ -56,5 +56,9 @@ Required:
 
 - `project_id` (Number) Project ID
 - `region` (String) Server
+
+Valid values:
+  - "mixpanel.com" - Mixpanel
+  - "eu.mixpanel.com" - Mixpanel (EU)
 - `service_account_secret` (String, Sensitive) Service account secret
 - `service_account_username` (String) Service account username

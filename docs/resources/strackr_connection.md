@@ -59,6 +59,12 @@ Required:
 - `api_key` (String, Sensitive) API Key
 - `currency_type` (String) Currency Type
 
+Valid values: "EUR", "USD", "CAD", "GBP", "RUB", "SEK", "AUD", "INR", "NOK", "DKK".
+
+Default: USD.
+
+Example: USD.
+
 Optional:
 
 - `linkbuilder_customs_text` (String) Linkbuilder Customs Text

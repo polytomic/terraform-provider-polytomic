@@ -57,7 +57,13 @@ state before it will take effect on a destroy operation.
 Optional:
 
 - `account_type` (String) Account type
+
+Valid values: "Production", "Sandbox", "Demo".
+
+Example: Production.
 - `business_unit_id` (String) Business Unit ID
+
+Example: 1234567.
 - `daily_api_calls` (Number) Daily call limit
 - `enforce_api_limits` (Boolean) Enforce API limits
 - `username` (String)

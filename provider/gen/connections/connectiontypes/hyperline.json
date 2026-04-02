@@ -1,0 +1,1 @@
+{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://github.com/polytomic/app/services/polytomic/backend/hyperline/connection-conf","properties":{"api_key":{"type":"string","title":"API Key","sensitive":true}},"type":"object","required":["api_key"]}

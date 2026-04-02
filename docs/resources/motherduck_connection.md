@@ -60,16 +60,22 @@ state before it will take effect on a destroy operation.
 Required:
 
 - `access_token` (String, Sensitive) Access Token
-- `database` (String)
+- `database` (String) Example: my_db.
 
 Optional:
 
 - `aws_access_key_id` (String) AWS Access Key ID (destinations only)
 
     Access Key ID with read/write access to a bucket.
+
+Example: AKIAIOSFODNN7EXAMPLE.
 - `aws_secret_access_key` (String, Sensitive) AWS Secret Access Key (destinations only)
 - `aws_user` (String) User ARN
 - `s3_bucket_name` (String) S3 Bucket Name (destinations only)
 
     Bucket name (folder optional); ex: s3://polytomic/dataset
+
+Example: s3://polytomic/dataset.
 - `s3_bucket_region` (String) S3 Bucket Region (destinations only)
+
+Example: us-east-1.

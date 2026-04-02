@@ -39,12 +39,14 @@ Read-Only:
 - `headers` (Attributes Set) (see [below for nested schema](#nestedatt--configuration--headers))
 - `url` (String) Webhook URL
 
+Example: https://example.com/webhook.
+
 <a id="nestedatt--configuration--headers"></a>
 ### Nested Schema for `configuration.headers`
 
 Read-Only:
 
-- `name` (String)
+- `name` (String) Example: foo.
 - `value` (String)
 
 

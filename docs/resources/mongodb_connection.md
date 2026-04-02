@@ -59,9 +59,13 @@ Required:
 
 - `hosts` (String) Hostname(s)
 
+Example: mongodb.example.net.
+
 Optional:
 
 - `change_detection` (Boolean) Use change stream for bulk syncs
+
+Default: false.
 - `database` (String) Auth Database
 - `params` (String) Additional Parameters
 
@@ -69,4 +73,6 @@ Optional:
 - `password` (String, Sensitive)
 - `srv` (Boolean) Connect using SRV record?
 - `ssl` (Boolean) Use TLS/SSL
-- `username` (String)
+
+Default: true.
+- `username` (String) Example: admin.

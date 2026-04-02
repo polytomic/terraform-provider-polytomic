@@ -57,3 +57,14 @@ Required:
 
 - `api_key` (String, Sensitive) API key
 - `region` (String) Site
+
+Valid values:
+  - "US1" - US1
+  - "US3" - US3
+  - "US5" - US5
+  - "EU1" - EU1
+  - "US1-FED" - US1-FED
+  - "AP1" - AP1
+  - "AP2" - AP2
+
+Default: US1.

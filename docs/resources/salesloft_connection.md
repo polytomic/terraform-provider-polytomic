@@ -59,6 +59,12 @@ Required:
 
 - `auth_method` (String) Authentication method
 
+Valid values:
+  - "oauth" - OAuth
+  - "api_key" - API Key
+
+Default: oauth.
+
 Optional:
 
 - `api_key` (String, Sensitive) API Key

@@ -37,16 +37,32 @@ data "polytomic_postgresql_connection" "postgresql" {
 Read-Only:
 
 - `change_detection` (Boolean) Use logical replication for bulk syncs
+
+Default: false.
 - `client_certs` (Boolean) Use client certificates
-- `database` (String)
-- `hostname` (String)
-- `port` (Number)
-- `publication` (String)
+
+Default: false.
+- `database` (String) Example: sampledb.
+- `hostname` (String) Example: database.example.com.
+- `port` (Number) Default: 5432.
+
+Example: 5432.
+- `publication` (String) Example: polytomic.
 - `ssh` (Boolean) Connect over SSH tunnel
 - `ssh_host` (String) SSH host
+
+Example: bastion.example.com.
 - `ssh_port` (Number) SSH port
+
+Default: 22.
+
+Example: 22.
 - `ssh_user` (String) SSH user
+
+Default: root.
 - `ssl` (Boolean) Use SSL
-- `username` (String)
+
+Default: true.
+- `username` (String) Example: postgres.
 
 

@@ -37,6 +37,12 @@ data "polytomic_salesloft_connection" "salesloft" {
 Read-Only:
 
 - `auth_method` (String) Authentication method
+
+Valid values:
+  - "oauth" - OAuth
+  - "api_key" - API Key
+
+Default: oauth.
 - `connected_user` (String) Connected user's email
 - `oauth_token_expiry` (String)
 

@@ -38,4 +38,6 @@ Read-Only:
 
 - `application_id` (String) Application ID
 
+Example: 1234567890.
+
 

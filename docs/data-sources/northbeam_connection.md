@@ -37,6 +37,10 @@ data "polytomic_northbeam_connection" "northbeam" {
 Read-Only:
 
 - `data_client_id` (String) Data Client ID
-- `instance` (String)
+- `instance` (String) Valid values:
+  - "prod" - Production
+  - "test" - Test
+
+Default: prod.
 
 

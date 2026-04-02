@@ -58,7 +58,17 @@ state before it will take effect on a destroy operation.
 Required:
 
 - `auth_method` (String) Authentication method
+
+Valid values:
+  - "apikey" - API token
+  - "pat" - Personal access token
+
+Default: apikey.
+
+Example: pat.
 - `url` (String) Jira URL
+
+Example: https://jira.mycompany.com/.
 
 Optional:
 

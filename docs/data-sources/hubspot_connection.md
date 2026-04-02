@@ -41,4 +41,6 @@ Read-Only:
 - `include_static_list_support` (Boolean) Include static list support
 - `use_search_api` (Boolean) Use HubSpot incremental API for bulk syncs
 
+Default: true.
+
 

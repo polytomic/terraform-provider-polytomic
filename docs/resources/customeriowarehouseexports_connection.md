@@ -62,16 +62,30 @@ Required:
 - `auth_mode` (String) Authentication Method
 
     How to authenticate with AWS. Defaults to Access Key and Secret
+
+Valid values:
+  - "access_key_and_secret" - Access Key and Secret
+  - "iam_role" - IAM role
+
+Default: access_key_and_secret.
+
+Example: access_key_and_secret.
 - `s3_bucket_name` (String) S3 Bucket Name
 
     Bucket name (folder optional); ex: s3://polytomic/dataset
+
+Example: s3://polytomic/dataset.
 - `s3_bucket_region` (String) S3 Bucket Region
+
+Example: us-east-1.
 
 Optional:
 
 - `aws_access_key_id` (String) AWS Access Key ID
 
     Access Key ID with read/write access to a bucket.
+
+Example: AKIAIOSFODNN7EXAMPLE.
 - `aws_secret_access_key` (String, Sensitive) AWS Secret Access Key
 - `aws_user` (String) User ARN
 - `external_id` (String) External ID

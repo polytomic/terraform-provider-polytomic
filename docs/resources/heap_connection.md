@@ -56,3 +56,5 @@ state before it will take effect on a destroy operation.
 Required:
 
 - `application_id` (String) Application ID
+
+Example: 1234567890.

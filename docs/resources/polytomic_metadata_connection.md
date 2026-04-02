@@ -59,6 +59,14 @@ Required:
 
     Type of API key to use for authentication
 
+Valid values:
+  - "personal_api_key" - Personal API Key
+  - "partner_api_key" - Partner API Key
+
+Default: personal_api_key.
+
+Example: personal_api_key.
+
 Optional:
 
 - `connected_org` (String) Connected organization

@@ -58,8 +58,12 @@ state before it will take effect on a destroy operation.
 
 Required:
 
-- `database` (String)
+- `database` (String) Example: yourdatabase.
 - `hostname` (String) Server
+
+Example: yourserver.sql.azuresynapse.net.
 - `password` (String, Sensitive)
-- `port` (Number)
-- `username` (String)
+- `port` (Number) Default: 1433.
+
+Example: 1433.
+- `username` (String) Example: user.

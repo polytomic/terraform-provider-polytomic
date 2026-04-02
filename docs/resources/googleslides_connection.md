@@ -64,7 +64,13 @@ Optional:
 - `client_id` (String, Sensitive)
 - `client_secret` (String, Sensitive)
 - `connect_mode` (String) Default: browser
+
+Valid values: "browser", "jwt".
+
+Default: browser.
 - `include_subdirectories` (Boolean) Include Subdirectories
+
+Default: false.
 - `oauth_refresh_token` (String, Sensitive)
 - `oauth_token_expiry` (String)
 - `service_account` (String, Sensitive) Service account key

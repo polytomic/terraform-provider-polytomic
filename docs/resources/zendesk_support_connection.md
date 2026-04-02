@@ -60,13 +60,23 @@ state before it will take effect on a destroy operation.
 Required:
 
 - `auth_method` (String) Authentication method
+
+Valid values:
+  - "apitoken" - API token
+  - "oauth" - OAuth
+
+Default: oauth.
+
+Example: apitoken.
 - `domain` (String) Zendesk Subdomain
+
+Example: polytomic.zendesk.com.
 
 Optional:
 
 - `api_token` (String, Sensitive) API token
 - `custom_api_limits` (Boolean) Enforce custom API limits
-- `email` (String)
+- `email` (String) Example: user@example.com.
 - `oauth_refresh_token` (String, Sensitive)
 - `oauth_token_expiry` (String)
 - `ratelimit_rpm` (Number) Maximum requests per minute

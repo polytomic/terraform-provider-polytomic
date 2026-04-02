@@ -57,6 +57,8 @@ Required:
 
 - `url` (String) Webhook URL
 
+Example: https://example.com/webhook.
+
 Optional:
 
 - `headers` (Attributes Set) (see [below for nested schema](#nestedatt--configuration--headers))
@@ -67,5 +69,5 @@ Optional:
 
 Optional:
 
-- `name` (String)
+- `name` (String) Example: foo.
 - `value` (String)

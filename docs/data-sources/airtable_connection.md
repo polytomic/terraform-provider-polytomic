@@ -37,6 +37,6 @@ data "polytomic_airtable_connection" "airtable" {
 Read-Only:
 
 - `connected_user` (String) Connected user's email
-- `oauth_token_expiry` (String)
+- `oauth_token_expiry` (String) Example: 2023-11-21T21:48:51Z.
 
 

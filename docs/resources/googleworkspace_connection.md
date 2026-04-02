@@ -57,6 +57,10 @@ state before it will take effect on a destroy operation.
 Optional:
 
 - `auth_method` (String) Default: browser
+
+Valid values:
+  - "oauth" - OAuth
+  - "service_account" - Service Account
 - `client_email` (String) Connected Account
 - `client_id` (String, Sensitive)
 - `client_secret` (String, Sensitive)

@@ -37,6 +37,10 @@ data "polytomic_gorgias_connection" "gorgias" {
 Read-Only:
 
 - `domain` (String) Your Gorgias subdomain (e.g. 'acme' for acme.gorgias.com)
+
+Example: acme.
 - `email` (String) Your Gorgias account email address
+
+Example: user@example.com.
 
 

@@ -38,4 +38,6 @@ Read-Only:
 
 - `org_id` (String) Organization ID
 
+Example: your-org-id-uuid.
+
 

@@ -56,6 +56,8 @@ state before it will take effect on a destroy operation.
 Required:
 
 - `account_id` (String) Account ID
+
+Example: 1234567_SB1.
 - `certificate_id` (String) Certificate ID
 - `client_id` (String) Client ID
 - `private_key` (String, Sensitive) Private key

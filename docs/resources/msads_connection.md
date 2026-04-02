@@ -59,6 +59,12 @@ Optional:
 
 - `accounts` (Attributes Set) (see [below for nested schema](#nestedatt--configuration--accounts))
 - `auth_method` (String) Authentication method
+
+Valid values:
+  - "microsoft" - Microsoft
+  - "google" - Google
+
+Default: microsoft.
 - `client_id` (String, Sensitive)
 - `client_secret` (String, Sensitive)
 - `oauth_refresh_token` (String, Sensitive)

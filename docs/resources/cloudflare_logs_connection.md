@@ -61,7 +61,11 @@ Required:
 - `aws_access_key_id` (String) Access Key ID
 
     Access Key ID with read/write access to a bucket.
+
+Example: AKIAIOSFODNN7EXAMPLE.
 - `aws_secret_access_key` (String, Sensitive) Secret Access Key
 - `bucket_name` (String) Bucket Name
 
     Bucket name (folder optional); ex: polytomic/dataset
+
+Example: polytomic/dataset.
