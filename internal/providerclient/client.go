@@ -158,6 +158,7 @@ func (p *Provider) Client(org string) (*ptclient.Client, error) {
 		p.clients[orgID] = ptclient.NewClient(
 			ptoption.WithBaseURL(p.opts.DeploymentURL),
 			ptoption.WithHTTPHeader(headers),
+			ptoption.WithMaxAttempts(1),
 		)
 		return p.clients[orgID], nil
 	}
@@ -177,6 +178,7 @@ func (p *Provider) client() (*ptclient.Client, error) {
 			ptoption.WithBaseURL(p.opts.DeploymentURL),
 			ptoption.WithToken(p.opts.APIKey),
 			ptoption.WithHTTPHeader(headers),
+			ptoption.WithMaxAttempts(1),
 		), nil
 	}
 
@@ -188,6 +190,7 @@ func (p *Provider) client() (*ptclient.Client, error) {
 				cmp.Or(p.opts.PartnerKey, p.opts.DeploymentKey),
 			),
 			ptoption.WithHTTPHeader(headers),
+			ptoption.WithMaxAttempts(1),
 		), nil
 	}
 
