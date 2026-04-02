@@ -56,7 +56,6 @@ state before it will take effect on a destroy operation.
 
 Required:
 
-- `branch` (String) Exposures branch
 - `commit_exposures` (Boolean) Commit exposures file
 - `oauth_access_token` (String, Sensitive)
 - `repository` (String) dbt project repository
@@ -65,6 +64,7 @@ Required:
 
 Optional:
 
+- `branch` (String) Exposures branch
 - `connected_user` (String) Connected user
 - `latest_commit` (Attributes) Most recent exposures commit (see [below for nested schema](#nestedatt--configuration--latest_commit))
 - `oauth_refresh_token` (String, Sensitive)

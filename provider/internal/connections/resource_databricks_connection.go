@@ -48,9 +48,9 @@ var DatabricksSchema = schema.Schema{
 			Attributes: map[string]schema.Attribute{
 				"access_token": schema.StringAttribute{
 					MarkdownDescription: `Access Token`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
 					Sensitive:           true,
 					PlanModifiers: []planmodifier.String{
 						stringplanmodifier.UseStateForUnknown(),
@@ -68,9 +68,9 @@ Valid values:
 Default: access_key_and_secret.
 
 Example: access_key_and_secret.`,
-					Required:  true,
-					Optional:  false,
-					Computed:  false,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
 					Sensitive: false,
 					Validators: []validator.String{
 						stringvalidator.OneOf("access_key_and_secret", "iam_role"),
@@ -289,16 +289,16 @@ Example: dbc-1234dsafas-d0001.cloud.databricks.com.`,
 					MarkdownDescription: `Service Principal ID
 
 Example: sp-1234abcd.`,
-					Required:  true,
-					Optional:  false,
-					Computed:  false,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
 					Sensitive: false,
 				},
 				"service_principal_secret": schema.StringAttribute{
 					MarkdownDescription: `Service Principal Secret`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
 					Sensitive:           true,
 					PlanModifiers: []planmodifier.String{
 						stringplanmodifier.UseStateForUnknown(),

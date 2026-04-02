@@ -24,17 +24,14 @@ import (
 	"github.com/polytomic/polytomic-go"
 	ptcore "github.com/polytomic/polytomic-go/core"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
-
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
-var _ resource.Resource = &DynamodbConnectionResource{}
-var _ resource.ResourceWithImportState = &DynamodbConnectionResource{}
+var _ resource.Resource = &DubConnectionResource{}
+var _ resource.ResourceWithImportState = &DubConnectionResource{}
 
-var DynamodbSchema = schema.Schema{
-	MarkdownDescription: ":meta:subcategory:Connections: DynamoDB Connection",
+var DubSchema = schema.Schema{
+	MarkdownDescription: ":meta:subcategory:Connections: Dub Connection",
 	Attributes: map[string]schema.Attribute{
 		"organization": schema.StringAttribute{
 			MarkdownDescription: "Organization ID",
@@ -46,89 +43,11 @@ var DynamodbSchema = schema.Schema{
 		},
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
-				"access_id": schema.StringAttribute{
-					MarkdownDescription: `AWS Access ID`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           true,
-					PlanModifiers: []planmodifier.String{
-						stringplanmodifier.UseStateForUnknown(),
-					},
-				},
-				"auth_mode": schema.StringAttribute{
-					MarkdownDescription: `Authentication Method
-
-    How to authenticate with AWS. Defaults to Access Key and Secret
-
-Valid values:
-  - "access_key_and_secret" - Access Key and Secret
-  - "iam_role" - IAM role
-
-Default: access_key_and_secret.
-
-Example: access_key_and_secret.`,
-					Required:  true,
-					Optional:  false,
-					Computed:  false,
-					Sensitive: false,
-					Validators: []validator.String{
-						stringvalidator.OneOf("access_key_and_secret", "iam_role"),
-					},
-				},
-				"aws_user": schema.StringAttribute{
-					MarkdownDescription: `User ARN`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
-				},
-				"change_detection": schema.BoolAttribute{
-					MarkdownDescription: `Use DynamoDB Streams for bulk syncs
-
-Default: false.`,
-					Required:  false,
-					Optional:  true,
-					Computed:  true,
-					Sensitive: false,
-				},
-				"external_id": schema.StringAttribute{
-					MarkdownDescription: `External ID
-
-    External ID for the IAM role`,
-					Required:  false,
-					Optional:  true,
-					Computed:  true,
-					Sensitive: false,
-				},
-				"iam_role_arn": schema.StringAttribute{
-					MarkdownDescription: `IAM Role ARN`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
-				},
-				"managed_streams": schema.BoolAttribute{
-					MarkdownDescription: `Let Polytomic manage DynamoDB Stream settings`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
-				},
-				"region": schema.StringAttribute{
-					MarkdownDescription: `AWS region
-
-Example: us-east-1.`,
-					Required:  true,
-					Optional:  false,
-					Computed:  false,
-					Sensitive: false,
-				},
-				"secret_access_key": schema.StringAttribute{
-					MarkdownDescription: `AWS Secret Access Key`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
+				"api_key": schema.StringAttribute{
+					MarkdownDescription: `API Key`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
 					Sensitive:           true,
 					PlanModifiers: []planmodifier.String{
 						stringplanmodifier.UseStateForUnknown(),
@@ -148,7 +67,7 @@ Example: us-east-1.`,
 		},
 		"id": schema.StringAttribute{
 			Computed:            true,
-			MarkdownDescription: "DynamoDB Connection identifier",
+			MarkdownDescription: "Dub Connection identifier",
 			PlanModifiers: []planmodifier.String{
 				stringplanmodifier.UseStateForUnknown(),
 			},
@@ -156,37 +75,29 @@ Example: us-east-1.`,
 	},
 }
 
-func (t *DynamodbConnectionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = DynamodbSchema
+func (t *DubConnectionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = DubSchema
 }
 
-type DynamodbConf struct {
-	Access_id         string `mapstructure:"access_id" tfsdk:"access_id"`
-	Auth_mode         string `mapstructure:"auth_mode" tfsdk:"auth_mode"`
-	Aws_user          string `mapstructure:"aws_user" tfsdk:"aws_user"`
-	Change_detection  bool   `mapstructure:"change_detection" tfsdk:"change_detection"`
-	External_id       string `mapstructure:"external_id" tfsdk:"external_id"`
-	Iam_role_arn      string `mapstructure:"iam_role_arn" tfsdk:"iam_role_arn"`
-	Managed_streams   bool   `mapstructure:"managed_streams" tfsdk:"managed_streams"`
-	Region            string `mapstructure:"region" tfsdk:"region"`
-	Secret_access_key string `mapstructure:"secret_access_key" tfsdk:"secret_access_key"`
+type DubConf struct {
+	Api_key string `mapstructure:"api_key" tfsdk:"api_key"`
 }
 
-type DynamodbConnectionResource struct {
+type DubConnectionResource struct {
 	provider *providerclient.Provider
 }
 
-func (r *DynamodbConnectionResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *DubConnectionResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if provider := providerclient.GetProvider(req.ProviderData, resp.Diagnostics); provider != nil {
 		r.provider = provider
 	}
 }
 
-func (r *DynamodbConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_dynamodb_connection"
+func (r *DubConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_dub_connection"
 }
 
-func (r *DynamodbConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *DubConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data connectionData
 
 	diags := req.Config.Get(ctx, &data)
@@ -201,14 +112,14 @@ func (r *DynamodbConnectionResource) Create(ctx context.Context, req resource.Cr
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
-	connConf, err := objectMapValue(ctx, data.Configuration, getOptionalFields(DynamodbSchema))
+	connConf, err := objectMapValue(ctx, data.Configuration, getOptionalFields(DubSchema))
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
-		Type:           "dynamodb",
+		Type:           "dub",
 		OrganizationId: data.Organization.ValueStringPointer(),
 		Configuration:  connConf,
 		Validate:       pointer.ToBool(false),
@@ -221,35 +132,27 @@ func (r *DynamodbConnectionResource) Create(ctx context.Context, req resource.Cr
 	data.Name = types.StringPointerValue(created.Data.Name)
 	data.Organization = types.StringPointerValue(created.Data.OrganizationId)
 
-	conf := DynamodbConf{}
+	conf := DubConf{}
 	err = mapstructure.Decode(created.Data.Configuration, &conf)
 	if err != nil {
 		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error decoding connection configuration: %s", err))
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"access_id":         types.StringType,
-		"auth_mode":         types.StringType,
-		"aws_user":          types.StringType,
-		"change_detection":  types.BoolType,
-		"external_id":       types.StringType,
-		"iam_role_arn":      types.StringType,
-		"managed_streams":   types.BoolType,
-		"region":            types.StringType,
-		"secret_access_key": types.StringType,
+		"api_key": types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Dynamodb", "id": created.Data.Id})
+	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Dub", "id": created.Data.Id})
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r *DynamodbConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *DubConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data connectionData
 
 	diags := req.State.Get(ctx, &data)
@@ -284,7 +187,7 @@ func (r *DynamodbConnectionResource) Read(ctx context.Context, req resource.Read
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
 
-	configAttributes, ok := getConfigAttributes(DynamodbSchema)
+	configAttributes, ok := getConfigAttributes(DubSchema)
 	if !ok {
 		resp.Diagnostics.AddError("Error getting connection configuration attributes", "Could not get configuration attributes")
 		return
@@ -299,22 +202,14 @@ func (r *DynamodbConnectionResource) Read(ctx context.Context, req resource.Read
 	// reset sensitive values so terraform doesn't think we have changes
 	connection.Data.Configuration = resetSensitiveValues(configAttributes, originalConfData, connection.Data.Configuration)
 
-	conf := DynamodbConf{}
+	conf := DubConf{}
 	err = mapstructure.Decode(connection.Data.Configuration, &conf)
 	if err != nil {
 		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error decoding connection configuration: %s", err))
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"access_id":         types.StringType,
-		"auth_mode":         types.StringType,
-		"aws_user":          types.StringType,
-		"change_detection":  types.BoolType,
-		"external_id":       types.StringType,
-		"iam_role_arn":      types.StringType,
-		"managed_streams":   types.BoolType,
-		"region":            types.StringType,
-		"secret_access_key": types.StringType,
+		"api_key": types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -325,7 +220,7 @@ func (r *DynamodbConnectionResource) Read(ctx context.Context, req resource.Read
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r *DynamodbConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *DubConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var data connectionData
 
 	diags := req.Plan.Get(ctx, &data)
@@ -340,13 +235,13 @@ func (r *DynamodbConnectionResource) Update(ctx context.Context, req resource.Up
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
-	connConf, err := objectMapValue(ctx, data.Configuration, getOptionalFields(DynamodbSchema))
+	connConf, err := objectMapValue(ctx, data.Configuration, getOptionalFields(DubSchema))
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
 
-	configAttributes, ok := getConfigAttributes(DynamodbSchema)
+	configAttributes, ok := getConfigAttributes(DubSchema)
 	if !ok {
 		resp.Diagnostics.AddError("Error getting connection configuration attributes", "Could not get configuration attributes")
 		return
@@ -376,22 +271,14 @@ func (r *DynamodbConnectionResource) Update(ctx context.Context, req resource.Up
 	data.Name = types.StringPointerValue(updated.Data.Name)
 	data.Organization = types.StringPointerValue(updated.Data.OrganizationId)
 
-	conf := DynamodbConf{}
+	conf := DubConf{}
 	err = mapstructure.Decode(updated.Data.Configuration, &conf)
 	if err != nil {
 		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error decoding connection configuration: %s", err))
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"access_id":         types.StringType,
-		"auth_mode":         types.StringType,
-		"aws_user":          types.StringType,
-		"change_detection":  types.BoolType,
-		"external_id":       types.StringType,
-		"iam_role_arn":      types.StringType,
-		"managed_streams":   types.BoolType,
-		"region":            types.StringType,
-		"secret_access_key": types.StringType,
+		"api_key": types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -401,7 +288,7 @@ func (r *DynamodbConnectionResource) Update(ctx context.Context, req resource.Up
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r *DynamodbConnectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *DubConnectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var data connectionData
 
 	diags := req.State.Get(ctx, &data)
@@ -464,6 +351,6 @@ func (r *DynamodbConnectionResource) Delete(ctx context.Context, req resource.De
 	}
 }
 
-func (r *DynamodbConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *DubConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

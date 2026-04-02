@@ -58,7 +58,6 @@ state before it will take effect on a destroy operation.
 
 Required:
 
-- `access_id` (String, Sensitive) AWS Access ID
 - `auth_mode` (String) Authentication Method
 
     How to authenticate with AWS. Defaults to Access Key and Secret
@@ -73,10 +72,10 @@ Example: access_key_and_secret.
 - `region` (String) AWS region
 
 Example: us-east-1.
-- `secret_access_key` (String, Sensitive) AWS Secret Access Key
 
 Optional:
 
+- `access_id` (String, Sensitive) AWS Access ID
 - `aws_user` (String) User ARN
 - `change_detection` (Boolean) Use DynamoDB Streams for bulk syncs
 
@@ -86,3 +85,4 @@ Default: false.
     External ID for the IAM role
 - `iam_role_arn` (String) IAM Role ARN
 - `managed_streams` (Boolean) Let Polytomic manage DynamoDB Stream settings
+- `secret_access_key` (String, Sensitive) AWS Secret Access Key

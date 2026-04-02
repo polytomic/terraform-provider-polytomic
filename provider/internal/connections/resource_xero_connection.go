@@ -48,9 +48,9 @@ var XeroSchema = schema.Schema{
 			Attributes: map[string]schema.Attribute{
 				"client_id": schema.StringAttribute{
 					MarkdownDescription: `Client ID`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
 					Sensitive:           true,
 					PlanModifiers: []planmodifier.String{
 						stringplanmodifier.UseStateForUnknown(),
@@ -58,9 +58,9 @@ var XeroSchema = schema.Schema{
 				},
 				"client_secret": schema.StringAttribute{
 					MarkdownDescription: `Client Secret`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
 					Sensitive:           true,
 					PlanModifiers: []planmodifier.String{
 						stringplanmodifier.UseStateForUnknown(),

@@ -66,9 +66,9 @@ Default: service_account_key.`,
 					MarkdownDescription: `Google Cloud Storage bucket
 
 Example: my-bucket.`,
-					Required:  true,
-					Optional:  false,
-					Computed:  false,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
 					Sensitive: false,
 				},
 				"client_email": schema.StringAttribute{

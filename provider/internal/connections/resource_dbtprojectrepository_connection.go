@@ -45,9 +45,9 @@ var DbtprojectrepositorySchema = schema.Schema{
 			Attributes: map[string]schema.Attribute{
 				"branch": schema.StringAttribute{
 					MarkdownDescription: `Exposures branch`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
 					Sensitive:           false,
 				},
 				"commit_exposures": schema.BoolAttribute{
