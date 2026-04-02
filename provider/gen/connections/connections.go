@@ -35,6 +35,7 @@ const (
 	exampleResourceTemplate       = "./provider/gen/connections/resource.tf.go.tmpl"
 	exampleResourceOutputPath     = "./examples/resources"
 	docTemplateOutputPath         = "./templates/resources"
+	forceDestroyDescriptionFile   = "./provider/internal/connections/force_destroy.md"
 
 	// Datasources
 	connectionDataSourceTemplate = "./provider/gen/connections/datasource.go.tmpl"
@@ -806,36 +807,25 @@ func tfAttr(k string, a *jsonschema.Schema, required []string) (Attribute, error
 			entries := make([]string, len(attr.EnumValues))
 			for i, v := range attr.EnumValues {
 				if attr.EnumLabels[i] != "" {
-					entries[i] = fmt.Sprintf("  - %q - %s", v, attr.EnumLabels[i])
+					entries[i] = fmt.Sprintf("<code>%s</code> (%s)", v, attr.EnumLabels[i])
 				} else {
-					entries[i] = fmt.Sprintf("  - %q", v)
+					entries[i] = fmt.Sprintf("<code>%s</code>", v)
 				}
 			}
-			attr.Description += fmt.Sprintf("\n\nValid values:\n%s", strings.Join(entries, "\n"))
+			attr.Description += fmt.Sprintf(" Valid values: %s.", strings.Join(entries, ", "))
 		} else {
-			quoted := make([]string, len(attr.EnumValues))
+			entries := make([]string, len(attr.EnumValues))
 			for i, v := range attr.EnumValues {
-				quoted[i] = fmt.Sprintf("%q", v)
+				entries[i] = fmt.Sprintf("<code>%s</code>", v)
 			}
-			attr.Description += fmt.Sprintf("\n\nValid values: %s.", strings.Join(quoted, ", "))
+			attr.Description += fmt.Sprintf(" Valid values: %s.", strings.Join(entries, ", "))
 		}
 		attr.Description = strings.TrimSpace(attr.Description)
 	}
 
 	// Add default value to description when present.
 	if a.Default != nil {
-		attr.Description += fmt.Sprintf("\n\nDefault: %v.", a.Default)
-		attr.Description = strings.TrimSpace(attr.Description)
-	}
-
-	// Add examples to description when present and not already used as
-	// the attribute example value (which only captures the first).
-	if len(a.Examples) > 0 && !attr.Sensitive {
-		examples := make([]string, 0, len(a.Examples))
-		for _, e := range a.Examples {
-			examples = append(examples, fmt.Sprintf("%v", e))
-		}
-		attr.Description += fmt.Sprintf("\n\nExample: %s.", strings.Join(examples, ", "))
+		attr.Description += fmt.Sprintf(" Default: <code>%v</code>.", a.Default)
 		attr.Description = strings.TrimSpace(attr.Description)
 	}
 
@@ -1026,15 +1016,207 @@ func writeConnectionResource(r Connection) error {
 	return err
 }
 
+// displayType maps a Terraform schema attribute type to a human-readable name
+// for use in documentation.
+func displayType(attrType string) string {
+	switch attrType {
+	case "schema.StringAttribute":
+		return "String"
+	case "schema.BoolAttribute":
+		return "Boolean"
+	case "schema.NumberAttribute", "schema.Int64Attribute":
+		return "Number"
+	case "schema.SetAttribute":
+		return "Set of String"
+	case "schema.SingleNestedAttribute":
+		return "Attributes"
+	case "schema.MapAttribute":
+		return "Map of String"
+	case "schema.SetNestedAttribute":
+		return "Attributes Set"
+	default:
+		return "String"
+	}
+}
+
+// hasNestedAttrs returns true if the attribute contains nested attributes
+// that should be rendered as a separate section.
+func hasNestedAttrs(a Attribute) bool {
+	if len(a.Attributes) > 0 {
+		return true
+	}
+	if a.Elem != nil && len(a.Elem.Attributes) > 0 {
+		return true
+	}
+	return false
+}
+
+// nestedAttrs returns the nested attributes for an attribute, handling both
+// direct nesting (SingleNestedAttribute) and element nesting (SetNestedAttribute).
+func nestedAttrs(a Attribute) []Attribute {
+	if len(a.Attributes) > 0 {
+		return a.Attributes
+	}
+	if a.Elem != nil {
+		return a.Elem.Attributes
+	}
+	return nil
+}
+
+// renderAttrLine renders a single attribute as a markdown list item.
+func renderAttrLine(a Attribute, anchorPrefix string) string {
+	typeName := displayType(a.AttrType)
+
+	annotations := []string{typeName}
+	if a.Sensitive {
+		annotations = append(annotations, "Sensitive")
+	}
+	if a.Required {
+		annotations = append(annotations, "Required")
+	} else {
+		annotations = append(annotations, "Optional")
+	}
+
+	desc := strings.TrimSpace(a.Description)
+
+	if hasNestedAttrs(a) {
+		anchor := anchorPrefix + "--" + a.AttrName
+		if desc != "" {
+			desc += fmt.Sprintf(" See [below for nested schema](#%s).", anchor)
+		} else {
+			desc = fmt.Sprintf("See [below for nested schema](#%s).", anchor)
+		}
+	}
+
+	if desc != "" {
+		return fmt.Sprintf("- `%s` (%s) %s", a.AttrName, strings.Join(annotations, ", "), desc)
+	}
+	return fmt.Sprintf("- `%s` (%s)", a.AttrName, strings.Join(annotations, ", "))
+}
+
+// renderNestedSections recursively renders nested schema sections for all
+// attributes that have sub-attributes.
+func renderNestedSections(attrs []Attribute, anchorPrefix, pathPrefix string) string {
+	var sb strings.Builder
+	for _, a := range attrs {
+		if !hasNestedAttrs(a) {
+			continue
+		}
+		anchor := anchorPrefix + "--" + a.AttrName
+		attrPath := pathPrefix + "." + a.AttrName
+
+		fmt.Fprintf(&sb, "\n<a id=%q></a>\n### Nested Schema for `%s`\n\n", anchor, attrPath)
+
+		nested := nestedAttrs(a)
+		for _, na := range nested {
+			sb.WriteString(renderAttrLine(na, anchor))
+			sb.WriteString("\n")
+		}
+
+		// Recurse into nested attributes.
+		sub := renderNestedSections(nested, anchor, attrPath)
+		if sub != "" {
+			sb.WriteString(sub)
+		}
+	}
+	return sb.String()
+}
+
+// generateSchemaMarkdown produces the full schema documentation section for a
+// connection resource, replacing the default tfplugindocs rendering.
+func generateSchemaMarkdown(conn Connection) string {
+	var sb strings.Builder
+
+	sb.WriteString("## Schema\n\n")
+
+	// Top-level attributes (same for all connections).
+	sb.WriteString("- `name` (String, Required)\n")
+	if len(conn.Attributes) > 0 {
+		sb.WriteString("- `configuration` (Attributes, Required) See [below for nested schema](#nestedatt--configuration).\n")
+	} else {
+		sb.WriteString("- `configuration` (Attributes, Optional)\n")
+	}
+	sb.WriteString("- `organization` (String, Optional) Organization ID.\n")
+	fmt.Fprintf(&sb, "- `id` (String, Read-only) %s Connection identifier.\n", conn.Name)
+	forceDestroyDesc := "Indicates whether dependent models, syncs, and bulk syncs should be cascade-deleted when this connection is destroyed."
+	if raw, err := os.ReadFile(forceDestroyDescriptionFile); err == nil {
+		// Indent continuation lines so they stay inside the markdown list item.
+		paragraphs := strings.Split(strings.TrimSpace(string(raw)), "\n\n")
+		forceDestroyDesc = strings.Join(paragraphs, "\n\n  ")
+	}
+	fmt.Fprintf(&sb, "- `force_destroy` (Boolean, Optional) %s\n", forceDestroyDesc)
+
+	// Nested configuration schema.
+	if len(conn.Attributes) > 0 {
+		sb.WriteString("\n<a id=\"nestedatt--configuration\"></a>\n### Nested Schema for `configuration`\n\n")
+		for _, a := range conn.Attributes {
+			sb.WriteString(renderAttrLine(a, "nestedatt--configuration"))
+			sb.WriteString("\n")
+		}
+		sub := renderNestedSections(conn.Attributes, "nestedatt--configuration", "configuration")
+		if sub != "" {
+			sb.WriteString(sub)
+		}
+	}
+
+	return sb.String()
+}
+
+// exampleHeading converts an example filename like "example_with_ssh_tunnel.tf"
+// into a heading like "With SSH Tunnel".
+func exampleHeading(filename string) string {
+	name := strings.TrimSuffix(filename, ".tf")
+	name = strings.TrimPrefix(name, "example_")
+	name = strings.ReplaceAll(name, "_", " ")
+	// Title-case each word.
+	words := strings.Fields(name)
+	for i, w := range words {
+		words[i] = strings.ToUpper(w[:1]) + w[1:]
+	}
+	return strings.Join(words, " ")
+}
+
+// generateExamplesSection builds the Example Usage section for the doc
+// template. If curated example files (example_*.tf) exist in the resource's
+// example directory, only those are rendered (with headings derived from
+// filenames). Otherwise, the auto-generated resource.tf is used.
+func generateExamplesSection(resourceName string) string {
+	exampleDir := filepath.Join(exampleResourceOutputPath,
+		fmt.Sprintf("polytomic_%s_connection", resourceName))
+
+	matches, _ := filepath.Glob(filepath.Join(exampleDir, "example_*.tf"))
+	if len(matches) == 0 {
+		// Fall back to the auto-generated example via tfplugindocs.
+		return `{{ tffile .ExampleFile }}`
+	}
+
+	slices.Sort(matches)
+	var sb strings.Builder
+	for _, m := range matches {
+		heading := exampleHeading(filepath.Base(m))
+		// Path relative to repo root for tffile.
+		rel := filepath.Join(exampleDir, filepath.Base(m))
+		fmt.Fprintf(&sb, "### %s\n\n{{ tffile %q }}\n\n", heading, rel)
+	}
+	return strings.TrimSpace(sb.String())
+}
+
 func writeConnectionDocTemplate(r Connection) error {
 	tmpl, err := template.New("resource_doc.md.tmpl").ParseFiles(connectionResourceDocTemplate)
 	if err != nil {
 		return fmt.Errorf("error parsing doc template: %w", err)
 	}
 	var buf bytes.Buffer
-	err = tmpl.Execute(&buf, Connection{
-		Name:         r.Name,
-		ResourceName: r.ResourceName,
+	err = tmpl.Execute(&buf, struct {
+		Name           string
+		ResourceName   string
+		SchemaMarkdown string
+		Examples       string
+	}{
+		Name:           r.Name,
+		ResourceName:   r.ResourceName,
+		SchemaMarkdown: generateSchemaMarkdown(r),
+		Examples:       generateExamplesSection(r.ResourceName),
 	})
 	if err != nil {
 		return fmt.Errorf("error executing doc template for %s: %w", r.Connection, err)
