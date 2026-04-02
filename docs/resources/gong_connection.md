@@ -60,6 +60,12 @@ Required:
 
 - `auth_method` (String) Authentication method
 
+Valid values:
+  - "token" - Access key and secret
+  - "oauth" - OAuth
+
+Default: token.
+
 Optional:
 
 - `access_key` (String) Access key
@@ -69,3 +75,5 @@ Optional:
 - `oauth_refresh_token` (String, Sensitive)
 - `oauth_token_expiry` (String)
 - `subdomain` (String) Gong subdomain i.e. company-17 if you access Gong via https://company-17.app.gong.io
+
+Example: company-123.

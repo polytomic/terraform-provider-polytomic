@@ -59,4 +59,8 @@ Required:
 
 - `api_key` (String, Sensitive) API Key
 - `network_id` (String) Network ID
+
+Example: 12345.
 - `organization_id` (String) Organization ID
+
+Example: 67890.

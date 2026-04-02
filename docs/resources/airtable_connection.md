@@ -66,4 +66,4 @@ Optional:
 - `connected_user` (String) Connected user's email
 - `oauth_access_token` (String, Sensitive)
 - `oauth_refresh_token` (String, Sensitive)
-- `oauth_token_expiry` (String)
+- `oauth_token_expiry` (String) Example: 2023-11-21T21:48:51Z.

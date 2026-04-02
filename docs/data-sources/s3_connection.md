@@ -39,39 +39,76 @@ Read-Only:
 - `auth_mode` (String) Authentication Method
 
     How to authenticate with AWS. Defaults to Access Key and Secret
+
+Valid values:
+  - "access_key_and_secret" - Access Key and Secret
+  - "iam_role" - IAM role
+
+Default: access_key_and_secret.
+
+Example: access_key_and_secret.
 - `aws_access_key_id` (String) AWS Access Key ID
 
     Access Key ID with read/write access to a bucket.
+
+Example: AKIAIOSFODNN7EXAMPLE.
 - `aws_user` (String) User ARN
 - `csv_has_headers` (Boolean) CSV files have headers
 
     Whether CSV files have a header row with field names.
+
+Default: true.
 - `directory_glob_pattern` (String) Tables glob path
-- `enable_event_notifications` (Boolean) Enable Event Notifications
+- `enable_event_notifications` (Boolean) Enable event notifications
 
     Enable S3 event notifications for incremental sync
 - `event_queue_arn` (String) Event Queue ARN
 
     ARN of the SQS queue receiving S3 event notifications
+
+Example: arn:aws:sqs:us-east-1:123456789012:my-queue.
 - `external_id` (String) External ID
 
     External ID for the IAM role
 - `iam_role_arn` (String) IAM Role ARN
 - `is_directory_snapshot` (Boolean) Multi-directory multi-table
+
+Default: false.
 - `is_single_table` (Boolean) Files are time-based snapshots
 
     Treat the files as a single table.
+
+Default: false.
 - `s3_bucket_name` (String) S3 Bucket Name
 
     Bucket name (folder optional); ex: s3://polytomic/dataset
+
+Example: s3://polytomic/dataset.
 - `s3_bucket_region` (String) S3 Bucket Region
+
+Example: us-east-1.
 - `single_table_file_format` (String) File format
+
+Valid values:
+  - "csv" - CSV
+  - "json" - JSON
+  - "parquet" - Parquet
+
+Default: csv.
+
+Example: csv.
 - `single_table_file_formats` (Set of String) File formats
 
     File formats that may be present across different tables
+
+Default: [[csv]].
 - `single_table_name` (String) Collection name
+
+Example: collection.
 - `skip_lines` (Number) Skip first lines
 
     Skip first N lines of each CSV file.
+
+Default: 0.
 
 

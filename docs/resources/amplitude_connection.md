@@ -57,4 +57,6 @@ state before it will take effect on a destroy operation.
 Required:
 
 - `api_key` (String) API Key
+
+Example: api-key.
 - `secret_key` (String, Sensitive) Secret Key

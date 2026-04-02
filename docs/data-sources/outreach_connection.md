@@ -40,4 +40,6 @@ Read-Only:
 - `oauth_token_expiry` (String)
 - `use_bulk_upsert` (Boolean) Use bulk API for syncing to Outreach
 
+Default: true.
+
 

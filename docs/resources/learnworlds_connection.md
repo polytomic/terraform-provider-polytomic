@@ -58,3 +58,5 @@ Required:
 - `client_id` (String) Client ID
 - `client_secret` (String, Sensitive) Client Secret
 - `school_url` (String) School URL
+
+Example: https://my-school.learnworlds.com.

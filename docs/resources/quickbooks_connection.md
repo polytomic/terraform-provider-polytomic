@@ -60,6 +60,8 @@ Required:
 
 - `realm_id` (String) Company ID
 
+Example: 12345678.
+
 Optional:
 
 - `client_id` (String, Sensitive)

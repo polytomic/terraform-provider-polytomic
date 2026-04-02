@@ -56,4 +56,8 @@ Required:
 
 - `api_key` (String, Sensitive) API Key
 - `data_client_id` (String) Data Client ID
-- `instance` (String)
+- `instance` (String) Valid values:
+  - "prod" - Production
+  - "test" - Test
+
+Default: prod.

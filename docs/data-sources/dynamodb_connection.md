@@ -39,13 +39,25 @@ Read-Only:
 - `auth_mode` (String) Authentication Method
 
     How to authenticate with AWS. Defaults to Access Key and Secret
+
+Valid values:
+  - "access_key_and_secret" - Access Key and Secret
+  - "iam_role" - IAM role
+
+Default: access_key_and_secret.
+
+Example: access_key_and_secret.
 - `aws_user` (String) User ARN
 - `change_detection` (Boolean) Use DynamoDB Streams for bulk syncs
+
+Default: false.
 - `external_id` (String) External ID
 
     External ID for the IAM role
 - `iam_role_arn` (String) IAM Role ARN
 - `managed_streams` (Boolean) Let Polytomic manage DynamoDB Stream settings
 - `region` (String) AWS region
+
+Example: us-east-1.
 
 

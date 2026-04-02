@@ -58,18 +58,30 @@ state before it will take effect on a destroy operation.
 
 Required:
 
-- `hostname` (String)
-- `port` (Number)
-- `username` (String)
+- `hostname` (String) Example: clickhouse.example.com.
+- `port` (Number) Default: 9440.
+- `username` (String) Example: default.
 
 Optional:
 
-- `database` (String)
+- `database` (String) Example: default.
 - `password` (String, Sensitive)
 - `skip_verify` (Boolean) Skip certificate verification
+
+Default: true.
 - `ssh` (Boolean) Connect over SSH tunnel
 - `ssh_host` (String) SSH host
+
+Example: bastion.example.com.
 - `ssh_port` (Number) SSH port
+
+Default: 22.
+
+Example: 22.
 - `ssh_private_key` (String, Sensitive) Private key
 - `ssh_user` (String) SSH user
+
+Default: root.
 - `ssl` (Boolean) Use SSL
+
+Default: true.

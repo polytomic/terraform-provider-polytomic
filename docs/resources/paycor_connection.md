@@ -61,5 +61,7 @@ Optional:
 - `client_id` (String, Sensitive) Client ID
 - `client_secret` (String, Sensitive) Client Secret
 - `scopes` (String) Scope Name
+
+Example: profile.
 - `subscription_key` (String, Sensitive) APIm Subscription Key
 - `use_sandbox` (Boolean) Use Sandbox

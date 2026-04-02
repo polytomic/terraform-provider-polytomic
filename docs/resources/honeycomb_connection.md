@@ -57,4 +57,4 @@ state before it will take effect on a destroy operation.
 Required:
 
 - `api_key` (String, Sensitive) API key
-- `dataset` (String)
+- `dataset` (String) Example: dataset.

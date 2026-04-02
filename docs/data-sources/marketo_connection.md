@@ -37,11 +37,25 @@ data "polytomic_marketo_connection" "marketo" {
 Read-Only:
 
 - `client_id` (String) Client ID
+
+Example: 629b6d74-f602-47f4-8fef-388485343d85.
 - `concurrent_imports` (Number) Concurrent import jobs
+
+Default: 5.
+
+Example: 5.
 - `daily_api_calls` (Number) Daily call limit
+
+Default: 37500.
+
+Example: 37500.
 - `enforce_api_limits` (Boolean) Enforce API limits
 - `include_static_lists` (Boolean) Include static list support
+
+Default: true.
 - `oauth_token_expiry` (String)
 - `rest_endpoint` (String) REST Endpoint
+
+Example: https://123-ABC-999.mktorest.com/rest.
 
 

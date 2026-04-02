@@ -64,3 +64,5 @@ Optional:
 - `include_static_list_support` (Boolean) Include static list support
 - `oauth_refresh_token` (String, Sensitive)
 - `use_search_api` (Boolean) Use HubSpot incremental API for bulk syncs
+
+Default: true.

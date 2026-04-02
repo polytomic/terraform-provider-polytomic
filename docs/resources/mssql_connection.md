@@ -59,18 +59,34 @@ state before it will take effect on a destroy operation.
 
 Required:
 
-- `database` (String)
+- `database` (String) Example: sampledb.
 - `hostname` (String) Server
+
+Example: example.database.windows.net.
 - `password` (String, Sensitive)
-- `port` (Number)
-- `username` (String)
+- `port` (Number) Default: 1433.
+
+Example: 1433.
+- `username` (String) Example: user.
 
 Optional:
 
 - `change_detection` (Boolean) Use change data capture for bulk syncs
+
+Default: false.
 - `ssh` (Boolean) Connect over SSH tunnel
 - `ssh_host` (String) SSH host
+
+Example: bastion.example.com.
 - `ssh_port` (Number) SSH port
+
+Default: 22.
+
+Example: 22.
 - `ssh_private_key` (String, Sensitive) Private key
 - `ssh_user` (String) SSH user
+
+Default: root.
 - `ssl` (Boolean) Use SSL
+
+Default: true.

@@ -59,4 +59,8 @@ Required:
 
 - `apikey` (String, Sensitive) API Key
 - `domain` (String) Your Gorgias subdomain (e.g. 'acme' for acme.gorgias.com)
+
+Example: acme.
 - `email` (String) Your Gorgias account email address
+
+Example: user@example.com.

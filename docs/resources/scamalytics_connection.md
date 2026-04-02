@@ -57,3 +57,5 @@ Required:
 
 - `apikey` (String, Sensitive) API Key
 - `endpoint` (String) Enrichment Endpoint
+
+Example: https://api9.scamalytics.com/xyz.

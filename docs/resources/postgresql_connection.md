@@ -60,23 +60,39 @@ state before it will take effect on a destroy operation.
 
 Required:
 
-- `database` (String)
-- `hostname` (String)
+- `database` (String) Example: sampledb.
+- `hostname` (String) Example: database.example.com.
 - `password` (String, Sensitive)
-- `port` (Number)
-- `username` (String)
+- `port` (Number) Default: 5432.
+
+Example: 5432.
+- `username` (String) Example: postgres.
 
 Optional:
 
 - `ca_cert` (String, Sensitive) CA certificate
 - `change_detection` (Boolean) Use logical replication for bulk syncs
+
+Default: false.
 - `client_certificate` (String, Sensitive) Client certificate
 - `client_certs` (Boolean) Use client certificates
+
+Default: false.
 - `client_key` (String, Sensitive) Client key
-- `publication` (String)
+- `publication` (String) Example: polytomic.
 - `ssh` (Boolean) Connect over SSH tunnel
 - `ssh_host` (String) SSH host
+
+Example: bastion.example.com.
 - `ssh_port` (Number) SSH port
+
+Default: 22.
+
+Example: 22.
 - `ssh_private_key` (String, Sensitive) Private key
 - `ssh_user` (String) SSH user
+
+Default: root.
 - `ssl` (Boolean) Use SSL
+
+Default: true.

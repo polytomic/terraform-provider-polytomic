@@ -63,9 +63,17 @@ state before it will take effect on a destroy operation.
 Required:
 
 - `connection_method` (String) Connection method
-- `database` (String)
+
+Valid values:
+  - "data_api" - Redshift Data API
+  - "endpoint" - Redshift Serverless Endpoint
+
+Example: data_api.
+- `database` (String) Example: users.
 - `iam_role_arn` (String) IAM Role ARN
-- `workgroup` (String)
+
+Example: arn:aws:iam::012345678910:role/role.
+- `workgroup` (String) Example: default.
 
 Optional:
 
@@ -74,10 +82,18 @@ Optional:
 
     Example: https://redshift-data.us-west-2.amazonaws.com
 - `endpoint` (String) Redshift Serverless endpoint
+
+Example: acme.12345.us-west-2.redshift-serverless.amazonaws.com:5439.
 - `external_id` (String) External ID
 - `override_endpoint` (Boolean) Override Redshift Data API endpoint
-- `region` (String)
+- `region` (String) Example: us-west-2.
 - `s3_bucket_name` (String) S3 bucket name (destination/unload support only)
+
+Example: my-bucket.
 - `s3_bucket_region` (String) S3 bucket region (destination/unload support only)
+
+Example: us-west-2.
 - `use_bulk_sync_staging_schema` (Boolean) Use custom bulk sync staging schema
+
+Default: false.
 - `use_unload` (Boolean) Read data using Unload

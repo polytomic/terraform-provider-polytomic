@@ -59,7 +59,11 @@ Required:
 
 - `client_id` (String, Sensitive) API User Name
 - `client_secret` (String) API Secret
+
+Example: your-client-secret.
 - `merchant_id` (String) Merchant ID
+
+Example: your-merchant-id.
 
 Optional:
 

@@ -38,4 +38,6 @@ Read-Only:
 
 - `domain` (String) Your Gainsight CS domain
 
+Example: company.gainsightcloud.com.
+
 

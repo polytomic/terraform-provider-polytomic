@@ -39,4 +39,15 @@ Read-Only:
 - `oauth_token_expiry` (String)
 - `region` (String) Data center region
 
+Valid values:
+  - "usa" - USA
+  - "europe" - Europe
+  - "australia" - Australia
+  - "canada" - Canada
+  - "china" - China
+  - "japan" - Japan
+  - "saudi_arabia" - Saudi Arabia
+
+Default: usa.
+
 

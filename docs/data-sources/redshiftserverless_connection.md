@@ -38,19 +38,35 @@ Read-Only:
 
 - `bulk_sync_staging_schema` (String) Staging schema name
 - `connection_method` (String) Connection method
+
+Valid values:
+  - "data_api" - Redshift Data API
+  - "endpoint" - Redshift Serverless Endpoint
+
+Example: data_api.
 - `data_api_endpoint` (String) Redshift Data API endpoint
 
     Example: https://redshift-data.us-west-2.amazonaws.com
-- `database` (String)
+- `database` (String) Example: users.
 - `endpoint` (String) Redshift Serverless endpoint
+
+Example: acme.12345.us-west-2.redshift-serverless.amazonaws.com:5439.
 - `external_id` (String) External ID
 - `iam_role_arn` (String) IAM Role ARN
+
+Example: arn:aws:iam::012345678910:role/role.
 - `override_endpoint` (Boolean) Override Redshift Data API endpoint
-- `region` (String)
+- `region` (String) Example: us-west-2.
 - `s3_bucket_name` (String) S3 bucket name (destination/unload support only)
+
+Example: my-bucket.
 - `s3_bucket_region` (String) S3 bucket region (destination/unload support only)
+
+Example: us-west-2.
 - `use_bulk_sync_staging_schema` (Boolean) Use custom bulk sync staging schema
+
+Default: false.
 - `use_unload` (Boolean) Read data using Unload
-- `workgroup` (String)
+- `workgroup` (String) Example: default.
 
 

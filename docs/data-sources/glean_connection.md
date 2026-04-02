@@ -38,4 +38,6 @@ Read-Only:
 
 - `domain` (String) https://{domain}-be.glean.com
 
+Example: customer.
+
 

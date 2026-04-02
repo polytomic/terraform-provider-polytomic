@@ -62,21 +62,39 @@ state before it will take effect on a destroy operation.
 
 Required:
 
-- `database` (String)
+- `database` (String) Example: sampledb.
 - `hostname` (String) Server
+
+Example: example.database.windows.net.
 - `password` (String, Sensitive)
-- `port` (Number)
-- `username` (String)
+- `port` (Number) Default: 1433.
+
+Example: 1433.
+- `username` (String) Example: user.
 
 Optional:
 
 - `access_key` (String, Sensitive) Storage account access key (destination only)
 - `account_name` (String) Storage account name (destination only)
+
+Example: account.
 - `blob_store` (Boolean) Use Azure blob storage for faster bulk loading (destination only)
 - `container_name` (String) Storage container name (destination only)
+
+Example: container.
 - `ssh` (Boolean) Connect over SSH tunnel
 - `ssh_host` (String) SSH host
+
+Example: bastion.example.com.
 - `ssh_port` (Number) SSH port
+
+Default: 22.
+
+Example: 22.
 - `ssh_private_key` (String, Sensitive) Private key
 - `ssh_user` (String) SSH user
+
+Default: root.
 - `ssl` (Boolean) Use SSL
+
+Default: true.

@@ -60,17 +60,35 @@ state before it will take effect on a destroy operation.
 Required:
 
 - `account` (String) Username
-- `hostname` (String)
+
+Example: admin.
+- `hostname` (String) Example: database.example.com.
 - `passwd` (String, Sensitive) Password
-- `port` (Number)
+- `port` (Number) Default: 3306.
+
+Example: 3306.
 
 Optional:
 
 - `change_detection` (Boolean) Use replication for bulk syncs
+
+Default: false.
 - `dbname` (String) Database
+
+Example: mydb.
 - `ssh` (Boolean) Connect over SSH tunnel
 - `ssh_host` (String) SSH host
+
+Example: bastion.example.com.
 - `ssh_port` (Number) SSH port
+
+Default: 22.
+
+Example: 22.
 - `ssh_private_key` (String, Sensitive) Private key
 - `ssh_user` (String) SSH user
+
+Default: root.
 - `ssl` (Boolean) Use SSL
+
+Default: true.

@@ -57,4 +57,4 @@ state before it will take effect on a destroy operation.
 Required:
 
 - `key` (String, Sensitive)
-- `uri` (String)
+- `uri` (String) Example: https://contosomarketing.documents.azure.com.

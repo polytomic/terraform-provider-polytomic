@@ -38,6 +38,12 @@ Read-Only:
 
 - `accounts` (Attributes Set) (see [below for nested schema](#nestedatt--configuration--accounts))
 - `auth_method` (String) Authentication method
+
+Valid values:
+  - "microsoft" - Microsoft
+  - "google" - Google
+
+Default: microsoft.
 - `oauth_token_expiry` (String)
 - `username` (String) Connected user
 

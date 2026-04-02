@@ -36,6 +36,6 @@ data "polytomic_vanilla_connection" "vanilla" {
 
 Read-Only:
 
-- `domain` (String)
+- `domain` (String) Example: yourcompany.vanillacommunities.com.
 
 

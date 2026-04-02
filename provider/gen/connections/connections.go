@@ -205,12 +205,12 @@ type Attribute struct {
 
 	TfType string `yaml:"-"`
 	// AttrType is the Terraform schema.* type for the attribute.
-	AttrType     string       `yaml:"-"`
-	AttrReadType string       `yaml:"-"`
-	AttrName     string       `yaml:"-"`
-	Default      DefaultValue `yaml:"-"`
-	EnumValues   []string     `yaml:"-"` // valid values for string enums
-	EnumLabels   []string     `yaml:"-"` // human-readable labels for enum values (parallel to EnumValues)
+	AttrType     string          `yaml:"-"`
+	AttrReadType string          `yaml:"-"`
+	AttrName     string          `yaml:"-"`
+	Default      DefaultValue    `yaml:"-"`
+	EnumValues   []string        `yaml:"-"` // valid values for string enums
+	EnumLabels   []string        `yaml:"-"` // human-readable labels for enum values (parallel to EnumValues)
 	Conditions   []AttrCondition `yaml:"-"` // conditions under which this attribute applies
 	Attributes   []Attribute
 	Elem         *Attribute

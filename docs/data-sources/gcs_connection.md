@@ -36,24 +36,45 @@ data "polytomic_gcs_connection" "gcs" {
 
 Read-Only:
 
-- `bucket` (String)
+- `bucket` (String) Example: my-bucket.
 - `client_email` (String) Service account identity
 - `csv_has_headers` (Boolean) CSV files have headers
 
     Whether CSV files have a header row with field names.
+
+Default: true.
 - `directory_glob_pattern` (String) Tables glob path
 - `is_directory_snapshot` (Boolean) Multi-directory multi-table
+
+Default: false.
 - `is_single_table` (Boolean) Files are time-based snapshots
 
     Treat the files as a single table.
+
+Default: false.
 - `project_id` (String) Service account project ID
 - `single_table_file_format` (String) File format
+
+Valid values:
+  - "csv" - CSV
+  - "json" - JSON
+  - "parquet" - Parquet
+
+Default: csv.
+
+Example: csv.
 - `single_table_file_formats` (Set of String) File formats
 
     File formats that may be present across different tables
+
+Default: [[csv]].
 - `single_table_name` (String) Collection name
+
+Example: collection.
 - `skip_lines` (Number) Skip first lines
 
     Skip first N lines of each CSV file.
+
+Default: 0.
 
 

@@ -64,6 +64,10 @@ Optional:
 - `client_id` (String, Sensitive)
 - `client_secret` (String, Sensitive)
 - `connect_mode` (String) Default: browser
+
+Valid values: "browser", "jwt".
+
+Default: browser.
 - `has_headers` (Boolean) Columns have headers
 - `oauth_refresh_token` (String, Sensitive)
 - `oauth_token_expiry` (String)

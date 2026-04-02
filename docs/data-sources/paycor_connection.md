@@ -37,6 +37,8 @@ data "polytomic_paycor_connection" "paycor" {
 Read-Only:
 
 - `scopes` (String) Scope Name
+
+Example: profile.
 - `use_sandbox` (Boolean) Use Sandbox
 
 

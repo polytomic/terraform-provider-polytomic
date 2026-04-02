@@ -36,6 +36,6 @@ data "polytomic_honeycomb_connection" "honeycomb" {
 
 Read-Only:
 
-- `dataset` (String)
+- `dataset` (String) Example: dataset.
 
 

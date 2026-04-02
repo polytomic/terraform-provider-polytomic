@@ -57,6 +57,8 @@ Required:
 
 - `domain` (String) Zendesk Support Subdomain
 
+Example: polytomic.zendesk.com.
+
 Optional:
 
 - `custom_api_limits` (Boolean) Enforce custom API limits

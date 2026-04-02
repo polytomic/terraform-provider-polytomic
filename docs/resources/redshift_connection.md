@@ -67,17 +67,29 @@ Required:
 - `auth_mode` (String) Authentication Method
 
     How to authenticate with AWS. Defaults to Access Key and Secret
-- `database` (String)
-- `hostname` (String)
+
+Valid values:
+  - "access_key_and_secret" - Access Key and Secret
+  - "iam_role" - IAM role
+
+Default: access_key_and_secret.
+
+Example: access_key_and_secret.
+- `database` (String) Example: mydb.
+- `hostname` (String) Example: mycluster.us-west-2.redshift.amazonaws.com.
 - `password` (String, Sensitive)
-- `port` (Number)
-- `username` (String)
+- `port` (Number) Default: 5439.
+
+Example: 5439.
+- `username` (String) Example: redshift_user.
 
 Optional:
 
 - `aws_access_key_id` (String) AWS Access Key ID (destinations only)
 
     Access Key ID with read/write access to a bucket. More info: https://docs.polytomic.com/docs/redshift
+
+Example: AKIAIOSFODNN7EXAMPLE.
 - `aws_secret_access_key` (String, Sensitive) AWS Secret Access Key (destinations only)
 - `aws_user` (String) User ARN
 - `bulk_sync_staging_schema` (String) Staging schema name
@@ -88,12 +100,26 @@ Optional:
 - `s3_bucket_name` (String) S3 Bucket Name (destinations only)
 
     Name of bucket used for staging data load files
+
+Example: my-bucket.
 - `s3_bucket_region` (String) S3 Bucket Region (destinations only)
 
     Region of bucket. Note: must match region of redshift server
+
+Example: us-west-2.
 - `ssh` (Boolean) Connect over SSH tunnel
 - `ssh_host` (String) SSH host
+
+Example: bastion.example.com.
 - `ssh_port` (Number) SSH port
+
+Default: 22.
+
+Example: 22.
 - `ssh_private_key` (String, Sensitive) Private key
 - `ssh_user` (String) SSH user
+
+Default: root.
 - `use_bulk_sync_staging_schema` (Boolean) Use custom bulk sync staging schema
+
+Default: false.

@@ -36,6 +36,6 @@ data "polytomic_cosmosdb_connection" "cosmosdb" {
 
 Read-Only:
 
-- `uri` (String)
+- `uri` (String) Example: https://contosomarketing.documents.azure.com.
 
 

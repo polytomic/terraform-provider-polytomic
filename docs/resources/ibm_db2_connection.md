@@ -59,10 +59,14 @@ state before it will take effect on a destroy operation.
 Required:
 
 - `account` (String) Username
-- `database` (String)
-- `hostname` (String)
+
+Example: db2admin.
+- `database` (String) Example: SAMPLE.
+- `hostname` (String) Example: db2.example.com.
 - `passwd` (String, Sensitive) Password
 
 Optional:
 
 - `ssl` (Boolean) Use SSL
+
+Default: true.

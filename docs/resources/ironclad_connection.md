@@ -59,11 +59,25 @@ state before it will take effect on a destroy operation.
 Required:
 
 - `auth_method` (String) Authentication method
-- `environment` (String)
+
+Valid values:
+  - "oauth" - OAuth Client Credentials
+  - "api_key" - API Key
+
+Default: oauth.
+- `environment` (String) Valid values:
+  - "prod" - Prod
+  - "demo" - Demo
+
+Default: prod.
 
 Optional:
 
 - `api_key` (String, Sensitive) Access token
 - `client_id` (String) Client ID
+
+Example: ironclad.
 - `client_secret` (String, Sensitive) Client secret
 - `user_as_email` (String) Ironclad user email
+
+Example: email@domain.com.

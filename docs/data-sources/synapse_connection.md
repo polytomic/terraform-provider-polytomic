@@ -36,9 +36,13 @@ data "polytomic_synapse_connection" "synapse" {
 
 Read-Only:
 
-- `database` (String)
+- `database` (String) Example: yourdatabase.
 - `hostname` (String) Server
-- `port` (Number)
-- `username` (String)
+
+Example: yourserver.sql.azuresynapse.net.
+- `port` (Number) Default: 1433.
+
+Example: 1433.
+- `username` (String) Example: user.
 
 

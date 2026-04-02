@@ -57,3 +57,5 @@ Required:
 
 - `api_token` (String, Sensitive) API Token
 - `subdomain` (String) e.g. 'acme' if your Showpad URL is https://acme.api.showpad.com
+
+Example: acme.

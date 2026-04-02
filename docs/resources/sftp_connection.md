@@ -60,18 +60,38 @@ Required:
 
 - `auth_mode` (String) Authentication Method
 
+Valid values:
+  - "private_key" - Private key
+  - "password" - Password
+
+Default: private_key.
+
+Example: private_key.
+
 Optional:
 
 - `is_single_table` (Boolean) Files are time-based snapshots
 
     Treat the files as a single table.
 - `path` (String) The path to the directory on the SFTP server containing the files.
+
+Example: /path/to/files.
 - `single_table_name` (String) Collection name
 - `skip_lines` (Number) Skip first lines
 
     Skip first N lines of each CSV file.
+
+Default: 0.
 - `ssh_host` (String) Host
+
+Example: sftp.example.net.
 - `ssh_password` (String, Sensitive) Password
 - `ssh_port` (Number) Port
+
+Default: 22.
+
+Example: 22.
 - `ssh_private_key` (String, Sensitive) Private key
 - `ssh_user` (String) User
+
+Example: user.

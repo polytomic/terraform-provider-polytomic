@@ -37,6 +37,12 @@ data "polytomic_chorus_connection" "chorus" {
 Read-Only:
 
 - `auth_method` (String) Authentication method
+
+Valid values:
+  - "basic" - Basic Auth
+  - "api_key" - API Key
+
+Default: basic.
 - `username` (String)
 
 

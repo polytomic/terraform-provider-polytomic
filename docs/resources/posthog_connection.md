@@ -57,7 +57,13 @@ state before it will take effect on a destroy operation.
 Required:
 
 - `api_key` (String, Sensitive) Personal API key
-- `location` (String)
+- `location` (String) Valid values:
+  - "us" - US
+  - "eu" - EU
+
+Default: us.
+
+Example: us.
 - `project` (String)
 
 Optional:

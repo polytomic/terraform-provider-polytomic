@@ -57,7 +57,7 @@ state before it will take effect on a destroy operation.
 
 Required:
 
-- `bucket` (String)
+- `bucket` (String) Example: my-bucket.
 - `service_account` (String, Sensitive) Service account key
 
 Optional:
@@ -66,17 +66,38 @@ Optional:
 - `csv_has_headers` (Boolean) CSV files have headers
 
     Whether CSV files have a header row with field names.
+
+Default: true.
 - `directory_glob_pattern` (String) Tables glob path
 - `is_directory_snapshot` (Boolean) Multi-directory multi-table
+
+Default: false.
 - `is_single_table` (Boolean) Files are time-based snapshots
 
     Treat the files as a single table.
+
+Default: false.
 - `project_id` (String) Service account project ID
 - `single_table_file_format` (String) File format
+
+Valid values:
+  - "csv" - CSV
+  - "json" - JSON
+  - "parquet" - Parquet
+
+Default: csv.
+
+Example: csv.
 - `single_table_file_formats` (Set of String) File formats
 
     File formats that may be present across different tables
+
+Default: [[csv]].
 - `single_table_name` (String) Collection name
+
+Example: collection.
 - `skip_lines` (Number) Skip first lines
 
     Skip first N lines of each CSV file.
+
+Default: 0.

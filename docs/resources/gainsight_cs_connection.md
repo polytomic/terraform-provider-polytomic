@@ -59,3 +59,5 @@ Required:
 
     Gainsight CS API Access Key
 - `domain` (String) Your Gainsight CS domain
+
+Example: company.gainsightcloud.com.
