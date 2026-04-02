@@ -63,12 +63,12 @@ Valid values:
   - "workload_identity_federation" - Workload Identity Federation
 
 Default: service_account_key.
-- `bucket` (String) Google Cloud Storage bucket
-
-Example: my-bucket.
 
 Optional:
 
+- `bucket` (String) Google Cloud Storage bucket
+
+Example: my-bucket.
 - `client_email` (String) Service account identity
 - `credential_config` (String, Sensitive) Credential configuration
 

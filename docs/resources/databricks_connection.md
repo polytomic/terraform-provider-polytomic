@@ -70,18 +70,6 @@ state before it will take effect on a destroy operation.
 
 Required:
 
-- `access_token` (String, Sensitive) Access Token
-- `auth_mode` (String) AWS Authentication Method
-
-    How to authenticate with AWS. Defaults to Access Key and Secret
-
-Valid values:
-  - "access_key_and_secret" - Access Key and Secret
-  - "iam_role" - IAM role
-
-Default: access_key_and_secret.
-
-Example: access_key_and_secret.
 - `databricks_auth_mode` (String) Authentication Method
 
 Valid values:
@@ -102,13 +90,21 @@ Example: 443.
 - `server_hostname` (String) Server Hostname
 
 Example: dbc-1234dsafas-d0001.cloud.databricks.com.
-- `service_principal_id` (String) Service Principal ID
-
-Example: sp-1234abcd.
-- `service_principal_secret` (String, Sensitive) Service Principal Secret
 
 Optional:
 
+- `access_token` (String, Sensitive) Access Token
+- `auth_mode` (String) AWS Authentication Method
+
+    How to authenticate with AWS. Defaults to Access Key and Secret
+
+Valid values:
+  - "access_key_and_secret" - Access Key and Secret
+  - "iam_role" - IAM role
+
+Default: access_key_and_secret.
+
+Example: access_key_and_secret.
 - `aws_access_key_id` (String) AWS Access Key ID (destinations only)
 
     See https://docs.polytomic.com/docs/databricks-connections#writing-to-databricks
@@ -160,6 +156,10 @@ Example: s3://polytomic-databricks-results/customer-dataset.
     Region of bucket
 
 Example: us-east-1.
+- `service_principal_id` (String) Service Principal ID
+
+Example: sp-1234abcd.
+- `service_principal_secret` (String, Sensitive) Service Principal Secret
 - `set_retention_properties` (Boolean) Configure data retention for tables
 - `ssh` (Boolean) Connect over SSH tunnel
 - `ssh_blob_storage` (Boolean) Use SSH for cloud storage bucket

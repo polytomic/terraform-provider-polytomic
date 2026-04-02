@@ -1,24 +1,22 @@
 ---
-page_title: "polytomic_xero_connection Resource - terraform-provider-polytomic"
+page_title: "polytomic_dub_connection Resource - terraform-provider-polytomic"
 subcategory: "Connections"
 description: |-
-  Xero Connection
+  Dub Connection
 ---
 
-# polytomic_xero_connection (Resource)
+# polytomic_dub_connection (Resource)
 
-Xero Connection
+Dub Connection
 
-For detailed configuration guidance, see the [Xero connection guide](https://apidocs.polytomic.com/guides/configuring-your-connections/connections/xero).
+For detailed configuration guidance, see the [Dub connection guide](https://apidocs.polytomic.com/guides/configuring-your-connections/connections/dub).
 
 ## Example Usage
 
 ```terraform
-resource "polytomic_xero_connection" "xero" {
+resource "polytomic_dub_connection" "dub" {
   name = "example"
   configuration = {
-    client_id     = "your-client-id"
-    client_secret = "your-client-secret"
   }
 }
 ```
@@ -49,21 +47,11 @@ state before it will take effect on a destroy operation.
 
 ### Read-Only
 
-- `id` (String) Xero Connection identifier
+- `id` (String) Dub Connection identifier
 
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
-Optional:
+Required:
 
-- `client_id` (String, Sensitive) Client ID
-- `client_secret` (String, Sensitive) Client Secret
-- `connect_mode` (String) Default: browser. Select client credentials to use a Xero custom connection.
-
-Valid values:
-  - "browser" - OAuth
-  - "clientcredentials" - Client credentials
-
-Default: browser.
-- `tenant_name` (String) Organization Name
-- `tenant_type` (String) Organization Type
+- `api_key` (String, Sensitive) API Key
