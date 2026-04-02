@@ -36,6 +36,6 @@ data "polytomic_constructionwire_connection" "constructionwire" {
 
 Read-Only:
 
-- `email` (String) Example: user@example.com.
+- `email` (String)
 
 

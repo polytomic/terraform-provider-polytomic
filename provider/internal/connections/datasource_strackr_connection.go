@@ -52,14 +52,8 @@ func (d *StrackrConnectionDataSource) Schema(ctx context.Context, req datasource
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"currency_type": schema.StringAttribute{
-						MarkdownDescription: `Currency Type
-
-Valid values: "EUR", "USD", "CAD", "GBP", "RUB", "SEK", "AUD", "INR", "NOK", "DKK".
-
-Default: USD.
-
-Example: USD.`,
-						Computed: true,
+						MarkdownDescription: `Currency Type Valid values: <code>EUR</code>, <code>USD</code>, <code>CAD</code>, <code>GBP</code>, <code>RUB</code>, <code>SEK</code>, <code>AUD</code>, <code>INR</code>, <code>NOK</code>, <code>DKK</code>. Default: <code>USD</code>.`,
+						Computed:            true,
 					},
 					"linkbuilder_customs_text": schema.StringAttribute{
 						MarkdownDescription: `Linkbuilder Customs Text`,

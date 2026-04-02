@@ -52,10 +52,8 @@ func (d *AmplitudeConnectionDataSource) Schema(ctx context.Context, req datasour
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"api_key": schema.StringAttribute{
-						MarkdownDescription: `API Key
-
-Example: api-key.`,
-						Computed: true,
+						MarkdownDescription: `API Key`,
+						Computed:            true,
 					},
 				},
 				Optional: true,

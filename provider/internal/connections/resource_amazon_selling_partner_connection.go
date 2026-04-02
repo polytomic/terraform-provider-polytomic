@@ -81,14 +81,11 @@ var Amazon_selling_partnerSchema = schema.Schema{
 					},
 				},
 				"region": schema.StringAttribute{
-					MarkdownDescription: `Valid values:
-  - "na" - North America
-  - "eu" - Europe
-  - "fe" - Far East`,
-					Required:  true,
-					Optional:  false,
-					Computed:  false,
-					Sensitive: false,
+					MarkdownDescription: `Valid values: <code>na</code> (North America), <code>eu</code> (Europe), <code>fe</code> (Far East).`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
 					Validators: []validator.String{
 						stringvalidator.OneOf("na", "eu", "fe"),
 					},

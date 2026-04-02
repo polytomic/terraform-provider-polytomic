@@ -36,15 +36,11 @@ data "polytomic_googlecloudmysql_connection" "googlecloudmysql" {
 
 Read-Only:
 
-- `change_detection` (Boolean) Use replication for bulk syncs
-
-Default: false.
+- `change_detection` (Boolean) Use replication for bulk syncs Default: <code>false</code>.
 - `connection_name` (String) Cloud SQL connection name
 
     Takes the form of project:region:instance
-
-Example: project:region:instance.
-- `database` (String) Example: sampledb.
-- `username` (String) Example: cloudsql.
+- `database` (String)
+- `username` (String)
 
 

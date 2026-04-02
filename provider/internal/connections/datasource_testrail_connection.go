@@ -52,7 +52,7 @@ func (d *TestrailConnectionDataSource) Schema(ctx context.Context, req datasourc
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"hostname": schema.StringAttribute{
-						MarkdownDescription: `Example: https://example.testrail.io.`,
+						MarkdownDescription: ``,
 						Computed:            true,
 					},
 					"username": schema.StringAttribute{

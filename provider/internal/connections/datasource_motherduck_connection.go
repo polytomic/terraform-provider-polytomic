@@ -54,9 +54,7 @@ func (d *MotherduckConnectionDataSource) Schema(ctx context.Context, req datasou
 					"aws_access_key_id": schema.StringAttribute{
 						MarkdownDescription: `AWS Access Key ID (destinations only)
 
-    Access Key ID with read/write access to a bucket.
-
-Example: AKIAIOSFODNN7EXAMPLE.`,
+    Access Key ID with read/write access to a bucket.`,
 						Computed: true,
 					},
 					"aws_user": schema.StringAttribute{
@@ -64,22 +62,18 @@ Example: AKIAIOSFODNN7EXAMPLE.`,
 						Computed:            true,
 					},
 					"database": schema.StringAttribute{
-						MarkdownDescription: `Example: my_db.`,
+						MarkdownDescription: ``,
 						Computed:            true,
 					},
 					"s3_bucket_name": schema.StringAttribute{
 						MarkdownDescription: `S3 Bucket Name (destinations only)
 
-    Bucket name (folder optional); ex: s3://polytomic/dataset
-
-Example: s3://polytomic/dataset.`,
+    Bucket name (folder optional); ex: s3://polytomic/dataset`,
 						Computed: true,
 					},
 					"s3_bucket_region": schema.StringAttribute{
-						MarkdownDescription: `S3 Bucket Region (destinations only)
-
-Example: us-east-1.`,
-						Computed: true,
+						MarkdownDescription: `S3 Bucket Region (destinations only)`,
+						Computed:            true,
 					},
 				},
 				Optional: true,

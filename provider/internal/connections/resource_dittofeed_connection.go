@@ -44,13 +44,11 @@ var DittofeedSchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"url": schema.StringAttribute{
-					MarkdownDescription: `Dittofeed URL
-
-Example: https://demo.dittofeed.com/.`,
-					Required:  true,
-					Optional:  false,
-					Computed:  false,
-					Sensitive: false,
+					MarkdownDescription: `Dittofeed URL`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
 				},
 				"write_key": schema.StringAttribute{
 					MarkdownDescription: `Write Key`,

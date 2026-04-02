@@ -67,17 +67,11 @@ var XeroSchema = schema.Schema{
 					},
 				},
 				"connect_mode": schema.StringAttribute{
-					MarkdownDescription: `Default: browser. Select client credentials to use a Xero custom connection.
-
-Valid values:
-  - "browser" - OAuth
-  - "clientcredentials" - Client credentials
-
-Default: browser.`,
-					Required:  false,
-					Optional:  true,
-					Computed:  true,
-					Sensitive: false,
+					MarkdownDescription: `Default: browser. Select client credentials to use a Xero custom connection. Valid values: <code>browser</code> (OAuth), <code>clientcredentials</code> (Client credentials). Default: <code>browser</code>.`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
 					Validators: []validator.String{
 						stringvalidator.OneOf("browser", "clientcredentials"),
 					},

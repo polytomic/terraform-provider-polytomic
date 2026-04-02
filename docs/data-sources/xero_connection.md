@@ -36,13 +36,7 @@ data "polytomic_xero_connection" "xero" {
 
 Read-Only:
 
-- `connect_mode` (String) Default: browser. Select client credentials to use a Xero custom connection.
-
-Valid values:
-  - "browser" - OAuth
-  - "clientcredentials" - Client credentials
-
-Default: browser.
+- `connect_mode` (String) Default: browser. Select client credentials to use a Xero custom connection. Valid values: <code>browser</code> (OAuth), <code>clientcredentials</code> (Client credentials). Default: <code>browser</code>.
 - `tenant_name` (String) Organization Name
 - `tenant_type` (String) Organization Type
 

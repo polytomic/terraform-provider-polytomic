@@ -37,12 +37,8 @@ data "polytomic_awsopensearch_connection" "awsopensearch" {
 Read-Only:
 
 - `aws_access_key_id` (String) AWS Access Key ID
-
-Example: AKIAIOSFODNN7EXAMPLE.
 - `aws_user` (String) User ARN
 - `endpoint` (String) Endpoint(s)
-
-Example: es.us-east-2.amazonaws.com.
-- `region` (String) Example: us-east-1.
+- `region` (String)
 
 

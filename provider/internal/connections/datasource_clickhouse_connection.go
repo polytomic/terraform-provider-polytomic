@@ -52,55 +52,43 @@ func (d *ClickhouseConnectionDataSource) Schema(ctx context.Context, req datasou
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"database": schema.StringAttribute{
-						MarkdownDescription: `Example: default.`,
+						MarkdownDescription: ``,
 						Computed:            true,
 					},
 					"hostname": schema.StringAttribute{
-						MarkdownDescription: `Example: clickhouse.example.com.`,
+						MarkdownDescription: ``,
 						Computed:            true,
 					},
 					"port": schema.Int64Attribute{
-						MarkdownDescription: `Default: 9440.`,
+						MarkdownDescription: `Default: <code>9440</code>.`,
 						Computed:            true,
 					},
 					"skip_verify": schema.BoolAttribute{
-						MarkdownDescription: `Skip certificate verification
-
-Default: true.`,
-						Computed: true,
+						MarkdownDescription: `Skip certificate verification Default: <code>true</code>.`,
+						Computed:            true,
 					},
 					"ssh": schema.BoolAttribute{
 						MarkdownDescription: `Connect over SSH tunnel`,
 						Computed:            true,
 					},
 					"ssh_host": schema.StringAttribute{
-						MarkdownDescription: `SSH host
-
-Example: bastion.example.com.`,
-						Computed: true,
+						MarkdownDescription: `SSH host`,
+						Computed:            true,
 					},
 					"ssh_port": schema.Int64Attribute{
-						MarkdownDescription: `SSH port
-
-Default: 22.
-
-Example: 22.`,
-						Computed: true,
+						MarkdownDescription: `SSH port Default: <code>22</code>.`,
+						Computed:            true,
 					},
 					"ssh_user": schema.StringAttribute{
-						MarkdownDescription: `SSH user
-
-Default: root.`,
-						Computed: true,
+						MarkdownDescription: `SSH user Default: <code>root</code>.`,
+						Computed:            true,
 					},
 					"ssl": schema.BoolAttribute{
-						MarkdownDescription: `Use SSL
-
-Default: true.`,
-						Computed: true,
+						MarkdownDescription: `Use SSL Default: <code>true</code>.`,
+						Computed:            true,
 					},
 					"username": schema.StringAttribute{
-						MarkdownDescription: `Example: default.`,
+						MarkdownDescription: ``,
 						Computed:            true,
 					},
 				},

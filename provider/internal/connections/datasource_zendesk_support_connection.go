@@ -52,29 +52,19 @@ func (d *Zendesk_supportConnectionDataSource) Schema(ctx context.Context, req da
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"auth_method": schema.StringAttribute{
-						MarkdownDescription: `Authentication method
-
-Valid values:
-  - "apitoken" - API token
-  - "oauth" - OAuth
-
-Default: oauth.
-
-Example: apitoken.`,
-						Computed: true,
+						MarkdownDescription: `Authentication method Valid values: <code>apitoken</code> (API token), <code>oauth</code> (OAuth). Default: <code>oauth</code>.`,
+						Computed:            true,
 					},
 					"custom_api_limits": schema.BoolAttribute{
 						MarkdownDescription: `Enforce custom API limits`,
 						Computed:            true,
 					},
 					"domain": schema.StringAttribute{
-						MarkdownDescription: `Zendesk Subdomain
-
-Example: polytomic.zendesk.com.`,
-						Computed: true,
+						MarkdownDescription: `Zendesk Subdomain`,
+						Computed:            true,
 					},
 					"email": schema.StringAttribute{
-						MarkdownDescription: `Example: user@example.com.`,
+						MarkdownDescription: ``,
 						Computed:            true,
 					},
 					"oauth_token_expiry": schema.StringAttribute{

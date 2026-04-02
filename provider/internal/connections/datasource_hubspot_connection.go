@@ -64,10 +64,8 @@ func (d *HubspotConnectionDataSource) Schema(ctx context.Context, req datasource
 						Computed:            true,
 					},
 					"use_search_api": schema.BoolAttribute{
-						MarkdownDescription: `Use HubSpot incremental API for bulk syncs
-
-Default: true.`,
-						Computed: true,
+						MarkdownDescription: `Use HubSpot incremental API for bulk syncs Default: <code>true</code>.`,
+						Computed:            true,
 					},
 				},
 				Optional: true,

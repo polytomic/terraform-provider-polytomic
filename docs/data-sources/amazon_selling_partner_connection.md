@@ -38,9 +38,6 @@ Read-Only:
 
 - `client_id` (String) Client ID
 - `merchant_token` (String) Merchant Token
-- `region` (String) Valid values:
-  - "na" - North America
-  - "eu" - Europe
-  - "fe" - Far East
+- `region` (String) Valid values: <code>na</code> (North America), <code>eu</code> (Europe), <code>fe</code> (Far East).
 
 

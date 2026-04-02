@@ -37,10 +37,6 @@ data "polytomic_stord_connection" "stord" {
 Read-Only:
 
 - `network_id` (String) Network ID
-
-Example: 12345.
 - `organization_id` (String) Organization ID
-
-Example: 67890.
 
 

@@ -57,29 +57,21 @@ var IroncladSchema = schema.Schema{
 					},
 				},
 				"auth_method": schema.StringAttribute{
-					MarkdownDescription: `Authentication method
-
-Valid values:
-  - "oauth" - OAuth Client Credentials
-  - "api_key" - API Key
-
-Default: oauth.`,
-					Required:  true,
-					Optional:  false,
-					Computed:  false,
-					Sensitive: false,
+					MarkdownDescription: `Authentication method Valid values: <code>oauth</code> (OAuth Client Credentials), <code>api_key</code> (API Key). Default: <code>oauth</code>.`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
 					Validators: []validator.String{
 						stringvalidator.OneOf("oauth", "api_key"),
 					},
 				},
 				"client_id": schema.StringAttribute{
-					MarkdownDescription: `Client ID
-
-Example: ironclad.`,
-					Required:  false,
-					Optional:  true,
-					Computed:  true,
-					Sensitive: false,
+					MarkdownDescription: `Client ID`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
 				},
 				"client_secret": schema.StringAttribute{
 					MarkdownDescription: `Client secret`,
@@ -92,27 +84,21 @@ Example: ironclad.`,
 					},
 				},
 				"environment": schema.StringAttribute{
-					MarkdownDescription: `Valid values:
-  - "prod" - Prod
-  - "demo" - Demo
-
-Default: prod.`,
-					Required:  true,
-					Optional:  false,
-					Computed:  false,
-					Sensitive: false,
+					MarkdownDescription: `Valid values: <code>prod</code> (Prod), <code>demo</code> (Demo). Default: <code>prod</code>.`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
 					Validators: []validator.String{
 						stringvalidator.OneOf("prod", "demo"),
 					},
 				},
 				"user_as_email": schema.StringAttribute{
-					MarkdownDescription: `Ironclad user email
-
-Example: email@domain.com.`,
-					Required:  false,
-					Optional:  true,
-					Computed:  true,
-					Sensitive: false,
+					MarkdownDescription: `Ironclad user email`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
 				},
 			},
 

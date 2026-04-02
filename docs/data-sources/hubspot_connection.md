@@ -39,8 +39,6 @@ Read-Only:
 - `hub_domain` (String) HubSpot domain
 - `hub_user` (String) HubSpot user
 - `include_static_list_support` (Boolean) Include static list support
-- `use_search_api` (Boolean) Use HubSpot incremental API for bulk syncs
-
-Default: true.
+- `use_search_api` (Boolean) Use HubSpot incremental API for bulk syncs Default: <code>true</code>.
 
 

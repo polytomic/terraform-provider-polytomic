@@ -36,45 +36,24 @@ data "polytomic_gcs_connection" "gcs" {
 
 Read-Only:
 
-- `bucket` (String) Example: my-bucket.
+- `bucket` (String)
 - `client_email` (String) Service account identity
 - `csv_has_headers` (Boolean) CSV files have headers
 
-    Whether CSV files have a header row with field names.
-
-Default: true.
+    Whether CSV files have a header row with field names. Default: <code>true</code>.
 - `directory_glob_pattern` (String) Tables glob path
-- `is_directory_snapshot` (Boolean) Multi-directory multi-table
-
-Default: false.
+- `is_directory_snapshot` (Boolean) Multi-directory multi-table Default: <code>false</code>.
 - `is_single_table` (Boolean) Files are time-based snapshots
 
-    Treat the files as a single table.
-
-Default: false.
+    Treat the files as a single table. Default: <code>false</code>.
 - `project_id` (String) Service account project ID
-- `single_table_file_format` (String) File format
-
-Valid values:
-  - "csv" - CSV
-  - "json" - JSON
-  - "parquet" - Parquet
-
-Default: csv.
-
-Example: csv.
+- `single_table_file_format` (String) File format Valid values: <code>csv</code> (CSV), <code>json</code> (JSON), <code>parquet</code> (Parquet). Default: <code>csv</code>.
 - `single_table_file_formats` (Set of String) File formats
 
-    File formats that may be present across different tables
-
-Default: [[csv]].
+    File formats that may be present across different tables Default: <code>[[csv]]</code>.
 - `single_table_name` (String) Collection name
-
-Example: collection.
 - `skip_lines` (Number) Skip first lines
 
-    Skip first N lines of each CSV file.
-
-Default: 0.
+    Skip first N lines of each CSV file. Default: <code>0</code>.
 
 

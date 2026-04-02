@@ -57,27 +57,18 @@ var AzureblobSchema = schema.Schema{
 					},
 				},
 				"account_name": schema.StringAttribute{
-					MarkdownDescription: `Account Name
-
-Example: account.`,
-					Required:  true,
-					Optional:  false,
-					Computed:  false,
-					Sensitive: false,
+					MarkdownDescription: `Account Name`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
 				},
 				"auth_method": schema.StringAttribute{
-					MarkdownDescription: `Authentication method
-
-Valid values:
-  - "access_key" - Access Key
-  - "client_credentials" - Client Credentials
-  - "oauth" - Oauth
-
-Default: access_key.`,
-					Required:  true,
-					Optional:  false,
-					Computed:  false,
-					Sensitive: false,
+					MarkdownDescription: `Authentication method Valid values: <code>access_key</code> (Access Key), <code>client_credentials</code> (Client Credentials), <code>oauth</code> (Oauth). Default: <code>access_key</code>.`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
 					Validators: []validator.String{
 						stringvalidator.OneOf("access_key", "client_credentials", "oauth"),
 					},
@@ -100,20 +91,16 @@ Default: access_key.`,
 					},
 				},
 				"container_name": schema.StringAttribute{
-					MarkdownDescription: `Container Name
-
-Example: container.`,
-					Required:  true,
-					Optional:  false,
-					Computed:  false,
-					Sensitive: false,
+					MarkdownDescription: `Container Name`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
 				},
 				"csv_has_headers": schema.BoolAttribute{
 					MarkdownDescription: `CSV files have headers
 
-    Whether CSV files have a header row with field names.
-
-Default: true.`,
+    Whether CSV files have a header row with field names. Default: <code>true</code>.`,
 					Required:  false,
 					Optional:  true,
 					Computed:  true,
@@ -127,20 +114,16 @@ Default: true.`,
 					Sensitive:           false,
 				},
 				"is_directory_snapshot": schema.BoolAttribute{
-					MarkdownDescription: `Multi-directory multi-table
-
-Default: false.`,
-					Required:  false,
-					Optional:  true,
-					Computed:  true,
-					Sensitive: false,
+					MarkdownDescription: `Multi-directory multi-table Default: <code>false</code>.`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
 				},
 				"is_single_table": schema.BoolAttribute{
 					MarkdownDescription: `Files are time-based snapshots
 
-    Treat the files as a single table.
-
-Default: false.`,
+    Treat the files as a single table. Default: <code>false</code>.`,
 					Required:  false,
 					Optional:  true,
 					Computed:  true,
@@ -157,20 +140,11 @@ Default: false.`,
 					},
 				},
 				"single_table_file_format": schema.StringAttribute{
-					MarkdownDescription: `File format
-
-Valid values:
-  - "csv" - CSV
-  - "json" - JSON
-  - "parquet" - Parquet
-
-Default: csv.
-
-Example: csv.`,
-					Required:  false,
-					Optional:  true,
-					Computed:  true,
-					Sensitive: false,
+					MarkdownDescription: `File format Valid values: <code>csv</code> (CSV), <code>json</code> (JSON), <code>parquet</code> (Parquet). Default: <code>csv</code>.`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
 					Validators: []validator.String{
 						stringvalidator.OneOf("csv", "json", "parquet"),
 					},
@@ -178,9 +152,7 @@ Example: csv.`,
 				"single_table_file_formats": schema.SetAttribute{
 					MarkdownDescription: `File formats
 
-    File formats that may be present across different tables
-
-Default: [[csv]].`,
+    File formats that may be present across different tables Default: <code>[[csv]]</code>.`,
 					Required:  false,
 					Optional:  true,
 					Computed:  true,
@@ -189,20 +161,16 @@ Default: [[csv]].`,
 					ElementType: types.StringType,
 				},
 				"single_table_name": schema.StringAttribute{
-					MarkdownDescription: `Collection name
-
-Example: collection.`,
-					Required:  false,
-					Optional:  true,
-					Computed:  true,
-					Sensitive: false,
+					MarkdownDescription: `Collection name`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
 				},
 				"skip_lines": schema.Int64Attribute{
 					MarkdownDescription: `Skip first lines
 
-    Skip first N lines of each CSV file.
-
-Default: 0.`,
+    Skip first N lines of each CSV file. Default: <code>0</code>.`,
 					Required:  false,
 					Optional:  true,
 					Computed:  true,

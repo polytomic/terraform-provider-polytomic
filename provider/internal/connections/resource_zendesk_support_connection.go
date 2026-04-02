@@ -57,19 +57,11 @@ var Zendesk_supportSchema = schema.Schema{
 					},
 				},
 				"auth_method": schema.StringAttribute{
-					MarkdownDescription: `Authentication method
-
-Valid values:
-  - "apitoken" - API token
-  - "oauth" - OAuth
-
-Default: oauth.
-
-Example: apitoken.`,
-					Required:  true,
-					Optional:  false,
-					Computed:  false,
-					Sensitive: false,
+					MarkdownDescription: `Authentication method Valid values: <code>apitoken</code> (API token), <code>oauth</code> (OAuth). Default: <code>oauth</code>.`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
 					Validators: []validator.String{
 						stringvalidator.OneOf("apitoken", "oauth"),
 					},
@@ -82,16 +74,14 @@ Example: apitoken.`,
 					Sensitive:           false,
 				},
 				"domain": schema.StringAttribute{
-					MarkdownDescription: `Zendesk Subdomain
-
-Example: polytomic.zendesk.com.`,
-					Required:  true,
-					Optional:  false,
-					Computed:  false,
-					Sensitive: false,
+					MarkdownDescription: `Zendesk Subdomain`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
 				},
 				"email": schema.StringAttribute{
-					MarkdownDescription: `Example: user@example.com.`,
+					MarkdownDescription: ``,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,

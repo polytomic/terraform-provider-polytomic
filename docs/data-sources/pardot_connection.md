@@ -36,14 +36,8 @@ data "polytomic_pardot_connection" "pardot" {
 
 Read-Only:
 
-- `account_type` (String) Account type
-
-Valid values: "Production", "Sandbox", "Demo".
-
-Example: Production.
+- `account_type` (String) Account type Valid values: <code>Production</code>, <code>Sandbox</code>, <code>Demo</code>.
 - `business_unit_id` (String) Business Unit ID
-
-Example: 1234567.
 - `daily_api_calls` (Number) Daily call limit
 - `enforce_api_limits` (Boolean) Enforce API limits
 - `username` (String)

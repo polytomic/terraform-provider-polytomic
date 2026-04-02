@@ -37,17 +37,6 @@ data "polytomic_zoho_crm_connection" "zoho_crm" {
 Read-Only:
 
 - `oauth_token_expiry` (String)
-- `region` (String) Data center region
-
-Valid values:
-  - "usa" - USA
-  - "europe" - Europe
-  - "australia" - Australia
-  - "canada" - Canada
-  - "china" - China
-  - "japan" - Japan
-  - "saudi_arabia" - Saudi Arabia
-
-Default: usa.
+- `region` (String) Data center region Valid values: <code>usa</code> (USA), <code>europe</code> (Europe), <code>australia</code> (Australia), <code>canada</code> (Canada), <code>china</code> (China), <code>japan</code> (Japan), <code>saudi_arabia</code> (Saudi Arabia). Default: <code>usa</code>.
 
 

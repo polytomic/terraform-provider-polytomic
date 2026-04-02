@@ -95,13 +95,11 @@ var HubspotSchema = schema.Schema{
 					},
 				},
 				"use_search_api": schema.BoolAttribute{
-					MarkdownDescription: `Use HubSpot incremental API for bulk syncs
-
-Default: true.`,
-					Required:  false,
-					Optional:  true,
-					Computed:  true,
-					Sensitive: false,
+					MarkdownDescription: `Use HubSpot incremental API for bulk syncs Default: <code>true</code>.`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
 				},
 			},
 

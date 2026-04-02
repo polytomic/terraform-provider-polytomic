@@ -72,19 +72,11 @@ var FbaudienceSchema = schema.Schema{
 					},
 				},
 				"auth_method": schema.StringAttribute{
-					MarkdownDescription: `Authentication Method
-
-Valid values:
-  - "oauth" - Oauth
-  - "token" - Token
-
-Default: oauth.
-
-Example: token.`,
-					Required:  true,
-					Optional:  false,
-					Computed:  false,
-					Sensitive: false,
+					MarkdownDescription: `Authentication Method Valid values: <code>oauth</code> (Oauth), <code>token</code> (Token). Default: <code>oauth</code>.`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
 					Validators: []validator.String{
 						stringvalidator.OneOf("oauth", "token"),
 					},
@@ -100,15 +92,11 @@ Example: token.`,
 					},
 				},
 				"graph_api_version": schema.StringAttribute{
-					MarkdownDescription: `Graph API version
-
-Default: v24.0.
-
-Example: v24.0.`,
-					Required:  false,
-					Optional:  true,
-					Computed:  true,
-					Sensitive: false,
+					MarkdownDescription: `Graph API version Default: <code>v24.0</code>.`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
 				},
 				"user_name": schema.StringAttribute{
 					MarkdownDescription: `Connected as`,

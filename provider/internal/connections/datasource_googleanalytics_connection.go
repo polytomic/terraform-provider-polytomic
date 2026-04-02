@@ -52,14 +52,8 @@ func (d *GoogleanalyticsConnectionDataSource) Schema(ctx context.Context, req da
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"auth_method": schema.StringAttribute{
-						MarkdownDescription: `Authentication method
-
-Valid values:
-  - "oauth" - OAuth
-  - "jwt" - Service Account
-
-Default: oauth.`,
-						Computed: true,
+						MarkdownDescription: `Authentication method Valid values: <code>oauth</code> (OAuth), <code>jwt</code> (Service Account). Default: <code>oauth</code>.`,
+						Computed:            true,
 					},
 					"custom_reports": schema.StringAttribute{
 						MarkdownDescription: `Custom reports

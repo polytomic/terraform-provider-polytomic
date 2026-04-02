@@ -37,57 +37,25 @@ data "polytomic_azureblob_connection" "azureblob" {
 Read-Only:
 
 - `account_name` (String) Account Name
-
-Example: account.
-- `auth_method` (String) Authentication method
-
-Valid values:
-  - "access_key" - Access Key
-  - "client_credentials" - Client Credentials
-  - "oauth" - Oauth
-
-Default: access_key.
+- `auth_method` (String) Authentication method Valid values: <code>access_key</code> (Access Key), <code>client_credentials</code> (Client Credentials), <code>oauth</code> (Oauth). Default: <code>access_key</code>.
 - `client_id` (String) Client ID
 - `container_name` (String) Container Name
-
-Example: container.
 - `csv_has_headers` (Boolean) CSV files have headers
 
-    Whether CSV files have a header row with field names.
-
-Default: true.
+    Whether CSV files have a header row with field names. Default: <code>true</code>.
 - `directory_glob_pattern` (String) Tables glob path
-- `is_directory_snapshot` (Boolean) Multi-directory multi-table
-
-Default: false.
+- `is_directory_snapshot` (Boolean) Multi-directory multi-table Default: <code>false</code>.
 - `is_single_table` (Boolean) Files are time-based snapshots
 
-    Treat the files as a single table.
-
-Default: false.
-- `single_table_file_format` (String) File format
-
-Valid values:
-  - "csv" - CSV
-  - "json" - JSON
-  - "parquet" - Parquet
-
-Default: csv.
-
-Example: csv.
+    Treat the files as a single table. Default: <code>false</code>.
+- `single_table_file_format` (String) File format Valid values: <code>csv</code> (CSV), <code>json</code> (JSON), <code>parquet</code> (Parquet). Default: <code>csv</code>.
 - `single_table_file_formats` (Set of String) File formats
 
-    File formats that may be present across different tables
-
-Default: [[csv]].
+    File formats that may be present across different tables Default: <code>[[csv]]</code>.
 - `single_table_name` (String) Collection name
-
-Example: collection.
 - `skip_lines` (Number) Skip first lines
 
-    Skip first N lines of each CSV file.
-
-Default: 0.
+    Skip first N lines of each CSV file. Default: <code>0</code>.
 - `tenant_id` (String) Tenant ID
 
 

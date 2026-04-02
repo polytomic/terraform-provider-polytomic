@@ -44,20 +44,16 @@ var GooglecloudsqlSchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"change_detection": schema.BoolAttribute{
-					MarkdownDescription: `Use logical replication for bulk syncs
-
-Default: false.`,
-					Required:  false,
-					Optional:  true,
-					Computed:  true,
-					Sensitive: false,
+					MarkdownDescription: `Use logical replication for bulk syncs Default: <code>false</code>.`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
 				},
 				"connection_name": schema.StringAttribute{
 					MarkdownDescription: `Cloud SQL connection name
 
-    Takes the form of project:region:instance
-
-Example: project:region:instance.`,
+    Takes the form of project:region:instance`,
 					Required:  true,
 					Optional:  false,
 					Computed:  false,
@@ -74,7 +70,7 @@ Example: project:region:instance.`,
 					},
 				},
 				"database": schema.StringAttribute{
-					MarkdownDescription: `Example: sampledb.`,
+					MarkdownDescription: ``,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
@@ -91,14 +87,14 @@ Example: project:region:instance.`,
 					},
 				},
 				"publication": schema.StringAttribute{
-					MarkdownDescription: `Example: polytomic.`,
+					MarkdownDescription: ``,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,
 					Sensitive:           false,
 				},
 				"username": schema.StringAttribute{
-					MarkdownDescription: `Example: cloudsql.`,
+					MarkdownDescription: ``,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,

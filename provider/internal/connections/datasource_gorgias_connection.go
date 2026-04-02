@@ -52,16 +52,12 @@ func (d *GorgiasConnectionDataSource) Schema(ctx context.Context, req datasource
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"domain": schema.StringAttribute{
-						MarkdownDescription: `Your Gorgias subdomain (e.g. 'acme' for acme.gorgias.com)
-
-Example: acme.`,
-						Computed: true,
+						MarkdownDescription: `Your Gorgias subdomain (e.g. 'acme' for acme.gorgias.com)`,
+						Computed:            true,
 					},
 					"email": schema.StringAttribute{
-						MarkdownDescription: `Your Gorgias account email address
-
-Example: user@example.com.`,
-						Computed: true,
+						MarkdownDescription: `Your Gorgias account email address`,
+						Computed:            true,
 					},
 				},
 				Optional: true,

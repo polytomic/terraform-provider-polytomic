@@ -54,22 +54,18 @@ var Ware2goSchema = schema.Schema{
 					},
 				},
 				"client_secret": schema.StringAttribute{
-					MarkdownDescription: `API Secret
-
-Example: your-client-secret.`,
-					Required:  true,
-					Optional:  false,
-					Computed:  false,
-					Sensitive: false,
+					MarkdownDescription: `API Secret`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
 				},
 				"merchant_id": schema.StringAttribute{
-					MarkdownDescription: `Merchant ID
-
-Example: your-merchant-id.`,
-					Required:  true,
-					Optional:  false,
-					Computed:  false,
-					Sensitive: false,
+					MarkdownDescription: `Merchant ID`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
 				},
 				"staging": schema.BoolAttribute{
 					MarkdownDescription: `Use Staging Environment`,

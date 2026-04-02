@@ -88,13 +88,11 @@ var OutreachSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"use_bulk_upsert": schema.BoolAttribute{
-					MarkdownDescription: `Use bulk API for syncing to Outreach
-
-Default: true.`,
-					Required:  false,
-					Optional:  true,
-					Computed:  true,
-					Sensitive: false,
+					MarkdownDescription: `Use bulk API for syncing to Outreach Default: <code>true</code>.`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
 				},
 			},
 

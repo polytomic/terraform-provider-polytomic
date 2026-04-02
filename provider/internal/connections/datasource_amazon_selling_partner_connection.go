@@ -60,11 +60,8 @@ func (d *Amazon_selling_partnerConnectionDataSource) Schema(ctx context.Context,
 						Computed:            true,
 					},
 					"region": schema.StringAttribute{
-						MarkdownDescription: `Valid values:
-  - "na" - North America
-  - "eu" - Europe
-  - "fe" - Far East`,
-						Computed: true,
+						MarkdownDescription: `Valid values: <code>na</code> (North America), <code>eu</code> (Europe), <code>fe</code> (Far East).`,
+						Computed:            true,
 					},
 				},
 				Optional: true,

@@ -39,24 +39,14 @@ Read-Only:
 - `account` (String) Account identifier
 
     e.g. FRXJLEC-UJA94780
-
-Example: FRXJLEC-UJA94780.
 - `bulk_sync_staging_schema` (String) Staging schema name
 - `dbname` (String) Database
-
-Example: database_name.
-- `key_pair_auth` (Boolean) Use key pair authentication
-
-Default: false.
+- `key_pair_auth` (Boolean) Use key pair authentication Default: <code>false</code>.
 - `params` (String) Additional parameters
 
     Additional connection parameters, formatted as a query string
-- `use_bulk_sync_staging_schema` (Boolean) Use custom bulk sync staging schema
-
-Default: false.
-- `username` (String) Example: user.
+- `use_bulk_sync_staging_schema` (Boolean) Use custom bulk sync staging schema Default: <code>false</code>.
+- `username` (String)
 - `warehouse` (String) Compute warehouse
-
-Example: warehouse.
 
 

@@ -52,20 +52,16 @@ func (d *MongodbConnectionDataSource) Schema(ctx context.Context, req datasource
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"change_detection": schema.BoolAttribute{
-						MarkdownDescription: `Use change stream for bulk syncs
-
-Default: false.`,
-						Computed: true,
+						MarkdownDescription: `Use change stream for bulk syncs Default: <code>false</code>.`,
+						Computed:            true,
 					},
 					"database": schema.StringAttribute{
 						MarkdownDescription: `Auth Database`,
 						Computed:            true,
 					},
 					"hosts": schema.StringAttribute{
-						MarkdownDescription: `Hostname(s)
-
-Example: mongodb.example.net.`,
-						Computed: true,
+						MarkdownDescription: `Hostname(s)`,
+						Computed:            true,
 					},
 					"params": schema.StringAttribute{
 						MarkdownDescription: `Additional Parameters
@@ -78,13 +74,11 @@ Example: mongodb.example.net.`,
 						Computed:            true,
 					},
 					"ssl": schema.BoolAttribute{
-						MarkdownDescription: `Use TLS/SSL
-
-Default: true.`,
-						Computed: true,
+						MarkdownDescription: `Use TLS/SSL Default: <code>true</code>.`,
+						Computed:            true,
 					},
 					"username": schema.StringAttribute{
-						MarkdownDescription: `Example: admin.`,
+						MarkdownDescription: ``,
 						Computed:            true,
 					},
 				},

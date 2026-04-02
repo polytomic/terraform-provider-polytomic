@@ -36,6 +36,6 @@ data "polytomic_sharepoint_excel_connection" "sharepoint_excel" {
 
 Read-Only:
 
-- `oauth_token_expiry` (String) Example: 2023-11-21T21:48:51Z.
+- `oauth_token_expiry` (String)
 
 

@@ -64,13 +64,11 @@ var M3terSchema = schema.Schema{
 					},
 				},
 				"org_id": schema.StringAttribute{
-					MarkdownDescription: `Organization ID
-
-Example: your-org-id-uuid.`,
-					Required:  true,
-					Optional:  false,
-					Computed:  false,
-					Sensitive: false,
+					MarkdownDescription: `Organization ID`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
 				},
 			},
 

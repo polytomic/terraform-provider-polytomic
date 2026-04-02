@@ -52,12 +52,8 @@ func (d *GsheetsConnectionDataSource) Schema(ctx context.Context, req datasource
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"connect_mode": schema.StringAttribute{
-						MarkdownDescription: `Default: browser
-
-Valid values: "browser", "jwt".
-
-Default: browser.`,
-						Computed: true,
+						MarkdownDescription: `Default: browser Valid values: <code>browser</code>, <code>jwt</code>. Default: <code>browser</code>.`,
+						Computed:            true,
 					},
 					"has_headers": schema.BoolAttribute{
 						MarkdownDescription: `Columns have headers`,

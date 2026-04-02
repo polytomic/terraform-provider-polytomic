@@ -52,10 +52,8 @@ func (d *GleanConnectionDataSource) Schema(ctx context.Context, req datasource.S
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"domain": schema.StringAttribute{
-						MarkdownDescription: `https://{domain}-be.glean.com
-
-Example: customer.`,
-						Computed: true,
+						MarkdownDescription: `https://{domain}-be.glean.com`,
+						Computed:            true,
 					},
 				},
 				Optional: true,

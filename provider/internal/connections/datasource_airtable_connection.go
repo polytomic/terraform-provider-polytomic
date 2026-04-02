@@ -56,7 +56,7 @@ func (d *AirtableConnectionDataSource) Schema(ctx context.Context, req datasourc
 						Computed:            true,
 					},
 					"oauth_token_expiry": schema.StringAttribute{
-						MarkdownDescription: `Example: 2023-11-21T21:48:51Z.`,
+						MarkdownDescription: ``,
 						Computed:            true,
 					},
 				},

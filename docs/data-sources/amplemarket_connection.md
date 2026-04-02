@@ -36,11 +36,7 @@ data "polytomic_amplemarket_connection" "amplemarket" {
 
 Read-Only:
 
-- `reveal_email_for_person` (Boolean) Reveal email address for person enrichment
-
-Default: true.
-- `reveal_phone_number_for_person` (Boolean) Reveal phone number for person enrichment
-
-Default: true.
+- `reveal_email_for_person` (Boolean) Reveal email address for person enrichment Default: <code>true</code>.
+- `reveal_phone_number_for_person` (Boolean) Reveal phone number for person enrichment Default: <code>true</code>.
 
 

@@ -52,23 +52,13 @@ func (d *AwsathenaConnectionDataSource) Schema(ctx context.Context, req datasour
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"access_id": schema.StringAttribute{
-						MarkdownDescription: `AWS Access ID
-
-Example: AKIAIOSFODNN7EXAMPLE.`,
-						Computed: true,
+						MarkdownDescription: `AWS Access ID`,
+						Computed:            true,
 					},
 					"auth_mode": schema.StringAttribute{
 						MarkdownDescription: `Authentication Method
 
-    How to authenticate with AWS. Defaults to Access Key and Secret
-
-Valid values:
-  - "access_key_and_secret" - Access Key and Secret
-  - "iam_role" - IAM role
-
-Default: access_key_and_secret.
-
-Example: access_key_and_secret.`,
+    How to authenticate with AWS. Defaults to Access Key and Secret Valid values: <code>access_key_and_secret</code> (Access Key and Secret), <code>iam_role</code> (IAM role). Default: <code>access_key_and_secret</code>.`,
 						Computed: true,
 					},
 					"aws_user": schema.StringAttribute{
@@ -88,16 +78,12 @@ Example: access_key_and_secret.`,
 					"outputbucket": schema.StringAttribute{
 						MarkdownDescription: `AWS S3 output bucket
 
-    A pre-existing bucket (folder optional) that AWS can use to store query results. ex: s3://polytomic-athena-results/customer-dataset
-
-Example: s3://polytomic-athena-results/customer-dataset.`,
+    A pre-existing bucket (folder optional) that AWS can use to store query results. ex: s3://polytomic-athena-results/customer-dataset`,
 						Computed: true,
 					},
 					"region": schema.StringAttribute{
-						MarkdownDescription: `AWS region
-
-Example: us-east-1.`,
-						Computed: true,
+						MarkdownDescription: `AWS region`,
+						Computed:            true,
 					},
 					"tags": schema.MapAttribute{
 						MarkdownDescription: `Additional tags to apply during role assumption`,

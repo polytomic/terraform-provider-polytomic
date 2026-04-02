@@ -39,6 +39,4 @@ Read-Only:
 - `client_id` (String) Client ID
 - `school_url` (String) School URL
 
-Example: https://my-school.learnworlds.com.
-
 

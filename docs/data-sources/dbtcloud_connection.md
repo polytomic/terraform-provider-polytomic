@@ -38,6 +38,4 @@ Read-Only:
 
 - `url` (String) URL of dbt Cloud instance e.g. https://cloud.getdbt.com
 
-Example: https://cloud.getdbt.com.
-
 

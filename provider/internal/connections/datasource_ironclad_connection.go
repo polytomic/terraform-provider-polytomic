@@ -52,34 +52,20 @@ func (d *IroncladConnectionDataSource) Schema(ctx context.Context, req datasourc
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"auth_method": schema.StringAttribute{
-						MarkdownDescription: `Authentication method
-
-Valid values:
-  - "oauth" - OAuth Client Credentials
-  - "api_key" - API Key
-
-Default: oauth.`,
-						Computed: true,
+						MarkdownDescription: `Authentication method Valid values: <code>oauth</code> (OAuth Client Credentials), <code>api_key</code> (API Key). Default: <code>oauth</code>.`,
+						Computed:            true,
 					},
 					"client_id": schema.StringAttribute{
-						MarkdownDescription: `Client ID
-
-Example: ironclad.`,
-						Computed: true,
+						MarkdownDescription: `Client ID`,
+						Computed:            true,
 					},
 					"environment": schema.StringAttribute{
-						MarkdownDescription: `Valid values:
-  - "prod" - Prod
-  - "demo" - Demo
-
-Default: prod.`,
-						Computed: true,
+						MarkdownDescription: `Valid values: <code>prod</code> (Prod), <code>demo</code> (Demo). Default: <code>prod</code>.`,
+						Computed:            true,
 					},
 					"user_as_email": schema.StringAttribute{
-						MarkdownDescription: `Ironclad user email
-
-Example: email@domain.com.`,
-						Computed: true,
+						MarkdownDescription: `Ironclad user email`,
+						Computed:            true,
 					},
 				},
 				Optional: true,

@@ -64,17 +64,11 @@ var GongSchema = schema.Schema{
 					},
 				},
 				"auth_method": schema.StringAttribute{
-					MarkdownDescription: `Authentication method
-
-Valid values:
-  - "token" - Access key and secret
-  - "oauth" - OAuth
-
-Default: token.`,
-					Required:  true,
-					Optional:  false,
-					Computed:  false,
-					Sensitive: false,
+					MarkdownDescription: `Authentication method Valid values: <code>token</code> (Access key and secret), <code>oauth</code> (OAuth). Default: <code>token</code>.`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
 					Validators: []validator.String{
 						stringvalidator.OneOf("token", "oauth"),
 					},
@@ -117,13 +111,11 @@ Default: token.`,
 					Sensitive:           false,
 				},
 				"subdomain": schema.StringAttribute{
-					MarkdownDescription: `Gong subdomain i.e. company-17 if you access Gong via https://company-17.app.gong.io
-
-Example: company-123.`,
-					Required:  false,
-					Optional:  true,
-					Computed:  true,
-					Sensitive: false,
+					MarkdownDescription: `Gong subdomain i.e. company-17 if you access Gong via https://company-17.app.gong.io`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
 				},
 			},
 

@@ -54,23 +54,13 @@ func (d *CustomeriowarehouseexportsConnectionDataSource) Schema(ctx context.Cont
 					"auth_mode": schema.StringAttribute{
 						MarkdownDescription: `Authentication Method
 
-    How to authenticate with AWS. Defaults to Access Key and Secret
-
-Valid values:
-  - "access_key_and_secret" - Access Key and Secret
-  - "iam_role" - IAM role
-
-Default: access_key_and_secret.
-
-Example: access_key_and_secret.`,
+    How to authenticate with AWS. Defaults to Access Key and Secret Valid values: <code>access_key_and_secret</code> (Access Key and Secret), <code>iam_role</code> (IAM role). Default: <code>access_key_and_secret</code>.`,
 						Computed: true,
 					},
 					"aws_access_key_id": schema.StringAttribute{
 						MarkdownDescription: `AWS Access Key ID
 
-    Access Key ID with read/write access to a bucket.
-
-Example: AKIAIOSFODNN7EXAMPLE.`,
+    Access Key ID with read/write access to a bucket.`,
 						Computed: true,
 					},
 					"aws_user": schema.StringAttribute{
@@ -90,16 +80,12 @@ Example: AKIAIOSFODNN7EXAMPLE.`,
 					"s3_bucket_name": schema.StringAttribute{
 						MarkdownDescription: `S3 Bucket Name
 
-    Bucket name (folder optional); ex: s3://polytomic/dataset
-
-Example: s3://polytomic/dataset.`,
+    Bucket name (folder optional); ex: s3://polytomic/dataset`,
 						Computed: true,
 					},
 					"s3_bucket_region": schema.StringAttribute{
-						MarkdownDescription: `S3 Bucket Region
-
-Example: us-east-1.`,
-						Computed: true,
+						MarkdownDescription: `S3 Bucket Region`,
+						Computed:            true,
 					},
 				},
 				Optional: true,

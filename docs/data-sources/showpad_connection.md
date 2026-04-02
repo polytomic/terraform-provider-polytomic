@@ -38,6 +38,4 @@ Read-Only:
 
 - `subdomain` (String) e.g. 'acme' if your Showpad URL is https://acme.api.showpad.com
 
-Example: acme.
-
 

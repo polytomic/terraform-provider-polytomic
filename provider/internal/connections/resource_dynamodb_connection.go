@@ -59,15 +59,7 @@ var DynamodbSchema = schema.Schema{
 				"auth_mode": schema.StringAttribute{
 					MarkdownDescription: `Authentication Method
 
-    How to authenticate with AWS. Defaults to Access Key and Secret
-
-Valid values:
-  - "access_key_and_secret" - Access Key and Secret
-  - "iam_role" - IAM role
-
-Default: access_key_and_secret.
-
-Example: access_key_and_secret.`,
+    How to authenticate with AWS. Defaults to Access Key and Secret Valid values: <code>access_key_and_secret</code> (Access Key and Secret), <code>iam_role</code> (IAM role). Default: <code>access_key_and_secret</code>.`,
 					Required:  true,
 					Optional:  false,
 					Computed:  false,
@@ -84,13 +76,11 @@ Example: access_key_and_secret.`,
 					Sensitive:           false,
 				},
 				"change_detection": schema.BoolAttribute{
-					MarkdownDescription: `Use DynamoDB Streams for bulk syncs
-
-Default: false.`,
-					Required:  false,
-					Optional:  true,
-					Computed:  true,
-					Sensitive: false,
+					MarkdownDescription: `Use DynamoDB Streams for bulk syncs Default: <code>false</code>.`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
 				},
 				"external_id": schema.StringAttribute{
 					MarkdownDescription: `External ID
@@ -116,13 +106,11 @@ Default: false.`,
 					Sensitive:           false,
 				},
 				"region": schema.StringAttribute{
-					MarkdownDescription: `AWS region
-
-Example: us-east-1.`,
-					Required:  true,
-					Optional:  false,
-					Computed:  false,
-					Sensitive: false,
+					MarkdownDescription: `AWS region`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
 				},
 				"secret_access_key": schema.StringAttribute{
 					MarkdownDescription: `AWS Secret Access Key`,

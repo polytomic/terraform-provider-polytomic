@@ -68,14 +68,8 @@ func (d *MsadsConnectionDataSource) Schema(ctx context.Context, req datasource.S
 						},
 					},
 					"auth_method": schema.StringAttribute{
-						MarkdownDescription: `Authentication method
-
-Valid values:
-  - "microsoft" - Microsoft
-  - "google" - Google
-
-Default: microsoft.`,
-						Computed: true,
+						MarkdownDescription: `Authentication method Valid values: <code>microsoft</code> (Microsoft), <code>google</code> (Google). Default: <code>microsoft</code>.`,
+						Computed:            true,
 					},
 					"oauth_token_expiry": schema.StringAttribute{
 						MarkdownDescription: ``,

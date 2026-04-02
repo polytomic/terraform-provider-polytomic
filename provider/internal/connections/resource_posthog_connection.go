@@ -64,17 +64,11 @@ var PosthogSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"location": schema.StringAttribute{
-					MarkdownDescription: `Valid values:
-  - "us" - US
-  - "eu" - EU
-
-Default: us.
-
-Example: us.`,
-					Required:  true,
-					Optional:  false,
-					Computed:  false,
-					Sensitive: false,
+					MarkdownDescription: `Valid values: <code>us</code> (US), <code>eu</code> (EU). Default: <code>us</code>.`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
 					Validators: []validator.String{
 						stringvalidator.OneOf("us", "eu"),
 					},

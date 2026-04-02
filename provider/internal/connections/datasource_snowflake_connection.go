@@ -54,9 +54,7 @@ func (d *SnowflakeConnectionDataSource) Schema(ctx context.Context, req datasour
 					"account": schema.StringAttribute{
 						MarkdownDescription: `Account identifier
 
-    e.g. FRXJLEC-UJA94780
-
-Example: FRXJLEC-UJA94780.`,
+    e.g. FRXJLEC-UJA94780`,
 						Computed: true,
 					},
 					"bulk_sync_staging_schema": schema.StringAttribute{
@@ -64,16 +62,12 @@ Example: FRXJLEC-UJA94780.`,
 						Computed:            true,
 					},
 					"dbname": schema.StringAttribute{
-						MarkdownDescription: `Database
-
-Example: database_name.`,
-						Computed: true,
+						MarkdownDescription: `Database`,
+						Computed:            true,
 					},
 					"key_pair_auth": schema.BoolAttribute{
-						MarkdownDescription: `Use key pair authentication
-
-Default: false.`,
-						Computed: true,
+						MarkdownDescription: `Use key pair authentication Default: <code>false</code>.`,
+						Computed:            true,
 					},
 					"params": schema.StringAttribute{
 						MarkdownDescription: `Additional parameters
@@ -82,20 +76,16 @@ Default: false.`,
 						Computed: true,
 					},
 					"use_bulk_sync_staging_schema": schema.BoolAttribute{
-						MarkdownDescription: `Use custom bulk sync staging schema
-
-Default: false.`,
-						Computed: true,
+						MarkdownDescription: `Use custom bulk sync staging schema Default: <code>false</code>.`,
+						Computed:            true,
 					},
 					"username": schema.StringAttribute{
-						MarkdownDescription: `Example: user.`,
+						MarkdownDescription: ``,
 						Computed:            true,
 					},
 					"warehouse": schema.StringAttribute{
-						MarkdownDescription: `Compute warehouse
-
-Example: warehouse.`,
-						Computed: true,
+						MarkdownDescription: `Compute warehouse`,
+						Computed:            true,
 					},
 				},
 				Optional: true,

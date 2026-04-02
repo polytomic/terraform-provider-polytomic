@@ -57,17 +57,11 @@ var ChorusSchema = schema.Schema{
 					},
 				},
 				"auth_method": schema.StringAttribute{
-					MarkdownDescription: `Authentication method
-
-Valid values:
-  - "basic" - Basic Auth
-  - "api_key" - API Key
-
-Default: basic.`,
-					Required:  true,
-					Optional:  false,
-					Computed:  false,
-					Sensitive: false,
+					MarkdownDescription: `Authentication method Valid values: <code>basic</code> (Basic Auth), <code>api_key</code> (API Key). Default: <code>basic</code>.`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
 					Validators: []validator.String{
 						stringvalidator.OneOf("basic", "api_key"),
 					},

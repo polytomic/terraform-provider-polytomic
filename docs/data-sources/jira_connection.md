@@ -36,18 +36,8 @@ data "polytomic_jira_connection" "jira" {
 
 Read-Only:
 
-- `auth_method` (String) Authentication method
-
-Valid values:
-  - "apikey" - API token
-  - "pat" - Personal access token
-
-Default: apikey.
-
-Example: pat.
+- `auth_method` (String) Authentication method Valid values: <code>apikey</code> (API token), <code>pat</code> (Personal access token). Default: <code>apikey</code>.
 - `url` (String) Jira URL
-
-Example: https://jira.mycompany.com/.
 - `username` (String)
 
 

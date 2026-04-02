@@ -36,7 +36,7 @@ data "polytomic_testrail_connection" "testrail" {
 
 Read-Only:
 
-- `hostname` (String) Example: https://example.testrail.io.
+- `hostname` (String)
 - `username` (String)
 
 

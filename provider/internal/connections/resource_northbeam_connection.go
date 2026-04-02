@@ -64,15 +64,11 @@ var NorthbeamSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"instance": schema.StringAttribute{
-					MarkdownDescription: `Valid values:
-  - "prod" - Production
-  - "test" - Test
-
-Default: prod.`,
-					Required:  true,
-					Optional:  false,
-					Computed:  false,
-					Sensitive: false,
+					MarkdownDescription: `Valid values: <code>prod</code> (Production), <code>test</code> (Test). Default: <code>prod</code>.`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
 					Validators: []validator.String{
 						stringvalidator.OneOf("prod", "test"),
 					},

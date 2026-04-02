@@ -40,49 +40,24 @@ Read-Only:
 - `aws_access_key_id` (String) Access Key ID
 
     Access Key ID with read/write access to a bucket.
-
-Example: AKIAIOSFODNN7EXAMPLE.
 - `bucket_name` (String) Bucket Name
 
     Bucket name (folder optional); ex: polytomic/dataset
-
-Example: polytomic/dataset.
 - `csv_has_headers` (Boolean) CSV files have headers
 
-    Whether CSV files have a header row with field names.
-
-Default: true.
+    Whether CSV files have a header row with field names. Default: <code>true</code>.
 - `directory_glob_pattern` (String) Tables glob path
-- `is_directory_snapshot` (Boolean) Multi-directory multi-table
-
-Default: false.
+- `is_directory_snapshot` (Boolean) Multi-directory multi-table Default: <code>false</code>.
 - `is_single_table` (Boolean) Files are time-based snapshots
 
-    Treat the files as a single table.
-
-Default: false.
-- `single_table_file_format` (String) File format
-
-Valid values:
-  - "csv" - CSV
-  - "json" - JSON
-  - "parquet" - Parquet
-
-Default: csv.
-
-Example: csv.
+    Treat the files as a single table. Default: <code>false</code>.
+- `single_table_file_format` (String) File format Valid values: <code>csv</code> (CSV), <code>json</code> (JSON), <code>parquet</code> (Parquet). Default: <code>csv</code>.
 - `single_table_file_formats` (Set of String) File formats
 
-    File formats that may be present across different tables
-
-Default: [[csv]].
+    File formats that may be present across different tables Default: <code>[[csv]]</code>.
 - `single_table_name` (String) Collection name
-
-Example: collection.
 - `skip_lines` (Number) Skip first lines
 
-    Skip first N lines of each CSV file.
-
-Default: 0.
+    Skip first N lines of each CSV file. Default: <code>0</code>.
 
 

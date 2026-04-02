@@ -61,13 +61,11 @@ var LearnworldsSchema = schema.Schema{
 					},
 				},
 				"school_url": schema.StringAttribute{
-					MarkdownDescription: `School URL
-
-Example: https://my-school.learnworlds.com.`,
-					Required:  true,
-					Optional:  false,
-					Computed:  false,
-					Sensitive: false,
+					MarkdownDescription: `School URL`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
 				},
 			},
 

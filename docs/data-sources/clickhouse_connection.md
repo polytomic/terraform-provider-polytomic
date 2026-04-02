@@ -36,27 +36,15 @@ data "polytomic_clickhouse_connection" "clickhouse" {
 
 Read-Only:
 
-- `database` (String) Example: default.
-- `hostname` (String) Example: clickhouse.example.com.
-- `port` (Number) Default: 9440.
-- `skip_verify` (Boolean) Skip certificate verification
-
-Default: true.
+- `database` (String)
+- `hostname` (String)
+- `port` (Number) Default: <code>9440</code>.
+- `skip_verify` (Boolean) Skip certificate verification Default: <code>true</code>.
 - `ssh` (Boolean) Connect over SSH tunnel
 - `ssh_host` (String) SSH host
-
-Example: bastion.example.com.
-- `ssh_port` (Number) SSH port
-
-Default: 22.
-
-Example: 22.
-- `ssh_user` (String) SSH user
-
-Default: root.
-- `ssl` (Boolean) Use SSL
-
-Default: true.
-- `username` (String) Example: default.
+- `ssh_port` (Number) SSH port Default: <code>22</code>.
+- `ssh_user` (String) SSH user Default: <code>root</code>.
+- `ssl` (Boolean) Use SSL Default: <code>true</code>.
+- `username` (String)
 
 

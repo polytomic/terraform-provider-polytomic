@@ -38,6 +38,4 @@ Read-Only:
 
 - `endpoint` (String) Enrichment Endpoint
 
-Example: https://api9.scamalytics.com/xyz.
-
 

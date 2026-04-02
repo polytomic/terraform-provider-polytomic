@@ -54,13 +54,11 @@ var ScamalyticsSchema = schema.Schema{
 					},
 				},
 				"endpoint": schema.StringAttribute{
-					MarkdownDescription: `Enrichment Endpoint
-
-Example: https://api9.scamalytics.com/xyz.`,
-					Required:  true,
-					Optional:  false,
-					Computed:  false,
-					Sensitive: false,
+					MarkdownDescription: `Enrichment Endpoint`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
 				},
 			},
 

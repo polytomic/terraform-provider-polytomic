@@ -15,4 +15,40 @@ For detailed configuration guidance, see the [SFTP connection guide](https://api
 
 {{ tffile .ExampleFile }}
 
-{{ .SchemaMarkdown | trimspace }}
+## Schema
+
+- `name` (String, Required)
+- `configuration` (Attributes, Required) See [below for nested schema](#nestedatt--configuration).
+- `organization` (String, Optional) Organization ID.
+- `id` (String, Read-only) SFTP Connection identifier.
+- `force_destroy` (Boolean, Optional) Indicates whether dependent models, syncs, and bulk syncs should be
+cascade-deleted when this connection is destroyed.
+
+    This only deletes other resources when the connection is destroyed, not when
+setting this parameter to `true`. Once this parameter is set to `true`, there
+must be a successful `terraform apply` run before a destroy is required to
+update this value in the resource state. Without a successful `terraform apply`
+after this parameter is set, this flag will have no effect. If setting this
+field in the same operation that would require replacing the connection or
+destroying the connection, this flag will not work. Additionally when importing
+a connection, a successful `terraform apply` is required to set this value in
+state before it will take effect on a destroy operation.
+
+<a id="nestedatt--configuration"></a>
+### Nested Schema for `configuration`
+
+- `auth_mode` (String, Required) Authentication Method Valid values: <code>private_key</code> (Private key), <code>password</code> (Password). Default: <code>private_key</code>.
+- `is_single_table` (Boolean, Optional) Files are time-based snapshots
+
+    Treat the files as a single table.
+- `path` (String, Optional) The path to the directory on the SFTP server containing the files.
+- `single_table_name` (String, Optional) Collection name
+- `skip_lines` (Number, Optional) Skip first lines
+
+    Skip first N lines of each CSV file. Default: <code>0</code>.
+- `ssh_host` (String, Optional) Host
+- `ssh_password` (String, Sensitive, Optional) Password
+- `ssh_port` (Number, Optional) Port Default: <code>22</code>.
+- `ssh_private_key` (String, Sensitive, Optional) Private key
+- `ssh_user` (String, Optional) User
+

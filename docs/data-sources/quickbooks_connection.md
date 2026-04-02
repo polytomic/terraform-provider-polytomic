@@ -39,6 +39,4 @@ Read-Only:
 - `oauth_token_expiry` (String)
 - `realm_id` (String) Company ID
 
-Example: 12345678.
-
 

@@ -58,17 +58,13 @@ func (d *Cloudflare_logsConnectionDataSource) Schema(ctx context.Context, req da
 					"aws_access_key_id": schema.StringAttribute{
 						MarkdownDescription: `Access Key ID
 
-    Access Key ID with read/write access to a bucket.
-
-Example: AKIAIOSFODNN7EXAMPLE.`,
+    Access Key ID with read/write access to a bucket.`,
 						Computed: true,
 					},
 					"bucket_name": schema.StringAttribute{
 						MarkdownDescription: `Bucket Name
 
-    Bucket name (folder optional); ex: polytomic/dataset
-
-Example: polytomic/dataset.`,
+    Bucket name (folder optional); ex: polytomic/dataset`,
 						Computed: true,
 					},
 				},

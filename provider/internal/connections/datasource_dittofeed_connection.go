@@ -52,10 +52,8 @@ func (d *DittofeedConnectionDataSource) Schema(ctx context.Context, req datasour
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"url": schema.StringAttribute{
-						MarkdownDescription: `Dittofeed URL
-
-Example: https://demo.dittofeed.com/.`,
-						Computed: true,
+						MarkdownDescription: `Dittofeed URL`,
+						Computed:            true,
 					},
 				},
 				Optional: true,

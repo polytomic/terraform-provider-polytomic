@@ -54,15 +54,7 @@ func (d *Polytomic_metadataConnectionDataSource) Schema(ctx context.Context, req
 					"auth_mode": schema.StringAttribute{
 						MarkdownDescription: `Authentication Method
 
-    Type of API key to use for authentication
-
-Valid values:
-  - "personal_api_key" - Personal API Key
-  - "partner_api_key" - Partner API Key
-
-Default: personal_api_key.
-
-Example: personal_api_key.`,
+    Type of API key to use for authentication Valid values: <code>personal_api_key</code> (Personal API Key), <code>partner_api_key</code> (Partner API Key). Default: <code>personal_api_key</code>.`,
 						Computed: true,
 					},
 					"connected_org": schema.StringAttribute{

@@ -36,20 +36,6 @@ data "polytomic_qualtrics_connection" "qualtrics" {
 
 Read-Only:
 
-- `data_center` (String) Data Center
-
-Valid values:
-  - "portland" - Portland, Oregon, USA
-  - "washington_dc" - Washington, DC, USA
-  - "arizona" - Arizona, USA (az1)
-  - "us_government" - US Government
-  - "canada" - Canada
-  - "eu" - EU
-  - "london" - London, UK
-  - "singapore" - Singapore
-  - "sydney" - Sydney, Australia
-  - "tokyo" - Tokyo, Japan
-
-Default: portland.
+- `data_center` (String) Data Center Valid values: <code>portland</code> (Portland, Oregon, USA), <code>washington_dc</code> (Washington, DC, USA), <code>arizona</code> (Arizona, USA (az1)), <code>us_government</code> (US Government), <code>canada</code> (Canada), <code>eu</code> (EU), <code>london</code> (London, UK), <code>singapore</code> (Singapore), <code>sydney</code> (Sydney, Australia), <code>tokyo</code> (Tokyo, Japan). Default: <code>portland</code>.
 
 

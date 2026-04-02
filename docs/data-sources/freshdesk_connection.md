@@ -38,6 +38,4 @@ Read-Only:
 
 - `subdomain` (String) e.g. 'polytomic' if your helpdesk is at https://polytomic.freshdesk.com
 
-Example: polytomic.
-
 

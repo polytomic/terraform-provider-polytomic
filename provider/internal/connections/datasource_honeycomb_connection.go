@@ -52,7 +52,7 @@ func (d *HoneycombConnectionDataSource) Schema(ctx context.Context, req datasour
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"dataset": schema.StringAttribute{
-						MarkdownDescription: `Example: dataset.`,
+						MarkdownDescription: ``,
 						Computed:            true,
 					},
 				},

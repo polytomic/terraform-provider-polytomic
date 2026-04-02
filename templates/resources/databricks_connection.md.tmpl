@@ -15,4 +15,77 @@ For detailed configuration guidance, see the [Databricks connection guide](https
 
 {{ tffile .ExampleFile }}
 
-{{ .SchemaMarkdown | trimspace }}
+## Schema
+
+- `name` (String, Required)
+- `configuration` (Attributes, Required) See [below for nested schema](#nestedatt--configuration).
+- `organization` (String, Optional) Organization ID.
+- `id` (String, Read-only) Databricks Connection identifier.
+- `force_destroy` (Boolean, Optional) Indicates whether dependent models, syncs, and bulk syncs should be
+cascade-deleted when this connection is destroyed.
+
+    This only deletes other resources when the connection is destroyed, not when
+setting this parameter to `true`. Once this parameter is set to `true`, there
+must be a successful `terraform apply` run before a destroy is required to
+update this value in the resource state. Without a successful `terraform apply`
+after this parameter is set, this flag will have no effect. If setting this
+field in the same operation that would require replacing the connection or
+destroying the connection, this flag will not work. Additionally when importing
+a connection, a successful `terraform apply` is required to set this value in
+state before it will take effect on a destroy operation.
+
+<a id="nestedatt--configuration"></a>
+### Nested Schema for `configuration`
+
+- `access_token` (String, Sensitive, Optional) Access Token
+- `auth_mode` (String, Optional) AWS Authentication Method
+
+    How to authenticate with AWS. Defaults to Access Key and Secret Valid values: <code>access_key_and_secret</code> (Access Key and Secret), <code>iam_role</code> (IAM role). Default: <code>access_key_and_secret</code>.
+- `aws_access_key_id` (String, Optional) AWS Access Key ID (destinations only)
+
+    See https://docs.polytomic.com/docs/databricks-connections#writing-to-databricks
+- `aws_secret_access_key` (String, Sensitive, Optional) AWS Secret Access Key (destinations only)
+- `aws_user` (String, Optional) User ARN (destinations only)
+- `azure_access_key` (String, Sensitive, Optional) Storage Account Access Key (destination support only)
+
+    The access key associated with this storage account
+- `azure_account_name` (String, Optional) Storage Account Name (destination support only)
+
+    The account name of the storage account
+- `bulk_sync_staging_schema` (String, Optional) Staging schema name
+- `cloud_provider` (String, Optional) Cloud Provider (destination support only) Valid values: <code>aws</code> (AWS), <code>azure</code> (Azure).
+- `concurrent_queries` (Number, Optional) Concurrent query limit
+- `container_name` (String, Optional) Storage Container Name (destination support only)
+
+    The container which we will stage files in
+- `databricks_auth_mode` (String, Required) Authentication Method Valid values: <code>access_token</code> (Access Token), <code>oauth_service_principal</code> (OAuth Service Principal). Default: <code>access_token</code>.
+- `deleted_file_retention_days` (Number, Optional) Deleted file retention
+- `enable_delta_uniform` (Boolean, Optional) Enable Delta UniForm tables Default: <code>false</code>.
+- `enforce_query_limit` (Boolean, Optional) Limit concurrent queries Default: <code>false</code>.
+- `external_id` (String, Optional) External ID
+
+    External ID for the IAM role
+- `http_path` (String, Required) HTTP Path Default: <code>/sql</code>.
+- `iam_role_arn` (String, Optional) IAM Role ARN
+- `log_file_retention_days` (Number, Optional) Log retention
+- `port` (Number, Required) Default: <code>443</code>.
+- `s3_bucket_name` (String, Optional) S3 Bucket Name (destinations only)
+
+    Name of bucket used for staging data load files
+- `s3_bucket_region` (String, Optional) S3 Bucket Region (destinations only)
+
+    Region of bucket
+- `server_hostname` (String, Required) Server Hostname
+- `service_principal_id` (String, Optional) Service Principal ID
+- `service_principal_secret` (String, Sensitive, Optional) Service Principal Secret
+- `set_retention_properties` (Boolean, Optional) Configure data retention for tables
+- `ssh` (Boolean, Optional) Connect over SSH tunnel
+- `ssh_blob_storage` (Boolean, Optional) Use SSH for cloud storage bucket Default: <code>false</code>.
+- `ssh_host` (String, Optional) SSH host
+- `ssh_port` (Number, Optional) SSH port Default: <code>22</code>.
+- `ssh_private_key` (String, Sensitive, Optional) Private key
+- `ssh_user` (String, Optional) SSH user Default: <code>root</code>.
+- `storage_credential_name` (String, Optional) Storage credential name
+- `unity_catalog_enabled` (Boolean, Optional) Unity Catalog enabled Default: <code>true</code>.
+- `use_bulk_sync_staging_schema` (Boolean, Optional) Use custom bulk sync staging schema Default: <code>false</code>.
+

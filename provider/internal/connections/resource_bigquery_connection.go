@@ -47,29 +47,21 @@ var BigquerySchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"auth_method": schema.StringAttribute{
-					MarkdownDescription: `Authentication method
-
-Valid values:
-  - "service_account_key" - Service Account Key
-  - "workload_identity_federation" - Workload Identity Federation
-
-Default: service_account_key.`,
-					Required:  true,
-					Optional:  false,
-					Computed:  false,
-					Sensitive: false,
+					MarkdownDescription: `Authentication method Valid values: <code>service_account_key</code> (Service Account Key), <code>workload_identity_federation</code> (Workload Identity Federation). Default: <code>service_account_key</code>.`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
 					Validators: []validator.String{
 						stringvalidator.OneOf("service_account_key", "workload_identity_federation"),
 					},
 				},
 				"bucket": schema.StringAttribute{
-					MarkdownDescription: `Google Cloud Storage bucket
-
-Example: my-bucket.`,
-					Required:  false,
-					Optional:  true,
-					Computed:  true,
-					Sensitive: false,
+					MarkdownDescription: `Google Cloud Storage bucket`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
 				},
 				"client_email": schema.StringAttribute{
 					MarkdownDescription: `Service account identity`,
@@ -91,13 +83,11 @@ Example: my-bucket.`,
 					},
 				},
 				"location": schema.StringAttribute{
-					MarkdownDescription: `Region or multi-region for query operations
-
-Example: us-east1.`,
-					Required:  false,
-					Optional:  true,
-					Computed:  true,
-					Sensitive: false,
+					MarkdownDescription: `Region or multi-region for query operations`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
 				},
 				"override_project_id": schema.StringAttribute{
 					MarkdownDescription: `Override project ID
@@ -126,13 +116,11 @@ Example: us-east1.`,
 					},
 				},
 				"structured_values_as_json": schema.BoolAttribute{
-					MarkdownDescription: `Write object and array values as JSON
-
-Default: false.`,
-					Required:  false,
-					Optional:  true,
-					Computed:  true,
-					Sensitive: false,
+					MarkdownDescription: `Write object and array values as JSON Default: <code>false</code>.`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
 				},
 				"use_extract": schema.BoolAttribute{
 					MarkdownDescription: `Use Extract for bulk sync from BigQuery`,

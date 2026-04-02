@@ -57,22 +57,11 @@ var DatadogSchema = schema.Schema{
 					},
 				},
 				"region": schema.StringAttribute{
-					MarkdownDescription: `Site
-
-Valid values:
-  - "US1" - US1
-  - "US3" - US3
-  - "US5" - US5
-  - "EU1" - EU1
-  - "US1-FED" - US1-FED
-  - "AP1" - AP1
-  - "AP2" - AP2
-
-Default: US1.`,
-					Required:  true,
-					Optional:  false,
-					Computed:  false,
-					Sensitive: false,
+					MarkdownDescription: `Site Valid values: <code>US1</code> (US1), <code>US3</code> (US3), <code>US5</code> (US5), <code>EU1</code> (EU1), <code>US1-FED</code> (US1-FED), <code>AP1</code> (AP1), <code>AP2</code> (AP2). Default: <code>US1</code>.`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
 					Validators: []validator.String{
 						stringvalidator.OneOf("US1", "US3", "US5", "EU1", "US1-FED", "AP1", "AP2"),
 					},

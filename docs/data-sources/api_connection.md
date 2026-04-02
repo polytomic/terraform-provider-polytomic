@@ -38,18 +38,12 @@ Read-Only:
 
 - `auth` (Attributes) Authentication method (see [below for nested schema](#nestedatt--configuration--auth))
 - `body` (String) JSON payload
-
-Example: {"key":"value"}.
 - `headers` (Attributes Set) (see [below for nested schema](#nestedatt--configuration--headers))
 - `healthcheck` (String) Health check endpoint
 
     Path to request when checking the health of this connection. No health check will be performed if left empty.
-
-Example: https://example.com/healthz.
 - `parameters` (Attributes Set) Query string parameters (see [below for nested schema](#nestedatt--configuration--parameters))
 - `url` (String) Base URL
-
-Example: https://example.com.
 
 <a id="nestedatt--configuration--auth"></a>
 ### Nested Schema for `configuration.auth`
@@ -65,8 +59,8 @@ Read-Only:
 
 Read-Only:
 
-- `password` (String) Example: secret.
-- `username` (String) Example: user@example.com.
+- `password` (String)
+- `username` (String)
 
 
 <a id="nestedatt--configuration--auth--header"></a>
@@ -74,7 +68,7 @@ Read-Only:
 
 Read-Only:
 
-- `name` (String) Example: foo.
+- `name` (String)
 - `value` (String)
 
 
@@ -85,23 +79,17 @@ Read-Only:
 
 - `auth_style` (Number) Auth style
 - `client_id` (String) Client ID
-
-Example: client_id.
 - `client_secret` (String) Client secret
-
-Example: client_secret.
 - `extra_form_data` (Attributes Set) Extra form data (see [below for nested schema](#nestedatt--configuration--auth--oauth--extra_form_data))
 - `scopes` (Set of String)
 - `token_endpoint` (String) Token endpoint
-
-Example: https://example.com/oauth/token.
 
 <a id="nestedatt--configuration--auth--oauth--extra_form_data"></a>
 ### Nested Schema for `configuration.auth.oauth.token_endpoint`
 
 Read-Only:
 
-- `name` (String) Example: foo.
+- `name` (String)
 - `value` (String)
 
 
@@ -112,7 +100,7 @@ Read-Only:
 
 Read-Only:
 
-- `name` (String) Example: foo.
+- `name` (String)
 - `value` (String)
 
 
@@ -121,7 +109,7 @@ Read-Only:
 
 Read-Only:
 
-- `name` (String) Example: foo.
+- `name` (String)
 - `value` (String)
 
 

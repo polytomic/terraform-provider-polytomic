@@ -56,10 +56,8 @@ func (d *CustomerioConnectionDataSource) Schema(ctx context.Context, req datasou
 						Computed:            true,
 					},
 					"site_id": schema.StringAttribute{
-						MarkdownDescription: `Site ID
-
-Example: osh853chlrhick8w7qyz.`,
-						Computed: true,
+						MarkdownDescription: `Site ID`,
+						Computed:            true,
 					},
 				},
 				Optional: true,

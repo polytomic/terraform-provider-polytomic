@@ -52,22 +52,16 @@ func (d *NetsuiteConnectionDataSource) Schema(ctx context.Context, req datasourc
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"account_id": schema.StringAttribute{
-						MarkdownDescription: `Account ID
-
-Example: 1234567_SB1.`,
-						Computed: true,
+						MarkdownDescription: `Account ID`,
+						Computed:            true,
 					},
 					"consumer_key": schema.StringAttribute{
-						MarkdownDescription: `Consumer Key
-
-Example: ac3nougotfs7ict684hnbomxmcn496nqdo27b8myvkc19uhmxno8gx6o2g264kim2ivkaona2chyje5k2pcb904iuw.`,
-						Computed: true,
+						MarkdownDescription: `Consumer Key`,
+						Computed:            true,
 					},
 					"token": schema.StringAttribute{
-						MarkdownDescription: `Token ID
-
-Example: rgzq4xk3nz3huuwanngu9k1z7s8ogyr6haa7u7rg63qpxx5cn36ddxswhjse1dgwabqin1q9aay9nvfgkfjglgvtqv.`,
-						Computed: true,
+						MarkdownDescription: `Token ID`,
+						Computed:            true,
 					},
 				},
 				Optional: true,

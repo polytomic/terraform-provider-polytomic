@@ -54,23 +54,13 @@ func (d *DatabricksConnectionDataSource) Schema(ctx context.Context, req datasou
 					"auth_mode": schema.StringAttribute{
 						MarkdownDescription: `AWS Authentication Method
 
-    How to authenticate with AWS. Defaults to Access Key and Secret
-
-Valid values:
-  - "access_key_and_secret" - Access Key and Secret
-  - "iam_role" - IAM role
-
-Default: access_key_and_secret.
-
-Example: access_key_and_secret.`,
+    How to authenticate with AWS. Defaults to Access Key and Secret Valid values: <code>access_key_and_secret</code> (Access Key and Secret), <code>iam_role</code> (IAM role). Default: <code>access_key_and_secret</code>.`,
 						Computed: true,
 					},
 					"aws_access_key_id": schema.StringAttribute{
 						MarkdownDescription: `AWS Access Key ID (destinations only)
 
-    See https://docs.polytomic.com/docs/databricks-connections#writing-to-databricks
-
-Example: AKIAIOSFODNN7EXAMPLE.`,
+    See https://docs.polytomic.com/docs/databricks-connections#writing-to-databricks`,
 						Computed: true,
 					},
 					"aws_user": schema.StringAttribute{
@@ -80,9 +70,7 @@ Example: AKIAIOSFODNN7EXAMPLE.`,
 					"azure_account_name": schema.StringAttribute{
 						MarkdownDescription: `Storage Account Name (destination support only)
 
-    The account name of the storage account
-
-Example: account.`,
+    The account name of the storage account`,
 						Computed: true,
 					},
 					"bulk_sync_staging_schema": schema.StringAttribute{
@@ -90,14 +78,8 @@ Example: account.`,
 						Computed:            true,
 					},
 					"cloud_provider": schema.StringAttribute{
-						MarkdownDescription: `Cloud Provider (destination support only)
-
-Valid values:
-  - "aws" - AWS
-  - "azure" - Azure
-
-Example: aws.`,
-						Computed: true,
+						MarkdownDescription: `Cloud Provider (destination support only) Valid values: <code>aws</code> (AWS), <code>azure</code> (Azure).`,
+						Computed:            true,
 					},
 					"concurrent_queries": schema.Int64Attribute{
 						MarkdownDescription: `Concurrent query limit`,
@@ -106,38 +88,24 @@ Example: aws.`,
 					"container_name": schema.StringAttribute{
 						MarkdownDescription: `Storage Container Name (destination support only)
 
-    The container which we will stage files in
-
-Example: container.`,
+    The container which we will stage files in`,
 						Computed: true,
 					},
 					"databricks_auth_mode": schema.StringAttribute{
-						MarkdownDescription: `Authentication Method
-
-Valid values:
-  - "access_token" - Access Token
-  - "oauth_service_principal" - OAuth Service Principal
-
-Default: access_token.
-
-Example: access_token.`,
-						Computed: true,
+						MarkdownDescription: `Authentication Method Valid values: <code>access_token</code> (Access Token), <code>oauth_service_principal</code> (OAuth Service Principal). Default: <code>access_token</code>.`,
+						Computed:            true,
 					},
 					"deleted_file_retention_days": schema.Int64Attribute{
 						MarkdownDescription: `Deleted file retention`,
 						Computed:            true,
 					},
 					"enable_delta_uniform": schema.BoolAttribute{
-						MarkdownDescription: `Enable Delta UniForm tables
-
-Default: false.`,
-						Computed: true,
+						MarkdownDescription: `Enable Delta UniForm tables Default: <code>false</code>.`,
+						Computed:            true,
 					},
 					"enforce_query_limit": schema.BoolAttribute{
-						MarkdownDescription: `Limit concurrent queries
-
-Default: false.`,
-						Computed: true,
+						MarkdownDescription: `Limit concurrent queries Default: <code>false</code>.`,
+						Computed:            true,
 					},
 					"external_id": schema.StringAttribute{
 						MarkdownDescription: `External ID
@@ -146,12 +114,8 @@ Default: false.`,
 						Computed: true,
 					},
 					"http_path": schema.StringAttribute{
-						MarkdownDescription: `HTTP Path
-
-Default: /sql.
-
-Example: /sql.`,
-						Computed: true,
+						MarkdownDescription: `HTTP Path Default: <code>/sql</code>.`,
+						Computed:            true,
 					},
 					"iam_role_arn": schema.StringAttribute{
 						MarkdownDescription: `IAM Role ARN`,
@@ -162,38 +126,28 @@ Example: /sql.`,
 						Computed:            true,
 					},
 					"port": schema.Int64Attribute{
-						MarkdownDescription: `Default: 443.
-
-Example: 443.`,
-						Computed: true,
+						MarkdownDescription: `Default: <code>443</code>.`,
+						Computed:            true,
 					},
 					"s3_bucket_name": schema.StringAttribute{
 						MarkdownDescription: `S3 Bucket Name (destinations only)
 
-    Name of bucket used for staging data load files
-
-Example: s3://polytomic-databricks-results/customer-dataset.`,
+    Name of bucket used for staging data load files`,
 						Computed: true,
 					},
 					"s3_bucket_region": schema.StringAttribute{
 						MarkdownDescription: `S3 Bucket Region (destinations only)
 
-    Region of bucket
-
-Example: us-east-1.`,
+    Region of bucket`,
 						Computed: true,
 					},
 					"server_hostname": schema.StringAttribute{
-						MarkdownDescription: `Server Hostname
-
-Example: dbc-1234dsafas-d0001.cloud.databricks.com.`,
-						Computed: true,
+						MarkdownDescription: `Server Hostname`,
+						Computed:            true,
 					},
 					"service_principal_id": schema.StringAttribute{
-						MarkdownDescription: `Service Principal ID
-
-Example: sp-1234abcd.`,
-						Computed: true,
+						MarkdownDescription: `Service Principal ID`,
+						Computed:            true,
 					},
 					"set_retention_properties": schema.BoolAttribute{
 						MarkdownDescription: `Configure data retention for tables`,
@@ -204,46 +158,32 @@ Example: sp-1234abcd.`,
 						Computed:            true,
 					},
 					"ssh_blob_storage": schema.BoolAttribute{
-						MarkdownDescription: `Use SSH for cloud storage bucket
-
-Default: false.`,
-						Computed: true,
+						MarkdownDescription: `Use SSH for cloud storage bucket Default: <code>false</code>.`,
+						Computed:            true,
 					},
 					"ssh_host": schema.StringAttribute{
-						MarkdownDescription: `SSH host
-
-Example: bastion.example.com.`,
-						Computed: true,
+						MarkdownDescription: `SSH host`,
+						Computed:            true,
 					},
 					"ssh_port": schema.Int64Attribute{
-						MarkdownDescription: `SSH port
-
-Default: 22.
-
-Example: 22.`,
-						Computed: true,
+						MarkdownDescription: `SSH port Default: <code>22</code>.`,
+						Computed:            true,
 					},
 					"ssh_user": schema.StringAttribute{
-						MarkdownDescription: `SSH user
-
-Default: root.`,
-						Computed: true,
+						MarkdownDescription: `SSH user Default: <code>root</code>.`,
+						Computed:            true,
 					},
 					"storage_credential_name": schema.StringAttribute{
 						MarkdownDescription: `Storage credential name`,
 						Computed:            true,
 					},
 					"unity_catalog_enabled": schema.BoolAttribute{
-						MarkdownDescription: `Unity Catalog enabled
-
-Default: true.`,
-						Computed: true,
+						MarkdownDescription: `Unity Catalog enabled Default: <code>true</code>.`,
+						Computed:            true,
 					},
 					"use_bulk_sync_staging_schema": schema.BoolAttribute{
-						MarkdownDescription: `Use custom bulk sync staging schema
-
-Default: false.`,
-						Computed: true,
+						MarkdownDescription: `Use custom bulk sync staging schema Default: <code>false</code>.`,
+						Computed:            true,
 					},
 				},
 				Optional: true,

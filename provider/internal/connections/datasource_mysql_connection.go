@@ -52,62 +52,44 @@ func (d *MysqlConnectionDataSource) Schema(ctx context.Context, req datasource.S
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"account": schema.StringAttribute{
-						MarkdownDescription: `Username
-
-Example: admin.`,
-						Computed: true,
+						MarkdownDescription: `Username`,
+						Computed:            true,
 					},
 					"change_detection": schema.BoolAttribute{
-						MarkdownDescription: `Use replication for bulk syncs
-
-Default: false.`,
-						Computed: true,
+						MarkdownDescription: `Use replication for bulk syncs Default: <code>false</code>.`,
+						Computed:            true,
 					},
 					"dbname": schema.StringAttribute{
-						MarkdownDescription: `Database
-
-Example: mydb.`,
-						Computed: true,
+						MarkdownDescription: `Database`,
+						Computed:            true,
 					},
 					"hostname": schema.StringAttribute{
-						MarkdownDescription: `Example: database.example.com.`,
+						MarkdownDescription: ``,
 						Computed:            true,
 					},
 					"port": schema.Int64Attribute{
-						MarkdownDescription: `Default: 3306.
-
-Example: 3306.`,
-						Computed: true,
+						MarkdownDescription: `Default: <code>3306</code>.`,
+						Computed:            true,
 					},
 					"ssh": schema.BoolAttribute{
 						MarkdownDescription: `Connect over SSH tunnel`,
 						Computed:            true,
 					},
 					"ssh_host": schema.StringAttribute{
-						MarkdownDescription: `SSH host
-
-Example: bastion.example.com.`,
-						Computed: true,
+						MarkdownDescription: `SSH host`,
+						Computed:            true,
 					},
 					"ssh_port": schema.Int64Attribute{
-						MarkdownDescription: `SSH port
-
-Default: 22.
-
-Example: 22.`,
-						Computed: true,
+						MarkdownDescription: `SSH port Default: <code>22</code>.`,
+						Computed:            true,
 					},
 					"ssh_user": schema.StringAttribute{
-						MarkdownDescription: `SSH user
-
-Default: root.`,
-						Computed: true,
+						MarkdownDescription: `SSH user Default: <code>root</code>.`,
+						Computed:            true,
 					},
 					"ssl": schema.BoolAttribute{
-						MarkdownDescription: `Use SSL
-
-Default: true.`,
-						Computed: true,
+						MarkdownDescription: `Use SSL Default: <code>true</code>.`,
+						Computed:            true,
 					},
 				},
 				Optional: true,

@@ -36,13 +36,7 @@ data "polytomic_googleanalytics_connection" "googleanalytics" {
 
 Read-Only:
 
-- `auth_method` (String) Authentication method
-
-Valid values:
-  - "oauth" - OAuth
-  - "jwt" - Service Account
-
-Default: oauth.
+- `auth_method` (String) Authentication method Valid values: <code>oauth</code> (OAuth), <code>jwt</code> (Service Account). Default: <code>oauth</code>.
 - `custom_reports` (String) Custom reports
 
     One report per line. Format is a report name followed by a comma-separated list of fields. e.g. myReport:field1

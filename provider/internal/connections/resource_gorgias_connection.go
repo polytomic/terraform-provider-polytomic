@@ -54,22 +54,18 @@ var GorgiasSchema = schema.Schema{
 					},
 				},
 				"domain": schema.StringAttribute{
-					MarkdownDescription: `Your Gorgias subdomain (e.g. 'acme' for acme.gorgias.com)
-
-Example: acme.`,
-					Required:  true,
-					Optional:  false,
-					Computed:  false,
-					Sensitive: false,
+					MarkdownDescription: `Your Gorgias subdomain (e.g. 'acme' for acme.gorgias.com)`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
 				},
 				"email": schema.StringAttribute{
-					MarkdownDescription: `Your Gorgias account email address
-
-Example: user@example.com.`,
-					Required:  true,
-					Optional:  false,
-					Computed:  false,
-					Sensitive: false,
+					MarkdownDescription: `Your Gorgias account email address`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
 				},
 			},
 

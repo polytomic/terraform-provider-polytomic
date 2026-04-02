@@ -52,14 +52,8 @@ func (d *SalesforceConnectionDataSource) Schema(ctx context.Context, req datasou
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"connect_mode": schema.StringAttribute{
-						MarkdownDescription: `Default: browser (i.e. oauth through Polytomic). If 'code' is specified, the response will include an auth_code for the user to enter when completing authorization. NOTE: when supplying client_id and client_secret the connect mode must be 'api'.
-
-Valid values: "browser", "clientcredentials", "code", "api".
-
-Default: browser.
-
-Example: api.`,
-						Computed: true,
+						MarkdownDescription: `Default: browser (i.e. oauth through Polytomic). If 'code' is specified, the response will include an auth_code for the user to enter when completing authorization. NOTE: when supplying client_id and client_secret the connect mode must be 'api'. Valid values: <code>browser</code>, <code>clientcredentials</code>, <code>code</code>, <code>api</code>. Default: <code>browser</code>.`,
+						Computed:            true,
 					},
 					"daily_api_calls": schema.Int64Attribute{
 						MarkdownDescription: `Daily call limit
@@ -68,10 +62,8 @@ Example: api.`,
 						Computed: true,
 					},
 					"domain": schema.StringAttribute{
-						MarkdownDescription: `The Salesforce instance's login domain, e.g. acmecorp.my.salesforce.com
-
-Example: http://instance.my.salesforce.com.`,
-						Computed: true,
+						MarkdownDescription: `The Salesforce instance's login domain, e.g. acmecorp.my.salesforce.com`,
+						Computed:            true,
 					},
 					"enable_multicurrency_lookup": schema.BoolAttribute{
 						MarkdownDescription: `Enable multicurrency source field support

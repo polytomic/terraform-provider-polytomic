@@ -60,11 +60,11 @@ func (d *HttpenrichmentConnectionDataSource) Schema(ctx context.Context, req dat
 								Computed:            true,
 								Attributes: map[string]schema.Attribute{
 									"password": schema.StringAttribute{
-										MarkdownDescription: `Example: secret.`,
+										MarkdownDescription: ``,
 										Computed:            true,
 									},
 									"username": schema.StringAttribute{
-										MarkdownDescription: `Example: user@example.com.`,
+										MarkdownDescription: ``,
 										Computed:            true,
 									},
 								},
@@ -74,7 +74,7 @@ func (d *HttpenrichmentConnectionDataSource) Schema(ctx context.Context, req dat
 								Computed:            true,
 								Attributes: map[string]schema.Attribute{
 									"name": schema.StringAttribute{
-										MarkdownDescription: `Example: foo.`,
+										MarkdownDescription: ``,
 										Computed:            true,
 									},
 									"value": schema.StringAttribute{
@@ -92,16 +92,12 @@ func (d *HttpenrichmentConnectionDataSource) Schema(ctx context.Context, req dat
 										Computed:            true,
 									},
 									"client_id": schema.StringAttribute{
-										MarkdownDescription: `Client ID
-
-Example: client_id.`,
-										Computed: true,
+										MarkdownDescription: `Client ID`,
+										Computed:            true,
 									},
 									"client_secret": schema.StringAttribute{
-										MarkdownDescription: `Client secret
-
-Example: client_secret.`,
-										Computed: true,
+										MarkdownDescription: `Client secret`,
+										Computed:            true,
 									},
 									"extra_form_data": schema.SetNestedAttribute{
 										MarkdownDescription: `Extra form data`,
@@ -109,7 +105,7 @@ Example: client_secret.`,
 										NestedObject: schema.NestedAttributeObject{
 											Attributes: map[string]schema.Attribute{
 												"name": schema.StringAttribute{
-													MarkdownDescription: `Example: foo.`,
+													MarkdownDescription: ``,
 													Computed:            true,
 												},
 												"value": schema.StringAttribute{
@@ -125,20 +121,16 @@ Example: client_secret.`,
 										ElementType:         types.StringType,
 									},
 									"token_endpoint": schema.StringAttribute{
-										MarkdownDescription: `Token endpoint
-
-Example: https://example.com/oauth/token.`,
-										Computed: true,
+										MarkdownDescription: `Token endpoint`,
+										Computed:            true,
 									},
 								},
 							},
 						},
 					},
 					"body": schema.StringAttribute{
-						MarkdownDescription: `JSON payload
-
-Example: {"key":"value"}.`,
-						Computed: true,
+						MarkdownDescription: `JSON payload`,
+						Computed:            true,
 					},
 					"example_body": schema.StringAttribute{
 						MarkdownDescription: `Example body
@@ -179,7 +171,7 @@ Example: {"key":"value"}.`,
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 								"name": schema.StringAttribute{
-									MarkdownDescription: `Example: foo.`,
+									MarkdownDescription: ``,
 									Computed:            true,
 								},
 								"value": schema.StringAttribute{
@@ -192,9 +184,7 @@ Example: {"key":"value"}.`,
 					"healthcheck": schema.StringAttribute{
 						MarkdownDescription: `Health check endpoint
 
-    Path to request when checking the health of this connection. No health check will be performed if left empty.
-
-Example: https://example.com/healthz.`,
+    Path to request when checking the health of this connection. No health check will be performed if left empty.`,
 						Computed: true,
 					},
 					"input_mappings": schema.SetNestedAttribute{
@@ -220,10 +210,8 @@ Example: https://example.com/healthz.`,
 						},
 					},
 					"method": schema.StringAttribute{
-						MarkdownDescription: `HTTP Method
-
-Valid values: "GET", "POST".`,
-						Computed: true,
+						MarkdownDescription: `HTTP Method Valid values: <code>GET</code>, <code>POST</code>.`,
+						Computed:            true,
 					},
 					"parameters": schema.SetNestedAttribute{
 						MarkdownDescription: `Query string parameters`,
@@ -231,7 +219,7 @@ Valid values: "GET", "POST".`,
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 								"name": schema.StringAttribute{
-									MarkdownDescription: `Example: foo.`,
+									MarkdownDescription: ``,
 									Computed:            true,
 								},
 								"value": schema.StringAttribute{
@@ -242,10 +230,8 @@ Valid values: "GET", "POST".`,
 						},
 					},
 					"url": schema.StringAttribute{
-						MarkdownDescription: `Base URL
-
-Example: https://example.com.`,
-						Computed: true,
+						MarkdownDescription: `Base URL`,
+						Computed:            true,
 					},
 				},
 				Optional: true,

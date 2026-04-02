@@ -39,6 +39,4 @@ Read-Only:
 - `region` (String) Datacenter region we detected
 - `site_id` (String) Site ID
 
-Example: osh853chlrhick8w7qyz.
-
 

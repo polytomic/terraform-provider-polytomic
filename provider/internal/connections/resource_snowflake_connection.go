@@ -46,9 +46,7 @@ var SnowflakeSchema = schema.Schema{
 				"account": schema.StringAttribute{
 					MarkdownDescription: `Account identifier
 
-    e.g. FRXJLEC-UJA94780
-
-Example: FRXJLEC-UJA94780.`,
+    e.g. FRXJLEC-UJA94780`,
 					Required:  true,
 					Optional:  false,
 					Computed:  false,
@@ -62,22 +60,18 @@ Example: FRXJLEC-UJA94780.`,
 					Sensitive:           false,
 				},
 				"dbname": schema.StringAttribute{
-					MarkdownDescription: `Database
-
-Example: database_name.`,
-					Required:  true,
-					Optional:  false,
-					Computed:  false,
-					Sensitive: false,
+					MarkdownDescription: `Database`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
 				},
 				"key_pair_auth": schema.BoolAttribute{
-					MarkdownDescription: `Use key pair authentication
-
-Default: false.`,
-					Required:  false,
-					Optional:  true,
-					Computed:  true,
-					Sensitive: false,
+					MarkdownDescription: `Use key pair authentication Default: <code>false</code>.`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
 				},
 				"params": schema.StringAttribute{
 					MarkdownDescription: `Additional parameters
@@ -119,29 +113,25 @@ Default: false.`,
 					},
 				},
 				"use_bulk_sync_staging_schema": schema.BoolAttribute{
-					MarkdownDescription: `Use custom bulk sync staging schema
-
-Default: false.`,
-					Required:  false,
-					Optional:  true,
-					Computed:  true,
-					Sensitive: false,
+					MarkdownDescription: `Use custom bulk sync staging schema Default: <code>false</code>.`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
 				},
 				"username": schema.StringAttribute{
-					MarkdownDescription: `Example: user.`,
+					MarkdownDescription: ``,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
 					Sensitive:           false,
 				},
 				"warehouse": schema.StringAttribute{
-					MarkdownDescription: `Compute warehouse
-
-Example: warehouse.`,
-					Required:  false,
-					Optional:  true,
-					Computed:  true,
-					Sensitive: false,
+					MarkdownDescription: `Compute warehouse`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
 				},
 			},
 

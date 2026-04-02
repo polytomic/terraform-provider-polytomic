@@ -52,7 +52,7 @@ func (d *Sharepoint_excelConnectionDataSource) Schema(ctx context.Context, req d
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"oauth_token_expiry": schema.StringAttribute{
-						MarkdownDescription: `Example: 2023-11-21T21:48:51Z.`,
+						MarkdownDescription: ``,
 						Computed:            true,
 					},
 				},

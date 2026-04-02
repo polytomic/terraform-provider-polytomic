@@ -37,13 +37,7 @@ data "polytomic_msads_connection" "msads" {
 Read-Only:
 
 - `accounts` (Attributes Set) (see [below for nested schema](#nestedatt--configuration--accounts))
-- `auth_method` (String) Authentication method
-
-Valid values:
-  - "microsoft" - Microsoft
-  - "google" - Google
-
-Default: microsoft.
+- `auth_method` (String) Authentication method Valid values: <code>microsoft</code> (Microsoft), <code>google</code> (Google). Default: <code>microsoft</code>.
 - `oauth_token_expiry` (String)
 - `username` (String) Connected user
 

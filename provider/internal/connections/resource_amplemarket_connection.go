@@ -54,22 +54,18 @@ var AmplemarketSchema = schema.Schema{
 					},
 				},
 				"reveal_email_for_person": schema.BoolAttribute{
-					MarkdownDescription: `Reveal email address for person enrichment
-
-Default: true.`,
-					Required:  false,
-					Optional:  true,
-					Computed:  true,
-					Sensitive: false,
+					MarkdownDescription: `Reveal email address for person enrichment Default: <code>true</code>.`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
 				},
 				"reveal_phone_number_for_person": schema.BoolAttribute{
-					MarkdownDescription: `Reveal phone number for person enrichment
-
-Default: true.`,
-					Required:  false,
-					Optional:  true,
-					Computed:  true,
-					Sensitive: false,
+					MarkdownDescription: `Reveal phone number for person enrichment Default: <code>true</code>.`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
 				},
 			},
 

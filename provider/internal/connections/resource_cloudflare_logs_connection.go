@@ -53,9 +53,7 @@ var Cloudflare_logsSchema = schema.Schema{
 				"aws_access_key_id": schema.StringAttribute{
 					MarkdownDescription: `Access Key ID
 
-    Access Key ID with read/write access to a bucket.
-
-Example: AKIAIOSFODNN7EXAMPLE.`,
+    Access Key ID with read/write access to a bucket.`,
 					Required:  true,
 					Optional:  false,
 					Computed:  false,
@@ -74,9 +72,7 @@ Example: AKIAIOSFODNN7EXAMPLE.`,
 				"bucket_name": schema.StringAttribute{
 					MarkdownDescription: `Bucket Name
 
-    Bucket name (folder optional); ex: polytomic/dataset
-
-Example: polytomic/dataset.`,
+    Bucket name (folder optional); ex: polytomic/dataset`,
 					Required:  true,
 					Optional:  false,
 					Computed:  false,

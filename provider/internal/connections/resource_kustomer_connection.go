@@ -56,9 +56,7 @@ var KustomerSchema = schema.Schema{
 				"domain": schema.StringAttribute{
 					MarkdownDescription: `Customer Portal Subdomain
 
-    e.g. 'polytomic' if your portal is 'https://polytomic.kustomerapp.com/app'
-
-Example: polytomic.`,
+    e.g. 'polytomic' if your portal is 'https://polytomic.kustomerapp.com/app'`,
 					Required:  true,
 					Optional:  false,
 					Computed:  false,

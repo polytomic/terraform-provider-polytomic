@@ -54,15 +54,11 @@ var MixpanelSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"region": schema.StringAttribute{
-					MarkdownDescription: `Server
-
-Valid values:
-  - "mixpanel.com" - Mixpanel
-  - "eu.mixpanel.com" - Mixpanel (EU)`,
-					Required:  true,
-					Optional:  false,
-					Computed:  false,
-					Sensitive: false,
+					MarkdownDescription: `Server Valid values: <code>mixpanel.com</code> (Mixpanel), <code>eu.mixpanel.com</code> (Mixpanel (EU)).`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
 					Validators: []validator.String{
 						stringvalidator.OneOf("mixpanel.com", "eu.mixpanel.com"),
 					},

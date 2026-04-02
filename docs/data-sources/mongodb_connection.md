@@ -36,20 +36,14 @@ data "polytomic_mongodb_connection" "mongodb" {
 
 Read-Only:
 
-- `change_detection` (Boolean) Use change stream for bulk syncs
-
-Default: false.
+- `change_detection` (Boolean) Use change stream for bulk syncs Default: <code>false</code>.
 - `database` (String) Auth Database
 - `hosts` (String) Hostname(s)
-
-Example: mongodb.example.net.
 - `params` (String) Additional Parameters
 
     Additional connection parameters, formatted as a query string
 - `srv` (Boolean) Connect using SRV record?
-- `ssl` (Boolean) Use TLS/SSL
-
-Default: true.
-- `username` (String) Example: admin.
+- `ssl` (Boolean) Use TLS/SSL Default: <code>true</code>.
+- `username` (String)
 
 

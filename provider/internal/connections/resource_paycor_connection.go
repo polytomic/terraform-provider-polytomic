@@ -64,13 +64,11 @@ var PaycorSchema = schema.Schema{
 					},
 				},
 				"scopes": schema.StringAttribute{
-					MarkdownDescription: `Scope Name
-
-Example: profile.`,
-					Required:  false,
-					Optional:  true,
-					Computed:  true,
-					Sensitive: false,
+					MarkdownDescription: `Scope Name`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
 				},
 				"subscription_key": schema.StringAttribute{
 					MarkdownDescription: `APIm Subscription Key`,

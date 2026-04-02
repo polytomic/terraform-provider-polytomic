@@ -67,31 +67,21 @@ var JiraSchema = schema.Schema{
 					},
 				},
 				"auth_method": schema.StringAttribute{
-					MarkdownDescription: `Authentication method
-
-Valid values:
-  - "apikey" - API token
-  - "pat" - Personal access token
-
-Default: apikey.
-
-Example: pat.`,
-					Required:  true,
-					Optional:  false,
-					Computed:  false,
-					Sensitive: false,
+					MarkdownDescription: `Authentication method Valid values: <code>apikey</code> (API token), <code>pat</code> (Personal access token). Default: <code>apikey</code>.`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
 					Validators: []validator.String{
 						stringvalidator.OneOf("apikey", "pat"),
 					},
 				},
 				"url": schema.StringAttribute{
-					MarkdownDescription: `Jira URL
-
-Example: https://jira.mycompany.com/.`,
-					Required:  true,
-					Optional:  false,
-					Computed:  false,
-					Sensitive: false,
+					MarkdownDescription: `Jira URL`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
 				},
 				"username": schema.StringAttribute{
 					MarkdownDescription: ``,

@@ -40,6 +40,4 @@ Read-Only:
 
     e.g. 'polytomic' if your portal is 'https://polytomic.kustomerapp.com/app'
 
-Example: polytomic.
-
 

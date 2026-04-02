@@ -38,8 +38,6 @@ Read-Only:
 
 - `custom_api_limits` (Boolean) Enforce custom API limits
 - `domain` (String) Zendesk Support Subdomain
-
-Example: polytomic.zendesk.com.
 - `ratelimit_rpm` (Number) Maximum requests per minute
 
     Set a custom maximum request per minute limit.

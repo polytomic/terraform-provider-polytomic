@@ -38,6 +38,4 @@ Read-Only:
 
 - `url` (String) Dittofeed URL
 
-Example: https://demo.dittofeed.com/.
-
 

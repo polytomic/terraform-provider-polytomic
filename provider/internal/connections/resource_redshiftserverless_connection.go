@@ -54,17 +54,11 @@ var RedshiftserverlessSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"connection_method": schema.StringAttribute{
-					MarkdownDescription: `Connection method
-
-Valid values:
-  - "data_api" - Redshift Data API
-  - "endpoint" - Redshift Serverless Endpoint
-
-Example: data_api.`,
-					Required:  true,
-					Optional:  false,
-					Computed:  false,
-					Sensitive: false,
+					MarkdownDescription: `Connection method Valid values: <code>data_api</code> (Redshift Data API), <code>endpoint</code> (Redshift Serverless Endpoint).`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
 					Validators: []validator.String{
 						stringvalidator.OneOf("data_api", "endpoint"),
 					},
@@ -79,20 +73,18 @@ Example: data_api.`,
 					Sensitive: false,
 				},
 				"database": schema.StringAttribute{
-					MarkdownDescription: `Example: users.`,
+					MarkdownDescription: ``,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
 					Sensitive:           false,
 				},
 				"endpoint": schema.StringAttribute{
-					MarkdownDescription: `Redshift Serverless endpoint
-
-Example: acme.12345.us-west-2.redshift-serverless.amazonaws.com:5439.`,
-					Required:  false,
-					Optional:  true,
-					Computed:  true,
-					Sensitive: false,
+					MarkdownDescription: `Redshift Serverless endpoint`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
 				},
 				"external_id": schema.StringAttribute{
 					MarkdownDescription: `External ID`,
@@ -102,13 +94,11 @@ Example: acme.12345.us-west-2.redshift-serverless.amazonaws.com:5439.`,
 					Sensitive:           false,
 				},
 				"iam_role_arn": schema.StringAttribute{
-					MarkdownDescription: `IAM Role ARN
-
-Example: arn:aws:iam::012345678910:role/role.`,
-					Required:  true,
-					Optional:  false,
-					Computed:  false,
-					Sensitive: false,
+					MarkdownDescription: `IAM Role ARN`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
 				},
 				"override_endpoint": schema.BoolAttribute{
 					MarkdownDescription: `Override Redshift Data API endpoint`,
@@ -118,38 +108,32 @@ Example: arn:aws:iam::012345678910:role/role.`,
 					Sensitive:           false,
 				},
 				"region": schema.StringAttribute{
-					MarkdownDescription: `Example: us-west-2.`,
+					MarkdownDescription: ``,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,
 					Sensitive:           false,
 				},
 				"s3_bucket_name": schema.StringAttribute{
-					MarkdownDescription: `S3 bucket name (destination/unload support only)
-
-Example: my-bucket.`,
-					Required:  false,
-					Optional:  true,
-					Computed:  true,
-					Sensitive: false,
+					MarkdownDescription: `S3 bucket name (destination/unload support only)`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
 				},
 				"s3_bucket_region": schema.StringAttribute{
-					MarkdownDescription: `S3 bucket region (destination/unload support only)
-
-Example: us-west-2.`,
-					Required:  false,
-					Optional:  true,
-					Computed:  true,
-					Sensitive: false,
+					MarkdownDescription: `S3 bucket region (destination/unload support only)`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
 				},
 				"use_bulk_sync_staging_schema": schema.BoolAttribute{
-					MarkdownDescription: `Use custom bulk sync staging schema
-
-Default: false.`,
-					Required:  false,
-					Optional:  true,
-					Computed:  true,
-					Sensitive: false,
+					MarkdownDescription: `Use custom bulk sync staging schema Default: <code>false</code>.`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
 				},
 				"use_unload": schema.BoolAttribute{
 					MarkdownDescription: `Read data using Unload`,
@@ -159,7 +143,7 @@ Default: false.`,
 					Sensitive:           false,
 				},
 				"workgroup": schema.StringAttribute{
-					MarkdownDescription: `Example: default.`,
+					MarkdownDescription: ``,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,

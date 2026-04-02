@@ -52,22 +52,12 @@ func (d *JiraConnectionDataSource) Schema(ctx context.Context, req datasource.Sc
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"auth_method": schema.StringAttribute{
-						MarkdownDescription: `Authentication method
-
-Valid values:
-  - "apikey" - API token
-  - "pat" - Personal access token
-
-Default: apikey.
-
-Example: pat.`,
-						Computed: true,
+						MarkdownDescription: `Authentication method Valid values: <code>apikey</code> (API token), <code>pat</code> (Personal access token). Default: <code>apikey</code>.`,
+						Computed:            true,
 					},
 					"url": schema.StringAttribute{
-						MarkdownDescription: `Jira URL
-
-Example: https://jira.mycompany.com/.`,
-						Computed: true,
+						MarkdownDescription: `Jira URL`,
+						Computed:            true,
 					},
 					"username": schema.StringAttribute{
 						MarkdownDescription: ``,

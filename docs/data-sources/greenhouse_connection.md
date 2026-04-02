@@ -36,12 +36,6 @@ data "polytomic_greenhouse_connection" "greenhouse" {
 
 Read-Only:
 
-- `auth_method` (String) Authentication method
-
-Valid values:
-  - "oauth" - OAuth
-  - "clientcredentials" - Client credentials
-
-Default: oauth.
+- `auth_method` (String) Authentication method Valid values: <code>oauth</code> (OAuth), <code>clientcredentials</code> (Client credentials). Default: <code>oauth</code>.
 
 

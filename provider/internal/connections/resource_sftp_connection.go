@@ -47,19 +47,11 @@ var SftpSchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"auth_mode": schema.StringAttribute{
-					MarkdownDescription: `Authentication Method
-
-Valid values:
-  - "private_key" - Private key
-  - "password" - Password
-
-Default: private_key.
-
-Example: private_key.`,
-					Required:  true,
-					Optional:  false,
-					Computed:  false,
-					Sensitive: false,
+					MarkdownDescription: `Authentication Method Valid values: <code>private_key</code> (Private key), <code>password</code> (Password). Default: <code>private_key</code>.`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
 					Validators: []validator.String{
 						stringvalidator.OneOf("private_key", "password"),
 					},
@@ -74,13 +66,11 @@ Example: private_key.`,
 					Sensitive: false,
 				},
 				"path": schema.StringAttribute{
-					MarkdownDescription: `The path to the directory on the SFTP server containing the files.
-
-Example: /path/to/files.`,
-					Required:  false,
-					Optional:  true,
-					Computed:  true,
-					Sensitive: false,
+					MarkdownDescription: `The path to the directory on the SFTP server containing the files.`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
 				},
 				"single_table_name": schema.StringAttribute{
 					MarkdownDescription: `Collection name`,
@@ -92,22 +82,18 @@ Example: /path/to/files.`,
 				"skip_lines": schema.Int64Attribute{
 					MarkdownDescription: `Skip first lines
 
-    Skip first N lines of each CSV file.
-
-Default: 0.`,
+    Skip first N lines of each CSV file. Default: <code>0</code>.`,
 					Required:  false,
 					Optional:  true,
 					Computed:  true,
 					Sensitive: false,
 				},
 				"ssh_host": schema.StringAttribute{
-					MarkdownDescription: `Host
-
-Example: sftp.example.net.`,
-					Required:  false,
-					Optional:  true,
-					Computed:  true,
-					Sensitive: false,
+					MarkdownDescription: `Host`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
 				},
 				"ssh_password": schema.StringAttribute{
 					MarkdownDescription: `Password`,
@@ -120,15 +106,11 @@ Example: sftp.example.net.`,
 					},
 				},
 				"ssh_port": schema.Int64Attribute{
-					MarkdownDescription: `Port
-
-Default: 22.
-
-Example: 22.`,
-					Required:  false,
-					Optional:  true,
-					Computed:  true,
-					Sensitive: false,
+					MarkdownDescription: `Port Default: <code>22</code>.`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
 				},
 				"ssh_private_key": schema.StringAttribute{
 					MarkdownDescription: `Private key`,
@@ -141,13 +123,11 @@ Example: 22.`,
 					},
 				},
 				"ssh_user": schema.StringAttribute{
-					MarkdownDescription: `User
-
-Example: user.`,
-					Required:  false,
-					Optional:  true,
-					Computed:  true,
-					Sensitive: false,
+					MarkdownDescription: `User`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
 				},
 			},
 

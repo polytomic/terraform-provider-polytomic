@@ -44,13 +44,11 @@ var Auth0Schema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"client_id": schema.StringAttribute{
-					MarkdownDescription: `App Client ID
-
-Example: jI2Zem1Yzxy8s8s....`,
-					Required:  true,
-					Optional:  false,
-					Computed:  false,
-					Sensitive: false,
+					MarkdownDescription: `App Client ID`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
 				},
 				"client_secret": schema.StringAttribute{
 					MarkdownDescription: `App Client Secret`,
@@ -63,13 +61,11 @@ Example: jI2Zem1Yzxy8s8s....`,
 					},
 				},
 				"domain": schema.StringAttribute{
-					MarkdownDescription: `The domain of the Auth0 instance
-
-Example: dev-g1ce1rt9.us.auth0.com.`,
-					Required:  true,
-					Optional:  false,
-					Computed:  false,
-					Sensitive: false,
+					MarkdownDescription: `The domain of the Auth0 instance`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
 				},
 			},
 

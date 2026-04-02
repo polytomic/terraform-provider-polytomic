@@ -37,11 +37,7 @@ data "polytomic_mixpanel_connection" "mixpanel" {
 Read-Only:
 
 - `project_id` (Number) Project ID
-- `region` (String) Server
-
-Valid values:
-  - "mixpanel.com" - Mixpanel
-  - "eu.mixpanel.com" - Mixpanel (EU)
+- `region` (String) Server Valid values: <code>mixpanel.com</code> (Mixpanel), <code>eu.mixpanel.com</code> (Mixpanel (EU)).
 - `service_account_username` (String) Service account username
 
 

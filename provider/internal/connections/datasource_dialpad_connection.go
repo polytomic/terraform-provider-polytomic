@@ -52,16 +52,8 @@ func (d *DialpadConnectionDataSource) Schema(ctx context.Context, req datasource
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"auth_method": schema.StringAttribute{
-						MarkdownDescription: `Authentication method
-
-Valid values:
-  - "api_key" - API Key
-  - "oauth" - OAuth
-
-Default: api_key.
-
-Example: api_key.`,
-						Computed: true,
+						MarkdownDescription: `Authentication method Valid values: <code>api_key</code> (API Key), <code>oauth</code> (OAuth). Default: <code>api_key</code>.`,
+						Computed:            true,
 					},
 					"oauth_token_expiry": schema.StringAttribute{
 						MarkdownDescription: ``,

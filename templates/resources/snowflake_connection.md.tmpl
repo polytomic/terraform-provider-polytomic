@@ -15,4 +15,41 @@ For detailed configuration guidance, see the [Snowflake connection guide](https:
 
 {{ tffile .ExampleFile }}
 
-{{ .SchemaMarkdown | trimspace }}
+## Schema
+
+- `name` (String, Required)
+- `configuration` (Attributes, Required) See [below for nested schema](#nestedatt--configuration).
+- `organization` (String, Optional) Organization ID.
+- `id` (String, Read-only) Snowflake Connection identifier.
+- `force_destroy` (Boolean, Optional) Indicates whether dependent models, syncs, and bulk syncs should be
+cascade-deleted when this connection is destroyed.
+
+    This only deletes other resources when the connection is destroyed, not when
+setting this parameter to `true`. Once this parameter is set to `true`, there
+must be a successful `terraform apply` run before a destroy is required to
+update this value in the resource state. Without a successful `terraform apply`
+after this parameter is set, this flag will have no effect. If setting this
+field in the same operation that would require replacing the connection or
+destroying the connection, this flag will not work. Additionally when importing
+a connection, a successful `terraform apply` is required to set this value in
+state before it will take effect on a destroy operation.
+
+<a id="nestedatt--configuration"></a>
+### Nested Schema for `configuration`
+
+- `account` (String, Required) Account identifier
+
+    e.g. FRXJLEC-UJA94780
+- `bulk_sync_staging_schema` (String, Optional) Staging schema name
+- `dbname` (String, Required) Database
+- `key_pair_auth` (Boolean, Optional) Use key pair authentication Default: <code>false</code>.
+- `params` (String, Optional) Additional parameters
+
+    Additional connection parameters, formatted as a query string
+- `password` (String, Sensitive, Optional)
+- `private_key` (String, Sensitive, Optional) Private key
+- `private_key_passphrase` (String, Sensitive, Optional) Private key passphrase
+- `use_bulk_sync_staging_schema` (Boolean, Optional) Use custom bulk sync staging schema Default: <code>false</code>.
+- `username` (String, Required)
+- `warehouse` (String, Optional) Compute warehouse
+

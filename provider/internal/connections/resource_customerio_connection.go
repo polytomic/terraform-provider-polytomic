@@ -61,13 +61,11 @@ var CustomerioSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"site_id": schema.StringAttribute{
-					MarkdownDescription: `Site ID
-
-Example: osh853chlrhick8w7qyz.`,
-					Required:  true,
-					Optional:  false,
-					Computed:  false,
-					Sensitive: false,
+					MarkdownDescription: `Site ID`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
 				},
 				"tracking_api_key": schema.StringAttribute{
 					MarkdownDescription: `Tracking API Key`,

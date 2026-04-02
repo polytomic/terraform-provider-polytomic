@@ -38,6 +38,4 @@ Read-Only:
 
 - `domain` (String) Subdomain
 
-Example: polytomic.
-
 

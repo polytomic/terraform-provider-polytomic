@@ -47,27 +47,21 @@ var PardotSchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"account_type": schema.StringAttribute{
-					MarkdownDescription: `Account type
-
-Valid values: "Production", "Sandbox", "Demo".
-
-Example: Production.`,
-					Required:  false,
-					Optional:  true,
-					Computed:  true,
-					Sensitive: false,
+					MarkdownDescription: `Account type Valid values: <code>Production</code>, <code>Sandbox</code>, <code>Demo</code>.`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
 					Validators: []validator.String{
 						stringvalidator.OneOf("Production", "Sandbox", "Demo"),
 					},
 				},
 				"business_unit_id": schema.StringAttribute{
-					MarkdownDescription: `Business Unit ID
-
-Example: 1234567.`,
-					Required:  false,
-					Optional:  true,
-					Computed:  true,
-					Sensitive: false,
+					MarkdownDescription: `Business Unit ID`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
 				},
 				"daily_api_calls": schema.Int64Attribute{
 					MarkdownDescription: `Daily call limit`,

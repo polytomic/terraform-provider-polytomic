@@ -57,17 +57,11 @@ var ChargebeeSchema = schema.Schema{
 					},
 				},
 				"product_catalog": schema.StringAttribute{
-					MarkdownDescription: `Product Catalog version
-
-Valid values:
-  - "1.0" - 1.0
-  - "2.0" - 2.0
-
-Example: 2.0.`,
-					Required:  true,
-					Optional:  false,
-					Computed:  false,
-					Sensitive: false,
+					MarkdownDescription: `Product Catalog version Valid values: <code>1.0</code> (1.0), <code>2.0</code> (2.0).`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
 					Validators: []validator.String{
 						stringvalidator.OneOf("1.0", "2.0"),
 					},
@@ -84,9 +78,7 @@ Example: 2.0.`,
 				"site": schema.StringAttribute{
 					MarkdownDescription: `Chargebee site
 
-    https://{site}.chargebee.com
-
-Example: https://example.chargebee.com.`,
+    https://{site}.chargebee.com`,
 					Required:  true,
 					Optional:  false,
 					Computed:  false,

@@ -52,10 +52,8 @@ func (d *ShowpadConnectionDataSource) Schema(ctx context.Context, req datasource
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"subdomain": schema.StringAttribute{
-						MarkdownDescription: `e.g. 'acme' if your Showpad URL is https://acme.api.showpad.com
-
-Example: acme.`,
-						Computed: true,
+						MarkdownDescription: `e.g. 'acme' if your Showpad URL is https://acme.api.showpad.com`,
+						Computed:            true,
 					},
 				},
 				Optional: true,

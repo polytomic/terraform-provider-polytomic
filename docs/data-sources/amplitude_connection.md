@@ -38,6 +38,4 @@ Read-Only:
 
 - `api_key` (String) API Key
 
-Example: api-key.
-
 

@@ -52,16 +52,12 @@ func (d *AmplemarketConnectionDataSource) Schema(ctx context.Context, req dataso
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"reveal_email_for_person": schema.BoolAttribute{
-						MarkdownDescription: `Reveal email address for person enrichment
-
-Default: true.`,
-						Computed: true,
+						MarkdownDescription: `Reveal email address for person enrichment Default: <code>true</code>.`,
+						Computed:            true,
 					},
 					"reveal_phone_number_for_person": schema.BoolAttribute{
-						MarkdownDescription: `Reveal phone number for person enrichment
-
-Default: true.`,
-						Computed: true,
+						MarkdownDescription: `Reveal phone number for person enrichment Default: <code>true</code>.`,
+						Computed:            true,
 					},
 				},
 				Optional: true,

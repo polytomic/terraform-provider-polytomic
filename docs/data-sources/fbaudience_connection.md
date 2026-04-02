@@ -37,20 +37,8 @@ data "polytomic_fbaudience_connection" "fbaudience" {
 Read-Only:
 
 - `accounts` (Attributes Set) (see [below for nested schema](#nestedatt--configuration--accounts))
-- `auth_method` (String) Authentication Method
-
-Valid values:
-  - "oauth" - Oauth
-  - "token" - Token
-
-Default: oauth.
-
-Example: token.
-- `graph_api_version` (String) Graph API version
-
-Default: v24.0.
-
-Example: v24.0.
+- `auth_method` (String) Authentication Method Valid values: <code>oauth</code> (Oauth), <code>token</code> (Token). Default: <code>oauth</code>.
+- `graph_api_version` (String) Graph API version Default: <code>v24.0</code>.
 - `user_name` (String) Connected as
 
 <a id="nestedatt--configuration--accounts"></a>

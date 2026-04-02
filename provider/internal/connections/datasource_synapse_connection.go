@@ -52,23 +52,19 @@ func (d *SynapseConnectionDataSource) Schema(ctx context.Context, req datasource
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"database": schema.StringAttribute{
-						MarkdownDescription: `Example: yourdatabase.`,
+						MarkdownDescription: ``,
 						Computed:            true,
 					},
 					"hostname": schema.StringAttribute{
-						MarkdownDescription: `Server
-
-Example: yourserver.sql.azuresynapse.net.`,
-						Computed: true,
+						MarkdownDescription: `Server`,
+						Computed:            true,
 					},
 					"port": schema.Int64Attribute{
-						MarkdownDescription: `Default: 1433.
-
-Example: 1433.`,
-						Computed: true,
+						MarkdownDescription: `Default: <code>1433</code>.`,
+						Computed:            true,
 					},
 					"username": schema.StringAttribute{
-						MarkdownDescription: `Example: user.`,
+						MarkdownDescription: ``,
 						Computed:            true,
 					},
 				},

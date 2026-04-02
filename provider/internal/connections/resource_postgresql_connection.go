@@ -54,13 +54,11 @@ var PostgresqlSchema = schema.Schema{
 					},
 				},
 				"change_detection": schema.BoolAttribute{
-					MarkdownDescription: `Use logical replication for bulk syncs
-
-Default: false.`,
-					Required:  false,
-					Optional:  true,
-					Computed:  true,
-					Sensitive: false,
+					MarkdownDescription: `Use logical replication for bulk syncs Default: <code>false</code>.`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
 				},
 				"client_certificate": schema.StringAttribute{
 					MarkdownDescription: `Client certificate`,
@@ -73,13 +71,11 @@ Default: false.`,
 					},
 				},
 				"client_certs": schema.BoolAttribute{
-					MarkdownDescription: `Use client certificates
-
-Default: false.`,
-					Required:  false,
-					Optional:  true,
-					Computed:  true,
-					Sensitive: false,
+					MarkdownDescription: `Use client certificates Default: <code>false</code>.`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
 				},
 				"client_key": schema.StringAttribute{
 					MarkdownDescription: `Client key`,
@@ -92,14 +88,14 @@ Default: false.`,
 					},
 				},
 				"database": schema.StringAttribute{
-					MarkdownDescription: `Example: sampledb.`,
+					MarkdownDescription: ``,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
 					Sensitive:           false,
 				},
 				"hostname": schema.StringAttribute{
-					MarkdownDescription: `Example: database.example.com.`,
+					MarkdownDescription: ``,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
@@ -116,16 +112,14 @@ Default: false.`,
 					},
 				},
 				"port": schema.Int64Attribute{
-					MarkdownDescription: `Default: 5432.
-
-Example: 5432.`,
-					Required:  true,
-					Optional:  false,
-					Computed:  false,
-					Sensitive: false,
+					MarkdownDescription: `Default: <code>5432</code>.`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
 				},
 				"publication": schema.StringAttribute{
-					MarkdownDescription: `Example: polytomic.`,
+					MarkdownDescription: ``,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,
@@ -139,24 +133,18 @@ Example: 5432.`,
 					Sensitive:           false,
 				},
 				"ssh_host": schema.StringAttribute{
-					MarkdownDescription: `SSH host
-
-Example: bastion.example.com.`,
-					Required:  false,
-					Optional:  true,
-					Computed:  true,
-					Sensitive: false,
+					MarkdownDescription: `SSH host`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
 				},
 				"ssh_port": schema.Int64Attribute{
-					MarkdownDescription: `SSH port
-
-Default: 22.
-
-Example: 22.`,
-					Required:  false,
-					Optional:  true,
-					Computed:  true,
-					Sensitive: false,
+					MarkdownDescription: `SSH port Default: <code>22</code>.`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
 				},
 				"ssh_private_key": schema.StringAttribute{
 					MarkdownDescription: `Private key`,
@@ -169,25 +157,21 @@ Example: 22.`,
 					},
 				},
 				"ssh_user": schema.StringAttribute{
-					MarkdownDescription: `SSH user
-
-Default: root.`,
-					Required:  false,
-					Optional:  true,
-					Computed:  true,
-					Sensitive: false,
+					MarkdownDescription: `SSH user Default: <code>root</code>.`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
 				},
 				"ssl": schema.BoolAttribute{
-					MarkdownDescription: `Use SSL
-
-Default: true.`,
-					Required:  false,
-					Optional:  true,
-					Computed:  true,
-					Sensitive: false,
+					MarkdownDescription: `Use SSL Default: <code>true</code>.`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
 				},
 				"username": schema.StringAttribute{
-					MarkdownDescription: `Example: postgres.`,
+					MarkdownDescription: ``,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,

@@ -37,32 +37,14 @@ data "polytomic_mysql_connection" "mysql" {
 Read-Only:
 
 - `account` (String) Username
-
-Example: admin.
-- `change_detection` (Boolean) Use replication for bulk syncs
-
-Default: false.
+- `change_detection` (Boolean) Use replication for bulk syncs Default: <code>false</code>.
 - `dbname` (String) Database
-
-Example: mydb.
-- `hostname` (String) Example: database.example.com.
-- `port` (Number) Default: 3306.
-
-Example: 3306.
+- `hostname` (String)
+- `port` (Number) Default: <code>3306</code>.
 - `ssh` (Boolean) Connect over SSH tunnel
 - `ssh_host` (String) SSH host
-
-Example: bastion.example.com.
-- `ssh_port` (Number) SSH port
-
-Default: 22.
-
-Example: 22.
-- `ssh_user` (String) SSH user
-
-Default: root.
-- `ssl` (Boolean) Use SSL
-
-Default: true.
+- `ssh_port` (Number) SSH port Default: <code>22</code>.
+- `ssh_user` (String) SSH user Default: <code>root</code>.
+- `ssl` (Boolean) Use SSL Default: <code>true</code>.
 
 

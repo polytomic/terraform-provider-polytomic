@@ -52,30 +52,20 @@ func (d *BigqueryConnectionDataSource) Schema(ctx context.Context, req datasourc
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"auth_method": schema.StringAttribute{
-						MarkdownDescription: `Authentication method
-
-Valid values:
-  - "service_account_key" - Service Account Key
-  - "workload_identity_federation" - Workload Identity Federation
-
-Default: service_account_key.`,
-						Computed: true,
+						MarkdownDescription: `Authentication method Valid values: <code>service_account_key</code> (Service Account Key), <code>workload_identity_federation</code> (Workload Identity Federation). Default: <code>service_account_key</code>.`,
+						Computed:            true,
 					},
 					"bucket": schema.StringAttribute{
-						MarkdownDescription: `Google Cloud Storage bucket
-
-Example: my-bucket.`,
-						Computed: true,
+						MarkdownDescription: `Google Cloud Storage bucket`,
+						Computed:            true,
 					},
 					"client_email": schema.StringAttribute{
 						MarkdownDescription: `Service account identity`,
 						Computed:            true,
 					},
 					"location": schema.StringAttribute{
-						MarkdownDescription: `Region or multi-region for query operations
-
-Example: us-east1.`,
-						Computed: true,
+						MarkdownDescription: `Region or multi-region for query operations`,
+						Computed:            true,
 					},
 					"override_project_id": schema.StringAttribute{
 						MarkdownDescription: `Override project ID
@@ -88,10 +78,8 @@ Example: us-east1.`,
 						Computed:            true,
 					},
 					"structured_values_as_json": schema.BoolAttribute{
-						MarkdownDescription: `Write object and array values as JSON
-
-Default: false.`,
-						Computed: true,
+						MarkdownDescription: `Write object and array values as JSON Default: <code>false</code>.`,
+						Computed:            true,
 					},
 					"use_extract": schema.BoolAttribute{
 						MarkdownDescription: `Use Extract for bulk sync from BigQuery`,

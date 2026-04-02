@@ -60,10 +60,8 @@ func (d *OutreachConnectionDataSource) Schema(ctx context.Context, req datasourc
 						Computed:            true,
 					},
 					"use_bulk_upsert": schema.BoolAttribute{
-						MarkdownDescription: `Use bulk API for syncing to Outreach
-
-Default: true.`,
-						Computed: true,
+						MarkdownDescription: `Use bulk API for syncing to Outreach Default: <code>true</code>.`,
+						Computed:            true,
 					},
 				},
 				Optional: true,

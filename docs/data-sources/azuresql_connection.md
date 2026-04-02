@@ -37,34 +37,16 @@ data "polytomic_azuresql_connection" "azuresql" {
 Read-Only:
 
 - `account_name` (String) Storage account name (destination only)
-
-Example: account.
 - `blob_store` (Boolean) Use Azure blob storage for faster bulk loading (destination only)
 - `container_name` (String) Storage container name (destination only)
-
-Example: container.
-- `database` (String) Example: sampledb.
+- `database` (String)
 - `hostname` (String) Server
-
-Example: example.database.windows.net.
-- `port` (Number) Default: 1433.
-
-Example: 1433.
+- `port` (Number) Default: <code>1433</code>.
 - `ssh` (Boolean) Connect over SSH tunnel
 - `ssh_host` (String) SSH host
-
-Example: bastion.example.com.
-- `ssh_port` (Number) SSH port
-
-Default: 22.
-
-Example: 22.
-- `ssh_user` (String) SSH user
-
-Default: root.
-- `ssl` (Boolean) Use SSL
-
-Default: true.
-- `username` (String) Example: user.
+- `ssh_port` (Number) SSH port Default: <code>22</code>.
+- `ssh_user` (String) SSH user Default: <code>root</code>.
+- `ssl` (Boolean) Use SSL Default: <code>true</code>.
+- `username` (String)
 
 

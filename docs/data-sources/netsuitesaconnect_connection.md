@@ -37,8 +37,6 @@ data "polytomic_netsuitesaconnect_connection" "netsuitesaconnect" {
 Read-Only:
 
 - `account_id` (String) Account ID
-
-Example: 1234567_SB1.
 - `certificate_id` (String) Certificate ID
 - `client_id` (String) Client ID
 - `role_id` (String) Role ID

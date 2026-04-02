@@ -61,14 +61,14 @@ var HttpenrichmentSchema = schema.Schema{
 							Sensitive:           false,
 							Attributes: map[string]schema.Attribute{
 								"password": schema.StringAttribute{
-									MarkdownDescription: `Example: secret.`,
+									MarkdownDescription: ``,
 									Required:            false,
 									Optional:            true,
 									Computed:            true,
 									Sensitive:           false,
 								},
 								"username": schema.StringAttribute{
-									MarkdownDescription: `Example: user@example.com.`,
+									MarkdownDescription: ``,
 									Required:            false,
 									Optional:            true,
 									Computed:            true,
@@ -84,7 +84,7 @@ var HttpenrichmentSchema = schema.Schema{
 							Sensitive:           false,
 							Attributes: map[string]schema.Attribute{
 								"name": schema.StringAttribute{
-									MarkdownDescription: `Example: foo.`,
+									MarkdownDescription: ``,
 									Required:            false,
 									Optional:            true,
 									Computed:            true,
@@ -114,22 +114,18 @@ var HttpenrichmentSchema = schema.Schema{
 									Sensitive:           false,
 								},
 								"client_id": schema.StringAttribute{
-									MarkdownDescription: `Client ID
-
-Example: client_id.`,
-									Required:  false,
-									Optional:  true,
-									Computed:  true,
-									Sensitive: false,
+									MarkdownDescription: `Client ID`,
+									Required:            false,
+									Optional:            true,
+									Computed:            true,
+									Sensitive:           false,
 								},
 								"client_secret": schema.StringAttribute{
-									MarkdownDescription: `Client secret
-
-Example: client_secret.`,
-									Required:  false,
-									Optional:  true,
-									Computed:  true,
-									Sensitive: false,
+									MarkdownDescription: `Client secret`,
+									Required:            false,
+									Optional:            true,
+									Computed:            true,
+									Sensitive:           false,
 								},
 								"extra_form_data": schema.SetNestedAttribute{
 									MarkdownDescription: `Extra form data`,
@@ -140,7 +136,7 @@ Example: client_secret.`,
 									NestedObject: schema.NestedAttributeObject{
 										Attributes: map[string]schema.Attribute{
 											"name": schema.StringAttribute{
-												MarkdownDescription: `Example: foo.`,
+												MarkdownDescription: ``,
 												Required:            false,
 												Optional:            true,
 												Computed:            true,
@@ -166,26 +162,22 @@ Example: client_secret.`,
 									ElementType: types.StringType,
 								},
 								"token_endpoint": schema.StringAttribute{
-									MarkdownDescription: `Token endpoint
-
-Example: https://example.com/oauth/token.`,
-									Required:  false,
-									Optional:  true,
-									Computed:  true,
-									Sensitive: false,
+									MarkdownDescription: `Token endpoint`,
+									Required:            false,
+									Optional:            true,
+									Computed:            true,
+									Sensitive:           false,
 								},
 							},
 						},
 					},
 				},
 				"body": schema.StringAttribute{
-					MarkdownDescription: `JSON payload
-
-Example: {"key":"value"}.`,
-					Required:  false,
-					Optional:  true,
-					Computed:  true,
-					Sensitive: false,
+					MarkdownDescription: `JSON payload`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
 				},
 				"example_body": schema.StringAttribute{
 					MarkdownDescription: `Example body
@@ -247,7 +239,7 @@ Example: {"key":"value"}.`,
 					NestedObject: schema.NestedAttributeObject{
 						Attributes: map[string]schema.Attribute{
 							"name": schema.StringAttribute{
-								MarkdownDescription: `Example: foo.`,
+								MarkdownDescription: ``,
 								Required:            false,
 								Optional:            true,
 								Computed:            true,
@@ -266,9 +258,7 @@ Example: {"key":"value"}.`,
 				"healthcheck": schema.StringAttribute{
 					MarkdownDescription: `Health check endpoint
 
-    Path to request when checking the health of this connection. No health check will be performed if left empty.
-
-Example: https://example.com/healthz.`,
+    Path to request when checking the health of this connection. No health check will be performed if left empty.`,
 					Required:  false,
 					Optional:  true,
 					Computed:  true,
@@ -309,13 +299,11 @@ Example: https://example.com/healthz.`,
 					},
 				},
 				"method": schema.StringAttribute{
-					MarkdownDescription: `HTTP Method
-
-Valid values: "GET", "POST".`,
-					Required:  true,
-					Optional:  false,
-					Computed:  false,
-					Sensitive: false,
+					MarkdownDescription: `HTTP Method Valid values: <code>GET</code>, <code>POST</code>.`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
 					Validators: []validator.String{
 						stringvalidator.OneOf("GET", "POST"),
 					},
@@ -329,7 +317,7 @@ Valid values: "GET", "POST".`,
 					NestedObject: schema.NestedAttributeObject{
 						Attributes: map[string]schema.Attribute{
 							"name": schema.StringAttribute{
-								MarkdownDescription: `Example: foo.`,
+								MarkdownDescription: ``,
 								Required:            false,
 								Optional:            true,
 								Computed:            true,
@@ -346,13 +334,11 @@ Valid values: "GET", "POST".`,
 					},
 				},
 				"url": schema.StringAttribute{
-					MarkdownDescription: `Base URL
-
-Example: https://example.com.`,
-					Required:  true,
-					Optional:  false,
-					Computed:  false,
-					Sensitive: false,
+					MarkdownDescription: `Base URL`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
 				},
 			},
 

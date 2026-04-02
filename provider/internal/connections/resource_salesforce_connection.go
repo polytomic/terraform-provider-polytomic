@@ -67,17 +67,11 @@ var SalesforceSchema = schema.Schema{
 					},
 				},
 				"connect_mode": schema.StringAttribute{
-					MarkdownDescription: `Default: browser (i.e. oauth through Polytomic). If 'code' is specified, the response will include an auth_code for the user to enter when completing authorization. NOTE: when supplying client_id and client_secret the connect mode must be 'api'.
-
-Valid values: "browser", "clientcredentials", "code", "api".
-
-Default: browser.
-
-Example: api.`,
-					Required:  false,
-					Optional:  true,
-					Computed:  true,
-					Sensitive: false,
+					MarkdownDescription: `Default: browser (i.e. oauth through Polytomic). If 'code' is specified, the response will include an auth_code for the user to enter when completing authorization. NOTE: when supplying client_id and client_secret the connect mode must be 'api'. Valid values: <code>browser</code>, <code>clientcredentials</code>, <code>code</code>, <code>api</code>. Default: <code>browser</code>.`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
 					Validators: []validator.String{
 						stringvalidator.OneOf("browser", "clientcredentials", "code", "api"),
 					},
@@ -92,13 +86,11 @@ Example: api.`,
 					Sensitive: false,
 				},
 				"domain": schema.StringAttribute{
-					MarkdownDescription: `The Salesforce instance's login domain, e.g. acmecorp.my.salesforce.com
-
-Example: http://instance.my.salesforce.com.`,
-					Required:  true,
-					Optional:  false,
-					Computed:  false,
-					Sensitive: false,
+					MarkdownDescription: `The Salesforce instance's login domain, e.g. acmecorp.my.salesforce.com`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
 				},
 				"enable_multicurrency_lookup": schema.BoolAttribute{
 					MarkdownDescription: `Enable multicurrency source field support

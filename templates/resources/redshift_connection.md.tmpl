@@ -15,4 +15,56 @@ For detailed configuration guidance, see the [Redshift connection guide](https:/
 
 {{ tffile .ExampleFile }}
 
-{{ .SchemaMarkdown | trimspace }}
+## Schema
+
+- `name` (String, Required)
+- `configuration` (Attributes, Required) See [below for nested schema](#nestedatt--configuration).
+- `organization` (String, Optional) Organization ID.
+- `id` (String, Read-only) Redshift Connection identifier.
+- `force_destroy` (Boolean, Optional) Indicates whether dependent models, syncs, and bulk syncs should be
+cascade-deleted when this connection is destroyed.
+
+    This only deletes other resources when the connection is destroyed, not when
+setting this parameter to `true`. Once this parameter is set to `true`, there
+must be a successful `terraform apply` run before a destroy is required to
+update this value in the resource state. Without a successful `terraform apply`
+after this parameter is set, this flag will have no effect. If setting this
+field in the same operation that would require replacing the connection or
+destroying the connection, this flag will not work. Additionally when importing
+a connection, a successful `terraform apply` is required to set this value in
+state before it will take effect on a destroy operation.
+
+<a id="nestedatt--configuration"></a>
+### Nested Schema for `configuration`
+
+- `auth_mode` (String, Required) Authentication Method
+
+    How to authenticate with AWS. Defaults to Access Key and Secret Valid values: <code>access_key_and_secret</code> (Access Key and Secret), <code>iam_role</code> (IAM role). Default: <code>access_key_and_secret</code>.
+- `aws_access_key_id` (String, Optional) AWS Access Key ID (destinations only)
+
+    Access Key ID with read/write access to a bucket. More info: https://docs.polytomic.com/docs/redshift
+- `aws_secret_access_key` (String, Sensitive, Optional) AWS Secret Access Key (destinations only)
+- `aws_user` (String, Optional) User ARN
+- `bulk_sync_staging_schema` (String, Optional) Staging schema name
+- `database` (String, Required)
+- `external_id` (String, Optional) External ID
+
+    External ID for the IAM role
+- `hostname` (String, Required)
+- `iam_role_arn` (String, Optional) IAM Role ARN
+- `password` (String, Sensitive, Required)
+- `port` (Number, Required) Default: <code>5439</code>.
+- `s3_bucket_name` (String, Optional) S3 Bucket Name (destinations only)
+
+    Name of bucket used for staging data load files
+- `s3_bucket_region` (String, Optional) S3 Bucket Region (destinations only)
+
+    Region of bucket. Note: must match region of redshift server
+- `ssh` (Boolean, Optional) Connect over SSH tunnel
+- `ssh_host` (String, Optional) SSH host
+- `ssh_port` (Number, Optional) SSH port Default: <code>22</code>.
+- `ssh_private_key` (String, Sensitive, Optional) Private key
+- `ssh_user` (String, Optional) SSH user Default: <code>root</code>.
+- `use_bulk_sync_staging_schema` (Boolean, Optional) Use custom bulk sync staging schema Default: <code>false</code>.
+- `username` (String, Required)
+

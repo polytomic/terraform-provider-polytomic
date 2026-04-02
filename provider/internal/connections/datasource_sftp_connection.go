@@ -52,16 +52,8 @@ func (d *SftpConnectionDataSource) Schema(ctx context.Context, req datasource.Sc
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"auth_mode": schema.StringAttribute{
-						MarkdownDescription: `Authentication Method
-
-Valid values:
-  - "private_key" - Private key
-  - "password" - Password
-
-Default: private_key.
-
-Example: private_key.`,
-						Computed: true,
+						MarkdownDescription: `Authentication Method Valid values: <code>private_key</code> (Private key), <code>password</code> (Password). Default: <code>private_key</code>.`,
+						Computed:            true,
 					},
 					"is_single_table": schema.BoolAttribute{
 						MarkdownDescription: `Files are time-based snapshots
@@ -70,10 +62,8 @@ Example: private_key.`,
 						Computed: true,
 					},
 					"path": schema.StringAttribute{
-						MarkdownDescription: `The path to the directory on the SFTP server containing the files.
-
-Example: /path/to/files.`,
-						Computed: true,
+						MarkdownDescription: `The path to the directory on the SFTP server containing the files.`,
+						Computed:            true,
 					},
 					"single_table_name": schema.StringAttribute{
 						MarkdownDescription: `Collection name`,
@@ -82,30 +72,20 @@ Example: /path/to/files.`,
 					"skip_lines": schema.Int64Attribute{
 						MarkdownDescription: `Skip first lines
 
-    Skip first N lines of each CSV file.
-
-Default: 0.`,
+    Skip first N lines of each CSV file. Default: <code>0</code>.`,
 						Computed: true,
 					},
 					"ssh_host": schema.StringAttribute{
-						MarkdownDescription: `Host
-
-Example: sftp.example.net.`,
-						Computed: true,
+						MarkdownDescription: `Host`,
+						Computed:            true,
 					},
 					"ssh_port": schema.Int64Attribute{
-						MarkdownDescription: `Port
-
-Default: 22.
-
-Example: 22.`,
-						Computed: true,
+						MarkdownDescription: `Port Default: <code>22</code>.`,
+						Computed:            true,
 					},
 					"ssh_user": schema.StringAttribute{
-						MarkdownDescription: `User
-
-Example: user.`,
-						Computed: true,
+						MarkdownDescription: `User`,
+						Computed:            true,
 					},
 				},
 				Optional: true,

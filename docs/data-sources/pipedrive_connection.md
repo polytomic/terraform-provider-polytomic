@@ -36,6 +36,6 @@ data "polytomic_pipedrive_connection" "pipedrive" {
 
 Read-Only:
 
-- `domain` (String) Example: polytomic.
+- `domain` (String)
 
 

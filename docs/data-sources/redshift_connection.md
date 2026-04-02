@@ -38,56 +38,30 @@ Read-Only:
 
 - `auth_mode` (String) Authentication Method
 
-    How to authenticate with AWS. Defaults to Access Key and Secret
-
-Valid values:
-  - "access_key_and_secret" - Access Key and Secret
-  - "iam_role" - IAM role
-
-Default: access_key_and_secret.
-
-Example: access_key_and_secret.
+    How to authenticate with AWS. Defaults to Access Key and Secret Valid values: <code>access_key_and_secret</code> (Access Key and Secret), <code>iam_role</code> (IAM role). Default: <code>access_key_and_secret</code>.
 - `aws_access_key_id` (String) AWS Access Key ID (destinations only)
 
     Access Key ID with read/write access to a bucket. More info: https://docs.polytomic.com/docs/redshift
-
-Example: AKIAIOSFODNN7EXAMPLE.
 - `aws_user` (String) User ARN
 - `bulk_sync_staging_schema` (String) Staging schema name
-- `database` (String) Example: mydb.
+- `database` (String)
 - `external_id` (String) External ID
 
     External ID for the IAM role
-- `hostname` (String) Example: mycluster.us-west-2.redshift.amazonaws.com.
+- `hostname` (String)
 - `iam_role_arn` (String) IAM Role ARN
-- `port` (Number) Default: 5439.
-
-Example: 5439.
+- `port` (Number) Default: <code>5439</code>.
 - `s3_bucket_name` (String) S3 Bucket Name (destinations only)
 
     Name of bucket used for staging data load files
-
-Example: my-bucket.
 - `s3_bucket_region` (String) S3 Bucket Region (destinations only)
 
     Region of bucket. Note: must match region of redshift server
-
-Example: us-west-2.
 - `ssh` (Boolean) Connect over SSH tunnel
 - `ssh_host` (String) SSH host
-
-Example: bastion.example.com.
-- `ssh_port` (Number) SSH port
-
-Default: 22.
-
-Example: 22.
-- `ssh_user` (String) SSH user
-
-Default: root.
-- `use_bulk_sync_staging_schema` (Boolean) Use custom bulk sync staging schema
-
-Default: false.
-- `username` (String) Example: redshift_user.
+- `ssh_port` (Number) SSH port Default: <code>22</code>.
+- `ssh_user` (String) SSH user Default: <code>root</code>.
+- `use_bulk_sync_staging_schema` (Boolean) Use custom bulk sync staging schema Default: <code>false</code>.
+- `username` (String)
 
 

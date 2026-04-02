@@ -54,7 +54,7 @@ var TestrailSchema = schema.Schema{
 					},
 				},
 				"hostname": schema.StringAttribute{
-					MarkdownDescription: `Example: https://example.testrail.io.`,
+					MarkdownDescription: ``,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,

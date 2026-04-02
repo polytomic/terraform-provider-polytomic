@@ -52,17 +52,13 @@ func (d *DropboxConnectionDataSource) Schema(ctx context.Context, req datasource
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"bucket": schema.StringAttribute{
-						MarkdownDescription: `Folder
-
-Example: my-folder.`,
-						Computed: true,
+						MarkdownDescription: `Folder`,
+						Computed:            true,
 					},
 					"csv_has_headers": schema.BoolAttribute{
 						MarkdownDescription: `CSV files have headers
 
-    Whether CSV files have a header row with field names.
-
-Default: true.`,
+    Whether CSV files have a header row with field names. Default: <code>true</code>.`,
 						Computed: true,
 					},
 					"directory_glob_pattern": schema.StringAttribute{
@@ -70,17 +66,13 @@ Default: true.`,
 						Computed:            true,
 					},
 					"is_directory_snapshot": schema.BoolAttribute{
-						MarkdownDescription: `Multi-directory multi-table
-
-Default: false.`,
-						Computed: true,
+						MarkdownDescription: `Multi-directory multi-table Default: <code>false</code>.`,
+						Computed:            true,
 					},
 					"is_single_table": schema.BoolAttribute{
 						MarkdownDescription: `Files are time-based snapshots
 
-    Treat the files as a single table.
-
-Default: false.`,
+    Treat the files as a single table. Default: <code>false</code>.`,
 						Computed: true,
 					},
 					"oauth_token_expiry": schema.StringAttribute{
@@ -88,39 +80,24 @@ Default: false.`,
 						Computed:            true,
 					},
 					"single_table_file_format": schema.StringAttribute{
-						MarkdownDescription: `File format
-
-Valid values:
-  - "csv" - CSV
-  - "json" - JSON
-  - "parquet" - Parquet
-
-Default: csv.
-
-Example: csv.`,
-						Computed: true,
+						MarkdownDescription: `File format Valid values: <code>csv</code> (CSV), <code>json</code> (JSON), <code>parquet</code> (Parquet). Default: <code>csv</code>.`,
+						Computed:            true,
 					},
 					"single_table_file_formats": schema.SetAttribute{
 						MarkdownDescription: `File formats
 
-    File formats that may be present across different tables
-
-Default: [[csv]].`,
+    File formats that may be present across different tables Default: <code>[[csv]]</code>.`,
 						Computed:    true,
 						ElementType: types.StringType,
 					},
 					"single_table_name": schema.StringAttribute{
-						MarkdownDescription: `Collection name
-
-Example: collection.`,
-						Computed: true,
+						MarkdownDescription: `Collection name`,
+						Computed:            true,
 					},
 					"skip_lines": schema.Int64Attribute{
 						MarkdownDescription: `Skip first lines
 
-    Skip first N lines of each CSV file.
-
-Default: 0.`,
+    Skip first N lines of each CSV file. Default: <code>0</code>.`,
 						Computed: true,
 					},
 				},

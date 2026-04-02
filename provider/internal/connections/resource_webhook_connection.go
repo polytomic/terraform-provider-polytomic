@@ -52,7 +52,7 @@ var WebhookSchema = schema.Schema{
 					NestedObject: schema.NestedAttributeObject{
 						Attributes: map[string]schema.Attribute{
 							"name": schema.StringAttribute{
-								MarkdownDescription: `Example: foo.`,
+								MarkdownDescription: ``,
 								Required:            false,
 								Optional:            true,
 								Computed:            true,
@@ -79,13 +79,11 @@ var WebhookSchema = schema.Schema{
 					},
 				},
 				"url": schema.StringAttribute{
-					MarkdownDescription: `Webhook URL
-
-Example: https://example.com/webhook.`,
-					Required:  true,
-					Optional:  false,
-					Computed:  false,
-					Sensitive: false,
+					MarkdownDescription: `Webhook URL`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
 				},
 			},
 

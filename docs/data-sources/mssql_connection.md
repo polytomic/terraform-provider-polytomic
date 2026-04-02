@@ -36,31 +36,15 @@ data "polytomic_mssql_connection" "mssql" {
 
 Read-Only:
 
-- `change_detection` (Boolean) Use change data capture for bulk syncs
-
-Default: false.
-- `database` (String) Example: sampledb.
+- `change_detection` (Boolean) Use change data capture for bulk syncs Default: <code>false</code>.
+- `database` (String)
 - `hostname` (String) Server
-
-Example: example.database.windows.net.
-- `port` (Number) Default: 1433.
-
-Example: 1433.
+- `port` (Number) Default: <code>1433</code>.
 - `ssh` (Boolean) Connect over SSH tunnel
 - `ssh_host` (String) SSH host
-
-Example: bastion.example.com.
-- `ssh_port` (Number) SSH port
-
-Default: 22.
-
-Example: 22.
-- `ssh_user` (String) SSH user
-
-Default: root.
-- `ssl` (Boolean) Use SSL
-
-Default: true.
-- `username` (String) Example: user.
+- `ssh_port` (Number) SSH port Default: <code>22</code>.
+- `ssh_user` (String) SSH user Default: <code>root</code>.
+- `ssl` (Boolean) Use SSL Default: <code>true</code>.
+- `username` (String)
 
 

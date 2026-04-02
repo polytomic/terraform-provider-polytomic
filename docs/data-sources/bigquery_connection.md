@@ -36,27 +36,15 @@ data "polytomic_bigquery_connection" "bigquery" {
 
 Read-Only:
 
-- `auth_method` (String) Authentication method
-
-Valid values:
-  - "service_account_key" - Service Account Key
-  - "workload_identity_federation" - Workload Identity Federation
-
-Default: service_account_key.
+- `auth_method` (String) Authentication method Valid values: <code>service_account_key</code> (Service Account Key), <code>workload_identity_federation</code> (Workload Identity Federation). Default: <code>service_account_key</code>.
 - `bucket` (String) Google Cloud Storage bucket
-
-Example: my-bucket.
 - `client_email` (String) Service account identity
 - `location` (String) Region or multi-region for query operations
-
-Example: us-east1.
 - `override_project_id` (String) Override project ID
 
     Override service key's project ID for cross-account access
 - `project_id` (String) Service account project ID
-- `structured_values_as_json` (Boolean) Write object and array values as JSON
-
-Default: false.
+- `structured_values_as_json` (Boolean) Write object and array values as JSON Default: <code>false</code>.
 - `use_extract` (Boolean) Use Extract for bulk sync from BigQuery
 - `wif_project_id` (String) Google Cloud project ID
 

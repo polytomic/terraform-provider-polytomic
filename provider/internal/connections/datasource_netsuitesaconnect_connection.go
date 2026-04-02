@@ -52,10 +52,8 @@ func (d *NetsuitesaconnectConnectionDataSource) Schema(ctx context.Context, req 
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"account_id": schema.StringAttribute{
-						MarkdownDescription: `Account ID
-
-Example: 1234567_SB1.`,
-						Computed: true,
+						MarkdownDescription: `Account ID`,
+						Computed:            true,
 					},
 					"certificate_id": schema.StringAttribute{
 						MarkdownDescription: `Certificate ID`,

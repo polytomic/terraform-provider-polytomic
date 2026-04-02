@@ -36,20 +36,10 @@ data "polytomic_zendesk_support_connection" "zendesk_support" {
 
 Read-Only:
 
-- `auth_method` (String) Authentication method
-
-Valid values:
-  - "apitoken" - API token
-  - "oauth" - OAuth
-
-Default: oauth.
-
-Example: apitoken.
+- `auth_method` (String) Authentication method Valid values: <code>apitoken</code> (API token), <code>oauth</code> (OAuth). Default: <code>oauth</code>.
 - `custom_api_limits` (Boolean) Enforce custom API limits
 - `domain` (String) Zendesk Subdomain
-
-Example: polytomic.zendesk.com.
-- `email` (String) Example: user@example.com.
+- `email` (String)
 - `oauth_token_expiry` (String)
 - `ratelimit_rpm` (Number) Maximum requests per minute
 

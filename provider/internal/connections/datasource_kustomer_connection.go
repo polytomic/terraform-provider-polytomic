@@ -54,9 +54,7 @@ func (d *KustomerConnectionDataSource) Schema(ctx context.Context, req datasourc
 					"domain": schema.StringAttribute{
 						MarkdownDescription: `Customer Portal Subdomain
 
-    e.g. 'polytomic' if your portal is 'https://polytomic.kustomerapp.com/app'
-
-Example: polytomic.`,
+    e.g. 'polytomic' if your portal is 'https://polytomic.kustomerapp.com/app'`,
 						Computed: true,
 					},
 				},
