@@ -25,10 +25,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
-	"github.com/polytomic/polytomic-go"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"github.com/polytomic/polytomic-go"
 	"github.com/polytomic/polytomic-go/bulksync"
-ptcore "github.com/polytomic/polytomic-go/core"
+	ptcore "github.com/polytomic/polytomic-go/core"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 

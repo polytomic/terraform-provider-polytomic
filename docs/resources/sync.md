@@ -92,8 +92,8 @@ resource "polytomic_sync" "sync" {
 ### Optional
 
 - `encryption_passphrase` (String, Sensitive) Passphrase for encrypting sync data
-- `filter_logic` (String) Logical expression to combine filters (e.g. `1 AND 2`, `1 OR (2 AND 3)`).
-- `filters` (Attributes Set) Filters to apply to source data before syncing. Use `filter_logic` to combine multiple filters. (see [below for nested schema](#nestedatt--filters))
+- `filter_logic` (String) Logical expression to combine model field filters (e.g. `1 AND 2`, `1 OR (2 AND 3)`).
+- `filters` (Attributes Set) Model field filters to apply to source data before syncing. Use `filter_logic` to combine multiple filters. (see [below for nested schema](#nestedatt--filters))
 - `identity` (Attributes) Record matching configuration. Defines how source records are matched to existing target records for update and upsert modes. (see [below for nested schema](#nestedatt--identity))
 - `only_enrich_updates` (Boolean) Whether enrichment models only track changes
 - `organization` (String) Organization ID for the sync. Required when using a deployment or partner key.
@@ -101,6 +101,7 @@ resource "polytomic_sync" "sync" {
 - `overrides` (Attributes Set) Conditional value replacements. When a record matches the condition, the override value is used instead of the source value. (see [below for nested schema](#nestedatt--overrides))
 - `skip_initial_backfill` (Boolean) Skip initial backfill, sync only new records
 - `sync_all_records` (Boolean) Whether to sync all records from the source on every execution, regardless of whether they have changed.
+- `target_filters` (Attributes Set) Target field filters. Only valid for syncs with mode `update`. Use `target.filter_logic` to combine multiple target filters. (see [below for nested schema](#nestedatt--target_filters))
 
 ### Read-Only
 
@@ -180,7 +181,6 @@ Optional:
 - `filter_logic` (String) Logical expression to combine target-level filters (e.g. `1 AND 2`).
 - `new_name` (String) Name for a new target object to create in the destination.
 - `object` (String) Existing target object name in the destination connection. Mutually exclusive with `create`.
-- `search_values` (String) Search criteria for targets, as a JSON object.
 
 
 <a id="nestedatt--filters"></a>
@@ -188,14 +188,22 @@ Optional:
 
 Required:
 
-- `field_id` (String) Model or target field name to filter on.
-- `field_type` (String) Reference type for the field. One of `model` or `target`.
 - `function` (String) Filter function to apply (e.g. `Equality`, `Inequality`, `IsNull`, `IsNotNull`, `True`, `False`, `OnOrAfter`, `OnOrBefore`).
+- `source` (Attributes) Source model field reference. (see [below for nested schema](#nestedatt--filters--source))
 
 Optional:
 
 - `label` (String) Display name for the filter.
 - `value` (String) Comparison value for the filter, as a JSON value.
+
+<a id="nestedatt--filters--source"></a>
+### Nested Schema for `filters.source`
+
+Required:
+
+- `field` (String) Source field name.
+- `model_id` (String) Source model identifier.
+
 
 
 <a id="nestedatt--identity"></a>
@@ -235,12 +243,25 @@ Required:
 Optional:
 
 - `new` (Boolean) Set to `true` if the target field should be created by Polytomic.
-- `override_value` (String) Static value to set in the target field. When provided, `source` is ignored.
-- `source` (Attributes) Source model field reference. Required unless `override_value` is set. (see [below for nested schema](#nestedatt--override_fields--source))
+- `override_value` (String) Static value to set in the target field.
 - `sync_mode` (String) Field-level sync mode.
 
-<a id="nestedatt--override_fields--source"></a>
-### Nested Schema for `override_fields.source`
+
+<a id="nestedatt--overrides"></a>
+### Nested Schema for `overrides`
+
+Required:
+
+- `function` (String) Condition function (e.g. `Equality`, `Inequality`, `IsNull`).
+- `override` (String) Replacement value to use when the condition matches, as a JSON value.
+- `source` (Attributes) Source model field reference to evaluate the condition against. (see [below for nested schema](#nestedatt--overrides--source))
+
+Optional:
+
+- `value` (String) Condition value to compare against, as a JSON value.
+
+<a id="nestedatt--overrides--source"></a>
+### Nested Schema for `overrides.source`
 
 Required:
 
@@ -249,18 +270,18 @@ Required:
 
 
 
-<a id="nestedatt--overrides"></a>
-### Nested Schema for `overrides`
+<a id="nestedatt--target_filters"></a>
+### Nested Schema for `target_filters`
 
 Required:
 
-- `field_id` (String) Model field identifier to evaluate the condition against.
-- `function` (String) Condition function (e.g. `Equality`, `Inequality`, `IsNull`).
-- `override` (String) Replacement value to use when the condition matches, as a JSON value.
+- `field` (String) Target field name to filter on.
+- `function` (String) Filter function to apply (e.g. `Equality`, `Inequality`, `IsNull`, `IsNotNull`).
 
 Optional:
 
-- `value` (String) Condition value to compare against, as a JSON value.
+- `label` (String) Display name for the filter.
+- `value` (String) Comparison value for the filter, as a JSON value.
 
 
 <a id="nestedatt--created_by"></a>

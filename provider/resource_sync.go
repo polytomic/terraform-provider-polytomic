@@ -190,7 +190,7 @@ func (r *syncResource) Schema(ctx context.Context, req resource.SchemaRequest, r
 						},
 						"function": schema.StringAttribute{
 							MarkdownDescription: "Filter function to apply (e.g. `Equality`, `Inequality`, `IsNull`, `IsNotNull`, `True`, `False`, `OnOrAfter`, `OnOrBefore`).",
-							Required: true,
+							Required:            true,
 						},
 						"value": schema.StringAttribute{
 							MarkdownDescription: "Comparison value for the filter, as a JSON value.",
