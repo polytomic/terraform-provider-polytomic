@@ -3,6 +3,7 @@ package provider
 import (
 	"html/template"
 	"os"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -42,9 +43,53 @@ func APIKey() bool {
 	return os.Getenv(providerclient.PolytomicAPIKey) != "" && os.Getenv(providerclient.PolytomicDeploymentKey) == ""
 }
 
+type postgresTestConfig struct {
+	Host     string
+	Database string
+	Username string
+	Password string
+	Port     int
+}
+
+func testPostgresConfig(t *testing.T) postgresTestConfig {
+	t.Helper()
+
+	cfg := postgresTestConfig{
+		Host:     getenvOr("POLYTOMIC_TEST_PG_HOST", "postgres"),
+		Database: getenvOr("POLYTOMIC_TEST_PG_DATABASE", "polytomic"),
+		Username: os.Getenv("POLYTOMIC_TEST_PG_USERNAME"),
+		Password: os.Getenv("POLYTOMIC_TEST_PG_PASSWORD"),
+	}
+
+	port, err := strconv.Atoi(getenvOr("POLYTOMIC_TEST_PG_PORT", "5432"))
+	if err != nil {
+		t.Fatalf("POLYTOMIC_TEST_PG_PORT must be a valid integer: %v", err)
+	}
+	cfg.Port = port
+
+	if cfg.Username == "" {
+		t.Fatalf("POLYTOMIC_TEST_PG_USERNAME must be set for PostgreSQL-backed acceptance tests")
+	}
+
+	if cfg.Password == "" {
+		t.Fatalf("POLYTOMIC_TEST_PG_PASSWORD must be set for PostgreSQL-backed acceptance tests")
+	}
+
+	return cfg
+}
+
+func getenvOr(name, fallback string) string {
+	if value := os.Getenv(name); value != "" {
+		return value
+	}
+
+	return fallback
+}
+
 type TestCaseTfArgs struct {
-	Name   string
-	APIKey bool
+	Name     string
+	APIKey   bool
+	Postgres postgresTestConfig
 }
 
 // TestCaseTfResource generates the Terraform configuration for a test case from

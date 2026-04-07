@@ -124,7 +124,8 @@ func (s *Syncs) GenerateTerraformFiles(ctx context.Context, writer io.Writer, re
 		if err != nil {
 			return err
 		}
-		tokens := wrapJSONEncode(target, "search_values", "configuration")
+		delete(target, "search_values")
+		tokens := wrapJSONEncode(target, "configuration")
 		resourceBlock.Body().SetAttributeRaw("target", tokens)
 
 		if sync.Data.FilterLogic != nil {
@@ -132,21 +133,51 @@ func (s *Syncs) GenerateTerraformFiles(ctx context.Context, writer io.Writer, re
 		}
 
 		if len(sync.Data.Filters) > 0 {
-			var filters []map[string]interface{}
-			decoder, err = mapstructure.NewDecoder(
-				&mapstructure.DecoderConfig{
-					TagName: "json",
-					Result:  &filters,
-				})
-			if err != nil {
-				return err
+			// Split filters by type: model filters → "filters", target filters → "target_filters"
+			var modelFilters []map[string]interface{}
+			var targetFilters []map[string]interface{}
+			for _, f := range sync.Data.Filters {
+				var m map[string]interface{}
+				dec, decErr := mapstructure.NewDecoder(&mapstructure.DecoderConfig{TagName: "json", Result: &m})
+				if decErr != nil {
+					return decErr
+				}
+				if decErr = dec.Decode(f); decErr != nil {
+					return decErr
+				}
+				fieldType, _ := m["field_type"].(string)
+				if fieldType == "Target" {
+					// Target filter: use field_id as "field", drop field_id/field_type/field
+					tf := map[string]interface{}{
+						"field":    m["field_id"],
+						"function": m["function"],
+						"value":    m["value"],
+					}
+					if label, ok := m["label"]; ok && label != nil && label != "" {
+						tf["label"] = label
+					}
+					targetFilters = append(targetFilters, tf)
+				} else {
+					// Model filter: use "field" source reference as "source", drop field_id/field_type
+					mf := map[string]interface{}{
+						"source":   m["field"],
+						"function": m["function"],
+						"value":    m["value"],
+					}
+					if label, ok := m["label"]; ok && label != nil && label != "" {
+						mf["label"] = label
+					}
+					modelFilters = append(modelFilters, mf)
+				}
 			}
-			err = decoder.Decode(sync.Data.Filters)
-			if err != nil {
-				return err
+			if len(modelFilters) > 0 {
+				filterTokens := wrapJSONEncode(modelFilters, "value")
+				resourceBlock.Body().SetAttributeRaw("filters", filterTokens)
 			}
-			filterTokens := wrapJSONEncode(filters, "value")
-			resourceBlock.Body().SetAttributeRaw("filters", filterTokens)
+			if len(targetFilters) > 0 {
+				tfTokens := wrapJSONEncode(targetFilters, "value")
+				resourceBlock.Body().SetAttributeRaw("target_filters", tfTokens)
+			}
 		}
 
 		if sync.Data.Identity != nil {
@@ -179,21 +210,32 @@ func (s *Syncs) GenerateTerraformFiles(ctx context.Context, writer io.Writer, re
 			if err != nil {
 				return err
 			}
+			// Drop source from override_fields — it was always ignored server-side
+			for i := range overrideFields {
+				delete(overrideFields[i], "source")
+				delete(overrideFields[i], "encryption_enabled")
+			}
 			resourceBlock.Body().SetAttributeValue("override_fields", typeConverter(overrideFields))
 		}
 		if len(sync.Data.Overrides) > 0 {
 			var overrides []map[string]interface{}
-			decoder, err = mapstructure.NewDecoder(
-				&mapstructure.DecoderConfig{
-					TagName: "json",
-					Result:  &overrides,
-				})
-			if err != nil {
-				return err
-			}
-			err = decoder.Decode(sync.Data.Overrides)
-			if err != nil {
-				return err
+			for _, o := range sync.Data.Overrides {
+				var m map[string]interface{}
+				dec, decErr := mapstructure.NewDecoder(&mapstructure.DecoderConfig{TagName: "json", Result: &m})
+				if decErr != nil {
+					return decErr
+				}
+				if decErr = dec.Decode(o); decErr != nil {
+					return decErr
+				}
+				// Use "field" source reference as "source", drop field_id
+				ov := map[string]interface{}{
+					"source":   m["field"],
+					"function": m["function"],
+					"value":    m["value"],
+					"override": m["override"],
+				}
+				overrides = append(overrides, ov)
 			}
 			overrideTokens := wrapJSONEncode(overrides, "value")
 			resourceBlock.Body().SetAttributeRaw("overrides", overrideTokens)
