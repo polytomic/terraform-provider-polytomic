@@ -1,3 +1,18 @@
+## 1.4.0 (Unreleased)
+
+BREAKING CHANGES:
+
+- `polytomic_sync` resource: The `filters`, `overrides`, and `override_fields` attributes have been redesigned. See the [Upgrading to v1.4.0](docs/guides/upgrading-to-v1.4.0.md) guide for migration instructions.
+  - **`filters`**: Replaced `field_id`/`field_type` with `source { model_id, field }` reference. The server resolves field UUIDs from the source reference, so users no longer need to look up field UUIDs.
+  - **`target_filters`**: New attribute for target-field filters (previously mixed into `filters` with `field_type = "Target"`). Only valid for syncs with mode `update`.
+  - **`overrides`**: Replaced `field_id` with `source { model_id, field }` reference, matching the new `filters` pattern.
+  - **`override_fields`**: Removed the `source` block, which was always ignored by the server. Only `target`, `override_value`, `new`, and `sync_mode` remain.
+  - **`target.search_values`**: Removed. This was internal application state derived from `target.object` by the server. Users should remove any `search_values` from their `target` blocks; the server populates this automatically from the `object` field.
+
+BUG FIXES:
+
+- Fixed override string values causing "Invalid JSON String Value" errors due to missing JSON marshaling in response handling.
+
 ## 1.3.9 (2 April 2026)
 
 - Added support for new connection types:

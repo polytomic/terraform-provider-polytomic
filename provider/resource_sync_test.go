@@ -15,14 +15,16 @@ import (
 
 func TestAccSyncResource(t *testing.T) {
 	name := fmt.Sprintf("TestAccSync-%s", uuid.NewString())
+	postgres := testPostgresConfig(t)
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: TestAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: TestCaseTfResource(t, syncResourceTemplate, TestCaseTfArgs{
-					Name:   name,
-					APIKey: APIKey(),
+					Name:     name,
+					APIKey:   APIKey(),
+					Postgres: postgres,
 				}),
 				ConfigStateChecks: []statecheck.StateCheck{
 					statecheck.ExpectKnownValue(
@@ -105,11 +107,11 @@ resource "polytomic_model" "test" {
 resource "polytomic_postgresql_connection" "test" {
   name = "{{.Name}}-postgres"
   configuration = {
-    hostname = "localhost"
-    database = "test"
-    username = "test"
-    password = "test"
-    port     = 5432
+    hostname = "{{.Postgres.Host}}"
+    database = "{{.Postgres.Database}}"
+    username = "{{.Postgres.Username}}"
+    password = "{{.Postgres.Password}}"
+    port     = {{.Postgres.Port}}
   }
 {{if not .APIKey}}
   organization = polytomic_organization.test.id

@@ -220,11 +220,6 @@ func typeConverter(value any) cty.Value {
 			"model_id": cty.StringVal(value.ModelId),
 		}
 		return cty.ObjectVal(config)
-	case *polytomic.FilterFieldReferenceType:
-		if value == nil {
-			return cty.NilVal
-		}
-		return cty.StringVal(string(*value))
 	case polytomic.FilterFunction:
 		return cty.StringVal(string(value))
 	case *polytomic.FilterFunction:

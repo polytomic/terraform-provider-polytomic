@@ -72,12 +72,6 @@ func (r *syncResource) Schema(ctx context.Context, req resource.SchemaRequest, r
 						Optional:            true,
 						Computed:            true,
 					},
-					"search_values": schema.StringAttribute{
-						MarkdownDescription: "Search criteria for targets, as a JSON object.",
-						CustomType:          jsontypes.NormalizedType{},
-						Optional:            true,
-						Computed:            true,
-					},
 					"configuration": schema.StringAttribute{
 						MarkdownDescription: "Connection-specific target options, as a JSON object.",
 						CustomType:          jsontypes.NormalizedType{},
@@ -157,20 +151,6 @@ func (r *syncResource) Schema(ctx context.Context, req resource.SchemaRequest, r
 				MarkdownDescription: "Fields whose values are set unconditionally in the target, regardless of source data.",
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
-						"source": schema.SingleNestedAttribute{
-							MarkdownDescription: "Source model field reference. Required unless `override_value` is set.",
-							Attributes: map[string]schema.Attribute{
-								"model_id": schema.StringAttribute{
-									MarkdownDescription: "Source model identifier.",
-									Required:            true,
-								},
-								"field": schema.StringAttribute{
-									MarkdownDescription: "Source field name.",
-									Required:            true,
-								},
-							},
-							Optional: true,
-						},
 						"target": schema.StringAttribute{
 							MarkdownDescription: "Target field identifier that the value will be written to.",
 							Required:            true,
@@ -180,7 +160,7 @@ func (r *syncResource) Schema(ctx context.Context, req resource.SchemaRequest, r
 							Optional:            true,
 						},
 						"override_value": schema.StringAttribute{
-							MarkdownDescription: "Static value to set in the target field. When provided, `source` is ignored.",
+							MarkdownDescription: "Static value to set in the target field.",
 							Optional:            true,
 						},
 						"sync_mode": schema.StringAttribute{
@@ -191,19 +171,50 @@ func (r *syncResource) Schema(ctx context.Context, req resource.SchemaRequest, r
 				Optional: true,
 			},
 			"filters": schema.SetNestedAttribute{
-				MarkdownDescription: "Filters to apply to source data before syncing. Use `filter_logic` to combine multiple filters.",
+				MarkdownDescription: "Model field filters to apply to source data before syncing. Use `filter_logic` to combine multiple filters.",
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
-						"field_id": schema.StringAttribute{
-							MarkdownDescription: "Model or target field name to filter on.",
-							Required:            true,
-						},
-						"field_type": schema.StringAttribute{
-							MarkdownDescription: "Reference type for the field. One of `model` or `target`.",
-							Required:            true,
+						"source": schema.SingleNestedAttribute{
+							MarkdownDescription: "Source model field reference.",
+							Attributes: map[string]schema.Attribute{
+								"model_id": schema.StringAttribute{
+									MarkdownDescription: "Source model identifier.",
+									Required:            true,
+								},
+								"field": schema.StringAttribute{
+									MarkdownDescription: "Source field name.",
+									Required:            true,
+								},
+							},
+							Required: true,
 						},
 						"function": schema.StringAttribute{
 							MarkdownDescription: "Filter function to apply (e.g. `Equality`, `Inequality`, `IsNull`, `IsNotNull`, `True`, `False`, `OnOrAfter`, `OnOrBefore`).",
+							Required: true,
+						},
+						"value": schema.StringAttribute{
+							MarkdownDescription: "Comparison value for the filter, as a JSON value.",
+							CustomType:          jsontypes.NormalizedType{},
+							Optional:            true,
+						},
+						"label": schema.StringAttribute{
+							MarkdownDescription: "Display name for the filter.",
+							Optional:            true,
+							Computed:            true,
+						},
+					}},
+				Optional: true,
+			},
+			"target_filters": schema.SetNestedAttribute{
+				MarkdownDescription: "Target field filters. Only valid for syncs with mode `update`. Use `target.filter_logic` to combine multiple target filters.",
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"field": schema.StringAttribute{
+							MarkdownDescription: "Target field name to filter on.",
+							Required:            true,
+						},
+						"function": schema.StringAttribute{
+							MarkdownDescription: "Filter function to apply (e.g. `Equality`, `Inequality`, `IsNull`, `IsNotNull`).",
 							Required:            true,
 						},
 						"value": schema.StringAttribute{
@@ -220,16 +231,26 @@ func (r *syncResource) Schema(ctx context.Context, req resource.SchemaRequest, r
 				Optional: true,
 			},
 			"filter_logic": schema.StringAttribute{
-				MarkdownDescription: "Logical expression to combine filters (e.g. `1 AND 2`, `1 OR (2 AND 3)`).",
+				MarkdownDescription: "Logical expression to combine model field filters (e.g. `1 AND 2`, `1 OR (2 AND 3)`).",
 				Optional:            true,
 			},
 			"overrides": schema.SetNestedAttribute{
 				MarkdownDescription: "Conditional value replacements. When a record matches the condition, the override value is used instead of the source value.",
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
-						"field_id": schema.StringAttribute{
-							MarkdownDescription: "Model field identifier to evaluate the condition against.",
-							Required:            true,
+						"source": schema.SingleNestedAttribute{
+							MarkdownDescription: "Source model field reference to evaluate the condition against.",
+							Attributes: map[string]schema.Attribute{
+								"model_id": schema.StringAttribute{
+									MarkdownDescription: "Source model identifier.",
+									Required:            true,
+								},
+								"field": schema.StringAttribute{
+									MarkdownDescription: "Source field name.",
+									Required:            true,
+								},
+							},
+							Required: true,
 						},
 						"function": schema.StringAttribute{
 							MarkdownDescription: "Condition function (e.g. `Equality`, `Inequality`, `IsNull`).",
@@ -326,6 +347,7 @@ func (r *syncResource) Schema(ctx context.Context, req resource.SchemaRequest, r
 					"run_after_success_only": schema.BoolAttribute{
 						MarkdownDescription: "If `true`, this sync only runs when all dependent syncs complete successfully.",
 						Optional:            true,
+						Computed:            true,
 					},
 				},
 				Required: true,
@@ -441,6 +463,7 @@ type syncResourceResourceData struct {
 	Fields               types.Set         `tfsdk:"fields"`
 	OverrideFields       types.Set         `tfsdk:"override_fields"`
 	Filters              types.Set         `tfsdk:"filters"`
+	TargetFilters        types.Set         `tfsdk:"target_filters"`
 	FilterLogic          types.String      `tfsdk:"filter_logic"`
 	Overrides            types.Set         `tfsdk:"overrides"`
 	Schedule             types.Object      `tfsdk:"schedule"`
@@ -458,28 +481,83 @@ type syncResourceResourceData struct {
 	UpdatedBy            types.Object      `tfsdk:"updated_by"`
 }
 
-type Filter struct {
-	FieldID   string               `json:"field_id" tfsdk:"field_id" mapstructure:"field_id"`
-	FieldType string               `json:"field_type" tfsdk:"field_type" mapstructure:"field_type"`
-	Function  string               `json:"function" tfsdk:"function" mapstructure:"function"`
-	Value     jsontypes.Normalized `json:"value" tfsdk:"value" mapstructure:"value"`
-	Label     string               `json:"label" tfsdk:"label" mapstructure:"label"`
+// overrideField is the Terraform-side representation of an override field.
+// This is a subset of polytomic.ModelSyncField — the SDK type includes
+// `source` and `encryption_enabled` which are not part of the Terraform schema.
+type overrideField struct {
+	Target        types.String `tfsdk:"target"`
+	New           types.Bool   `tfsdk:"new"`
+	OverrideValue types.String `tfsdk:"override_value"`
+	SyncMode      types.String `tfsdk:"sync_mode"`
 }
 
-func (Filter) AttrTypes() map[string]attr.Type {
+func overrideFieldsToSDK(ctx context.Context, set types.Set) ([]*polytomic.ModelSyncField, diag.Diagnostics) {
+	if set.IsNull() || set.IsUnknown() {
+		return nil, nil
+	}
+
+	var fields []overrideField
+	diags := set.ElementsAs(ctx, &fields, false)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	result := make([]*polytomic.ModelSyncField, len(fields))
+	for i, f := range fields {
+		result[i] = &polytomic.ModelSyncField{
+			Target:        f.Target.ValueString(),
+			New:           f.New.ValueBoolPointer(),
+			OverrideValue: f.OverrideValue.ValueStringPointer(),
+			SyncMode:      f.SyncMode.ValueStringPointer(),
+		}
+	}
+	return result, nil
+}
+
+// ModelFilter represents a filter on a model field. The source reference
+// (model_id + field name) is resolved to a field UUID by the server.
+type ModelFilter struct {
+	Source   types.Object         `tfsdk:"source"`
+	Function string               `tfsdk:"function"`
+	Value    jsontypes.Normalized `tfsdk:"value"`
+	Label    string               `tfsdk:"label"`
+}
+
+func (ModelFilter) AttrTypes() map[string]attr.Type {
 	return map[string]attr.Type{
-		"field_id":   types.StringType,
-		"field_type": types.StringType,
-		"function":   types.StringType,
-		"value":      jsontypes.NormalizedType{},
-		"label":      types.StringType,
+		"source": types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				"model_id": types.StringType,
+				"field":    types.StringType,
+			},
+		},
+		"function": types.StringType,
+		"value":    jsontypes.NormalizedType{},
+		"label":    types.StringType,
+	}
+}
+
+// TargetFilter represents a filter on a target field. Only valid for
+// syncs with mode "update". Uses the target field name directly.
+type TargetFilter struct {
+	Field    string               `tfsdk:"field"`
+	Function string               `tfsdk:"function"`
+	Value    jsontypes.Normalized `tfsdk:"value"`
+	Label    string               `tfsdk:"label"`
+}
+
+func (TargetFilter) AttrTypes() map[string]attr.Type {
+	return map[string]attr.Type{
+		"field":    types.StringType,
+		"function": types.StringType,
+		"value":    jsontypes.NormalizedType{},
+		"label":    types.StringType,
 	}
 }
 
 type Target struct {
 	ConnectionID  string               `json:"connection_id" tfsdk:"connection_id" mapstructure:"connection_id"`
 	Object        *string              `json:"object" tfsdk:"object" mapstructure:"object"`
-	SearchValues  jsontypes.Normalized `json:"search_values,omitempty" tfsdk:"search_values" mapstructure:"search_values,omitempty"`
 	Configuration jsontypes.Normalized `json:"configuration,omitempty" tfsdk:"configuration" mapstructure:"configuration,omitempty"`
 	NewName       *string              `json:"new_name,omitempty" tfsdk:"new_name" mapstructure:"new_name"`
 	Create        map[string]string    `json:"create,omitempty" tfsdk:"create" mapstructure:"create,omitempty"`
@@ -490,7 +568,6 @@ func (Target) AttrTypes() map[string]attr.Type {
 	return map[string]attr.Type{
 		"connection_id": types.StringType,
 		"object":        types.StringType,
-		"search_values": jsontypes.NormalizedType{},
 		"configuration": jsontypes.NormalizedType{},
 		"new_name":      types.StringType,
 		"create":        types.MapType{ElemType: types.StringType},
@@ -498,16 +575,23 @@ func (Target) AttrTypes() map[string]attr.Type {
 	}
 }
 
-type Override struct {
-	FieldID  string               `json:"field_id" tfsdk:"field_id" mapstructure:"field_id"`
-	Function string               `json:"function" tfsdk:"function" mapstructure:"function"`
-	Value    jsontypes.Normalized `json:"value" tfsdk:"value" mapstructure:"value"`
-	Override jsontypes.Normalized `json:"override" tfsdk:"override" mapstructure:"override"`
+// ModelOverride represents a conditional value replacement on a model field.
+// The source reference (model_id + field name) is resolved to a field UUID by the server.
+type ModelOverride struct {
+	Source   types.Object         `tfsdk:"source"`
+	Function string               `tfsdk:"function"`
+	Value    jsontypes.Normalized `tfsdk:"value"`
+	Override jsontypes.Normalized `tfsdk:"override"`
 }
 
-func (Override) AttrTypes() map[string]attr.Type {
+func (ModelOverride) AttrTypes() map[string]attr.Type {
 	return map[string]attr.Type{
-		"field_id": types.StringType,
+		"source": types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				"model_id": types.StringType,
+				"field":    types.StringType,
+			},
+		},
 		"function": types.StringType,
 		"value":    jsontypes.NormalizedType{},
 		"override": jsontypes.NormalizedType{},
@@ -557,6 +641,145 @@ func (r *syncResource) Configure(ctx context.Context, req resource.ConfigureRequ
 	}
 }
 
+// modelFiltersToSDK converts ModelFilter TF elements to polytomic SDK filter objects.
+// The source reference is sent so the server resolves the field UUID.
+func modelFiltersToSDK(ctx context.Context, filtersSet types.Set) ([]*polytomic.Filter, diag.Diagnostics) {
+	var diags diag.Diagnostics
+	if filtersSet.IsNull() || filtersSet.IsUnknown() {
+		return nil, diags
+	}
+
+	var filters []ModelFilter
+	diags = filtersSet.ElementsAs(ctx, &filters, true)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	var result []*polytomic.Filter
+	for _, filter := range filters {
+		var source polytomic.Source
+		d := filter.Source.As(ctx, &source, basetypes.ObjectAsOptions{UnhandledNullAsEmpty: true})
+		diags.Append(d...)
+		if d.HasError() {
+			return nil, diags
+		}
+
+		f := &polytomic.Filter{
+			Field:     &polytomic.Source{ModelId: source.ModelId, Field: source.Field},
+			FieldType: pointer.To(polytomic.FilterFieldReferenceType("Model")),
+			Function:  polytomic.FilterFunction(filter.Function),
+			Label:     pointer.To(filter.Label),
+		}
+
+		var val interface{}
+		if !filter.Value.IsNull() && !filter.Value.IsUnknown() {
+			d = filter.Value.Unmarshal(&val)
+			diags.Append(d...)
+			if d.HasError() {
+				return nil, diags
+			}
+			f.Value = val
+		}
+		result = append(result, f)
+	}
+	return result, diags
+}
+
+// targetFiltersToSDK converts TargetFilter TF elements to polytomic SDK filter objects.
+func targetFiltersToSDK(ctx context.Context, filtersSet types.Set) ([]*polytomic.Filter, diag.Diagnostics) {
+	var diags diag.Diagnostics
+	if filtersSet.IsNull() || filtersSet.IsUnknown() {
+		return nil, diags
+	}
+
+	var filters []TargetFilter
+	diags = filtersSet.ElementsAs(ctx, &filters, true)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	var result []*polytomic.Filter
+	for _, filter := range filters {
+		f := &polytomic.Filter{
+			FieldId:   pointer.To(filter.Field),
+			FieldType: pointer.To(polytomic.FilterFieldReferenceType("Target")),
+			Function:  polytomic.FilterFunction(filter.Function),
+			Label:     pointer.To(filter.Label),
+		}
+
+		var val interface{}
+		if !filter.Value.IsNull() && !filter.Value.IsUnknown() {
+			d := filter.Value.Unmarshal(&val)
+			diags.Append(d...)
+			if d.HasError() {
+				return nil, diags
+			}
+			f.Value = val
+		}
+		result = append(result, f)
+	}
+	return result, diags
+}
+
+// overridesToSDK converts ModelOverride TF elements to polytomic SDK override objects.
+// The source reference is sent so the server resolves the field UUID.
+func overridesToSDK(ctx context.Context, overridesSet types.Set) ([]*polytomic.Override, diag.Diagnostics) {
+	var diags diag.Diagnostics
+	if overridesSet.IsNull() || overridesSet.IsUnknown() {
+		return nil, diags
+	}
+
+	var overrides []ModelOverride
+	diags = overridesSet.ElementsAs(ctx, &overrides, true)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	var result []*polytomic.Override
+	for _, override := range overrides {
+		var source polytomic.Source
+		d := override.Source.As(ctx, &source, basetypes.ObjectAsOptions{UnhandledNullAsEmpty: true})
+		diags.Append(d...)
+		if d.HasError() {
+			return nil, diags
+		}
+
+		o := &polytomic.Override{
+			Field:    &polytomic.Source{ModelId: source.ModelId, Field: source.Field},
+			Function: pointer.To(polytomic.FilterFunction(override.Function)),
+		}
+
+		var val interface{}
+		if !override.Value.IsNull() && !override.Value.IsUnknown() {
+			d = override.Value.Unmarshal(&val)
+			diags.Append(d...)
+			if d.HasError() {
+				return nil, diags
+			}
+			o.Value = val
+		}
+
+		var ov interface{}
+		if !override.Override.IsNull() && !override.Override.IsUnknown() {
+			d = override.Override.Unmarshal(&ov)
+			if d.HasError() {
+				// if unmarshalling fails, try to use as string
+				var ovStr string
+				d = override.Override.Unmarshal(&ovStr)
+				diags.Append(d...)
+				if d.HasError() {
+					return nil, diags
+				}
+				ov = ovStr
+			}
+			o.Override = ov
+		}
+
+		result = append(result, o)
+	}
+	return result, diags
+}
+
 func (r *syncResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data syncResourceResourceData
 
@@ -583,18 +806,6 @@ func (r *syncResource) Create(ctx context.Context, req resource.CreateRequest, r
 		FilterLogic:  target.FilterLogic,
 	}
 
-	var searchValues map[string]interface{}
-	if !target.SearchValues.IsNull() && !target.SearchValues.IsUnknown() {
-		diags = target.SearchValues.Unmarshal(&searchValues)
-		if diags.HasError() {
-			resp.Diagnostics.Append(diags...)
-			return
-		}
-		pt.SearchValues = searchValues
-	} else {
-		pt.SearchValues = make(map[string]interface{})
-	}
-
 	var tConf map[string]interface{}
 	if !target.Configuration.IsNull() && !target.Configuration.IsUnknown() {
 		diags = target.Configuration.Unmarshal(&tConf)
@@ -614,84 +825,29 @@ func (r *syncResource) Create(ctx context.Context, req resource.CreateRequest, r
 		return
 	}
 
-	var overrideFields []*polytomic.ModelSyncField
-	diags = data.OverrideFields.ElementsAs(ctx, &overrideFields, true)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
+	overrideFields, d := overrideFieldsToSDK(ctx, data.OverrideFields)
+	resp.Diagnostics.Append(d...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	var filters []Filter
-	diags = data.Filters.ElementsAs(ctx, &filters, true)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
+	pfilters, d := modelFiltersToSDK(ctx, data.Filters)
+	resp.Diagnostics.Append(d...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	var pfilters []*polytomic.Filter
-	for _, filter := range filters {
-		f := &polytomic.Filter{
-			FieldId:   pointer.To(filter.FieldID),
-			FieldType: pointer.To(polytomic.FilterFieldReferenceType(filter.FieldType)),
-			Function:  polytomic.FilterFunction(filter.Function),
-			Label:     pointer.To(filter.Label),
-		}
-
-		var val interface{}
-		if !filter.Value.IsNull() && !filter.Value.IsUnknown() {
-			diags = filter.Value.Unmarshal(&val)
-			if diags.HasError() {
-				resp.Diagnostics.Append(diags...)
-				return
-			}
-			f.Value = val
-		}
-		pfilters = append(pfilters, f)
-
-	}
-
-	var overrides []Override
-	diags = data.Overrides.ElementsAs(ctx, &overrides, true)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
+	targetFilters, d := targetFiltersToSDK(ctx, data.TargetFilters)
+	resp.Diagnostics.Append(d...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
+	pfilters = append(pfilters, targetFilters...)
 
-	var poverrides []*polytomic.Override
-	for _, override := range overrides {
-		o := &polytomic.Override{
-			FieldId:  &override.FieldID,
-			Function: pointer.To(polytomic.FilterFunction(override.Function)),
-		}
-
-		var val interface{}
-		if !override.Value.IsNull() && !override.Value.IsUnknown() {
-			diags = override.Value.Unmarshal(&val)
-			if diags.HasError() {
-				resp.Diagnostics.Append(diags...)
-				return
-			}
-			o.Value = val
-		}
-
-		var ov interface{}
-		if !override.Override.IsNull() && !override.Override.IsUnknown() {
-			diags = override.Override.Unmarshal(&ov)
-			if diags.HasError() {
-				// if unmarshalling fails, try to use as string
-				var ovStr string
-				diags = override.Override.Unmarshal(&ovStr)
-				if diags.HasError() {
-					resp.Diagnostics.Append(diags...)
-					return
-				}
-				ov = ovStr
-			}
-			o.Override = ov
-		}
-
-		poverrides = append(poverrides, o)
-
+	poverrides, d := overridesToSDK(ctx, data.Overrides)
+	resp.Diagnostics.Append(d...)
+	if resp.Diagnostics.HasError() {
+		return
 	}
 
 	var schedule polytomic.Schedule
@@ -750,6 +906,7 @@ func (r *syncResource) Create(ctx context.Context, req resource.CreateRequest, r
 		return
 	}
 	configTarget := data.Target
+	configPassphrase := data.EncryptionPassphrase
 
 	sync, err := client.ModelSync.Create(ctx, request)
 	if err != nil {
@@ -768,6 +925,9 @@ func (r *syncResource) Create(ctx context.Context, req resource.CreateRequest, r
 	if diags.HasError() {
 		return
 	}
+
+	// Preserve write-only encryption_passphrase from the plan (the API never returns it).
+	data.EncryptionPassphrase = configPassphrase
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -789,6 +949,7 @@ func (r *syncResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 		return
 	}
 	priorTarget := data.Target
+	priorPassphrase := data.EncryptionPassphrase
 
 	sync, err := client.ModelSync.Get(ctx, data.ID.ValueString())
 	if err != nil {
@@ -814,6 +975,9 @@ func (r *syncResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 	if diags.HasError() {
 		return
 	}
+
+	// Preserve write-only encryption_passphrase from prior state (the API never returns it).
+	data.EncryptionPassphrase = priorPassphrase
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -853,18 +1017,6 @@ func (r *syncResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		FilterLogic:  target.FilterLogic,
 	}
 
-	var searchValues map[string]interface{}
-	if !target.SearchValues.IsNull() && !target.SearchValues.IsUnknown() {
-		diags = target.SearchValues.Unmarshal(&searchValues)
-		if diags.HasError() {
-			resp.Diagnostics.Append(diags...)
-			return
-		}
-		pt.SearchValues = searchValues
-	} else {
-		pt.SearchValues = make(map[string]interface{})
-	}
-
 	var tConf map[string]interface{}
 	if !target.Configuration.IsNull() && !target.Configuration.IsUnknown() {
 		diags = target.Configuration.Unmarshal(&tConf)
@@ -884,90 +1036,29 @@ func (r *syncResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		return
 	}
 
-	var overrideFields []*polytomic.ModelSyncField
-	diags = data.OverrideFields.ElementsAs(ctx, &overrideFields, true)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
+	overrideFields, d := overrideFieldsToSDK(ctx, data.OverrideFields)
+	resp.Diagnostics.Append(d...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	var filters []*Filter
-	diags = data.Filters.ElementsAs(ctx, &filters, true)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
+	pfilters, d := modelFiltersToSDK(ctx, data.Filters)
+	resp.Diagnostics.Append(d...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	var pfilters []*polytomic.Filter
-	for _, filter := range filters {
-		f := &polytomic.Filter{
-			FieldId:   pointer.To(filter.FieldID),
-			FieldType: pointer.To(polytomic.FilterFieldReferenceType(filter.FieldType)),
-			Function:  polytomic.FilterFunction(filter.Function),
-			Label:     pointer.To(filter.Label),
-		}
-
-		var val interface{}
-		if !filter.Value.IsNull() && !filter.Value.IsUnknown() {
-			diags = filter.Value.Unmarshal(&val)
-			if diags.HasError() {
-				resp.Diagnostics.Append(diags...)
-				return
-			}
-			f.Value = val
-		}
-		pfilters = append(pfilters, f)
-
-	}
-
-	var overrides []Override
-	diags = data.Overrides.ElementsAs(ctx, &overrides, true)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
+	targetFilters, d := targetFiltersToSDK(ctx, data.TargetFilters)
+	resp.Diagnostics.Append(d...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
+	pfilters = append(pfilters, targetFilters...)
 
-	var poverrides []*polytomic.Override
-	for _, override := range overrides {
-		o := &polytomic.Override{
-			FieldId:  pointer.To(override.FieldID),
-			Function: pointer.To(polytomic.FilterFunction(override.Function)),
-		}
-
-		var val interface{}
-		if !override.Value.IsNull() && !override.Value.IsUnknown() {
-			diags = override.Value.Unmarshal(&val)
-			if diags.HasError() {
-				// if unmarshalling fails, try to use as string
-				var valStr string
-				diags = override.Value.Unmarshal(&valStr)
-				if diags.HasError() {
-					resp.Diagnostics.Append(diags...)
-					return
-				}
-				val = valStr
-			}
-			o.Value = val
-		}
-
-		var ov interface{}
-		if !override.Override.IsNull() && !override.Override.IsUnknown() {
-			diags = override.Override.Unmarshal(&ov)
-			if diags.HasError() {
-				// if unmarshalling fails, try to use as string
-				var ovStr string
-				diags = override.Override.Unmarshal(&ovStr)
-				if diags.HasError() {
-					resp.Diagnostics.Append(diags...)
-					return
-				}
-				ov = ovStr
-			}
-			o.Override = ov
-		}
-
-		poverrides = append(poverrides, o)
-
+	poverrides, d := overridesToSDK(ctx, data.Overrides)
+	resp.Diagnostics.Append(d...)
+	if resp.Diagnostics.HasError() {
+		return
 	}
 
 	var schedule polytomic.Schedule
@@ -1019,6 +1110,7 @@ func (r *syncResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	}
 
 	planTarget := data.Target
+	planPassphrase := data.EncryptionPassphrase
 
 	client, err := r.provider.Client(data.Organization.ValueString())
 	if err != nil {
@@ -1042,6 +1134,9 @@ func (r *syncResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	if diags.HasError() {
 		return
 	}
+
+	// Preserve write-only encryption_passphrase from the plan (the API never returns it).
+	data.EncryptionPassphrase = planPassphrase
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -1113,23 +1208,11 @@ func syncDataFromResponse(ctx context.Context, sync *polytomic.ModelSyncResponse
 	data.OnlyEnrichUpdates = types.BoolPointerValue(sync.OnlyEnrichUpdates)
 	data.SkipInitialBackfill = types.BoolPointerValue(sync.SkipInitialBackfill)
 
-	// Target - using jsontypes for SearchValues and Configuration
-	searchValJSON, err := json.Marshal(sync.Target.SearchValues)
-	if err != nil {
-		diags.AddError("Error marshaling search values", err.Error())
-		return data, diags
-	}
+	// Target - using jsontypes for Configuration
 	confJSON, err := json.Marshal(sync.Target.Configuration)
 	if err != nil {
 		diags.AddError("Error marshaling configuration", err.Error())
 		return data, diags
-	}
-
-	var searchValNormalized jsontypes.Normalized
-	if string(searchValJSON) == "null" {
-		searchValNormalized = jsontypes.NewNormalizedNull()
-	} else {
-		searchValNormalized = jsontypes.NewNormalizedValue(string(searchValJSON))
 	}
 
 	var confNormalized jsontypes.Normalized
@@ -1142,7 +1225,6 @@ func syncDataFromResponse(ctx context.Context, sync *polytomic.ModelSyncResponse
 	targetData := Target{
 		ConnectionID:  sync.Target.ConnectionId,
 		Object:        sync.Target.Object,
-		SearchValues:  searchValNormalized,
 		Configuration: confNormalized,
 		NewName:       sync.Target.NewName,
 		Create:        sync.Target.Create,
@@ -1153,7 +1235,26 @@ func syncDataFromResponse(ctx context.Context, sync *polytomic.ModelSyncResponse
 		return data, diags
 	}
 
-	// Fields
+	// Fields and OverrideFields — the API merges override fields into the
+	// regular fields list. Split them back out: fields with an override_value
+	// and no real source are override fields.
+	var regularFields []*polytomic.ModelSyncField
+	var extractedOverrides []overrideField
+	for _, f := range sync.Fields {
+		isOverride := f.OverrideValue != nil &&
+			(f.Source == nil || (f.Source.ModelId == "" && f.Source.Field == "") ||
+				f.Source.ModelId == "00000000-0000-0000-0000-000000000000")
+		if isOverride {
+			extractedOverrides = append(extractedOverrides, overrideField{
+				Target:        types.StringValue(f.Target),
+				New:           types.BoolPointerValue(f.New),
+				OverrideValue: types.StringPointerValue(f.OverrideValue),
+				SyncMode:      types.StringPointerValue(f.SyncMode),
+			})
+		} else {
+			regularFields = append(regularFields, f)
+		}
+	}
 	data.Fields, diags = types.SetValueFrom(ctx, types.ObjectType{
 		AttrTypes: map[string]attr.Type{
 			"source": types.ObjectType{
@@ -1166,26 +1267,26 @@ func syncDataFromResponse(ctx context.Context, sync *polytomic.ModelSyncResponse
 			"override_value":     types.StringType,
 			"sync_mode":          types.StringType,
 			"encryption_enabled": types.BoolType,
-		}}, sync.Fields)
+		}}, regularFields)
 	if diags.HasError() {
 		return data, diags
 	}
 
 	// Override Fields
-	data.OverrideFields, diags = types.SetValueFrom(ctx, types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"source": types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					"model_id": types.StringType,
-					"field":    types.StringType,
-				}},
-			"target":         types.StringType,
-			"new":            types.BoolType,
-			"override_value": types.StringType,
-			"sync_mode":      types.StringType,
-		}}, sync.OverrideFields)
-	if diags.HasError() {
-		return data, diags
+	overrideFieldAttrTypes := map[string]attr.Type{
+		"target":         types.StringType,
+		"new":            types.BoolType,
+		"override_value": types.StringType,
+		"sync_mode":      types.StringType,
+	}
+	if len(extractedOverrides) > 0 {
+		data.OverrideFields, diags = types.SetValueFrom(ctx, types.ObjectType{
+			AttrTypes: overrideFieldAttrTypes}, extractedOverrides)
+		if diags.HasError() {
+			return data, diags
+		}
+	} else {
+		data.OverrideFields = types.SetNull(types.ObjectType{AttrTypes: overrideFieldAttrTypes})
 	}
 
 	// FilterLogic
@@ -1195,74 +1296,90 @@ func syncDataFromResponse(ctx context.Context, sync *polytomic.ModelSyncResponse
 		data.FilterLogic = types.StringNull()
 	}
 
-	// Filters - convert SDK filters to TF filters
-	var tfFilters []Filter
+	// Filters — split by field type into model filters and target filters
+	var tfModelFilters []ModelFilter
+	var tfTargetFilters []TargetFilter
 	for _, f := range sync.Filters {
-		var valNormalized jsontypes.Normalized
-		valJSON, err := json.Marshal(f.Value)
-		if err != nil {
-			diags.AddError("Error marshaling filter value", err.Error())
-			return data, diags
-		}
-		if string(valJSON) == "null" {
-			valNormalized = jsontypes.NewNormalizedNull()
-		} else {
-			valNormalized = jsontypes.NewNormalizedValue(string(valJSON))
-		}
+		valNormalized := marshalJSONNormalized(f.Value)
 
-		tfFilters = append(tfFilters, Filter{
-			FieldID:   pointer.Get(f.FieldId),
-			FieldType: string(pointer.Get(f.FieldType)),
-			Function:  string(f.Function),
-			Value:     valNormalized,
-			Label:     pointer.GetString(f.Label),
-		})
+		fieldType := string(pointer.Get(f.FieldType))
+		if fieldType == "Target" {
+			tfTargetFilters = append(tfTargetFilters, TargetFilter{
+				Field:    pointer.Get(f.FieldId),
+				Function: string(f.Function),
+				Value:    valNormalized,
+				Label:    pointer.GetString(f.Label),
+			})
+		} else {
+			// Model filter — use Source reference
+			var source types.Object
+			if f.Field != nil {
+				source, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+					"model_id": types.StringType,
+					"field":    types.StringType,
+				}, f.Field)
+				if diags.HasError() {
+					return data, diags
+				}
+			} else {
+				diags.AddWarning("Filter missing source reference",
+					"A model filter was returned without a source field reference. The filter field_id is: "+pointer.Get(f.FieldId))
+				source = types.ObjectNull(map[string]attr.Type{
+					"model_id": types.StringType,
+					"field":    types.StringType,
+				})
+			}
+			tfModelFilters = append(tfModelFilters, ModelFilter{
+				Source:   source,
+				Function: string(f.Function),
+				Value:    valNormalized,
+				Label:    pointer.GetString(f.Label),
+			})
+		}
 	}
-	data.Filters, diags = types.SetValueFrom(ctx, types.ObjectType{AttrTypes: Filter{}.AttrTypes()}, tfFilters)
+	data.Filters, diags = types.SetValueFrom(ctx, types.ObjectType{AttrTypes: ModelFilter{}.AttrTypes()}, tfModelFilters)
+	if diags.HasError() {
+		return data, diags
+	}
+	data.TargetFilters, diags = types.SetValueFrom(ctx, types.ObjectType{AttrTypes: TargetFilter{}.AttrTypes()}, tfTargetFilters)
 	if diags.HasError() {
 		return data, diags
 	}
 
-	// Overrides - convert SDK overrides to TF overrides
-	var tfOverrides []Override
+	// Overrides — use Source reference
+	var tfOverrides []ModelOverride
 	for _, o := range sync.Overrides {
-		var valNormalized jsontypes.Normalized
-		valJSON, err := json.Marshal(o.Value)
-		if err != nil {
-			diags.AddError("Error marshaling override value", err.Error())
-			return data, diags
-		}
-		if string(valJSON) == "null" {
-			valNormalized = jsontypes.NewNormalizedNull()
-		} else {
-			valNormalized = jsontypes.NewNormalizedValue(string(valJSON))
-		}
+		valNormalized := marshalJSONNormalized(o.Value)
 
-		var overrideNormalized jsontypes.Normalized
-		// Handle both string and complex override values
-		if v, ok := o.Override.(string); ok {
-			overrideNormalized = jsontypes.NewNormalizedValue(v)
-		} else {
-			overrideJSON, err := json.Marshal(o.Override)
-			if err != nil {
-				diags.AddError("Error marshaling override override", err.Error())
+		// Override values are always JSON-marshaled, even when the API returns a plain string.
+		overrideNormalized := marshalJSONNormalized(o.Override)
+
+		var source types.Object
+		if o.Field != nil {
+			source, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+				"model_id": types.StringType,
+				"field":    types.StringType,
+			}, o.Field)
+			if diags.HasError() {
 				return data, diags
 			}
-			if string(overrideJSON) == "null" {
-				overrideNormalized = jsontypes.NewNormalizedNull()
-			} else {
-				overrideNormalized = jsontypes.NewNormalizedValue(string(overrideJSON))
-			}
+		} else {
+			diags.AddWarning("Override missing source reference",
+				"An override was returned without a source field reference. The override field_id is: "+pointer.Get(o.FieldId))
+			source = types.ObjectNull(map[string]attr.Type{
+				"model_id": types.StringType,
+				"field":    types.StringType,
+			})
 		}
 
-		tfOverrides = append(tfOverrides, Override{
-			FieldID:  pointer.Get(o.FieldId),
+		tfOverrides = append(tfOverrides, ModelOverride{
+			Source:   source,
 			Function: string(pointer.Get(o.Function)),
 			Value:    valNormalized,
 			Override: overrideNormalized,
 		})
 	}
-	data.Overrides, diags = types.SetValueFrom(ctx, types.ObjectType{AttrTypes: Override{}.AttrTypes()}, tfOverrides)
+	data.Overrides, diags = types.SetValueFrom(ctx, types.ObjectType{AttrTypes: ModelOverride{}.AttrTypes()}, tfOverrides)
 	if diags.HasError() {
 		return data, diags
 	}
@@ -1333,4 +1450,14 @@ func syncDataFromResponse(ctx context.Context, sync *polytomic.ModelSyncResponse
 	}
 
 	return data, diags
+}
+
+// marshalJSONNormalized converts an interface{} value to a jsontypes.Normalized value.
+// Returns NormalizedNull for nil values.
+func marshalJSONNormalized(v interface{}) jsontypes.Normalized {
+	b, err := json.Marshal(v)
+	if err != nil || string(b) == "null" {
+		return jsontypes.NewNormalizedNull()
+	}
+	return jsontypes.NewNormalizedValue(string(b))
 }

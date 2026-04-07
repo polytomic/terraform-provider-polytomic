@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net/http"
 	"slices"
+	"strings"
 	"time"
 
 	"github.com/AlekSi/pointer"
@@ -25,10 +26,64 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/polytomic/polytomic-go"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/polytomic/polytomic-go/bulksync"
-	ptcore "github.com/polytomic/polytomic-go/core"
+ptcore "github.com/polytomic/polytomic-go/core"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
+
+// retryOnCacheRefresh retries an operation that may fail because the source
+// connection's schema cache is not yet populated. This manifests as either a
+// 422 "cache refresh in progress" error or a 400 "did not provide any schemas"
+// error. Newly-created connections need time for the server to discover and
+// cache their schemas.
+func retryOnCacheRefresh[T any](ctx context.Context, label string, fn func() (T, error)) (T, error) {
+	const maxAttempts = 10
+	const baseDelay = 5 * time.Second
+
+	for attempt := 1; ; attempt++ {
+		result, err := fn()
+		if err == nil {
+			return result, nil
+		}
+
+		if !isCacheNotReadyError(err) || attempt >= maxAttempts {
+			return result, err
+		}
+
+		delay := baseDelay * time.Duration(attempt)
+		tflog.Info(ctx, "Schema cache not ready, retrying", map[string]any{
+			"attempt":   attempt,
+			"max":       maxAttempts,
+			"delay":     delay.String(),
+			"operation": label,
+		})
+
+		select {
+		case <-ctx.Done():
+			return result, ctx.Err()
+		case <-time.After(delay):
+		}
+	}
+}
+
+// isCacheNotReadyError returns true if the error indicates the source
+// connection's schema cache is still initializing.
+func isCacheNotReadyError(err error) bool {
+	apiErr := &ptcore.APIError{}
+	if !errors.As(err, &apiErr) {
+		return false
+	}
+	if apiErr.StatusCode == http.StatusUnprocessableEntity {
+		return true
+	}
+	if apiErr.StatusCode == http.StatusBadRequest {
+		msg := err.Error()
+		return strings.Contains(msg, "did not provide any schemas") ||
+			strings.Contains(msg, "cache refresh in progress")
+	}
+	return false
+}
 
 // Ensure provider defined types fully satisfy framework interfaces
 var _ resource.Resource = &bulkSyncResource{}
@@ -551,16 +606,23 @@ func (r *bulkSyncResource) Create(ctx context.Context, req resource.CreateReques
 	}
 
 	var schemaData []bulkSyncSchema
-	diags = data.Schemas.ElementsAs(ctx, &schemaData, false)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
+	if !data.Schemas.IsNull() && !data.Schemas.IsUnknown() {
+		diags = data.Schemas.ElementsAs(ctx, &schemaData, false)
+		if diags.HasError() {
+			resp.Diagnostics.Append(diags...)
+			return
+		}
+		slices.SortFunc(schemaData, func(a, b bulkSyncSchema) int {
+			return cmp.Compare(a.Id.String(), b.Id.String())
+		})
 	}
-	slices.SortFunc(schemaData, func(a, b bulkSyncSchema) int {
-		return cmp.Compare(a.Id.String(), b.Id.String())
-	})
 
-	schemas := make([]*polytomic.V2CreateBulkSyncRequestSchemasItem, len(schemaData))
+	// Send nil (not empty slice) when no schemas are specified, so the
+	// server applies its default behavior (select all schemas).
+	var schemas []*polytomic.V2CreateBulkSyncRequestSchemasItem
+	if len(schemaData) > 0 {
+		schemas = make([]*polytomic.V2CreateBulkSyncRequestSchemasItem, len(schemaData))
+	}
 	for i, s := range schemaData {
 		var cutoff *time.Time
 		if !s.DataCutoffTimestamp.IsNull() {
@@ -616,6 +678,7 @@ func (r *bulkSyncResource) Create(ctx context.Context, req resource.CreateReques
 				Id:                  s.Id.ValueStringPointer(),
 				Enabled:             s.Enabled.ValueBoolPointer(),
 				PartitionKey:        s.PartitionKey.ValueStringPointer(),
+				TrackingField:       s.TrackingField.ValueStringPointer(),
 				DataCutoffTimestamp: cutoff,
 				DisableDataCutoff:   s.DisableDataCutoff.ValueBoolPointer(),
 				Fields:              fieldConfs,
@@ -723,31 +786,46 @@ func (r *bulkSyncResource) Create(ctx context.Context, req resource.CreateReques
 		orgID = data.Organization.ValueStringPointer()
 	}
 
-	created, err := client.BulkSync.Create(ctx,
-		&polytomic.CreateBulkSyncRequest{
-			OrganizationId:             orgID,
-			Name:                       data.Name.ValueString(),
-			DestinationConnectionId:    destination.ConnectionID.ValueString(),
-			SourceConnectionId:         source.ConnectionID.ValueString(),
-			Mode:                       pointer.To(polytomic.BulkSyncMode(data.Mode.ValueString())),
-			Active:                     data.Active.ValueBoolPointer(),
-			AutomaticallyAddNewFields:  pointer.To(polytomic.BulkDiscover(data.AutomaticallyAddNewFields.ValueString())),
-			AutomaticallyAddNewObjects: pointer.To(polytomic.BulkDiscover(data.AutomaticallyAddNewObjects.ValueString())),
-			Schemas:                    schemas,
-			Policies:                   policies,
-			Schedule:                   sche,
-			DestinationConfiguration:   destConf,
-			SourceConfiguration:        sourceConf,
-			ConcurrencyLimit:           concurrencyLimit,
-			ResyncConcurrencyLimit:     resyncConcurrencyLimit,
-			NormalizeNames:             normalizeNames,
-		},
-	)
+	var topLevelCutoff *time.Time
+	if !data.DataCutoffTimestamp.IsNull() && !data.DataCutoffTimestamp.IsUnknown() {
+		t, cutoffDiags := data.DataCutoffTimestamp.ValueRFC3339Time()
+		if cutoffDiags.HasError() {
+			resp.Diagnostics.Append(cutoffDiags...)
+			return
+		}
+		topLevelCutoff = &t
+	}
+
+	createReq := &polytomic.CreateBulkSyncRequest{
+		OrganizationId:             orgID,
+		Name:                       data.Name.ValueString(),
+		DestinationConnectionId:    destination.ConnectionID.ValueString(),
+		SourceConnectionId:         source.ConnectionID.ValueString(),
+		Mode:                       pointer.To(polytomic.BulkSyncMode(data.Mode.ValueString())),
+		Active:                     data.Active.ValueBoolPointer(),
+		AutomaticallyAddNewFields:  pointer.To(polytomic.BulkDiscover(data.AutomaticallyAddNewFields.ValueString())),
+		AutomaticallyAddNewObjects: pointer.To(polytomic.BulkDiscover(data.AutomaticallyAddNewObjects.ValueString())),
+		Schemas:                    schemas,
+		Policies:                   policies,
+		Schedule:                   sche,
+		DestinationConfiguration:   destConf,
+		SourceConfiguration:        sourceConf,
+		ConcurrencyLimit:           concurrencyLimit,
+		ResyncConcurrencyLimit:     resyncConcurrencyLimit,
+		NormalizeNames:             normalizeNames,
+		DisableRecordTimestamps:    data.DisableRecordTimestamps.ValueBoolPointer(),
+		DataCutoffTimestamp:        topLevelCutoff,
+	}
+	created, err := retryOnCacheRefresh(ctx, "create bulk sync", func() (*polytomic.BulkSyncResponseEnvelope, error) {
+		return client.BulkSync.Create(ctx, createReq)
+	})
 	if err != nil {
 		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error creating bulk sync: %s", err))
 		return
 	}
-	createdSchemas, err := client.BulkSync.Schemas.List(ctx, pointer.Get(created.Data.Id), &bulksync.SchemasListRequest{})
+	createdSchemas, err := retryOnCacheRefresh(ctx, "list bulk sync schemas", func() (*polytomic.ListBulkSchema, error) {
+		return client.BulkSync.Schemas.List(ctx, pointer.Get(created.Data.Id), &bulksync.SchemasListRequest{})
+	})
 	if err != nil {
 		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error reading bulk sync schemas: %s", err))
 		return
@@ -788,12 +866,14 @@ func (r *bulkSyncResource) Read(ctx context.Context, req resource.ReadRequest, r
 		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error reading bulk sync: %s", err))
 		return
 	}
-	schemas, err := client.BulkSync.Schemas.List(ctx, data.Id.ValueString(), &bulksync.SchemasListRequest{})
+	bulkSyncSchemas, err := retryOnCacheRefresh(ctx, "list bulk sync schemas", func() (*polytomic.ListBulkSchema, error) {
+		return client.BulkSync.Schemas.List(ctx, data.Id.ValueString(), &bulksync.SchemasListRequest{})
+	})
 	if err != nil {
 		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error reading bulk sync schemas: %s", err))
 		return
 	}
-	data, diags = bulkSyncDataFromResponse(ctx, bulkSync.Data, schemas.Data, &data)
+	data, diags = bulkSyncDataFromResponse(ctx, bulkSync.Data, bulkSyncSchemas.Data, &data)
 	resp.Diagnostics.Append(diags...)
 	if diags.HasError() {
 		return
@@ -813,16 +893,23 @@ func (r *bulkSyncResource) Update(ctx context.Context, req resource.UpdateReques
 	}
 
 	var schemaData []bulkSyncSchema
-	diags = data.Schemas.ElementsAs(ctx, &schemaData, false)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
+	if !data.Schemas.IsNull() && !data.Schemas.IsUnknown() {
+		diags = data.Schemas.ElementsAs(ctx, &schemaData, false)
+		if diags.HasError() {
+			resp.Diagnostics.Append(diags...)
+			return
+		}
+		slices.SortFunc(schemaData, func(a, b bulkSyncSchema) int {
+			return cmp.Compare(a.Id.String(), b.Id.String())
+		})
 	}
-	slices.SortFunc(schemaData, func(a, b bulkSyncSchema) int {
-		return cmp.Compare(a.Id.String(), b.Id.String())
-	})
 
-	schemas := make([]*polytomic.V2UpdateBulkSyncRequestSchemasItem, len(schemaData))
+	// Send nil (not empty slice) when no schemas are specified, so the
+	// server applies its default behavior (select all schemas).
+	var schemas []*polytomic.V2UpdateBulkSyncRequestSchemasItem
+	if len(schemaData) > 0 {
+		schemas = make([]*polytomic.V2UpdateBulkSyncRequestSchemasItem, len(schemaData))
+	}
 	for i, s := range schemaData {
 		var cutoff *time.Time
 		if !s.DataCutoffTimestamp.IsNull() {
@@ -878,6 +965,7 @@ func (r *bulkSyncResource) Update(ctx context.Context, req resource.UpdateReques
 				Id:                  s.Id.ValueStringPointer(),
 				Enabled:             s.Enabled.ValueBoolPointer(),
 				PartitionKey:        s.PartitionKey.ValueStringPointer(),
+				TrackingField:       s.TrackingField.ValueStringPointer(),
 				DataCutoffTimestamp: cutoff,
 				DisableDataCutoff:   s.DisableDataCutoff.ValueBoolPointer(),
 				Fields:              fieldConfs,
@@ -986,6 +1074,16 @@ func (r *bulkSyncResource) Update(ctx context.Context, req resource.UpdateReques
 		orgID = data.Organization.ValueStringPointer()
 	}
 
+	var topLevelCutoff *time.Time
+	if !data.DataCutoffTimestamp.IsNull() && !data.DataCutoffTimestamp.IsUnknown() {
+		t, cutoffDiags := data.DataCutoffTimestamp.ValueRFC3339Time()
+		if cutoffDiags.HasError() {
+			resp.Diagnostics.Append(cutoffDiags...)
+			return
+		}
+		topLevelCutoff = &t
+	}
+
 	updated, err := client.BulkSync.Update(ctx,
 		data.Id.ValueString(),
 		&polytomic.UpdateBulkSyncRequest{
@@ -1005,13 +1103,17 @@ func (r *bulkSyncResource) Update(ctx context.Context, req resource.UpdateReques
 			ConcurrencyLimit:           concurrencyLimit,
 			ResyncConcurrencyLimit:     resyncConcurrencyLimit,
 			NormalizeNames:             normalizeNames,
+			DisableRecordTimestamps:    data.DisableRecordTimestamps.ValueBoolPointer(),
+			DataCutoffTimestamp:        topLevelCutoff,
 		},
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error creating bulk sync: %s", err))
 		return
 	}
-	updatedSchemas, err := client.BulkSync.Schemas.List(ctx, data.Id.ValueString(), &bulksync.SchemasListRequest{})
+	updatedSchemas, err := retryOnCacheRefresh(ctx, "list bulk sync schemas", func() (*polytomic.ListBulkSchema, error) {
+		return client.BulkSync.Schemas.List(ctx, data.Id.ValueString(), &bulksync.SchemasListRequest{})
+	})
 	if err != nil {
 		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error reading bulk sync schemas: %s", err))
 		return
@@ -1109,10 +1211,51 @@ func bulkSyncDataFromResponse(ctx context.Context, response *polytomic.BulkSyncR
 				merged.Enabled = PopulateUnknownBool(merged.Enabled, api.Enabled)
 				merged.DisableDataCutoff = PopulateUnknownBool(merged.DisableDataCutoff, api.DisableDataCutoff)
 
-				// Populate computed set fields
-				merged.Fields, mergeDiags = PopulateUnknownSet(ctx, merged.Fields, api.Fields, fieldType)
+				// Merge fields: when user specifies fields, populate computed
+				// values (output_name, user_output_name) from the API response.
+				if merged.Fields.IsUnknown() {
+					merged.Fields, mergeDiags = PopulateUnknownSet(ctx, merged.Fields, api.Fields, fieldType)
+				} else if !merged.Fields.IsNull() {
+					merged.Fields, mergeDiags = MergeSetElements(
+						ctx,
+						merged.Fields,
+						api.Fields,
+						types.ObjectType{AttrTypes: bulkSyncSchemaField{}.AttrTypes()},
+						func(f bulkSyncSchemaField) string { return f.Id.ValueString() },
+						func(f *polytomic.BulkField) string { return pointer.GetString(f.Id) },
+						func(_ context.Context, planField bulkSyncSchemaField, apiField *polytomic.BulkField) (bulkSyncSchemaField, diag.Diagnostics) {
+							m := planField
+							m.OutputName = PopulateUnknownString(m.OutputName, apiField.OutputName)
+							m.UserOutputName = PopulateUnknownString(m.UserOutputName, apiField.UserOutputName)
+							m.Enabled = PopulateUnknownBool(m.Enabled, apiField.Enabled)
+							return m, nil
+						},
+					)
+				}
 				if mergeDiags.HasError() {
 					return merged, mergeDiags
+				}
+
+				// Ensure no unknown values remain on fields that weren't matched
+				// by the API (e.g., the API hadn't discovered the field yet).
+				if !merged.Fields.IsNull() && !merged.Fields.IsUnknown() {
+					var fields []bulkSyncSchemaField
+					mergeDiags = merged.Fields.ElementsAs(ctx, &fields, false)
+					if mergeDiags.HasError() {
+						return merged, mergeDiags
+					}
+					for i := range fields {
+						if fields[i].OutputName.IsUnknown() {
+							fields[i].OutputName = types.StringNull()
+						}
+						if fields[i].UserOutputName.IsUnknown() {
+							fields[i].UserOutputName = types.StringNull()
+						}
+					}
+					merged.Fields, mergeDiags = types.SetValueFrom(ctx, fieldType, fields)
+					if mergeDiags.HasError() {
+						return merged, mergeDiags
+					}
 				}
 
 				if merged.Filters.IsUnknown() {
