@@ -79,12 +79,34 @@ Environment variables required for acceptance tests:
   - `POLYTOMIC_API_KEY` (org-scoped)
   - `POLYTOMIC_DEPLOYMENT_KEY` (deployment/partner scoped; tests will create an org and pass `organization = ...`)
 
+Additional environment variables are required for PostgreSQL-backed acceptance
+tests, including the sync and bulk-sync suites:
+
+- `POLYTOMIC_TEST_PG_USERNAME`
+- `POLYTOMIC_TEST_PG_PASSWORD`
+- `POLYTOMIC_TEST_PG_HOST` optional, defaults to `postgres`
+- `POLYTOMIC_TEST_PG_DATABASE` optional, defaults to `polytomic`
+- `POLYTOMIC_TEST_PG_PORT` optional, defaults to `5432`
+
 If you prefer to run an individual package directly:
 
 ```shell
 TF_ACC=1 \
   POLYTOMIC_DEPLOYMENT_URL=https://app.polytomic-local.com \
   go test ./provider/... -run TestAccGlobalErrorSubscribersResource -count=1 -v
+```
+
+To run a PostgreSQL-backed sync acceptance test locally:
+
+```shell
+TF_ACC=1 \
+  POLYTOMIC_DEPLOYMENT_URL=https://app.polytomic-local.com \
+  POLYTOMIC_API_KEY=... \
+  POLYTOMIC_TEST_PG_HOST=postgres \
+  POLYTOMIC_TEST_PG_DATABASE=polytomic \
+  POLYTOMIC_TEST_PG_USERNAME=... \
+  POLYTOMIC_TEST_PG_PASSWORD=... \
+  go test ./provider/... -run TestAccSyncResourceWithIdentity -count=1 -v
 ```
 
 ### Requirements
