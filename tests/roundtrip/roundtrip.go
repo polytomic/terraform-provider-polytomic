@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"time"
 	"os/exec"
 	"path/filepath"
 	"reflect"
@@ -168,6 +169,9 @@ func runImporter(ctx context.Context, outputDir string, includePermissions bool)
 	if err != nil {
 		return fmt.Errorf("failed to create client provider: %w", err)
 	}
+
+	ctx, cancel := context.WithTimeout(ctx, 2*time.Minute)
+	defer cancel()
 
 	// Initialize and run importer directly
 	// Note: importer.Init uses log.Fatal on errors, so if we get here it succeeded

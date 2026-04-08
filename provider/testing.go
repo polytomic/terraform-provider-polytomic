@@ -1,6 +1,8 @@
 package provider
 
 import (
+	"database/sql"
+	"fmt"
 	"html/template"
 	"os"
 	"strconv"
@@ -9,6 +11,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
+	_ "github.com/lib/pq"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 	"github.com/stretchr/testify/require"
 )
@@ -51,8 +54,12 @@ type postgresTestConfig struct {
 	Port     int
 }
 
-func testPostgresConfig(t *testing.T) postgresTestConfig {
+func testPostgresConfigFromEnv(t *testing.T) (postgresTestConfig, bool) {
 	t.Helper()
+
+	if os.Getenv("POLYTOMIC_TEST_PG_USERNAME") == "" {
+		return postgresTestConfig{}, false
+	}
 
 	cfg := postgresTestConfig{
 		Host:     getenvOr("POLYTOMIC_TEST_PG_HOST", "postgres"),
@@ -67,15 +74,14 @@ func testPostgresConfig(t *testing.T) postgresTestConfig {
 	}
 	cfg.Port = port
 
-	if cfg.Username == "" {
-		t.Fatalf("POLYTOMIC_TEST_PG_USERNAME must be set for PostgreSQL-backed acceptance tests")
-	}
-
 	if cfg.Password == "" {
-		t.Fatalf("POLYTOMIC_TEST_PG_PASSWORD must be set for PostgreSQL-backed acceptance tests")
+		t.Fatalf("POLYTOMIC_TEST_PG_PASSWORD must be set when POLYTOMIC_TEST_PG_USERNAME is set")
 	}
 
-	return cfg
+	// Ensure fixture tables exist for BYOP Postgres.
+	ensureFixtureTables(t, cfg)
+
+	return cfg, true
 }
 
 func getenvOr(name, fallback string) string {
@@ -84,6 +90,46 @@ func getenvOr(name, fallback string) string {
 	}
 
 	return fallback
+}
+
+// fixtureSQL creates the schemas and tables expected by acceptance tests.
+const fixtureSQL = `
+CREATE SCHEMA IF NOT EXISTS polytomic;
+
+CREATE TABLE IF NOT EXISTS polytomic.sync_test_source (
+    email TEXT PRIMARY KEY,
+    name TEXT
+);
+
+INSERT INTO polytomic.sync_test_source (email, name)
+VALUES ('test@example.com', 'Test User')
+ON CONFLICT DO NOTHING;
+
+CREATE TABLE IF NOT EXISTS polytomic.sync_test_target (
+    email TEXT PRIMARY KEY,
+    name TEXT
+);
+`
+
+// ensureFixtureTables connects to the given Postgres instance and runs
+// fixtureSQL to create the schemas and seed data needed by acceptance tests.
+func ensureFixtureTables(t *testing.T, cfg postgresTestConfig) {
+	t.Helper()
+
+	dsn := fmt.Sprintf(
+		"host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
+		cfg.Host, cfg.Port, cfg.Username, cfg.Password, cfg.Database,
+	)
+
+	db, err := sql.Open("postgres", dsn)
+	if err != nil {
+		t.Fatalf("connecting to postgres for fixture setup: %v", err)
+	}
+	defer db.Close()
+
+	if _, err := db.Exec(fixtureSQL); err != nil {
+		t.Fatalf("running fixture SQL: %v", err)
+	}
 }
 
 type TestCaseTfArgs struct {

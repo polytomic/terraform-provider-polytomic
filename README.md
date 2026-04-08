@@ -79,14 +79,21 @@ Environment variables required for acceptance tests:
   - `POLYTOMIC_API_KEY` (org-scoped)
   - `POLYTOMIC_DEPLOYMENT_KEY` (deployment/partner scoped; tests will create an org and pass `organization = ...`)
 
-Additional environment variables are required for PostgreSQL-backed acceptance
-tests, including the sync and bulk-sync suites:
+PostgreSQL-backed acceptance tests (sync and bulk-sync suites) will
+automatically start a Postgres container via
+[testcontainers](https://golang.testcontainers.org/) when no credentials are
+provided. Docker must be running. The container is reachable from Polytomic's
+Docker network via `host.docker.internal`.
+
+To use an existing Postgres instance instead, set these environment variables:
 
 - `POLYTOMIC_TEST_PG_USERNAME`
 - `POLYTOMIC_TEST_PG_PASSWORD`
 - `POLYTOMIC_TEST_PG_HOST` optional, defaults to `postgres`
 - `POLYTOMIC_TEST_PG_DATABASE` optional, defaults to `polytomic`
 - `POLYTOMIC_TEST_PG_PORT` optional, defaults to `5432`
+
+The required fixture schema and tables are created automatically in both cases.
 
 If you prefer to run an individual package directly:
 

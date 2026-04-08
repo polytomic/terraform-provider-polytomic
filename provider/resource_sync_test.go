@@ -93,17 +93,6 @@ resource "polytomic_organization" "test" {
 }
 {{end}}
 
-resource "polytomic_model" "test" {
-  name          = "{{.Name}}-model"
-  configuration = jsonencode({
-    "query" = "SELECT email FROM users"
-  })
-  connection_id = polytomic_postgresql_connection.test.id
-{{if not .APIKey}}
-  organization  = polytomic_organization.test.id
-{{end}}
-}
-
 resource "polytomic_postgresql_connection" "test" {
   name = "{{.Name}}-postgres"
   configuration = {
@@ -118,11 +107,12 @@ resource "polytomic_postgresql_connection" "test" {
 {{end}}
 }
 
-resource "polytomic_csv_connection" "test" {
-  name          = "{{.Name}}-csv"
-  configuration = {
-    url = "https://gist.githubusercontent.com/jpalawaga/20df01c463b82950cc7421e5117a67bc/raw/14bae37fb748114901f7cfdaa5834e4b417537d5/"
-  }
+resource "polytomic_model" "test" {
+  name          = "{{.Name}}-model"
+  configuration = jsonencode({
+    "query" = "SELECT email FROM polytomic.sync_test_source"
+  })
+  connection_id = polytomic_postgresql_connection.test.id
 {{if not .APIKey}}
   organization  = polytomic_organization.test.id
 {{end}}
@@ -141,15 +131,12 @@ resource "polytomic_sync" "test" {
         field    = "email"
         model_id = polytomic_model.test.id
       }
-      target = "record"
+      target = "email"
     }
   ]
   target = {
-    connection_id = polytomic_csv_connection.test.id
-    object        = "test"
-    configuration = jsonencode({
-      "format" = "csv"
-    })
+    connection_id = polytomic_postgresql_connection.test.id
+    object        = "polytomic.sync_test_target"
   }
 {{if not .APIKey}}
   organization = polytomic_organization.test.id
