@@ -16,26 +16,26 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
-var _ datasource.DataSource = &Tiktok_adsConnectionDataSource{}
+var _ datasource.DataSource = &Factors_aiConnectionDataSource{}
 
 // ExampleDataSource defines the data source implementation.
-type Tiktok_adsConnectionDataSource struct {
+type Factors_aiConnectionDataSource struct {
 	provider *providerclient.Provider
 }
 
-func (d *Tiktok_adsConnectionDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *Factors_aiConnectionDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	if provider := providerclient.GetProvider(req.ProviderData, resp.Diagnostics); provider != nil {
 		d.provider = provider
 	}
 }
 
-func (d *Tiktok_adsConnectionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_tiktok_ads_connection"
+func (d *Factors_aiConnectionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_factors_ai_connection"
 }
 
-func (d *Tiktok_adsConnectionDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+func (d *Factors_aiConnectionDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: ":meta:subcategory:Connections: TikTok Ads Connection",
+		MarkdownDescription: ":meta:subcategory:Connections: Factors.ai Connection",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				MarkdownDescription: "",
@@ -51,31 +51,9 @@ func (d *Tiktok_adsConnectionDataSource) Schema(ctx context.Context, req datasou
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
-					"advertisers": schema.SetNestedAttribute{
-						MarkdownDescription: ``,
+					"account_domain": schema.StringAttribute{
+						MarkdownDescription: `Account Domain`,
 						Computed:            true,
-						NestedObject: schema.NestedAttributeObject{
-							Attributes: map[string]schema.Attribute{
-								"label": schema.StringAttribute{
-									MarkdownDescription: ``,
-									Computed:            true,
-								},
-								"value": schema.StringAttribute{
-									MarkdownDescription: ``,
-									Computed:            true,
-								},
-							},
-						},
-					},
-					"connected_user": schema.StringAttribute{
-						MarkdownDescription: `Connected user`,
-						Computed:            true,
-					},
-					"custom_reports": schema.StringAttribute{
-						MarkdownDescription: `Custom reports
-
-    One report per line. Format: name:report_level:aggregate:dimensions:metrics. Example: my_report:auction_basic_campaign:daily:campaign_id`,
-						Computed: true,
 					},
 				},
 				Optional: true,
@@ -84,16 +62,11 @@ func (d *Tiktok_adsConnectionDataSource) Schema(ctx context.Context, req datasou
 	}
 }
 
-type Tiktok_adsDataSourceConf struct {
-	Advertisers []struct {
-		Label string `mapstructure:"label" tfsdk:"label"`
-		Value string `mapstructure:"value" tfsdk:"value"`
-	} `mapstructure:"advertisers" tfsdk:"advertisers"`
-	Connected_user string `mapstructure:"connected_user" tfsdk:"connected_user"`
-	Custom_reports string `mapstructure:"custom_reports" tfsdk:"custom_reports"`
+type Factors_aiDataSourceConf struct {
+	Account_domain string `mapstructure:"account_domain" tfsdk:"account_domain"`
 }
 
-func (d *Tiktok_adsConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+func (d *Factors_aiConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 
 	// Read Terraform configuration data into the model
@@ -119,7 +92,7 @@ func (d *Tiktok_adsConnectionDataSource) Read(ctx context.Context, req datasourc
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
 
-	conf := Tiktok_adsDataSourceConf{}
+	conf := Factors_aiDataSourceConf{}
 	err = mapstructure.Decode(connection.Data.Configuration, &conf)
 	if err != nil {
 		resp.Diagnostics.AddError("Error decoding connection configuration", err.Error())
@@ -128,16 +101,7 @@ func (d *Tiktok_adsConnectionDataSource) Read(ctx context.Context, req datasourc
 
 	var diags diag.Diagnostics
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"advertisers": types.SetType{
-			ElemType: types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					"label": types.StringType,
-					"value": types.StringType,
-				},
-			},
-		},
-		"connected_user": types.StringType,
-		"custom_reports": types.StringType,
+		"account_domain": types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
