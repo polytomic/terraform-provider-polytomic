@@ -38,6 +38,9 @@ Read-Only:
 
 - `advertisers` (Attributes Set) (see [below for nested schema](#nestedatt--configuration--advertisers))
 - `connected_user` (String) Connected user
+- `custom_reports` (String) Custom reports
+
+    One report per line. Format: name:report_level:aggregate:dimensions:metrics. Example: my_report:auction_basic_campaign:daily:campaign_id
 
 <a id="nestedatt--configuration--advertisers"></a>
 ### Nested Schema for `configuration.advertisers`

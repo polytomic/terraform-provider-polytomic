@@ -16,26 +16,26 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
-var _ datasource.DataSource = &Tiktok_adsConnectionDataSource{}
+var _ datasource.DataSource = &GatsbyConnectionDataSource{}
 
 // ExampleDataSource defines the data source implementation.
-type Tiktok_adsConnectionDataSource struct {
+type GatsbyConnectionDataSource struct {
 	provider *providerclient.Provider
 }
 
-func (d *Tiktok_adsConnectionDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *GatsbyConnectionDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	if provider := providerclient.GetProvider(req.ProviderData, resp.Diagnostics); provider != nil {
 		d.provider = provider
 	}
 }
 
-func (d *Tiktok_adsConnectionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_tiktok_ads_connection"
+func (d *GatsbyConnectionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_gatsby_connection"
 }
 
-func (d *Tiktok_adsConnectionDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+func (d *GatsbyConnectionDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: ":meta:subcategory:Connections: TikTok Ads Connection",
+		MarkdownDescription: ":meta:subcategory:Connections: Gatsby Connection",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				MarkdownDescription: "",
@@ -51,7 +51,11 @@ func (d *Tiktok_adsConnectionDataSource) Schema(ctx context.Context, req datasou
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
-					"advertisers": schema.SetNestedAttribute{
+					"email": schema.StringAttribute{
+						MarkdownDescription: ``,
+						Computed:            true,
+					},
+					"organizations": schema.SetNestedAttribute{
 						MarkdownDescription: ``,
 						Computed:            true,
 						NestedObject: schema.NestedAttributeObject{
@@ -67,16 +71,6 @@ func (d *Tiktok_adsConnectionDataSource) Schema(ctx context.Context, req datasou
 							},
 						},
 					},
-					"connected_user": schema.StringAttribute{
-						MarkdownDescription: `Connected user`,
-						Computed:            true,
-					},
-					"custom_reports": schema.StringAttribute{
-						MarkdownDescription: `Custom reports
-
-    One report per line. Format: name:report_level:aggregate:dimensions:metrics. Example: my_report:auction_basic_campaign:daily:campaign_id`,
-						Computed: true,
-					},
 				},
 				Optional: true,
 			},
@@ -84,16 +78,15 @@ func (d *Tiktok_adsConnectionDataSource) Schema(ctx context.Context, req datasou
 	}
 }
 
-type Tiktok_adsDataSourceConf struct {
-	Advertisers []struct {
+type GatsbyDataSourceConf struct {
+	Email         string `mapstructure:"email" tfsdk:"email"`
+	Organizations []struct {
 		Label string `mapstructure:"label" tfsdk:"label"`
 		Value string `mapstructure:"value" tfsdk:"value"`
-	} `mapstructure:"advertisers" tfsdk:"advertisers"`
-	Connected_user string `mapstructure:"connected_user" tfsdk:"connected_user"`
-	Custom_reports string `mapstructure:"custom_reports" tfsdk:"custom_reports"`
+	} `mapstructure:"organizations" tfsdk:"organizations"`
 }
 
-func (d *Tiktok_adsConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+func (d *GatsbyConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 
 	// Read Terraform configuration data into the model
@@ -119,7 +112,7 @@ func (d *Tiktok_adsConnectionDataSource) Read(ctx context.Context, req datasourc
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
 
-	conf := Tiktok_adsDataSourceConf{}
+	conf := GatsbyDataSourceConf{}
 	err = mapstructure.Decode(connection.Data.Configuration, &conf)
 	if err != nil {
 		resp.Diagnostics.AddError("Error decoding connection configuration", err.Error())
@@ -128,7 +121,8 @@ func (d *Tiktok_adsConnectionDataSource) Read(ctx context.Context, req datasourc
 
 	var diags diag.Diagnostics
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"advertisers": types.SetType{
+		"email": types.StringType,
+		"organizations": types.SetType{
 			ElemType: types.ObjectType{
 				AttrTypes: map[string]attr.Type{
 					"label": types.StringType,
@@ -136,8 +130,6 @@ func (d *Tiktok_adsConnectionDataSource) Read(ctx context.Context, req datasourc
 				},
 			},
 		},
-		"connected_user": types.StringType,
-		"custom_reports": types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

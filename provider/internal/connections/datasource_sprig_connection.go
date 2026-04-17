@@ -6,36 +6,33 @@ package connections
 import (
 	"context"
 
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
-var _ datasource.DataSource = &AffinityConnectionDataSource{}
+var _ datasource.DataSource = &SprigConnectionDataSource{}
 
 // ExampleDataSource defines the data source implementation.
-type AffinityConnectionDataSource struct {
+type SprigConnectionDataSource struct {
 	provider *providerclient.Provider
 }
 
-func (d *AffinityConnectionDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *SprigConnectionDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	if provider := providerclient.GetProvider(req.ProviderData, resp.Diagnostics); provider != nil {
 		d.provider = provider
 	}
 }
 
-func (d *AffinityConnectionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_affinity_connection"
+func (d *SprigConnectionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_sprig_connection"
 }
 
-func (d *AffinityConnectionDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+func (d *SprigConnectionDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: ":meta:subcategory:Connections: Affinity Connection",
+		MarkdownDescription: ":meta:subcategory:Connections: Sprig Connection",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				MarkdownDescription: "",
@@ -50,28 +47,17 @@ func (d *AffinityConnectionDataSource) Schema(ctx context.Context, req datasourc
 				Computed:            true,
 			},
 			"configuration": schema.SingleNestedAttribute{
-				Attributes: map[string]schema.Attribute{
-					"enable_webhooks": schema.BoolAttribute{
-						MarkdownDescription: `Enable Affinity webhook updates for bulk syncs`,
-						Computed:            true,
-					},
-					"user": schema.StringAttribute{
-						MarkdownDescription: ``,
-						Computed:            true,
-					},
-				},
-				Optional: true,
+				Attributes: map[string]schema.Attribute{},
+				Optional:   true,
 			},
 		},
 	}
 }
 
-type AffinityDataSourceConf struct {
-	Enable_webhooks bool   `mapstructure:"enable_webhooks" tfsdk:"enable_webhooks"`
-	User            string `mapstructure:"user" tfsdk:"user"`
+type SprigDataSourceConf struct {
 }
 
-func (d *AffinityConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+func (d *SprigConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 
 	// Read Terraform configuration data into the model
@@ -96,23 +82,6 @@ func (d *AffinityConnectionDataSource) Read(ctx context.Context, req datasource.
 	data.Id = types.StringPointerValue(connection.Data.Id)
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
-
-	conf := AffinityDataSourceConf{}
-	err = mapstructure.Decode(connection.Data.Configuration, &conf)
-	if err != nil {
-		resp.Diagnostics.AddError("Error decoding connection configuration", err.Error())
-		return
-	}
-
-	var diags diag.Diagnostics
-	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"enable_webhooks": types.BoolType,
-		"user":            types.StringType,
-	}, conf)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
 
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)

@@ -45,5 +45,6 @@ state before it will take effect on a destroy operation.
 ### Nested Schema for `configuration`
 
 - `api_key` (String, Sensitive, Required) API Key
+- `enable_webhooks` (Boolean, Optional) Enable Affinity webhook updates for bulk syncs
 - `user` (String, Optional)
 

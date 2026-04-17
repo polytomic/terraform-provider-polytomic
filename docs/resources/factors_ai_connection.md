@@ -1,26 +1,32 @@
 ---
-page_title: "{{ .Name }} {{ .Type }} - {{ .ProviderName }}"
+page_title: "polytomic_factors_ai_connection Resource - terraform-provider-polytomic"
 subcategory: "Connections"
 description: |-
-{{ .Description | plainmarkdown | trimspace | prefixlines "  " }}
+  Factors.ai Connection
 ---
 
-# {{ .Name }} ({{ .Type }})
+# polytomic_factors_ai_connection (Resource)
 
-{{ .Description | trimspace }}
+Factors.ai Connection
 
-For detailed configuration guidance, see the [Affinity connection guide](https://apidocs.polytomic.com/guides/configuring-your-connections/connections/affinity).
+For detailed configuration guidance, see the [Factors.ai connection guide](https://apidocs.polytomic.com/guides/configuring-your-connections/connections/factors_ai).
 
 ## Example Usage
 
-{{ tffile .ExampleFile }}
+```terraform
+resource "polytomic_factors_ai_connection" "factors_ai" {
+  name = "example"
+  configuration = {
+  }
+}
+```
 
 ## Schema
 
 - `name` (String, Required)
 - `configuration` (Attributes, Required) See [below for nested schema](#nestedatt--configuration).
 - `organization` (String, Optional) Organization ID.
-- `id` (String, Read-only) Affinity Connection identifier.
+- `id` (String, Read-only) Factors.ai Connection identifier.
 - `force_destroy` (Boolean, Optional) Indicates whether dependent models, syncs, and bulk syncs should be
 cascade-deleted when this connection is destroyed.
 
@@ -37,7 +43,6 @@ state before it will take effect on a destroy operation.
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
+- `account_domain` (String, Required) Account Domain
 - `api_key` (String, Sensitive, Required) API Key
-- `enable_webhooks` (Boolean, Optional) Enable Affinity webhook updates for bulk syncs
-- `user` (String, Optional)
 

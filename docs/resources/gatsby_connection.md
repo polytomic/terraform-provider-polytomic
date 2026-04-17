@@ -1,26 +1,32 @@
 ---
-page_title: "{{ .Name }} {{ .Type }} - {{ .ProviderName }}"
+page_title: "polytomic_gatsby_connection Resource - terraform-provider-polytomic"
 subcategory: "Connections"
 description: |-
-{{ .Description | plainmarkdown | trimspace | prefixlines "  " }}
+  Gatsby Connection
 ---
 
-# {{ .Name }} ({{ .Type }})
+# polytomic_gatsby_connection (Resource)
 
-{{ .Description | trimspace }}
+Gatsby Connection
 
-For detailed configuration guidance, see the [Affinity connection guide](https://apidocs.polytomic.com/guides/configuring-your-connections/connections/affinity).
+For detailed configuration guidance, see the [Gatsby connection guide](https://apidocs.polytomic.com/guides/configuring-your-connections/connections/gatsby).
 
 ## Example Usage
 
-{{ tffile .ExampleFile }}
+```terraform
+resource "polytomic_gatsby_connection" "gatsby" {
+  name = "example"
+  configuration = {
+  }
+}
+```
 
 ## Schema
 
 - `name` (String, Required)
 - `configuration` (Attributes, Required) See [below for nested schema](#nestedatt--configuration).
 - `organization` (String, Optional) Organization ID.
-- `id` (String, Read-only) Affinity Connection identifier.
+- `id` (String, Read-only) Gatsby Connection identifier.
 - `force_destroy` (Boolean, Optional) Indicates whether dependent models, syncs, and bulk syncs should be
 cascade-deleted when this connection is destroyed.
 
@@ -37,7 +43,13 @@ state before it will take effect on a destroy operation.
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
-- `api_key` (String, Sensitive, Required) API Key
-- `enable_webhooks` (Boolean, Optional) Enable Affinity webhook updates for bulk syncs
-- `user` (String, Optional)
+- `email` (String, Required)
+- `organizations` (Attributes Set, Optional) See [below for nested schema](#nestedatt--configuration--organizations).
+- `password` (String, Sensitive, Required)
+
+<a id="nestedatt--configuration--organizations"></a>
+### Nested Schema for `configuration.organizations`
+
+- `label` (String, Optional)
+- `value` (String, Optional)
 

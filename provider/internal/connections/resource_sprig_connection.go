@@ -27,11 +27,11 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
-var _ resource.Resource = &AffinityConnectionResource{}
-var _ resource.ResourceWithImportState = &AffinityConnectionResource{}
+var _ resource.Resource = &SprigConnectionResource{}
+var _ resource.ResourceWithImportState = &SprigConnectionResource{}
 
-var AffinitySchema = schema.Schema{
-	MarkdownDescription: ":meta:subcategory:Connections: Affinity Connection",
+var SprigSchema = schema.Schema{
+	MarkdownDescription: ":meta:subcategory:Connections: Sprig Connection",
 	Attributes: map[string]schema.Attribute{
 		"organization": schema.StringAttribute{
 			MarkdownDescription: "Organization ID",
@@ -44,7 +44,7 @@ var AffinitySchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"api_key": schema.StringAttribute{
-					MarkdownDescription: `API Key`,
+					MarkdownDescription: `API key`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
@@ -52,20 +52,6 @@ var AffinitySchema = schema.Schema{
 					PlanModifiers: []planmodifier.String{
 						stringplanmodifier.UseStateForUnknown(),
 					},
-				},
-				"enable_webhooks": schema.BoolAttribute{
-					MarkdownDescription: `Enable Affinity webhook updates for bulk syncs`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
-				},
-				"user": schema.StringAttribute{
-					MarkdownDescription: ``,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
 				},
 			},
 
@@ -81,7 +67,7 @@ var AffinitySchema = schema.Schema{
 		},
 		"id": schema.StringAttribute{
 			Computed:            true,
-			MarkdownDescription: "Affinity Connection identifier",
+			MarkdownDescription: "Sprig Connection identifier",
 			PlanModifiers: []planmodifier.String{
 				stringplanmodifier.UseStateForUnknown(),
 			},
@@ -89,31 +75,29 @@ var AffinitySchema = schema.Schema{
 	},
 }
 
-func (t *AffinityConnectionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = AffinitySchema
+func (t *SprigConnectionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = SprigSchema
 }
 
-type AffinityConf struct {
-	Api_key         string `mapstructure:"api_key" tfsdk:"api_key"`
-	Enable_webhooks bool   `mapstructure:"enable_webhooks" tfsdk:"enable_webhooks"`
-	User            string `mapstructure:"user" tfsdk:"user"`
+type SprigConf struct {
+	Api_key string `mapstructure:"api_key" tfsdk:"api_key"`
 }
 
-type AffinityConnectionResource struct {
+type SprigConnectionResource struct {
 	provider *providerclient.Provider
 }
 
-func (r *AffinityConnectionResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *SprigConnectionResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if provider := providerclient.GetProvider(req.ProviderData, resp.Diagnostics); provider != nil {
 		r.provider = provider
 	}
 }
 
-func (r *AffinityConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_affinity_connection"
+func (r *SprigConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_sprig_connection"
 }
 
-func (r *AffinityConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *SprigConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data connectionData
 
 	diags := req.Config.Get(ctx, &data)
@@ -128,14 +112,14 @@ func (r *AffinityConnectionResource) Create(ctx context.Context, req resource.Cr
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
-	connConf, err := objectMapValue(ctx, data.Configuration, getOptionalFields(AffinitySchema))
+	connConf, err := objectMapValue(ctx, data.Configuration, getOptionalFields(SprigSchema))
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
-		Type:           "affinity",
+		Type:           "sprig",
 		OrganizationId: data.Organization.ValueStringPointer(),
 		Configuration:  connConf,
 		Validate:       pointer.ToBool(false),
@@ -148,29 +132,27 @@ func (r *AffinityConnectionResource) Create(ctx context.Context, req resource.Cr
 	data.Name = types.StringPointerValue(created.Data.Name)
 	data.Organization = types.StringPointerValue(created.Data.OrganizationId)
 
-	conf := AffinityConf{}
+	conf := SprigConf{}
 	err = mapstructure.Decode(created.Data.Configuration, &conf)
 	if err != nil {
 		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error decoding connection configuration: %s", err))
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"api_key":         types.StringType,
-		"enable_webhooks": types.BoolType,
-		"user":            types.StringType,
+		"api_key": types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Affinity", "id": created.Data.Id})
+	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Sprig", "id": created.Data.Id})
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r *AffinityConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *SprigConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data connectionData
 
 	diags := req.State.Get(ctx, &data)
@@ -205,7 +187,7 @@ func (r *AffinityConnectionResource) Read(ctx context.Context, req resource.Read
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
 
-	configAttributes, ok := getConfigAttributes(AffinitySchema)
+	configAttributes, ok := getConfigAttributes(SprigSchema)
 	if !ok {
 		resp.Diagnostics.AddError("Error getting connection configuration attributes", "Could not get configuration attributes")
 		return
@@ -220,16 +202,14 @@ func (r *AffinityConnectionResource) Read(ctx context.Context, req resource.Read
 	// reset sensitive values so terraform doesn't think we have changes
 	connection.Data.Configuration = resetSensitiveValues(configAttributes, originalConfData, connection.Data.Configuration)
 
-	conf := AffinityConf{}
+	conf := SprigConf{}
 	err = mapstructure.Decode(connection.Data.Configuration, &conf)
 	if err != nil {
 		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error decoding connection configuration: %s", err))
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"api_key":         types.StringType,
-		"enable_webhooks": types.BoolType,
-		"user":            types.StringType,
+		"api_key": types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -240,7 +220,7 @@ func (r *AffinityConnectionResource) Read(ctx context.Context, req resource.Read
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r *AffinityConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *SprigConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var data connectionData
 
 	diags := req.Plan.Get(ctx, &data)
@@ -255,13 +235,13 @@ func (r *AffinityConnectionResource) Update(ctx context.Context, req resource.Up
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
-	connConf, err := objectMapValue(ctx, data.Configuration, getOptionalFields(AffinitySchema))
+	connConf, err := objectMapValue(ctx, data.Configuration, getOptionalFields(SprigSchema))
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
 
-	configAttributes, ok := getConfigAttributes(AffinitySchema)
+	configAttributes, ok := getConfigAttributes(SprigSchema)
 	if !ok {
 		resp.Diagnostics.AddError("Error getting connection configuration attributes", "Could not get configuration attributes")
 		return
@@ -291,16 +271,14 @@ func (r *AffinityConnectionResource) Update(ctx context.Context, req resource.Up
 	data.Name = types.StringPointerValue(updated.Data.Name)
 	data.Organization = types.StringPointerValue(updated.Data.OrganizationId)
 
-	conf := AffinityConf{}
+	conf := SprigConf{}
 	err = mapstructure.Decode(updated.Data.Configuration, &conf)
 	if err != nil {
 		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error decoding connection configuration: %s", err))
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"api_key":         types.StringType,
-		"enable_webhooks": types.BoolType,
-		"user":            types.StringType,
+		"api_key": types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -310,7 +288,7 @@ func (r *AffinityConnectionResource) Update(ctx context.Context, req resource.Up
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r *AffinityConnectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *SprigConnectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var data connectionData
 
 	diags := req.State.Get(ctx, &data)
@@ -373,6 +351,6 @@ func (r *AffinityConnectionResource) Delete(ctx context.Context, req resource.De
 	}
 }
 
-func (r *AffinityConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *SprigConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

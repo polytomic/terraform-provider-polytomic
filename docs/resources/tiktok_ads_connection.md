@@ -49,6 +49,9 @@ state before it will take effect on a destroy operation.
 - `client_id` (String, Sensitive, Optional)
 - `client_secret` (String, Sensitive, Optional)
 - `connected_user` (String, Optional) Connected user
+- `custom_reports` (String, Optional) Custom reports
+
+    One report per line. Format: name:report_level:aggregate:dimensions:metrics. Example: my_report:auction_basic_campaign:daily:campaign_id
 
 <a id="nestedatt--configuration--advertisers"></a>
 ### Nested Schema for `configuration.advertisers`

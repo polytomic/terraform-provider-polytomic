@@ -95,6 +95,15 @@ var Tiktok_adsSchema = schema.Schema{
 					Computed:            true,
 					Sensitive:           false,
 				},
+				"custom_reports": schema.StringAttribute{
+					MarkdownDescription: `Custom reports
+
+    One report per line. Format: name:report_level:aggregate:dimensions:metrics. Example: my_report:auction_basic_campaign:daily:campaign_id`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
+				},
 			},
 
 			Required: true,
@@ -129,6 +138,7 @@ type Tiktok_adsConf struct {
 	Client_id      string `mapstructure:"client_id" tfsdk:"client_id"`
 	Client_secret  string `mapstructure:"client_secret" tfsdk:"client_secret"`
 	Connected_user string `mapstructure:"connected_user" tfsdk:"connected_user"`
+	Custom_reports string `mapstructure:"custom_reports" tfsdk:"custom_reports"`
 }
 
 type Tiktok_adsConnectionResource struct {
@@ -198,6 +208,7 @@ func (r *Tiktok_adsConnectionResource) Create(ctx context.Context, req resource.
 		"client_id":      types.StringType,
 		"client_secret":  types.StringType,
 		"connected_user": types.StringType,
+		"custom_reports": types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -278,6 +289,7 @@ func (r *Tiktok_adsConnectionResource) Read(ctx context.Context, req resource.Re
 		"client_id":      types.StringType,
 		"client_secret":  types.StringType,
 		"connected_user": types.StringType,
+		"custom_reports": types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -357,6 +369,7 @@ func (r *Tiktok_adsConnectionResource) Update(ctx context.Context, req resource.
 		"client_id":      types.StringType,
 		"client_secret":  types.StringType,
 		"connected_user": types.StringType,
+		"custom_reports": types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
