@@ -1,3 +1,11 @@
+## 1.4.1 (17 April 2026)
+
+- Added support for new connection types:
+  - Factors AI
+  - Gatsby
+  - Sprig
+- Updated connection schemas for Affinity and TikTok Ads.
+
 ## 1.4.0 (6 April 2026)
 
 BREAKING CHANGES:
