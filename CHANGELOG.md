@@ -1,3 +1,9 @@
+## 1.4.2 (23 April 2026)
+
+- Added support for new connection types:
+  - Calendly
+- Updated connection schema for BigQuery.
+
 ## 1.4.1 (17 April 2026)
 
 - Added support for new connection types:
