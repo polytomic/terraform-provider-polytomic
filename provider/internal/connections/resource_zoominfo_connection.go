@@ -151,6 +151,21 @@ func (r *ZoominfoConnectionResource) Create(ctx context.Context, req resource.Cr
 	data.Name = types.StringPointerValue(created.Data.Name)
 	data.Organization = types.StringPointerValue(created.Data.OrganizationId)
 
+	configAttributes, ok := getConfigAttributes(ZoominfoSchema)
+	if !ok {
+		resp.Diagnostics.AddError("Error getting connection configuration attributes", "Could not get configuration attributes")
+		return
+	}
+
+	originalConfData, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
+
+	// the API masks sensitive values in responses; restore them from the user's config
+	// so terraform doesn't see the masked values as drift
+	created.Data.Configuration = resetSensitiveValues(configAttributes, originalConfData, created.Data.Configuration)
 	conf := ZoominfoConf{}
 	err = mapstructure.Decode(created.Data.Configuration, &conf)
 	if err != nil {
@@ -297,6 +312,15 @@ func (r *ZoominfoConnectionResource) Update(ctx context.Context, req resource.Up
 	data.Name = types.StringPointerValue(updated.Data.Name)
 	data.Organization = types.StringPointerValue(updated.Data.OrganizationId)
 
+	planConfData, err := objectMapValue(ctx, data.Configuration)
+	if err != nil {
+		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
+		return
+	}
+
+	// the API masks sensitive values in responses; restore them from the plan's config
+	// so terraform doesn't see the masked values as drift
+	updated.Data.Configuration = resetSensitiveValues(configAttributes, planConfData, updated.Data.Configuration)
 	conf := ZoominfoConf{}
 	err = mapstructure.Decode(updated.Data.Configuration, &conf)
 	if err != nil {

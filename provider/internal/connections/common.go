@@ -145,7 +145,10 @@ func attrValue(ctx context.Context, val attr.Value) (interface{}, error) {
 // used to wipe whatever is read from the api back to its original state
 func resetSensitiveValues(attrs map[string]schema.Attribute, state, read map[string]any) map[string]any {
 	for k, attr := range attrs {
-		if attr.IsSensitive() {
+		// Preserve server-managed computed-only sensitive values from the API
+		// response. Restore all other sensitive values from state so Terraform
+		// does not see masked API values as drift.
+		if attr.IsSensitive() && !(attr.IsComputed() && !attr.IsRequired() && !attr.IsOptional()) {
 			read[k] = state[k]
 			continue
 		}
