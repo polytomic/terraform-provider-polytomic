@@ -24,17 +24,14 @@ import (
 	"github.com/polytomic/polytomic-go"
 	ptcore "github.com/polytomic/polytomic-go/core"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
-
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
-var _ resource.Resource = &BigqueryConnectionResource{}
-var _ resource.ResourceWithImportState = &BigqueryConnectionResource{}
+var _ resource.Resource = &CalendlyConnectionResource{}
+var _ resource.ResourceWithImportState = &CalendlyConnectionResource{}
 
-var BigquerySchema = schema.Schema{
-	MarkdownDescription: ":meta:subcategory:Connections: Google BigQuery Connection",
+var CalendlySchema = schema.Schema{
+	MarkdownDescription: ":meta:subcategory:Connections: Calendly Connection",
 	Attributes: map[string]schema.Attribute{
 		"organization": schema.StringAttribute{
 			MarkdownDescription: "Organization ID",
@@ -46,95 +43,15 @@ var BigquerySchema = schema.Schema{
 		},
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
-				"auth_method": schema.StringAttribute{
-					MarkdownDescription: `Authentication method Valid values: <code>service_account_key</code> (Service Account Key), <code>workload_identity_federation</code> (Workload Identity Federation), <code>application_default_credentials</code> (Application Default Credentials). Default: <code>service_account_key</code>.`,
+				"api_key": schema.StringAttribute{
+					MarkdownDescription: `Personal Access Token`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
-					Sensitive:           false,
-					Validators: []validator.String{
-						stringvalidator.OneOf("service_account_key", "workload_identity_federation", "application_default_credentials"),
-					},
-				},
-				"bucket": schema.StringAttribute{
-					MarkdownDescription: `Google Cloud Storage bucket`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
-				},
-				"client_email": schema.StringAttribute{
-					MarkdownDescription: `Service account identity`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
-				},
-				"credential_config": schema.StringAttribute{
-					MarkdownDescription: `Credential configuration
-
-    Credential configuration JSON file downloaded from Google Cloud`,
-					Required:  false,
-					Optional:  true,
-					Computed:  true,
-					Sensitive: true,
-					PlanModifiers: []planmodifier.String{
-						stringplanmodifier.UseStateForUnknown(),
-					},
-				},
-				"location": schema.StringAttribute{
-					MarkdownDescription: `Region or multi-region for query operations`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
-				},
-				"override_project_id": schema.StringAttribute{
-					MarkdownDescription: `Override project ID
-
-    Override the default project ID for cross-project access`,
-					Required:  false,
-					Optional:  true,
-					Computed:  true,
-					Sensitive: false,
-				},
-				"project_id": schema.StringAttribute{
-					MarkdownDescription: `Service account project ID`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
-				},
-				"service_account": schema.StringAttribute{
-					MarkdownDescription: `Service account key`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
 					Sensitive:           true,
 					PlanModifiers: []planmodifier.String{
 						stringplanmodifier.UseStateForUnknown(),
 					},
-				},
-				"structured_values_as_json": schema.BoolAttribute{
-					MarkdownDescription: `Write object and array values as JSON Default: <code>false</code>.`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
-				},
-				"use_extract": schema.BoolAttribute{
-					MarkdownDescription: `Use Extract for bulk sync from BigQuery`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
-				},
-				"wif_project_id": schema.StringAttribute{
-					MarkdownDescription: `Google Cloud project ID`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
 				},
 			},
 
@@ -150,7 +67,7 @@ var BigquerySchema = schema.Schema{
 		},
 		"id": schema.StringAttribute{
 			Computed:            true,
-			MarkdownDescription: "Google BigQuery Connection identifier",
+			MarkdownDescription: "Calendly Connection identifier",
 			PlanModifiers: []planmodifier.String{
 				stringplanmodifier.UseStateForUnknown(),
 			},
@@ -158,39 +75,29 @@ var BigquerySchema = schema.Schema{
 	},
 }
 
-func (t *BigqueryConnectionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = BigquerySchema
+func (t *CalendlyConnectionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = CalendlySchema
 }
 
-type BigqueryConf struct {
-	Auth_method               string `mapstructure:"auth_method" tfsdk:"auth_method"`
-	Bucket                    string `mapstructure:"bucket" tfsdk:"bucket"`
-	Client_email              string `mapstructure:"client_email" tfsdk:"client_email"`
-	Credential_config         string `mapstructure:"credential_config" tfsdk:"credential_config"`
-	Location                  string `mapstructure:"location" tfsdk:"location"`
-	Override_project_id       string `mapstructure:"override_project_id" tfsdk:"override_project_id"`
-	Project_id                string `mapstructure:"project_id" tfsdk:"project_id"`
-	Service_account           string `mapstructure:"service_account" tfsdk:"service_account"`
-	Structured_values_as_json bool   `mapstructure:"structured_values_as_json" tfsdk:"structured_values_as_json"`
-	Use_extract               bool   `mapstructure:"use_extract" tfsdk:"use_extract"`
-	Wif_project_id            string `mapstructure:"wif_project_id" tfsdk:"wif_project_id"`
+type CalendlyConf struct {
+	Api_key string `mapstructure:"api_key" tfsdk:"api_key"`
 }
 
-type BigqueryConnectionResource struct {
+type CalendlyConnectionResource struct {
 	provider *providerclient.Provider
 }
 
-func (r *BigqueryConnectionResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *CalendlyConnectionResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if provider := providerclient.GetProvider(req.ProviderData, resp.Diagnostics); provider != nil {
 		r.provider = provider
 	}
 }
 
-func (r *BigqueryConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_bigquery_connection"
+func (r *CalendlyConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_calendly_connection"
 }
 
-func (r *BigqueryConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *CalendlyConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data connectionData
 
 	diags := req.Config.Get(ctx, &data)
@@ -205,14 +112,14 @@ func (r *BigqueryConnectionResource) Create(ctx context.Context, req resource.Cr
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
-	connConf, err := objectMapValue(ctx, data.Configuration, getOptionalFields(BigquerySchema))
+	connConf, err := objectMapValue(ctx, data.Configuration, getOptionalFields(CalendlySchema))
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
-		Type:           "bigquery",
+		Type:           "calendly",
 		OrganizationId: data.Organization.ValueStringPointer(),
 		Configuration:  connConf,
 		Validate:       pointer.ToBool(false),
@@ -225,37 +132,27 @@ func (r *BigqueryConnectionResource) Create(ctx context.Context, req resource.Cr
 	data.Name = types.StringPointerValue(created.Data.Name)
 	data.Organization = types.StringPointerValue(created.Data.OrganizationId)
 
-	conf := BigqueryConf{}
+	conf := CalendlyConf{}
 	err = mapstructure.Decode(created.Data.Configuration, &conf)
 	if err != nil {
 		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error decoding connection configuration: %s", err))
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"auth_method":               types.StringType,
-		"bucket":                    types.StringType,
-		"client_email":              types.StringType,
-		"credential_config":         types.StringType,
-		"location":                  types.StringType,
-		"override_project_id":       types.StringType,
-		"project_id":                types.StringType,
-		"service_account":           types.StringType,
-		"structured_values_as_json": types.BoolType,
-		"use_extract":               types.BoolType,
-		"wif_project_id":            types.StringType,
+		"api_key": types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Bigquery", "id": created.Data.Id})
+	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Calendly", "id": created.Data.Id})
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r *BigqueryConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *CalendlyConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data connectionData
 
 	diags := req.State.Get(ctx, &data)
@@ -290,7 +187,7 @@ func (r *BigqueryConnectionResource) Read(ctx context.Context, req resource.Read
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
 
-	configAttributes, ok := getConfigAttributes(BigquerySchema)
+	configAttributes, ok := getConfigAttributes(CalendlySchema)
 	if !ok {
 		resp.Diagnostics.AddError("Error getting connection configuration attributes", "Could not get configuration attributes")
 		return
@@ -305,24 +202,14 @@ func (r *BigqueryConnectionResource) Read(ctx context.Context, req resource.Read
 	// reset sensitive values so terraform doesn't think we have changes
 	connection.Data.Configuration = resetSensitiveValues(configAttributes, originalConfData, connection.Data.Configuration)
 
-	conf := BigqueryConf{}
+	conf := CalendlyConf{}
 	err = mapstructure.Decode(connection.Data.Configuration, &conf)
 	if err != nil {
 		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error decoding connection configuration: %s", err))
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"auth_method":               types.StringType,
-		"bucket":                    types.StringType,
-		"client_email":              types.StringType,
-		"credential_config":         types.StringType,
-		"location":                  types.StringType,
-		"override_project_id":       types.StringType,
-		"project_id":                types.StringType,
-		"service_account":           types.StringType,
-		"structured_values_as_json": types.BoolType,
-		"use_extract":               types.BoolType,
-		"wif_project_id":            types.StringType,
+		"api_key": types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -333,7 +220,7 @@ func (r *BigqueryConnectionResource) Read(ctx context.Context, req resource.Read
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r *BigqueryConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *CalendlyConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var data connectionData
 
 	diags := req.Plan.Get(ctx, &data)
@@ -348,13 +235,13 @@ func (r *BigqueryConnectionResource) Update(ctx context.Context, req resource.Up
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
-	connConf, err := objectMapValue(ctx, data.Configuration, getOptionalFields(BigquerySchema))
+	connConf, err := objectMapValue(ctx, data.Configuration, getOptionalFields(CalendlySchema))
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
 
-	configAttributes, ok := getConfigAttributes(BigquerySchema)
+	configAttributes, ok := getConfigAttributes(CalendlySchema)
 	if !ok {
 		resp.Diagnostics.AddError("Error getting connection configuration attributes", "Could not get configuration attributes")
 		return
@@ -384,24 +271,14 @@ func (r *BigqueryConnectionResource) Update(ctx context.Context, req resource.Up
 	data.Name = types.StringPointerValue(updated.Data.Name)
 	data.Organization = types.StringPointerValue(updated.Data.OrganizationId)
 
-	conf := BigqueryConf{}
+	conf := CalendlyConf{}
 	err = mapstructure.Decode(updated.Data.Configuration, &conf)
 	if err != nil {
 		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error decoding connection configuration: %s", err))
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"auth_method":               types.StringType,
-		"bucket":                    types.StringType,
-		"client_email":              types.StringType,
-		"credential_config":         types.StringType,
-		"location":                  types.StringType,
-		"override_project_id":       types.StringType,
-		"project_id":                types.StringType,
-		"service_account":           types.StringType,
-		"structured_values_as_json": types.BoolType,
-		"use_extract":               types.BoolType,
-		"wif_project_id":            types.StringType,
+		"api_key": types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -411,7 +288,7 @@ func (r *BigqueryConnectionResource) Update(ctx context.Context, req resource.Up
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r *BigqueryConnectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *CalendlyConnectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var data connectionData
 
 	diags := req.State.Get(ctx, &data)
@@ -474,6 +351,6 @@ func (r *BigqueryConnectionResource) Delete(ctx context.Context, req resource.De
 	}
 }
 
-func (r *BigqueryConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *CalendlyConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

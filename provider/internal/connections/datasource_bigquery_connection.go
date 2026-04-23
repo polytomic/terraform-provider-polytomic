@@ -52,7 +52,7 @@ func (d *BigqueryConnectionDataSource) Schema(ctx context.Context, req datasourc
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"auth_method": schema.StringAttribute{
-						MarkdownDescription: `Authentication method Valid values: <code>service_account_key</code> (Service Account Key), <code>workload_identity_federation</code> (Workload Identity Federation). Default: <code>service_account_key</code>.`,
+						MarkdownDescription: `Authentication method Valid values: <code>service_account_key</code> (Service Account Key), <code>workload_identity_federation</code> (Workload Identity Federation), <code>application_default_credentials</code> (Application Default Credentials). Default: <code>service_account_key</code>.`,
 						Computed:            true,
 					},
 					"bucket": schema.StringAttribute{
@@ -70,7 +70,7 @@ func (d *BigqueryConnectionDataSource) Schema(ctx context.Context, req datasourc
 					"override_project_id": schema.StringAttribute{
 						MarkdownDescription: `Override project ID
 
-    Override service key's project ID for cross-account access`,
+    Override the default project ID for cross-project access`,
 						Computed: true,
 					},
 					"project_id": schema.StringAttribute{

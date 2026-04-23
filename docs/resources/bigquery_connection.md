@@ -63,7 +63,7 @@ state before it will take effect on a destroy operation.
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
-- `auth_method` (String, Required) Authentication method Valid values: <code>service_account_key</code> (Service Account Key), <code>workload_identity_federation</code> (Workload Identity Federation). Default: <code>service_account_key</code>.
+- `auth_method` (String, Required) Authentication method Valid values: <code>service_account_key</code> (Service Account Key), <code>workload_identity_federation</code> (Workload Identity Federation), <code>application_default_credentials</code> (Application Default Credentials). Default: <code>service_account_key</code>.
 - `bucket` (String, Optional) Google Cloud Storage bucket
 - `client_email` (String, Optional) Service account identity
 - `credential_config` (String, Sensitive, Optional) Credential configuration
@@ -72,7 +72,7 @@ state before it will take effect on a destroy operation.
 - `location` (String, Optional) Region or multi-region for query operations
 - `override_project_id` (String, Optional) Override project ID
 
-    Override service key's project ID for cross-account access
+    Override the default project ID for cross-project access
 - `project_id` (String, Optional) Service account project ID
 - `service_account` (String, Sensitive, Optional) Service account key
 - `structured_values_as_json` (Boolean, Optional) Write object and array values as JSON Default: <code>false</code>.
