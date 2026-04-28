@@ -117,6 +117,9 @@ func (r *Chili_piperConnectionResource) Create(ctx context.Context, req resource
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
+	for k := range getComputedOnlyFields(Chili_piperSchema) {
+		delete(connConf, k)
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "chili_piper",
@@ -239,6 +242,9 @@ func (r *Chili_piperConnectionResource) Update(ctx context.Context, req resource
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(Chili_piperSchema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(Chili_piperSchema)

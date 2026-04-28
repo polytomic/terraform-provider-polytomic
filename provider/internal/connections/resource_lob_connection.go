@@ -117,6 +117,9 @@ func (r *LobConnectionResource) Create(ctx context.Context, req resource.CreateR
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
+	for k := range getComputedOnlyFields(LobSchema) {
+		delete(connConf, k)
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "lob",
@@ -239,6 +242,9 @@ func (r *LobConnectionResource) Update(ctx context.Context, req resource.UpdateR
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(LobSchema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(LobSchema)

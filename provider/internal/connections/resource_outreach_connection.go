@@ -66,7 +66,7 @@ var OutreachSchema = schema.Schema{
 				"connected_user": schema.StringAttribute{
 					MarkdownDescription: `Connected user`,
 					Required:            false,
-					Optional:            true,
+					Optional:            false,
 					Computed:            true,
 					Sensitive:           false,
 				},
@@ -162,6 +162,9 @@ func (r *OutreachConnectionResource) Create(ctx context.Context, req resource.Cr
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(OutreachSchema) {
+		delete(connConf, k)
 	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
@@ -295,6 +298,9 @@ func (r *OutreachConnectionResource) Update(ctx context.Context, req resource.Up
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(OutreachSchema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(OutreachSchema)

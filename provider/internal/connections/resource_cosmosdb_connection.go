@@ -125,6 +125,9 @@ func (r *CosmosdbConnectionResource) Create(ctx context.Context, req resource.Cr
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
+	for k := range getComputedOnlyFields(CosmosdbSchema) {
+		delete(connConf, k)
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "cosmosdb",
@@ -249,6 +252,9 @@ func (r *CosmosdbConnectionResource) Update(ctx context.Context, req resource.Up
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(CosmosdbSchema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(CosmosdbSchema)

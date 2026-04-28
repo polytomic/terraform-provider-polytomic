@@ -133,6 +133,9 @@ func (r *TestrailConnectionResource) Create(ctx context.Context, req resource.Cr
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
+	for k := range getComputedOnlyFields(TestrailSchema) {
+		delete(connConf, k)
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "testrail",
@@ -259,6 +262,9 @@ func (r *TestrailConnectionResource) Update(ctx context.Context, req resource.Up
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(TestrailSchema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(TestrailSchema)

@@ -176,6 +176,9 @@ func (r *GooglesearchconsoleConnectionResource) Create(ctx context.Context, req 
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
+	for k := range getComputedOnlyFields(GooglesearchconsoleSchema) {
+		delete(connConf, k)
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "googlesearchconsole",
@@ -320,6 +323,9 @@ func (r *GooglesearchconsoleConnectionResource) Update(ctx context.Context, req 
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(GooglesearchconsoleSchema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(GooglesearchconsoleSchema)

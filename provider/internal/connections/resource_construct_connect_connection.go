@@ -117,6 +117,9 @@ func (r *Construct_connectConnectionResource) Create(ctx context.Context, req re
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
+	for k := range getComputedOnlyFields(Construct_connectSchema) {
+		delete(connConf, k)
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "construct_connect",
@@ -239,6 +242,9 @@ func (r *Construct_connectConnectionResource) Update(ctx context.Context, req re
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(Construct_connectSchema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(Construct_connectSchema)

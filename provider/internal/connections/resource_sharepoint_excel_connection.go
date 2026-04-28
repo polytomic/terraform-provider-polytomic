@@ -158,6 +158,9 @@ func (r *Sharepoint_excelConnectionResource) Create(ctx context.Context, req res
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
+	for k := range getComputedOnlyFields(Sharepoint_excelSchema) {
+		delete(connConf, k)
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "sharepoint_excel",
@@ -288,6 +291,9 @@ func (r *Sharepoint_excelConnectionResource) Update(ctx context.Context, req res
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(Sharepoint_excelSchema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(Sharepoint_excelSchema)

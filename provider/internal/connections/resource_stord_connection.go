@@ -133,6 +133,9 @@ func (r *StordConnectionResource) Create(ctx context.Context, req resource.Creat
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
+	for k := range getComputedOnlyFields(StordSchema) {
+		delete(connConf, k)
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "stord",
@@ -259,6 +262,9 @@ func (r *StordConnectionResource) Update(ctx context.Context, req resource.Updat
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(StordSchema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(StordSchema)

@@ -117,6 +117,9 @@ func (r *Work_osConnectionResource) Create(ctx context.Context, req resource.Cre
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
+	for k := range getComputedOnlyFields(Work_osSchema) {
+		delete(connConf, k)
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "work_os",
@@ -239,6 +242,9 @@ func (r *Work_osConnectionResource) Update(ctx context.Context, req resource.Upd
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(Work_osSchema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(Work_osSchema)

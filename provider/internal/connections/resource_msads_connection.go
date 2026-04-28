@@ -121,7 +121,7 @@ var MsadsSchema = schema.Schema{
 				"username": schema.StringAttribute{
 					MarkdownDescription: `Connected user`,
 					Required:            false,
-					Optional:            true,
+					Optional:            false,
 					Computed:            true,
 					Sensitive:           false,
 				},
@@ -197,6 +197,9 @@ func (r *MsadsConnectionResource) Create(ctx context.Context, req resource.Creat
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(MsadsSchema) {
+		delete(connConf, k)
 	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
@@ -346,6 +349,9 @@ func (r *MsadsConnectionResource) Update(ctx context.Context, req resource.Updat
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(MsadsSchema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(MsadsSchema)

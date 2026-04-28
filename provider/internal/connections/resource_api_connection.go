@@ -337,6 +337,9 @@ func (r *ApiConnectionResource) Create(ctx context.Context, req resource.CreateR
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
+	for k := range getComputedOnlyFields(ApiSchema) {
+		delete(connConf, k)
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "api",
@@ -559,6 +562,9 @@ func (r *ApiConnectionResource) Update(ctx context.Context, req resource.UpdateR
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(ApiSchema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(ApiSchema)

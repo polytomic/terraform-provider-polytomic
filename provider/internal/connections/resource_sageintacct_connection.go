@@ -147,6 +147,9 @@ func (r *SageintacctConnectionResource) Create(ctx context.Context, req resource
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
+	for k := range getComputedOnlyFields(SageintacctSchema) {
+		delete(connConf, k)
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "sageintacct",
@@ -275,6 +278,9 @@ func (r *SageintacctConnectionResource) Update(ctx context.Context, req resource
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(SageintacctSchema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(SageintacctSchema)

@@ -141,6 +141,9 @@ func (r *Ware2goConnectionResource) Create(ctx context.Context, req resource.Cre
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
+	for k := range getComputedOnlyFields(Ware2goSchema) {
+		delete(connConf, k)
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "ware2go",
@@ -269,6 +272,9 @@ func (r *Ware2goConnectionResource) Update(ctx context.Context, req resource.Upd
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(Ware2goSchema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(Ware2goSchema)

@@ -125,6 +125,9 @@ func (r *Standard_metricsConnectionResource) Create(ctx context.Context, req res
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
+	for k := range getComputedOnlyFields(Standard_metricsSchema) {
+		delete(connConf, k)
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "standard_metrics",
@@ -249,6 +252,9 @@ func (r *Standard_metricsConnectionResource) Update(ctx context.Context, req res
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(Standard_metricsSchema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(Standard_metricsSchema)

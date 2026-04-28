@@ -128,6 +128,9 @@ func (r *Walmart_marketplaceConnectionResource) Create(ctx context.Context, req 
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
+	for k := range getComputedOnlyFields(Walmart_marketplaceSchema) {
+		delete(connConf, k)
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "walmart_marketplace",
@@ -252,6 +255,9 @@ func (r *Walmart_marketplaceConnectionResource) Update(ctx context.Context, req 
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(Walmart_marketplaceSchema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(Walmart_marketplaceSchema)

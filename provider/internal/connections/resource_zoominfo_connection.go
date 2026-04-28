@@ -133,6 +133,9 @@ func (r *ZoominfoConnectionResource) Create(ctx context.Context, req resource.Cr
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
+	for k := range getComputedOnlyFields(ZoominfoSchema) {
+		delete(connConf, k)
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "zoominfo",
@@ -259,6 +262,9 @@ func (r *ZoominfoConnectionResource) Update(ctx context.Context, req resource.Up
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(ZoominfoSchema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(ZoominfoSchema)

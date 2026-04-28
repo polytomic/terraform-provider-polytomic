@@ -139,6 +139,9 @@ func (r *GladlyConnectionResource) Create(ctx context.Context, req resource.Crea
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
+	for k := range getComputedOnlyFields(GladlySchema) {
+		delete(connConf, k)
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "gladly",
@@ -265,6 +268,9 @@ func (r *GladlyConnectionResource) Update(ctx context.Context, req resource.Upda
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(GladlySchema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(GladlySchema)

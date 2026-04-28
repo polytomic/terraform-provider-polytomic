@@ -63,7 +63,7 @@ var AffinitySchema = schema.Schema{
 				"user": schema.StringAttribute{
 					MarkdownDescription: ``,
 					Required:            false,
-					Optional:            true,
+					Optional:            false,
 					Computed:            true,
 					Sensitive:           false,
 				},
@@ -132,6 +132,9 @@ func (r *AffinityConnectionResource) Create(ctx context.Context, req resource.Cr
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(AffinitySchema) {
+		delete(connConf, k)
 	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
@@ -259,6 +262,9 @@ func (r *AffinityConnectionResource) Update(ctx context.Context, req resource.Up
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(AffinitySchema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(AffinitySchema)

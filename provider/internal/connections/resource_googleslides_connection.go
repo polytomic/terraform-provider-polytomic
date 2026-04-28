@@ -136,7 +136,7 @@ var GoogleslidesSchema = schema.Schema{
 				"user_email": schema.StringAttribute{
 					MarkdownDescription: `Connected user's email`,
 					Required:            false,
-					Optional:            true,
+					Optional:            false,
 					Computed:            true,
 					Sensitive:           false,
 				},
@@ -214,6 +214,9 @@ func (r *GoogleslidesConnectionResource) Create(ctx context.Context, req resourc
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(GoogleslidesSchema) {
+		delete(connConf, k)
 	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
@@ -361,6 +364,9 @@ func (r *GoogleslidesConnectionResource) Update(ctx context.Context, req resourc
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(GoogleslidesSchema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(GoogleslidesSchema)

@@ -188,6 +188,9 @@ func (r *GongConnectionResource) Create(ctx context.Context, req resource.Create
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
+	for k := range getComputedOnlyFields(GongSchema) {
+		delete(connConf, k)
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "gong",
@@ -324,6 +327,9 @@ func (r *GongConnectionResource) Update(ctx context.Context, req resource.Update
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(GongSchema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(GongSchema)

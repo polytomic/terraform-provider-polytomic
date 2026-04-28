@@ -80,7 +80,7 @@ var RedshiftSchema = schema.Schema{
 				"aws_user": schema.StringAttribute{
 					MarkdownDescription: `User ARN`,
 					Required:            false,
-					Optional:            true,
+					Optional:            false,
 					Computed:            true,
 					Sensitive:           false,
 				},
@@ -103,7 +103,7 @@ var RedshiftSchema = schema.Schema{
 
     External ID for the IAM role`,
 					Required:  false,
-					Optional:  true,
+					Optional:  false,
 					Computed:  true,
 					Sensitive: false,
 				},
@@ -291,6 +291,9 @@ func (r *RedshiftConnectionResource) Create(ctx context.Context, req resource.Cr
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
+	for k := range getComputedOnlyFields(RedshiftSchema) {
+		delete(connConf, k)
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "redshift",
@@ -451,6 +454,9 @@ func (r *RedshiftConnectionResource) Update(ctx context.Context, req resource.Up
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(RedshiftSchema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(RedshiftSchema)

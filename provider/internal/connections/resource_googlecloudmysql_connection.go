@@ -162,6 +162,9 @@ func (r *GooglecloudmysqlConnectionResource) Create(ctx context.Context, req res
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
+	for k := range getComputedOnlyFields(GooglecloudmysqlSchema) {
+		delete(connConf, k)
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "googlecloudmysql",
@@ -294,6 +297,9 @@ func (r *GooglecloudmysqlConnectionResource) Update(ctx context.Context, req res
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(GooglecloudmysqlSchema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(GooglecloudmysqlSchema)

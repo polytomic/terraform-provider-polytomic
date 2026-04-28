@@ -91,7 +91,7 @@ var Tiktok_adsSchema = schema.Schema{
 				"connected_user": schema.StringAttribute{
 					MarkdownDescription: `Connected user`,
 					Required:            false,
-					Optional:            true,
+					Optional:            false,
 					Computed:            true,
 					Sensitive:           false,
 				},
@@ -174,6 +174,9 @@ func (r *Tiktok_adsConnectionResource) Create(ctx context.Context, req resource.
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(Tiktok_adsSchema) {
+		delete(connConf, k)
 	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
@@ -319,6 +322,9 @@ func (r *Tiktok_adsConnectionResource) Update(ctx context.Context, req resource.
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(Tiktok_adsSchema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(Tiktok_adsSchema)

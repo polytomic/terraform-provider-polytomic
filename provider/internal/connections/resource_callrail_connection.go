@@ -117,6 +117,9 @@ func (r *CallrailConnectionResource) Create(ctx context.Context, req resource.Cr
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
+	for k := range getComputedOnlyFields(CallrailSchema) {
+		delete(connConf, k)
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "callrail",
@@ -239,6 +242,9 @@ func (r *CallrailConnectionResource) Update(ctx context.Context, req resource.Up
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(CallrailSchema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(CallrailSchema)

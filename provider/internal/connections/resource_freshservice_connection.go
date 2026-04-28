@@ -122,6 +122,9 @@ func (r *FreshserviceConnectionResource) Create(ctx context.Context, req resourc
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
+	for k := range getComputedOnlyFields(FreshserviceSchema) {
+		delete(connConf, k)
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "freshservice",
@@ -246,6 +249,9 @@ func (r *FreshserviceConnectionResource) Update(ctx context.Context, req resourc
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(FreshserviceSchema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(FreshserviceSchema)

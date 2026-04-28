@@ -63,7 +63,7 @@ var AwsopensearchSchema = schema.Schema{
 				"aws_user": schema.StringAttribute{
 					MarkdownDescription: `User ARN`,
 					Required:            false,
-					Optional:            true,
+					Optional:            false,
 					Computed:            true,
 					Sensitive:           false,
 				},
@@ -148,6 +148,9 @@ func (r *AwsopensearchConnectionResource) Create(ctx context.Context, req resour
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(AwsopensearchSchema) {
+		delete(connConf, k)
 	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
@@ -279,6 +282,9 @@ func (r *AwsopensearchConnectionResource) Update(ctx context.Context, req resour
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(AwsopensearchSchema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(AwsopensearchSchema)

@@ -139,6 +139,9 @@ func (r *AsanaConnectionResource) Create(ctx context.Context, req resource.Creat
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
+	for k := range getComputedOnlyFields(AsanaSchema) {
+		delete(connConf, k)
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "asana",
@@ -265,6 +268,9 @@ func (r *AsanaConnectionResource) Update(ctx context.Context, req resource.Updat
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(AsanaSchema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(AsanaSchema)

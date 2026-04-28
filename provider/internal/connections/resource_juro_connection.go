@@ -117,6 +117,9 @@ func (r *JuroConnectionResource) Create(ctx context.Context, req resource.Create
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
+	for k := range getComputedOnlyFields(JuroSchema) {
+		delete(connConf, k)
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "juro",
@@ -239,6 +242,9 @@ func (r *JuroConnectionResource) Update(ctx context.Context, req resource.Update
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(JuroSchema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(JuroSchema)

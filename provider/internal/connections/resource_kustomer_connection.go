@@ -127,6 +127,9 @@ func (r *KustomerConnectionResource) Create(ctx context.Context, req resource.Cr
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
+	for k := range getComputedOnlyFields(KustomerSchema) {
+		delete(connConf, k)
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "kustomer",
@@ -251,6 +254,9 @@ func (r *KustomerConnectionResource) Update(ctx context.Context, req resource.Up
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(KustomerSchema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(KustomerSchema)

@@ -151,6 +151,9 @@ func (r *ChargebeeConnectionResource) Create(ctx context.Context, req resource.C
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
+	for k := range getComputedOnlyFields(ChargebeeSchema) {
+		delete(connConf, k)
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "chargebee",
@@ -279,6 +282,9 @@ func (r *ChargebeeConnectionResource) Update(ctx context.Context, req resource.U
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(ChargebeeSchema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(ChargebeeSchema)

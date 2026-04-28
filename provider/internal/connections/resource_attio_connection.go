@@ -60,7 +60,7 @@ var AttioSchema = schema.Schema{
 				"workspace_name": schema.StringAttribute{
 					MarkdownDescription: `Workspace name`,
 					Required:            false,
-					Optional:            true,
+					Optional:            false,
 					Computed:            true,
 					Sensitive:           false,
 				},
@@ -129,6 +129,9 @@ func (r *AttioConnectionResource) Create(ctx context.Context, req resource.Creat
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(AttioSchema) {
+		delete(connConf, k)
 	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
@@ -256,6 +259,9 @@ func (r *AttioConnectionResource) Update(ctx context.Context, req resource.Updat
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(AttioSchema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(AttioSchema)

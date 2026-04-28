@@ -125,6 +125,9 @@ func (r *ClazarConnectionResource) Create(ctx context.Context, req resource.Crea
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
+	for k := range getComputedOnlyFields(ClazarSchema) {
+		delete(connConf, k)
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "clazar",
@@ -249,6 +252,9 @@ func (r *ClazarConnectionResource) Update(ctx context.Context, req resource.Upda
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(ClazarSchema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(ClazarSchema)

@@ -79,14 +79,14 @@ var XeroSchema = schema.Schema{
 				"tenant_name": schema.StringAttribute{
 					MarkdownDescription: `Organization Name`,
 					Required:            false,
-					Optional:            true,
+					Optional:            false,
 					Computed:            true,
 					Sensitive:           false,
 				},
 				"tenant_type": schema.StringAttribute{
 					MarkdownDescription: `Organization Type`,
 					Required:            false,
-					Optional:            true,
+					Optional:            false,
 					Computed:            true,
 					Sensitive:           false,
 				},
@@ -157,6 +157,9 @@ func (r *XeroConnectionResource) Create(ctx context.Context, req resource.Create
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(XeroSchema) {
+		delete(connConf, k)
 	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
@@ -288,6 +291,9 @@ func (r *XeroConnectionResource) Update(ctx context.Context, req resource.Update
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(XeroSchema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(XeroSchema)

@@ -207,6 +207,9 @@ func (r *SnowflakeConnectionResource) Create(ctx context.Context, req resource.C
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
+	for k := range getComputedOnlyFields(SnowflakeSchema) {
+		delete(connConf, k)
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "snowflake",
@@ -349,6 +352,9 @@ func (r *SnowflakeConnectionResource) Update(ctx context.Context, req resource.U
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(SnowflakeSchema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(SnowflakeSchema)

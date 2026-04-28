@@ -80,7 +80,7 @@ var PardotSchema = schema.Schema{
 				"username": schema.StringAttribute{
 					MarkdownDescription: ``,
 					Required:            false,
-					Optional:            true,
+					Optional:            false,
 					Computed:            true,
 					Sensitive:           false,
 				},
@@ -151,6 +151,9 @@ func (r *PardotConnectionResource) Create(ctx context.Context, req resource.Crea
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(PardotSchema) {
+		delete(connConf, k)
 	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
@@ -282,6 +285,9 @@ func (r *PardotConnectionResource) Update(ctx context.Context, req resource.Upda
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(PardotSchema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(PardotSchema)

@@ -117,6 +117,9 @@ func (r *TabsConnectionResource) Create(ctx context.Context, req resource.Create
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
+	for k := range getComputedOnlyFields(TabsSchema) {
+		delete(connConf, k)
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "tabs",
@@ -239,6 +242,9 @@ func (r *TabsConnectionResource) Update(ctx context.Context, req resource.Update
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(TabsSchema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(TabsSchema)

@@ -60,7 +60,7 @@ var DbtprojectrepositorySchema = schema.Schema{
 				"connected_user": schema.StringAttribute{
 					MarkdownDescription: `Connected user`,
 					Required:            false,
-					Optional:            true,
+					Optional:            false,
 					Computed:            true,
 					Sensitive:           false,
 				},
@@ -196,6 +196,9 @@ func (r *DbtprojectrepositoryConnectionResource) Create(ctx context.Context, req
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(DbtprojectrepositorySchema) {
+		delete(connConf, k)
 	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
@@ -341,6 +344,9 @@ func (r *DbtprojectrepositoryConnectionResource) Update(ctx context.Context, req
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(DbtprojectrepositorySchema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(DbtprojectrepositorySchema)

@@ -117,6 +117,9 @@ func (r *Seal_subscriptionsConnectionResource) Create(ctx context.Context, req r
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
+	for k := range getComputedOnlyFields(Seal_subscriptionsSchema) {
+		delete(connConf, k)
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "seal_subscriptions",
@@ -239,6 +242,9 @@ func (r *Seal_subscriptionsConnectionResource) Update(ctx context.Context, req r
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(Seal_subscriptionsSchema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(Seal_subscriptionsSchema)

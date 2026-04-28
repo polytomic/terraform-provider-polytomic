@@ -117,6 +117,9 @@ func (r *Twilio_sendgridConnectionResource) Create(ctx context.Context, req reso
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
+	for k := range getComputedOnlyFields(Twilio_sendgridSchema) {
+		delete(connConf, k)
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "twilio_sendgrid",
@@ -239,6 +242,9 @@ func (r *Twilio_sendgridConnectionResource) Update(ctx context.Context, req reso
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(Twilio_sendgridSchema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(Twilio_sendgridSchema)

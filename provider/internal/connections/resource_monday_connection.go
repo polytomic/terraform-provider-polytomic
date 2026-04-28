@@ -117,6 +117,9 @@ func (r *MondayConnectionResource) Create(ctx context.Context, req resource.Crea
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
+	for k := range getComputedOnlyFields(MondaySchema) {
+		delete(connConf, k)
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "monday",
@@ -239,6 +242,9 @@ func (r *MondayConnectionResource) Update(ctx context.Context, req resource.Upda
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(MondaySchema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(MondaySchema)

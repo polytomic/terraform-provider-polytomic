@@ -71,7 +71,7 @@ var WebhookSchema = schema.Schema{
 				"secret": schema.StringAttribute{
 					MarkdownDescription: ``,
 					Required:            false,
-					Optional:            true,
+					Optional:            false,
 					Computed:            true,
 					Sensitive:           true,
 					PlanModifiers: []planmodifier.String{
@@ -153,6 +153,9 @@ func (r *WebhookConnectionResource) Create(ctx context.Context, req resource.Cre
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(WebhookSchema) {
+		delete(connConf, k)
 	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
@@ -294,6 +297,9 @@ func (r *WebhookConnectionResource) Update(ctx context.Context, req resource.Upd
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(WebhookSchema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(WebhookSchema)

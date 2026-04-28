@@ -117,6 +117,9 @@ func (r *TowbookConnectionResource) Create(ctx context.Context, req resource.Cre
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
+	for k := range getComputedOnlyFields(TowbookSchema) {
+		delete(connConf, k)
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "towbook",
@@ -239,6 +242,9 @@ func (r *TowbookConnectionResource) Update(ctx context.Context, req resource.Upd
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(TowbookSchema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(TowbookSchema)

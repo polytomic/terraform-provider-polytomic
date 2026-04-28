@@ -61,14 +61,14 @@ var Polytomic_metadataSchema = schema.Schema{
 				"connected_org": schema.StringAttribute{
 					MarkdownDescription: `Connected organization`,
 					Required:            false,
-					Optional:            true,
+					Optional:            false,
 					Computed:            true,
 					Sensitive:           false,
 				},
 				"connected_user": schema.StringAttribute{
 					MarkdownDescription: `Connected user`,
 					Required:            false,
-					Optional:            true,
+					Optional:            false,
 					Computed:            true,
 					Sensitive:           false,
 				},
@@ -174,6 +174,9 @@ func (r *Polytomic_metadataConnectionResource) Create(ctx context.Context, req r
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(Polytomic_metadataSchema) {
+		delete(connConf, k)
 	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
@@ -307,6 +310,9 @@ func (r *Polytomic_metadataConnectionResource) Update(ctx context.Context, req r
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(Polytomic_metadataSchema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(Polytomic_metadataSchema)

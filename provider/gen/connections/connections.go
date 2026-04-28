@@ -829,9 +829,15 @@ func tfAttr(k string, a *jsonschema.Schema, required []string) (Attribute, error
 		attr.Description = strings.TrimSpace(attr.Description)
 	}
 
-	attr.Required = slices.Contains(required, k)
-	attr.Optional = !attr.Required
-	attr.Computed = a.ReadOnly || attr.Optional
+	if a.ReadOnly {
+		attr.Required = false
+		attr.Optional = false
+		attr.Computed = true
+	} else {
+		attr.Required = slices.Contains(required, k)
+		attr.Optional = !attr.Required
+		attr.Computed = attr.Optional
+	}
 	if attr.Computed {
 		attr.Default = t.Default
 	}

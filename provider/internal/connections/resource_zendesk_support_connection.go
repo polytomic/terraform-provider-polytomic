@@ -184,6 +184,9 @@ func (r *Zendesk_supportConnectionResource) Create(ctx context.Context, req reso
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
+	for k := range getComputedOnlyFields(Zendesk_supportSchema) {
+		delete(connConf, k)
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "zendesk_support",
@@ -320,6 +323,9 @@ func (r *Zendesk_supportConnectionResource) Update(ctx context.Context, req reso
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(Zendesk_supportSchema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(Zendesk_supportSchema)

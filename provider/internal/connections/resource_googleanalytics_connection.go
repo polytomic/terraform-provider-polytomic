@@ -140,7 +140,7 @@ var GoogleanalyticsSchema = schema.Schema{
 				"user_email": schema.StringAttribute{
 					MarkdownDescription: `Connected user's email`,
 					Required:            false,
-					Optional:            true,
+					Optional:            false,
 					Computed:            true,
 					Sensitive:           false,
 				},
@@ -218,6 +218,9 @@ func (r *GoogleanalyticsConnectionResource) Create(ctx context.Context, req reso
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(GoogleanalyticsSchema) {
+		delete(connConf, k)
 	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
@@ -371,6 +374,9 @@ func (r *GoogleanalyticsConnectionResource) Update(ctx context.Context, req reso
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(GoogleanalyticsSchema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(GoogleanalyticsSchema)

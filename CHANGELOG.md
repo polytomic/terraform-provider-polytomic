@@ -1,3 +1,10 @@
+## Unreleased
+
+BREAKING CHANGES:
+
+- Connection resource schemas: read-only configuration fields are now `Computed`-only and can no longer be set in user configuration. Previously these fields were generated as `Optional` + `Computed`, which silently accepted user-supplied values that the server would overwrite. Configurations that set a read-only field (e.g. `authenticated_as` on `polytomic_posthog_connection`) must remove the assignment.
+- Computed-only configuration fields are now stripped from connection create and update API request payloads, since they represent server-managed values.
+
 ## 1.4.2 (23 April 2026)
 
 - Added support for new connection types:

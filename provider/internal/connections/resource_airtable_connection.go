@@ -46,7 +46,7 @@ var AirtableSchema = schema.Schema{
 				"api_key": schema.StringAttribute{
 					MarkdownDescription: `API key`,
 					Required:            false,
-					Optional:            true,
+					Optional:            false,
 					Computed:            true,
 					Sensitive:           true,
 					PlanModifiers: []planmodifier.String{
@@ -76,7 +76,7 @@ var AirtableSchema = schema.Schema{
 				"connected_user": schema.StringAttribute{
 					MarkdownDescription: `Connected user's email`,
 					Required:            false,
-					Optional:            true,
+					Optional:            false,
 					Computed:            true,
 					Sensitive:           false,
 				},
@@ -176,6 +176,9 @@ func (r *AirtableConnectionResource) Create(ctx context.Context, req resource.Cr
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(AirtableSchema) {
+		delete(connConf, k)
 	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
@@ -311,6 +314,9 @@ func (r *AirtableConnectionResource) Update(ctx context.Context, req resource.Up
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(AirtableSchema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(AirtableSchema)

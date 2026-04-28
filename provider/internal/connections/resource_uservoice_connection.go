@@ -125,6 +125,9 @@ func (r *UservoiceConnectionResource) Create(ctx context.Context, req resource.C
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
+	for k := range getComputedOnlyFields(UservoiceSchema) {
+		delete(connConf, k)
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "uservoice",
@@ -249,6 +252,9 @@ func (r *UservoiceConnectionResource) Update(ctx context.Context, req resource.U
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(UservoiceSchema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(UservoiceSchema)

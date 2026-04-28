@@ -124,7 +124,7 @@ var SalesforceSchema = schema.Schema{
 
     This URL will be used for API requests instead of the one provided by Salesforce during OAuth.`,
 					Required:  false,
-					Optional:  true,
+					Optional:  false,
 					Computed:  true,
 					Sensitive: false,
 				},
@@ -141,7 +141,7 @@ var SalesforceSchema = schema.Schema{
 				"username": schema.StringAttribute{
 					MarkdownDescription: `Salesforce user`,
 					Required:            false,
-					Optional:            true,
+					Optional:            false,
 					Computed:            true,
 					Sensitive:           false,
 				},
@@ -218,6 +218,9 @@ func (r *SalesforceConnectionResource) Create(ctx context.Context, req resource.
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(SalesforceSchema) {
+		delete(connConf, k)
 	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
@@ -361,6 +364,9 @@ func (r *SalesforceConnectionResource) Update(ctx context.Context, req resource.
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(SalesforceSchema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(SalesforceSchema)

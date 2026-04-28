@@ -125,6 +125,9 @@ func (r *AmplitudeConnectionResource) Create(ctx context.Context, req resource.C
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
+	for k := range getComputedOnlyFields(AmplitudeSchema) {
+		delete(connConf, k)
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "amplitude",
@@ -249,6 +252,9 @@ func (r *AmplitudeConnectionResource) Update(ctx context.Context, req resource.U
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(AmplitudeSchema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(AmplitudeSchema)

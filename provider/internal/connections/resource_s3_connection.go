@@ -80,7 +80,7 @@ var S3Schema = schema.Schema{
 				"aws_user": schema.StringAttribute{
 					MarkdownDescription: `User ARN`,
 					Required:            false,
-					Optional:            true,
+					Optional:            false,
 					Computed:            true,
 					Sensitive:           false,
 				},
@@ -123,7 +123,7 @@ var S3Schema = schema.Schema{
 
     External ID for the IAM role`,
 					Required:  false,
-					Optional:  true,
+					Optional:  false,
 					Computed:  true,
 					Sensitive: false,
 				},
@@ -283,6 +283,9 @@ func (r *S3ConnectionResource) Create(ctx context.Context, req resource.CreateRe
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(S3Schema) {
+		delete(connConf, k)
 	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
@@ -444,6 +447,9 @@ func (r *S3ConnectionResource) Update(ctx context.Context, req resource.UpdateRe
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(S3Schema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(S3Schema)

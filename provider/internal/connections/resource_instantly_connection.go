@@ -117,6 +117,9 @@ func (r *InstantlyConnectionResource) Create(ctx context.Context, req resource.C
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
+	for k := range getComputedOnlyFields(InstantlySchema) {
+		delete(connConf, k)
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "instantly",
@@ -239,6 +242,9 @@ func (r *InstantlyConnectionResource) Update(ctx context.Context, req resource.U
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(InstantlySchema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(InstantlySchema)

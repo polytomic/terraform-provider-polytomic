@@ -117,6 +117,9 @@ func (r *G2ConnectionResource) Create(ctx context.Context, req resource.CreateRe
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
+	for k := range getComputedOnlyFields(G2Schema) {
+		delete(connConf, k)
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "g2",
@@ -239,6 +242,9 @@ func (r *G2ConnectionResource) Update(ctx context.Context, req resource.UpdateRe
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(G2Schema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(G2Schema)

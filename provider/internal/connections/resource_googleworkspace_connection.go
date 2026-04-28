@@ -59,7 +59,7 @@ var GoogleworkspaceSchema = schema.Schema{
 				"client_email": schema.StringAttribute{
 					MarkdownDescription: `Connected Account`,
 					Required:            false,
-					Optional:            true,
+					Optional:            false,
 					Computed:            true,
 					Sensitive:           false,
 				},
@@ -176,6 +176,9 @@ func (r *GoogleworkspaceConnectionResource) Create(ctx context.Context, req reso
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(GoogleworkspaceSchema) {
+		delete(connConf, k)
 	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
@@ -311,6 +314,9 @@ func (r *GoogleworkspaceConnectionResource) Update(ctx context.Context, req reso
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(GoogleworkspaceSchema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(GoogleworkspaceSchema)

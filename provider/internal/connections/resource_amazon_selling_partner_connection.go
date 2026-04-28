@@ -158,6 +158,9 @@ func (r *Amazon_selling_partnerConnectionResource) Create(ctx context.Context, r
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
+	for k := range getComputedOnlyFields(Amazon_selling_partnerSchema) {
+		delete(connConf, k)
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "amazon_selling_partner",
@@ -288,6 +291,9 @@ func (r *Amazon_selling_partnerConnectionResource) Update(ctx context.Context, r
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(Amazon_selling_partnerSchema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(Amazon_selling_partnerSchema)

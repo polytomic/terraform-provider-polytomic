@@ -155,6 +155,9 @@ func (r *MsdynamicsConnectionResource) Create(ctx context.Context, req resource.
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
+	for k := range getComputedOnlyFields(MsdynamicsSchema) {
+		delete(connConf, k)
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "msdynamics",
@@ -285,6 +288,9 @@ func (r *MsdynamicsConnectionResource) Update(ctx context.Context, req resource.
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(MsdynamicsSchema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(MsdynamicsSchema)

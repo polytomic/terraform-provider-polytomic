@@ -91,7 +91,7 @@ var RedditadsSchema = schema.Schema{
 				"connected_user": schema.StringAttribute{
 					MarkdownDescription: `Connected user's email`,
 					Required:            false,
-					Optional:            true,
+					Optional:            false,
 					Computed:            true,
 					Sensitive:           false,
 				},
@@ -193,6 +193,9 @@ func (r *RedditadsConnectionResource) Create(ctx context.Context, req resource.C
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(RedditadsSchema) {
+		delete(connConf, k)
 	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
@@ -342,6 +345,9 @@ func (r *RedditadsConnectionResource) Update(ctx context.Context, req resource.U
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(RedditadsSchema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(RedditadsSchema)

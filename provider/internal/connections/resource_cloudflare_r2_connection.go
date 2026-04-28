@@ -225,6 +225,9 @@ func (r *Cloudflare_r2ConnectionResource) Create(ctx context.Context, req resour
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
+	for k := range getComputedOnlyFields(Cloudflare_r2Schema) {
+		delete(connConf, k)
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "cloudflare_r2",
@@ -373,6 +376,9 @@ func (r *Cloudflare_r2ConnectionResource) Update(ctx context.Context, req resour
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(Cloudflare_r2Schema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(Cloudflare_r2Schema)

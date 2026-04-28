@@ -125,6 +125,9 @@ func (r *Factors_aiConnectionResource) Create(ctx context.Context, req resource.
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
+	for k := range getComputedOnlyFields(Factors_aiSchema) {
+		delete(connConf, k)
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "factors_ai",
@@ -249,6 +252,9 @@ func (r *Factors_aiConnectionResource) Update(ctx context.Context, req resource.
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(Factors_aiSchema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(Factors_aiSchema)

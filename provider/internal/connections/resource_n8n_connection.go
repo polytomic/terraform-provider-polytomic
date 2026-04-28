@@ -127,6 +127,9 @@ func (r *N8nConnectionResource) Create(ctx context.Context, req resource.CreateR
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
+	for k := range getComputedOnlyFields(N8nSchema) {
+		delete(connConf, k)
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "n8n",
@@ -251,6 +254,9 @@ func (r *N8nConnectionResource) Update(ctx context.Context, req resource.UpdateR
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(N8nSchema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(N8nSchema)

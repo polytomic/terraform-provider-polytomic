@@ -172,6 +172,9 @@ func (r *DialpadConnectionResource) Create(ctx context.Context, req resource.Cre
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
+	for k := range getComputedOnlyFields(DialpadSchema) {
+		delete(connConf, k)
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "dialpad",
@@ -304,6 +307,9 @@ func (r *DialpadConnectionResource) Update(ctx context.Context, req resource.Upd
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(DialpadSchema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(DialpadSchema)

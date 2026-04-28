@@ -117,6 +117,9 @@ func (r *HeyreachConnectionResource) Create(ctx context.Context, req resource.Cr
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
+	for k := range getComputedOnlyFields(HeyreachSchema) {
+		delete(connConf, k)
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "heyreach",
@@ -239,6 +242,9 @@ func (r *HeyreachConnectionResource) Update(ctx context.Context, req resource.Up
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(HeyreachSchema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(HeyreachSchema)

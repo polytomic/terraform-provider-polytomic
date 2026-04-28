@@ -127,6 +127,9 @@ func (r *Gainsight_csConnectionResource) Create(ctx context.Context, req resourc
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
+	for k := range getComputedOnlyFields(Gainsight_csSchema) {
+		delete(connConf, k)
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "gainsight_cs",
@@ -251,6 +254,9 @@ func (r *Gainsight_csConnectionResource) Update(ctx context.Context, req resourc
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(Gainsight_csSchema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(Gainsight_csSchema)

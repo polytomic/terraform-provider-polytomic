@@ -117,6 +117,9 @@ func (r *BrevoConnectionResource) Create(ctx context.Context, req resource.Creat
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
+	for k := range getComputedOnlyFields(BrevoSchema) {
+		delete(connConf, k)
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "brevo",
@@ -239,6 +242,9 @@ func (r *BrevoConnectionResource) Update(ctx context.Context, req resource.Updat
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(BrevoSchema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(BrevoSchema)

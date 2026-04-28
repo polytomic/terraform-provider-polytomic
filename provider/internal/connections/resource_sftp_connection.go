@@ -202,6 +202,9 @@ func (r *SftpConnectionResource) Create(ctx context.Context, req resource.Create
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
+	for k := range getComputedOnlyFields(SftpSchema) {
+		delete(connConf, k)
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "sftp",
@@ -342,6 +345,9 @@ func (r *SftpConnectionResource) Update(ctx context.Context, req resource.Update
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(SftpSchema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(SftpSchema)

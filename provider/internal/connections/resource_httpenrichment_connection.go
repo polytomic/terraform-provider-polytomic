@@ -448,6 +448,9 @@ func (r *HttpenrichmentConnectionResource) Create(ctx context.Context, req resou
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
+	for k := range getComputedOnlyFields(HttpenrichmentSchema) {
+		delete(connConf, k)
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "httpenrichment",
@@ -714,6 +717,9 @@ func (r *HttpenrichmentConnectionResource) Update(ctx context.Context, req resou
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(HttpenrichmentSchema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(HttpenrichmentSchema)

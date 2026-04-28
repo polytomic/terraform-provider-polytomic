@@ -133,6 +133,9 @@ func (r *Auth0ConnectionResource) Create(ctx context.Context, req resource.Creat
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
+	for k := range getComputedOnlyFields(Auth0Schema) {
+		delete(connConf, k)
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "auth0",
@@ -259,6 +262,9 @@ func (r *Auth0ConnectionResource) Update(ctx context.Context, req resource.Updat
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(Auth0Schema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(Auth0Schema)

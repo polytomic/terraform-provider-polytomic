@@ -149,6 +149,9 @@ func (r *Ibm_db2ConnectionResource) Create(ctx context.Context, req resource.Cre
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
+	for k := range getComputedOnlyFields(Ibm_db2Schema) {
+		delete(connConf, k)
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "ibm_db2",
@@ -279,6 +282,9 @@ func (r *Ibm_db2ConnectionResource) Update(ctx context.Context, req resource.Upd
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(Ibm_db2Schema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(Ibm_db2Schema)

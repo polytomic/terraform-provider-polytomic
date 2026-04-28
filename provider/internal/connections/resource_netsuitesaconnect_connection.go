@@ -149,6 +149,9 @@ func (r *NetsuitesaconnectConnectionResource) Create(ctx context.Context, req re
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
+	for k := range getComputedOnlyFields(NetsuitesaconnectSchema) {
+		delete(connConf, k)
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "netsuitesaconnect",
@@ -279,6 +282,9 @@ func (r *NetsuitesaconnectConnectionResource) Update(ctx context.Context, req re
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(NetsuitesaconnectSchema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(NetsuitesaconnectSchema)

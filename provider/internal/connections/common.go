@@ -231,6 +231,24 @@ func getOptionalFields(s schema.Schema) map[string]bool {
 	return optional
 }
 
+// getComputedOnlyFields returns the set of configuration fields that are
+// Computed but neither Required nor Optional. These are server-managed values
+// (e.g. JSON Schema readOnly fields) and must be excluded from API request
+// payloads.
+func getComputedOnlyFields(s schema.Schema) map[string]bool {
+	attrs, ok := getConfigAttributes(s)
+	if !ok {
+		return nil
+	}
+	computedOnly := make(map[string]bool)
+	for k, a := range attrs {
+		if a.IsComputed() && !a.IsRequired() && !a.IsOptional() {
+			computedOnly[k] = true
+		}
+	}
+	return computedOnly
+}
+
 func getConfigAttributes(s schema.Schema) (map[string]schema.Attribute, bool) {
 	attrsRaw, ok := s.Attributes["configuration"]
 	if !ok {

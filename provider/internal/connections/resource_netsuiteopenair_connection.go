@@ -171,6 +171,9 @@ func (r *NetsuiteopenairConnectionResource) Create(ctx context.Context, req reso
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
+	for k := range getComputedOnlyFields(NetsuiteopenairSchema) {
+		delete(connConf, k)
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "netsuiteopenair",
@@ -305,6 +308,9 @@ func (r *NetsuiteopenairConnectionResource) Update(ctx context.Context, req reso
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(NetsuiteopenairSchema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(NetsuiteopenairSchema)

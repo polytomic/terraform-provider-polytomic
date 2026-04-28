@@ -56,7 +56,7 @@ var GcsSchema = schema.Schema{
 				"client_email": schema.StringAttribute{
 					MarkdownDescription: `Service account identity`,
 					Required:            false,
-					Optional:            true,
+					Optional:            false,
 					Computed:            true,
 					Sensitive:           false,
 				},
@@ -95,7 +95,7 @@ var GcsSchema = schema.Schema{
 				"project_id": schema.StringAttribute{
 					MarkdownDescription: `Service account project ID`,
 					Required:            false,
-					Optional:            true,
+					Optional:            false,
 					Computed:            true,
 					Sensitive:           false,
 				},
@@ -220,6 +220,9 @@ func (r *GcsConnectionResource) Create(ctx context.Context, req resource.CreateR
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(GcsSchema) {
+		delete(connConf, k)
 	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
@@ -369,6 +372,9 @@ func (r *GcsConnectionResource) Update(ctx context.Context, req resource.UpdateR
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(GcsSchema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(GcsSchema)

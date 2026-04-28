@@ -90,7 +90,7 @@ var DatabricksSchema = schema.Schema{
 				"aws_user": schema.StringAttribute{
 					MarkdownDescription: `User ARN (destinations only)`,
 					Required:            false,
-					Optional:            true,
+					Optional:            false,
 					Computed:            true,
 					Sensitive:           false,
 				},
@@ -184,7 +184,7 @@ var DatabricksSchema = schema.Schema{
 
     External ID for the IAM role`,
 					Required:  false,
-					Optional:  true,
+					Optional:  false,
 					Computed:  true,
 					Sensitive: false,
 				},
@@ -429,6 +429,9 @@ func (r *DatabricksConnectionResource) Create(ctx context.Context, req resource.
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
+	for k := range getComputedOnlyFields(DatabricksSchema) {
+		delete(connConf, k)
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "databricks",
@@ -619,6 +622,9 @@ func (r *DatabricksConnectionResource) Update(ctx context.Context, req resource.
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(DatabricksSchema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(DatabricksSchema)

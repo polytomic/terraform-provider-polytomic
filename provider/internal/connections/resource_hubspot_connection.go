@@ -66,14 +66,14 @@ var HubspotSchema = schema.Schema{
 				"hub_domain": schema.StringAttribute{
 					MarkdownDescription: `HubSpot domain`,
 					Required:            false,
-					Optional:            true,
+					Optional:            false,
 					Computed:            true,
 					Sensitive:           false,
 				},
 				"hub_user": schema.StringAttribute{
 					MarkdownDescription: `HubSpot user`,
 					Required:            false,
-					Optional:            true,
+					Optional:            false,
 					Computed:            true,
 					Sensitive:           false,
 				},
@@ -170,6 +170,9 @@ func (r *HubspotConnectionResource) Create(ctx context.Context, req resource.Cre
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(HubspotSchema) {
+		delete(connConf, k)
 	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
@@ -305,6 +308,9 @@ func (r *HubspotConnectionResource) Update(ctx context.Context, req resource.Upd
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(HubspotSchema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(HubspotSchema)

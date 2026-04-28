@@ -117,6 +117,9 @@ func (r *FullstoryConnectionResource) Create(ctx context.Context, req resource.C
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
+	for k := range getComputedOnlyFields(FullstorySchema) {
+		delete(connConf, k)
+	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "fullstory",
@@ -239,6 +242,9 @@ func (r *FullstoryConnectionResource) Update(ctx context.Context, req resource.U
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
+	}
+	for k := range getComputedOnlyFields(FullstorySchema) {
+		delete(connConf, k)
 	}
 
 	configAttributes, ok := getConfigAttributes(FullstorySchema)
