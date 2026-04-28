@@ -15,6 +15,10 @@ var (
 	// ConnectionDatasourcesMap is a map of all the connections that can be
 	// imported as data sources.
 	ConnectionDatasourcesMap = datasourcesMap()
+
+	// OAuthConnections identifies connection types whose credentials come from
+	// an OAuth flow and therefore cannot be supplied as Terraform inputs.
+	OAuthConnections = connections.OAuthConnections
 )
 
 // connectionsMap combines the generated importable connections

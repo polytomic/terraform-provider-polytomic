@@ -32,4 +32,15 @@ var (
 		"{{ .Name }}": &{{ .ResourceName }}{},
 				{{- end }}
 	}
+
+	// OAuthConnections marks connection types whose secret credentials are
+	// produced by an interactive OAuth flow and therefore cannot be supplied
+	// out-of-band by a Terraform user.
+	OAuthConnections = map[string]bool {
+			{{- range .Resources }}
+				{{- if .UseOAuth }}
+		"{{ .Name }}": true,
+				{{- end }}
+			{{- end }}
+	}
 )

@@ -1,14 +1,17 @@
 POLYTOMIC_DEPLOYMENT_URL ?= https://app.polytomic-local.com
-TESTARGS ?= -count=1
+TESTARGS ?= -count=1 -v
 
 default: testacc
 
 # Run acceptance tests
 .PHONY: testacc
 testacc:
-	POLYTOMIC_DEPLOYMENT_URL=$(POLYTOMIC_DEPLOYMENT_URL) TF_ACC=1 go test ./tests/... $(TESTARGS) -timeout 120m
+	@echo "==> Running acceptance tests: ./provider/..."
 	POLYTOMIC_DEPLOYMENT_URL=$(POLYTOMIC_DEPLOYMENT_URL) TF_ACC=1 go test ./provider/... $(TESTARGS) -timeout 120m
+	@echo "==> Running acceptance tests: ./importer/..."
 	POLYTOMIC_DEPLOYMENT_URL=$(POLYTOMIC_DEPLOYMENT_URL) TF_ACC=1 go test ./importer/... $(TESTARGS) -timeout 120m
+	@echo "==> Running acceptance tests: ./tests/..."
+	POLYTOMIC_DEPLOYMENT_URL=$(POLYTOMIC_DEPLOYMENT_URL) TF_ACC=1 go test ./tests/... $(TESTARGS) -timeout 120m
 
 .PHONY: generate-local
 generate-local:

@@ -245,6 +245,7 @@ ptcore "github.com/polytomic/polytomic-go/core"
 type Importable struct {
 	Name         string
 	ResourceName string
+	UseOAuth     bool
 }
 
 type ConnectionType struct {
@@ -377,6 +378,7 @@ func GenerateConnections(ctx context.Context) error {
 			i := Importable{
 				Name:         r.Connection,
 				ResourceName: fmt.Sprintf("%sConnectionResource", strings.Title(r.Connection)),
+				UseOAuth:     connType.UseOAuth,
 			}
 			if r.Type != "" {
 				i.Name = r.Type

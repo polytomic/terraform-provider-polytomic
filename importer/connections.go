@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"regexp"
 
 	"github.com/AlekSi/pointer"
 	"github.com/hashicorp/hcl/v2"
@@ -22,6 +23,23 @@ const (
 	ConnectionsResourceFileName = "connections.tf"
 )
 
+// varSentinelRe matches the placeholder strings we plant for required
+// sensitive fields. The HCL writer emits these as quoted string values; we
+// post-process them into bare var.<name> traversals.
+var varSentinelRe = regexp.MustCompile(`"__VARREF_([a-zA-Z0-9_]+)__"`)
+
+// varRefSentinel returns the placeholder string for a Terraform input
+// variable reference. It is replaced with `var.<name>` after HCL rendering.
+func varRefSentinel(name string) string {
+	return fmt.Sprintf("__VARREF_%s__", name)
+}
+
+// substituteVarRefs converts placeholder strings emitted by varRefSentinel
+// into unquoted var.<name> traversals in the rendered HCL bytes.
+func substituteVarRefs(b []byte) []byte {
+	return varSentinelRe.ReplaceAll(b, []byte("var.$1"))
+}
+
 var (
 	_ Importable = &Connections{}
 )
@@ -31,6 +49,10 @@ type Connections struct {
 
 	Resources   map[string]Connection
 	Datasources map[string]Connection
+
+	// variables collects the input variables generated for required
+	// sensitive fields whose values cannot be read back from the API.
+	variables []Variable
 }
 
 type Connection struct {
@@ -80,16 +102,24 @@ func (c *Connections) Init(ctx context.Context) error {
 				return fmt.Errorf("not single nested attribute %s", resp.TypeName)
 			}
 
-			// Filter config to only include fields that exist in the schema
-			// and remove sensitive fields
+			// Filter config to only include fields that exist in the schema,
+			// excluding sensitive fields (cannot be read from the API) and
+			// computed-only fields (server-managed; the provider rejects them
+			// in config).
 			filteredConfig := make(map[string]interface{})
 			missingRequiredFields := []string{}
 			for k, v := range config {
-				if attr, exists := configSchema.Attributes[k]; exists {
-					if !attr.IsSensitive() {
-						filteredConfig[k] = v
-					}
+				attr, exists := configSchema.Attributes[k]
+				if !exists {
+					continue
 				}
+				if attr.IsSensitive() {
+					continue
+				}
+				if attr.IsComputed() && !attr.IsRequired() && !attr.IsOptional() {
+					continue
+				}
+				filteredConfig[k] = v
 			}
 
 			// Check if any required fields are missing after filtering
@@ -103,15 +133,37 @@ func (c *Connections) Init(ctx context.Context) error {
 				}
 			}
 
-			// Skip OAuth connections that have required sensitive fields
-			// These cannot be imported because the credentials are not readable from the API
+			connTypeID := pointer.GetString(conn.Type.Id)
 			if len(missingRequiredFields) > 0 {
-				log.Warn().
+				// True OAuth connections cannot be reproduced from a Terraform
+				// config — the refresh token only exists after an interactive
+				// consent flow. Skip them.
+				if provider.OAuthConnections[connTypeID] {
+					log.Warn().
+						Str("connection", pointer.GetString(conn.Name)).
+						Str("type", resp.TypeName).
+						Strs("missing_fields", missingRequiredFields).
+						Msg("skipping OAuth connection (credentials not retrievable from API)")
+					continue
+				}
+
+				// For non-OAuth connections, generate input variables for the
+				// missing required sensitive fields so the user can supply
+				// them at apply time.
+				for _, fieldName := range missingRequiredFields {
+					varName := fmt.Sprintf("%s_%s", name, fieldName)
+					filteredConfig[fieldName] = varRefSentinel(varName)
+					c.variables = append(c.variables, Variable{
+						Name:      varName,
+						Type:      "string",
+						Sensitive: true,
+					})
+				}
+				log.Info().
 					Str("connection", pointer.GetString(conn.Name)).
 					Str("type", resp.TypeName).
-					Strs("missing_fields", missingRequiredFields).
-					Msg("skipping connection with required sensitive fields (OAuth connections cannot be imported)")
-				continue
+					Strs("fields", missingRequiredFields).
+					Msg("generating input variables for required sensitive fields")
 			}
 
 			config = filteredConfig
@@ -232,7 +284,7 @@ func (c *Connections) GenerateTerraformFiles(ctx context.Context, writer io.Writ
 		resourceBlock.Body().SetAttributeValue("configuration", config)
 		body.AppendNewline()
 
-		writer.Write(hclFile.Bytes())
+		writer.Write(substituteVarRefs(hclFile.Bytes()))
 	}
 	return nil
 
@@ -272,7 +324,7 @@ func (c *Connections) DatasourceRefs() map[string]string {
 }
 
 func (c *Connections) Variables() []Variable {
-	return nil
+	return c.variables
 }
 
 // normalizeConfigKeys converts configuration keys from camelCase to snake_case
