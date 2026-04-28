@@ -79,7 +79,7 @@ func getSharedPGContainer(t *testing.T) pgContainer {
 
 		sharedPGContainer = &pgContainer{
 			host: "host.docker.internal",
-			port: mappedPort.Int(),
+			port: int(mappedPort.Num()),
 		}
 	})
 
