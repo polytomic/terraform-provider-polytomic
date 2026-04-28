@@ -586,6 +586,40 @@ func TestResetSensitiveValues(t *testing.T) {
 				},
 			},
 		},
+		"computed-only sensitive value is preserved": {
+			attrs: map[string]schema.Attribute{
+				"secret": schema.StringAttribute{
+					Computed:  true,
+					Sensitive: true,
+				},
+			},
+			state: map[string]any{
+				"secret": "",
+			},
+			read: map[string]any{
+				"secret": "server-generated-secret",
+			},
+			expected: map[string]any{
+				"secret": "server-generated-secret",
+			},
+		},
+		"optional sensitive value is restored": {
+			attrs: map[string]schema.Attribute{
+				"api_key": schema.StringAttribute{
+					Optional:  true,
+					Sensitive: true,
+				},
+			},
+			state: map[string]any{
+				"api_key": "configured-secret",
+			},
+			read: map[string]any{
+				"api_key": "********",
+			},
+			expected: map[string]any{
+				"api_key": "configured-secret",
+			},
+		},
 	}
 
 	for name, test := range tests {
