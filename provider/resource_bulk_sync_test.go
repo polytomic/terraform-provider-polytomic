@@ -505,7 +505,7 @@ func TestAccBulkSyncResourceWithFilters(t *testing.T) {
 					Mode:               "replicate",
 					Active:             "true",
 					Schemas: `[{
-    id = "polytomic.users"
+    id = "polytomic.sync_test_source"
     filters = [{
       field_id = "created_at"
       function = "OnOrAfter"
@@ -873,7 +873,7 @@ func TestAccBulkSyncResourceSchemaFields(t *testing.T) {
 					Mode:               "replicate",
 					Active:             "true",
 					Schemas: `[{
-    id      = "polytomic.users"
+    id      = "polytomic.sync_test_source"
     enabled = true
     fields = [{
       id        = "email"
@@ -917,11 +917,11 @@ func TestAccBulkSyncResourceMultipleSchemas(t *testing.T) {
 					Active:             "true",
 					Schemas: `[
     {
-      id      = "polytomic.users"
+      id      = "polytomic.sync_test_source"
       enabled = true
     },
     {
-      id      = "polytomic.organizations"
+      id      = "polytomic.sync_test_other"
       enabled = true
     }
   ]`,
@@ -1032,7 +1032,7 @@ func TestAccBulkSyncResourceSchemaTrackingField(t *testing.T) {
 					Mode:               "replicate",
 					Active:             "true",
 					Schemas: `[{
-    id             = "polytomic.users"
+    id             = "polytomic.sync_test_source"
     enabled        = true
     tracking_field = "updated_at"
   }]`,

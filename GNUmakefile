@@ -10,7 +10,11 @@ testacc:
 	POLYTOMIC_DEPLOYMENT_URL=$(POLYTOMIC_DEPLOYMENT_URL) TF_ACC=1 go test ./provider/... $(TESTARGS) -timeout 120m
 	@echo "==> Running acceptance tests: ./importer/..."
 	POLYTOMIC_DEPLOYMENT_URL=$(POLYTOMIC_DEPLOYMENT_URL) TF_ACC=1 go test ./importer/... $(TESTARGS) -timeout 120m
-	@echo "==> Running acceptance tests: ./tests/..."
+
+# Run round-trip tests (separate from testacc; requires extra setup — see tests/Makefile)
+.PHONY: testroundtrip
+testroundtrip:
+	@echo "==> Running round-trip tests: ./tests/..."
 	POLYTOMIC_DEPLOYMENT_URL=$(POLYTOMIC_DEPLOYMENT_URL) TF_ACC=1 go test ./tests/... $(TESTARGS) -timeout 120m
 
 .PHONY: generate-local

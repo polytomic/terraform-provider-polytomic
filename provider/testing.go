@@ -98,7 +98,9 @@ CREATE SCHEMA IF NOT EXISTS polytomic;
 
 CREATE TABLE IF NOT EXISTS polytomic.sync_test_source (
     email TEXT PRIMARY KEY,
-    name TEXT
+    name TEXT,
+    created_at TIMESTAMPTZ DEFAULT now(),
+    updated_at TIMESTAMPTZ DEFAULT now()
 );
 
 INSERT INTO polytomic.sync_test_source (email, name)
@@ -108,6 +110,11 @@ ON CONFLICT DO NOTHING;
 CREATE TABLE IF NOT EXISTS polytomic.sync_test_target (
     email TEXT PRIMARY KEY,
     name TEXT
+);
+
+CREATE TABLE IF NOT EXISTS polytomic.sync_test_other (
+    id TEXT PRIMARY KEY,
+    label TEXT
 );
 `
 
