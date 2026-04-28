@@ -1,9 +1,17 @@
-## Unreleased
+## v1.5.0 (28 April 2026)
+
+BUG FIXES:
+
+- Computed-only configuration fields are now stripped from connection create and update API request payloads, since they represent server-managed values.
+- Preserve user-supplied sensitive connection values (passwords, service account keys, certificates, etc.) in state across Create and Update. Previously the provider stored the API's masked response, which caused "Provider produced inconsistent result after apply" errors and spurious drift on subsequent plans.
 
 BREAKING CHANGES:
 
-- Connection resource schemas: read-only configuration fields are now `Computed`-only and can no longer be set in user configuration. Previously these fields were generated as `Optional` + `Computed`, which silently accepted user-supplied values that the server would overwrite. Configurations that set a read-only field (e.g. `authenticated_as` on `polytomic_posthog_connection`) must remove the assignment.
-- Computed-only configuration fields are now stripped from connection create and update API request payloads, since they represent server-managed values.
+- Connection resource schemas: read-only configuration fields are now `Computed`-only and can no longer be set in user configuration. Previously these fields were generated as `Optional` + `Computed`, which silently accepted user-supplied values that the server would overwrite. Configurations that set a read-only field (e.g. `authenticated_as` on `polytomic_posthog_connection`) must remove the assignment. See the [Upgrading to v1.5.0](docs/guides/upgrading-to-v1.5.0.md) guide for the full list of affected fields.
+
+IMPORTER:
+
+- Connections with non-OAuth sensitive fields (e.g. PostHog API keys) are now imported with a generated sensitive Terraform input variable per missing field, instead of being skipped as OAuth connections.
 
 ## 1.4.2 (23 April 2026)
 
