@@ -1,4 +1,4 @@
-## v1.5.0 (28 April 2026)
+## v1.5.1 (28 April 2026)
 
 BUG FIXES:
 
