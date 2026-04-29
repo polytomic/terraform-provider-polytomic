@@ -23,11 +23,15 @@ resource "polytomic_seismic_connection" "seismic" {
 
 ## Schema
 
-- `name` (String, Required)
-- `configuration` (Attributes, Required) See [below for nested schema](#nestedatt--configuration).
-- `organization` (String, Optional) Organization ID.
-- `id` (String, Read-only) Seismic Connection identifier.
-- `force_destroy` (Boolean, Optional) Indicates whether dependent models, syncs, and bulk syncs should be
+### Required
+
+- `name` (String)
+- `configuration` (Attributes) See [below for nested schema](#nestedatt--configuration).
+
+### Optional
+
+- `organization` (String) Organization ID.
+- `force_destroy` (Boolean) Indicates whether dependent models, syncs, and bulk syncs should be
 cascade-deleted when this connection is destroyed.
 
     This only deletes other resources when the connection is destroyed, not when
@@ -40,11 +44,21 @@ destroying the connection, this flag will not work. Additionally when importing
 a connection, a successful `terraform apply` is required to set this value in
 state before it will take effect on a destroy operation.
 
+### Read-Only
+
+- `id` (String) Seismic Connection identifier.
+
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
-- `client_id` (String, Sensitive, Required) Client ID
-- `client_secret` (String, Sensitive, Required) Client Secret
-- `oauth_refresh_token` (String, Sensitive, Optional)
-- `tenant_id` (String, Required) Tenant ID
+#### Required
+
+- `client_id` (String, Sensitive) Client ID
+- `client_secret` (String, Sensitive) Client Secret
+- `tenant_id` (String) Tenant ID
+
+#### Optional
+
+- `oauth_refresh_token` (String, Sensitive)
+
 

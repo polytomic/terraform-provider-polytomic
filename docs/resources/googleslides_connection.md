@@ -26,11 +26,15 @@ resource "polytomic_googleslides_connection" "googleslides" {
 
 ## Schema
 
-- `name` (String, Required)
-- `configuration` (Attributes, Required) See [below for nested schema](#nestedatt--configuration).
-- `organization` (String, Optional) Organization ID.
-- `id` (String, Read-only) Google Slides Connection identifier.
-- `force_destroy` (Boolean, Optional) Indicates whether dependent models, syncs, and bulk syncs should be
+### Required
+
+- `name` (String)
+- `configuration` (Attributes) See [below for nested schema](#nestedatt--configuration).
+
+### Optional
+
+- `organization` (String) Organization ID.
+- `force_destroy` (Boolean) Indicates whether dependent models, syncs, and bulk syncs should be
 cascade-deleted when this connection is destroyed.
 
     This only deletes other resources when the connection is destroyed, not when
@@ -43,22 +47,38 @@ destroying the connection, this flag will not work. Additionally when importing
 a connection, a successful `terraform apply` is required to set this value in
 state before it will take effect on a destroy operation.
 
+### Read-Only
+
+- `id` (String) Google Slides Connection identifier.
+
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
-- `client_id` (String, Sensitive, Optional)
-- `client_secret` (String, Sensitive, Optional)
-- `connect_mode` (String, Optional) Default: browser Valid values: <code>browser</code>, <code>jwt</code>. Default: <code>browser</code>.
-- `folder_id` (Attributes, Required) Folder See [below for nested schema](#nestedatt--configuration--folder_id).
-- `include_subdirectories` (Boolean, Optional) Include Subdirectories Default: <code>false</code>.
-- `oauth_refresh_token` (String, Sensitive, Optional)
-- `oauth_token_expiry` (String, Optional)
-- `service_account` (String, Sensitive, Optional) Service account key
-- `user_email` (String, Optional) Connected user's email
+#### Required
+
+- `folder_id` (Attributes) Folder See [below for nested schema](#nestedatt--configuration--folder_id).
+
+#### Optional
+
+- `client_id` (String, Sensitive)
+- `client_secret` (String, Sensitive)
+- `connect_mode` (String) Default: browser Valid values: <code>browser</code>, <code>jwt</code>. Default: <code>browser</code>.
+- `include_subdirectories` (Boolean) Include Subdirectories Default: <code>false</code>.
+- `oauth_refresh_token` (String, Sensitive)
+- `oauth_token_expiry` (String)
+- `service_account` (String, Sensitive) Service account key
+
+#### Read-Only
+
+- `user_email` (String) Connected user's email
+
 
 <a id="nestedatt--configuration--folder_id"></a>
 ### Nested Schema for `configuration.folder_id`
 
-- `label` (String, Optional)
-- `value` (String, Optional)
+#### Optional
+
+- `label` (String)
+- `value` (String)
+
 

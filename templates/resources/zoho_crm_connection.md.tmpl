@@ -17,11 +17,15 @@ For detailed configuration guidance, see the [Zoho CRM connection guide](https:/
 
 ## Schema
 
-- `name` (String, Required)
-- `configuration` (Attributes, Required) See [below for nested schema](#nestedatt--configuration).
-- `organization` (String, Optional) Organization ID.
-- `id` (String, Read-only) Zoho CRM Connection identifier.
-- `force_destroy` (Boolean, Optional) Indicates whether dependent models, syncs, and bulk syncs should be
+### Required
+
+- `name` (String)
+- `configuration` (Attributes) See [below for nested schema](#nestedatt--configuration).
+
+### Optional
+
+- `organization` (String) Organization ID.
+- `force_destroy` (Boolean) Indicates whether dependent models, syncs, and bulk syncs should be
 cascade-deleted when this connection is destroyed.
 
     This only deletes other resources when the connection is destroyed, not when
@@ -34,11 +38,21 @@ destroying the connection, this flag will not work. Additionally when importing
 a connection, a successful `terraform apply` is required to set this value in
 state before it will take effect on a destroy operation.
 
+### Read-Only
+
+- `id` (String) Zoho CRM Connection identifier.
+
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
-- `client_id` (String, Sensitive, Optional) Client ID
-- `client_secret` (String, Sensitive, Optional) Client secret
-- `oauth_token_expiry` (String, Optional)
-- `region` (String, Required) Data center region Valid values: <code>usa</code> (USA), <code>europe</code> (Europe), <code>australia</code> (Australia), <code>canada</code> (Canada), <code>china</code> (China), <code>japan</code> (Japan), <code>saudi_arabia</code> (Saudi Arabia). Default: <code>usa</code>.
+#### Required
+
+- `region` (String) Data center region Valid values: <code>usa</code> (USA), <code>europe</code> (Europe), <code>australia</code> (Australia), <code>canada</code> (Canada), <code>china</code> (China), <code>japan</code> (Japan), <code>saudi_arabia</code> (Saudi Arabia). Default: <code>usa</code>.
+
+#### Optional
+
+- `client_id` (String, Sensitive) Client ID
+- `client_secret` (String, Sensitive) Client secret
+- `oauth_token_expiry` (String)
+
 

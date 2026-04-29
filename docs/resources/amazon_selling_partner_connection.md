@@ -23,11 +23,15 @@ resource "polytomic_amazon_selling_partner_connection" "amazon_selling_partner" 
 
 ## Schema
 
-- `name` (String, Required)
-- `configuration` (Attributes, Required) See [below for nested schema](#nestedatt--configuration).
-- `organization` (String, Optional) Organization ID.
-- `id` (String, Read-only) Amazon Selling Partner Connection identifier.
-- `force_destroy` (Boolean, Optional) Indicates whether dependent models, syncs, and bulk syncs should be
+### Required
+
+- `name` (String)
+- `configuration` (Attributes) See [below for nested schema](#nestedatt--configuration).
+
+### Optional
+
+- `organization` (String) Organization ID.
+- `force_destroy` (Boolean) Indicates whether dependent models, syncs, and bulk syncs should be
 cascade-deleted when this connection is destroyed.
 
     This only deletes other resources when the connection is destroyed, not when
@@ -40,12 +44,19 @@ destroying the connection, this flag will not work. Additionally when importing
 a connection, a successful `terraform apply` is required to set this value in
 state before it will take effect on a destroy operation.
 
+### Read-Only
+
+- `id` (String) Amazon Selling Partner Connection identifier.
+
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
-- `client_id` (String, Required) Client ID
-- `client_secret` (String, Sensitive, Required) Client Secret
-- `merchant_token` (String, Required) Merchant Token
-- `refresh_token` (String, Sensitive, Required) Refresh Token
-- `region` (String, Required) Valid values: <code>na</code> (North America), <code>eu</code> (Europe), <code>fe</code> (Far East).
+#### Required
+
+- `client_id` (String) Client ID
+- `client_secret` (String, Sensitive) Client Secret
+- `merchant_token` (String) Merchant Token
+- `refresh_token` (String, Sensitive) Refresh Token
+- `region` (String) Valid values: <code>na</code> (North America), <code>eu</code> (Europe), <code>fe</code> (Far East).
+
 

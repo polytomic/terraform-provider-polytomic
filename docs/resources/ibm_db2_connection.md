@@ -27,11 +27,15 @@ resource "polytomic_ibm_db2_connection" "ibm_db2" {
 
 ## Schema
 
-- `name` (String, Required)
-- `configuration` (Attributes, Required) See [below for nested schema](#nestedatt--configuration).
-- `organization` (String, Optional) Organization ID.
-- `id` (String, Read-only) IBM Db2 Connection identifier.
-- `force_destroy` (Boolean, Optional) Indicates whether dependent models, syncs, and bulk syncs should be
+### Required
+
+- `name` (String)
+- `configuration` (Attributes) See [below for nested schema](#nestedatt--configuration).
+
+### Optional
+
+- `organization` (String) Organization ID.
+- `force_destroy` (Boolean) Indicates whether dependent models, syncs, and bulk syncs should be
 cascade-deleted when this connection is destroyed.
 
     This only deletes other resources when the connection is destroyed, not when
@@ -44,12 +48,22 @@ destroying the connection, this flag will not work. Additionally when importing
 a connection, a successful `terraform apply` is required to set this value in
 state before it will take effect on a destroy operation.
 
+### Read-Only
+
+- `id` (String) IBM Db2 Connection identifier.
+
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
-- `account` (String, Required) Username
-- `database` (String, Required)
-- `hostname` (String, Required)
-- `passwd` (String, Sensitive, Required) Password
-- `ssl` (Boolean, Optional) Use SSL Default: <code>true</code>.
+#### Required
+
+- `account` (String) Username
+- `database` (String)
+- `hostname` (String)
+- `passwd` (String, Sensitive) Password
+
+#### Optional
+
+- `ssl` (Boolean) Use SSL Default: <code>true</code>.
+
 

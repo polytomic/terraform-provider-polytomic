@@ -26,11 +26,15 @@ resource "polytomic_hubspot_connection" "hubspot" {
 
 ## Schema
 
-- `name` (String, Required)
-- `configuration` (Attributes, Required) See [below for nested schema](#nestedatt--configuration).
-- `organization` (String, Optional) Organization ID.
-- `id` (String, Read-only) HubSpot Connection identifier.
-- `force_destroy` (Boolean, Optional) Indicates whether dependent models, syncs, and bulk syncs should be
+### Required
+
+- `name` (String)
+- `configuration` (Attributes) See [below for nested schema](#nestedatt--configuration).
+
+### Optional
+
+- `organization` (String) Organization ID.
+- `force_destroy` (Boolean) Indicates whether dependent models, syncs, and bulk syncs should be
 cascade-deleted when this connection is destroyed.
 
     This only deletes other resources when the connection is destroyed, not when
@@ -43,14 +47,24 @@ destroying the connection, this flag will not work. Additionally when importing
 a connection, a successful `terraform apply` is required to set this value in
 state before it will take effect on a destroy operation.
 
+### Read-Only
+
+- `id` (String) HubSpot Connection identifier.
+
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
-- `client_id` (String, Sensitive, Optional)
-- `client_secret` (String, Sensitive, Optional)
-- `hub_domain` (String, Optional) HubSpot domain
-- `hub_user` (String, Optional) HubSpot user
-- `include_static_list_support` (Boolean, Optional) Include static list support
-- `oauth_refresh_token` (String, Sensitive, Optional)
-- `use_search_api` (Boolean, Optional) Use HubSpot incremental API for bulk syncs Default: <code>true</code>.
+#### Optional
+
+- `client_id` (String, Sensitive)
+- `client_secret` (String, Sensitive)
+- `include_static_list_support` (Boolean) Include static list support
+- `oauth_refresh_token` (String, Sensitive)
+- `use_search_api` (Boolean) Use HubSpot incremental API for bulk syncs Default: <code>true</code>.
+
+#### Read-Only
+
+- `hub_domain` (String) HubSpot domain
+- `hub_user` (String) HubSpot user
+
 

@@ -25,11 +25,15 @@ resource "polytomic_googleworkspace_connection" "googleworkspace" {
 
 ## Schema
 
-- `name` (String, Required)
-- `configuration` (Attributes, Required) See [below for nested schema](#nestedatt--configuration).
-- `organization` (String, Optional) Organization ID.
-- `id` (String, Read-only) Google Workspace Connection identifier.
-- `force_destroy` (Boolean, Optional) Indicates whether dependent models, syncs, and bulk syncs should be
+### Required
+
+- `name` (String)
+- `configuration` (Attributes) See [below for nested schema](#nestedatt--configuration).
+
+### Optional
+
+- `organization` (String) Organization ID.
+- `force_destroy` (Boolean) Indicates whether dependent models, syncs, and bulk syncs should be
 cascade-deleted when this connection is destroyed.
 
     This only deletes other resources when the connection is destroyed, not when
@@ -42,14 +46,24 @@ destroying the connection, this flag will not work. Additionally when importing
 a connection, a successful `terraform apply` is required to set this value in
 state before it will take effect on a destroy operation.
 
+### Read-Only
+
+- `id` (String) Google Workspace Connection identifier.
+
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
-- `auth_method` (String, Optional) Default: browser Valid values: <code>oauth</code> (OAuth), <code>service_account</code> (Service Account).
-- `client_email` (String, Optional) Connected Account
-- `client_id` (String, Sensitive, Optional)
-- `client_secret` (String, Sensitive, Optional)
-- `customer_id` (String, Optional) Customer ID
-- `oauth_token_expiry` (String, Optional)
-- `service_account` (String, Sensitive, Optional) Service account key
+#### Optional
+
+- `auth_method` (String) Default: browser Valid values: <code>oauth</code> (OAuth), <code>service_account</code> (Service Account).
+- `client_id` (String, Sensitive)
+- `client_secret` (String, Sensitive)
+- `customer_id` (String) Customer ID
+- `oauth_token_expiry` (String)
+- `service_account` (String, Sensitive) Service account key
+
+#### Read-Only
+
+- `client_email` (String) Connected Account
+
 

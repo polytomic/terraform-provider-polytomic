@@ -17,11 +17,15 @@ For detailed configuration guidance, see the [Zendesk Support connection guide](
 
 ## Schema
 
-- `name` (String, Required)
-- `configuration` (Attributes, Required) See [below for nested schema](#nestedatt--configuration).
-- `organization` (String, Optional) Organization ID.
-- `id` (String, Read-only) Zendesk Support Connection identifier.
-- `force_destroy` (Boolean, Optional) Indicates whether dependent models, syncs, and bulk syncs should be
+### Required
+
+- `name` (String)
+- `configuration` (Attributes) See [below for nested schema](#nestedatt--configuration).
+
+### Optional
+
+- `organization` (String) Organization ID.
+- `force_destroy` (Boolean) Indicates whether dependent models, syncs, and bulk syncs should be
 cascade-deleted when this connection is destroyed.
 
     This only deletes other resources when the connection is destroyed, not when
@@ -34,17 +38,27 @@ destroying the connection, this flag will not work. Additionally when importing
 a connection, a successful `terraform apply` is required to set this value in
 state before it will take effect on a destroy operation.
 
+### Read-Only
+
+- `id` (String) Zendesk Support Connection identifier.
+
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
-- `api_token` (String, Sensitive, Optional) API token
-- `auth_method` (String, Required) Authentication method Valid values: <code>apitoken</code> (API token), <code>oauth</code> (OAuth). Default: <code>oauth</code>.
-- `custom_api_limits` (Boolean, Optional) Enforce custom API limits
-- `domain` (String, Required) Zendesk Subdomain
-- `email` (String, Optional)
-- `oauth_refresh_token` (String, Sensitive, Optional)
-- `oauth_token_expiry` (String, Optional)
-- `ratelimit_rpm` (Number, Optional) Maximum requests per minute
+#### Required
+
+- `auth_method` (String) Authentication method Valid values: <code>apitoken</code> (API token), <code>oauth</code> (OAuth). Default: <code>oauth</code>.
+- `domain` (String) Zendesk Subdomain
+
+#### Optional
+
+- `api_token` (String, Sensitive) API token
+- `custom_api_limits` (Boolean) Enforce custom API limits
+- `email` (String)
+- `oauth_refresh_token` (String, Sensitive)
+- `oauth_token_expiry` (String)
+- `ratelimit_rpm` (Number) Maximum requests per minute
 
     Set a custom maximum request per minute limit.
+
 

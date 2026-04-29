@@ -27,11 +27,15 @@ resource "polytomic_dynamodb_connection" "dynamodb" {
 
 ## Schema
 
-- `name` (String, Required)
-- `configuration` (Attributes, Required) See [below for nested schema](#nestedatt--configuration).
-- `organization` (String, Optional) Organization ID.
-- `id` (String, Read-only) DynamoDB Connection identifier.
-- `force_destroy` (Boolean, Optional) Indicates whether dependent models, syncs, and bulk syncs should be
+### Required
+
+- `name` (String)
+- `configuration` (Attributes) See [below for nested schema](#nestedatt--configuration).
+
+### Optional
+
+- `organization` (String) Organization ID.
+- `force_destroy` (Boolean) Indicates whether dependent models, syncs, and bulk syncs should be
 cascade-deleted when this connection is destroyed.
 
     This only deletes other resources when the connection is destroyed, not when
@@ -44,20 +48,33 @@ destroying the connection, this flag will not work. Additionally when importing
 a connection, a successful `terraform apply` is required to set this value in
 state before it will take effect on a destroy operation.
 
+### Read-Only
+
+- `id` (String) DynamoDB Connection identifier.
+
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
-- `access_id` (String, Sensitive, Optional) AWS Access ID
-- `auth_mode` (String, Required) Authentication Method
+#### Required
+
+- `auth_mode` (String) Authentication Method
 
     How to authenticate with AWS. Defaults to Access Key and Secret Valid values: <code>access_key_and_secret</code> (Access Key and Secret), <code>iam_role</code> (IAM role). Default: <code>access_key_and_secret</code>.
-- `aws_user` (String, Optional) User ARN
-- `change_detection` (Boolean, Optional) Use DynamoDB Streams for bulk syncs Default: <code>false</code>.
-- `external_id` (String, Optional) External ID
+- `region` (String) AWS region
+
+#### Optional
+
+- `access_id` (String, Sensitive) AWS Access ID
+- `change_detection` (Boolean) Use DynamoDB Streams for bulk syncs Default: <code>false</code>.
+- `iam_role_arn` (String) IAM Role ARN
+- `managed_streams` (Boolean) Let Polytomic manage DynamoDB Stream settings
+- `secret_access_key` (String, Sensitive) AWS Secret Access Key
+
+#### Read-Only
+
+- `aws_user` (String) User ARN
+- `external_id` (String) External ID
 
     External ID for the IAM role
-- `iam_role_arn` (String, Optional) IAM Role ARN
-- `managed_streams` (Boolean, Optional) Let Polytomic manage DynamoDB Stream settings
-- `region` (String, Required) AWS region
-- `secret_access_key` (String, Sensitive, Optional) AWS Secret Access Key
+
 

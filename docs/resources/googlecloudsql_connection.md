@@ -28,11 +28,15 @@ resource "polytomic_googlecloudsql_connection" "googlecloudsql" {
 
 ## Schema
 
-- `name` (String, Required)
-- `configuration` (Attributes, Required) See [below for nested schema](#nestedatt--configuration).
-- `organization` (String, Optional) Organization ID.
-- `id` (String, Read-only) Google Cloud PostgreSQL Connection identifier.
-- `force_destroy` (Boolean, Optional) Indicates whether dependent models, syncs, and bulk syncs should be
+### Required
+
+- `name` (String)
+- `configuration` (Attributes) See [below for nested schema](#nestedatt--configuration).
+
+### Optional
+
+- `organization` (String) Organization ID.
+- `force_destroy` (Boolean) Indicates whether dependent models, syncs, and bulk syncs should be
 cascade-deleted when this connection is destroyed.
 
     This only deletes other resources when the connection is destroyed, not when
@@ -45,16 +49,26 @@ destroying the connection, this flag will not work. Additionally when importing
 a connection, a successful `terraform apply` is required to set this value in
 state before it will take effect on a destroy operation.
 
+### Read-Only
+
+- `id` (String) Google Cloud PostgreSQL Connection identifier.
+
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
-- `change_detection` (Boolean, Optional) Use logical replication for bulk syncs Default: <code>false</code>.
-- `connection_name` (String, Required) Cloud SQL connection name
+#### Required
+
+- `connection_name` (String) Cloud SQL connection name
 
     Takes the form of project:region:instance
-- `credentials` (String, Sensitive, Required) Service account key
-- `database` (String, Required)
-- `password` (String, Sensitive, Optional) May be omitted when authenticating to Postgres using the service account key.
-- `publication` (String, Optional)
-- `username` (String, Optional)
+- `credentials` (String, Sensitive) Service account key
+- `database` (String)
+
+#### Optional
+
+- `change_detection` (Boolean) Use logical replication for bulk syncs Default: <code>false</code>.
+- `password` (String, Sensitive) May be omitted when authenticating to Postgres using the service account key.
+- `publication` (String)
+- `username` (String)
+
 

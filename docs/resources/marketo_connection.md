@@ -26,11 +26,15 @@ resource "polytomic_marketo_connection" "marketo" {
 
 ## Schema
 
-- `name` (String, Required)
-- `configuration` (Attributes, Required) See [below for nested schema](#nestedatt--configuration).
-- `organization` (String, Optional) Organization ID.
-- `id` (String, Read-only) Marketo Connection identifier.
-- `force_destroy` (Boolean, Optional) Indicates whether dependent models, syncs, and bulk syncs should be
+### Required
+
+- `name` (String)
+- `configuration` (Attributes) See [below for nested schema](#nestedatt--configuration).
+
+### Optional
+
+- `organization` (String) Organization ID.
+- `force_destroy` (Boolean) Indicates whether dependent models, syncs, and bulk syncs should be
 cascade-deleted when this connection is destroyed.
 
     This only deletes other resources when the connection is destroyed, not when
@@ -43,15 +47,25 @@ destroying the connection, this flag will not work. Additionally when importing
 a connection, a successful `terraform apply` is required to set this value in
 state before it will take effect on a destroy operation.
 
+### Read-Only
+
+- `id` (String) Marketo Connection identifier.
+
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
-- `client_id` (String, Required) Client ID
-- `client_secret` (String, Sensitive, Required) Client Secret
-- `concurrent_imports` (Number, Optional) Concurrent import jobs Default: <code>5</code>.
-- `daily_api_calls` (Number, Optional) Daily call limit Default: <code>37500</code>.
-- `enforce_api_limits` (Boolean, Optional) Enforce API limits
-- `include_static_lists` (Boolean, Optional) Include static list support Default: <code>true</code>.
-- `oauth_token_expiry` (String, Optional)
-- `rest_endpoint` (String, Required) REST Endpoint
+#### Required
+
+- `client_id` (String) Client ID
+- `client_secret` (String, Sensitive) Client Secret
+- `rest_endpoint` (String) REST Endpoint
+
+#### Optional
+
+- `concurrent_imports` (Number) Concurrent import jobs Default: <code>5</code>.
+- `daily_api_calls` (Number) Daily call limit Default: <code>37500</code>.
+- `enforce_api_limits` (Boolean) Enforce API limits
+- `include_static_lists` (Boolean) Include static list support Default: <code>true</code>.
+- `oauth_token_expiry` (String)
+
 

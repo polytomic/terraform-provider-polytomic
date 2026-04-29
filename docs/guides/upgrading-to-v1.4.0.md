@@ -1,3 +1,10 @@
+---
+page_title: "Upgrading to v1.4.0"
+subcategory: ""
+description: |-
+  Notes on upgrading the Polytomic provider to v1.4.0.
+---
+
 # Upgrading to v1.4.0
 
 Version 1.4.0 redesigns the `filters`, `overrides`, and `override_fields` attributes on the `polytomic_sync` resource. These changes make filters and overrides easier to use by replacing opaque field UUIDs with human-readable source references.

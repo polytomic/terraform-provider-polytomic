@@ -43,11 +43,15 @@ resource "polytomic_bigquery_connection" "bigquery" {
 
 ## Schema
 
-- `name` (String, Required)
-- `configuration` (Attributes, Required) See [below for nested schema](#nestedatt--configuration).
-- `organization` (String, Optional) Organization ID.
-- `id` (String, Read-only) Google BigQuery Connection identifier.
-- `force_destroy` (Boolean, Optional) Indicates whether dependent models, syncs, and bulk syncs should be
+### Required
+
+- `name` (String)
+- `configuration` (Attributes) See [below for nested schema](#nestedatt--configuration).
+
+### Optional
+
+- `organization` (String) Organization ID.
+- `force_destroy` (Boolean) Indicates whether dependent models, syncs, and bulk syncs should be
 cascade-deleted when this connection is destroyed.
 
     This only deletes other resources when the connection is destroyed, not when
@@ -60,22 +64,35 @@ destroying the connection, this flag will not work. Additionally when importing
 a connection, a successful `terraform apply` is required to set this value in
 state before it will take effect on a destroy operation.
 
+### Read-Only
+
+- `id` (String) Google BigQuery Connection identifier.
+
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
-- `auth_method` (String, Required) Authentication method Valid values: <code>service_account_key</code> (Service Account Key), <code>workload_identity_federation</code> (Workload Identity Federation), <code>application_default_credentials</code> (Application Default Credentials). Default: <code>service_account_key</code>.
-- `bucket` (String, Optional) Google Cloud Storage bucket
-- `client_email` (String, Optional) Service account identity
-- `credential_config` (String, Sensitive, Optional) Credential configuration
+#### Required
+
+- `auth_method` (String) Authentication method Valid values: <code>service_account_key</code> (Service Account Key), <code>workload_identity_federation</code> (Workload Identity Federation), <code>application_default_credentials</code> (Application Default Credentials). Default: <code>service_account_key</code>.
+
+#### Optional
+
+- `bucket` (String) Google Cloud Storage bucket
+- `credential_config` (String, Sensitive) Credential configuration
 
     Credential configuration JSON file downloaded from Google Cloud
-- `location` (String, Optional) Region or multi-region for query operations
-- `override_project_id` (String, Optional) Override project ID
+- `location` (String) Region or multi-region for query operations
+- `override_project_id` (String) Override project ID
 
     Override the default project ID for cross-project access
-- `project_id` (String, Optional) Service account project ID
-- `service_account` (String, Sensitive, Optional) Service account key
-- `structured_values_as_json` (Boolean, Optional) Write object and array values as JSON Default: <code>false</code>.
-- `use_extract` (Boolean, Optional) Use Extract for bulk sync from BigQuery
-- `wif_project_id` (String, Optional) Google Cloud project ID
+- `service_account` (String, Sensitive) Service account key
+- `structured_values_as_json` (Boolean) Write object and array values as JSON Default: <code>false</code>.
+- `use_extract` (Boolean) Use Extract for bulk sync from BigQuery
+- `wif_project_id` (String) Google Cloud project ID
+
+#### Read-Only
+
+- `client_email` (String) Service account identity
+- `project_id` (String) Service account project ID
+
 

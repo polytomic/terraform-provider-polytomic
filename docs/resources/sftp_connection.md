@@ -27,11 +27,15 @@ resource "polytomic_sftp_connection" "sftp" {
 
 ## Schema
 
-- `name` (String, Required)
-- `configuration` (Attributes, Required) See [below for nested schema](#nestedatt--configuration).
-- `organization` (String, Optional) Organization ID.
-- `id` (String, Read-only) SFTP Connection identifier.
-- `force_destroy` (Boolean, Optional) Indicates whether dependent models, syncs, and bulk syncs should be
+### Required
+
+- `name` (String)
+- `configuration` (Attributes) See [below for nested schema](#nestedatt--configuration).
+
+### Optional
+
+- `organization` (String) Organization ID.
+- `force_destroy` (Boolean) Indicates whether dependent models, syncs, and bulk syncs should be
 cascade-deleted when this connection is destroyed.
 
     This only deletes other resources when the connection is destroyed, not when
@@ -44,21 +48,31 @@ destroying the connection, this flag will not work. Additionally when importing
 a connection, a successful `terraform apply` is required to set this value in
 state before it will take effect on a destroy operation.
 
+### Read-Only
+
+- `id` (String) SFTP Connection identifier.
+
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
-- `auth_mode` (String, Required) Authentication Method Valid values: <code>private_key</code> (Private key), <code>password</code> (Password). Default: <code>private_key</code>.
-- `is_single_table` (Boolean, Optional) Files are time-based snapshots
+#### Required
+
+- `auth_mode` (String) Authentication Method Valid values: <code>private_key</code> (Private key), <code>password</code> (Password). Default: <code>private_key</code>.
+
+#### Optional
+
+- `is_single_table` (Boolean) Files are time-based snapshots
 
     Treat the files as a single table.
-- `path` (String, Optional) The path to the directory on the SFTP server containing the files.
-- `single_table_name` (String, Optional) Collection name
-- `skip_lines` (Number, Optional) Skip first lines
+- `path` (String) The path to the directory on the SFTP server containing the files.
+- `single_table_name` (String) Collection name
+- `skip_lines` (Number) Skip first lines
 
     Skip first N lines of each CSV file. Default: <code>0</code>.
-- `ssh_host` (String, Optional) Host
-- `ssh_password` (String, Sensitive, Optional) Password
-- `ssh_port` (Number, Optional) Port Default: <code>22</code>.
-- `ssh_private_key` (String, Sensitive, Optional) Private key
-- `ssh_user` (String, Optional) User
+- `ssh_host` (String) Host
+- `ssh_password` (String, Sensitive) Password
+- `ssh_port` (Number) Port Default: <code>22</code>.
+- `ssh_private_key` (String, Sensitive) Private key
+- `ssh_user` (String) User
+
 

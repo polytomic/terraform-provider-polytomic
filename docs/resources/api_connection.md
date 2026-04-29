@@ -26,11 +26,15 @@ resource "polytomic_api_connection" "api" {
 
 ## Schema
 
-- `name` (String, Required)
-- `configuration` (Attributes, Required) See [below for nested schema](#nestedatt--configuration).
-- `organization` (String, Optional) Organization ID.
-- `id` (String, Read-only) HTTP API Connection identifier.
-- `force_destroy` (Boolean, Optional) Indicates whether dependent models, syncs, and bulk syncs should be
+### Required
+
+- `name` (String)
+- `configuration` (Attributes) See [below for nested schema](#nestedatt--configuration).
+
+### Optional
+
+- `organization` (String) Organization ID.
+- `force_destroy` (Boolean) Indicates whether dependent models, syncs, and bulk syncs should be
 cascade-deleted when this connection is destroyed.
 
     This only deletes other resources when the connection is destroyed, not when
@@ -43,62 +47,93 @@ destroying the connection, this flag will not work. Additionally when importing
 a connection, a successful `terraform apply` is required to set this value in
 state before it will take effect on a destroy operation.
 
+### Read-Only
+
+- `id` (String) HTTP API Connection identifier.
+
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
-- `auth` (Attributes, Optional) Authentication method See [below for nested schema](#nestedatt--configuration--auth).
-- `body` (String, Optional) JSON payload
-- `headers` (Attributes Set, Optional) See [below for nested schema](#nestedatt--configuration--headers).
-- `healthcheck` (String, Optional) Health check endpoint
+#### Required
+
+- `url` (String) Base URL
+
+#### Optional
+
+- `auth` (Attributes) Authentication method See [below for nested schema](#nestedatt--configuration--auth).
+- `body` (String) JSON payload
+- `headers` (Attributes Set) See [below for nested schema](#nestedatt--configuration--headers).
+- `healthcheck` (String) Health check endpoint
 
     Path to request when checking the health of this connection. No health check will be performed if left empty.
-- `parameters` (Attributes Set, Optional) Query string parameters See [below for nested schema](#nestedatt--configuration--parameters).
-- `url` (String, Required) Base URL
+- `parameters` (Attributes Set) Query string parameters See [below for nested schema](#nestedatt--configuration--parameters).
+
 
 <a id="nestedatt--configuration--auth"></a>
 ### Nested Schema for `configuration.auth`
 
-- `basic` (Attributes, Optional) Basic authentication See [below for nested schema](#nestedatt--configuration--auth--basic).
-- `header` (Attributes, Optional) Header key See [below for nested schema](#nestedatt--configuration--auth--header).
-- `oauth` (Attributes, Optional) See [below for nested schema](#nestedatt--configuration--auth--oauth).
+#### Optional
+
+- `basic` (Attributes) Basic authentication See [below for nested schema](#nestedatt--configuration--auth--basic).
+- `header` (Attributes) Header key See [below for nested schema](#nestedatt--configuration--auth--header).
+- `oauth` (Attributes) See [below for nested schema](#nestedatt--configuration--auth--oauth).
+
 
 <a id="nestedatt--configuration--auth--basic"></a>
 ### Nested Schema for `configuration.auth.basic`
 
-- `password` (String, Optional)
-- `username` (String, Optional)
+#### Optional
+
+- `password` (String)
+- `username` (String)
+
 
 <a id="nestedatt--configuration--auth--header"></a>
 ### Nested Schema for `configuration.auth.header`
 
-- `name` (String, Optional)
-- `value` (String, Optional)
+#### Optional
+
+- `name` (String)
+- `value` (String)
+
 
 <a id="nestedatt--configuration--auth--oauth"></a>
 ### Nested Schema for `configuration.auth.oauth`
 
-- `auth_style` (Number, Optional) Auth style
-- `client_id` (String, Optional) Client ID
-- `client_secret` (String, Optional) Client secret
-- `extra_form_data` (Attributes Set, Optional) Extra form data See [below for nested schema](#nestedatt--configuration--auth--oauth--extra_form_data).
-- `scopes` (Set of String, Optional)
-- `token_endpoint` (String, Optional) Token endpoint
+#### Optional
+
+- `auth_style` (Number) Auth style
+- `client_id` (String) Client ID
+- `client_secret` (String) Client secret
+- `extra_form_data` (Attributes Set) Extra form data See [below for nested schema](#nestedatt--configuration--auth--oauth--extra_form_data).
+- `scopes` (Set of String)
+- `token_endpoint` (String) Token endpoint
+
 
 <a id="nestedatt--configuration--auth--oauth--extra_form_data"></a>
 ### Nested Schema for `configuration.auth.oauth.extra_form_data`
 
-- `name` (String, Optional)
-- `value` (String, Optional)
+#### Optional
+
+- `name` (String)
+- `value` (String)
+
 
 <a id="nestedatt--configuration--headers"></a>
 ### Nested Schema for `configuration.headers`
 
-- `name` (String, Optional)
-- `value` (String, Optional)
+#### Optional
+
+- `name` (String)
+- `value` (String)
+
 
 <a id="nestedatt--configuration--parameters"></a>
 ### Nested Schema for `configuration.parameters`
 
-- `name` (String, Optional)
-- `value` (String, Optional)
+#### Optional
+
+- `name` (String)
+- `value` (String)
+
 

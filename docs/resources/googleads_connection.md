@@ -26,11 +26,15 @@ resource "polytomic_googleads_connection" "googleads" {
 
 ## Schema
 
-- `name` (String, Required)
-- `configuration` (Attributes, Required) See [below for nested schema](#nestedatt--configuration).
-- `organization` (String, Optional) Organization ID.
-- `id` (String, Read-only) Google Ads Connection identifier.
-- `force_destroy` (Boolean, Optional) Indicates whether dependent models, syncs, and bulk syncs should be
+### Required
+
+- `name` (String)
+- `configuration` (Attributes) See [below for nested schema](#nestedatt--configuration).
+
+### Optional
+
+- `organization` (String) Organization ID.
+- `force_destroy` (Boolean) Indicates whether dependent models, syncs, and bulk syncs should be
 cascade-deleted when this connection is destroyed.
 
     This only deletes other resources when the connection is destroyed, not when
@@ -43,25 +47,38 @@ destroying the connection, this flag will not work. Additionally when importing
 a connection, a successful `terraform apply` is required to set this value in
 state before it will take effect on a destroy operation.
 
+### Read-Only
+
+- `id` (String) Google Ads Connection identifier.
+
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
-- `accounts` (Attributes Set, Optional) See [below for nested schema](#nestedatt--configuration--accounts).
-- `blanket_user_consent` (Boolean, Optional) All transmitted users consented to ad personalization and information sharing with Google Ads
+#### Optional
+
+- `accounts` (Attributes Set) See [below for nested schema](#nestedatt--configuration--accounts).
+- `blanket_user_consent` (Boolean) All transmitted users consented to ad personalization and information sharing with Google Ads
 
     Causes this connection to send signals to Google Ads indicating that every transmitted user has accepted ad personalization and data sharing policies. This will cause the user to be included in more advertising functions
-- `client_id` (String, Sensitive, Optional)
-- `client_secret` (String, Sensitive, Optional)
-- `connected_user` (String, Optional) Connected user's email
-- `custom_reports` (String, Optional) Custom reports
+- `client_id` (String, Sensitive)
+- `client_secret` (String, Sensitive)
+- `custom_reports` (String) Custom reports
 
     One report per line. Format is a report name:ads object:field list. e.g. myReport:ad_groups:campaign.id
-- `oauth_refresh_token` (String, Sensitive, Optional)
-- `oauth_token_expiry` (String, Optional)
+- `oauth_refresh_token` (String, Sensitive)
+- `oauth_token_expiry` (String)
+
+#### Read-Only
+
+- `connected_user` (String) Connected user's email
+
 
 <a id="nestedatt--configuration--accounts"></a>
 ### Nested Schema for `configuration.accounts`
 
-- `label` (String, Optional)
-- `value` (String, Optional)
+#### Optional
+
+- `label` (String)
+- `value` (String)
+
 

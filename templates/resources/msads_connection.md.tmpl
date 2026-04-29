@@ -17,11 +17,15 @@ For detailed configuration guidance, see the [Microsoft Ads connection guide](ht
 
 ## Schema
 
-- `name` (String, Required)
-- `configuration` (Attributes, Required) See [below for nested schema](#nestedatt--configuration).
-- `organization` (String, Optional) Organization ID.
-- `id` (String, Read-only) Microsoft Ads Connection identifier.
-- `force_destroy` (Boolean, Optional) Indicates whether dependent models, syncs, and bulk syncs should be
+### Required
+
+- `name` (String)
+- `configuration` (Attributes) See [below for nested schema](#nestedatt--configuration).
+
+### Optional
+
+- `organization` (String) Organization ID.
+- `force_destroy` (Boolean) Indicates whether dependent models, syncs, and bulk syncs should be
 cascade-deleted when this connection is destroyed.
 
     This only deletes other resources when the connection is destroyed, not when
@@ -34,20 +38,33 @@ destroying the connection, this flag will not work. Additionally when importing
 a connection, a successful `terraform apply` is required to set this value in
 state before it will take effect on a destroy operation.
 
+### Read-Only
+
+- `id` (String) Microsoft Ads Connection identifier.
+
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
-- `accounts` (Attributes Set, Optional) See [below for nested schema](#nestedatt--configuration--accounts).
-- `auth_method` (String, Optional) Authentication method Valid values: <code>microsoft</code> (Microsoft), <code>google</code> (Google). Default: <code>microsoft</code>.
-- `client_id` (String, Sensitive, Optional)
-- `client_secret` (String, Sensitive, Optional)
-- `oauth_refresh_token` (String, Sensitive, Optional)
-- `oauth_token_expiry` (String, Optional)
-- `username` (String, Optional) Connected user
+#### Optional
+
+- `accounts` (Attributes Set) See [below for nested schema](#nestedatt--configuration--accounts).
+- `auth_method` (String) Authentication method Valid values: <code>microsoft</code> (Microsoft), <code>google</code> (Google). Default: <code>microsoft</code>.
+- `client_id` (String, Sensitive)
+- `client_secret` (String, Sensitive)
+- `oauth_refresh_token` (String, Sensitive)
+- `oauth_token_expiry` (String)
+
+#### Read-Only
+
+- `username` (String) Connected user
+
 
 <a id="nestedatt--configuration--accounts"></a>
 ### Nested Schema for `configuration.accounts`
 
-- `label` (String, Optional)
-- `value` (String, Optional)
+#### Optional
+
+- `label` (String)
+- `value` (String)
+
 

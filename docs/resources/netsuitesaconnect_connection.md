@@ -24,11 +24,15 @@ resource "polytomic_netsuitesaconnect_connection" "netsuitesaconnect" {
 
 ## Schema
 
-- `name` (String, Required)
-- `configuration` (Attributes, Required) See [below for nested schema](#nestedatt--configuration).
-- `organization` (String, Optional) Organization ID.
-- `id` (String, Read-only) NetSuite SuiteAnalytics Connection identifier.
-- `force_destroy` (Boolean, Optional) Indicates whether dependent models, syncs, and bulk syncs should be
+### Required
+
+- `name` (String)
+- `configuration` (Attributes) See [below for nested schema](#nestedatt--configuration).
+
+### Optional
+
+- `organization` (String) Organization ID.
+- `force_destroy` (Boolean) Indicates whether dependent models, syncs, and bulk syncs should be
 cascade-deleted when this connection is destroyed.
 
     This only deletes other resources when the connection is destroyed, not when
@@ -41,12 +45,19 @@ destroying the connection, this flag will not work. Additionally when importing
 a connection, a successful `terraform apply` is required to set this value in
 state before it will take effect on a destroy operation.
 
+### Read-Only
+
+- `id` (String) NetSuite SuiteAnalytics Connection identifier.
+
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
-- `account_id` (String, Required) Account ID
-- `certificate_id` (String, Required) Certificate ID
-- `client_id` (String, Required) Client ID
-- `private_key` (String, Sensitive, Required) Private key
-- `role_id` (String, Required) Role ID
+#### Required
+
+- `account_id` (String) Account ID
+- `certificate_id` (String) Certificate ID
+- `client_id` (String) Client ID
+- `private_key` (String, Sensitive) Private key
+- `role_id` (String) Role ID
+
 

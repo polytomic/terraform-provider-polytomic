@@ -26,11 +26,15 @@ resource "polytomic_fbaudience_connection" "fbaudience" {
 
 ## Schema
 
-- `name` (String, Required)
-- `configuration` (Attributes, Required) See [below for nested schema](#nestedatt--configuration).
-- `organization` (String, Optional) Organization ID.
-- `id` (String, Read-only) Facebook Ads Connection identifier.
-- `force_destroy` (Boolean, Optional) Indicates whether dependent models, syncs, and bulk syncs should be
+### Required
+
+- `name` (String)
+- `configuration` (Attributes) See [below for nested schema](#nestedatt--configuration).
+
+### Optional
+
+- `organization` (String) Organization ID.
+- `force_destroy` (Boolean) Indicates whether dependent models, syncs, and bulk syncs should be
 cascade-deleted when this connection is destroyed.
 
     This only deletes other resources when the connection is destroyed, not when
@@ -43,18 +47,34 @@ destroying the connection, this flag will not work. Additionally when importing
 a connection, a successful `terraform apply` is required to set this value in
 state before it will take effect on a destroy operation.
 
+### Read-Only
+
+- `id` (String) Facebook Ads Connection identifier.
+
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
-- `accounts` (Attributes Set, Optional) See [below for nested schema](#nestedatt--configuration--accounts).
-- `auth_method` (String, Required) Authentication Method Valid values: <code>oauth</code> (Oauth), <code>token</code> (Token). Default: <code>oauth</code>.
-- `byo_app_token` (String, Sensitive, Optional) Token
-- `graph_api_version` (String, Optional) Graph API version Default: <code>v24.0</code>.
-- `user_name` (String, Optional) Connected as
+#### Required
+
+- `auth_method` (String) Authentication Method Valid values: <code>oauth</code> (Oauth), <code>token</code> (Token). Default: <code>oauth</code>.
+
+#### Optional
+
+- `accounts` (Attributes Set) See [below for nested schema](#nestedatt--configuration--accounts).
+- `byo_app_token` (String, Sensitive) Token
+- `graph_api_version` (String) Graph API version Default: <code>v24.0</code>.
+
+#### Read-Only
+
+- `user_name` (String) Connected as
+
 
 <a id="nestedatt--configuration--accounts"></a>
 ### Nested Schema for `configuration.accounts`
 
-- `label` (String, Optional)
-- `value` (String, Optional)
+#### Optional
+
+- `label` (String)
+- `value` (String)
+
 

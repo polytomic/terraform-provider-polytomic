@@ -17,11 +17,15 @@ For detailed configuration guidance, see the [AWS OpenSearch connection guide](h
 
 ## Schema
 
-- `name` (String, Required)
-- `configuration` (Attributes, Required) See [below for nested schema](#nestedatt--configuration).
-- `organization` (String, Optional) Organization ID.
-- `id` (String, Read-only) AWS OpenSearch Connection identifier.
-- `force_destroy` (Boolean, Optional) Indicates whether dependent models, syncs, and bulk syncs should be
+### Required
+
+- `name` (String)
+- `configuration` (Attributes) See [below for nested schema](#nestedatt--configuration).
+
+### Optional
+
+- `organization` (String) Organization ID.
+- `force_destroy` (Boolean) Indicates whether dependent models, syncs, and bulk syncs should be
 cascade-deleted when this connection is destroyed.
 
     This only deletes other resources when the connection is destroyed, not when
@@ -34,12 +38,22 @@ destroying the connection, this flag will not work. Additionally when importing
 a connection, a successful `terraform apply` is required to set this value in
 state before it will take effect on a destroy operation.
 
+### Read-Only
+
+- `id` (String) AWS OpenSearch Connection identifier.
+
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
-- `aws_access_key_id` (String, Required) AWS Access Key ID
-- `aws_secret_access_key` (String, Sensitive, Required) AWS Secret Access Key
-- `aws_user` (String, Optional) User ARN
-- `endpoint` (String, Required) Endpoint(s)
-- `region` (String, Required)
+#### Required
+
+- `aws_access_key_id` (String) AWS Access Key ID
+- `aws_secret_access_key` (String, Sensitive) AWS Secret Access Key
+- `endpoint` (String) Endpoint(s)
+- `region` (String)
+
+#### Read-Only
+
+- `aws_user` (String) User ARN
+
 

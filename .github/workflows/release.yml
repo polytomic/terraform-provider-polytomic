@@ -26,6 +26,13 @@ jobs:
         with:
           go-version-file: "go.mod"
           cache: true
+      - uses: hashicorp/setup-terraform@v3
+      - name: Verify generated files are up to date
+        run: |
+          go install golang.org/x/tools/cmd/goimports@latest
+          go generate main.go
+          git diff --compact-summary --exit-code || \
+            (echo; echo "Generated files are stale. Run 'go generate main.go' and commit before tagging a release."; exit 1)
       - name: Import GPG key
         uses: crazy-max/ghaction-import-gpg@e89d40939c28e39f97cf32126055eeae86ba74ec # v6.3.0
         id: import_gpg

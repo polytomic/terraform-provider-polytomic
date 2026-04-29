@@ -26,11 +26,15 @@ resource "polytomic_jira_connection" "jira" {
 
 ## Schema
 
-- `name` (String, Required)
-- `configuration` (Attributes, Required) See [below for nested schema](#nestedatt--configuration).
-- `organization` (String, Optional) Organization ID.
-- `id` (String, Read-only) Jira Connection identifier.
-- `force_destroy` (Boolean, Optional) Indicates whether dependent models, syncs, and bulk syncs should be
+### Required
+
+- `name` (String)
+- `configuration` (Attributes) See [below for nested schema](#nestedatt--configuration).
+
+### Optional
+
+- `organization` (String) Organization ID.
+- `force_destroy` (Boolean) Indicates whether dependent models, syncs, and bulk syncs should be
 cascade-deleted when this connection is destroyed.
 
     This only deletes other resources when the connection is destroyed, not when
@@ -43,12 +47,22 @@ destroying the connection, this flag will not work. Additionally when importing
 a connection, a successful `terraform apply` is required to set this value in
 state before it will take effect on a destroy operation.
 
+### Read-Only
+
+- `id` (String) Jira Connection identifier.
+
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
-- `access_token` (String, Sensitive, Optional) Personal access token
-- `api_key` (String, Sensitive, Optional) API token
-- `auth_method` (String, Required) Authentication method Valid values: <code>apikey</code> (API token), <code>pat</code> (Personal access token). Default: <code>apikey</code>.
-- `url` (String, Required) Jira URL
-- `username` (String, Optional)
+#### Required
+
+- `auth_method` (String) Authentication method Valid values: <code>apikey</code> (API token), <code>pat</code> (Personal access token). Default: <code>apikey</code>.
+- `url` (String) Jira URL
+
+#### Optional
+
+- `access_token` (String, Sensitive) Personal access token
+- `api_key` (String, Sensitive) API token
+- `username` (String)
+
 

@@ -26,11 +26,15 @@ resource "polytomic_youtubeanalytics_connection" "youtubeanalytics" {
 
 ## Schema
 
-- `name` (String, Required)
-- `configuration` (Attributes, Required) See [below for nested schema](#nestedatt--configuration).
-- `organization` (String, Optional) Organization ID.
-- `id` (String, Read-only) YouTube Analytics Connection identifier.
-- `force_destroy` (Boolean, Optional) Indicates whether dependent models, syncs, and bulk syncs should be
+### Required
+
+- `name` (String)
+- `configuration` (Attributes) See [below for nested schema](#nestedatt--configuration).
+
+### Optional
+
+- `organization` (String) Organization ID.
+- `force_destroy` (Boolean) Indicates whether dependent models, syncs, and bulk syncs should be
 cascade-deleted when this connection is destroyed.
 
     This only deletes other resources when the connection is destroyed, not when
@@ -43,15 +47,25 @@ destroying the connection, this flag will not work. Additionally when importing
 a connection, a successful `terraform apply` is required to set this value in
 state before it will take effect on a destroy operation.
 
+### Read-Only
+
+- `id` (String) YouTube Analytics Connection identifier.
+
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
-- `client_id` (String, Sensitive, Optional)
-- `client_secret` (String, Sensitive, Optional)
-- `content_owner_id` (String, Optional) Content owner ID
+#### Optional
+
+- `client_id` (String, Sensitive)
+- `client_secret` (String, Sensitive)
+- `content_owner_id` (String) Content owner ID
 
     If you are using a content owner account enter the content owner ID here. This is required for some reports.
-- `oauth_refresh_token` (String, Sensitive, Optional)
-- `oauth_token_expiry` (String, Optional)
-- `user_email` (String, Optional) Connected user's email
+- `oauth_refresh_token` (String, Sensitive)
+- `oauth_token_expiry` (String)
+
+#### Read-Only
+
+- `user_email` (String) Connected user's email
+
 

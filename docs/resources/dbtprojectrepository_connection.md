@@ -25,11 +25,15 @@ resource "polytomic_dbtprojectrepository_connection" "dbtprojectrepository" {
 
 ## Schema
 
-- `name` (String, Required)
-- `configuration` (Attributes, Required) See [below for nested schema](#nestedatt--configuration).
-- `organization` (String, Optional) Organization ID.
-- `id` (String, Read-only) dbt Project Repository Connection identifier.
-- `force_destroy` (Boolean, Optional) Indicates whether dependent models, syncs, and bulk syncs should be
+### Required
+
+- `name` (String)
+- `configuration` (Attributes) See [below for nested schema](#nestedatt--configuration).
+
+### Optional
+
+- `organization` (String) Organization ID.
+- `force_destroy` (Boolean) Indicates whether dependent models, syncs, and bulk syncs should be
 cascade-deleted when this connection is destroyed.
 
     This only deletes other resources when the connection is destroyed, not when
@@ -42,23 +46,39 @@ destroying the connection, this flag will not work. Additionally when importing
 a connection, a successful `terraform apply` is required to set this value in
 state before it will take effect on a destroy operation.
 
+### Read-Only
+
+- `id` (String) dbt Project Repository Connection identifier.
+
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
-- `branch` (String, Optional) Exposures branch
-- `commit_exposures` (Boolean, Required) Commit exposures file
-- `connected_user` (String, Optional) Connected user
-- `latest_commit` (Attributes, Optional) Most recent exposures commit See [below for nested schema](#nestedatt--configuration--latest_commit).
-- `oauth_access_token` (String, Sensitive, Required)
-- `oauth_refresh_token` (String, Sensitive, Optional)
-- `oauth_token_expiry` (String, Optional)
-- `repository` (String, Required) dbt project repository
+#### Required
+
+- `commit_exposures` (Boolean) Commit exposures file
+- `oauth_access_token` (String, Sensitive)
+- `repository` (String) dbt project repository
 
     Only repositories with the Polytomic app installed will be listed.
+
+#### Optional
+
+- `branch` (String) Exposures branch
+- `latest_commit` (Attributes) Most recent exposures commit See [below for nested schema](#nestedatt--configuration--latest_commit).
+- `oauth_refresh_token` (String, Sensitive)
+- `oauth_token_expiry` (String)
+
+#### Read-Only
+
+- `connected_user` (String) Connected user
+
 
 <a id="nestedatt--configuration--latest_commit"></a>
 ### Nested Schema for `configuration.latest_commit`
 
-- `href` (String, Optional)
-- `text` (String, Optional)
+#### Optional
+
+- `href` (String)
+- `text` (String)
+
 

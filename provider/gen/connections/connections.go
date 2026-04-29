@@ -1071,18 +1071,24 @@ func nestedAttrs(a Attribute) []Attribute {
 	return nil
 }
 
-// renderAttrLine renders a single attribute as a markdown list item.
-func renderAttrLine(a Attribute, anchorPrefix string) string {
+// renderAttrLine renders a single attribute as a markdown list item. When
+// includeCategory is false the Required/Optional/Read-Only annotation is
+// omitted (used when the attribute is rendered under a category heading).
+func renderAttrLine(a Attribute, anchorPrefix string, includeCategory bool) string {
 	typeName := displayType(a.AttrType)
 
 	annotations := []string{typeName}
 	if a.Sensitive {
 		annotations = append(annotations, "Sensitive")
 	}
-	if a.Required {
-		annotations = append(annotations, "Required")
-	} else {
-		annotations = append(annotations, "Optional")
+	if includeCategory {
+		if a.Required {
+			annotations = append(annotations, "Required")
+		} else if a.Optional {
+			annotations = append(annotations, "Optional")
+		} else {
+			annotations = append(annotations, "Read-Only")
+		}
 	}
 
 	desc := strings.TrimSpace(a.Description)
@@ -1102,8 +1108,49 @@ func renderAttrLine(a Attribute, anchorPrefix string) string {
 	return fmt.Sprintf("- `%s` (%s)", a.AttrName, strings.Join(annotations, ", "))
 }
 
+// categorizeAttrs splits attributes into Required, Optional, and Read-Only
+// buckets while preserving input order within each bucket.
+func categorizeAttrs(attrs []Attribute) (required, optional, readOnly []Attribute) {
+	for _, a := range attrs {
+		switch {
+		case a.Required:
+			required = append(required, a)
+		case a.Optional:
+			optional = append(optional, a)
+		default:
+			readOnly = append(readOnly, a)
+		}
+	}
+	return
+}
+
+// renderCategorizedAttrs writes attributes grouped under Required, Optional,
+// and Read-Only sub-headings. Headings with no attributes are omitted.
+func renderCategorizedAttrs(sb *strings.Builder, attrs []Attribute, anchorPrefix, headingLevel string) {
+	required, optional, readOnly := categorizeAttrs(attrs)
+	groups := []struct {
+		label string
+		items []Attribute
+	}{
+		{"Required", required},
+		{"Optional", optional},
+		{"Read-Only", readOnly},
+	}
+	for _, g := range groups {
+		if len(g.items) == 0 {
+			continue
+		}
+		fmt.Fprintf(sb, "%s %s\n\n", headingLevel, g.label)
+		for _, a := range g.items {
+			sb.WriteString(renderAttrLine(a, anchorPrefix, false))
+			sb.WriteString("\n")
+		}
+		sb.WriteString("\n")
+	}
+}
+
 // renderNestedSections recursively renders nested schema sections for all
-// attributes that have sub-attributes.
+// attributes that have sub-attributes, grouping by Required/Optional/Read-Only.
 func renderNestedSections(attrs []Attribute, anchorPrefix, pathPrefix string) string {
 	var sb strings.Builder
 	for _, a := range attrs {
@@ -1116,10 +1163,7 @@ func renderNestedSections(attrs []Attribute, anchorPrefix, pathPrefix string) st
 		fmt.Fprintf(&sb, "\n<a id=%q></a>\n### Nested Schema for `%s`\n\n", anchor, attrPath)
 
 		nested := nestedAttrs(a)
-		for _, na := range nested {
-			sb.WriteString(renderAttrLine(na, anchor))
-			sb.WriteString("\n")
-		}
+		renderCategorizedAttrs(&sb, nested, anchor, "####")
 
 		// Recurse into nested attributes.
 		sub := renderNestedSections(nested, anchor, attrPath)
@@ -1137,30 +1181,40 @@ func generateSchemaMarkdown(conn Connection) string {
 
 	sb.WriteString("## Schema\n\n")
 
-	// Top-level attributes (same for all connections).
-	sb.WriteString("- `name` (String, Required)\n")
-	if len(conn.Attributes) > 0 {
-		sb.WriteString("- `configuration` (Attributes, Required) See [below for nested schema](#nestedatt--configuration).\n")
-	} else {
-		sb.WriteString("- `configuration` (Attributes, Optional)\n")
+	configRequired := len(conn.Attributes) > 0
+	configDesc := ""
+	if configRequired {
+		configDesc = "See [below for nested schema](#nestedatt--configuration)."
 	}
-	sb.WriteString("- `organization` (String, Optional) Organization ID.\n")
-	fmt.Fprintf(&sb, "- `id` (String, Read-only) %s Connection identifier.\n", conn.Name)
 	forceDestroyDesc := "Indicates whether dependent models, syncs, and bulk syncs should be cascade-deleted when this connection is destroyed."
 	if raw, err := os.ReadFile(forceDestroyDescriptionFile); err == nil {
-		// Indent continuation lines so they stay inside the markdown list item.
 		paragraphs := strings.Split(strings.TrimSpace(string(raw)), "\n\n")
 		forceDestroyDesc = strings.Join(paragraphs, "\n\n  ")
 	}
-	fmt.Fprintf(&sb, "- `force_destroy` (Boolean, Optional) %s\n", forceDestroyDesc)
+
+	sb.WriteString("### Required\n\n")
+	sb.WriteString("- `name` (String)\n")
+	if configRequired {
+		fmt.Fprintf(&sb, "- `configuration` (Attributes) %s\n", configDesc)
+	}
+	sb.WriteString("\n")
+
+	sb.WriteString("### Optional\n\n")
+	if !configRequired {
+		sb.WriteString("- `configuration` (Attributes)\n")
+	}
+	sb.WriteString("- `organization` (String) Organization ID.\n")
+	fmt.Fprintf(&sb, "- `force_destroy` (Boolean) %s\n", forceDestroyDesc)
+	sb.WriteString("\n")
+
+	sb.WriteString("### Read-Only\n\n")
+	fmt.Fprintf(&sb, "- `id` (String) %s Connection identifier.\n", conn.Name)
+	sb.WriteString("\n")
 
 	// Nested configuration schema.
-	if len(conn.Attributes) > 0 {
-		sb.WriteString("\n<a id=\"nestedatt--configuration\"></a>\n### Nested Schema for `configuration`\n\n")
-		for _, a := range conn.Attributes {
-			sb.WriteString(renderAttrLine(a, "nestedatt--configuration"))
-			sb.WriteString("\n")
-		}
+	if configRequired {
+		sb.WriteString("<a id=\"nestedatt--configuration\"></a>\n### Nested Schema for `configuration`\n\n")
+		renderCategorizedAttrs(&sb, conn.Attributes, "nestedatt--configuration", "####")
 		sub := renderNestedSections(conn.Attributes, "nestedatt--configuration", "configuration")
 		if sub != "" {
 			sb.WriteString(sub)

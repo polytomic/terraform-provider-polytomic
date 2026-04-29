@@ -26,11 +26,15 @@ resource "polytomic_chargebee_connection" "chargebee" {
 
 ## Schema
 
-- `name` (String, Required)
-- `configuration` (Attributes, Required) See [below for nested schema](#nestedatt--configuration).
-- `organization` (String, Optional) Organization ID.
-- `id` (String, Read-only) Chargebee Connection identifier.
-- `force_destroy` (Boolean, Optional) Indicates whether dependent models, syncs, and bulk syncs should be
+### Required
+
+- `name` (String)
+- `configuration` (Attributes) See [below for nested schema](#nestedatt--configuration).
+
+### Optional
+
+- `organization` (String) Organization ID.
+- `force_destroy` (Boolean) Indicates whether dependent models, syncs, and bulk syncs should be
 cascade-deleted when this connection is destroyed.
 
     This only deletes other resources when the connection is destroyed, not when
@@ -43,15 +47,25 @@ destroying the connection, this flag will not work. Additionally when importing
 a connection, a successful `terraform apply` is required to set this value in
 state before it will take effect on a destroy operation.
 
+### Read-Only
+
+- `id` (String) Chargebee Connection identifier.
+
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
-- `api_key` (String, Sensitive, Required) API key
-- `product_catalog` (String, Required) Product Catalog version Valid values: <code>1.0</code> (1.0), <code>2.0</code> (2.0).
-- `ratelimit_rpm` (Number, Optional) Maximum Requests Per Minute
+#### Required
 
-    Default rate limits can be found at https://www.chargebee.com/docs/2.0/site-configuration/articles-and-faq/what-are-the-chargebee-api-limits.html
-- `site` (String, Required) Chargebee site
+- `api_key` (String, Sensitive) API key
+- `product_catalog` (String) Product Catalog version Valid values: <code>1.0</code> (1.0), <code>2.0</code> (2.0).
+- `site` (String) Chargebee site
 
     https://{site}.chargebee.com
+
+#### Optional
+
+- `ratelimit_rpm` (Number) Maximum Requests Per Minute
+
+    Default rate limits can be found at https://www.chargebee.com/docs/2.0/site-configuration/articles-and-faq/what-are-the-chargebee-api-limits.html
+
 

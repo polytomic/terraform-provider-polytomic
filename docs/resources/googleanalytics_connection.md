@@ -26,11 +26,15 @@ resource "polytomic_googleanalytics_connection" "googleanalytics" {
 
 ## Schema
 
-- `name` (String, Required)
-- `configuration` (Attributes, Required) See [below for nested schema](#nestedatt--configuration).
-- `organization` (String, Optional) Organization ID.
-- `id` (String, Read-only) Google Analytics Connection identifier.
-- `force_destroy` (Boolean, Optional) Indicates whether dependent models, syncs, and bulk syncs should be
+### Required
+
+- `name` (String)
+- `configuration` (Attributes) See [below for nested schema](#nestedatt--configuration).
+
+### Optional
+
+- `organization` (String) Organization ID.
+- `force_destroy` (Boolean) Indicates whether dependent models, syncs, and bulk syncs should be
 cascade-deleted when this connection is destroyed.
 
     This only deletes other resources when the connection is destroyed, not when
@@ -43,24 +47,40 @@ destroying the connection, this flag will not work. Additionally when importing
 a connection, a successful `terraform apply` is required to set this value in
 state before it will take effect on a destroy operation.
 
+### Read-Only
+
+- `id` (String) Google Analytics Connection identifier.
+
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
-- `auth_method` (String, Required) Authentication method Valid values: <code>oauth</code> (OAuth), <code>jwt</code> (Service Account). Default: <code>oauth</code>.
-- `client_id` (String, Sensitive, Optional)
-- `client_secret` (String, Sensitive, Optional)
-- `custom_reports` (String, Optional) Custom reports
+#### Required
+
+- `auth_method` (String) Authentication method Valid values: <code>oauth</code> (OAuth), <code>jwt</code> (Service Account). Default: <code>oauth</code>.
+
+#### Optional
+
+- `client_id` (String, Sensitive)
+- `client_secret` (String, Sensitive)
+- `custom_reports` (String) Custom reports
 
     One report per line. Format is a report name followed by a comma-separated list of fields. e.g. myReport:field1
-- `oauth_refresh_token` (String, Sensitive, Optional)
-- `oauth_token_expiry` (String, Optional)
-- `properties` (Attributes Set, Optional) See [below for nested schema](#nestedatt--configuration--properties).
-- `service_account` (String, Sensitive, Optional) Service account key
-- `user_email` (String, Optional) Connected user's email
+- `oauth_refresh_token` (String, Sensitive)
+- `oauth_token_expiry` (String)
+- `properties` (Attributes Set) See [below for nested schema](#nestedatt--configuration--properties).
+- `service_account` (String, Sensitive) Service account key
+
+#### Read-Only
+
+- `user_email` (String) Connected user's email
+
 
 <a id="nestedatt--configuration--properties"></a>
 ### Nested Schema for `configuration.properties`
 
-- `label` (String, Optional)
-- `value` (String, Optional)
+#### Optional
+
+- `label` (String)
+- `value` (String)
+
 

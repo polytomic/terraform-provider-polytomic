@@ -28,11 +28,15 @@ resource "polytomic_salesforce_connection" "salesforce" {
 
 ## Schema
 
-- `name` (String, Required)
-- `configuration` (Attributes, Required) See [below for nested schema](#nestedatt--configuration).
-- `organization` (String, Optional) Organization ID.
-- `id` (String, Read-only) Salesforce Connection identifier.
-- `force_destroy` (Boolean, Optional) Indicates whether dependent models, syncs, and bulk syncs should be
+### Required
+
+- `name` (String)
+- `configuration` (Attributes) See [below for nested schema](#nestedatt--configuration).
+
+### Optional
+
+- `organization` (String) Organization ID.
+- `force_destroy` (Boolean) Indicates whether dependent models, syncs, and bulk syncs should be
 cascade-deleted when this connection is destroyed.
 
     This only deletes other resources when the connection is destroyed, not when
@@ -45,28 +49,41 @@ destroying the connection, this flag will not work. Additionally when importing
 a connection, a successful `terraform apply` is required to set this value in
 state before it will take effect on a destroy operation.
 
+### Read-Only
+
+- `id` (String) Salesforce Connection identifier.
+
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
-- `client_id` (String, Sensitive, Required) Client ID
-- `client_secret` (String, Sensitive, Required) Client Secret
-- `connect_mode` (String, Optional) Default: browser (i.e. oauth through Polytomic). If 'code' is specified, the response will include an auth_code for the user to enter when completing authorization. NOTE: when supplying client_id and client_secret the connect mode must be 'api'. Valid values: <code>browser</code>, <code>clientcredentials</code>, <code>code</code>, <code>api</code>. Default: <code>browser</code>.
-- `daily_api_calls` (Number, Optional) Daily call limit
+#### Required
+
+- `client_id` (String, Sensitive) Client ID
+- `client_secret` (String, Sensitive) Client Secret
+- `domain` (String) The Salesforce instance's login domain, e.g. acmecorp.my.salesforce.com
+
+#### Optional
+
+- `connect_mode` (String) Default: browser (i.e. oauth through Polytomic). If 'code' is specified, the response will include an auth_code for the user to enter when completing authorization. NOTE: when supplying client_id and client_secret the connect mode must be 'api'. Valid values: <code>browser</code>, <code>clientcredentials</code>, <code>code</code>, <code>api</code>. Default: <code>browser</code>.
+- `daily_api_calls` (Number) Daily call limit
 
     The daily Salesforce API call cap that Polytomic should adhere to.
-- `domain` (String, Required) The Salesforce instance's login domain, e.g. acmecorp.my.salesforce.com
-- `enable_multicurrency_lookup` (Boolean, Optional) Enable multicurrency source field support
+- `enable_multicurrency_lookup` (Boolean) Enable multicurrency source field support
 
     If incremental mode for bulk-syncing from Salesforce formula fields is enabled, setting this to true extends support to accurate currency conversions.
-- `enable_tooling` (Boolean, Optional) Enable support for Tooling API
+- `enable_tooling` (Boolean) Enable support for Tooling API
 
     If true, expose objects from the Salesforce Tooling API in the Polytomic bulk sync source object list.
-- `enforce_api_limits` (Boolean, Optional) Enforce API limits
+- `enforce_api_limits` (Boolean) Enforce API limits
 
     If true, Polytomic will restrict itself to a fixed daily cap of Salesforce API calls enforced by the number in daily_api_calls.
-- `instance_url_override` (String, Optional) Instance URL override
+- `oauth_refresh_token` (String, Sensitive)
+
+#### Read-Only
+
+- `instance_url_override` (String) Instance URL override
 
     This URL will be used for API requests instead of the one provided by Salesforce during OAuth.
-- `oauth_refresh_token` (String, Sensitive, Optional)
-- `username` (String, Optional) Salesforce user
+- `username` (String) Salesforce user
+
 

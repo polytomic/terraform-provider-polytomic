@@ -17,11 +17,15 @@ For detailed configuration guidance, see the [Customer.io connection guide](http
 
 ## Schema
 
-- `name` (String, Required)
-- `configuration` (Attributes, Required) See [below for nested schema](#nestedatt--configuration).
-- `organization` (String, Optional) Organization ID.
-- `id` (String, Read-only) Customer.io Connection identifier.
-- `force_destroy` (Boolean, Optional) Indicates whether dependent models, syncs, and bulk syncs should be
+### Required
+
+- `name` (String)
+- `configuration` (Attributes) See [below for nested schema](#nestedatt--configuration).
+
+### Optional
+
+- `organization` (String) Organization ID.
+- `force_destroy` (Boolean) Indicates whether dependent models, syncs, and bulk syncs should be
 cascade-deleted when this connection is destroyed.
 
     This only deletes other resources when the connection is destroyed, not when
@@ -34,11 +38,21 @@ destroying the connection, this flag will not work. Additionally when importing
 a connection, a successful `terraform apply` is required to set this value in
 state before it will take effect on a destroy operation.
 
+### Read-Only
+
+- `id` (String) Customer.io Connection identifier.
+
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
-- `app_api_key` (String, Sensitive, Required) App API Key
-- `region` (String, Optional) Datacenter region we detected
-- `site_id` (String, Required) Site ID
-- `tracking_api_key` (String, Sensitive, Required) Tracking API Key
+#### Required
+
+- `app_api_key` (String, Sensitive) App API Key
+- `site_id` (String) Site ID
+- `tracking_api_key` (String, Sensitive) Tracking API Key
+
+#### Read-Only
+
+- `region` (String) Datacenter region we detected
+
 

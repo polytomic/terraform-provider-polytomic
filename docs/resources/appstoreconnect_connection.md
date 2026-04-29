@@ -23,11 +23,15 @@ resource "polytomic_appstoreconnect_connection" "appstoreconnect" {
 
 ## Schema
 
-- `name` (String, Required)
-- `configuration` (Attributes, Required) See [below for nested schema](#nestedatt--configuration).
-- `organization` (String, Optional) Organization ID.
-- `id` (String, Read-only) App Store Connect Connection identifier.
-- `force_destroy` (Boolean, Optional) Indicates whether dependent models, syncs, and bulk syncs should be
+### Required
+
+- `name` (String)
+- `configuration` (Attributes) See [below for nested schema](#nestedatt--configuration).
+
+### Optional
+
+- `organization` (String) Organization ID.
+- `force_destroy` (Boolean) Indicates whether dependent models, syncs, and bulk syncs should be
 cascade-deleted when this connection is destroyed.
 
     This only deletes other resources when the connection is destroyed, not when
@@ -40,11 +44,18 @@ destroying the connection, this flag will not work. Additionally when importing
 a connection, a successful `terraform apply` is required to set this value in
 state before it will take effect on a destroy operation.
 
+### Read-Only
+
+- `id` (String) App Store Connect Connection identifier.
+
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
-- `issuer_id` (String, Required) Issuer ID
-- `private_key` (String, Sensitive, Required) Private key
-- `private_key_id` (String, Required) Private key ID
-- `vendor_number` (String, Required) Vendor number
+#### Required
+
+- `issuer_id` (String) Issuer ID
+- `private_key` (String, Sensitive) Private key
+- `private_key_id` (String) Private key ID
+- `vendor_number` (String) Vendor number
+
 

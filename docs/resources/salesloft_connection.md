@@ -26,11 +26,15 @@ resource "polytomic_salesloft_connection" "salesloft" {
 
 ## Schema
 
-- `name` (String, Required)
-- `configuration` (Attributes, Required) See [below for nested schema](#nestedatt--configuration).
-- `organization` (String, Optional) Organization ID.
-- `id` (String, Read-only) Salesloft Connection identifier.
-- `force_destroy` (Boolean, Optional) Indicates whether dependent models, syncs, and bulk syncs should be
+### Required
+
+- `name` (String)
+- `configuration` (Attributes) See [below for nested schema](#nestedatt--configuration).
+
+### Optional
+
+- `organization` (String) Organization ID.
+- `force_destroy` (Boolean) Indicates whether dependent models, syncs, and bulk syncs should be
 cascade-deleted when this connection is destroyed.
 
     This only deletes other resources when the connection is destroyed, not when
@@ -43,14 +47,27 @@ destroying the connection, this flag will not work. Additionally when importing
 a connection, a successful `terraform apply` is required to set this value in
 state before it will take effect on a destroy operation.
 
+### Read-Only
+
+- `id` (String) Salesloft Connection identifier.
+
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
-- `api_key` (String, Sensitive, Optional) API Key
-- `application_id` (String, Sensitive, Optional)
-- `auth_method` (String, Required) Authentication method Valid values: <code>oauth</code> (OAuth), <code>api_key</code> (API Key). Default: <code>oauth</code>.
-- `client_secret` (String, Sensitive, Optional)
-- `connected_user` (String, Optional) Connected user's email
-- `oauth_refresh_token` (String, Sensitive, Optional)
-- `oauth_token_expiry` (String, Optional)
+#### Required
+
+- `auth_method` (String) Authentication method Valid values: <code>oauth</code> (OAuth), <code>api_key</code> (API Key). Default: <code>oauth</code>.
+
+#### Optional
+
+- `api_key` (String, Sensitive) API Key
+- `application_id` (String, Sensitive)
+- `client_secret` (String, Sensitive)
+- `oauth_refresh_token` (String, Sensitive)
+- `oauth_token_expiry` (String)
+
+#### Read-Only
+
+- `connected_user` (String) Connected user's email
+
 

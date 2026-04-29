@@ -27,11 +27,15 @@ resource "polytomic_ironclad_connection" "ironclad" {
 
 ## Schema
 
-- `name` (String, Required)
-- `configuration` (Attributes, Required) See [below for nested schema](#nestedatt--configuration).
-- `organization` (String, Optional) Organization ID.
-- `id` (String, Read-only) Ironclad Connection identifier.
-- `force_destroy` (Boolean, Optional) Indicates whether dependent models, syncs, and bulk syncs should be
+### Required
+
+- `name` (String)
+- `configuration` (Attributes) See [below for nested schema](#nestedatt--configuration).
+
+### Optional
+
+- `organization` (String) Organization ID.
+- `force_destroy` (Boolean) Indicates whether dependent models, syncs, and bulk syncs should be
 cascade-deleted when this connection is destroyed.
 
     This only deletes other resources when the connection is destroyed, not when
@@ -44,13 +48,23 @@ destroying the connection, this flag will not work. Additionally when importing
 a connection, a successful `terraform apply` is required to set this value in
 state before it will take effect on a destroy operation.
 
+### Read-Only
+
+- `id` (String) Ironclad Connection identifier.
+
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
-- `api_key` (String, Sensitive, Optional) Access token
-- `auth_method` (String, Required) Authentication method Valid values: <code>oauth</code> (OAuth Client Credentials), <code>api_key</code> (API Key). Default: <code>oauth</code>.
-- `client_id` (String, Optional) Client ID
-- `client_secret` (String, Sensitive, Optional) Client secret
-- `environment` (String, Required) Valid values: <code>prod</code> (Prod), <code>demo</code> (Demo). Default: <code>prod</code>.
-- `user_as_email` (String, Optional) Ironclad user email
+#### Required
+
+- `auth_method` (String) Authentication method Valid values: <code>oauth</code> (OAuth Client Credentials), <code>api_key</code> (API Key). Default: <code>oauth</code>.
+- `environment` (String) Valid values: <code>prod</code> (Prod), <code>demo</code> (Demo). Default: <code>prod</code>.
+
+#### Optional
+
+- `api_key` (String, Sensitive) Access token
+- `client_id` (String) Client ID
+- `client_secret` (String, Sensitive) Client secret
+- `user_as_email` (String) Ironclad user email
+
 

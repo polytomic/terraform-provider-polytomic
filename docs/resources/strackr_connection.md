@@ -24,11 +24,15 @@ resource "polytomic_strackr_connection" "strackr" {
 
 ## Schema
 
-- `name` (String, Required)
-- `configuration` (Attributes, Required) See [below for nested schema](#nestedatt--configuration).
-- `organization` (String, Optional) Organization ID.
-- `id` (String, Read-only) Strackr Connection identifier.
-- `force_destroy` (Boolean, Optional) Indicates whether dependent models, syncs, and bulk syncs should be
+### Required
+
+- `name` (String)
+- `configuration` (Attributes) See [below for nested schema](#nestedatt--configuration).
+
+### Optional
+
+- `organization` (String) Organization ID.
+- `force_destroy` (Boolean) Indicates whether dependent models, syncs, and bulk syncs should be
 cascade-deleted when this connection is destroyed.
 
     This only deletes other resources when the connection is destroyed, not when
@@ -41,11 +45,21 @@ destroying the connection, this flag will not work. Additionally when importing
 a connection, a successful `terraform apply` is required to set this value in
 state before it will take effect on a destroy operation.
 
+### Read-Only
+
+- `id` (String) Strackr Connection identifier.
+
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
-- `api_id` (Number, Sensitive, Required) API ID
-- `api_key` (String, Sensitive, Required) API Key
-- `currency_type` (String, Required) Currency Type Valid values: <code>EUR</code>, <code>USD</code>, <code>CAD</code>, <code>GBP</code>, <code>RUB</code>, <code>SEK</code>, <code>AUD</code>, <code>INR</code>, <code>NOK</code>, <code>DKK</code>. Default: <code>USD</code>.
-- `linkbuilder_customs_text` (String, Optional) Linkbuilder Customs Text
+#### Required
+
+- `api_id` (Number, Sensitive) API ID
+- `api_key` (String, Sensitive) API Key
+- `currency_type` (String) Currency Type Valid values: <code>EUR</code>, <code>USD</code>, <code>CAD</code>, <code>GBP</code>, <code>RUB</code>, <code>SEK</code>, <code>AUD</code>, <code>INR</code>, <code>NOK</code>, <code>DKK</code>. Default: <code>USD</code>.
+
+#### Optional
+
+- `linkbuilder_customs_text` (String) Linkbuilder Customs Text
+
 

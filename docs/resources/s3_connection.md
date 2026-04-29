@@ -31,11 +31,15 @@ resource "polytomic_s3_connection" "s3" {
 
 ## Schema
 
-- `name` (String, Required)
-- `configuration` (Attributes, Required) See [below for nested schema](#nestedatt--configuration).
-- `organization` (String, Optional) Organization ID.
-- `id` (String, Read-only) S3 Connection identifier.
-- `force_destroy` (Boolean, Optional) Indicates whether dependent models, syncs, and bulk syncs should be
+### Required
+
+- `name` (String)
+- `configuration` (Attributes) See [below for nested schema](#nestedatt--configuration).
+
+### Optional
+
+- `organization` (String) Organization ID.
+- `force_destroy` (Boolean) Indicates whether dependent models, syncs, and bulk syncs should be
 cascade-deleted when this connection is destroyed.
 
     This only deletes other resources when the connection is destroyed, not when
@@ -48,45 +52,58 @@ destroying the connection, this flag will not work. Additionally when importing
 a connection, a successful `terraform apply` is required to set this value in
 state before it will take effect on a destroy operation.
 
+### Read-Only
+
+- `id` (String) S3 Connection identifier.
+
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
-- `auth_mode` (String, Required) Authentication Method
+#### Required
+
+- `auth_mode` (String) Authentication Method
 
     How to authenticate with AWS. Defaults to Access Key and Secret Valid values: <code>access_key_and_secret</code> (Access Key and Secret), <code>iam_role</code> (IAM role). Default: <code>access_key_and_secret</code>.
-- `aws_access_key_id` (String, Optional) AWS Access Key ID
-
-    Access Key ID with read/write access to a bucket.
-- `aws_secret_access_key` (String, Sensitive, Optional) AWS Secret Access Key
-- `aws_user` (String, Optional) User ARN
-- `csv_has_headers` (Boolean, Optional) CSV files have headers
-
-    Whether CSV files have a header row with field names. Default: <code>true</code>.
-- `directory_glob_pattern` (String, Optional) Tables glob path
-- `enable_event_notifications` (Boolean, Optional) Enable event notifications
-
-    Enable S3 event notifications for incremental sync
-- `event_queue_arn` (String, Optional) Event Queue ARN
-
-    ARN of the SQS queue receiving S3 event notifications
-- `external_id` (String, Optional) External ID
-
-    External ID for the IAM role
-- `iam_role_arn` (String, Optional) IAM Role ARN
-- `is_directory_snapshot` (Boolean, Optional) Multi-directory multi-table Default: <code>false</code>.
-- `is_single_table` (Boolean, Optional) Files are time-based snapshots
-
-    Treat the files as a single table. Default: <code>false</code>.
-- `s3_bucket_name` (String, Required) S3 Bucket Name
+- `s3_bucket_name` (String) S3 Bucket Name
 
     Bucket name (folder optional); ex: s3://polytomic/dataset
-- `s3_bucket_region` (String, Required) S3 Bucket Region
-- `single_table_file_format` (String, Optional) File format Valid values: <code>csv</code> (CSV), <code>json</code> (JSON), <code>parquet</code> (Parquet). Default: <code>csv</code>.
-- `single_table_file_formats` (Set of String, Optional) File formats
+- `s3_bucket_region` (String) S3 Bucket Region
+
+#### Optional
+
+- `aws_access_key_id` (String) AWS Access Key ID
+
+    Access Key ID with read/write access to a bucket.
+- `aws_secret_access_key` (String, Sensitive) AWS Secret Access Key
+- `csv_has_headers` (Boolean) CSV files have headers
+
+    Whether CSV files have a header row with field names. Default: <code>true</code>.
+- `directory_glob_pattern` (String) Tables glob path
+- `enable_event_notifications` (Boolean) Enable event notifications
+
+    Enable S3 event notifications for incremental sync
+- `event_queue_arn` (String) Event Queue ARN
+
+    ARN of the SQS queue receiving S3 event notifications
+- `iam_role_arn` (String) IAM Role ARN
+- `is_directory_snapshot` (Boolean) Multi-directory multi-table Default: <code>false</code>.
+- `is_single_table` (Boolean) Files are time-based snapshots
+
+    Treat the files as a single table. Default: <code>false</code>.
+- `single_table_file_format` (String) File format Valid values: <code>csv</code> (CSV), <code>json</code> (JSON), <code>parquet</code> (Parquet). Default: <code>csv</code>.
+- `single_table_file_formats` (Set of String) File formats
 
     File formats that may be present across different tables Default: <code>[[csv]]</code>.
-- `single_table_name` (String, Optional) Collection name
-- `skip_lines` (Number, Optional) Skip first lines
+- `single_table_name` (String) Collection name
+- `skip_lines` (Number) Skip first lines
 
     Skip first N lines of each CSV file. Default: <code>0</code>.
+
+#### Read-Only
+
+- `aws_user` (String) User ARN
+- `external_id` (String) External ID
+
+    External ID for the IAM role
+
 

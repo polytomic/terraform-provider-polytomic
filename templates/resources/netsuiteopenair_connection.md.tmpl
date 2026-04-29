@@ -17,11 +17,15 @@ For detailed configuration guidance, see the [NetSuite OpenAir connection guide]
 
 ## Schema
 
-- `name` (String, Required)
-- `configuration` (Attributes, Required) See [below for nested schema](#nestedatt--configuration).
-- `organization` (String, Optional) Organization ID.
-- `id` (String, Read-only) NetSuite OpenAir Connection identifier.
-- `force_destroy` (Boolean, Optional) Indicates whether dependent models, syncs, and bulk syncs should be
+### Required
+
+- `name` (String)
+- `configuration` (Attributes) See [below for nested schema](#nestedatt--configuration).
+
+### Optional
+
+- `organization` (String) Organization ID.
+- `force_destroy` (Boolean) Indicates whether dependent models, syncs, and bulk syncs should be
 cascade-deleted when this connection is destroyed.
 
     This only deletes other resources when the connection is destroyed, not when
@@ -34,14 +38,21 @@ destroying the connection, this flag will not work. Additionally when importing
 a connection, a successful `terraform apply` is required to set this value in
 state before it will take effect on a destroy operation.
 
+### Read-Only
+
+- `id` (String) NetSuite OpenAir Connection identifier.
+
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
-- `api_key` (String, Sensitive, Required) API Key
-- `api_namespace` (String, Required) API Namespace
-- `client_id` (String, Sensitive, Required) Client ID
-- `client_secret` (String, Sensitive, Required) Client Secret
-- `company_id` (String, Required) Company ID
-- `per_day_rate_limit` (Number, Required) Per Day Rate Limit
-- `per_minute_rate_limit` (Number, Required) Per Minute Rate Limit
+#### Required
+
+- `api_key` (String, Sensitive) API Key
+- `api_namespace` (String) API Namespace
+- `client_id` (String, Sensitive) Client ID
+- `client_secret` (String, Sensitive) Client Secret
+- `company_id` (String) Company ID
+- `per_day_rate_limit` (Number) Per Day Rate Limit
+- `per_minute_rate_limit` (Number) Per Minute Rate Limit
+
 

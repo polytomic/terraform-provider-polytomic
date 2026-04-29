@@ -26,11 +26,15 @@ resource "polytomic_ware2go_connection" "ware2go" {
 
 ## Schema
 
-- `name` (String, Required)
-- `configuration` (Attributes, Required) See [below for nested schema](#nestedatt--configuration).
-- `organization` (String, Optional) Organization ID.
-- `id` (String, Read-only) Ware2Go Connection identifier.
-- `force_destroy` (Boolean, Optional) Indicates whether dependent models, syncs, and bulk syncs should be
+### Required
+
+- `name` (String)
+- `configuration` (Attributes) See [below for nested schema](#nestedatt--configuration).
+
+### Optional
+
+- `organization` (String) Organization ID.
+- `force_destroy` (Boolean) Indicates whether dependent models, syncs, and bulk syncs should be
 cascade-deleted when this connection is destroyed.
 
     This only deletes other resources when the connection is destroyed, not when
@@ -43,11 +47,21 @@ destroying the connection, this flag will not work. Additionally when importing
 a connection, a successful `terraform apply` is required to set this value in
 state before it will take effect on a destroy operation.
 
+### Read-Only
+
+- `id` (String) Ware2Go Connection identifier.
+
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
-- `client_id` (String, Sensitive, Required) API User Name
-- `client_secret` (String, Required) API Secret
-- `merchant_id` (String, Required) Merchant ID
-- `staging` (Boolean, Optional) Use Staging Environment
+#### Required
+
+- `client_id` (String, Sensitive) API User Name
+- `client_secret` (String) API Secret
+- `merchant_id` (String) Merchant ID
+
+#### Optional
+
+- `staging` (Boolean) Use Staging Environment
+
 
