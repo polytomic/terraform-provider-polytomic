@@ -1,3 +1,9 @@
+## v1.5.2 (30 April 2026)
+
+BUG FIXES:
+
+- Fixed incompatibility between provider and organization discovery endpoints.
+
 ## v1.5.1 (28 April 2026)
 
 BUG FIXES:
