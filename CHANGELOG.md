@@ -1,3 +1,9 @@
+## v1.5.3 (6 May 2026)
+
+BUG FIXES:
+
+- Fixed misleading "partner key is required" error when using an API key with a resource that sets `organization`. The provider now verifies the organization via `/api/me` instead of the partner-only `Organization.List` endpoint.
+
 ## v1.5.2 (30 April 2026)
 
 BUG FIXES:
