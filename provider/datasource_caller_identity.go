@@ -96,7 +96,7 @@ func (id *identityDatasource) Read(ctx context.Context, req datasource.ReadReque
 	// Get the schemas
 	var client *ptclient.Client
 	var err error
-	client, err = id.provider.Client(data.OrganizationID.ValueString())
+	client, err = id.provider.Client(ctx, data.OrganizationID.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("error getting client", err.Error())
 		return

@@ -900,7 +900,7 @@ func (r *syncResource) Create(ctx context.Context, req resource.CreateRequest, r
 	if identity.Source != nil && identity.Source.ModelId != "" && identity.Source.Field != "" {
 		request.Identity = &identity
 	}
-	client, err := r.provider.Client(data.Organization.ValueString())
+	client, err := r.provider.Client(ctx, data.Organization.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
@@ -943,7 +943,7 @@ func (r *syncResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 		return
 	}
 
-	client, err := r.provider.Client(data.Organization.ValueString())
+	client, err := r.provider.Client(ctx, data.Organization.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
@@ -1112,7 +1112,7 @@ func (r *syncResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	planTarget := data.Target
 	planPassphrase := data.EncryptionPassphrase
 
-	client, err := r.provider.Client(data.Organization.ValueString())
+	client, err := r.provider.Client(ctx, data.Organization.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
@@ -1148,7 +1148,7 @@ func (r *syncResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 	diags := req.State.Get(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 
-	client, err := r.provider.Client(data.Organization.ValueString())
+	client, err := r.provider.Client(ctx, data.Organization.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return

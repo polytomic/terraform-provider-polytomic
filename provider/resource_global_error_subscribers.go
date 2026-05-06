@@ -75,7 +75,7 @@ func (r *globalErrorSubscribersResource) Create(ctx context.Context, req resourc
 		return
 	}
 
-	client, err := r.provider.Client(data.Organization.ValueString())
+	client, err := r.provider.Client(ctx, data.Organization.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
@@ -121,7 +121,7 @@ func (r *globalErrorSubscribersResource) Read(ctx context.Context, req resource.
 		return
 	}
 
-	client, err := r.provider.Client(data.Organization.ValueString())
+	client, err := r.provider.Client(ctx, data.Organization.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
@@ -157,7 +157,7 @@ func (r *globalErrorSubscribersResource) Update(ctx context.Context, req resourc
 		return
 	}
 
-	client, err := r.provider.Client(data.Organization.ValueString())
+	client, err := r.provider.Client(ctx, data.Organization.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
@@ -203,7 +203,7 @@ func (r *globalErrorSubscribersResource) Delete(ctx context.Context, req resourc
 		return
 	}
 
-	client, err := r.provider.Client(data.Organization.ValueString())
+	client, err := r.provider.Client(ctx, data.Organization.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return

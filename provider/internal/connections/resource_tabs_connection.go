@@ -107,7 +107,7 @@ func (r *TabsConnectionResource) Create(ctx context.Context, req resource.Create
 		return
 	}
 
-	client, err := r.provider.Client(data.Organization.ValueString())
+	client, err := r.provider.Client(ctx, data.Organization.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
@@ -180,14 +180,15 @@ func (r *TabsConnectionResource) Read(ctx context.Context, req resource.ReadRequ
 		return
 	}
 
-	client, err := r.provider.Client(data.Organization.ValueString())
+	client, err := r.provider.Client(ctx, data.Organization.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddWarning("Error getting client; trying partner client", err.Error())
-		client, err = r.provider.PartnerClient()
-	}
-	if err != nil {
-		resp.Diagnostics.AddError("Error getting client", err.Error())
-		return
+		if data.Organization.IsNull() || data.Organization.ValueString() == "" {
+			client, err = r.provider.PartnerClient()
+		}
+		if err != nil {
+			resp.Diagnostics.AddError("Error getting client", err.Error())
+			return
+		}
 	}
 	connection, err := client.Connections.Get(ctx, data.Id.ValueString())
 	if err != nil {
@@ -248,7 +249,7 @@ func (r *TabsConnectionResource) Update(ctx context.Context, req resource.Update
 		return
 	}
 
-	client, err := r.provider.Client(data.Organization.ValueString())
+	client, err := r.provider.Client(ctx, data.Organization.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
@@ -328,7 +329,7 @@ func (r *TabsConnectionResource) Delete(ctx context.Context, req resource.Delete
 		return
 	}
 
-	client, err := r.provider.Client(data.Organization.ValueString())
+	client, err := r.provider.Client(ctx, data.Organization.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return

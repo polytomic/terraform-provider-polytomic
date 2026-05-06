@@ -758,7 +758,7 @@ func (r *bulkSyncResource) Create(ctx context.Context, req resource.CreateReques
 		}
 		sourceConf = sc
 	}
-	client, err := r.provider.Client(data.Organization.ValueString())
+	client, err := r.provider.Client(ctx, data.Organization.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
@@ -849,7 +849,7 @@ func (r *bulkSyncResource) Read(ctx context.Context, req resource.ReadRequest, r
 		return
 	}
 
-	client, err := r.provider.Client(data.Organization.ValueString())
+	client, err := r.provider.Client(ctx, data.Organization.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
@@ -1046,7 +1046,7 @@ func (r *bulkSyncResource) Update(ctx context.Context, req resource.UpdateReques
 		sourceConf = sc
 	}
 
-	client, err := r.provider.Client(data.Organization.ValueString())
+	client, err := r.provider.Client(ctx, data.Organization.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
@@ -1140,7 +1140,7 @@ func (r *bulkSyncResource) Delete(ctx context.Context, req resource.DeleteReques
 		return
 	}
 
-	client, err := r.provider.Client(data.Organization.ValueString())
+	client, err := r.provider.Client(ctx, data.Organization.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return

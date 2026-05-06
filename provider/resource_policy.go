@@ -108,7 +108,7 @@ func (r *policyResource) Create(ctx context.Context, req resource.CreateRequest,
 		return
 	}
 
-	client, err := r.provider.Client(data.Organization.ValueString())
+	client, err := r.provider.Client(ctx, data.Organization.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
@@ -186,7 +186,7 @@ func (r *policyResource) Read(ctx context.Context, req resource.ReadRequest, res
 		return
 	}
 
-	client, err := r.provider.Client(data.Organization.ValueString())
+	client, err := r.provider.Client(ctx, data.Organization.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
@@ -264,7 +264,7 @@ func (r *policyResource) Update(ctx context.Context, req resource.UpdateRequest,
 		return
 	}
 
-	client, err := r.provider.Client(data.Organization.ValueString())
+	client, err := r.provider.Client(ctx, data.Organization.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
@@ -337,7 +337,7 @@ func (r *policyResource) Delete(ctx context.Context, req resource.DeleteRequest,
 		return
 	}
 
-	client, err := r.provider.Client(data.Organization.ValueString())
+	client, err := r.provider.Client(ctx, data.Organization.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return

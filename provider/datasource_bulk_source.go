@@ -77,7 +77,7 @@ func (d *bulkSourceDatasource) Read(ctx context.Context, req datasource.ReadRequ
 	}
 
 	// Get the schemas
-	client, err := d.provider.Client(data.Organization.ValueString())
+	client, err := d.provider.Client(ctx, data.Organization.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return

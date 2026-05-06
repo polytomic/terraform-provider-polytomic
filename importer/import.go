@@ -75,7 +75,7 @@ func Init(ctx context.Context, clientProvider *providerclient.Provider, organiza
 			orgPath := filepath.Join(outputPath, pointer.Get(org.Name))
 
 			// Import resources for this organization
-			orgClient, err := clientProvider.Client(pointer.Get(org.Id))
+			orgClient, err := clientProvider.Client(ctx, pointer.Get(org.Id))
 			if err != nil {
 				log.Fatal().AnErr("error", err).Msg("failed to create organization client")
 			}
@@ -83,7 +83,7 @@ func Init(ctx context.Context, clientProvider *providerclient.Provider, organiza
 		}
 	} else {
 		// Single organization - use it directly
-		orgClient, err := clientProvider.Client(pointer.Get(targetOrgs[0].Id))
+		orgClient, err := clientProvider.Client(ctx, pointer.Get(targetOrgs[0].Id))
 		if err != nil {
 			log.Fatal().AnErr("error", err).Msg("failed to create organization client")
 		}

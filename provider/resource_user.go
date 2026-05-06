@@ -105,7 +105,7 @@ func (r *userResource) Create(ctx context.Context, req resource.CreateRequest, r
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	client, err := r.provider.Client(data.Organization.ValueString())
+	client, err := r.provider.Client(ctx, data.Organization.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
@@ -153,7 +153,7 @@ func (r *userResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 	}
 
 	orgID := data.Organization.ValueString()
-	client, err := r.provider.Client(orgID)
+	client, err := r.provider.Client(ctx, orgID)
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
@@ -205,7 +205,7 @@ func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		return
 	}
 
-	client, err := r.provider.Client(data.Organization.ValueString())
+	client, err := r.provider.Client(ctx, data.Organization.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
@@ -269,7 +269,7 @@ func (r *userResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	client, err := r.provider.Client(data.Organization.ValueString())
+	client, err := r.provider.Client(ctx, data.Organization.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
@@ -294,7 +294,7 @@ func (r *userResource) ImportState(ctx context.Context, req resource.ImportState
 		// Simple format: just identifier, auto-detect organization from caller identity
 		identifier = req.ID
 
-		client, err := r.provider.Client("")
+		client, err := r.provider.Client(ctx, "")
 		if err != nil {
 			resp.Diagnostics.AddError("Error getting client", err.Error())
 			return
@@ -329,7 +329,7 @@ func (r *userResource) ImportState(ctx context.Context, req resource.ImportState
 			"email":  identifier,
 		})
 
-		client, err := r.provider.Client(organizationID)
+		client, err := r.provider.Client(ctx, organizationID)
 		if err != nil {
 			resp.Diagnostics.AddError("Error getting client", err.Error())
 			return

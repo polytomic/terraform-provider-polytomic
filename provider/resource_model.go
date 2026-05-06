@@ -267,7 +267,7 @@ func (r *modelResource) Create(ctx context.Context, req resource.CreateRequest, 
 		request.OrganizationId = data.Organization.ValueStringPointer()
 	}
 
-	client, err := r.provider.Client(data.Organization.ValueString())
+	client, err := r.provider.Client(ctx, data.Organization.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
@@ -454,7 +454,7 @@ func (r *modelResource) Read(ctx context.Context, req resource.ReadRequest, resp
 		return
 	}
 
-	client, err := r.provider.Client(data.Organization.ValueString())
+	client, err := r.provider.Client(ctx, data.Organization.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
@@ -698,7 +698,7 @@ func (r *modelResource) Update(ctx context.Context, req resource.UpdateRequest, 
 		request.OrganizationId = data.Organization.ValueStringPointer()
 	}
 
-	client, err := r.provider.Client(data.Organization.ValueString())
+	client, err := r.provider.Client(ctx, data.Organization.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
@@ -881,7 +881,7 @@ func (r *modelResource) Delete(ctx context.Context, req resource.DeleteRequest, 
 		return
 	}
 
-	client, err := r.provider.Client(data.Organization.ValueString())
+	client, err := r.provider.Client(ctx, data.Organization.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return

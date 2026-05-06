@@ -20,6 +20,11 @@ import (
 	ptoption "github.com/polytomic/polytomic-go/option"
 )
 
+// ErrNoPartnerKey is returned by PartnerClient when no partner or deployment
+// key is configured. Callers can use errors.Is to detect this case and decide
+// whether to fall back to surfacing an earlier error.
+var ErrNoPartnerKey = errors.New("partner key is required")
+
 const (
 	UserAgent    = "polytomic-terraform-provider"
 	APIVersion   = "2024-02-08"
@@ -109,7 +114,7 @@ func (p *Provider) Validate() error {
 	return p.opts.Validate()
 }
 
-func (p *Provider) Client(org string) (*ptclient.Client, error) {
+func (p *Provider) Client(ctx context.Context, org string) (*ptclient.Client, error) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
@@ -126,28 +131,31 @@ func (p *Provider) Client(org string) (*ptclient.Client, error) {
 	}
 
 	if p.opts.APIKey != "" {
+		c, err := p.client()
+		if err != nil {
+			return nil, err
+		}
 		if orgID != uuid.Nil {
-			// confirm that the requested org ID matches the org ID for this key
-			orgs, err := p.ListOrganizations(context.Background())
+			// Confirm that the requested org ID matches the org ID for this
+			// API key. /api/me works with API keys; the /organizations list
+			// endpoint requires a partner key, so we can't use it here.
+			identity, err := c.Identity.Get(ctx)
 			if err != nil {
-				return nil, fmt.Errorf("failed to list organizations for API key: %w", err)
+				return nil, fmt.Errorf("failed to get caller identity for API key: %w", err)
 			}
-			if len(orgs) < 1 || pointer.Get(orgs[0].Id) != orgID.String() {
+			if identity == nil || identity.Data == nil || pointer.Get(identity.Data.OrganizationId) != orgID.String() {
 				return nil, fmt.Errorf("API key does not have access to organization %s", orgID)
 			}
 		}
 
-		return p.client()
+		p.clients[orgID] = c
+		return c, nil
 	}
 
 	if orgID == uuid.Nil {
 		return nil, errors.New("organization ID must be specified with partner or deployment key")
 	}
 	if p.opts.PartnerKey != "" || p.opts.DeploymentKey != "" {
-		if orgID == uuid.Nil {
-			return p.PartnerClient()
-		}
-
 		headers := http.Header{
 			"User-Agent": []string{UserAgent},
 			// Use Basic Auth with organization ID as username and partner key as password
@@ -203,7 +211,7 @@ func (p *Provider) client() (*ptclient.Client, error) {
 
 func (p *Provider) PartnerClient() (*ptclient.Client, error) {
 	if p.opts.PartnerKey == "" && p.opts.DeploymentKey == "" {
-		return nil, errors.New("partner key is required")
+		return nil, ErrNoPartnerKey
 	}
 	return p.client()
 }

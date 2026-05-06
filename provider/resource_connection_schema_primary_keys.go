@@ -123,7 +123,7 @@ func (r *connectionSchemaPrimaryKeysResource) Create(ctx context.Context, req re
 	}
 
 	// Get client
-	client, err := r.provider.Client(data.Organization.ValueString())
+	client, err := r.provider.Client(ctx, data.Organization.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
@@ -194,7 +194,7 @@ func (r *connectionSchemaPrimaryKeysResource) Read(ctx context.Context, req reso
 		return
 	}
 
-	client, err := r.provider.Client(data.Organization.ValueString())
+	client, err := r.provider.Client(ctx, data.Organization.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
@@ -298,7 +298,7 @@ func (r *connectionSchemaPrimaryKeysResource) Update(ctx context.Context, req re
 	}
 
 	// Get client
-	client, err := r.provider.Client(data.Organization.ValueString())
+	client, err := r.provider.Client(ctx, data.Organization.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
@@ -353,7 +353,7 @@ func (r *connectionSchemaPrimaryKeysResource) Delete(ctx context.Context, req re
 		return
 	}
 
-	client, err := r.provider.Client(data.Organization.ValueString())
+	client, err := r.provider.Client(ctx, data.Organization.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return

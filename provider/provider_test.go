@@ -19,7 +19,7 @@ func testClient(t *testing.T, org string) *ptclient.Client {
 		providerclient.OptionsFromEnv(),
 	)
 	require.NoError(t, err)
-	c, err := provider.Client(org)
+	c, err := provider.Client(t.Context(), org)
 	require.NoError(t, err)
 	return c
 }

@@ -177,7 +177,7 @@ func (r *CustomeriowarehouseexportsConnectionResource) Create(ctx context.Contex
 		return
 	}
 
-	client, err := r.provider.Client(data.Organization.ValueString())
+	client, err := r.provider.Client(ctx, data.Organization.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
@@ -257,14 +257,15 @@ func (r *CustomeriowarehouseexportsConnectionResource) Read(ctx context.Context,
 		return
 	}
 
-	client, err := r.provider.Client(data.Organization.ValueString())
+	client, err := r.provider.Client(ctx, data.Organization.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddWarning("Error getting client; trying partner client", err.Error())
-		client, err = r.provider.PartnerClient()
-	}
-	if err != nil {
-		resp.Diagnostics.AddError("Error getting client", err.Error())
-		return
+		if data.Organization.IsNull() || data.Organization.ValueString() == "" {
+			client, err = r.provider.PartnerClient()
+		}
+		if err != nil {
+			resp.Diagnostics.AddError("Error getting client", err.Error())
+			return
+		}
 	}
 	connection, err := client.Connections.Get(ctx, data.Id.ValueString())
 	if err != nil {
@@ -332,7 +333,7 @@ func (r *CustomeriowarehouseexportsConnectionResource) Update(ctx context.Contex
 		return
 	}
 
-	client, err := r.provider.Client(data.Organization.ValueString())
+	client, err := r.provider.Client(ctx, data.Organization.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
@@ -419,7 +420,7 @@ func (r *CustomeriowarehouseexportsConnectionResource) Delete(ctx context.Contex
 		return
 	}
 
-	client, err := r.provider.Client(data.Organization.ValueString())
+	client, err := r.provider.Client(ctx, data.Organization.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return

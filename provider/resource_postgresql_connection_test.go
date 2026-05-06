@@ -51,6 +51,50 @@ func TestAccPostgresqlConnectionResource(t *testing.T) {
 	})
 }
 
+// TestAccPostgresqlConnectionResource_APIKeyWithOrganization exercises the case
+// where a caller is authenticated with an API key and explicitly sets
+// `organization` on the resource to that key's own organization. This used to
+// fail with "partner key is required" because the provider verified the org by
+// calling ListOrganizations, which now requires a partner key.
+func TestAccPostgresqlConnectionResource_APIKeyWithOrganization(t *testing.T) {
+	if !APIKey() {
+		t.Skip("requires API key authentication")
+	}
+
+	name := fmt.Sprintf("TestAccPGConn-%s", uuid.NewString())
+	pg := testPostgresConfig(t)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV6ProviderFactories: TestAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: TestCaseTfResource(t, postgresqlConnectionWithOrgTemplate, TestCaseTfArgs{
+					Name:     name,
+					APIKey:   true,
+					Postgres: pg,
+				}),
+			},
+		},
+	})
+}
+
+const postgresqlConnectionWithOrgTemplate = `
+data "polytomic_caller_identity" "this" {}
+
+resource "polytomic_postgresql_connection" "test" {
+  name         = "{{.Name}}"
+  organization = data.polytomic_caller_identity.this.organization_id
+  configuration = {
+    hostname = "{{.Postgres.Host}}"
+    database = "{{.Postgres.Database}}"
+    username = "{{.Postgres.Username}}"
+    password = "{{.Postgres.Password}}"
+    port     = {{.Postgres.Port}}
+  }
+}
+`
+
 const postgresqlConnectionTemplate = `
 {{if not .APIKey}}
 resource "polytomic_organization" "test" {

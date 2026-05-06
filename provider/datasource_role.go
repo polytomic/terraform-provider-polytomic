@@ -62,7 +62,7 @@ func (d *roleDatasource) Read(ctx context.Context, req datasource.ReadRequest, r
 		return
 	}
 
-	client, err := d.provider.Client(data.Organization.ValueString())
+	client, err := d.provider.Client(ctx, data.Organization.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
