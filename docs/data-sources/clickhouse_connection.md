@@ -36,9 +36,27 @@ data "polytomic_clickhouse_connection" "clickhouse" {
 
 Read-Only:
 
+- `auth_mode` (String) AWS Authentication Method
+
+    How to authenticate with AWS for the staging bucket Valid values: <code>access_key_and_secret</code> (Access Key and Secret), <code>iam_role</code> (IAM role). Default: <code>access_key_and_secret</code>.
+- `aws_access_key_id` (String) AWS Access Key ID (destinations only)
+- `aws_user` (String) User ARN (destinations only)
+- `azure_account_name` (String) Storage Account Name (destinations only)
+- `cloud_provider` (String) Cloud Provider (destination support only) Valid values: <code>aws</code> (AWS), <code>azure</code> (Azure).
+- `container_name` (String) Storage Container Name (destinations only)
+
+    Container used for staging data load files (may be "container" or "container/prefix")
 - `database` (String)
+- `external_id` (String) External ID
+
+    External ID for the IAM role
 - `hostname` (String)
+- `iam_role_arn` (String) IAM Role ARN
 - `port` (Number) Default: <code>9440</code>.
+- `s3_bucket_name` (String) S3 Bucket Name (destinations only)
+
+    Name of bucket used for staging data load files
+- `s3_bucket_region` (String) S3 Bucket Region (destinations only)
 - `skip_verify` (Boolean) Skip certificate verification Default: <code>true</code>.
 - `ssh` (Boolean) Connect over SSH tunnel
 - `ssh_host` (String) SSH host

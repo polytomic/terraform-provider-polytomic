@@ -51,16 +51,64 @@ func (d *ClickhouseConnectionDataSource) Schema(ctx context.Context, req datasou
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
+					"auth_mode": schema.StringAttribute{
+						MarkdownDescription: `AWS Authentication Method
+
+    How to authenticate with AWS for the staging bucket Valid values: <code>access_key_and_secret</code> (Access Key and Secret), <code>iam_role</code> (IAM role). Default: <code>access_key_and_secret</code>.`,
+						Computed: true,
+					},
+					"aws_access_key_id": schema.StringAttribute{
+						MarkdownDescription: `AWS Access Key ID (destinations only)`,
+						Computed:            true,
+					},
+					"aws_user": schema.StringAttribute{
+						MarkdownDescription: `User ARN (destinations only)`,
+						Computed:            true,
+					},
+					"azure_account_name": schema.StringAttribute{
+						MarkdownDescription: `Storage Account Name (destinations only)`,
+						Computed:            true,
+					},
+					"cloud_provider": schema.StringAttribute{
+						MarkdownDescription: `Cloud Provider (destination support only) Valid values: <code>aws</code> (AWS), <code>azure</code> (Azure).`,
+						Computed:            true,
+					},
+					"container_name": schema.StringAttribute{
+						MarkdownDescription: `Storage Container Name (destinations only)
+
+    Container used for staging data load files (may be "container" or "container/prefix")`,
+						Computed: true,
+					},
 					"database": schema.StringAttribute{
 						MarkdownDescription: ``,
 						Computed:            true,
+					},
+					"external_id": schema.StringAttribute{
+						MarkdownDescription: `External ID
+
+    External ID for the IAM role`,
+						Computed: true,
 					},
 					"hostname": schema.StringAttribute{
 						MarkdownDescription: ``,
 						Computed:            true,
 					},
+					"iam_role_arn": schema.StringAttribute{
+						MarkdownDescription: `IAM Role ARN`,
+						Computed:            true,
+					},
 					"port": schema.Int64Attribute{
 						MarkdownDescription: `Default: <code>9440</code>.`,
+						Computed:            true,
+					},
+					"s3_bucket_name": schema.StringAttribute{
+						MarkdownDescription: `S3 Bucket Name (destinations only)
+
+    Name of bucket used for staging data load files`,
+						Computed: true,
+					},
+					"s3_bucket_region": schema.StringAttribute{
+						MarkdownDescription: `S3 Bucket Region (destinations only)`,
 						Computed:            true,
 					},
 					"skip_verify": schema.BoolAttribute{
@@ -99,16 +147,26 @@ func (d *ClickhouseConnectionDataSource) Schema(ctx context.Context, req datasou
 }
 
 type ClickhouseDataSourceConf struct {
-	Database    string `mapstructure:"database" tfsdk:"database"`
-	Hostname    string `mapstructure:"hostname" tfsdk:"hostname"`
-	Port        int64  `mapstructure:"port" tfsdk:"port"`
-	Skip_verify bool   `mapstructure:"skip_verify" tfsdk:"skip_verify"`
-	Ssh         bool   `mapstructure:"ssh" tfsdk:"ssh"`
-	Ssh_host    string `mapstructure:"ssh_host" tfsdk:"ssh_host"`
-	Ssh_port    int64  `mapstructure:"ssh_port" tfsdk:"ssh_port"`
-	Ssh_user    string `mapstructure:"ssh_user" tfsdk:"ssh_user"`
-	Ssl         bool   `mapstructure:"ssl" tfsdk:"ssl"`
-	Username    string `mapstructure:"username" tfsdk:"username"`
+	Auth_mode          string `mapstructure:"auth_mode" tfsdk:"auth_mode"`
+	Aws_access_key_id  string `mapstructure:"aws_access_key_id" tfsdk:"aws_access_key_id"`
+	Aws_user           string `mapstructure:"aws_user" tfsdk:"aws_user"`
+	Azure_account_name string `mapstructure:"azure_account_name" tfsdk:"azure_account_name"`
+	Cloud_provider     string `mapstructure:"cloud_provider" tfsdk:"cloud_provider"`
+	Container_name     string `mapstructure:"container_name" tfsdk:"container_name"`
+	Database           string `mapstructure:"database" tfsdk:"database"`
+	External_id        string `mapstructure:"external_id" tfsdk:"external_id"`
+	Hostname           string `mapstructure:"hostname" tfsdk:"hostname"`
+	Iam_role_arn       string `mapstructure:"iam_role_arn" tfsdk:"iam_role_arn"`
+	Port               int64  `mapstructure:"port" tfsdk:"port"`
+	S3_bucket_name     string `mapstructure:"s3_bucket_name" tfsdk:"s3_bucket_name"`
+	S3_bucket_region   string `mapstructure:"s3_bucket_region" tfsdk:"s3_bucket_region"`
+	Skip_verify        bool   `mapstructure:"skip_verify" tfsdk:"skip_verify"`
+	Ssh                bool   `mapstructure:"ssh" tfsdk:"ssh"`
+	Ssh_host           string `mapstructure:"ssh_host" tfsdk:"ssh_host"`
+	Ssh_port           int64  `mapstructure:"ssh_port" tfsdk:"ssh_port"`
+	Ssh_user           string `mapstructure:"ssh_user" tfsdk:"ssh_user"`
+	Ssl                bool   `mapstructure:"ssl" tfsdk:"ssl"`
+	Username           string `mapstructure:"username" tfsdk:"username"`
 }
 
 func (d *ClickhouseConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
@@ -146,16 +204,26 @@ func (d *ClickhouseConnectionDataSource) Read(ctx context.Context, req datasourc
 
 	var diags diag.Diagnostics
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"database":    types.StringType,
-		"hostname":    types.StringType,
-		"port":        types.NumberType,
-		"skip_verify": types.BoolType,
-		"ssh":         types.BoolType,
-		"ssh_host":    types.StringType,
-		"ssh_port":    types.NumberType,
-		"ssh_user":    types.StringType,
-		"ssl":         types.BoolType,
-		"username":    types.StringType,
+		"auth_mode":          types.StringType,
+		"aws_access_key_id":  types.StringType,
+		"aws_user":           types.StringType,
+		"azure_account_name": types.StringType,
+		"cloud_provider":     types.StringType,
+		"container_name":     types.StringType,
+		"database":           types.StringType,
+		"external_id":        types.StringType,
+		"hostname":           types.StringType,
+		"iam_role_arn":       types.StringType,
+		"port":               types.NumberType,
+		"s3_bucket_name":     types.StringType,
+		"s3_bucket_region":   types.StringType,
+		"skip_verify":        types.BoolType,
+		"ssh":                types.BoolType,
+		"ssh_host":           types.StringType,
+		"ssh_port":           types.NumberType,
+		"ssh_user":           types.StringType,
+		"ssl":                types.BoolType,
+		"username":           types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

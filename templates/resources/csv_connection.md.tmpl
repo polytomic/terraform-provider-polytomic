@@ -66,6 +66,7 @@ state before it will take effect on a destroy operation.
 - `basic` (Attributes) Basic authentication See [below for nested schema](#nestedatt--configuration--auth--basic).
 - `header` (Attributes) Header key See [below for nested schema](#nestedatt--configuration--auth--header).
 - `oauth` (Attributes) See [below for nested schema](#nestedatt--configuration--auth--oauth).
+- `query` (Attributes Set) Query string authentication parameters See [below for nested schema](#nestedatt--configuration--auth--query).
 
 
 <a id="nestedatt--configuration--auth--basic"></a>
@@ -101,6 +102,15 @@ state before it will take effect on a destroy operation.
 
 <a id="nestedatt--configuration--auth--oauth--extra_form_data"></a>
 ### Nested Schema for `configuration.auth.oauth.extra_form_data`
+
+#### Optional
+
+- `name` (String)
+- `value` (String)
+
+
+<a id="nestedatt--configuration--auth--query"></a>
+### Nested Schema for `configuration.auth.query`
 
 #### Optional
 

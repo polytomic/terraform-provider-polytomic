@@ -71,6 +71,13 @@ var MsadsSchema = schema.Schema{
 						},
 					},
 				},
+				"agree_customer_match_terms": schema.BoolAttribute{
+					MarkdownDescription: `Agree to Microsoft's [Customer Match Terms](https://help.ads.microsoft.com/#apex/ads/en/56921/1) when syncing audiences`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
 				"auth_method": schema.StringAttribute{
 					MarkdownDescription: `Authentication method Valid values: <code>microsoft</code> (Microsoft), <code>google</code> (Google). Default: <code>microsoft</code>.`,
 					Required:            false,
@@ -156,12 +163,13 @@ type MsadsConf struct {
 		Label string `mapstructure:"label" tfsdk:"label"`
 		Value string `mapstructure:"value" tfsdk:"value"`
 	} `mapstructure:"accounts" tfsdk:"accounts"`
-	Auth_method         string `mapstructure:"auth_method" tfsdk:"auth_method"`
-	Client_id           string `mapstructure:"client_id" tfsdk:"client_id"`
-	Client_secret       string `mapstructure:"client_secret" tfsdk:"client_secret"`
-	Oauth_refresh_token string `mapstructure:"oauth_refresh_token" tfsdk:"oauth_refresh_token"`
-	Oauth_token_expiry  string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
-	Username            string `mapstructure:"username" tfsdk:"username"`
+	Agree_customer_match_terms bool   `mapstructure:"agree_customer_match_terms" tfsdk:"agree_customer_match_terms"`
+	Auth_method                string `mapstructure:"auth_method" tfsdk:"auth_method"`
+	Client_id                  string `mapstructure:"client_id" tfsdk:"client_id"`
+	Client_secret              string `mapstructure:"client_secret" tfsdk:"client_secret"`
+	Oauth_refresh_token        string `mapstructure:"oauth_refresh_token" tfsdk:"oauth_refresh_token"`
+	Oauth_token_expiry         string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
+	Username                   string `mapstructure:"username" tfsdk:"username"`
 }
 
 type MsadsConnectionResource struct {
@@ -246,12 +254,13 @@ func (r *MsadsConnectionResource) Create(ctx context.Context, req resource.Creat
 				},
 			},
 		},
-		"auth_method":         types.StringType,
-		"client_id":           types.StringType,
-		"client_secret":       types.StringType,
-		"oauth_refresh_token": types.StringType,
-		"oauth_token_expiry":  types.StringType,
-		"username":            types.StringType,
+		"agree_customer_match_terms": types.BoolType,
+		"auth_method":                types.StringType,
+		"client_id":                  types.StringType,
+		"client_secret":              types.StringType,
+		"oauth_refresh_token":        types.StringType,
+		"oauth_token_expiry":         types.StringType,
+		"username":                   types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -330,12 +339,13 @@ func (r *MsadsConnectionResource) Read(ctx context.Context, req resource.ReadReq
 				},
 			},
 		},
-		"auth_method":         types.StringType,
-		"client_id":           types.StringType,
-		"client_secret":       types.StringType,
-		"oauth_refresh_token": types.StringType,
-		"oauth_token_expiry":  types.StringType,
-		"username":            types.StringType,
+		"agree_customer_match_terms": types.BoolType,
+		"auth_method":                types.StringType,
+		"client_id":                  types.StringType,
+		"client_secret":              types.StringType,
+		"oauth_refresh_token":        types.StringType,
+		"oauth_token_expiry":         types.StringType,
+		"username":                   types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -424,12 +434,13 @@ func (r *MsadsConnectionResource) Update(ctx context.Context, req resource.Updat
 				},
 			},
 		},
-		"auth_method":         types.StringType,
-		"client_id":           types.StringType,
-		"client_secret":       types.StringType,
-		"oauth_refresh_token": types.StringType,
-		"oauth_token_expiry":  types.StringType,
-		"username":            types.StringType,
+		"agree_customer_match_terms": types.BoolType,
+		"auth_method":                types.StringType,
+		"client_id":                  types.StringType,
+		"client_secret":              types.StringType,
+		"oauth_refresh_token":        types.StringType,
+		"oauth_token_expiry":         types.StringType,
+		"username":                   types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

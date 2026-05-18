@@ -167,6 +167,31 @@ var ApiSchema = schema.Schema{
 								},
 							},
 						},
+						"query": schema.SetNestedAttribute{
+							MarkdownDescription: `Query string authentication parameters`,
+							Required:            false,
+							Optional:            true,
+							Computed:            true,
+							Sensitive:           false,
+							NestedObject: schema.NestedAttributeObject{
+								Attributes: map[string]schema.Attribute{
+									"name": schema.StringAttribute{
+										MarkdownDescription: ``,
+										Required:            false,
+										Optional:            true,
+										Computed:            true,
+										Sensitive:           false,
+									},
+									"value": schema.StringAttribute{
+										MarkdownDescription: ``,
+										Required:            false,
+										Optional:            true,
+										Computed:            true,
+										Sensitive:           false,
+									},
+								},
+							},
+						},
 					},
 				},
 				"body": schema.StringAttribute{
@@ -289,6 +314,10 @@ type ApiConf struct {
 			Scopes         []string `mapstructure:"scopes" tfsdk:"scopes"`
 			Token_endpoint string   `mapstructure:"token_endpoint" tfsdk:"token_endpoint"`
 		} `mapstructure:"oauth" tfsdk:"oauth"`
+		Query []struct {
+			Name  string `mapstructure:"name" tfsdk:"name"`
+			Value string `mapstructure:"value" tfsdk:"value"`
+		} `mapstructure:"query" tfsdk:"query"`
 	} `mapstructure:"auth" tfsdk:"auth"`
 	Body    string `mapstructure:"body" tfsdk:"body"`
 	Headers []struct {
@@ -406,6 +435,13 @@ func (r *ApiConnectionResource) Create(ctx context.Context, req resource.CreateR
 							ElemType: types.StringType,
 						},
 						"token_endpoint": types.StringType,
+					},
+				}, "query": types.SetType{
+					ElemType: types.ObjectType{
+						AttrTypes: map[string]attr.Type{
+							"name":  types.StringType,
+							"value": types.StringType,
+						},
 					},
 				},
 			},
@@ -527,6 +563,13 @@ func (r *ApiConnectionResource) Read(ctx context.Context, req resource.ReadReque
 							ElemType: types.StringType,
 						},
 						"token_endpoint": types.StringType,
+					},
+				}, "query": types.SetType{
+					ElemType: types.ObjectType{
+						AttrTypes: map[string]attr.Type{
+							"name":  types.StringType,
+							"value": types.StringType,
+						},
 					},
 				},
 			},
@@ -658,6 +701,13 @@ func (r *ApiConnectionResource) Update(ctx context.Context, req resource.UpdateR
 							ElemType: types.StringType,
 						},
 						"token_endpoint": types.StringType,
+					},
+				}, "query": types.SetType{
+					ElemType: types.ObjectType{
+						AttrTypes: map[string]attr.Type{
+							"name":  types.StringType,
+							"value": types.StringType,
+						},
 					},
 				},
 			},

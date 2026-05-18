@@ -51,6 +51,7 @@ Read-Only:
 - `basic` (Attributes) Basic authentication (see [below for nested schema](#nestedatt--configuration--auth--basic))
 - `header` (Attributes) Header key (see [below for nested schema](#nestedatt--configuration--auth--header))
 - `oauth` (Attributes) (see [below for nested schema](#nestedatt--configuration--auth--oauth))
+- `query` (Attributes Set) Query string authentication parameters (see [below for nested schema](#nestedatt--configuration--auth--query))
 
 <a id="nestedatt--configuration--auth--basic"></a>
 ### Nested Schema for `configuration.auth.basic`
@@ -90,6 +91,15 @@ Read-Only:
 - `name` (String)
 - `value` (String)
 
+
+
+<a id="nestedatt--configuration--auth--query"></a>
+### Nested Schema for `configuration.auth.query`
+
+Read-Only:
+
+- `name` (String)
+- `value` (String)
 
 
 

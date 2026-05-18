@@ -48,7 +48,10 @@ var FreshserviceSchema = schema.Schema{
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
-					Sensitive:           false,
+					Sensitive:           true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
+					},
 				},
 				"subdomain": schema.StringAttribute{
 					MarkdownDescription: `Your Freshservice helpdesk subdomain; e.g. 'polytomic' if your helpdesk is at https://polytomic.freshdesk.com`,

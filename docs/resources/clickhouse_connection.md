@@ -17,10 +17,19 @@ For detailed configuration guidance, see the [ClickHouse connection guide](https
 resource "polytomic_clickhouse_connection" "clickhouse" {
   name = "example"
   configuration = {
-    database = "default"
-    hostname = "clickhouse.example.com"
-    ssh_host = "bastion.example.com"
-    username = "default"
+    auth_mode             = "access_key_and_secret"
+    aws_access_key_id     = "AKIAIOSFODNN7EXAMPLE"
+    aws_secret_access_key = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+    azure_access_key      = "abcdefghijklmnopqrstuvwxyz0123456789/+ABCDEabcdefghijklmnopqrstuvwxyz0123456789/+ABCDE=="
+    azure_account_name    = "account"
+    cloud_provider        = "aws"
+    container_name        = "container"
+    database              = "default"
+    hostname              = "clickhouse.example.com"
+    s3_bucket_name        = "my-bucket"
+    s3_bucket_region      = "us-east-1"
+    ssh_host              = "bastion.example.com"
+    username              = "default"
   }
 }
 ```
@@ -63,8 +72,24 @@ state before it will take effect on a destroy operation.
 
 #### Optional
 
+- `auth_mode` (String) AWS Authentication Method
+
+    How to authenticate with AWS for the staging bucket Valid values: <code>access_key_and_secret</code> (Access Key and Secret), <code>iam_role</code> (IAM role). Default: <code>access_key_and_secret</code>.
+- `aws_access_key_id` (String) AWS Access Key ID (destinations only)
+- `aws_secret_access_key` (String, Sensitive) AWS Secret Access Key (destinations only)
+- `azure_access_key` (String, Sensitive) Storage Account Access Key (destinations only)
+- `azure_account_name` (String) Storage Account Name (destinations only)
+- `cloud_provider` (String) Cloud Provider (destination support only) Valid values: <code>aws</code> (AWS), <code>azure</code> (Azure).
+- `container_name` (String) Storage Container Name (destinations only)
+
+    Container used for staging data load files (may be "container" or "container/prefix")
 - `database` (String)
+- `iam_role_arn` (String) IAM Role ARN
 - `password` (String, Sensitive)
+- `s3_bucket_name` (String) S3 Bucket Name (destinations only)
+
+    Name of bucket used for staging data load files
+- `s3_bucket_region` (String) S3 Bucket Region (destinations only)
 - `skip_verify` (Boolean) Skip certificate verification Default: <code>true</code>.
 - `ssh` (Boolean) Connect over SSH tunnel
 - `ssh_host` (String) SSH host
@@ -72,5 +97,12 @@ state before it will take effect on a destroy operation.
 - `ssh_private_key` (String, Sensitive) Private key
 - `ssh_user` (String) SSH user Default: <code>root</code>.
 - `ssl` (Boolean) Use SSL Default: <code>true</code>.
+
+#### Read-Only
+
+- `aws_user` (String) User ARN (destinations only)
+- `external_id` (String) External ID
+
+    External ID for the IAM role
 
 

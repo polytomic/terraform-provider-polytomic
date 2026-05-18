@@ -37,7 +37,5 @@ data "polytomic_netsuite_connection" "netsuite" {
 Read-Only:
 
 - `account_id` (String) Account ID
-- `consumer_key` (String) Consumer Key
-- `token` (String) Token ID
 
 

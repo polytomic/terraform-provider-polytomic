@@ -55,14 +55,6 @@ func (d *NetsuiteConnectionDataSource) Schema(ctx context.Context, req datasourc
 						MarkdownDescription: `Account ID`,
 						Computed:            true,
 					},
-					"consumer_key": schema.StringAttribute{
-						MarkdownDescription: `Consumer Key`,
-						Computed:            true,
-					},
-					"token": schema.StringAttribute{
-						MarkdownDescription: `Token ID`,
-						Computed:            true,
-					},
 				},
 				Optional: true,
 			},
@@ -71,9 +63,7 @@ func (d *NetsuiteConnectionDataSource) Schema(ctx context.Context, req datasourc
 }
 
 type NetsuiteDataSourceConf struct {
-	Account_id   string `mapstructure:"account_id" tfsdk:"account_id"`
-	Consumer_key string `mapstructure:"consumer_key" tfsdk:"consumer_key"`
-	Token        string `mapstructure:"token" tfsdk:"token"`
+	Account_id string `mapstructure:"account_id" tfsdk:"account_id"`
 }
 
 func (d *NetsuiteConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
@@ -111,9 +101,7 @@ func (d *NetsuiteConnectionDataSource) Read(ctx context.Context, req datasource.
 
 	var diags diag.Diagnostics
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"account_id":   types.StringType,
-		"consumer_key": types.StringType,
-		"token":        types.StringType,
+		"account_id": types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

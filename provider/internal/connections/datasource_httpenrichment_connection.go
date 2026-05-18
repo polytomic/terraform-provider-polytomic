@@ -126,6 +126,22 @@ func (d *HttpenrichmentConnectionDataSource) Schema(ctx context.Context, req dat
 									},
 								},
 							},
+							"query": schema.SetNestedAttribute{
+								MarkdownDescription: `Query string authentication parameters`,
+								Computed:            true,
+								NestedObject: schema.NestedAttributeObject{
+									Attributes: map[string]schema.Attribute{
+										"name": schema.StringAttribute{
+											MarkdownDescription: ``,
+											Computed:            true,
+										},
+										"value": schema.StringAttribute{
+											MarkdownDescription: ``,
+											Computed:            true,
+										},
+									},
+								},
+							},
 						},
 					},
 					"body": schema.StringAttribute{
@@ -261,6 +277,10 @@ type HttpenrichmentDataSourceConf struct {
 			Scopes         []string `mapstructure:"scopes" tfsdk:"scopes"`
 			Token_endpoint string   `mapstructure:"token_endpoint" tfsdk:"token_endpoint"`
 		} `mapstructure:"oauth" tfsdk:"oauth"`
+		Query []struct {
+			Name  string `mapstructure:"name" tfsdk:"name"`
+			Value string `mapstructure:"value" tfsdk:"value"`
+		} `mapstructure:"query" tfsdk:"query"`
 	} `mapstructure:"auth" tfsdk:"auth"`
 	Body           string            `mapstructure:"body" tfsdk:"body"`
 	Example_body   string            `mapstructure:"example_body" tfsdk:"example_body"`
@@ -352,6 +372,13 @@ func (d *HttpenrichmentConnectionDataSource) Read(ctx context.Context, req datas
 							ElemType: types.StringType,
 						},
 						"token_endpoint": types.StringType,
+					},
+				}, "query": types.SetType{
+					ElemType: types.ObjectType{
+						AttrTypes: map[string]attr.Type{
+							"name":  types.StringType,
+							"value": types.StringType,
+						},
 					},
 				},
 			},
