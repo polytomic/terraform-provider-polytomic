@@ -51,10 +51,6 @@ func (d *FreshserviceConnectionDataSource) Schema(ctx context.Context, req datas
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
-					"api_key": schema.StringAttribute{
-						MarkdownDescription: `API key`,
-						Computed:            true,
-					},
 					"subdomain": schema.StringAttribute{
 						MarkdownDescription: `Your Freshservice helpdesk subdomain; e.g. 'polytomic' if your helpdesk is at https://polytomic.freshdesk.com`,
 						Computed:            true,
@@ -67,7 +63,6 @@ func (d *FreshserviceConnectionDataSource) Schema(ctx context.Context, req datas
 }
 
 type FreshserviceDataSourceConf struct {
-	Api_key   string `mapstructure:"api_key" tfsdk:"api_key"`
 	Subdomain string `mapstructure:"subdomain" tfsdk:"subdomain"`
 }
 
@@ -106,7 +101,6 @@ func (d *FreshserviceConnectionDataSource) Read(ctx context.Context, req datasou
 
 	var diags diag.Diagnostics
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"api_key":   types.StringType,
 		"subdomain": types.StringType,
 	}, conf)
 	if diags.HasError() {

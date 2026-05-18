@@ -1,0 +1,1 @@
+{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://github.com/polytomic/app/services/polytomic/backend/notion/connection-conf","properties":{"workspace_name":{"type":"string","title":"Workspace name","readOnly":true}},"type":"object"}

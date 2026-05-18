@@ -51,10 +51,6 @@ func (d *Ware2goConnectionDataSource) Schema(ctx context.Context, req datasource
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
-					"client_secret": schema.StringAttribute{
-						MarkdownDescription: `API Secret`,
-						Computed:            true,
-					},
 					"merchant_id": schema.StringAttribute{
 						MarkdownDescription: `Merchant ID`,
 						Computed:            true,
@@ -71,9 +67,8 @@ func (d *Ware2goConnectionDataSource) Schema(ctx context.Context, req datasource
 }
 
 type Ware2goDataSourceConf struct {
-	Client_secret string `mapstructure:"client_secret" tfsdk:"client_secret"`
-	Merchant_id   string `mapstructure:"merchant_id" tfsdk:"merchant_id"`
-	Staging       bool   `mapstructure:"staging" tfsdk:"staging"`
+	Merchant_id string `mapstructure:"merchant_id" tfsdk:"merchant_id"`
+	Staging     bool   `mapstructure:"staging" tfsdk:"staging"`
 }
 
 func (d *Ware2goConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
@@ -111,9 +106,8 @@ func (d *Ware2goConnectionDataSource) Read(ctx context.Context, req datasource.R
 
 	var diags diag.Diagnostics
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"client_secret": types.StringType,
-		"merchant_id":   types.StringType,
-		"staging":       types.BoolType,
+		"merchant_id": types.StringType,
+		"staging":     types.BoolType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

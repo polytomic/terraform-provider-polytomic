@@ -34,8 +34,4 @@ data "polytomic_amplitude_connection" "amplitude" {
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
-Read-Only:
-
-- `api_key` (String) API Key
-
 

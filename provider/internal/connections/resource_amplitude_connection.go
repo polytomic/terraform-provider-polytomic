@@ -48,7 +48,10 @@ var AmplitudeSchema = schema.Schema{
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
-					Sensitive:           false,
+					Sensitive:           true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
+					},
 				},
 				"secret_key": schema.StringAttribute{
 					MarkdownDescription: `Secret Key`,

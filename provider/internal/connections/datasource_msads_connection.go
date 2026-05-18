@@ -67,6 +67,10 @@ func (d *MsadsConnectionDataSource) Schema(ctx context.Context, req datasource.S
 							},
 						},
 					},
+					"agree_customer_match_terms": schema.BoolAttribute{
+						MarkdownDescription: `Agree to Microsoft's [Customer Match Terms](https://help.ads.microsoft.com/#apex/ads/en/56921/1) when syncing audiences`,
+						Computed:            true,
+					},
 					"auth_method": schema.StringAttribute{
 						MarkdownDescription: `Authentication method Valid values: <code>microsoft</code> (Microsoft), <code>google</code> (Google). Default: <code>microsoft</code>.`,
 						Computed:            true,
@@ -91,9 +95,10 @@ type MsadsDataSourceConf struct {
 		Label string `mapstructure:"label" tfsdk:"label"`
 		Value string `mapstructure:"value" tfsdk:"value"`
 	} `mapstructure:"accounts" tfsdk:"accounts"`
-	Auth_method        string `mapstructure:"auth_method" tfsdk:"auth_method"`
-	Oauth_token_expiry string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
-	Username           string `mapstructure:"username" tfsdk:"username"`
+	Agree_customer_match_terms bool   `mapstructure:"agree_customer_match_terms" tfsdk:"agree_customer_match_terms"`
+	Auth_method                string `mapstructure:"auth_method" tfsdk:"auth_method"`
+	Oauth_token_expiry         string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
+	Username                   string `mapstructure:"username" tfsdk:"username"`
 }
 
 func (d *MsadsConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
@@ -139,9 +144,10 @@ func (d *MsadsConnectionDataSource) Read(ctx context.Context, req datasource.Rea
 				},
 			},
 		},
-		"auth_method":        types.StringType,
-		"oauth_token_expiry": types.StringType,
-		"username":           types.StringType,
+		"agree_customer_match_terms": types.BoolType,
+		"auth_method":                types.StringType,
+		"oauth_token_expiry":         types.StringType,
+		"username":                   types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

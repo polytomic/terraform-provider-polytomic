@@ -68,7 +68,10 @@ var Amazon_selling_partnerSchema = schema.Schema{
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
-					Sensitive:           false,
+					Sensitive:           true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
+					},
 				},
 				"refresh_token": schema.StringAttribute{
 					MarkdownDescription: `Refresh Token`,

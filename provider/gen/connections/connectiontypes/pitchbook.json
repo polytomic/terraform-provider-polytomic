@@ -1,1 +1,1 @@
-{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://github.com/polytomic/app/services/polytomic/backend/pitchbook/connection-conf","properties":{"api_key":{"type":"string","title":"API Key"}},"type":"object","required":["api_key"]}
+{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://github.com/polytomic/app/services/polytomic/backend/pitchbook/connection-conf","properties":{"api_key":{"type":"string","title":"API Key","sensitive":true}},"type":"object","required":["api_key"]}

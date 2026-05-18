@@ -126,6 +126,22 @@ func (d *ApiConnectionDataSource) Schema(ctx context.Context, req datasource.Sch
 									},
 								},
 							},
+							"query": schema.SetNestedAttribute{
+								MarkdownDescription: `Query string authentication parameters`,
+								Computed:            true,
+								NestedObject: schema.NestedAttributeObject{
+									Attributes: map[string]schema.Attribute{
+										"name": schema.StringAttribute{
+											MarkdownDescription: ``,
+											Computed:            true,
+										},
+										"value": schema.StringAttribute{
+											MarkdownDescription: ``,
+											Computed:            true,
+										},
+									},
+								},
+							},
 						},
 					},
 					"body": schema.StringAttribute{
@@ -202,6 +218,10 @@ type ApiDataSourceConf struct {
 			Scopes         []string `mapstructure:"scopes" tfsdk:"scopes"`
 			Token_endpoint string   `mapstructure:"token_endpoint" tfsdk:"token_endpoint"`
 		} `mapstructure:"oauth" tfsdk:"oauth"`
+		Query []struct {
+			Name  string `mapstructure:"name" tfsdk:"name"`
+			Value string `mapstructure:"value" tfsdk:"value"`
+		} `mapstructure:"query" tfsdk:"query"`
 	} `mapstructure:"auth" tfsdk:"auth"`
 	Body    string `mapstructure:"body" tfsdk:"body"`
 	Headers []struct {
@@ -280,6 +300,13 @@ func (d *ApiConnectionDataSource) Read(ctx context.Context, req datasource.ReadR
 							ElemType: types.StringType,
 						},
 						"token_endpoint": types.StringType,
+					},
+				}, "query": types.SetType{
+					ElemType: types.ObjectType{
+						AttrTypes: map[string]attr.Type{
+							"name":  types.StringType,
+							"value": types.StringType,
+						},
 					},
 				},
 			},

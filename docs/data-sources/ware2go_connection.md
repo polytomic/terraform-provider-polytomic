@@ -36,7 +36,6 @@ data "polytomic_ware2go_connection" "ware2go" {
 
 Read-Only:
 
-- `client_secret` (String) API Secret
 - `merchant_id` (String) Merchant ID
 - `staging` (Boolean) Use Staging Environment
 

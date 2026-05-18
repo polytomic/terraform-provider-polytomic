@@ -48,7 +48,10 @@ var PitchbookSchema = schema.Schema{
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
-					Sensitive:           false,
+					Sensitive:           true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
+					},
 				},
 			},
 

@@ -170,6 +170,31 @@ var HttpenrichmentSchema = schema.Schema{
 								},
 							},
 						},
+						"query": schema.SetNestedAttribute{
+							MarkdownDescription: `Query string authentication parameters`,
+							Required:            false,
+							Optional:            true,
+							Computed:            true,
+							Sensitive:           false,
+							NestedObject: schema.NestedAttributeObject{
+								Attributes: map[string]schema.Attribute{
+									"name": schema.StringAttribute{
+										MarkdownDescription: ``,
+										Required:            false,
+										Optional:            true,
+										Computed:            true,
+										Sensitive:           false,
+									},
+									"value": schema.StringAttribute{
+										MarkdownDescription: ``,
+										Required:            false,
+										Optional:            true,
+										Computed:            true,
+										Sensitive:           false,
+									},
+								},
+							},
+						},
 					},
 				},
 				"body": schema.StringAttribute{
@@ -387,6 +412,10 @@ type HttpenrichmentConf struct {
 			Scopes         []string `mapstructure:"scopes" tfsdk:"scopes"`
 			Token_endpoint string   `mapstructure:"token_endpoint" tfsdk:"token_endpoint"`
 		} `mapstructure:"oauth" tfsdk:"oauth"`
+		Query []struct {
+			Name  string `mapstructure:"name" tfsdk:"name"`
+			Value string `mapstructure:"value" tfsdk:"value"`
+		} `mapstructure:"query" tfsdk:"query"`
 	} `mapstructure:"auth" tfsdk:"auth"`
 	Body           string            `mapstructure:"body" tfsdk:"body"`
 	Example_body   string            `mapstructure:"example_body" tfsdk:"example_body"`
@@ -517,6 +546,13 @@ func (r *HttpenrichmentConnectionResource) Create(ctx context.Context, req resou
 							ElemType: types.StringType,
 						},
 						"token_endpoint": types.StringType,
+					},
+				}, "query": types.SetType{
+					ElemType: types.ObjectType{
+						AttrTypes: map[string]attr.Type{
+							"name":  types.StringType,
+							"value": types.StringType,
+						},
 					},
 				},
 			},
@@ -660,6 +696,13 @@ func (r *HttpenrichmentConnectionResource) Read(ctx context.Context, req resourc
 							ElemType: types.StringType,
 						},
 						"token_endpoint": types.StringType,
+					},
+				}, "query": types.SetType{
+					ElemType: types.ObjectType{
+						AttrTypes: map[string]attr.Type{
+							"name":  types.StringType,
+							"value": types.StringType,
+						},
 					},
 				},
 			},
@@ -813,6 +856,13 @@ func (r *HttpenrichmentConnectionResource) Update(ctx context.Context, req resou
 							ElemType: types.StringType,
 						},
 						"token_endpoint": types.StringType,
+					},
+				}, "query": types.SetType{
+					ElemType: types.ObjectType{
+						AttrTypes: map[string]attr.Type{
+							"name":  types.StringType,
+							"value": types.StringType,
+						},
 					},
 				},
 			},

@@ -58,7 +58,10 @@ var Ware2goSchema = schema.Schema{
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
-					Sensitive:           false,
+					Sensitive:           true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
+					},
 				},
 				"merchant_id": schema.StringAttribute{
 					MarkdownDescription: `Merchant ID`,

@@ -55,10 +55,6 @@ func (d *Amazon_selling_partnerConnectionDataSource) Schema(ctx context.Context,
 						MarkdownDescription: `Client ID`,
 						Computed:            true,
 					},
-					"merchant_token": schema.StringAttribute{
-						MarkdownDescription: `Merchant Token`,
-						Computed:            true,
-					},
 					"region": schema.StringAttribute{
 						MarkdownDescription: `Valid values: <code>na</code> (North America), <code>eu</code> (Europe), <code>fe</code> (Far East).`,
 						Computed:            true,
@@ -71,9 +67,8 @@ func (d *Amazon_selling_partnerConnectionDataSource) Schema(ctx context.Context,
 }
 
 type Amazon_selling_partnerDataSourceConf struct {
-	Client_id      string `mapstructure:"client_id" tfsdk:"client_id"`
-	Merchant_token string `mapstructure:"merchant_token" tfsdk:"merchant_token"`
-	Region         string `mapstructure:"region" tfsdk:"region"`
+	Client_id string `mapstructure:"client_id" tfsdk:"client_id"`
+	Region    string `mapstructure:"region" tfsdk:"region"`
 }
 
 func (d *Amazon_selling_partnerConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
@@ -111,9 +106,8 @@ func (d *Amazon_selling_partnerConnectionDataSource) Read(ctx context.Context, r
 
 	var diags diag.Diagnostics
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"client_id":      types.StringType,
-		"merchant_token": types.StringType,
-		"region":         types.StringType,
+		"client_id": types.StringType,
+		"region":    types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

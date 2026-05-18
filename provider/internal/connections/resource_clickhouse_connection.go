@@ -24,6 +24,9 @@ import (
 	"github.com/polytomic/polytomic-go"
 	ptcore "github.com/polytomic/polytomic-go/core"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
+
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -43,6 +46,78 @@ var ClickhouseSchema = schema.Schema{
 		},
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
+				"auth_mode": schema.StringAttribute{
+					MarkdownDescription: `AWS Authentication Method
+
+    How to authenticate with AWS for the staging bucket Valid values: <code>access_key_and_secret</code> (Access Key and Secret), <code>iam_role</code> (IAM role). Default: <code>access_key_and_secret</code>.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
+					Validators: []validator.String{
+						stringvalidator.OneOf("access_key_and_secret", "iam_role"),
+					},
+				},
+				"aws_access_key_id": schema.StringAttribute{
+					MarkdownDescription: `AWS Access Key ID (destinations only)`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
+				"aws_secret_access_key": schema.StringAttribute{
+					MarkdownDescription: `AWS Secret Access Key (destinations only)`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
+					},
+				},
+				"aws_user": schema.StringAttribute{
+					MarkdownDescription: `User ARN (destinations only)`,
+					Required:            false,
+					Optional:            false,
+					Computed:            true,
+					Sensitive:           false,
+				},
+				"azure_access_key": schema.StringAttribute{
+					MarkdownDescription: `Storage Account Access Key (destinations only)`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
+					},
+				},
+				"azure_account_name": schema.StringAttribute{
+					MarkdownDescription: `Storage Account Name (destinations only)`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
+				"cloud_provider": schema.StringAttribute{
+					MarkdownDescription: `Cloud Provider (destination support only) Valid values: <code>aws</code> (AWS), <code>azure</code> (Azure).`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+					Validators: []validator.String{
+						stringvalidator.OneOf("aws", "azure"),
+					},
+				},
+				"container_name": schema.StringAttribute{
+					MarkdownDescription: `Storage Container Name (destinations only)
+
+    Container used for staging data load files (may be "container" or "container/prefix")`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
+				},
 				"database": schema.StringAttribute{
 					MarkdownDescription: ``,
 					Required:            false,
@@ -50,11 +125,27 @@ var ClickhouseSchema = schema.Schema{
 					Computed:            true,
 					Sensitive:           false,
 				},
+				"external_id": schema.StringAttribute{
+					MarkdownDescription: `External ID
+
+    External ID for the IAM role`,
+					Required:  false,
+					Optional:  false,
+					Computed:  true,
+					Sensitive: false,
+				},
 				"hostname": schema.StringAttribute{
 					MarkdownDescription: ``,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
+					Sensitive:           false,
+				},
+				"iam_role_arn": schema.StringAttribute{
+					MarkdownDescription: `IAM Role ARN`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
 					Sensitive:           false,
 				},
 				"password": schema.StringAttribute{
@@ -72,6 +163,22 @@ var ClickhouseSchema = schema.Schema{
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
+					Sensitive:           false,
+				},
+				"s3_bucket_name": schema.StringAttribute{
+					MarkdownDescription: `S3 Bucket Name (destinations only)
+
+    Name of bucket used for staging data load files`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
+				},
+				"s3_bucket_region": schema.StringAttribute{
+					MarkdownDescription: `S3 Bucket Region (destinations only)`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
 					Sensitive:           false,
 				},
 				"skip_verify": schema.BoolAttribute{
@@ -160,18 +267,30 @@ func (t *ClickhouseConnectionResource) Schema(ctx context.Context, req resource.
 }
 
 type ClickhouseConf struct {
-	Database        string `mapstructure:"database" tfsdk:"database"`
-	Hostname        string `mapstructure:"hostname" tfsdk:"hostname"`
-	Password        string `mapstructure:"password" tfsdk:"password"`
-	Port            int64  `mapstructure:"port" tfsdk:"port"`
-	Skip_verify     bool   `mapstructure:"skip_verify" tfsdk:"skip_verify"`
-	Ssh             bool   `mapstructure:"ssh" tfsdk:"ssh"`
-	Ssh_host        string `mapstructure:"ssh_host" tfsdk:"ssh_host"`
-	Ssh_port        int64  `mapstructure:"ssh_port" tfsdk:"ssh_port"`
-	Ssh_private_key string `mapstructure:"ssh_private_key" tfsdk:"ssh_private_key"`
-	Ssh_user        string `mapstructure:"ssh_user" tfsdk:"ssh_user"`
-	Ssl             bool   `mapstructure:"ssl" tfsdk:"ssl"`
-	Username        string `mapstructure:"username" tfsdk:"username"`
+	Auth_mode             string `mapstructure:"auth_mode" tfsdk:"auth_mode"`
+	Aws_access_key_id     string `mapstructure:"aws_access_key_id" tfsdk:"aws_access_key_id"`
+	Aws_secret_access_key string `mapstructure:"aws_secret_access_key" tfsdk:"aws_secret_access_key"`
+	Aws_user              string `mapstructure:"aws_user" tfsdk:"aws_user"`
+	Azure_access_key      string `mapstructure:"azure_access_key" tfsdk:"azure_access_key"`
+	Azure_account_name    string `mapstructure:"azure_account_name" tfsdk:"azure_account_name"`
+	Cloud_provider        string `mapstructure:"cloud_provider" tfsdk:"cloud_provider"`
+	Container_name        string `mapstructure:"container_name" tfsdk:"container_name"`
+	Database              string `mapstructure:"database" tfsdk:"database"`
+	External_id           string `mapstructure:"external_id" tfsdk:"external_id"`
+	Hostname              string `mapstructure:"hostname" tfsdk:"hostname"`
+	Iam_role_arn          string `mapstructure:"iam_role_arn" tfsdk:"iam_role_arn"`
+	Password              string `mapstructure:"password" tfsdk:"password"`
+	Port                  int64  `mapstructure:"port" tfsdk:"port"`
+	S3_bucket_name        string `mapstructure:"s3_bucket_name" tfsdk:"s3_bucket_name"`
+	S3_bucket_region      string `mapstructure:"s3_bucket_region" tfsdk:"s3_bucket_region"`
+	Skip_verify           bool   `mapstructure:"skip_verify" tfsdk:"skip_verify"`
+	Ssh                   bool   `mapstructure:"ssh" tfsdk:"ssh"`
+	Ssh_host              string `mapstructure:"ssh_host" tfsdk:"ssh_host"`
+	Ssh_port              int64  `mapstructure:"ssh_port" tfsdk:"ssh_port"`
+	Ssh_private_key       string `mapstructure:"ssh_private_key" tfsdk:"ssh_private_key"`
+	Ssh_user              string `mapstructure:"ssh_user" tfsdk:"ssh_user"`
+	Ssl                   bool   `mapstructure:"ssl" tfsdk:"ssl"`
+	Username              string `mapstructure:"username" tfsdk:"username"`
 }
 
 type ClickhouseConnectionResource struct {
@@ -248,18 +367,30 @@ func (r *ClickhouseConnectionResource) Create(ctx context.Context, req resource.
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"database":        types.StringType,
-		"hostname":        types.StringType,
-		"password":        types.StringType,
-		"port":            types.NumberType,
-		"skip_verify":     types.BoolType,
-		"ssh":             types.BoolType,
-		"ssh_host":        types.StringType,
-		"ssh_port":        types.NumberType,
-		"ssh_private_key": types.StringType,
-		"ssh_user":        types.StringType,
-		"ssl":             types.BoolType,
-		"username":        types.StringType,
+		"auth_mode":             types.StringType,
+		"aws_access_key_id":     types.StringType,
+		"aws_secret_access_key": types.StringType,
+		"aws_user":              types.StringType,
+		"azure_access_key":      types.StringType,
+		"azure_account_name":    types.StringType,
+		"cloud_provider":        types.StringType,
+		"container_name":        types.StringType,
+		"database":              types.StringType,
+		"external_id":           types.StringType,
+		"hostname":              types.StringType,
+		"iam_role_arn":          types.StringType,
+		"password":              types.StringType,
+		"port":                  types.NumberType,
+		"s3_bucket_name":        types.StringType,
+		"s3_bucket_region":      types.StringType,
+		"skip_verify":           types.BoolType,
+		"ssh":                   types.BoolType,
+		"ssh_host":              types.StringType,
+		"ssh_port":              types.NumberType,
+		"ssh_private_key":       types.StringType,
+		"ssh_user":              types.StringType,
+		"ssl":                   types.BoolType,
+		"username":              types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -330,18 +461,30 @@ func (r *ClickhouseConnectionResource) Read(ctx context.Context, req resource.Re
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"database":        types.StringType,
-		"hostname":        types.StringType,
-		"password":        types.StringType,
-		"port":            types.NumberType,
-		"skip_verify":     types.BoolType,
-		"ssh":             types.BoolType,
-		"ssh_host":        types.StringType,
-		"ssh_port":        types.NumberType,
-		"ssh_private_key": types.StringType,
-		"ssh_user":        types.StringType,
-		"ssl":             types.BoolType,
-		"username":        types.StringType,
+		"auth_mode":             types.StringType,
+		"aws_access_key_id":     types.StringType,
+		"aws_secret_access_key": types.StringType,
+		"aws_user":              types.StringType,
+		"azure_access_key":      types.StringType,
+		"azure_account_name":    types.StringType,
+		"cloud_provider":        types.StringType,
+		"container_name":        types.StringType,
+		"database":              types.StringType,
+		"external_id":           types.StringType,
+		"hostname":              types.StringType,
+		"iam_role_arn":          types.StringType,
+		"password":              types.StringType,
+		"port":                  types.NumberType,
+		"s3_bucket_name":        types.StringType,
+		"s3_bucket_region":      types.StringType,
+		"skip_verify":           types.BoolType,
+		"ssh":                   types.BoolType,
+		"ssh_host":              types.StringType,
+		"ssh_port":              types.NumberType,
+		"ssh_private_key":       types.StringType,
+		"ssh_user":              types.StringType,
+		"ssl":                   types.BoolType,
+		"username":              types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -422,18 +565,30 @@ func (r *ClickhouseConnectionResource) Update(ctx context.Context, req resource.
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"database":        types.StringType,
-		"hostname":        types.StringType,
-		"password":        types.StringType,
-		"port":            types.NumberType,
-		"skip_verify":     types.BoolType,
-		"ssh":             types.BoolType,
-		"ssh_host":        types.StringType,
-		"ssh_port":        types.NumberType,
-		"ssh_private_key": types.StringType,
-		"ssh_user":        types.StringType,
-		"ssl":             types.BoolType,
-		"username":        types.StringType,
+		"auth_mode":             types.StringType,
+		"aws_access_key_id":     types.StringType,
+		"aws_secret_access_key": types.StringType,
+		"aws_user":              types.StringType,
+		"azure_access_key":      types.StringType,
+		"azure_account_name":    types.StringType,
+		"cloud_provider":        types.StringType,
+		"container_name":        types.StringType,
+		"database":              types.StringType,
+		"external_id":           types.StringType,
+		"hostname":              types.StringType,
+		"iam_role_arn":          types.StringType,
+		"password":              types.StringType,
+		"port":                  types.NumberType,
+		"s3_bucket_name":        types.StringType,
+		"s3_bucket_region":      types.StringType,
+		"skip_verify":           types.BoolType,
+		"ssh":                   types.BoolType,
+		"ssh_host":              types.StringType,
+		"ssh_port":              types.NumberType,
+		"ssh_private_key":       types.StringType,
+		"ssh_user":              types.StringType,
+		"ssl":                   types.BoolType,
+		"username":              types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

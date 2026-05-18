@@ -55,7 +55,10 @@ var NetsuiteSchema = schema.Schema{
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
-					Sensitive:           false,
+					Sensitive:           true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
+					},
 				},
 				"consumer_secret": schema.StringAttribute{
 					MarkdownDescription: `Consumer Secret`,
@@ -72,7 +75,10 @@ var NetsuiteSchema = schema.Schema{
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
-					Sensitive:           false,
+					Sensitive:           true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
+					},
 				},
 				"token_secret": schema.StringAttribute{
 					MarkdownDescription: `Token Secret`,

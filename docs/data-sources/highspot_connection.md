@@ -34,8 +34,4 @@ data "polytomic_highspot_connection" "highspot" {
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
-Read-Only:
-
-- `api_key` (String) API Key
-
 
