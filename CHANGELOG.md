@@ -1,3 +1,13 @@
+## v1.5.4 (18 May 2026)
+
+- Added support for new connection types:
+  - Autumn
+  - Luma
+  - Notion
+  - Reo.Dev
+  - ScyllaDB
+- Updated connection schemas for Amazon Selling Partner, Amplitude, API, ClickHouse, CSV, Freshservice, Highspot, HTTP Enrichment, MS Ads, NetSuite, Pitchbook, and Ware2Go.
+
 ## v1.5.3 (6 May 2026)
 
 BUG FIXES:
