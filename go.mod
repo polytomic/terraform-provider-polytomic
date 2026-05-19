@@ -15,7 +15,7 @@ require (
 	github.com/hashicorp/terraform-plugin-log v0.10.0
 	github.com/hashicorp/terraform-plugin-testing v1.14.0
 	github.com/invopop/jsonschema v0.13.0
-	github.com/lib/pq v1.10.9
+	github.com/lib/pq v1.12.3
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/polytomic/polytomic-go v1.16.1
 	github.com/rs/zerolog v1.34.0
