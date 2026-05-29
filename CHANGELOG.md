@@ -1,3 +1,11 @@
+## v1.5.5 (29 May 2026)
+
+- Added support for new connection types:
+  - DealCloud
+  - Knock
+  - Qtanium Connect
+  - Tigris
+
 ## v1.5.4 (18 May 2026)
 
 - Added support for new connection types:
