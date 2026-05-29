@@ -1,0 +1,1 @@
+{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://github.com/polytomic/app/services/polytomic/backend/qtanium_connect/connection-conf","properties":{"username":{"type":"string","title":"Username"},"password":{"type":"string","title":"Password","sensitive":true}},"type":"object","required":["username","password"]}
