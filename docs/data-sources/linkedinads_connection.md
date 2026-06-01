@@ -38,7 +38,6 @@ Read-Only:
 
 - `accounts` (Attributes Set) (see [below for nested schema](#nestedatt--configuration--accounts))
 - `connected_user` (String) Connected user
-- `oauth_token_expiry` (String)
 
 <a id="nestedatt--configuration--accounts"></a>
 ### Nested Schema for `configuration.accounts`

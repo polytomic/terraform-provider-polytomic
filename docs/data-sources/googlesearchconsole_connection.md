@@ -36,7 +36,6 @@ data "polytomic_googlesearchconsole_connection" "googlesearchconsole" {
 
 Read-Only:
 
-- `oauth_token_expiry` (String)
 - `sites` (Attributes Set) (see [below for nested schema](#nestedatt--configuration--sites))
 
 <a id="nestedatt--configuration--sites"></a>

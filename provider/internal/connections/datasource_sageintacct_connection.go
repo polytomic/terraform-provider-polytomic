@@ -6,12 +6,9 @@ package connections
 import (
 	"context"
 
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
@@ -50,20 +47,14 @@ func (d *SageintacctConnectionDataSource) Schema(ctx context.Context, req dataso
 				Computed:            true,
 			},
 			"configuration": schema.SingleNestedAttribute{
-				Attributes: map[string]schema.Attribute{
-					"oauth_token_expiry": schema.StringAttribute{
-						MarkdownDescription: ``,
-						Computed:            true,
-					},
-				},
-				Optional: true,
+				Attributes: map[string]schema.Attribute{},
+				Optional:   true,
 			},
 		},
 	}
 }
 
 type SageintacctDataSourceConf struct {
-	Oauth_token_expiry string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
 }
 
 func (d *SageintacctConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
@@ -91,22 +82,6 @@ func (d *SageintacctConnectionDataSource) Read(ctx context.Context, req datasour
 	data.Id = types.StringPointerValue(connection.Data.Id)
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
-
-	conf := SageintacctDataSourceConf{}
-	err = mapstructure.Decode(connection.Data.Configuration, &conf)
-	if err != nil {
-		resp.Diagnostics.AddError("Error decoding connection configuration", err.Error())
-		return
-	}
-
-	var diags diag.Diagnostics
-	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"oauth_token_expiry": types.StringType,
-	}, conf)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
 
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)

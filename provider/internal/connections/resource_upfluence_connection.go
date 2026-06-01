@@ -43,23 +43,6 @@ var UpfluenceSchema = schema.Schema{
 		},
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
-				"oauth_refresh_token": schema.StringAttribute{
-					MarkdownDescription: ``,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           true,
-					PlanModifiers: []planmodifier.String{
-						stringplanmodifier.UseStateForUnknown(),
-					},
-				},
-				"oauth_token_expiry": schema.StringAttribute{
-					MarkdownDescription: ``,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
-				},
 				"password": schema.StringAttribute{
 					MarkdownDescription: ``,
 					Required:            true,
@@ -104,10 +87,8 @@ func (t *UpfluenceConnectionResource) Schema(ctx context.Context, req resource.S
 }
 
 type UpfluenceConf struct {
-	Oauth_refresh_token string `mapstructure:"oauth_refresh_token" tfsdk:"oauth_refresh_token"`
-	Oauth_token_expiry  string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
-	Password            string `mapstructure:"password" tfsdk:"password"`
-	Username            string `mapstructure:"username" tfsdk:"username"`
+	Password string `mapstructure:"password" tfsdk:"password"`
+	Username string `mapstructure:"username" tfsdk:"username"`
 }
 
 type UpfluenceConnectionResource struct {
@@ -184,10 +165,8 @@ func (r *UpfluenceConnectionResource) Create(ctx context.Context, req resource.C
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"oauth_refresh_token": types.StringType,
-		"oauth_token_expiry":  types.StringType,
-		"password":            types.StringType,
-		"username":            types.StringType,
+		"password": types.StringType,
+		"username": types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -258,10 +237,8 @@ func (r *UpfluenceConnectionResource) Read(ctx context.Context, req resource.Rea
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"oauth_refresh_token": types.StringType,
-		"oauth_token_expiry":  types.StringType,
-		"password":            types.StringType,
-		"username":            types.StringType,
+		"password": types.StringType,
+		"username": types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -342,10 +319,8 @@ func (r *UpfluenceConnectionResource) Update(ctx context.Context, req resource.U
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"oauth_refresh_token": types.StringType,
-		"oauth_token_expiry":  types.StringType,
-		"password":            types.StringType,
-		"username":            types.StringType,
+		"password": types.StringType,
+		"username": types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

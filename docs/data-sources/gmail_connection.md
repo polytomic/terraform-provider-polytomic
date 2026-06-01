@@ -36,7 +36,6 @@ data "polytomic_gmail_connection" "gmail" {
 
 Read-Only:
 
-- `oauth_token_expiry` (String)
 - `user_email` (String) Connected user's email
 
 

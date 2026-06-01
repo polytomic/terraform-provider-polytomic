@@ -59,7 +59,6 @@ state before it will take effect on a destroy operation.
 - `client_id` (String, Sensitive)
 - `client_secret` (String, Sensitive)
 - `oauth_refresh_token` (String, Sensitive)
-- `oauth_token_expiry` (String)
 - `use_bulk_upsert` (Boolean) Use bulk API for syncing to Outreach Default: <code>true</code>.
 
 #### Read-Only

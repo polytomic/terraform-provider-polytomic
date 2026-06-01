@@ -55,10 +55,6 @@ func (d *RampConnectionDataSource) Schema(ctx context.Context, req datasource.Sc
 						MarkdownDescription: `Is Sandbox`,
 						Computed:            true,
 					},
-					"oauth_token_expiry": schema.StringAttribute{
-						MarkdownDescription: ``,
-						Computed:            true,
-					},
 				},
 				Optional: true,
 			},
@@ -67,8 +63,7 @@ func (d *RampConnectionDataSource) Schema(ctx context.Context, req datasource.Sc
 }
 
 type RampDataSourceConf struct {
-	Is_sandbox         bool   `mapstructure:"is_sandbox" tfsdk:"is_sandbox"`
-	Oauth_token_expiry string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
+	Is_sandbox bool `mapstructure:"is_sandbox" tfsdk:"is_sandbox"`
 }
 
 func (d *RampConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
@@ -106,8 +101,7 @@ func (d *RampConnectionDataSource) Read(ctx context.Context, req datasource.Read
 
 	var diags diag.Diagnostics
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"is_sandbox":         types.BoolType,
-		"oauth_token_expiry": types.StringType,
+		"is_sandbox": types.BoolType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

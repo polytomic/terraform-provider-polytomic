@@ -39,7 +39,6 @@ Read-Only:
 - `accounts` (Attributes Set) (see [below for nested schema](#nestedatt--configuration--accounts))
 - `agree_customer_match_terms` (Boolean) Agree to Microsoft's [Customer Match Terms](https://help.ads.microsoft.com/#apex/ads/en/56921/1) when syncing audiences
 - `auth_method` (String) Authentication method Valid values: <code>microsoft</code> (Microsoft), <code>google</code> (Google). Default: <code>microsoft</code>.
-- `oauth_token_expiry` (String)
 - `username` (String) Connected user
 
 <a id="nestedatt--configuration--accounts"></a>

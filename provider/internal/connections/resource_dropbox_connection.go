@@ -115,13 +115,6 @@ var DropboxSchema = schema.Schema{
 						stringplanmodifier.UseStateForUnknown(),
 					},
 				},
-				"oauth_token_expiry": schema.StringAttribute{
-					MarkdownDescription: ``,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
-				},
 				"single_table_file_format": schema.StringAttribute{
 					MarkdownDescription: `File format Valid values: <code>csv</code> (CSV), <code>json</code> (JSON), <code>parquet</code> (Parquet). Default: <code>csv</code>.`,
 					Required:            false,
@@ -194,7 +187,6 @@ type DropboxConf struct {
 	Is_directory_snapshot     bool     `mapstructure:"is_directory_snapshot" tfsdk:"is_directory_snapshot"`
 	Is_single_table           bool     `mapstructure:"is_single_table" tfsdk:"is_single_table"`
 	Oauth_refresh_token       string   `mapstructure:"oauth_refresh_token" tfsdk:"oauth_refresh_token"`
-	Oauth_token_expiry        string   `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
 	Single_table_file_format  string   `mapstructure:"single_table_file_format" tfsdk:"single_table_file_format"`
 	Single_table_file_formats []string `mapstructure:"single_table_file_formats" tfsdk:"single_table_file_formats"`
 	Single_table_name         string   `mapstructure:"single_table_name" tfsdk:"single_table_name"`
@@ -283,7 +275,6 @@ func (r *DropboxConnectionResource) Create(ctx context.Context, req resource.Cre
 		"is_directory_snapshot":    types.BoolType,
 		"is_single_table":          types.BoolType,
 		"oauth_refresh_token":      types.StringType,
-		"oauth_token_expiry":       types.StringType,
 		"single_table_file_format": types.StringType,
 		"single_table_file_formats": types.SetType{
 			ElemType: types.StringType,
@@ -368,7 +359,6 @@ func (r *DropboxConnectionResource) Read(ctx context.Context, req resource.ReadR
 		"is_directory_snapshot":    types.BoolType,
 		"is_single_table":          types.BoolType,
 		"oauth_refresh_token":      types.StringType,
-		"oauth_token_expiry":       types.StringType,
 		"single_table_file_format": types.StringType,
 		"single_table_file_formats": types.SetType{
 			ElemType: types.StringType,
@@ -463,7 +453,6 @@ func (r *DropboxConnectionResource) Update(ctx context.Context, req resource.Upd
 		"is_directory_snapshot":    types.BoolType,
 		"is_single_table":          types.BoolType,
 		"oauth_refresh_token":      types.StringType,
-		"oauth_token_expiry":       types.StringType,
 		"single_table_file_format": types.StringType,
 		"single_table_file_formats": types.SetType{
 			ElemType: types.StringType,

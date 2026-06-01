@@ -51,10 +51,6 @@ func (d *UpfluenceConnectionDataSource) Schema(ctx context.Context, req datasour
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
-					"oauth_token_expiry": schema.StringAttribute{
-						MarkdownDescription: ``,
-						Computed:            true,
-					},
 					"username": schema.StringAttribute{
 						MarkdownDescription: `Email`,
 						Computed:            true,
@@ -67,8 +63,7 @@ func (d *UpfluenceConnectionDataSource) Schema(ctx context.Context, req datasour
 }
 
 type UpfluenceDataSourceConf struct {
-	Oauth_token_expiry string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
-	Username           string `mapstructure:"username" tfsdk:"username"`
+	Username string `mapstructure:"username" tfsdk:"username"`
 }
 
 func (d *UpfluenceConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
@@ -106,8 +101,7 @@ func (d *UpfluenceConnectionDataSource) Read(ctx context.Context, req datasource
 
 	var diags diag.Diagnostics
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"oauth_token_expiry": types.StringType,
-		"username":           types.StringType,
+		"username": types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

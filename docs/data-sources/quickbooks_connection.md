@@ -36,7 +36,6 @@ data "polytomic_quickbooks_connection" "quickbooks" {
 
 Read-Only:
 
-- `oauth_token_expiry` (String)
 - `realm_id` (String) Company ID
 
 

@@ -51,10 +51,6 @@ func (d *GmailConnectionDataSource) Schema(ctx context.Context, req datasource.S
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
-					"oauth_token_expiry": schema.StringAttribute{
-						MarkdownDescription: ``,
-						Computed:            true,
-					},
 					"user_email": schema.StringAttribute{
 						MarkdownDescription: `Connected user's email`,
 						Computed:            true,
@@ -67,8 +63,7 @@ func (d *GmailConnectionDataSource) Schema(ctx context.Context, req datasource.S
 }
 
 type GmailDataSourceConf struct {
-	Oauth_token_expiry string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
-	User_email         string `mapstructure:"user_email" tfsdk:"user_email"`
+	User_email string `mapstructure:"user_email" tfsdk:"user_email"`
 }
 
 func (d *GmailConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
@@ -106,8 +101,7 @@ func (d *GmailConnectionDataSource) Read(ctx context.Context, req datasource.Rea
 
 	var diags diag.Diagnostics
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"oauth_token_expiry": types.StringType,
-		"user_email":         types.StringType,
+		"user_email": types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

@@ -43,13 +43,6 @@ var GithubSchema = schema.Schema{
 		},
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
-				"authenticated": schema.BoolAttribute{
-					MarkdownDescription: ``,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
-				},
 				"client_id": schema.StringAttribute{
 					MarkdownDescription: ``,
 					Required:            false,
@@ -132,7 +125,6 @@ func (t *GithubConnectionResource) Schema(ctx context.Context, req resource.Sche
 }
 
 type GithubConf struct {
-	Authenticated      bool   `mapstructure:"authenticated" tfsdk:"authenticated"`
 	Client_id          string `mapstructure:"client_id" tfsdk:"client_id"`
 	Client_secret      string `mapstructure:"client_secret" tfsdk:"client_secret"`
 	Oauth_access_token string `mapstructure:"oauth_access_token" tfsdk:"oauth_access_token"`
@@ -216,7 +208,6 @@ func (r *GithubConnectionResource) Create(ctx context.Context, req resource.Crea
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"authenticated":      types.BoolType,
 		"client_id":          types.StringType,
 		"client_secret":      types.StringType,
 		"oauth_access_token": types.StringType,
@@ -298,7 +289,6 @@ func (r *GithubConnectionResource) Read(ctx context.Context, req resource.ReadRe
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"authenticated":      types.BoolType,
 		"client_id":          types.StringType,
 		"client_secret":      types.StringType,
 		"oauth_access_token": types.StringType,
@@ -390,7 +380,6 @@ func (r *GithubConnectionResource) Update(ctx context.Context, req resource.Upda
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"authenticated":      types.BoolType,
 		"client_id":          types.StringType,
 		"client_secret":      types.StringType,
 		"oauth_access_token": types.StringType,

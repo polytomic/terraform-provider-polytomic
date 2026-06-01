@@ -105,13 +105,6 @@ var LinkedinadsSchema = schema.Schema{
 						stringplanmodifier.UseStateForUnknown(),
 					},
 				},
-				"oauth_token_expiry": schema.StringAttribute{
-					MarkdownDescription: ``,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
-				},
 			},
 
 			Required: true,
@@ -147,7 +140,6 @@ type LinkedinadsConf struct {
 	Client_secret       string `mapstructure:"client_secret" tfsdk:"client_secret"`
 	Connected_user      string `mapstructure:"connected_user" tfsdk:"connected_user"`
 	Oauth_refresh_token string `mapstructure:"oauth_refresh_token" tfsdk:"oauth_refresh_token"`
-	Oauth_token_expiry  string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
 }
 
 type LinkedinadsConnectionResource struct {
@@ -236,7 +228,6 @@ func (r *LinkedinadsConnectionResource) Create(ctx context.Context, req resource
 		"client_secret":       types.StringType,
 		"connected_user":      types.StringType,
 		"oauth_refresh_token": types.StringType,
-		"oauth_token_expiry":  types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -319,7 +310,6 @@ func (r *LinkedinadsConnectionResource) Read(ctx context.Context, req resource.R
 		"client_secret":       types.StringType,
 		"connected_user":      types.StringType,
 		"oauth_refresh_token": types.StringType,
-		"oauth_token_expiry":  types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -412,7 +402,6 @@ func (r *LinkedinadsConnectionResource) Update(ctx context.Context, req resource
 		"client_secret":       types.StringType,
 		"connected_user":      types.StringType,
 		"oauth_refresh_token": types.StringType,
-		"oauth_token_expiry":  types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

@@ -118,13 +118,6 @@ var MsadsSchema = schema.Schema{
 						stringplanmodifier.UseStateForUnknown(),
 					},
 				},
-				"oauth_token_expiry": schema.StringAttribute{
-					MarkdownDescription: ``,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
-				},
 				"username": schema.StringAttribute{
 					MarkdownDescription: `Connected user`,
 					Required:            false,
@@ -168,7 +161,6 @@ type MsadsConf struct {
 	Client_id                  string `mapstructure:"client_id" tfsdk:"client_id"`
 	Client_secret              string `mapstructure:"client_secret" tfsdk:"client_secret"`
 	Oauth_refresh_token        string `mapstructure:"oauth_refresh_token" tfsdk:"oauth_refresh_token"`
-	Oauth_token_expiry         string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
 	Username                   string `mapstructure:"username" tfsdk:"username"`
 }
 
@@ -259,7 +251,6 @@ func (r *MsadsConnectionResource) Create(ctx context.Context, req resource.Creat
 		"client_id":                  types.StringType,
 		"client_secret":              types.StringType,
 		"oauth_refresh_token":        types.StringType,
-		"oauth_token_expiry":         types.StringType,
 		"username":                   types.StringType,
 	}, conf)
 	if diags.HasError() {
@@ -344,7 +335,6 @@ func (r *MsadsConnectionResource) Read(ctx context.Context, req resource.ReadReq
 		"client_id":                  types.StringType,
 		"client_secret":              types.StringType,
 		"oauth_refresh_token":        types.StringType,
-		"oauth_token_expiry":         types.StringType,
 		"username":                   types.StringType,
 	}, conf)
 	if diags.HasError() {
@@ -439,7 +429,6 @@ func (r *MsadsConnectionResource) Update(ctx context.Context, req resource.Updat
 		"client_id":                  types.StringType,
 		"client_secret":              types.StringType,
 		"oauth_refresh_token":        types.StringType,
-		"oauth_token_expiry":         types.StringType,
 		"username":                   types.StringType,
 	}, conf)
 	if diags.HasError() {

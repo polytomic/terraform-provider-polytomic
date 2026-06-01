@@ -65,7 +65,6 @@ state before it will take effect on a destroy operation.
 - `connect_mode` (String) Default: browser Valid values: <code>browser</code>, <code>jwt</code>. Default: <code>browser</code>.
 - `has_headers` (Boolean) Columns have headers
 - `oauth_refresh_token` (String, Sensitive)
-- `oauth_token_expiry` (String)
 - `service_account` (String, Sensitive) Service account key
 
 #### Read-Only

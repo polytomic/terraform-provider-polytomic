@@ -57,10 +57,6 @@ func (d *YoutubeanalyticsConnectionDataSource) Schema(ctx context.Context, req d
     If you are using a content owner account enter the content owner ID here. This is required for some reports.`,
 						Computed: true,
 					},
-					"oauth_token_expiry": schema.StringAttribute{
-						MarkdownDescription: ``,
-						Computed:            true,
-					},
 					"user_email": schema.StringAttribute{
 						MarkdownDescription: `Connected user's email`,
 						Computed:            true,
@@ -73,9 +69,8 @@ func (d *YoutubeanalyticsConnectionDataSource) Schema(ctx context.Context, req d
 }
 
 type YoutubeanalyticsDataSourceConf struct {
-	Content_owner_id   string `mapstructure:"content_owner_id" tfsdk:"content_owner_id"`
-	Oauth_token_expiry string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
-	User_email         string `mapstructure:"user_email" tfsdk:"user_email"`
+	Content_owner_id string `mapstructure:"content_owner_id" tfsdk:"content_owner_id"`
+	User_email       string `mapstructure:"user_email" tfsdk:"user_email"`
 }
 
 func (d *YoutubeanalyticsConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
@@ -113,9 +108,8 @@ func (d *YoutubeanalyticsConnectionDataSource) Read(ctx context.Context, req dat
 
 	var diags diag.Diagnostics
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"content_owner_id":   types.StringType,
-		"oauth_token_expiry": types.StringType,
-		"user_email":         types.StringType,
+		"content_owner_id": types.StringType,
+		"user_email":       types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

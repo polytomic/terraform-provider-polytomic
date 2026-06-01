@@ -36,7 +36,6 @@ data "polytomic_github_connection" "github" {
 
 Read-Only:
 
-- `authenticated` (Boolean)
 - `repositories` (Attributes Set) (see [below for nested schema](#nestedatt--configuration--repositories))
 
 <a id="nestedatt--configuration--repositories"></a>

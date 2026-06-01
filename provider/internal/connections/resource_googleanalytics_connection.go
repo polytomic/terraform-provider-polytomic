@@ -95,13 +95,6 @@ var GoogleanalyticsSchema = schema.Schema{
 						stringplanmodifier.UseStateForUnknown(),
 					},
 				},
-				"oauth_token_expiry": schema.StringAttribute{
-					MarkdownDescription: ``,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
-				},
 				"properties": schema.SetNestedAttribute{
 					MarkdownDescription: ``,
 					Required:            false,
@@ -176,7 +169,6 @@ type GoogleanalyticsConf struct {
 	Client_secret       string `mapstructure:"client_secret" tfsdk:"client_secret"`
 	Custom_reports      string `mapstructure:"custom_reports" tfsdk:"custom_reports"`
 	Oauth_refresh_token string `mapstructure:"oauth_refresh_token" tfsdk:"oauth_refresh_token"`
-	Oauth_token_expiry  string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
 	Properties          []struct {
 		Label string `mapstructure:"label" tfsdk:"label"`
 		Value string `mapstructure:"value" tfsdk:"value"`
@@ -264,7 +256,6 @@ func (r *GoogleanalyticsConnectionResource) Create(ctx context.Context, req reso
 		"client_secret":       types.StringType,
 		"custom_reports":      types.StringType,
 		"oauth_refresh_token": types.StringType,
-		"oauth_token_expiry":  types.StringType,
 		"properties": types.SetType{
 			ElemType: types.ObjectType{
 				AttrTypes: map[string]attr.Type{
@@ -350,7 +341,6 @@ func (r *GoogleanalyticsConnectionResource) Read(ctx context.Context, req resour
 		"client_secret":       types.StringType,
 		"custom_reports":      types.StringType,
 		"oauth_refresh_token": types.StringType,
-		"oauth_token_expiry":  types.StringType,
 		"properties": types.SetType{
 			ElemType: types.ObjectType{
 				AttrTypes: map[string]attr.Type{
@@ -446,7 +436,6 @@ func (r *GoogleanalyticsConnectionResource) Update(ctx context.Context, req reso
 		"client_secret":       types.StringType,
 		"custom_reports":      types.StringType,
 		"oauth_refresh_token": types.StringType,
-		"oauth_token_expiry":  types.StringType,
 		"properties": types.SetType{
 			ElemType: types.ObjectType{
 				AttrTypes: map[string]attr.Type{

@@ -505,6 +505,9 @@ func attributesForJSONSchema(connSchema *jsonschema.Schema) ([]Attribute, error)
 	// dependentSchemas doesn't introduce duplicates and conditions merge.
 	seen := map[string]int{}
 	for pair := connSchema.Properties.Oldest(); pair != nil; pair = pair.Next() {
+		if isInternalHidden(pair.Value) {
+			continue
+		}
 		attr, err := tfAttr(pair.Key, pair.Value, connSchema.Required)
 		if err != nil {
 			return attrs, err
@@ -619,6 +622,9 @@ func extractConditionalAttrs(triggerField string, schema *jsonschema.Schema) ([]
 				if pair.Key == triggerField {
 					continue
 				}
+				if isInternalHidden(pair.Value) {
+					continue
+				}
 				attr, err := tfAttr(pair.Key, pair.Value, branch.Required)
 				if err != nil {
 					return nil, err
@@ -682,6 +688,9 @@ func extractIfThenAttrs(triggerField string, ifSchema, thenSchema *jsonschema.Sc
 			if pair.Key == triggerField {
 				continue
 			}
+			if isInternalHidden(pair.Value) {
+				continue
+			}
 			attr, err := tfAttr(pair.Key, pair.Value, thenSchema.Required)
 			if err != nil {
 				return nil, err
@@ -708,6 +717,22 @@ func extractIfThenAttrs(triggerField string, ifSchema, thenSchema *jsonschema.Sc
 	}
 
 	return attrs, nil
+}
+
+// isInternalHidden reports whether a property is server-managed internal state
+// that should not be surfaced in Terraform: the backend marks it hidden in the
+// UI AND it is not settable via the API (no api_field marker). Examples include
+// github `authenticated`, `oauth_token_expiry`, and upfluence
+// `oauth_refresh_token`. Fields that are hidden but api_field=true (client_id,
+// client_secret, oauth_access_token) are legitimate connection inputs and are
+// kept. The same field name may be api_field in one backend and internal in
+// another, so this decision must be made per-field from these flags rather than
+// from a name blocklist.
+func isInternalHidden(s *jsonschema.Schema) bool {
+	if s == nil {
+		return false
+	}
+	return s.Extras["hidden"] == true && s.Extras["api_field"] != true
 }
 
 func tfAttr(k string, a *jsonschema.Schema, required []string) (Attribute, error) {

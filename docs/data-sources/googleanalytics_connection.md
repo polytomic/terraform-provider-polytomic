@@ -40,7 +40,6 @@ Read-Only:
 - `custom_reports` (String) Custom reports
 
     One report per line. Format is a report name followed by a comma-separated list of fields. e.g. myReport:field1
-- `oauth_token_expiry` (String)
 - `properties` (Attributes Set) (see [below for nested schema](#nestedatt--configuration--properties))
 - `user_email` (String) Connected user's email
 

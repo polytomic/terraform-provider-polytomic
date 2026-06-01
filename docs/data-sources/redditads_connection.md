@@ -38,7 +38,6 @@ Read-Only:
 
 - `accounts` (Attributes Set) (see [below for nested schema](#nestedatt--configuration--accounts))
 - `connected_user` (String) Connected user's email
-- `oauth_token_expiry` (String)
 - `pixel_id` (String) Conversion Pixel ID
 
     Required if syncing conversion events to Reddit Ads.

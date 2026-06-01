@@ -39,7 +39,6 @@ Read-Only:
 - `content_owner_id` (String) Content owner ID
 
     If you are using a content owner account enter the content owner ID here. This is required for some reports.
-- `oauth_token_expiry` (String)
 - `user_email` (String) Connected user's email
 
 

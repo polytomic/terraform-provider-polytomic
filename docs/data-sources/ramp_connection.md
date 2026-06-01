@@ -37,6 +37,5 @@ data "polytomic_ramp_connection" "ramp" {
 Read-Only:
 
 - `is_sandbox` (Boolean) Is Sandbox
-- `oauth_token_expiry` (String)
 
 

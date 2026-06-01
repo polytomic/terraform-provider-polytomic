@@ -34,8 +34,4 @@ data "polytomic_typeform_connection" "typeform" {
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
-Read-Only:
-
-- `oauth_token_expiry` (String)
-
 

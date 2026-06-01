@@ -80,13 +80,6 @@ var OutreachSchema = schema.Schema{
 						stringplanmodifier.UseStateForUnknown(),
 					},
 				},
-				"oauth_token_expiry": schema.StringAttribute{
-					MarkdownDescription: ``,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
-				},
 				"use_bulk_upsert": schema.BoolAttribute{
 					MarkdownDescription: `Use bulk API for syncing to Outreach Default: <code>true</code>.`,
 					Required:            false,
@@ -125,7 +118,6 @@ type OutreachConf struct {
 	Client_secret       string `mapstructure:"client_secret" tfsdk:"client_secret"`
 	Connected_user      string `mapstructure:"connected_user" tfsdk:"connected_user"`
 	Oauth_refresh_token string `mapstructure:"oauth_refresh_token" tfsdk:"oauth_refresh_token"`
-	Oauth_token_expiry  string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
 	Use_bulk_upsert     bool   `mapstructure:"use_bulk_upsert" tfsdk:"use_bulk_upsert"`
 }
 
@@ -207,7 +199,6 @@ func (r *OutreachConnectionResource) Create(ctx context.Context, req resource.Cr
 		"client_secret":       types.StringType,
 		"connected_user":      types.StringType,
 		"oauth_refresh_token": types.StringType,
-		"oauth_token_expiry":  types.StringType,
 		"use_bulk_upsert":     types.BoolType,
 	}, conf)
 	if diags.HasError() {
@@ -283,7 +274,6 @@ func (r *OutreachConnectionResource) Read(ctx context.Context, req resource.Read
 		"client_secret":       types.StringType,
 		"connected_user":      types.StringType,
 		"oauth_refresh_token": types.StringType,
-		"oauth_token_expiry":  types.StringType,
 		"use_bulk_upsert":     types.BoolType,
 	}, conf)
 	if diags.HasError() {
@@ -369,7 +359,6 @@ func (r *OutreachConnectionResource) Update(ctx context.Context, req resource.Up
 		"client_secret":       types.StringType,
 		"connected_user":      types.StringType,
 		"oauth_refresh_token": types.StringType,
-		"oauth_token_expiry":  types.StringType,
 		"use_bulk_upsert":     types.BoolType,
 	}, conf)
 	if diags.HasError() {

@@ -83,10 +83,6 @@ func (d *GoogleadsConnectionDataSource) Schema(ctx context.Context, req datasour
     One report per line. Format is a report name:ads object:field list. e.g. myReport:ad_groups:campaign.id`,
 						Computed: true,
 					},
-					"oauth_token_expiry": schema.StringAttribute{
-						MarkdownDescription: ``,
-						Computed:            true,
-					},
 				},
 				Optional: true,
 			},
@@ -102,7 +98,6 @@ type GoogleadsDataSourceConf struct {
 	Blanket_user_consent bool   `mapstructure:"blanket_user_consent" tfsdk:"blanket_user_consent"`
 	Connected_user       string `mapstructure:"connected_user" tfsdk:"connected_user"`
 	Custom_reports       string `mapstructure:"custom_reports" tfsdk:"custom_reports"`
-	Oauth_token_expiry   string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
 }
 
 func (d *GoogleadsConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
@@ -151,7 +146,6 @@ func (d *GoogleadsConnectionDataSource) Read(ctx context.Context, req datasource
 		"blanket_user_consent": types.BoolType,
 		"connected_user":       types.StringType,
 		"custom_reports":       types.StringType,
-		"oauth_token_expiry":   types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
