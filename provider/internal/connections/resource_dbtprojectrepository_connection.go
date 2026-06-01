@@ -107,13 +107,6 @@ var DbtprojectrepositorySchema = schema.Schema{
 						stringplanmodifier.UseStateForUnknown(),
 					},
 				},
-				"oauth_token_expiry": schema.StringAttribute{
-					MarkdownDescription: ``,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
-				},
 				"repository": schema.StringAttribute{
 					MarkdownDescription: `dbt project repository
 
@@ -159,7 +152,6 @@ type DbtprojectrepositoryConf struct {
 	} `mapstructure:"latest_commit" tfsdk:"latest_commit"`
 	Oauth_access_token  string `mapstructure:"oauth_access_token" tfsdk:"oauth_access_token"`
 	Oauth_refresh_token string `mapstructure:"oauth_refresh_token" tfsdk:"oauth_refresh_token"`
-	Oauth_token_expiry  string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
 	Repository          string `mapstructure:"repository" tfsdk:"repository"`
 }
 
@@ -247,7 +239,6 @@ func (r *DbtprojectrepositoryConnectionResource) Create(ctx context.Context, req
 			},
 		}, "oauth_access_token": types.StringType,
 		"oauth_refresh_token": types.StringType,
-		"oauth_token_expiry":  types.StringType,
 		"repository":          types.StringType,
 	}, conf)
 	if diags.HasError() {
@@ -329,7 +320,6 @@ func (r *DbtprojectrepositoryConnectionResource) Read(ctx context.Context, req r
 			},
 		}, "oauth_access_token": types.StringType,
 		"oauth_refresh_token": types.StringType,
-		"oauth_token_expiry":  types.StringType,
 		"repository":          types.StringType,
 	}, conf)
 	if diags.HasError() {
@@ -421,7 +411,6 @@ func (r *DbtprojectrepositoryConnectionResource) Update(ctx context.Context, req
 			},
 		}, "oauth_access_token": types.StringType,
 		"oauth_refresh_token": types.StringType,
-		"oauth_token_expiry":  types.StringType,
 		"repository":          types.StringType,
 	}, conf)
 	if diags.HasError() {

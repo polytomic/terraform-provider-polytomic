@@ -116,13 +116,6 @@ var GoogleslidesSchema = schema.Schema{
 						stringplanmodifier.UseStateForUnknown(),
 					},
 				},
-				"oauth_token_expiry": schema.StringAttribute{
-					MarkdownDescription: ``,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
-				},
 				"service_account": schema.StringAttribute{
 					MarkdownDescription: `Service account key`,
 					Required:            false,
@@ -176,7 +169,6 @@ type GoogleslidesConf struct {
 	} `mapstructure:"folder_id" tfsdk:"folder_id"`
 	Include_subdirectories bool   `mapstructure:"include_subdirectories" tfsdk:"include_subdirectories"`
 	Oauth_refresh_token    string `mapstructure:"oauth_refresh_token" tfsdk:"oauth_refresh_token"`
-	Oauth_token_expiry     string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
 	Service_account        string `mapstructure:"service_account" tfsdk:"service_account"`
 	User_email             string `mapstructure:"user_email" tfsdk:"user_email"`
 }
@@ -265,7 +257,6 @@ func (r *GoogleslidesConnectionResource) Create(ctx context.Context, req resourc
 			},
 		}, "include_subdirectories": types.BoolType,
 		"oauth_refresh_token": types.StringType,
-		"oauth_token_expiry":  types.StringType,
 		"service_account":     types.StringType,
 		"user_email":          types.StringType,
 	}, conf)
@@ -348,7 +339,6 @@ func (r *GoogleslidesConnectionResource) Read(ctx context.Context, req resource.
 			},
 		}, "include_subdirectories": types.BoolType,
 		"oauth_refresh_token": types.StringType,
-		"oauth_token_expiry":  types.StringType,
 		"service_account":     types.StringType,
 		"user_email":          types.StringType,
 	}, conf)
@@ -441,7 +431,6 @@ func (r *GoogleslidesConnectionResource) Update(ctx context.Context, req resourc
 			},
 		}, "include_subdirectories": types.BoolType,
 		"oauth_refresh_token": types.StringType,
-		"oauth_token_expiry":  types.StringType,
 		"service_account":     types.StringType,
 		"user_email":          types.StringType,
 	}, conf)

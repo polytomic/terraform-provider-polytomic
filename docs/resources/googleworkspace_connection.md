@@ -59,7 +59,6 @@ state before it will take effect on a destroy operation.
 - `client_id` (String, Sensitive)
 - `client_secret` (String, Sensitive)
 - `customer_id` (String) Customer ID
-- `oauth_token_expiry` (String)
 - `service_account` (String, Sensitive) Service account key
 
 #### Read-Only

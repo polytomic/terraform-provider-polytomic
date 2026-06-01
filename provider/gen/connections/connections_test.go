@@ -242,3 +242,94 @@ func TestTfAttr(t *testing.T) {
 		assert.Equal(t, "schema.StringAttribute", nameAttr.AttrType)
 	})
 }
+
+func TestIsInternalHidden(t *testing.T) {
+	cases := []struct {
+		name  string
+		extra map[string]interface{}
+		want  bool
+	}{
+		{"hidden without api_field is internal", map[string]interface{}{"hidden": true}, true},
+		{"hidden with api_field is kept", map[string]interface{}{"hidden": true, "api_field": true}, false},
+		{"api_field without hidden is kept", map[string]interface{}{"api_field": true}, false},
+		{"no markers is kept", nil, false},
+		{"sensitive only is kept", map[string]interface{}{"sensitive": true}, false},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			assert.Equal(t, tc.want, isInternalHidden(&jsonschema.Schema{Extras: tc.extra}))
+		})
+	}
+
+	t.Run("nil schema is not internal", func(t *testing.T) {
+		assert.False(t, isInternalHidden(nil))
+	})
+}
+
+func TestAttributesForJSONSchemaFiltersInternalHidden(t *testing.T) {
+	t.Run("top-level properties", func(t *testing.T) {
+		props := jsonschema.NewProperties()
+		// Server-managed internal state: hidden, not settable via API. Dropped.
+		props.Set("authenticated", &jsonschema.Schema{
+			Type:   "boolean",
+			Extras: map[string]interface{}{"hidden": true},
+		})
+		props.Set("oauth_token_expiry", &jsonschema.Schema{
+			Type:   "string",
+			Extras: map[string]interface{}{"hidden": true},
+		})
+		// Hidden but settable via API (UI hides it behind an OAuth button). Kept.
+		props.Set("client_secret", &jsonschema.Schema{
+			Type:   "string",
+			Extras: map[string]interface{}{"hidden": true, "api_field": true},
+		})
+		// Ordinary field. Kept.
+		props.Set("repositories", &jsonschema.Schema{Type: "array", Items: &jsonschema.Schema{Type: "string"}})
+
+		attrs, err := attributesForJSONSchema(&jsonschema.Schema{
+			Type:       "object",
+			Properties: props,
+		})
+		require.NoError(t, err)
+
+		names := map[string]bool{}
+		for _, a := range attrs {
+			names[a.Name] = true
+		}
+		assert.NotContains(t, names, "authenticated")
+		assert.NotContains(t, names, "oauth_token_expiry")
+		assert.Contains(t, names, "client_secret")
+		assert.Contains(t, names, "repositories")
+	})
+
+	t.Run("conditional (dependentSchemas) properties", func(t *testing.T) {
+		props := jsonschema.NewProperties()
+		props.Set("auth_mode", &jsonschema.Schema{Type: "string", Enum: []interface{}{"oauth"}})
+
+		branchProps := jsonschema.NewProperties()
+		branchProps.Set("auth_mode", &jsonschema.Schema{Enum: []interface{}{"oauth"}})
+		branchProps.Set("oauth_refresh_token", &jsonschema.Schema{
+			Type:   "string",
+			Extras: map[string]interface{}{"hidden": true},
+		})
+		branchProps.Set("scope", &jsonschema.Schema{Type: "string"})
+
+		attrs, err := attributesForJSONSchema(&jsonschema.Schema{
+			Type:       "object",
+			Properties: props,
+			DependentSchemas: map[string]*jsonschema.Schema{
+				"auth_mode": {
+					OneOf: []*jsonschema.Schema{{Properties: branchProps}},
+				},
+			},
+		})
+		require.NoError(t, err)
+
+		names := map[string]bool{}
+		for _, a := range attrs {
+			names[a.Name] = true
+		}
+		assert.NotContains(t, names, "oauth_refresh_token")
+		assert.Contains(t, names, "scope")
+	})
+}

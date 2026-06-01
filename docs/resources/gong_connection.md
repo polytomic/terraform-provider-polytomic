@@ -66,7 +66,6 @@ state before it will take effect on a destroy operation.
 - `client_id` (String, Sensitive)
 - `client_secret` (String, Sensitive)
 - `oauth_refresh_token` (String, Sensitive)
-- `oauth_token_expiry` (String)
 - `subdomain` (String) Gong subdomain i.e. company-17 if you access Gong via https://company-17.app.gong.io
 
 

@@ -66,6 +66,5 @@ state before it will take effect on a destroy operation.
 - `daily_api_calls` (Number) Daily call limit Default: <code>37500</code>.
 - `enforce_api_limits` (Boolean) Enforce API limits
 - `include_static_lists` (Boolean) Include static list support Default: <code>true</code>.
-- `oauth_token_expiry` (String)
 
 

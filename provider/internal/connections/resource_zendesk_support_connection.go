@@ -97,13 +97,6 @@ var Zendesk_supportSchema = schema.Schema{
 						stringplanmodifier.UseStateForUnknown(),
 					},
 				},
-				"oauth_token_expiry": schema.StringAttribute{
-					MarkdownDescription: ``,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
-				},
 				"ratelimit_rpm": schema.Int64Attribute{
 					MarkdownDescription: `Maximum requests per minute
 
@@ -146,7 +139,6 @@ type Zendesk_supportConf struct {
 	Domain              string `mapstructure:"domain" tfsdk:"domain"`
 	Email               string `mapstructure:"email" tfsdk:"email"`
 	Oauth_refresh_token string `mapstructure:"oauth_refresh_token" tfsdk:"oauth_refresh_token"`
-	Oauth_token_expiry  string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
 	Ratelimit_rpm       int64  `mapstructure:"ratelimit_rpm" tfsdk:"ratelimit_rpm"`
 }
 
@@ -230,7 +222,6 @@ func (r *Zendesk_supportConnectionResource) Create(ctx context.Context, req reso
 		"domain":              types.StringType,
 		"email":               types.StringType,
 		"oauth_refresh_token": types.StringType,
-		"oauth_token_expiry":  types.StringType,
 		"ratelimit_rpm":       types.NumberType,
 	}, conf)
 	if diags.HasError() {
@@ -308,7 +299,6 @@ func (r *Zendesk_supportConnectionResource) Read(ctx context.Context, req resour
 		"domain":              types.StringType,
 		"email":               types.StringType,
 		"oauth_refresh_token": types.StringType,
-		"oauth_token_expiry":  types.StringType,
 		"ratelimit_rpm":       types.NumberType,
 	}, conf)
 	if diags.HasError() {
@@ -396,7 +386,6 @@ func (r *Zendesk_supportConnectionResource) Update(ctx context.Context, req reso
 		"domain":              types.StringType,
 		"email":               types.StringType,
 		"oauth_refresh_token": types.StringType,
-		"oauth_token_expiry":  types.StringType,
 		"ratelimit_rpm":       types.NumberType,
 	}, conf)
 	if diags.HasError() {

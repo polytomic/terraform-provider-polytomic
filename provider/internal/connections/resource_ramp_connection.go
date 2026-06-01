@@ -80,13 +80,6 @@ var RampSchema = schema.Schema{
 						stringplanmodifier.UseStateForUnknown(),
 					},
 				},
-				"oauth_token_expiry": schema.StringAttribute{
-					MarkdownDescription: ``,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
-				},
 			},
 
 			Required: true,
@@ -118,7 +111,6 @@ type RampConf struct {
 	Client_secret       string `mapstructure:"client_secret" tfsdk:"client_secret"`
 	Is_sandbox          bool   `mapstructure:"is_sandbox" tfsdk:"is_sandbox"`
 	Oauth_refresh_token string `mapstructure:"oauth_refresh_token" tfsdk:"oauth_refresh_token"`
-	Oauth_token_expiry  string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
 }
 
 type RampConnectionResource struct {
@@ -199,7 +191,6 @@ func (r *RampConnectionResource) Create(ctx context.Context, req resource.Create
 		"client_secret":       types.StringType,
 		"is_sandbox":          types.BoolType,
 		"oauth_refresh_token": types.StringType,
-		"oauth_token_expiry":  types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -274,7 +265,6 @@ func (r *RampConnectionResource) Read(ctx context.Context, req resource.ReadRequ
 		"client_secret":       types.StringType,
 		"is_sandbox":          types.BoolType,
 		"oauth_refresh_token": types.StringType,
-		"oauth_token_expiry":  types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -359,7 +349,6 @@ func (r *RampConnectionResource) Update(ctx context.Context, req resource.Update
 		"client_secret":       types.StringType,
 		"is_sandbox":          types.BoolType,
 		"oauth_refresh_token": types.StringType,
-		"oauth_token_expiry":  types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

@@ -71,10 +71,6 @@ func (d *MarketoConnectionDataSource) Schema(ctx context.Context, req datasource
 						MarkdownDescription: `Include static list support Default: <code>true</code>.`,
 						Computed:            true,
 					},
-					"oauth_token_expiry": schema.StringAttribute{
-						MarkdownDescription: ``,
-						Computed:            true,
-					},
 					"rest_endpoint": schema.StringAttribute{
 						MarkdownDescription: `REST Endpoint`,
 						Computed:            true,
@@ -92,7 +88,6 @@ type MarketoDataSourceConf struct {
 	Daily_api_calls      int64  `mapstructure:"daily_api_calls" tfsdk:"daily_api_calls"`
 	Enforce_api_limits   bool   `mapstructure:"enforce_api_limits" tfsdk:"enforce_api_limits"`
 	Include_static_lists bool   `mapstructure:"include_static_lists" tfsdk:"include_static_lists"`
-	Oauth_token_expiry   string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
 	Rest_endpoint        string `mapstructure:"rest_endpoint" tfsdk:"rest_endpoint"`
 }
 
@@ -136,7 +131,6 @@ func (d *MarketoConnectionDataSource) Read(ctx context.Context, req datasource.R
 		"daily_api_calls":      types.NumberType,
 		"enforce_api_limits":   types.BoolType,
 		"include_static_lists": types.BoolType,
-		"oauth_token_expiry":   types.StringType,
 		"rest_endpoint":        types.StringType,
 	}, conf)
 	if diags.HasError() {

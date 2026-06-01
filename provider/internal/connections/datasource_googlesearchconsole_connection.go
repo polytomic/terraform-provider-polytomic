@@ -51,10 +51,6 @@ func (d *GooglesearchconsoleConnectionDataSource) Schema(ctx context.Context, re
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
-					"oauth_token_expiry": schema.StringAttribute{
-						MarkdownDescription: ``,
-						Computed:            true,
-					},
 					"sites": schema.SetNestedAttribute{
 						MarkdownDescription: ``,
 						Computed:            true,
@@ -79,8 +75,7 @@ func (d *GooglesearchconsoleConnectionDataSource) Schema(ctx context.Context, re
 }
 
 type GooglesearchconsoleDataSourceConf struct {
-	Oauth_token_expiry string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
-	Sites              []struct {
+	Sites []struct {
 		Label string `mapstructure:"label" tfsdk:"label"`
 		Value string `mapstructure:"value" tfsdk:"value"`
 	} `mapstructure:"sites" tfsdk:"sites"`
@@ -121,7 +116,6 @@ func (d *GooglesearchconsoleConnectionDataSource) Read(ctx context.Context, req 
 
 	var diags diag.Diagnostics
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"oauth_token_expiry": types.StringType,
 		"sites": types.SetType{
 			ElemType: types.ObjectType{
 				AttrTypes: map[string]attr.Type{

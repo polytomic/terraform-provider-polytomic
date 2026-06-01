@@ -93,13 +93,6 @@ var GsheetsSchema = schema.Schema{
 						stringplanmodifier.UseStateForUnknown(),
 					},
 				},
-				"oauth_token_expiry": schema.StringAttribute{
-					MarkdownDescription: ``,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
-				},
 				"service_account": schema.StringAttribute{
 					MarkdownDescription: `Service account key`,
 					Required:            false,
@@ -172,7 +165,6 @@ type GsheetsConf struct {
 	Connect_mode        string `mapstructure:"connect_mode" tfsdk:"connect_mode"`
 	Has_headers         bool   `mapstructure:"has_headers" tfsdk:"has_headers"`
 	Oauth_refresh_token string `mapstructure:"oauth_refresh_token" tfsdk:"oauth_refresh_token"`
-	Oauth_token_expiry  string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
 	Service_account     string `mapstructure:"service_account" tfsdk:"service_account"`
 	Spreadsheet_id      struct {
 		Label string `mapstructure:"label" tfsdk:"label"`
@@ -260,7 +252,6 @@ func (r *GsheetsConnectionResource) Create(ctx context.Context, req resource.Cre
 		"connect_mode":        types.StringType,
 		"has_headers":         types.BoolType,
 		"oauth_refresh_token": types.StringType,
-		"oauth_token_expiry":  types.StringType,
 		"service_account":     types.StringType,
 		"spreadsheet_id": types.ObjectType{
 			AttrTypes: map[string]attr.Type{
@@ -343,7 +334,6 @@ func (r *GsheetsConnectionResource) Read(ctx context.Context, req resource.ReadR
 		"connect_mode":        types.StringType,
 		"has_headers":         types.BoolType,
 		"oauth_refresh_token": types.StringType,
-		"oauth_token_expiry":  types.StringType,
 		"service_account":     types.StringType,
 		"spreadsheet_id": types.ObjectType{
 			AttrTypes: map[string]attr.Type{
@@ -436,7 +426,6 @@ func (r *GsheetsConnectionResource) Update(ctx context.Context, req resource.Upd
 		"connect_mode":        types.StringType,
 		"has_headers":         types.BoolType,
 		"oauth_refresh_token": types.StringType,
-		"oauth_token_expiry":  types.StringType,
 		"service_account":     types.StringType,
 		"spreadsheet_id": types.ObjectType{
 			AttrTypes: map[string]attr.Type{

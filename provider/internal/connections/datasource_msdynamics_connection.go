@@ -55,10 +55,6 @@ func (d *MsdynamicsConnectionDataSource) Schema(ctx context.Context, req datasou
 						MarkdownDescription: `Dynamics URL`,
 						Computed:            true,
 					},
-					"oauth_token_expiry": schema.StringAttribute{
-						MarkdownDescription: ``,
-						Computed:            true,
-					},
 				},
 				Optional: true,
 			},
@@ -67,8 +63,7 @@ func (d *MsdynamicsConnectionDataSource) Schema(ctx context.Context, req datasou
 }
 
 type MsdynamicsDataSourceConf struct {
-	Dynamics_url       string `mapstructure:"dynamics_url" tfsdk:"dynamics_url"`
-	Oauth_token_expiry string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
+	Dynamics_url string `mapstructure:"dynamics_url" tfsdk:"dynamics_url"`
 }
 
 func (d *MsdynamicsConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
@@ -106,8 +101,7 @@ func (d *MsdynamicsConnectionDataSource) Read(ctx context.Context, req datasourc
 
 	var diags diag.Diagnostics
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"dynamics_url":       types.StringType,
-		"oauth_token_expiry": types.StringType,
+		"dynamics_url": types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

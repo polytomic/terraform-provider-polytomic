@@ -38,7 +38,6 @@ Read-Only:
 
 - `access_key` (String) Access key
 - `auth_method` (String) Authentication method Valid values: <code>token</code> (Access key and secret), <code>oauth</code> (OAuth). Default: <code>token</code>.
-- `oauth_token_expiry` (String)
 - `subdomain` (String) Gong subdomain i.e. company-17 if you access Gong via https://company-17.app.gong.io
 
 

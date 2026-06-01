@@ -1,3 +1,9 @@
+## v2.0.0 (unreleased)
+
+BREAKING CHANGES:
+
+- Removed server-managed internal fields from connection configurations. Fields such as `authenticated` (GitHub) and `oauth_token_expiry` were generated as `Optional` + `Computed` but tracked internal OAuth state and had no effect when set. This removes 28 fields across 27 connection types. Fields that are hidden in the UI but settable through the API (`client_id`, `client_secret`, `oauth_access_token`) are unchanged. See the [v2.0.0 upgrade guide](docs/guides/upgrading-to-v2.0.0.md) for the full list and migration steps.
+
 ## v1.5.5 (29 May 2026)
 
 - Added support for new connection types:

@@ -59,10 +59,6 @@ func (d *SalesloftConnectionDataSource) Schema(ctx context.Context, req datasour
 						MarkdownDescription: `Connected user's email`,
 						Computed:            true,
 					},
-					"oauth_token_expiry": schema.StringAttribute{
-						MarkdownDescription: ``,
-						Computed:            true,
-					},
 				},
 				Optional: true,
 			},
@@ -71,9 +67,8 @@ func (d *SalesloftConnectionDataSource) Schema(ctx context.Context, req datasour
 }
 
 type SalesloftDataSourceConf struct {
-	Auth_method        string `mapstructure:"auth_method" tfsdk:"auth_method"`
-	Connected_user     string `mapstructure:"connected_user" tfsdk:"connected_user"`
-	Oauth_token_expiry string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
+	Auth_method    string `mapstructure:"auth_method" tfsdk:"auth_method"`
+	Connected_user string `mapstructure:"connected_user" tfsdk:"connected_user"`
 }
 
 func (d *SalesloftConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
@@ -111,9 +106,8 @@ func (d *SalesloftConnectionDataSource) Read(ctx context.Context, req datasource
 
 	var diags diag.Diagnostics
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"auth_method":        types.StringType,
-		"connected_user":     types.StringType,
-		"oauth_token_expiry": types.StringType,
+		"auth_method":    types.StringType,
+		"connected_user": types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

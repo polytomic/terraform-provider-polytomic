@@ -36,7 +36,6 @@ data "polytomic_upfluence_connection" "upfluence" {
 
 Read-Only:
 
-- `oauth_token_expiry` (String)
 - `username` (String) Email
 
 

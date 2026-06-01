@@ -88,13 +88,6 @@ var MarketoSchema = schema.Schema{
 					Computed:            true,
 					Sensitive:           false,
 				},
-				"oauth_token_expiry": schema.StringAttribute{
-					MarkdownDescription: ``,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
-				},
 				"rest_endpoint": schema.StringAttribute{
 					MarkdownDescription: `REST Endpoint`,
 					Required:            true,
@@ -135,7 +128,6 @@ type MarketoConf struct {
 	Daily_api_calls      int64  `mapstructure:"daily_api_calls" tfsdk:"daily_api_calls"`
 	Enforce_api_limits   bool   `mapstructure:"enforce_api_limits" tfsdk:"enforce_api_limits"`
 	Include_static_lists bool   `mapstructure:"include_static_lists" tfsdk:"include_static_lists"`
-	Oauth_token_expiry   string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
 	Rest_endpoint        string `mapstructure:"rest_endpoint" tfsdk:"rest_endpoint"`
 }
 
@@ -219,7 +211,6 @@ func (r *MarketoConnectionResource) Create(ctx context.Context, req resource.Cre
 		"daily_api_calls":      types.NumberType,
 		"enforce_api_limits":   types.BoolType,
 		"include_static_lists": types.BoolType,
-		"oauth_token_expiry":   types.StringType,
 		"rest_endpoint":        types.StringType,
 	}, conf)
 	if diags.HasError() {
@@ -297,7 +288,6 @@ func (r *MarketoConnectionResource) Read(ctx context.Context, req resource.ReadR
 		"daily_api_calls":      types.NumberType,
 		"enforce_api_limits":   types.BoolType,
 		"include_static_lists": types.BoolType,
-		"oauth_token_expiry":   types.StringType,
 		"rest_endpoint":        types.StringType,
 	}, conf)
 	if diags.HasError() {
@@ -385,7 +375,6 @@ func (r *MarketoConnectionResource) Update(ctx context.Context, req resource.Upd
 		"daily_api_calls":      types.NumberType,
 		"enforce_api_limits":   types.BoolType,
 		"include_static_lists": types.BoolType,
-		"oauth_token_expiry":   types.StringType,
 		"rest_endpoint":        types.StringType,
 	}, conf)
 	if diags.HasError() {

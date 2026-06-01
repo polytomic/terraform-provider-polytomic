@@ -66,13 +66,6 @@ var Zoho_crmSchema = schema.Schema{
 						stringplanmodifier.UseStateForUnknown(),
 					},
 				},
-				"oauth_token_expiry": schema.StringAttribute{
-					MarkdownDescription: ``,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
-				},
 				"region": schema.StringAttribute{
 					MarkdownDescription: `Data center region Valid values: <code>usa</code> (USA), <code>europe</code> (Europe), <code>australia</code> (Australia), <code>canada</code> (Canada), <code>china</code> (China), <code>japan</code> (Japan), <code>saudi_arabia</code> (Saudi Arabia). Default: <code>usa</code>.`,
 					Required:            true,
@@ -110,10 +103,9 @@ func (t *Zoho_crmConnectionResource) Schema(ctx context.Context, req resource.Sc
 }
 
 type Zoho_crmConf struct {
-	Client_id          string `mapstructure:"client_id" tfsdk:"client_id"`
-	Client_secret      string `mapstructure:"client_secret" tfsdk:"client_secret"`
-	Oauth_token_expiry string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
-	Region             string `mapstructure:"region" tfsdk:"region"`
+	Client_id     string `mapstructure:"client_id" tfsdk:"client_id"`
+	Client_secret string `mapstructure:"client_secret" tfsdk:"client_secret"`
+	Region        string `mapstructure:"region" tfsdk:"region"`
 }
 
 type Zoho_crmConnectionResource struct {
@@ -190,10 +182,9 @@ func (r *Zoho_crmConnectionResource) Create(ctx context.Context, req resource.Cr
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"client_id":          types.StringType,
-		"client_secret":      types.StringType,
-		"oauth_token_expiry": types.StringType,
-		"region":             types.StringType,
+		"client_id":     types.StringType,
+		"client_secret": types.StringType,
+		"region":        types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -264,10 +255,9 @@ func (r *Zoho_crmConnectionResource) Read(ctx context.Context, req resource.Read
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"client_id":          types.StringType,
-		"client_secret":      types.StringType,
-		"oauth_token_expiry": types.StringType,
-		"region":             types.StringType,
+		"client_id":     types.StringType,
+		"client_secret": types.StringType,
+		"region":        types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -348,10 +338,9 @@ func (r *Zoho_crmConnectionResource) Update(ctx context.Context, req resource.Up
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"client_id":          types.StringType,
-		"client_secret":      types.StringType,
-		"oauth_token_expiry": types.StringType,
-		"region":             types.StringType,
+		"client_id":     types.StringType,
+		"client_secret": types.StringType,
+		"region":        types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

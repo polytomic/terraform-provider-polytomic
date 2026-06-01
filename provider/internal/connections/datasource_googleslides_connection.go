@@ -73,10 +73,6 @@ func (d *GoogleslidesConnectionDataSource) Schema(ctx context.Context, req datas
 						MarkdownDescription: `Include Subdirectories Default: <code>false</code>.`,
 						Computed:            true,
 					},
-					"oauth_token_expiry": schema.StringAttribute{
-						MarkdownDescription: ``,
-						Computed:            true,
-					},
 					"user_email": schema.StringAttribute{
 						MarkdownDescription: `Connected user's email`,
 						Computed:            true,
@@ -95,7 +91,6 @@ type GoogleslidesDataSourceConf struct {
 		Value string `mapstructure:"value" tfsdk:"value"`
 	} `mapstructure:"folder_id" tfsdk:"folder_id"`
 	Include_subdirectories bool   `mapstructure:"include_subdirectories" tfsdk:"include_subdirectories"`
-	Oauth_token_expiry     string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
 	User_email             string `mapstructure:"user_email" tfsdk:"user_email"`
 }
 
@@ -141,8 +136,7 @@ func (d *GoogleslidesConnectionDataSource) Read(ctx context.Context, req datasou
 				"value": types.StringType,
 			},
 		}, "include_subdirectories": types.BoolType,
-		"oauth_token_expiry": types.StringType,
-		"user_email":         types.StringType,
+		"user_email": types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

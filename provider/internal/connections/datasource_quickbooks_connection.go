@@ -51,10 +51,6 @@ func (d *QuickbooksConnectionDataSource) Schema(ctx context.Context, req datasou
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
-					"oauth_token_expiry": schema.StringAttribute{
-						MarkdownDescription: ``,
-						Computed:            true,
-					},
 					"realm_id": schema.StringAttribute{
 						MarkdownDescription: `Company ID`,
 						Computed:            true,
@@ -67,8 +63,7 @@ func (d *QuickbooksConnectionDataSource) Schema(ctx context.Context, req datasou
 }
 
 type QuickbooksDataSourceConf struct {
-	Oauth_token_expiry string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
-	Realm_id           string `mapstructure:"realm_id" tfsdk:"realm_id"`
+	Realm_id string `mapstructure:"realm_id" tfsdk:"realm_id"`
 }
 
 func (d *QuickbooksConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
@@ -106,8 +101,7 @@ func (d *QuickbooksConnectionDataSource) Read(ctx context.Context, req datasourc
 
 	var diags diag.Diagnostics
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"oauth_token_expiry": types.StringType,
-		"realm_id":           types.StringType,
+		"realm_id": types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

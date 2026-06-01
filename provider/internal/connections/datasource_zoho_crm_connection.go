@@ -51,10 +51,6 @@ func (d *Zoho_crmConnectionDataSource) Schema(ctx context.Context, req datasourc
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
-					"oauth_token_expiry": schema.StringAttribute{
-						MarkdownDescription: ``,
-						Computed:            true,
-					},
 					"region": schema.StringAttribute{
 						MarkdownDescription: `Data center region Valid values: <code>usa</code> (USA), <code>europe</code> (Europe), <code>australia</code> (Australia), <code>canada</code> (Canada), <code>china</code> (China), <code>japan</code> (Japan), <code>saudi_arabia</code> (Saudi Arabia). Default: <code>usa</code>.`,
 						Computed:            true,
@@ -67,8 +63,7 @@ func (d *Zoho_crmConnectionDataSource) Schema(ctx context.Context, req datasourc
 }
 
 type Zoho_crmDataSourceConf struct {
-	Oauth_token_expiry string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
-	Region             string `mapstructure:"region" tfsdk:"region"`
+	Region string `mapstructure:"region" tfsdk:"region"`
 }
 
 func (d *Zoho_crmConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
@@ -106,8 +101,7 @@ func (d *Zoho_crmConnectionDataSource) Read(ctx context.Context, req datasource.
 
 	var diags diag.Diagnostics
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"oauth_token_expiry": types.StringType,
-		"region":             types.StringType,
+		"region": types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

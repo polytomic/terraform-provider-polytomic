@@ -61,10 +61,6 @@ func (d *GoogleanalyticsConnectionDataSource) Schema(ctx context.Context, req da
     One report per line. Format is a report name followed by a comma-separated list of fields. e.g. myReport:field1`,
 						Computed: true,
 					},
-					"oauth_token_expiry": schema.StringAttribute{
-						MarkdownDescription: ``,
-						Computed:            true,
-					},
 					"properties": schema.SetNestedAttribute{
 						MarkdownDescription: ``,
 						Computed:            true,
@@ -93,10 +89,9 @@ func (d *GoogleanalyticsConnectionDataSource) Schema(ctx context.Context, req da
 }
 
 type GoogleanalyticsDataSourceConf struct {
-	Auth_method        string `mapstructure:"auth_method" tfsdk:"auth_method"`
-	Custom_reports     string `mapstructure:"custom_reports" tfsdk:"custom_reports"`
-	Oauth_token_expiry string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
-	Properties         []struct {
+	Auth_method    string `mapstructure:"auth_method" tfsdk:"auth_method"`
+	Custom_reports string `mapstructure:"custom_reports" tfsdk:"custom_reports"`
+	Properties     []struct {
 		Label string `mapstructure:"label" tfsdk:"label"`
 		Value string `mapstructure:"value" tfsdk:"value"`
 	} `mapstructure:"properties" tfsdk:"properties"`
@@ -138,9 +133,8 @@ func (d *GoogleanalyticsConnectionDataSource) Read(ctx context.Context, req data
 
 	var diags diag.Diagnostics
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"auth_method":        types.StringType,
-		"custom_reports":     types.StringType,
-		"oauth_token_expiry": types.StringType,
+		"auth_method":    types.StringType,
+		"custom_reports": types.StringType,
 		"properties": types.SetType{
 			ElemType: types.ObjectType{
 				AttrTypes: map[string]attr.Type{

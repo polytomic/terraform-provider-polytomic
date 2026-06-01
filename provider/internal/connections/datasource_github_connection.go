@@ -51,10 +51,6 @@ func (d *GithubConnectionDataSource) Schema(ctx context.Context, req datasource.
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
-					"authenticated": schema.BoolAttribute{
-						MarkdownDescription: ``,
-						Computed:            true,
-					},
 					"repositories": schema.SetNestedAttribute{
 						MarkdownDescription: ``,
 						Computed:            true,
@@ -79,8 +75,7 @@ func (d *GithubConnectionDataSource) Schema(ctx context.Context, req datasource.
 }
 
 type GithubDataSourceConf struct {
-	Authenticated bool `mapstructure:"authenticated" tfsdk:"authenticated"`
-	Repositories  []struct {
+	Repositories []struct {
 		Label string `mapstructure:"label" tfsdk:"label"`
 		Value string `mapstructure:"value" tfsdk:"value"`
 	} `mapstructure:"repositories" tfsdk:"repositories"`
@@ -121,7 +116,6 @@ func (d *GithubConnectionDataSource) Read(ctx context.Context, req datasource.Re
 
 	var diags diag.Diagnostics
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"authenticated": types.BoolType,
 		"repositories": types.SetType{
 			ElemType: types.ObjectType{
 				AttrTypes: map[string]attr.Type{
