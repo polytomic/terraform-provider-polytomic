@@ -1,8 +1,19 @@
-## v2.0.0 (unreleased)
+## v2.0.0 (1 July 2026)
 
 BREAKING CHANGES:
 
 - Removed server-managed internal fields from connection configurations. Fields such as `authenticated` (GitHub) and `oauth_token_expiry` were generated as `Optional` + `Computed` but tracked internal OAuth state and had no effect when set. This removes 28 fields across 27 connection types. Fields that are hidden in the UI but settable through the API (`client_id`, `client_secret`, `oauth_access_token`) are unchanged. See the [v2.0.0 upgrade guide](docs/guides/upgrading-to-v2.0.0.md) for the full list and migration steps.
+
+- Added support for new connection types:
+  - Amazon Keyspaces
+  - Apple Ads
+  - Baseten
+  - CloudTalk
+  - Google Search Ads 360
+  - OpenAI Ads
+  - Rillet
+  - Wavelength
+- Updated connection schemas for Asana, CSV URL, Google Ads, HTTP API, HTTP Enrichment, Knock, Plain, ScyllaDB, Tixr, Webhook, and Zendesk Support.
 
 ## v1.5.5 (29 May 2026)
 
