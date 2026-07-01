@@ -52,7 +52,7 @@ func (d *Zendesk_supportConnectionDataSource) Schema(ctx context.Context, req da
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"auth_method": schema.StringAttribute{
-						MarkdownDescription: `Authentication method Valid values: <code>apitoken</code> (API token), <code>oauth</code> (OAuth). Default: <code>oauth</code>.`,
+						MarkdownDescription: `Authentication method Valid values: <code>apitoken</code> (API token), <code>clientcredentials</code> (Client credentials), <code>oauth</code> (OAuth). Default: <code>oauth</code>.`,
 						Computed:            true,
 					},
 					"custom_api_limits": schema.BoolAttribute{

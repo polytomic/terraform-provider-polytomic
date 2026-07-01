@@ -24,6 +24,9 @@ import (
 	"github.com/polytomic/polytomic-go"
 	ptcore "github.com/polytomic/polytomic-go/core"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
+
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -43,8 +46,160 @@ var WebhookSchema = schema.Schema{
 		},
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
-				"headers": schema.SetNestedAttribute{
+				"auth_method": schema.StringAttribute{
+					MarkdownDescription: `Authentication method Valid values: <code>polytomic_secret</code> (Polytomic secret), <code>basic</code> (Basic authentication), <code>header</code> (Custom header), <code>query</code> (Query string key), <code>oauth_client_credentials</code> (OAuth client credentials). Default: <code>polytomic_secret</code>.`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
+					Validators: []validator.String{
+						stringvalidator.OneOf("polytomic_secret", "basic", "header", "query", "oauth_client_credentials"),
+					},
+				},
+				"basic": schema.SingleNestedAttribute{
+					MarkdownDescription: `Basic authentication`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+					Attributes: map[string]schema.Attribute{
+						"password": schema.StringAttribute{
+							MarkdownDescription: ``,
+							Required:            false,
+							Optional:            true,
+							Computed:            true,
+							Sensitive:           false,
+						},
+						"username": schema.StringAttribute{
+							MarkdownDescription: ``,
+							Required:            false,
+							Optional:            true,
+							Computed:            true,
+							Sensitive:           false,
+						},
+					},
+				},
+				"header": schema.SingleNestedAttribute{
 					MarkdownDescription: ``,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+					Attributes: map[string]schema.Attribute{
+						"name": schema.StringAttribute{
+							MarkdownDescription: ``,
+							Required:            false,
+							Optional:            true,
+							Computed:            true,
+							Sensitive:           false,
+						},
+						"value": schema.StringAttribute{
+							MarkdownDescription: ``,
+							Required:            false,
+							Optional:            true,
+							Computed:            true,
+							Sensitive:           false,
+						},
+					},
+				},
+				"headers": schema.SetNestedAttribute{
+					MarkdownDescription: `Additional headers`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+					NestedObject: schema.NestedAttributeObject{
+						Attributes: map[string]schema.Attribute{
+							"name": schema.StringAttribute{
+								MarkdownDescription: ``,
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
+								Sensitive:           false,
+							},
+							"value": schema.StringAttribute{
+								MarkdownDescription: ``,
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
+								Sensitive:           false,
+							},
+						},
+					},
+				},
+				"oauth": schema.SingleNestedAttribute{
+					MarkdownDescription: `OAuth client credentials`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+					Attributes: map[string]schema.Attribute{
+						"auth_style": schema.Int64Attribute{
+							MarkdownDescription: `Auth style`,
+							Required:            false,
+							Optional:            true,
+							Computed:            true,
+							Sensitive:           false,
+						},
+						"client_id": schema.StringAttribute{
+							MarkdownDescription: `Client ID`,
+							Required:            false,
+							Optional:            true,
+							Computed:            true,
+							Sensitive:           false,
+						},
+						"client_secret": schema.StringAttribute{
+							MarkdownDescription: `Client secret`,
+							Required:            false,
+							Optional:            true,
+							Computed:            true,
+							Sensitive:           false,
+						},
+						"extra_form_data": schema.SetNestedAttribute{
+							MarkdownDescription: `Extra form data`,
+							Required:            false,
+							Optional:            true,
+							Computed:            true,
+							Sensitive:           false,
+							NestedObject: schema.NestedAttributeObject{
+								Attributes: map[string]schema.Attribute{
+									"name": schema.StringAttribute{
+										MarkdownDescription: ``,
+										Required:            false,
+										Optional:            true,
+										Computed:            true,
+										Sensitive:           false,
+									},
+									"value": schema.StringAttribute{
+										MarkdownDescription: ``,
+										Required:            false,
+										Optional:            true,
+										Computed:            true,
+										Sensitive:           false,
+									},
+								},
+							},
+						},
+						"scopes": schema.SetAttribute{
+							MarkdownDescription: ``,
+							Required:            false,
+							Optional:            true,
+							Computed:            true,
+							Sensitive:           false,
+
+							ElementType: types.StringType,
+						},
+						"token_endpoint": schema.StringAttribute{
+							MarkdownDescription: `Token endpoint`,
+							Required:            false,
+							Optional:            true,
+							Computed:            true,
+							Sensitive:           false,
+						},
+					},
+				},
+				"query": schema.SetNestedAttribute{
+					MarkdownDescription: `Query string authentication parameters`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,
@@ -112,10 +267,34 @@ func (t *WebhookConnectionResource) Schema(ctx context.Context, req resource.Sch
 }
 
 type WebhookConf struct {
+	Auth_method string `mapstructure:"auth_method" tfsdk:"auth_method"`
+	Basic       struct {
+		Password string `mapstructure:"password" tfsdk:"password"`
+		Username string `mapstructure:"username" tfsdk:"username"`
+	} `mapstructure:"basic" tfsdk:"basic"`
+	Header struct {
+		Name  string `mapstructure:"name" tfsdk:"name"`
+		Value string `mapstructure:"value" tfsdk:"value"`
+	} `mapstructure:"header" tfsdk:"header"`
 	Headers []struct {
 		Name  string `mapstructure:"name" tfsdk:"name"`
 		Value string `mapstructure:"value" tfsdk:"value"`
 	} `mapstructure:"headers" tfsdk:"headers"`
+	Oauth struct {
+		Auth_style      int64  `mapstructure:"auth_style" tfsdk:"auth_style"`
+		Client_id       string `mapstructure:"client_id" tfsdk:"client_id"`
+		Client_secret   string `mapstructure:"client_secret" tfsdk:"client_secret"`
+		Extra_form_data []struct {
+			Name  string `mapstructure:"name" tfsdk:"name"`
+			Value string `mapstructure:"value" tfsdk:"value"`
+		} `mapstructure:"extra_form_data" tfsdk:"extra_form_data"`
+		Scopes         []string `mapstructure:"scopes" tfsdk:"scopes"`
+		Token_endpoint string   `mapstructure:"token_endpoint" tfsdk:"token_endpoint"`
+	} `mapstructure:"oauth" tfsdk:"oauth"`
+	Query []struct {
+		Name  string `mapstructure:"name" tfsdk:"name"`
+		Value string `mapstructure:"value" tfsdk:"value"`
+	} `mapstructure:"query" tfsdk:"query"`
 	Secret string `mapstructure:"secret" tfsdk:"secret"`
 	Url    string `mapstructure:"url" tfsdk:"url"`
 }
@@ -194,7 +373,44 @@ func (r *WebhookConnectionResource) Create(ctx context.Context, req resource.Cre
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"headers": types.SetType{
+		"auth_method": types.StringType,
+		"basic": types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				"password": types.StringType,
+				"username": types.StringType,
+			},
+		}, "header": types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				"name":  types.StringType,
+				"value": types.StringType,
+			},
+		}, "headers": types.SetType{
+			ElemType: types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"name":  types.StringType,
+					"value": types.StringType,
+				},
+			},
+		},
+		"oauth": types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				"auth_style":    types.NumberType,
+				"client_id":     types.StringType,
+				"client_secret": types.StringType,
+				"extra_form_data": types.SetType{
+					ElemType: types.ObjectType{
+						AttrTypes: map[string]attr.Type{
+							"name":  types.StringType,
+							"value": types.StringType,
+						},
+					},
+				},
+				"scopes": types.SetType{
+					ElemType: types.StringType,
+				},
+				"token_endpoint": types.StringType,
+			},
+		}, "query": types.SetType{
 			ElemType: types.ObjectType{
 				AttrTypes: map[string]attr.Type{
 					"name":  types.StringType,
@@ -274,7 +490,44 @@ func (r *WebhookConnectionResource) Read(ctx context.Context, req resource.ReadR
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"headers": types.SetType{
+		"auth_method": types.StringType,
+		"basic": types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				"password": types.StringType,
+				"username": types.StringType,
+			},
+		}, "header": types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				"name":  types.StringType,
+				"value": types.StringType,
+			},
+		}, "headers": types.SetType{
+			ElemType: types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"name":  types.StringType,
+					"value": types.StringType,
+				},
+			},
+		},
+		"oauth": types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				"auth_style":    types.NumberType,
+				"client_id":     types.StringType,
+				"client_secret": types.StringType,
+				"extra_form_data": types.SetType{
+					ElemType: types.ObjectType{
+						AttrTypes: map[string]attr.Type{
+							"name":  types.StringType,
+							"value": types.StringType,
+						},
+					},
+				},
+				"scopes": types.SetType{
+					ElemType: types.StringType,
+				},
+				"token_endpoint": types.StringType,
+			},
+		}, "query": types.SetType{
 			ElemType: types.ObjectType{
 				AttrTypes: map[string]attr.Type{
 					"name":  types.StringType,
@@ -364,7 +617,44 @@ func (r *WebhookConnectionResource) Update(ctx context.Context, req resource.Upd
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"headers": types.SetType{
+		"auth_method": types.StringType,
+		"basic": types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				"password": types.StringType,
+				"username": types.StringType,
+			},
+		}, "header": types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				"name":  types.StringType,
+				"value": types.StringType,
+			},
+		}, "headers": types.SetType{
+			ElemType: types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"name":  types.StringType,
+					"value": types.StringType,
+				},
+			},
+		},
+		"oauth": types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				"auth_style":    types.NumberType,
+				"client_id":     types.StringType,
+				"client_secret": types.StringType,
+				"extra_form_data": types.SetType{
+					ElemType: types.ObjectType{
+						AttrTypes: map[string]attr.Type{
+							"name":  types.StringType,
+							"value": types.StringType,
+						},
+					},
+				},
+				"scopes": types.SetType{
+					ElemType: types.StringType,
+				},
+				"token_endpoint": types.StringType,
+			},
+		}, "query": types.SetType{
 			ElemType: types.ObjectType{
 				AttrTypes: map[string]attr.Type{
 					"name":  types.StringType,

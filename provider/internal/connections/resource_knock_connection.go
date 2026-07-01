@@ -44,11 +44,25 @@ var KnockSchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"api_key": schema.StringAttribute{
-					MarkdownDescription: `API Key`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
-					Sensitive:           true,
+					MarkdownDescription: `Service Token
+
+    Knock management API service token (knock_st_...). Required to sync workspace configuration collections.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
+					},
+				},
+				"secret_key": schema.StringAttribute{
+					MarkdownDescription: `Secret Key
+
+    Knock standard API secret key (sk_...). Required to sync runtime data-plane collections.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: true,
 					PlanModifiers: []planmodifier.String{
 						stringplanmodifier.UseStateForUnknown(),
 					},
@@ -80,7 +94,8 @@ func (t *KnockConnectionResource) Schema(ctx context.Context, req resource.Schem
 }
 
 type KnockConf struct {
-	Api_key string `mapstructure:"api_key" tfsdk:"api_key"`
+	Api_key    string `mapstructure:"api_key" tfsdk:"api_key"`
+	Secret_key string `mapstructure:"secret_key" tfsdk:"secret_key"`
 }
 
 type KnockConnectionResource struct {
@@ -157,7 +172,8 @@ func (r *KnockConnectionResource) Create(ctx context.Context, req resource.Creat
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"api_key": types.StringType,
+		"api_key":    types.StringType,
+		"secret_key": types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -228,7 +244,8 @@ func (r *KnockConnectionResource) Read(ctx context.Context, req resource.ReadReq
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"api_key": types.StringType,
+		"api_key":    types.StringType,
+		"secret_key": types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -309,7 +326,8 @@ func (r *KnockConnectionResource) Update(ctx context.Context, req resource.Updat
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"api_key": types.StringType,
+		"api_key":    types.StringType,
+		"secret_key": types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

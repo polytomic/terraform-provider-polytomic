@@ -57,13 +57,33 @@ var Zendesk_supportSchema = schema.Schema{
 					},
 				},
 				"auth_method": schema.StringAttribute{
-					MarkdownDescription: `Authentication method Valid values: <code>apitoken</code> (API token), <code>oauth</code> (OAuth). Default: <code>oauth</code>.`,
+					MarkdownDescription: `Authentication method Valid values: <code>apitoken</code> (API token), <code>clientcredentials</code> (Client credentials), <code>oauth</code> (OAuth). Default: <code>oauth</code>.`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
 					Sensitive:           false,
 					Validators: []validator.String{
-						stringvalidator.OneOf("apitoken", "oauth"),
+						stringvalidator.OneOf("apitoken", "clientcredentials", "oauth"),
+					},
+				},
+				"client_id": schema.StringAttribute{
+					MarkdownDescription: `Client ID`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
+					},
+				},
+				"client_secret": schema.StringAttribute{
+					MarkdownDescription: `Client secret`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
 					},
 				},
 				"custom_api_limits": schema.BoolAttribute{
@@ -135,6 +155,8 @@ func (t *Zendesk_supportConnectionResource) Schema(ctx context.Context, req reso
 type Zendesk_supportConf struct {
 	Api_token           string `mapstructure:"api_token" tfsdk:"api_token"`
 	Auth_method         string `mapstructure:"auth_method" tfsdk:"auth_method"`
+	Client_id           string `mapstructure:"client_id" tfsdk:"client_id"`
+	Client_secret       string `mapstructure:"client_secret" tfsdk:"client_secret"`
 	Custom_api_limits   bool   `mapstructure:"custom_api_limits" tfsdk:"custom_api_limits"`
 	Domain              string `mapstructure:"domain" tfsdk:"domain"`
 	Email               string `mapstructure:"email" tfsdk:"email"`
@@ -218,6 +240,8 @@ func (r *Zendesk_supportConnectionResource) Create(ctx context.Context, req reso
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"api_token":           types.StringType,
 		"auth_method":         types.StringType,
+		"client_id":           types.StringType,
+		"client_secret":       types.StringType,
 		"custom_api_limits":   types.BoolType,
 		"domain":              types.StringType,
 		"email":               types.StringType,
@@ -295,6 +319,8 @@ func (r *Zendesk_supportConnectionResource) Read(ctx context.Context, req resour
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"api_token":           types.StringType,
 		"auth_method":         types.StringType,
+		"client_id":           types.StringType,
+		"client_secret":       types.StringType,
 		"custom_api_limits":   types.BoolType,
 		"domain":              types.StringType,
 		"email":               types.StringType,
@@ -382,6 +408,8 @@ func (r *Zendesk_supportConnectionResource) Update(ctx context.Context, req reso
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"api_token":           types.StringType,
 		"auth_method":         types.StringType,
+		"client_id":           types.StringType,
+		"client_secret":       types.StringType,
 		"custom_api_limits":   types.BoolType,
 		"domain":              types.StringType,
 		"email":               types.StringType,

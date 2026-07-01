@@ -6,9 +6,12 @@ package connections
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
@@ -47,14 +50,35 @@ func (d *AsanaConnectionDataSource) Schema(ctx context.Context, req datasource.S
 				Computed:            true,
 			},
 			"configuration": schema.SingleNestedAttribute{
-				Attributes: map[string]schema.Attribute{},
-				Optional:   true,
+				Attributes: map[string]schema.Attribute{
+					"projects": schema.SetNestedAttribute{
+						MarkdownDescription: ``,
+						Computed:            true,
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+								"label": schema.StringAttribute{
+									MarkdownDescription: ``,
+									Computed:            true,
+								},
+								"value": schema.StringAttribute{
+									MarkdownDescription: ``,
+									Computed:            true,
+								},
+							},
+						},
+					},
+				},
+				Optional: true,
 			},
 		},
 	}
 }
 
 type AsanaDataSourceConf struct {
+	Projects []struct {
+		Label string `mapstructure:"label" tfsdk:"label"`
+		Value string `mapstructure:"value" tfsdk:"value"`
+	} `mapstructure:"projects" tfsdk:"projects"`
 }
 
 func (d *AsanaConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
@@ -82,6 +106,29 @@ func (d *AsanaConnectionDataSource) Read(ctx context.Context, req datasource.Rea
 	data.Id = types.StringPointerValue(connection.Data.Id)
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
+
+	conf := AsanaDataSourceConf{}
+	err = mapstructure.Decode(connection.Data.Configuration, &conf)
+	if err != nil {
+		resp.Diagnostics.AddError("Error decoding connection configuration", err.Error())
+		return
+	}
+
+	var diags diag.Diagnostics
+	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"projects": types.SetType{
+			ElemType: types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"label": types.StringType,
+					"value": types.StringType,
+				},
+			},
+		},
+	}, conf)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
 
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)

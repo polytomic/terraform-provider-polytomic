@@ -1,0 +1,1 @@
+{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://github.com/polytomic/app/services/polytomic/backend/cloudtalk/connection-conf","properties":{"access_key_id":{"type":"string","title":"Access Key ID"},"access_key_secret":{"type":"string","title":"Access Key Secret","sensitive":true}},"type":"object","required":["access_key_id","access_key_secret"]}

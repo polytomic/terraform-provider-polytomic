@@ -58,12 +58,14 @@ state before it will take effect on a destroy operation.
 
 #### Required
 
-- `auth_method` (String) Authentication method Valid values: <code>apitoken</code> (API token), <code>oauth</code> (OAuth). Default: <code>oauth</code>.
+- `auth_method` (String) Authentication method Valid values: <code>apitoken</code> (API token), <code>clientcredentials</code> (Client credentials), <code>oauth</code> (OAuth). Default: <code>oauth</code>.
 - `domain` (String) Zendesk Subdomain
 
 #### Optional
 
 - `api_token` (String, Sensitive) API token
+- `client_id` (String, Sensitive) Client ID
+- `client_secret` (String, Sensitive) Client secret
 - `custom_api_limits` (Boolean) Enforce custom API limits
 - `email` (String)
 - `oauth_refresh_token` (String, Sensitive)

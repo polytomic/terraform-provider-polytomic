@@ -34,4 +34,8 @@ data "polytomic_plain_connection" "plain" {
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
+Read-Only:
+
+- `workspace_public_name` (String) Workspace Name
+
 
