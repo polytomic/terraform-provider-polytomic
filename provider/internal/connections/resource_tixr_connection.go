@@ -50,7 +50,10 @@ var TixrSchema = schema.Schema{
 					Required:  true,
 					Optional:  false,
 					Computed:  false,
-					Sensitive: false,
+					Sensitive: true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
+					},
 				},
 				"client_secret": schema.StringAttribute{
 					MarkdownDescription: `Client Secret`,

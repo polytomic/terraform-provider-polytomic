@@ -83,6 +83,12 @@ func (d *GoogleadsConnectionDataSource) Schema(ctx context.Context, req datasour
     One report per line. Format is a report name:ads object:field list. e.g. myReport:ad_groups:campaign.id`,
 						Computed: true,
 					},
+					"use_data_manager_apis": schema.BoolAttribute{
+						MarkdownDescription: `Use Data Manager APIs
+
+    Use Google Data Manager APIs for user list operations and conversion uploads. Requires a token granted the Data Manager OAuth scope.`,
+						Computed: true,
+					},
 				},
 				Optional: true,
 			},
@@ -95,9 +101,10 @@ type GoogleadsDataSourceConf struct {
 		Label string `mapstructure:"label" tfsdk:"label"`
 		Value string `mapstructure:"value" tfsdk:"value"`
 	} `mapstructure:"accounts" tfsdk:"accounts"`
-	Blanket_user_consent bool   `mapstructure:"blanket_user_consent" tfsdk:"blanket_user_consent"`
-	Connected_user       string `mapstructure:"connected_user" tfsdk:"connected_user"`
-	Custom_reports       string `mapstructure:"custom_reports" tfsdk:"custom_reports"`
+	Blanket_user_consent  bool   `mapstructure:"blanket_user_consent" tfsdk:"blanket_user_consent"`
+	Connected_user        string `mapstructure:"connected_user" tfsdk:"connected_user"`
+	Custom_reports        string `mapstructure:"custom_reports" tfsdk:"custom_reports"`
+	Use_data_manager_apis bool   `mapstructure:"use_data_manager_apis" tfsdk:"use_data_manager_apis"`
 }
 
 func (d *GoogleadsConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
@@ -143,9 +150,10 @@ func (d *GoogleadsConnectionDataSource) Read(ctx context.Context, req datasource
 				},
 			},
 		},
-		"blanket_user_consent": types.BoolType,
-		"connected_user":       types.StringType,
-		"custom_reports":       types.StringType,
+		"blanket_user_consent":  types.BoolType,
+		"connected_user":        types.StringType,
+		"custom_reports":        types.StringType,
+		"use_data_manager_apis": types.BoolType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

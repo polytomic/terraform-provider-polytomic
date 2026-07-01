@@ -72,7 +72,10 @@ var ScylladbSchema = schema.Schema{
 					Required:            false,
 					Optional:            true,
 					Computed:            true,
-					Sensitive:           false,
+					Sensitive:           true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
+					},
 				},
 				"hosts": schema.StringAttribute{
 					MarkdownDescription: `Hostname(s)

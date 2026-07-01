@@ -44,6 +44,9 @@ Read-Only:
 - `custom_reports` (String) Custom reports
 
     One report per line. Format is a report name:ads object:field list. e.g. myReport:ad_groups:campaign.id
+- `use_data_manager_apis` (Boolean) Use Data Manager APIs
+
+    Use Google Data Manager APIs for user list operations and conversion uploads. Requires a token granted the Data Manager OAuth scope.
 
 <a id="nestedatt--configuration--accounts"></a>
 ### Nested Schema for `configuration.accounts`

@@ -1,0 +1,74 @@
+---
+page_title: "polytomic_google_search_ads_360_connection Resource - terraform-provider-polytomic"
+subcategory: "Connections"
+description: |-
+  Google Search Ads 360 Connection
+---
+
+# polytomic_google_search_ads_360_connection (Resource)
+
+Google Search Ads 360 Connection
+
+For detailed configuration guidance, see the [Google Search Ads 360 connection guide](https://apidocs.polytomic.com/guides/configuring-your-connections/connections/google_search_ads_360).
+
+## Example Usage
+
+```terraform
+resource "polytomic_google_search_ads_360_connection" "google_search_ads_360" {
+  name = "example"
+  configuration = {
+  }
+}
+```
+
+## Schema
+
+### Required
+
+- `name` (String)
+- `configuration` (Attributes) See [below for nested schema](#nestedatt--configuration).
+
+### Optional
+
+- `organization` (String) Organization ID.
+- `force_destroy` (Boolean) Indicates whether dependent models, syncs, and bulk syncs should be
+cascade-deleted when this connection is destroyed.
+
+    This only deletes other resources when the connection is destroyed, not when
+setting this parameter to `true`. Once this parameter is set to `true`, there
+must be a successful `terraform apply` run before a destroy is required to
+update this value in the resource state. Without a successful `terraform apply`
+after this parameter is set, this flag will have no effect. If setting this
+field in the same operation that would require replacing the connection or
+destroying the connection, this flag will not work. Additionally when importing
+a connection, a successful `terraform apply` is required to set this value in
+state before it will take effect on a destroy operation.
+
+### Read-Only
+
+- `id` (String) Google Search Ads 360 Connection identifier.
+
+<a id="nestedatt--configuration"></a>
+### Nested Schema for `configuration`
+
+#### Optional
+
+- `accounts` (Attributes Set) See [below for nested schema](#nestedatt--configuration--accounts).
+- `client_id` (String, Sensitive)
+- `client_secret` (String, Sensitive)
+- `oauth_refresh_token` (String, Sensitive)
+
+#### Read-Only
+
+- `connected_user` (String) Connected user's email
+
+
+<a id="nestedatt--configuration--accounts"></a>
+### Nested Schema for `configuration.accounts`
+
+#### Optional
+
+- `label` (String)
+- `value` (String)
+
+

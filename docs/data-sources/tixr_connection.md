@@ -34,10 +34,4 @@ data "polytomic_tixr_connection" "tixr" {
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
-Read-Only:
-
-- `client_private_key` (String) Client Private Key
-
-    e.g. MDAwMA==
-
 

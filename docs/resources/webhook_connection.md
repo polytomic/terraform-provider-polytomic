@@ -54,19 +54,73 @@ state before it will take effect on a destroy operation.
 
 #### Required
 
+- `auth_method` (String) Authentication method Valid values: <code>polytomic_secret</code> (Polytomic secret), <code>basic</code> (Basic authentication), <code>header</code> (Custom header), <code>query</code> (Query string key), <code>oauth_client_credentials</code> (OAuth client credentials). Default: <code>polytomic_secret</code>.
 - `url` (String) Webhook URL
 
 #### Optional
 
-- `headers` (Attributes Set) See [below for nested schema](#nestedatt--configuration--headers).
+- `basic` (Attributes) Basic authentication See [below for nested schema](#nestedatt--configuration--basic).
+- `header` (Attributes) See [below for nested schema](#nestedatt--configuration--header).
+- `headers` (Attributes Set) Additional headers See [below for nested schema](#nestedatt--configuration--headers).
+- `oauth` (Attributes) OAuth client credentials See [below for nested schema](#nestedatt--configuration--oauth).
+- `query` (Attributes Set) Query string authentication parameters See [below for nested schema](#nestedatt--configuration--query).
 
 #### Read-Only
 
 - `secret` (String, Sensitive)
 
 
+<a id="nestedatt--configuration--basic"></a>
+### Nested Schema for `configuration.basic`
+
+#### Optional
+
+- `password` (String)
+- `username` (String)
+
+
+<a id="nestedatt--configuration--header"></a>
+### Nested Schema for `configuration.header`
+
+#### Optional
+
+- `name` (String)
+- `value` (String)
+
+
 <a id="nestedatt--configuration--headers"></a>
 ### Nested Schema for `configuration.headers`
+
+#### Optional
+
+- `name` (String)
+- `value` (String)
+
+
+<a id="nestedatt--configuration--oauth"></a>
+### Nested Schema for `configuration.oauth`
+
+#### Optional
+
+- `auth_style` (Number) Auth style
+- `client_id` (String) Client ID
+- `client_secret` (String) Client secret
+- `extra_form_data` (Attributes Set) Extra form data See [below for nested schema](#nestedatt--configuration--oauth--extra_form_data).
+- `scopes` (Set of String)
+- `token_endpoint` (String) Token endpoint
+
+
+<a id="nestedatt--configuration--oauth--extra_form_data"></a>
+### Nested Schema for `configuration.oauth.extra_form_data`
+
+#### Optional
+
+- `name` (String)
+- `value` (String)
+
+
+<a id="nestedatt--configuration--query"></a>
+### Nested Schema for `configuration.query`
 
 #### Optional
 

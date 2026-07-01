@@ -34,4 +34,16 @@ data "polytomic_asana_connection" "asana" {
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
+Read-Only:
+
+- `projects` (Attributes Set) (see [below for nested schema](#nestedatt--configuration--projects))
+
+<a id="nestedatt--configuration--projects"></a>
+### Nested Schema for `configuration.projects`
+
+Read-Only:
+
+- `label` (String)
+- `value` (String)
+
 
