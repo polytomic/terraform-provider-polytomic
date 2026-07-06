@@ -17,6 +17,7 @@ require (
 	github.com/invopop/jsonschema v0.14.0
 	github.com/lib/pq v1.12.3
 	github.com/mitchellh/mapstructure v1.5.0
+	github.com/pb33f/ordered-map/v2 v2.3.1
 	github.com/polytomic/polytomic-go v1.16.1
 	github.com/rs/zerolog v1.34.0
 	github.com/spf13/cobra v1.10.2
@@ -24,7 +25,6 @@ require (
 	github.com/stretchr/testify v1.11.1
 	github.com/testcontainers/testcontainers-go v0.42.0
 	github.com/testcontainers/testcontainers-go/modules/postgres v0.42.0
-	github.com/wk8/go-ordered-map/v2 v2.1.8
 	github.com/zclconf/go-cty v1.17.0
 	golang.org/x/exp v0.0.0-20240416160154-fe59bbe5cc7f
 )
@@ -89,7 +89,6 @@ require (
 	github.com/klauspost/compress v1.18.5 // indirect
 	github.com/lufia/plan9stats v0.0.0-20211012122336-39d0f177ccd0 // indirect
 	github.com/magiconair/properties v1.8.10 // indirect
-	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mitchellh/cli v1.1.5 // indirect
@@ -109,7 +108,6 @@ require (
 	github.com/oklog/run v1.1.0 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.1.1 // indirect
-	github.com/pb33f/ordered-map/v2 v2.3.1 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.4 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/posener/complete v1.2.3 // indirect

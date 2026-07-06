@@ -9,8 +9,8 @@ import (
 
 	"github.com/invopop/jsonschema"
 	"github.com/mitchellh/mapstructure"
+	orderedmap "github.com/pb33f/ordered-map/v2"
 	"github.com/polytomic/polytomic-go"
-	orderedmap "github.com/wk8/go-ordered-map/v2"
 )
 
 // getJSONSchema returns a JSON schema from a Polytomic API representation.
