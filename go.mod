@@ -25,7 +25,7 @@ require (
 	github.com/testcontainers/testcontainers-go v0.42.0
 	github.com/testcontainers/testcontainers-go/modules/postgres v0.42.0
 	github.com/wk8/go-ordered-map/v2 v2.1.8
-	github.com/zclconf/go-cty v1.17.0
+	github.com/zclconf/go-cty v1.18.1
 	golang.org/x/exp v0.0.0-20240416160154-fe59bbe5cc7f
 )
 
