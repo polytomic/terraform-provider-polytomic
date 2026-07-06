@@ -37,6 +37,5 @@ data "polytomic_dialpad_connection" "dialpad" {
 Read-Only:
 
 - `auth_method` (String) Authentication method Valid values: <code>api_key</code> (API Key), <code>oauth</code> (OAuth). Default: <code>api_key</code>.
-- `oauth_token_expiry` (String)
 
 

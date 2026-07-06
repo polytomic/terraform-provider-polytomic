@@ -60,6 +60,5 @@ state before it will take effect on a destroy operation.
 - `client_secret` (String, Sensitive)
 - `is_sandbox` (Boolean) Is Sandbox
 - `oauth_refresh_token` (String, Sensitive)
-- `oauth_token_expiry` (String)
 
 

@@ -55,6 +55,13 @@ var PlainSchema = schema.Schema{
 						stringplanmodifier.UseStateForUnknown(),
 					},
 				},
+				"workspace_public_name": schema.StringAttribute{
+					MarkdownDescription: `Workspace Name`,
+					Required:            false,
+					Optional:            false,
+					Computed:            true,
+					Sensitive:           false,
+				},
 			},
 
 			Required: true,
@@ -82,7 +89,8 @@ func (t *PlainConnectionResource) Schema(ctx context.Context, req resource.Schem
 }
 
 type PlainConf struct {
-	Api_key string `mapstructure:"api_key" tfsdk:"api_key"`
+	Api_key               string `mapstructure:"api_key" tfsdk:"api_key"`
+	Workspace_public_name string `mapstructure:"workspace_public_name" tfsdk:"workspace_public_name"`
 }
 
 type PlainConnectionResource struct {
@@ -159,7 +167,8 @@ func (r *PlainConnectionResource) Create(ctx context.Context, req resource.Creat
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"api_key": types.StringType,
+		"api_key":               types.StringType,
+		"workspace_public_name": types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -230,7 +239,8 @@ func (r *PlainConnectionResource) Read(ctx context.Context, req resource.ReadReq
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"api_key": types.StringType,
+		"api_key":               types.StringType,
+		"workspace_public_name": types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -311,7 +321,8 @@ func (r *PlainConnectionResource) Update(ctx context.Context, req resource.Updat
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"api_key": types.StringType,
+		"api_key":               types.StringType,
+		"workspace_public_name": types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

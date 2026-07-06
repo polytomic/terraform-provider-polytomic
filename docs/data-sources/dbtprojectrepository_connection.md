@@ -40,7 +40,6 @@ Read-Only:
 - `commit_exposures` (Boolean) Commit exposures file
 - `connected_user` (String) Connected user
 - `latest_commit` (Attributes) Most recent exposures commit (see [below for nested schema](#nestedatt--configuration--latest_commit))
-- `oauth_token_expiry` (String)
 - `repository` (String) dbt project repository
 
     Only repositories with the Polytomic app installed will be listed.

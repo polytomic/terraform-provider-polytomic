@@ -71,10 +71,6 @@ func (d *RedditadsConnectionDataSource) Schema(ctx context.Context, req datasour
 						MarkdownDescription: `Connected user's email`,
 						Computed:            true,
 					},
-					"oauth_token_expiry": schema.StringAttribute{
-						MarkdownDescription: ``,
-						Computed:            true,
-					},
 					"pixel_id": schema.StringAttribute{
 						MarkdownDescription: `Conversion Pixel ID
 
@@ -93,9 +89,8 @@ type RedditadsDataSourceConf struct {
 		Label string `mapstructure:"label" tfsdk:"label"`
 		Value string `mapstructure:"value" tfsdk:"value"`
 	} `mapstructure:"accounts" tfsdk:"accounts"`
-	Connected_user     string `mapstructure:"connected_user" tfsdk:"connected_user"`
-	Oauth_token_expiry string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
-	Pixel_id           string `mapstructure:"pixel_id" tfsdk:"pixel_id"`
+	Connected_user string `mapstructure:"connected_user" tfsdk:"connected_user"`
+	Pixel_id       string `mapstructure:"pixel_id" tfsdk:"pixel_id"`
 }
 
 func (d *RedditadsConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
@@ -141,9 +136,8 @@ func (d *RedditadsConnectionDataSource) Read(ctx context.Context, req datasource
 				},
 			},
 		},
-		"connected_user":     types.StringType,
-		"oauth_token_expiry": types.StringType,
-		"pixel_id":           types.StringType,
+		"connected_user": types.StringType,
+		"pixel_id":       types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

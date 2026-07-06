@@ -66,7 +66,6 @@ state before it will take effect on a destroy operation.
 
     One report per line. Format is a report name followed by a comma-separated list of fields. e.g. myReport:field1
 - `oauth_refresh_token` (String, Sensitive)
-- `oauth_token_expiry` (String)
 - `properties` (Attributes Set) See [below for nested schema](#nestedatt--configuration--properties).
 - `service_account` (String, Sensitive) Service account key
 

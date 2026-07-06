@@ -59,10 +59,6 @@ func (d *ScylladbConnectionDataSource) Schema(ctx context.Context, req datasourc
 						MarkdownDescription: `Use client certificates Default: <code>false</code>.`,
 						Computed:            true,
 					},
-					"client_key": schema.StringAttribute{
-						MarkdownDescription: `Client key`,
-						Computed:            true,
-					},
 					"hosts": schema.StringAttribute{
 						MarkdownDescription: `Hostname(s)
 
@@ -107,7 +103,6 @@ func (d *ScylladbConnectionDataSource) Schema(ctx context.Context, req datasourc
 type ScylladbDataSourceConf struct {
 	Ca_cert      string `mapstructure:"ca_cert" tfsdk:"ca_cert"`
 	Client_certs bool   `mapstructure:"client_certs" tfsdk:"client_certs"`
-	Client_key   string `mapstructure:"client_key" tfsdk:"client_key"`
 	Hosts        string `mapstructure:"hosts" tfsdk:"hosts"`
 	Skip_verify  bool   `mapstructure:"skip_verify" tfsdk:"skip_verify"`
 	Ssh          bool   `mapstructure:"ssh" tfsdk:"ssh"`
@@ -155,7 +150,6 @@ func (d *ScylladbConnectionDataSource) Read(ctx context.Context, req datasource.
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"ca_cert":      types.StringType,
 		"client_certs": types.BoolType,
-		"client_key":   types.StringType,
 		"hosts":        types.StringType,
 		"skip_verify":  types.BoolType,
 		"ssh":          types.BoolType,

@@ -55,10 +55,6 @@ func (d *OutreachConnectionDataSource) Schema(ctx context.Context, req datasourc
 						MarkdownDescription: `Connected user`,
 						Computed:            true,
 					},
-					"oauth_token_expiry": schema.StringAttribute{
-						MarkdownDescription: ``,
-						Computed:            true,
-					},
 					"use_bulk_upsert": schema.BoolAttribute{
 						MarkdownDescription: `Use bulk API for syncing to Outreach Default: <code>true</code>.`,
 						Computed:            true,
@@ -71,9 +67,8 @@ func (d *OutreachConnectionDataSource) Schema(ctx context.Context, req datasourc
 }
 
 type OutreachDataSourceConf struct {
-	Connected_user     string `mapstructure:"connected_user" tfsdk:"connected_user"`
-	Oauth_token_expiry string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
-	Use_bulk_upsert    bool   `mapstructure:"use_bulk_upsert" tfsdk:"use_bulk_upsert"`
+	Connected_user  string `mapstructure:"connected_user" tfsdk:"connected_user"`
+	Use_bulk_upsert bool   `mapstructure:"use_bulk_upsert" tfsdk:"use_bulk_upsert"`
 }
 
 func (d *OutreachConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
@@ -111,9 +106,8 @@ func (d *OutreachConnectionDataSource) Read(ctx context.Context, req datasource.
 
 	var diags diag.Diagnostics
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"connected_user":     types.StringType,
-		"oauth_token_expiry": types.StringType,
-		"use_bulk_upsert":    types.BoolType,
+		"connected_user":  types.StringType,
+		"use_bulk_upsert": types.BoolType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

@@ -59,10 +59,6 @@ func (d *GsheetsConnectionDataSource) Schema(ctx context.Context, req datasource
 						MarkdownDescription: `Columns have headers`,
 						Computed:            true,
 					},
-					"oauth_token_expiry": schema.StringAttribute{
-						MarkdownDescription: ``,
-						Computed:            true,
-					},
 					"spreadsheet_id": schema.SingleNestedAttribute{
 						MarkdownDescription: `Spreadsheet`,
 						Computed:            true,
@@ -89,10 +85,9 @@ func (d *GsheetsConnectionDataSource) Schema(ctx context.Context, req datasource
 }
 
 type GsheetsDataSourceConf struct {
-	Connect_mode       string `mapstructure:"connect_mode" tfsdk:"connect_mode"`
-	Has_headers        bool   `mapstructure:"has_headers" tfsdk:"has_headers"`
-	Oauth_token_expiry string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
-	Spreadsheet_id     struct {
+	Connect_mode   string `mapstructure:"connect_mode" tfsdk:"connect_mode"`
+	Has_headers    bool   `mapstructure:"has_headers" tfsdk:"has_headers"`
+	Spreadsheet_id struct {
 		Label string `mapstructure:"label" tfsdk:"label"`
 		Value string `mapstructure:"value" tfsdk:"value"`
 	} `mapstructure:"spreadsheet_id" tfsdk:"spreadsheet_id"`
@@ -134,9 +129,8 @@ func (d *GsheetsConnectionDataSource) Read(ctx context.Context, req datasource.R
 
 	var diags diag.Diagnostics
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"connect_mode":       types.StringType,
-		"has_headers":        types.BoolType,
-		"oauth_token_expiry": types.StringType,
+		"connect_mode": types.StringType,
+		"has_headers":  types.BoolType,
 		"spreadsheet_id": types.ObjectType{
 			AttrTypes: map[string]attr.Type{
 				"label": types.StringType,

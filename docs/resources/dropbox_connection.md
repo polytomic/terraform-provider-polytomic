@@ -74,7 +74,6 @@ state before it will take effect on a destroy operation.
 
     Treat the files as a single table. Default: <code>false</code>.
 - `oauth_refresh_token` (String, Sensitive)
-- `oauth_token_expiry` (String)
 - `single_table_file_format` (String) File format Valid values: <code>csv</code> (CSV), <code>json</code> (JSON), <code>parquet</code> (Parquet). Default: <code>csv</code>.
 - `single_table_file_formats` (Set of String) File formats
 

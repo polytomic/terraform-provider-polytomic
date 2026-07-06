@@ -73,6 +73,31 @@ var AsanaSchema = schema.Schema{
 						stringplanmodifier.UseStateForUnknown(),
 					},
 				},
+				"projects": schema.SetNestedAttribute{
+					MarkdownDescription: ``,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+					NestedObject: schema.NestedAttributeObject{
+						Attributes: map[string]schema.Attribute{
+							"label": schema.StringAttribute{
+								MarkdownDescription: ``,
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
+								Sensitive:           false,
+							},
+							"value": schema.StringAttribute{
+								MarkdownDescription: ``,
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
+								Sensitive:           false,
+							},
+						},
+					},
+				},
 			},
 
 			Required: true,
@@ -103,6 +128,10 @@ type AsanaConf struct {
 	Client_id           string `mapstructure:"client_id" tfsdk:"client_id"`
 	Client_secret       string `mapstructure:"client_secret" tfsdk:"client_secret"`
 	Oauth_refresh_token string `mapstructure:"oauth_refresh_token" tfsdk:"oauth_refresh_token"`
+	Projects            []struct {
+		Label string `mapstructure:"label" tfsdk:"label"`
+		Value string `mapstructure:"value" tfsdk:"value"`
+	} `mapstructure:"projects" tfsdk:"projects"`
 }
 
 type AsanaConnectionResource struct {
@@ -182,6 +211,14 @@ func (r *AsanaConnectionResource) Create(ctx context.Context, req resource.Creat
 		"client_id":           types.StringType,
 		"client_secret":       types.StringType,
 		"oauth_refresh_token": types.StringType,
+		"projects": types.SetType{
+			ElemType: types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"label": types.StringType,
+					"value": types.StringType,
+				},
+			},
+		},
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -255,6 +292,14 @@ func (r *AsanaConnectionResource) Read(ctx context.Context, req resource.ReadReq
 		"client_id":           types.StringType,
 		"client_secret":       types.StringType,
 		"oauth_refresh_token": types.StringType,
+		"projects": types.SetType{
+			ElemType: types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"label": types.StringType,
+					"value": types.StringType,
+				},
+			},
+		},
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -338,6 +383,14 @@ func (r *AsanaConnectionResource) Update(ctx context.Context, req resource.Updat
 		"client_id":           types.StringType,
 		"client_secret":       types.StringType,
 		"oauth_refresh_token": types.StringType,
+		"projects": types.SetType{
+			ElemType: types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"label": types.StringType,
+					"value": types.StringType,
+				},
+			},
+		},
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

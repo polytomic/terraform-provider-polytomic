@@ -75,10 +75,6 @@ func (d *MsadsConnectionDataSource) Schema(ctx context.Context, req datasource.S
 						MarkdownDescription: `Authentication method Valid values: <code>microsoft</code> (Microsoft), <code>google</code> (Google). Default: <code>microsoft</code>.`,
 						Computed:            true,
 					},
-					"oauth_token_expiry": schema.StringAttribute{
-						MarkdownDescription: ``,
-						Computed:            true,
-					},
 					"username": schema.StringAttribute{
 						MarkdownDescription: `Connected user`,
 						Computed:            true,
@@ -97,7 +93,6 @@ type MsadsDataSourceConf struct {
 	} `mapstructure:"accounts" tfsdk:"accounts"`
 	Agree_customer_match_terms bool   `mapstructure:"agree_customer_match_terms" tfsdk:"agree_customer_match_terms"`
 	Auth_method                string `mapstructure:"auth_method" tfsdk:"auth_method"`
-	Oauth_token_expiry         string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
 	Username                   string `mapstructure:"username" tfsdk:"username"`
 }
 
@@ -146,7 +141,6 @@ func (d *MsadsConnectionDataSource) Read(ctx context.Context, req datasource.Rea
 		},
 		"agree_customer_match_terms": types.BoolType,
 		"auth_method":                types.StringType,
-		"oauth_token_expiry":         types.StringType,
 		"username":                   types.StringType,
 	}, conf)
 	if diags.HasError() {

@@ -123,12 +123,14 @@ var GoogleadsSchema = schema.Schema{
 						stringplanmodifier.UseStateForUnknown(),
 					},
 				},
-				"oauth_token_expiry": schema.StringAttribute{
-					MarkdownDescription: ``,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
+				"use_data_manager_apis": schema.BoolAttribute{
+					MarkdownDescription: `Use Data Manager APIs
+
+    Use Google Data Manager APIs for user list operations and conversion uploads. Requires a token granted the Data Manager OAuth scope.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
 				},
 			},
 
@@ -161,13 +163,13 @@ type GoogleadsConf struct {
 		Label string `mapstructure:"label" tfsdk:"label"`
 		Value string `mapstructure:"value" tfsdk:"value"`
 	} `mapstructure:"accounts" tfsdk:"accounts"`
-	Blanket_user_consent bool   `mapstructure:"blanket_user_consent" tfsdk:"blanket_user_consent"`
-	Client_id            string `mapstructure:"client_id" tfsdk:"client_id"`
-	Client_secret        string `mapstructure:"client_secret" tfsdk:"client_secret"`
-	Connected_user       string `mapstructure:"connected_user" tfsdk:"connected_user"`
-	Custom_reports       string `mapstructure:"custom_reports" tfsdk:"custom_reports"`
-	Oauth_refresh_token  string `mapstructure:"oauth_refresh_token" tfsdk:"oauth_refresh_token"`
-	Oauth_token_expiry   string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
+	Blanket_user_consent  bool   `mapstructure:"blanket_user_consent" tfsdk:"blanket_user_consent"`
+	Client_id             string `mapstructure:"client_id" tfsdk:"client_id"`
+	Client_secret         string `mapstructure:"client_secret" tfsdk:"client_secret"`
+	Connected_user        string `mapstructure:"connected_user" tfsdk:"connected_user"`
+	Custom_reports        string `mapstructure:"custom_reports" tfsdk:"custom_reports"`
+	Oauth_refresh_token   string `mapstructure:"oauth_refresh_token" tfsdk:"oauth_refresh_token"`
+	Use_data_manager_apis bool   `mapstructure:"use_data_manager_apis" tfsdk:"use_data_manager_apis"`
 }
 
 type GoogleadsConnectionResource struct {
@@ -252,13 +254,13 @@ func (r *GoogleadsConnectionResource) Create(ctx context.Context, req resource.C
 				},
 			},
 		},
-		"blanket_user_consent": types.BoolType,
-		"client_id":            types.StringType,
-		"client_secret":        types.StringType,
-		"connected_user":       types.StringType,
-		"custom_reports":       types.StringType,
-		"oauth_refresh_token":  types.StringType,
-		"oauth_token_expiry":   types.StringType,
+		"blanket_user_consent":  types.BoolType,
+		"client_id":             types.StringType,
+		"client_secret":         types.StringType,
+		"connected_user":        types.StringType,
+		"custom_reports":        types.StringType,
+		"oauth_refresh_token":   types.StringType,
+		"use_data_manager_apis": types.BoolType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -337,13 +339,13 @@ func (r *GoogleadsConnectionResource) Read(ctx context.Context, req resource.Rea
 				},
 			},
 		},
-		"blanket_user_consent": types.BoolType,
-		"client_id":            types.StringType,
-		"client_secret":        types.StringType,
-		"connected_user":       types.StringType,
-		"custom_reports":       types.StringType,
-		"oauth_refresh_token":  types.StringType,
-		"oauth_token_expiry":   types.StringType,
+		"blanket_user_consent":  types.BoolType,
+		"client_id":             types.StringType,
+		"client_secret":         types.StringType,
+		"connected_user":        types.StringType,
+		"custom_reports":        types.StringType,
+		"oauth_refresh_token":   types.StringType,
+		"use_data_manager_apis": types.BoolType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -432,13 +434,13 @@ func (r *GoogleadsConnectionResource) Update(ctx context.Context, req resource.U
 				},
 			},
 		},
-		"blanket_user_consent": types.BoolType,
-		"client_id":            types.StringType,
-		"client_secret":        types.StringType,
-		"connected_user":       types.StringType,
-		"custom_reports":       types.StringType,
-		"oauth_refresh_token":  types.StringType,
-		"oauth_token_expiry":   types.StringType,
+		"blanket_user_consent":  types.BoolType,
+		"client_id":             types.StringType,
+		"client_secret":         types.StringType,
+		"connected_user":        types.StringType,
+		"custom_reports":        types.StringType,
+		"oauth_refresh_token":   types.StringType,
+		"use_data_manager_apis": types.BoolType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

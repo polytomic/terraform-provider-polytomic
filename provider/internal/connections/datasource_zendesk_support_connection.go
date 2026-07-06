@@ -52,7 +52,7 @@ func (d *Zendesk_supportConnectionDataSource) Schema(ctx context.Context, req da
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"auth_method": schema.StringAttribute{
-						MarkdownDescription: `Authentication method Valid values: <code>apitoken</code> (API token), <code>oauth</code> (OAuth). Default: <code>oauth</code>.`,
+						MarkdownDescription: `Authentication method Valid values: <code>apitoken</code> (API token), <code>clientcredentials</code> (Client credentials), <code>oauth</code> (OAuth). Default: <code>oauth</code>.`,
 						Computed:            true,
 					},
 					"custom_api_limits": schema.BoolAttribute{
@@ -64,10 +64,6 @@ func (d *Zendesk_supportConnectionDataSource) Schema(ctx context.Context, req da
 						Computed:            true,
 					},
 					"email": schema.StringAttribute{
-						MarkdownDescription: ``,
-						Computed:            true,
-					},
-					"oauth_token_expiry": schema.StringAttribute{
 						MarkdownDescription: ``,
 						Computed:            true,
 					},
@@ -85,12 +81,11 @@ func (d *Zendesk_supportConnectionDataSource) Schema(ctx context.Context, req da
 }
 
 type Zendesk_supportDataSourceConf struct {
-	Auth_method        string `mapstructure:"auth_method" tfsdk:"auth_method"`
-	Custom_api_limits  bool   `mapstructure:"custom_api_limits" tfsdk:"custom_api_limits"`
-	Domain             string `mapstructure:"domain" tfsdk:"domain"`
-	Email              string `mapstructure:"email" tfsdk:"email"`
-	Oauth_token_expiry string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
-	Ratelimit_rpm      int64  `mapstructure:"ratelimit_rpm" tfsdk:"ratelimit_rpm"`
+	Auth_method       string `mapstructure:"auth_method" tfsdk:"auth_method"`
+	Custom_api_limits bool   `mapstructure:"custom_api_limits" tfsdk:"custom_api_limits"`
+	Domain            string `mapstructure:"domain" tfsdk:"domain"`
+	Email             string `mapstructure:"email" tfsdk:"email"`
+	Ratelimit_rpm     int64  `mapstructure:"ratelimit_rpm" tfsdk:"ratelimit_rpm"`
 }
 
 func (d *Zendesk_supportConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
@@ -128,12 +123,11 @@ func (d *Zendesk_supportConnectionDataSource) Read(ctx context.Context, req data
 
 	var diags diag.Diagnostics
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"auth_method":        types.StringType,
-		"custom_api_limits":  types.BoolType,
-		"domain":             types.StringType,
-		"email":              types.StringType,
-		"oauth_token_expiry": types.StringType,
-		"ratelimit_rpm":      types.NumberType,
+		"auth_method":       types.StringType,
+		"custom_api_limits": types.BoolType,
+		"domain":            types.StringType,
+		"email":             types.StringType,
+		"ratelimit_rpm":     types.NumberType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

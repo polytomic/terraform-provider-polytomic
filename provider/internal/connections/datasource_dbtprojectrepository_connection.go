@@ -77,10 +77,6 @@ func (d *DbtprojectrepositoryConnectionDataSource) Schema(ctx context.Context, r
 							},
 						},
 					},
-					"oauth_token_expiry": schema.StringAttribute{
-						MarkdownDescription: ``,
-						Computed:            true,
-					},
 					"repository": schema.StringAttribute{
 						MarkdownDescription: `dbt project repository
 
@@ -102,8 +98,7 @@ type DbtprojectrepositoryDataSourceConf struct {
 		Href string `mapstructure:"href" tfsdk:"href"`
 		Text string `mapstructure:"text" tfsdk:"text"`
 	} `mapstructure:"latest_commit" tfsdk:"latest_commit"`
-	Oauth_token_expiry string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
-	Repository         string `mapstructure:"repository" tfsdk:"repository"`
+	Repository string `mapstructure:"repository" tfsdk:"repository"`
 }
 
 func (d *DbtprojectrepositoryConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
@@ -149,8 +144,7 @@ func (d *DbtprojectrepositoryConnectionDataSource) Read(ctx context.Context, req
 				"href": types.StringType,
 				"text": types.StringType,
 			},
-		}, "oauth_token_expiry": types.StringType,
-		"repository": types.StringType,
+		}, "repository": types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

@@ -51,8 +51,13 @@ state before it will take effect on a destroy operation.
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
-#### Required
+#### Optional
 
-- `api_key` (String, Sensitive) API Key
+- `api_key` (String, Sensitive) Service Token
+
+    Knock management API service token (knock_st_...). Required to sync workspace configuration collections.
+- `secret_key` (String, Sensitive) Secret Key
+
+    Knock standard API secret key (sk_...). Required to sync runtime data-plane collections.
 
 

@@ -53,7 +53,7 @@ state before it will take effect on a destroy operation.
 
 #### Required
 
-- `client_private_key` (String) Client Private Key
+- `client_private_key` (String, Sensitive) Client Private Key
 
     e.g. MDAwMA==
 - `client_secret` (String, Sensitive) Client Secret

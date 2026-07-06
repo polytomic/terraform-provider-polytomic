@@ -66,7 +66,6 @@ state before it will take effect on a destroy operation.
 - `branch` (String) Exposures branch
 - `latest_commit` (Attributes) Most recent exposures commit See [below for nested schema](#nestedatt--configuration--latest_commit).
 - `oauth_refresh_token` (String, Sensitive)
-- `oauth_token_expiry` (String)
 
 #### Read-Only
 

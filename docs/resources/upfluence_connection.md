@@ -56,9 +56,4 @@ state before it will take effect on a destroy operation.
 - `password` (String, Sensitive)
 - `username` (String) Email
 
-#### Optional
-
-- `oauth_refresh_token` (String, Sensitive)
-- `oauth_token_expiry` (String)
-
 

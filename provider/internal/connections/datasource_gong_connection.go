@@ -59,10 +59,6 @@ func (d *GongConnectionDataSource) Schema(ctx context.Context, req datasource.Sc
 						MarkdownDescription: `Authentication method Valid values: <code>token</code> (Access key and secret), <code>oauth</code> (OAuth). Default: <code>token</code>.`,
 						Computed:            true,
 					},
-					"oauth_token_expiry": schema.StringAttribute{
-						MarkdownDescription: ``,
-						Computed:            true,
-					},
 					"subdomain": schema.StringAttribute{
 						MarkdownDescription: `Gong subdomain i.e. company-17 if you access Gong via https://company-17.app.gong.io`,
 						Computed:            true,
@@ -75,10 +71,9 @@ func (d *GongConnectionDataSource) Schema(ctx context.Context, req datasource.Sc
 }
 
 type GongDataSourceConf struct {
-	Access_key         string `mapstructure:"access_key" tfsdk:"access_key"`
-	Auth_method        string `mapstructure:"auth_method" tfsdk:"auth_method"`
-	Oauth_token_expiry string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
-	Subdomain          string `mapstructure:"subdomain" tfsdk:"subdomain"`
+	Access_key  string `mapstructure:"access_key" tfsdk:"access_key"`
+	Auth_method string `mapstructure:"auth_method" tfsdk:"auth_method"`
+	Subdomain   string `mapstructure:"subdomain" tfsdk:"subdomain"`
 }
 
 func (d *GongConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
@@ -116,10 +111,9 @@ func (d *GongConnectionDataSource) Read(ctx context.Context, req datasource.Read
 
 	var diags diag.Diagnostics
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"access_key":         types.StringType,
-		"auth_method":        types.StringType,
-		"oauth_token_expiry": types.StringType,
-		"subdomain":          types.StringType,
+		"access_key":  types.StringType,
+		"auth_method": types.StringType,
+		"subdomain":   types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

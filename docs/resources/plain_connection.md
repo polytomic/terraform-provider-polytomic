@@ -57,4 +57,8 @@ state before it will take effect on a destroy operation.
 
     The API key for your Plain machine user.
 
+#### Read-Only
+
+- `workspace_public_name` (String) Workspace Name
+
 

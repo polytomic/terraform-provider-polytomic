@@ -105,13 +105,6 @@ var RedditadsSchema = schema.Schema{
 						stringplanmodifier.UseStateForUnknown(),
 					},
 				},
-				"oauth_token_expiry": schema.StringAttribute{
-					MarkdownDescription: ``,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
-				},
 				"pixel_id": schema.StringAttribute{
 					MarkdownDescription: `Conversion Pixel ID
 
@@ -156,7 +149,6 @@ type RedditadsConf struct {
 	Client_secret       string `mapstructure:"client_secret" tfsdk:"client_secret"`
 	Connected_user      string `mapstructure:"connected_user" tfsdk:"connected_user"`
 	Oauth_refresh_token string `mapstructure:"oauth_refresh_token" tfsdk:"oauth_refresh_token"`
-	Oauth_token_expiry  string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
 	Pixel_id            string `mapstructure:"pixel_id" tfsdk:"pixel_id"`
 }
 
@@ -246,7 +238,6 @@ func (r *RedditadsConnectionResource) Create(ctx context.Context, req resource.C
 		"client_secret":       types.StringType,
 		"connected_user":      types.StringType,
 		"oauth_refresh_token": types.StringType,
-		"oauth_token_expiry":  types.StringType,
 		"pixel_id":            types.StringType,
 	}, conf)
 	if diags.HasError() {
@@ -330,7 +321,6 @@ func (r *RedditadsConnectionResource) Read(ctx context.Context, req resource.Rea
 		"client_secret":       types.StringType,
 		"connected_user":      types.StringType,
 		"oauth_refresh_token": types.StringType,
-		"oauth_token_expiry":  types.StringType,
 		"pixel_id":            types.StringType,
 	}, conf)
 	if diags.HasError() {
@@ -424,7 +414,6 @@ func (r *RedditadsConnectionResource) Update(ctx context.Context, req resource.U
 		"client_secret":       types.StringType,
 		"connected_user":      types.StringType,
 		"oauth_refresh_token": types.StringType,
-		"oauth_token_expiry":  types.StringType,
 		"pixel_id":            types.StringType,
 	}, conf)
 	if diags.HasError() {

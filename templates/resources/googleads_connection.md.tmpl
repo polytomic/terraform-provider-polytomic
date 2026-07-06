@@ -57,7 +57,9 @@ state before it will take effect on a destroy operation.
 
     One report per line. Format is a report name:ads object:field list. e.g. myReport:ad_groups:campaign.id
 - `oauth_refresh_token` (String, Sensitive)
-- `oauth_token_expiry` (String)
+- `use_data_manager_apis` (Boolean) Use Data Manager APIs
+
+    Use Google Data Manager APIs for user list operations and conversion uploads. Requires a token granted the Data Manager OAuth scope.
 
 #### Read-Only
 

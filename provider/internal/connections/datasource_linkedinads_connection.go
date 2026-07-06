@@ -71,10 +71,6 @@ func (d *LinkedinadsConnectionDataSource) Schema(ctx context.Context, req dataso
 						MarkdownDescription: `Connected user`,
 						Computed:            true,
 					},
-					"oauth_token_expiry": schema.StringAttribute{
-						MarkdownDescription: ``,
-						Computed:            true,
-					},
 				},
 				Optional: true,
 			},
@@ -87,8 +83,7 @@ type LinkedinadsDataSourceConf struct {
 		Label string `mapstructure:"label" tfsdk:"label"`
 		Value string `mapstructure:"value" tfsdk:"value"`
 	} `mapstructure:"accounts" tfsdk:"accounts"`
-	Connected_user     string `mapstructure:"connected_user" tfsdk:"connected_user"`
-	Oauth_token_expiry string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
+	Connected_user string `mapstructure:"connected_user" tfsdk:"connected_user"`
 }
 
 func (d *LinkedinadsConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
@@ -134,8 +129,7 @@ func (d *LinkedinadsConnectionDataSource) Read(ctx context.Context, req datasour
 				},
 			},
 		},
-		"connected_user":     types.StringType,
-		"oauth_token_expiry": types.StringType,
+		"connected_user": types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

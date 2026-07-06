@@ -73,13 +73,6 @@ var GooglesearchconsoleSchema = schema.Schema{
 						stringplanmodifier.UseStateForUnknown(),
 					},
 				},
-				"oauth_token_expiry": schema.StringAttribute{
-					MarkdownDescription: ``,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
-				},
 				"sites": schema.SetNestedAttribute{
 					MarkdownDescription: ``,
 					Required:            false,
@@ -135,7 +128,6 @@ type GooglesearchconsoleConf struct {
 	Client_id           string `mapstructure:"client_id" tfsdk:"client_id"`
 	Client_secret       string `mapstructure:"client_secret" tfsdk:"client_secret"`
 	Oauth_refresh_token string `mapstructure:"oauth_refresh_token" tfsdk:"oauth_refresh_token"`
-	Oauth_token_expiry  string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
 	Sites               []struct {
 		Label string `mapstructure:"label" tfsdk:"label"`
 		Value string `mapstructure:"value" tfsdk:"value"`
@@ -219,7 +211,6 @@ func (r *GooglesearchconsoleConnectionResource) Create(ctx context.Context, req 
 		"client_id":           types.StringType,
 		"client_secret":       types.StringType,
 		"oauth_refresh_token": types.StringType,
-		"oauth_token_expiry":  types.StringType,
 		"sites": types.SetType{
 			ElemType: types.ObjectType{
 				AttrTypes: map[string]attr.Type{
@@ -301,7 +292,6 @@ func (r *GooglesearchconsoleConnectionResource) Read(ctx context.Context, req re
 		"client_id":           types.StringType,
 		"client_secret":       types.StringType,
 		"oauth_refresh_token": types.StringType,
-		"oauth_token_expiry":  types.StringType,
 		"sites": types.SetType{
 			ElemType: types.ObjectType{
 				AttrTypes: map[string]attr.Type{
@@ -393,7 +383,6 @@ func (r *GooglesearchconsoleConnectionResource) Update(ctx context.Context, req 
 		"client_id":           types.StringType,
 		"client_secret":       types.StringType,
 		"oauth_refresh_token": types.StringType,
-		"oauth_token_expiry":  types.StringType,
 		"sites": types.SetType{
 			ElemType: types.ObjectType{
 				AttrTypes: map[string]attr.Type{

@@ -73,13 +73,6 @@ var TypeformSchema = schema.Schema{
 						stringplanmodifier.UseStateForUnknown(),
 					},
 				},
-				"oauth_token_expiry": schema.StringAttribute{
-					MarkdownDescription: ``,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
-				},
 			},
 
 			Required: true,
@@ -110,7 +103,6 @@ type TypeformConf struct {
 	Application_id      string `mapstructure:"application_id" tfsdk:"application_id"`
 	Client_secret       string `mapstructure:"client_secret" tfsdk:"client_secret"`
 	Oauth_refresh_token string `mapstructure:"oauth_refresh_token" tfsdk:"oauth_refresh_token"`
-	Oauth_token_expiry  string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
 }
 
 type TypeformConnectionResource struct {
@@ -190,7 +182,6 @@ func (r *TypeformConnectionResource) Create(ctx context.Context, req resource.Cr
 		"application_id":      types.StringType,
 		"client_secret":       types.StringType,
 		"oauth_refresh_token": types.StringType,
-		"oauth_token_expiry":  types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -264,7 +255,6 @@ func (r *TypeformConnectionResource) Read(ctx context.Context, req resource.Read
 		"application_id":      types.StringType,
 		"client_secret":       types.StringType,
 		"oauth_refresh_token": types.StringType,
-		"oauth_token_expiry":  types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -348,7 +338,6 @@ func (r *TypeformConnectionResource) Update(ctx context.Context, req resource.Up
 		"application_id":      types.StringType,
 		"client_secret":       types.StringType,
 		"oauth_refresh_token": types.StringType,
-		"oauth_token_expiry":  types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

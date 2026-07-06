@@ -73,13 +73,6 @@ var GmailSchema = schema.Schema{
 						stringplanmodifier.UseStateForUnknown(),
 					},
 				},
-				"oauth_token_expiry": schema.StringAttribute{
-					MarkdownDescription: ``,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
-				},
 				"user_email": schema.StringAttribute{
 					MarkdownDescription: `Connected user's email`,
 					Required:            false,
@@ -117,7 +110,6 @@ type GmailConf struct {
 	Client_id           string `mapstructure:"client_id" tfsdk:"client_id"`
 	Client_secret       string `mapstructure:"client_secret" tfsdk:"client_secret"`
 	Oauth_refresh_token string `mapstructure:"oauth_refresh_token" tfsdk:"oauth_refresh_token"`
-	Oauth_token_expiry  string `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
 	User_email          string `mapstructure:"user_email" tfsdk:"user_email"`
 }
 
@@ -198,7 +190,6 @@ func (r *GmailConnectionResource) Create(ctx context.Context, req resource.Creat
 		"client_id":           types.StringType,
 		"client_secret":       types.StringType,
 		"oauth_refresh_token": types.StringType,
-		"oauth_token_expiry":  types.StringType,
 		"user_email":          types.StringType,
 	}, conf)
 	if diags.HasError() {
@@ -273,7 +264,6 @@ func (r *GmailConnectionResource) Read(ctx context.Context, req resource.ReadReq
 		"client_id":           types.StringType,
 		"client_secret":       types.StringType,
 		"oauth_refresh_token": types.StringType,
-		"oauth_token_expiry":  types.StringType,
 		"user_email":          types.StringType,
 	}, conf)
 	if diags.HasError() {
@@ -358,7 +348,6 @@ func (r *GmailConnectionResource) Update(ctx context.Context, req resource.Updat
 		"client_id":           types.StringType,
 		"client_secret":       types.StringType,
 		"oauth_refresh_token": types.StringType,
-		"oauth_token_expiry":  types.StringType,
 		"user_email":          types.StringType,
 	}, conf)
 	if diags.HasError() {

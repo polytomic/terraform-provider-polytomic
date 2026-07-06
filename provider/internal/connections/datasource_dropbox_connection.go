@@ -75,10 +75,6 @@ func (d *DropboxConnectionDataSource) Schema(ctx context.Context, req datasource
     Treat the files as a single table. Default: <code>false</code>.`,
 						Computed: true,
 					},
-					"oauth_token_expiry": schema.StringAttribute{
-						MarkdownDescription: ``,
-						Computed:            true,
-					},
 					"single_table_file_format": schema.StringAttribute{
 						MarkdownDescription: `File format Valid values: <code>csv</code> (CSV), <code>json</code> (JSON), <code>parquet</code> (Parquet). Default: <code>csv</code>.`,
 						Computed:            true,
@@ -113,7 +109,6 @@ type DropboxDataSourceConf struct {
 	Directory_glob_pattern    string   `mapstructure:"directory_glob_pattern" tfsdk:"directory_glob_pattern"`
 	Is_directory_snapshot     bool     `mapstructure:"is_directory_snapshot" tfsdk:"is_directory_snapshot"`
 	Is_single_table           bool     `mapstructure:"is_single_table" tfsdk:"is_single_table"`
-	Oauth_token_expiry        string   `mapstructure:"oauth_token_expiry" tfsdk:"oauth_token_expiry"`
 	Single_table_file_format  string   `mapstructure:"single_table_file_format" tfsdk:"single_table_file_format"`
 	Single_table_file_formats []string `mapstructure:"single_table_file_formats" tfsdk:"single_table_file_formats"`
 	Single_table_name         string   `mapstructure:"single_table_name" tfsdk:"single_table_name"`
@@ -160,7 +155,6 @@ func (d *DropboxConnectionDataSource) Read(ctx context.Context, req datasource.R
 		"directory_glob_pattern":   types.StringType,
 		"is_directory_snapshot":    types.BoolType,
 		"is_single_table":          types.BoolType,
-		"oauth_token_expiry":       types.StringType,
 		"single_table_file_format": types.StringType,
 		"single_table_file_formats": types.SetType{
 			ElemType: types.StringType,

@@ -38,7 +38,6 @@ Read-Only:
 
 - `ca_cert` (String) CA certificate
 - `client_certs` (Boolean) Use client certificates Default: <code>false</code>.
-- `client_key` (String) Client key
 - `hosts` (String) Hostname(s)
 
     Comma-separated list

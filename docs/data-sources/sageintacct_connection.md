@@ -34,8 +34,4 @@ data "polytomic_sageintacct_connection" "sageintacct" {
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
-Read-Only:
-
-- `oauth_token_expiry` (String)
-
 
