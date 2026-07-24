@@ -80,9 +80,9 @@ var MsadsSchema = schema.Schema{
 				},
 				"auth_method": schema.StringAttribute{
 					MarkdownDescription: `Authentication method Valid values: <code>microsoft</code> (Microsoft), <code>google</code> (Google). Default: <code>microsoft</code>.`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
 					Sensitive:           false,
 					Validators: []validator.String{
 						stringvalidator.OneOf("microsoft", "google"),

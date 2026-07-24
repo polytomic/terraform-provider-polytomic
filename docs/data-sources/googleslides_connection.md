@@ -36,7 +36,9 @@ data "polytomic_googleslides_connection" "googleslides" {
 
 Read-Only:
 
-- `connect_mode` (String) Default: browser Valid values: <code>browser</code>, <code>jwt</code>. Default: <code>browser</code>.
+- `connect_mode` (String) Authentication method
+
+    Default: browser Valid values: <code>browser</code>, <code>jwt</code>. Default: <code>browser</code>.
 - `folder_id` (Attributes) Folder (see [below for nested schema](#nestedatt--configuration--folder_id))
 - `include_subdirectories` (Boolean) Include Subdirectories Default: <code>false</code>.
 - `user_email` (String) Connected user's email

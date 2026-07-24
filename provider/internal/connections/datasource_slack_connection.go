@@ -57,6 +57,10 @@ func (d *SlackConnectionDataSource) Schema(ctx context.Context, req datasource.S
     Used if ingesting Slack events.`,
 						Computed: true,
 					},
+					"webhook_collections": schema.BoolAttribute{
+						MarkdownDescription: `Enable Slack event updates for bulk syncs`,
+						Computed:            true,
+					},
 				},
 				Optional: true,
 			},
@@ -65,7 +69,8 @@ func (d *SlackConnectionDataSource) Schema(ctx context.Context, req datasource.S
 }
 
 type SlackDataSourceConf struct {
-	Event_url string `mapstructure:"event_url" tfsdk:"event_url"`
+	Event_url           string `mapstructure:"event_url" tfsdk:"event_url"`
+	Webhook_collections bool   `mapstructure:"webhook_collections" tfsdk:"webhook_collections"`
 }
 
 func (d *SlackConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
@@ -103,7 +108,8 @@ func (d *SlackConnectionDataSource) Read(ctx context.Context, req datasource.Rea
 
 	var diags diag.Diagnostics
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"event_url": types.StringType,
+		"event_url":           types.StringType,
+		"webhook_collections": types.BoolType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

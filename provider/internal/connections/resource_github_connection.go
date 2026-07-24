@@ -65,9 +65,9 @@ var GithubSchema = schema.Schema{
 				},
 				"oauth_access_token": schema.StringAttribute{
 					MarkdownDescription: ``,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
 					Sensitive:           true,
 					PlanModifiers: []planmodifier.String{
 						stringplanmodifier.UseStateForUnknown(),

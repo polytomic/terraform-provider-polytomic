@@ -39,5 +39,6 @@ Read-Only:
 - `event_url` (String) Event Subscription Request URL
 
     Used if ingesting Slack events.
+- `webhook_collections` (Boolean) Enable Slack event updates for bulk syncs
 
 

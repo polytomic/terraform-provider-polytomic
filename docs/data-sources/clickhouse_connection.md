@@ -42,7 +42,7 @@ Read-Only:
 - `aws_access_key_id` (String) AWS Access Key ID (destinations only)
 - `aws_user` (String) User ARN (destinations only)
 - `azure_account_name` (String) Storage Account Name (destinations only)
-- `cloud_provider` (String) Cloud Provider (destination support only) Valid values: <code>aws</code> (AWS), <code>azure</code> (Azure).
+- `cloud_provider` (String) Cloud Provider (destination support only) Valid values: <code>aws</code> (AWS), <code>azure</code> (Azure), <code>gcp</code> (Google Cloud).
 - `container_name` (String) Storage Container Name (destinations only)
 
     Container used for staging data load files (may be "container" or "container/prefix")
@@ -50,6 +50,10 @@ Read-Only:
 - `external_id` (String) External ID
 
     External ID for the IAM role
+- `gcs_bucket_name` (String) GCS Bucket Name (destinations only)
+
+    Bucket used for staging data (may be "bucket" or "bucket/prefix")
+- `gcs_hmac_access_id` (String) HMAC Access ID (destinations only)
 - `hostname` (String)
 - `iam_role_arn` (String) IAM Role ARN
 - `port` (Number) Default: <code>9440</code>.

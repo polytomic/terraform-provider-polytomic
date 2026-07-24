@@ -70,7 +70,7 @@ func (d *ClickhouseConnectionDataSource) Schema(ctx context.Context, req datasou
 						Computed:            true,
 					},
 					"cloud_provider": schema.StringAttribute{
-						MarkdownDescription: `Cloud Provider (destination support only) Valid values: <code>aws</code> (AWS), <code>azure</code> (Azure).`,
+						MarkdownDescription: `Cloud Provider (destination support only) Valid values: <code>aws</code> (AWS), <code>azure</code> (Azure), <code>gcp</code> (Google Cloud).`,
 						Computed:            true,
 					},
 					"container_name": schema.StringAttribute{
@@ -88,6 +88,16 @@ func (d *ClickhouseConnectionDataSource) Schema(ctx context.Context, req datasou
 
     External ID for the IAM role`,
 						Computed: true,
+					},
+					"gcs_bucket_name": schema.StringAttribute{
+						MarkdownDescription: `GCS Bucket Name (destinations only)
+
+    Bucket used for staging data (may be "bucket" or "bucket/prefix")`,
+						Computed: true,
+					},
+					"gcs_hmac_access_id": schema.StringAttribute{
+						MarkdownDescription: `HMAC Access ID (destinations only)`,
+						Computed:            true,
 					},
 					"hostname": schema.StringAttribute{
 						MarkdownDescription: ``,
@@ -155,6 +165,8 @@ type ClickhouseDataSourceConf struct {
 	Container_name     string `mapstructure:"container_name" tfsdk:"container_name"`
 	Database           string `mapstructure:"database" tfsdk:"database"`
 	External_id        string `mapstructure:"external_id" tfsdk:"external_id"`
+	Gcs_bucket_name    string `mapstructure:"gcs_bucket_name" tfsdk:"gcs_bucket_name"`
+	Gcs_hmac_access_id string `mapstructure:"gcs_hmac_access_id" tfsdk:"gcs_hmac_access_id"`
 	Hostname           string `mapstructure:"hostname" tfsdk:"hostname"`
 	Iam_role_arn       string `mapstructure:"iam_role_arn" tfsdk:"iam_role_arn"`
 	Port               int64  `mapstructure:"port" tfsdk:"port"`
@@ -212,6 +224,8 @@ func (d *ClickhouseConnectionDataSource) Read(ctx context.Context, req datasourc
 		"container_name":     types.StringType,
 		"database":           types.StringType,
 		"external_id":        types.StringType,
+		"gcs_bucket_name":    types.StringType,
+		"gcs_hmac_access_id": types.StringType,
 		"hostname":           types.StringType,
 		"iam_role_arn":       types.StringType,
 		"port":               types.NumberType,

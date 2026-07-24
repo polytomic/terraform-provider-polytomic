@@ -45,11 +45,14 @@ state before it will take effect on a destroy operation.
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
+#### Required
+
+- `auth_method` (String) Authentication method Valid values: <code>microsoft</code> (Microsoft), <code>google</code> (Google). Default: <code>microsoft</code>.
+
 #### Optional
 
 - `accounts` (Attributes Set) See [below for nested schema](#nestedatt--configuration--accounts).
 - `agree_customer_match_terms` (Boolean) Agree to Microsoft's [Customer Match Terms](https://help.ads.microsoft.com/#apex/ads/en/56921/1) when syncing audiences
-- `auth_method` (String) Authentication method Valid values: <code>microsoft</code> (Microsoft), <code>google</code> (Google). Default: <code>microsoft</code>.
 - `client_id` (String, Sensitive)
 - `client_secret` (String, Sensitive)
 - `oauth_refresh_token` (String, Sensitive)

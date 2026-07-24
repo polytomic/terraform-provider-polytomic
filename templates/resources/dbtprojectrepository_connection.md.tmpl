@@ -45,19 +45,16 @@ state before it will take effect on a destroy operation.
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
-#### Required
-
-- `commit_exposures` (Boolean) Commit exposures file
-- `oauth_access_token` (String, Sensitive)
-- `repository` (String) dbt project repository
-
-    Only repositories with the Polytomic app installed will be listed.
-
 #### Optional
 
 - `branch` (String) Exposures branch
+- `commit_exposures` (Boolean) Commit exposures file
 - `latest_commit` (Attributes) Most recent exposures commit See [below for nested schema](#nestedatt--configuration--latest_commit).
+- `oauth_access_token` (String, Sensitive)
 - `oauth_refresh_token` (String, Sensitive)
+- `repository` (String) dbt project repository
+
+    Only repositories with the Polytomic app installed will be listed.
 
 #### Read-Only
 
