@@ -52,8 +52,10 @@ func (d *XeroConnectionDataSource) Schema(ctx context.Context, req datasource.Sc
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"connect_mode": schema.StringAttribute{
-						MarkdownDescription: `Default: browser. Select client credentials to use a Xero custom connection. Valid values: <code>browser</code> (OAuth), <code>clientcredentials</code> (Client credentials). Default: <code>browser</code>.`,
-						Computed:            true,
+						MarkdownDescription: `Connection method
+
+    Select client credentials to use a Xero custom connection. Valid values: <code>browser</code> (OAuth), <code>clientcredentials</code> (Client credentials). Default: <code>browser</code>.`,
+						Computed: true,
 					},
 					"tenant_name": schema.StringAttribute{
 						MarkdownDescription: `Organization Name`,

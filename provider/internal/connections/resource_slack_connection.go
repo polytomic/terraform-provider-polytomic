@@ -62,6 +62,13 @@ var SlackSchema = schema.Schema{
 					Computed:  true,
 					Sensitive: false,
 				},
+				"webhook_collections": schema.BoolAttribute{
+					MarkdownDescription: `Enable Slack event updates for bulk syncs`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
 			},
 
 			Required: true,
@@ -89,8 +96,9 @@ func (t *SlackConnectionResource) Schema(ctx context.Context, req resource.Schem
 }
 
 type SlackConf struct {
-	Api_key   string `mapstructure:"api_key" tfsdk:"api_key"`
-	Event_url string `mapstructure:"event_url" tfsdk:"event_url"`
+	Api_key             string `mapstructure:"api_key" tfsdk:"api_key"`
+	Event_url           string `mapstructure:"event_url" tfsdk:"event_url"`
+	Webhook_collections bool   `mapstructure:"webhook_collections" tfsdk:"webhook_collections"`
 }
 
 type SlackConnectionResource struct {
@@ -167,8 +175,9 @@ func (r *SlackConnectionResource) Create(ctx context.Context, req resource.Creat
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"api_key":   types.StringType,
-		"event_url": types.StringType,
+		"api_key":             types.StringType,
+		"event_url":           types.StringType,
+		"webhook_collections": types.BoolType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -239,8 +248,9 @@ func (r *SlackConnectionResource) Read(ctx context.Context, req resource.ReadReq
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"api_key":   types.StringType,
-		"event_url": types.StringType,
+		"api_key":             types.StringType,
+		"event_url":           types.StringType,
+		"webhook_collections": types.BoolType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -321,8 +331,9 @@ func (r *SlackConnectionResource) Update(ctx context.Context, req resource.Updat
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"api_key":   types.StringType,
-		"event_url": types.StringType,
+		"api_key":             types.StringType,
+		"event_url":           types.StringType,
+		"webhook_collections": types.BoolType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

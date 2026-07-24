@@ -64,7 +64,7 @@ state before it will take effect on a destroy operation.
 - `client_secret` (String, Sensitive)
 - `custom_reports` (String) Custom reports
 
-    One report per line. Format is a report name followed by a comma-separated list of fields. e.g. myReport:field1
+    One report per line. Format is a report name followed by a comma-separated list of fields. e.g. newUsersByDay:date
 - `oauth_refresh_token` (String, Sensitive)
 - `properties` (Attributes Set) See [below for nested schema](#nestedatt--configuration--properties).
 - `service_account` (String, Sensitive) Service account key

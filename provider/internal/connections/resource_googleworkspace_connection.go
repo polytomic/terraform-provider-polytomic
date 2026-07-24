@@ -47,11 +47,13 @@ var GoogleworkspaceSchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"auth_method": schema.StringAttribute{
-					MarkdownDescription: `Default: browser Valid values: <code>oauth</code> (OAuth), <code>service_account</code> (Service Account).`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
+					MarkdownDescription: `Authentication method
+
+    Default: browser Valid values: <code>oauth</code> (OAuth), <code>service_account</code> (Service Account). Default: <code>oauth</code>.`,
+					Required:  true,
+					Optional:  false,
+					Computed:  false,
+					Sensitive: false,
 					Validators: []validator.String{
 						stringvalidator.OneOf("oauth", "service_account"),
 					},

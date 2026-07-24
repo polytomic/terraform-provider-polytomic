@@ -58,6 +58,7 @@ state before it will take effect on a destroy operation.
 #### Optional
 
 - `bucket` (String) Google Cloud Storage bucket
+- `bulk_sync_staging_schema` (String) Staging schema name
 - `credential_config` (String, Sensitive) Credential configuration
 
     Credential configuration JSON file downloaded from Google Cloud
@@ -67,6 +68,7 @@ state before it will take effect on a destroy operation.
     Override the default project ID for cross-project access
 - `service_account` (String, Sensitive) Service account key
 - `structured_values_as_json` (Boolean) Write object and array values as JSON Default: <code>false</code>.
+- `use_bulk_sync_staging_schema` (Boolean) Use custom bulk sync staging schema Default: <code>false</code>.
 - `use_extract` (Boolean) Use Extract for bulk sync from BigQuery
 - `wif_project_id` (String) Google Cloud project ID
 

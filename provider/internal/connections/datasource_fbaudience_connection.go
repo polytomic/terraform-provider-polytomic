@@ -68,7 +68,7 @@ func (d *FbaudienceConnectionDataSource) Schema(ctx context.Context, req datasou
 						},
 					},
 					"auth_method": schema.StringAttribute{
-						MarkdownDescription: `Authentication Method Valid values: <code>oauth</code> (Oauth), <code>token</code> (Token). Default: <code>oauth</code>.`,
+						MarkdownDescription: `Authentication Method Valid values: <code>oauth</code> (OAuth), <code>token</code> (Token). Default: <code>oauth</code>.`,
 						Computed:            true,
 					},
 					"graph_api_version": schema.StringAttribute{

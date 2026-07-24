@@ -37,7 +37,13 @@ data "polytomic_google_search_ads_360_connection" "google_search_ads_360" {
 Read-Only:
 
 - `accounts` (Attributes Set) (see [below for nested schema](#nestedatt--configuration--accounts))
+- `blanket_user_consent` (Boolean) All transmitted users consented to ad personalization and information sharing
+
+    Causes Data Manager conversion uploads to signal that every transmitted user has accepted ad personalization and data sharing policies. This includes users in more advertising functions but requires you to have obtained express consent.
 - `connected_user` (String) Connected user's email
+- `use_data_manager_api` (Boolean) Use Data Manager API
+
+    Authorize this connection for the Google Data Manager API used for conversion uploads.
 
 <a id="nestedatt--configuration--accounts"></a>
 ### Nested Schema for `configuration.accounts`

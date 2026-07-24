@@ -67,9 +67,21 @@ func (d *Google_search_ads_360ConnectionDataSource) Schema(ctx context.Context, 
 							},
 						},
 					},
+					"blanket_user_consent": schema.BoolAttribute{
+						MarkdownDescription: `All transmitted users consented to ad personalization and information sharing
+
+    Causes Data Manager conversion uploads to signal that every transmitted user has accepted ad personalization and data sharing policies. This includes users in more advertising functions but requires you to have obtained express consent.`,
+						Computed: true,
+					},
 					"connected_user": schema.StringAttribute{
 						MarkdownDescription: `Connected user's email`,
 						Computed:            true,
+					},
+					"use_data_manager_api": schema.BoolAttribute{
+						MarkdownDescription: `Use Data Manager API
+
+    Authorize this connection for the Google Data Manager API used for conversion uploads.`,
+						Computed: true,
 					},
 				},
 				Optional: true,
@@ -83,7 +95,9 @@ type Google_search_ads_360DataSourceConf struct {
 		Label string `mapstructure:"label" tfsdk:"label"`
 		Value string `mapstructure:"value" tfsdk:"value"`
 	} `mapstructure:"accounts" tfsdk:"accounts"`
-	Connected_user string `mapstructure:"connected_user" tfsdk:"connected_user"`
+	Blanket_user_consent bool   `mapstructure:"blanket_user_consent" tfsdk:"blanket_user_consent"`
+	Connected_user       string `mapstructure:"connected_user" tfsdk:"connected_user"`
+	Use_data_manager_api bool   `mapstructure:"use_data_manager_api" tfsdk:"use_data_manager_api"`
 }
 
 func (d *Google_search_ads_360ConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
@@ -129,7 +143,9 @@ func (d *Google_search_ads_360ConnectionDataSource) Read(ctx context.Context, re
 				},
 			},
 		},
-		"connected_user": types.StringType,
+		"blanket_user_consent": types.BoolType,
+		"connected_user":       types.StringType,
+		"use_data_manager_api": types.BoolType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

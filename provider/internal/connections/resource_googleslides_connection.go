@@ -67,11 +67,13 @@ var GoogleslidesSchema = schema.Schema{
 					},
 				},
 				"connect_mode": schema.StringAttribute{
-					MarkdownDescription: `Default: browser Valid values: <code>browser</code>, <code>jwt</code>. Default: <code>browser</code>.`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
+					MarkdownDescription: `Authentication method
+
+    Default: browser Valid values: <code>browser</code>, <code>jwt</code>. Default: <code>browser</code>.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
 					Validators: []validator.String{
 						stringvalidator.OneOf("browser", "jwt"),
 					},

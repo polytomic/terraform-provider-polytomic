@@ -25,6 +25,9 @@ resource "polytomic_clickhouse_connection" "clickhouse" {
     cloud_provider        = "aws"
     container_name        = "container"
     database              = "default"
+    gcs_bucket_name       = "my-bucket"
+    gcs_hmac_access_id    = "GOOG1EXAMPLEACCESSID"
+    gcs_hmac_secret       = "bGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9EXAMPLE"
     hostname              = "clickhouse.example.com"
     s3_bucket_name        = "my-bucket"
     s3_bucket_region      = "us-east-1"
@@ -79,11 +82,16 @@ state before it will take effect on a destroy operation.
 - `aws_secret_access_key` (String, Sensitive) AWS Secret Access Key (destinations only)
 - `azure_access_key` (String, Sensitive) Storage Account Access Key (destinations only)
 - `azure_account_name` (String) Storage Account Name (destinations only)
-- `cloud_provider` (String) Cloud Provider (destination support only) Valid values: <code>aws</code> (AWS), <code>azure</code> (Azure).
+- `cloud_provider` (String) Cloud Provider (destination support only) Valid values: <code>aws</code> (AWS), <code>azure</code> (Azure), <code>gcp</code> (Google Cloud).
 - `container_name` (String) Storage Container Name (destinations only)
 
     Container used for staging data load files (may be "container" or "container/prefix")
 - `database` (String)
+- `gcs_bucket_name` (String) GCS Bucket Name (destinations only)
+
+    Bucket used for staging data (may be "bucket" or "bucket/prefix")
+- `gcs_hmac_access_id` (String) HMAC Access ID (destinations only)
+- `gcs_hmac_secret` (String, Sensitive) HMAC Secret (destinations only)
 - `iam_role_arn` (String) IAM Role ARN
 - `password` (String, Sensitive)
 - `s3_bucket_name` (String) S3 Bucket Name (destinations only)
