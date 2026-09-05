@@ -52,7 +52,7 @@ func (d *Pinterest_adsConnectionDataSource) Schema(ctx context.Context, req data
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"accounts": schema.SetNestedAttribute{
-						MarkdownDescription: `Ad Accounts`,
+						MarkdownDescription: `Ad accounts`,
 						Computed:            true,
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{

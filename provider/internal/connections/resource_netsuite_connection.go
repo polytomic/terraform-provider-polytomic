@@ -51,7 +51,7 @@ var NetsuiteSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"consumer_key": schema.StringAttribute{
-					MarkdownDescription: `Consumer Key`,
+					MarkdownDescription: `Consumer key`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
@@ -61,7 +61,7 @@ var NetsuiteSchema = schema.Schema{
 					},
 				},
 				"consumer_secret": schema.StringAttribute{
-					MarkdownDescription: `Consumer Secret`,
+					MarkdownDescription: `Consumer secret`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
@@ -81,7 +81,7 @@ var NetsuiteSchema = schema.Schema{
 					},
 				},
 				"token_secret": schema.StringAttribute{
-					MarkdownDescription: `Token Secret`,
+					MarkdownDescription: `Token secret`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,

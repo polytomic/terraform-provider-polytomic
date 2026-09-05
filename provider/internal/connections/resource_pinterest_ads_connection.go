@@ -44,7 +44,7 @@ var Pinterest_adsSchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"accounts": schema.SetNestedAttribute{
-					MarkdownDescription: `Ad Accounts`,
+					MarkdownDescription: `Ad accounts`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,

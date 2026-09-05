@@ -53,7 +53,7 @@ var SproutsocialSchema = schema.Schema{
 					Sensitive: false,
 				},
 				"client_secret": schema.StringAttribute{
-					MarkdownDescription: `Client Secret
+					MarkdownDescription: `Client secret
 
     Your Sprout Social OAuth Client Secret`,
 					Required:  false,

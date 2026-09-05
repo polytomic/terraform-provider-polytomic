@@ -59,9 +59,9 @@ state before it will take effect on a destroy operation.
 #### Required
 
 - `account_id` (String) Account ID
-- `consumer_key` (String, Sensitive) Consumer Key
-- `consumer_secret` (String, Sensitive) Consumer Secret
+- `consumer_key` (String, Sensitive) Consumer key
+- `consumer_secret` (String, Sensitive) Consumer secret
 - `token` (String, Sensitive) Token ID
-- `token_secret` (String, Sensitive) Token Secret
+- `token_secret` (String, Sensitive) Token secret
 
 

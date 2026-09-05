@@ -36,10 +36,10 @@ data "polytomic_azureblob_connection" "azureblob" {
 
 Read-Only:
 
-- `account_name` (String) Account Name
-- `auth_method` (String) Authentication method Valid values: <code>access_key</code> (Access Key), <code>client_credentials</code> (Client Credentials), <code>oauth</code> (Oauth). Default: <code>access_key</code>.
+- `account_name` (String) Account name
+- `auth_method` (String) Authentication method Valid values: <code>access_key</code> (Access key), <code>client_credentials</code> (Client credentials), <code>oauth</code> (OAuth). Default: <code>access_key</code>.
 - `client_id` (String) Client ID
-- `container_name` (String) Container Name
+- `container_name` (String) Container name
 - `csv_has_headers` (Boolean) CSV files have headers
 
     Whether CSV files have a header row with field names. Default: <code>true</code>.

@@ -56,12 +56,12 @@ state before it will take effect on a destroy operation.
 
 #### Required
 
-- `client_id` (String, Sensitive) API User Name
-- `client_secret` (String, Sensitive) API Secret
+- `client_id` (String, Sensitive) API user name
+- `client_secret` (String, Sensitive) API secret
 - `merchant_id` (String) Merchant ID
 
 #### Optional
 
-- `staging` (Boolean) Use Staging Environment
+- `staging` (Boolean) Use staging environment
 
 

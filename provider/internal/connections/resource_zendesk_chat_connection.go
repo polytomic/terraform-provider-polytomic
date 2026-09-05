@@ -51,7 +51,7 @@ var Zendesk_chatSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"domain": schema.StringAttribute{
-					MarkdownDescription: `Zendesk Support Subdomain`,
+					MarkdownDescription: `Zendesk Support subdomain`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,

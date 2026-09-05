@@ -24,6 +24,9 @@ import (
 	"github.com/polytomic/polytomic-go"
 	ptcore "github.com/polytomic/polytomic-go/core"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
+
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -43,8 +46,38 @@ var MsdynamicsSchema = schema.Schema{
 		},
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
+				"auth_method": schema.StringAttribute{
+					MarkdownDescription: `Authentication method Valid values: <code>oauth</code> (OAuth), <code>client_credentials</code> (Client credentials). Default: <code>oauth</code>.`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
+					Validators: []validator.String{
+						stringvalidator.OneOf("oauth", "client_credentials"),
+					},
+				},
+				"client_credentials_client_id": schema.StringAttribute{
+					MarkdownDescription: `Client ID`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
+					},
+				},
+				"client_credentials_client_secret": schema.StringAttribute{
+					MarkdownDescription: `Client secret`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
+					},
+				},
 				"client_id": schema.StringAttribute{
-					MarkdownDescription: ``,
+					MarkdownDescription: `Custom OAuth application client ID for the delegated flow.`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,
@@ -54,7 +87,7 @@ var MsdynamicsSchema = schema.Schema{
 					},
 				},
 				"client_secret": schema.StringAttribute{
-					MarkdownDescription: ``,
+					MarkdownDescription: `Custom OAuth application client secret for the delegated flow.`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,
@@ -79,6 +112,13 @@ var MsdynamicsSchema = schema.Schema{
 					PlanModifiers: []planmodifier.String{
 						stringplanmodifier.UseStateForUnknown(),
 					},
+				},
+				"tenant_id": schema.StringAttribute{
+					MarkdownDescription: `Directory (tenant) ID`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
 				},
 			},
 
@@ -107,10 +147,14 @@ func (t *MsdynamicsConnectionResource) Schema(ctx context.Context, req resource.
 }
 
 type MsdynamicsConf struct {
-	Client_id           string `mapstructure:"client_id" tfsdk:"client_id"`
-	Client_secret       string `mapstructure:"client_secret" tfsdk:"client_secret"`
-	Dynamics_url        string `mapstructure:"dynamics_url" tfsdk:"dynamics_url"`
-	Oauth_refresh_token string `mapstructure:"oauth_refresh_token" tfsdk:"oauth_refresh_token"`
+	Auth_method                      string `mapstructure:"auth_method" tfsdk:"auth_method"`
+	Client_credentials_client_id     string `mapstructure:"client_credentials_client_id" tfsdk:"client_credentials_client_id"`
+	Client_credentials_client_secret string `mapstructure:"client_credentials_client_secret" tfsdk:"client_credentials_client_secret"`
+	Client_id                        string `mapstructure:"client_id" tfsdk:"client_id"`
+	Client_secret                    string `mapstructure:"client_secret" tfsdk:"client_secret"`
+	Dynamics_url                     string `mapstructure:"dynamics_url" tfsdk:"dynamics_url"`
+	Oauth_refresh_token              string `mapstructure:"oauth_refresh_token" tfsdk:"oauth_refresh_token"`
+	Tenant_id                        string `mapstructure:"tenant_id" tfsdk:"tenant_id"`
 }
 
 type MsdynamicsConnectionResource struct {
@@ -187,10 +231,14 @@ func (r *MsdynamicsConnectionResource) Create(ctx context.Context, req resource.
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"client_id":           types.StringType,
-		"client_secret":       types.StringType,
-		"dynamics_url":        types.StringType,
-		"oauth_refresh_token": types.StringType,
+		"auth_method":                      types.StringType,
+		"client_credentials_client_id":     types.StringType,
+		"client_credentials_client_secret": types.StringType,
+		"client_id":                        types.StringType,
+		"client_secret":                    types.StringType,
+		"dynamics_url":                     types.StringType,
+		"oauth_refresh_token":              types.StringType,
+		"tenant_id":                        types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -261,10 +309,14 @@ func (r *MsdynamicsConnectionResource) Read(ctx context.Context, req resource.Re
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"client_id":           types.StringType,
-		"client_secret":       types.StringType,
-		"dynamics_url":        types.StringType,
-		"oauth_refresh_token": types.StringType,
+		"auth_method":                      types.StringType,
+		"client_credentials_client_id":     types.StringType,
+		"client_credentials_client_secret": types.StringType,
+		"client_id":                        types.StringType,
+		"client_secret":                    types.StringType,
+		"dynamics_url":                     types.StringType,
+		"oauth_refresh_token":              types.StringType,
+		"tenant_id":                        types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -345,10 +397,14 @@ func (r *MsdynamicsConnectionResource) Update(ctx context.Context, req resource.
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"client_id":           types.StringType,
-		"client_secret":       types.StringType,
-		"dynamics_url":        types.StringType,
-		"oauth_refresh_token": types.StringType,
+		"auth_method":                      types.StringType,
+		"client_credentials_client_id":     types.StringType,
+		"client_credentials_client_secret": types.StringType,
+		"client_id":                        types.StringType,
+		"client_secret":                    types.StringType,
+		"dynamics_url":                     types.StringType,
+		"oauth_refresh_token":              types.StringType,
+		"tenant_id":                        types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

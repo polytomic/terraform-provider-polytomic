@@ -36,6 +36,6 @@ data "polytomic_plain_connection" "plain" {
 
 Read-Only:
 
-- `workspace_public_name` (String) Workspace Name
+- `workspace_public_name` (String) Workspace name
 
 

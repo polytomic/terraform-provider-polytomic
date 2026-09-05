@@ -55,8 +55,8 @@ state before it will take effect on a destroy operation.
 
 #### Required
 
-- `apikey` (String, Sensitive) API Key
-- `domain` (String) Customer Portal Subdomain
+- `apikey` (String, Sensitive) API key
+- `domain` (String) Customer portal subdomain
 
     e.g. 'polytomic' if your portal is 'https://polytomic.kustomerapp.com/app'
 

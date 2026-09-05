@@ -57,6 +57,13 @@ var Apple_adsSchema = schema.Schema{
 					Computed:            false,
 					Sensitive:           false,
 				},
+				"org_id": schema.StringAttribute{
+					MarkdownDescription: `Organization`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
+				},
 				"public_key": schema.StringAttribute{
 					MarkdownDescription: `Public key`,
 					Required:            false,
@@ -100,6 +107,7 @@ func (t *Apple_adsConnectionResource) Schema(ctx context.Context, req resource.S
 type Apple_adsConf struct {
 	Client_id  string `mapstructure:"client_id" tfsdk:"client_id"`
 	Key_id     string `mapstructure:"key_id" tfsdk:"key_id"`
+	Org_id     string `mapstructure:"org_id" tfsdk:"org_id"`
 	Public_key string `mapstructure:"public_key" tfsdk:"public_key"`
 	Team_id    string `mapstructure:"team_id" tfsdk:"team_id"`
 }
@@ -180,6 +188,7 @@ func (r *Apple_adsConnectionResource) Create(ctx context.Context, req resource.C
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"client_id":  types.StringType,
 		"key_id":     types.StringType,
+		"org_id":     types.StringType,
 		"public_key": types.StringType,
 		"team_id":    types.StringType,
 	}, conf)
@@ -254,6 +263,7 @@ func (r *Apple_adsConnectionResource) Read(ctx context.Context, req resource.Rea
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"client_id":  types.StringType,
 		"key_id":     types.StringType,
+		"org_id":     types.StringType,
 		"public_key": types.StringType,
 		"team_id":    types.StringType,
 	}, conf)
@@ -338,6 +348,7 @@ func (r *Apple_adsConnectionResource) Update(ctx context.Context, req resource.U
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"client_id":  types.StringType,
 		"key_id":     types.StringType,
+		"org_id":     types.StringType,
 		"public_key": types.StringType,
 		"team_id":    types.StringType,
 	}, conf)

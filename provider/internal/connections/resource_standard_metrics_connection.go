@@ -51,7 +51,7 @@ var Standard_metricsSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"client_secret": schema.StringAttribute{
-					MarkdownDescription: `Client Secret`,
+					MarkdownDescription: `Client secret`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,

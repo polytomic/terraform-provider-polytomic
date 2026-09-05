@@ -38,6 +38,7 @@ Read-Only:
 
 - `client_id` (String) Client ID
 - `key_id` (String) Key ID
+- `org_id` (String) Organization
 - `public_key` (String) Public key
 - `team_id` (String) Team ID
 

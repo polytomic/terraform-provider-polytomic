@@ -56,7 +56,7 @@ state before it will take effect on a destroy operation.
 - `client_id` (String) Client ID
 
     Your Sprout Social OAuth Client ID
-- `client_secret` (String, Sensitive) Client Secret
+- `client_secret` (String, Sensitive) Client secret
 
     Your Sprout Social OAuth Client Secret
 

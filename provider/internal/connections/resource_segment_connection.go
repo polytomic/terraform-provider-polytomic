@@ -44,7 +44,7 @@ var SegmentSchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"write_key": schema.StringAttribute{
-					MarkdownDescription: `Write Key`,
+					MarkdownDescription: `Write key`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,

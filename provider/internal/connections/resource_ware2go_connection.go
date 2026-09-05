@@ -44,7 +44,7 @@ var Ware2goSchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"client_id": schema.StringAttribute{
-					MarkdownDescription: `API User Name`,
+					MarkdownDescription: `API user name`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
@@ -54,7 +54,7 @@ var Ware2goSchema = schema.Schema{
 					},
 				},
 				"client_secret": schema.StringAttribute{
-					MarkdownDescription: `API Secret`,
+					MarkdownDescription: `API secret`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
@@ -71,7 +71,7 @@ var Ware2goSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"staging": schema.BoolAttribute{
-					MarkdownDescription: `Use Staging Environment`,
+					MarkdownDescription: `Use staging environment`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,

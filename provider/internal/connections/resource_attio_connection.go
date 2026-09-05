@@ -24,6 +24,9 @@ import (
 	"github.com/polytomic/polytomic-go"
 	ptcore "github.com/polytomic/polytomic-go/core"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
+
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -43,8 +46,35 @@ var AttioSchema = schema.Schema{
 		},
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
+				"api_key": schema.StringAttribute{
+					MarkdownDescription: `API key`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
+					},
+				},
+				"auth_method": schema.StringAttribute{
+					MarkdownDescription: `Authentication method Valid values: <code>oauth</code> (OAuth), <code>api_key</code> (API key).`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
+					Validators: []validator.String{
+						stringvalidator.OneOf("oauth", "api_key"),
+					},
+				},
 				"disable_list_entry_projection": schema.BoolAttribute{
 					MarkdownDescription: `Skip parent fields when pulling lists`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
+				"enable_attribute_history": schema.BoolAttribute{
+					MarkdownDescription: `Enable Attio attribute change history`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,
@@ -91,7 +121,10 @@ func (t *AttioConnectionResource) Schema(ctx context.Context, req resource.Schem
 }
 
 type AttioConf struct {
+	Api_key                       string `mapstructure:"api_key" tfsdk:"api_key"`
+	Auth_method                   string `mapstructure:"auth_method" tfsdk:"auth_method"`
 	Disable_list_entry_projection bool   `mapstructure:"disable_list_entry_projection" tfsdk:"disable_list_entry_projection"`
+	Enable_attribute_history      bool   `mapstructure:"enable_attribute_history" tfsdk:"enable_attribute_history"`
 	Enable_webhooks               bool   `mapstructure:"enable_webhooks" tfsdk:"enable_webhooks"`
 	Workspace_name                string `mapstructure:"workspace_name" tfsdk:"workspace_name"`
 }
@@ -170,7 +203,10 @@ func (r *AttioConnectionResource) Create(ctx context.Context, req resource.Creat
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"api_key":                       types.StringType,
+		"auth_method":                   types.StringType,
 		"disable_list_entry_projection": types.BoolType,
+		"enable_attribute_history":      types.BoolType,
 		"enable_webhooks":               types.BoolType,
 		"workspace_name":                types.StringType,
 	}, conf)
@@ -243,7 +279,10 @@ func (r *AttioConnectionResource) Read(ctx context.Context, req resource.ReadReq
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"api_key":                       types.StringType,
+		"auth_method":                   types.StringType,
 		"disable_list_entry_projection": types.BoolType,
+		"enable_attribute_history":      types.BoolType,
 		"enable_webhooks":               types.BoolType,
 		"workspace_name":                types.StringType,
 	}, conf)
@@ -326,7 +365,10 @@ func (r *AttioConnectionResource) Update(ctx context.Context, req resource.Updat
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"api_key":                       types.StringType,
+		"auth_method":                   types.StringType,
 		"disable_list_entry_projection": types.BoolType,
+		"enable_attribute_history":      types.BoolType,
 		"enable_webhooks":               types.BoolType,
 		"workspace_name":                types.StringType,
 	}, conf)

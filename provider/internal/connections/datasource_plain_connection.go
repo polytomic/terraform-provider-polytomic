@@ -52,7 +52,7 @@ func (d *PlainConnectionDataSource) Schema(ctx context.Context, req datasource.S
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"workspace_public_name": schema.StringAttribute{
-						MarkdownDescription: `Workspace Name`,
+						MarkdownDescription: `Workspace name`,
 						Computed:            true,
 					},
 				},

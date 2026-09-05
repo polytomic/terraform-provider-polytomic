@@ -47,7 +47,7 @@ var Polytomic_metadataSchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"auth_mode": schema.StringAttribute{
-					MarkdownDescription: `Authentication Method
+					MarkdownDescription: `Authentication method
 
     Type of API key to use for authentication Valid values: <code>personal_api_key</code> (Personal API Key), <code>partner_api_key</code> (Partner API Key). Default: <code>personal_api_key</code>.`,
 					Required:  true,
@@ -73,7 +73,7 @@ var Polytomic_metadataSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"deployment_api_key": schema.StringAttribute{
-					MarkdownDescription: `Deployment API Key`,
+					MarkdownDescription: `Deployment API key`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,
@@ -83,7 +83,7 @@ var Polytomic_metadataSchema = schema.Schema{
 					},
 				},
 				"partner_api_key": schema.StringAttribute{
-					MarkdownDescription: `Partner API Key
+					MarkdownDescription: `Partner API key
 
     Partner API key provided by Polytomic`,
 					Required:  false,
@@ -95,7 +95,7 @@ var Polytomic_metadataSchema = schema.Schema{
 					},
 				},
 				"personal_api_key": schema.StringAttribute{
-					MarkdownDescription: `Personal API Key
+					MarkdownDescription: `Personal API key
 
     Your personal API key from Polytomic settings`,
 					Required:  false,

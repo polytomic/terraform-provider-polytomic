@@ -52,7 +52,7 @@ func (d *SftpConnectionDataSource) Schema(ctx context.Context, req datasource.Sc
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"auth_mode": schema.StringAttribute{
-						MarkdownDescription: `Authentication Method Valid values: <code>private_key</code> (Private key), <code>password</code> (Password). Default: <code>private_key</code>.`,
+						MarkdownDescription: `Authentication method Valid values: <code>private_key</code> (Private key), <code>password</code> (Password). Default: <code>private_key</code>.`,
 						Computed:            true,
 					},
 					"is_single_table": schema.BoolAttribute{

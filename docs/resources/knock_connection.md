@@ -53,10 +53,10 @@ state before it will take effect on a destroy operation.
 
 #### Optional
 
-- `api_key` (String, Sensitive) Service Token
+- `api_key` (String, Sensitive) Service token
 
     Knock management API service token (knock_st_...). Required to sync workspace configuration collections.
-- `secret_key` (String, Sensitive) Secret Key
+- `secret_key` (String, Sensitive) Secret key
 
     Knock standard API secret key (sk_...). Required to sync runtime data-plane collections.
 

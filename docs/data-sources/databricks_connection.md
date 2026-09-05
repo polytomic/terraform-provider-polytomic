@@ -36,41 +36,41 @@ data "polytomic_databricks_connection" "databricks" {
 
 Read-Only:
 
-- `auth_mode` (String) AWS Authentication Method
+- `auth_mode` (String) AWS authentication method
 
     How to authenticate with AWS. Defaults to Access Key and Secret Valid values: <code>access_key_and_secret</code> (Access Key and Secret), <code>iam_role</code> (IAM role). Default: <code>access_key_and_secret</code>.
-- `aws_access_key_id` (String) AWS Access Key ID (destinations only)
+- `aws_access_key_id` (String) AWS access key ID (destinations only)
 
     See https://docs.polytomic.com/docs/databricks-connections#writing-to-databricks
 - `aws_user` (String) User ARN (destinations only)
-- `azure_account_name` (String) Storage Account Name (destination support only)
+- `azure_account_name` (String) Storage account name (destination support only)
 
     The account name of the storage account
 - `bulk_sync_staging_schema` (String) Staging schema name
-- `cloud_provider` (String) Cloud Provider (destination support only) Valid values: <code>aws</code> (AWS), <code>azure</code> (Azure).
+- `cloud_provider` (String) Cloud provider (destination support only) Valid values: <code>aws</code> (AWS), <code>azure</code> (Azure).
 - `concurrent_queries` (Number) Concurrent query limit
-- `container_name` (String) Storage Container Name (destination support only)
+- `container_name` (String) Storage container name (destination support only)
 
     The container which we will stage files in
-- `databricks_auth_mode` (String) Authentication Method Valid values: <code>access_token</code> (Access Token), <code>oauth_service_principal</code> (OAuth Service Principal). Default: <code>access_token</code>.
+- `databricks_auth_mode` (String) Authentication method Valid values: <code>access_token</code> (Access Token), <code>oauth_service_principal</code> (OAuth Service Principal). Default: <code>access_token</code>.
 - `deleted_file_retention_days` (Number) Deleted file retention
 - `enable_delta_uniform` (Boolean) Enable Delta UniForm tables Default: <code>false</code>.
 - `enforce_query_limit` (Boolean) Limit concurrent queries Default: <code>false</code>.
 - `external_id` (String) External ID
 
     External ID for the IAM role
-- `http_path` (String) HTTP Path Default: <code>/sql</code>.
-- `iam_role_arn` (String) IAM Role ARN
+- `http_path` (String) HTTP path Default: <code>/sql</code>.
+- `iam_role_arn` (String) IAM role ARN
 - `log_file_retention_days` (Number) Log retention
 - `port` (Number) Default: <code>443</code>.
-- `s3_bucket_name` (String) S3 Bucket Name (destinations only)
+- `s3_bucket_name` (String) S3 bucket name (destinations only)
 
     Name of bucket used for staging data load files
-- `s3_bucket_region` (String) S3 Bucket Region (destinations only)
+- `s3_bucket_region` (String) S3 bucket region (destinations only)
 
     Region of bucket
-- `server_hostname` (String) Server Hostname
-- `service_principal_id` (String) Service Principal ID
+- `server_hostname` (String) Server hostname
+- `service_principal_id` (String) Service principal ID
 - `set_retention_properties` (Boolean) Configure data retention for tables
 - `ssh` (Boolean) Connect over SSH tunnel
 - `ssh_blob_storage` (Boolean) Use SSH for cloud storage bucket Default: <code>false</code>.

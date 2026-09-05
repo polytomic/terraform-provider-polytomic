@@ -53,12 +53,12 @@ state before it will take effect on a destroy operation.
 
 #### Required
 
-- `api_key` (String, Sensitive) API Key
+- `api_key` (String, Sensitive) API key
 
     The API key for your Plain machine user.
 
 #### Read-Only
 
-- `workspace_public_name` (String) Workspace Name
+- `workspace_public_name` (String) Workspace name
 
 

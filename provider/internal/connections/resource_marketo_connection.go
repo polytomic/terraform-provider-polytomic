@@ -51,7 +51,7 @@ var MarketoSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"client_secret": schema.StringAttribute{
-					MarkdownDescription: `Client Secret`,
+					MarkdownDescription: `Client secret`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
@@ -89,7 +89,7 @@ var MarketoSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"rest_endpoint": schema.StringAttribute{
-					MarkdownDescription: `REST Endpoint`,
+					MarkdownDescription: `REST endpoint`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,

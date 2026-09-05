@@ -47,7 +47,7 @@ var ClickhouseSchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"auth_mode": schema.StringAttribute{
-					MarkdownDescription: `AWS Authentication Method
+					MarkdownDescription: `AWS authentication method
 
     How to authenticate with AWS for the staging bucket Valid values: <code>access_key_and_secret</code> (Access Key and Secret), <code>iam_role</code> (IAM role). Default: <code>access_key_and_secret</code>.`,
 					Required:  false,
@@ -59,14 +59,14 @@ var ClickhouseSchema = schema.Schema{
 					},
 				},
 				"aws_access_key_id": schema.StringAttribute{
-					MarkdownDescription: `AWS Access Key ID (destinations only)`,
+					MarkdownDescription: `AWS access key ID (destinations only)`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,
 					Sensitive:           false,
 				},
 				"aws_secret_access_key": schema.StringAttribute{
-					MarkdownDescription: `AWS Secret Access Key (destinations only)`,
+					MarkdownDescription: `AWS secret access key (destinations only)`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,
@@ -83,7 +83,7 @@ var ClickhouseSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"azure_access_key": schema.StringAttribute{
-					MarkdownDescription: `Storage Account Access Key (destinations only)`,
+					MarkdownDescription: `Storage account access key (destinations only)`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,
@@ -93,24 +93,24 @@ var ClickhouseSchema = schema.Schema{
 					},
 				},
 				"azure_account_name": schema.StringAttribute{
-					MarkdownDescription: `Storage Account Name (destinations only)`,
+					MarkdownDescription: `Storage account name (destinations only)`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,
 					Sensitive:           false,
 				},
 				"cloud_provider": schema.StringAttribute{
-					MarkdownDescription: `Cloud Provider (destination support only) Valid values: <code>aws</code> (AWS), <code>azure</code> (Azure).`,
+					MarkdownDescription: `Cloud provider (destination support only) Valid values: <code>aws</code> (AWS), <code>azure</code> (Azure), <code>gcp</code> (Google Cloud).`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,
 					Sensitive:           false,
 					Validators: []validator.String{
-						stringvalidator.OneOf("aws", "azure"),
+						stringvalidator.OneOf("aws", "azure", "gcp"),
 					},
 				},
 				"container_name": schema.StringAttribute{
-					MarkdownDescription: `Storage Container Name (destinations only)
+					MarkdownDescription: `Storage container name (destinations only)
 
     Container used for staging data load files (may be "container" or "container/prefix")`,
 					Required:  false,
@@ -134,6 +134,32 @@ var ClickhouseSchema = schema.Schema{
 					Computed:  true,
 					Sensitive: false,
 				},
+				"gcs_bucket_name": schema.StringAttribute{
+					MarkdownDescription: `GCS bucket name (destinations only)
+
+    Bucket used for staging data (may be "bucket" or "bucket/prefix")`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
+				},
+				"gcs_hmac_access_id": schema.StringAttribute{
+					MarkdownDescription: `HMAC access ID (destinations only)`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
+				"gcs_hmac_secret": schema.StringAttribute{
+					MarkdownDescription: `HMAC secret (destinations only)`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
+					},
+				},
 				"hostname": schema.StringAttribute{
 					MarkdownDescription: ``,
 					Required:            true,
@@ -142,7 +168,7 @@ var ClickhouseSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"iam_role_arn": schema.StringAttribute{
-					MarkdownDescription: `IAM Role ARN`,
+					MarkdownDescription: `IAM role ARN`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,
@@ -166,7 +192,7 @@ var ClickhouseSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"s3_bucket_name": schema.StringAttribute{
-					MarkdownDescription: `S3 Bucket Name (destinations only)
+					MarkdownDescription: `S3 bucket name (destinations only)
 
     Name of bucket used for staging data load files`,
 					Required:  false,
@@ -175,7 +201,7 @@ var ClickhouseSchema = schema.Schema{
 					Sensitive: false,
 				},
 				"s3_bucket_region": schema.StringAttribute{
-					MarkdownDescription: `S3 Bucket Region (destinations only)`,
+					MarkdownDescription: `S3 bucket region (destinations only)`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,
@@ -277,6 +303,9 @@ type ClickhouseConf struct {
 	Container_name        string `mapstructure:"container_name" tfsdk:"container_name"`
 	Database              string `mapstructure:"database" tfsdk:"database"`
 	External_id           string `mapstructure:"external_id" tfsdk:"external_id"`
+	Gcs_bucket_name       string `mapstructure:"gcs_bucket_name" tfsdk:"gcs_bucket_name"`
+	Gcs_hmac_access_id    string `mapstructure:"gcs_hmac_access_id" tfsdk:"gcs_hmac_access_id"`
+	Gcs_hmac_secret       string `mapstructure:"gcs_hmac_secret" tfsdk:"gcs_hmac_secret"`
 	Hostname              string `mapstructure:"hostname" tfsdk:"hostname"`
 	Iam_role_arn          string `mapstructure:"iam_role_arn" tfsdk:"iam_role_arn"`
 	Password              string `mapstructure:"password" tfsdk:"password"`
@@ -377,6 +406,9 @@ func (r *ClickhouseConnectionResource) Create(ctx context.Context, req resource.
 		"container_name":        types.StringType,
 		"database":              types.StringType,
 		"external_id":           types.StringType,
+		"gcs_bucket_name":       types.StringType,
+		"gcs_hmac_access_id":    types.StringType,
+		"gcs_hmac_secret":       types.StringType,
 		"hostname":              types.StringType,
 		"iam_role_arn":          types.StringType,
 		"password":              types.StringType,
@@ -471,6 +503,9 @@ func (r *ClickhouseConnectionResource) Read(ctx context.Context, req resource.Re
 		"container_name":        types.StringType,
 		"database":              types.StringType,
 		"external_id":           types.StringType,
+		"gcs_bucket_name":       types.StringType,
+		"gcs_hmac_access_id":    types.StringType,
+		"gcs_hmac_secret":       types.StringType,
 		"hostname":              types.StringType,
 		"iam_role_arn":          types.StringType,
 		"password":              types.StringType,
@@ -575,6 +610,9 @@ func (r *ClickhouseConnectionResource) Update(ctx context.Context, req resource.
 		"container_name":        types.StringType,
 		"database":              types.StringType,
 		"external_id":           types.StringType,
+		"gcs_bucket_name":       types.StringType,
+		"gcs_hmac_access_id":    types.StringType,
+		"gcs_hmac_secret":       types.StringType,
 		"hostname":              types.StringType,
 		"iam_role_arn":          types.StringType,
 		"password":              types.StringType,

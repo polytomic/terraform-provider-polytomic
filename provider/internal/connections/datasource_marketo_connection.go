@@ -72,7 +72,7 @@ func (d *MarketoConnectionDataSource) Schema(ctx context.Context, req datasource
 						Computed:            true,
 					},
 					"rest_endpoint": schema.StringAttribute{
-						MarkdownDescription: `REST Endpoint`,
+						MarkdownDescription: `REST endpoint`,
 						Computed:            true,
 					},
 				},

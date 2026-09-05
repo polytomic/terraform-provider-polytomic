@@ -36,10 +36,11 @@ data "polytomic_googleanalytics_connection" "googleanalytics" {
 
 Read-Only:
 
-- `auth_method` (String) Authentication method Valid values: <code>oauth</code> (OAuth), <code>jwt</code> (Service Account). Default: <code>oauth</code>.
+- `auth_method` (String) Authentication method Valid values: <code>oauth</code> (OAuth), <code>jwt</code> (Service account). Default: <code>oauth</code>.
+- `auto_add_properties` (Boolean) Automatically add new properties
 - `custom_reports` (String) Custom reports
 
-    One report per line. Format is a report name followed by a comma-separated list of fields. e.g. myReport:field1
+    One report per line. Format is a report name followed by a comma-separated list of fields. e.g. newUsersByDay:date
 - `properties` (Attributes Set) (see [below for nested schema](#nestedatt--configuration--properties))
 - `user_email` (String) Connected user's email
 

@@ -51,7 +51,7 @@ var BotpressSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"personal_access_token": schema.StringAttribute{
-					MarkdownDescription: `Personal Access Token`,
+					MarkdownDescription: `Personal access token`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,

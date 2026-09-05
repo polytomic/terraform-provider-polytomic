@@ -36,8 +36,9 @@ data "polytomic_bigquery_connection" "bigquery" {
 
 Read-Only:
 
-- `auth_method` (String) Authentication method Valid values: <code>service_account_key</code> (Service Account Key), <code>workload_identity_federation</code> (Workload Identity Federation), <code>application_default_credentials</code> (Application Default Credentials). Default: <code>service_account_key</code>.
+- `auth_method` (String) Authentication method Valid values: <code>service_account_key</code> (Service account key), <code>workload_identity_federation</code> (Workload Identity Federation), <code>application_default_credentials</code> (Application Default Credentials). Default: <code>service_account_key</code>.
 - `bucket` (String) Google Cloud Storage bucket
+- `bulk_sync_staging_schema` (String) Staging schema name
 - `client_email` (String) Service account identity
 - `location` (String) Region or multi-region for query operations
 - `override_project_id` (String) Override project ID
@@ -45,7 +46,8 @@ Read-Only:
     Override the default project ID for cross-project access
 - `project_id` (String) Service account project ID
 - `structured_values_as_json` (Boolean) Write object and array values as JSON Default: <code>false</code>.
-- `use_extract` (Boolean) Use Extract for bulk sync from BigQuery
+- `use_bulk_sync_staging_schema` (Boolean) Use custom bulk sync staging schema Default: <code>false</code>.
+- `use_extract` (Boolean) Use extract for bulk sync from BigQuery
 - `wif_project_id` (String) Google Cloud project ID
 
 

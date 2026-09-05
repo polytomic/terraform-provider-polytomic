@@ -54,9 +54,9 @@ state before it will take effect on a destroy operation.
 #### Required
 
 - `client_id` (String) Client ID
-- `client_secret` (String, Sensitive) Client Secret
-- `merchant_token` (String, Sensitive) Merchant Token
-- `refresh_token` (String, Sensitive) Refresh Token
+- `client_secret` (String, Sensitive) Client secret
+- `merchant_token` (String, Sensitive) Merchant token
+- `refresh_token` (String, Sensitive) Refresh token
 - `region` (String) Valid values: <code>na</code> (North America), <code>eu</code> (Europe), <code>fe</code> (Far East).
 
 

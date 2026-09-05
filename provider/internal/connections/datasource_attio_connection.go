@@ -51,8 +51,16 @@ func (d *AttioConnectionDataSource) Schema(ctx context.Context, req datasource.S
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
+					"auth_method": schema.StringAttribute{
+						MarkdownDescription: `Authentication method Valid values: <code>oauth</code> (OAuth), <code>api_key</code> (API key).`,
+						Computed:            true,
+					},
 					"disable_list_entry_projection": schema.BoolAttribute{
 						MarkdownDescription: `Skip parent fields when pulling lists`,
+						Computed:            true,
+					},
+					"enable_attribute_history": schema.BoolAttribute{
+						MarkdownDescription: `Enable Attio attribute change history`,
 						Computed:            true,
 					},
 					"enable_webhooks": schema.BoolAttribute{
@@ -71,7 +79,9 @@ func (d *AttioConnectionDataSource) Schema(ctx context.Context, req datasource.S
 }
 
 type AttioDataSourceConf struct {
+	Auth_method                   string `mapstructure:"auth_method" tfsdk:"auth_method"`
 	Disable_list_entry_projection bool   `mapstructure:"disable_list_entry_projection" tfsdk:"disable_list_entry_projection"`
+	Enable_attribute_history      bool   `mapstructure:"enable_attribute_history" tfsdk:"enable_attribute_history"`
 	Enable_webhooks               bool   `mapstructure:"enable_webhooks" tfsdk:"enable_webhooks"`
 	Workspace_name                string `mapstructure:"workspace_name" tfsdk:"workspace_name"`
 }
@@ -111,7 +121,9 @@ func (d *AttioConnectionDataSource) Read(ctx context.Context, req datasource.Rea
 
 	var diags diag.Diagnostics
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"auth_method":                   types.StringType,
 		"disable_list_entry_projection": types.BoolType,
+		"enable_attribute_history":      types.BoolType,
 		"enable_webhooks":               types.BoolType,
 		"workspace_name":                types.StringType,
 	}, conf)

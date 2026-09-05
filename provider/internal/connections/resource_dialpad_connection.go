@@ -47,7 +47,7 @@ var DialpadSchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"api_key": schema.StringAttribute{
-					MarkdownDescription: `API Key`,
+					MarkdownDescription: `API key`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,
@@ -67,7 +67,7 @@ var DialpadSchema = schema.Schema{
 					},
 				},
 				"auth_method": schema.StringAttribute{
-					MarkdownDescription: `Authentication method Valid values: <code>api_key</code> (API Key), <code>oauth</code> (OAuth). Default: <code>api_key</code>.`,
+					MarkdownDescription: `Authentication method Valid values: <code>api_key</code> (API key), <code>oauth</code> (OAuth). Default: <code>api_key</code>.`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,

@@ -47,7 +47,7 @@ var GoogleanalyticsSchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"auth_method": schema.StringAttribute{
-					MarkdownDescription: `Authentication method Valid values: <code>oauth</code> (OAuth), <code>jwt</code> (Service Account). Default: <code>oauth</code>.`,
+					MarkdownDescription: `Authentication method Valid values: <code>oauth</code> (OAuth), <code>jwt</code> (Service account). Default: <code>oauth</code>.`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
@@ -55,6 +55,13 @@ var GoogleanalyticsSchema = schema.Schema{
 					Validators: []validator.String{
 						stringvalidator.OneOf("oauth", "jwt"),
 					},
+				},
+				"auto_add_properties": schema.BoolAttribute{
+					MarkdownDescription: `Automatically add new properties`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
 				},
 				"client_id": schema.StringAttribute{
 					MarkdownDescription: ``,
@@ -79,7 +86,7 @@ var GoogleanalyticsSchema = schema.Schema{
 				"custom_reports": schema.StringAttribute{
 					MarkdownDescription: `Custom reports
 
-    One report per line. Format is a report name followed by a comma-separated list of fields. e.g. myReport:field1`,
+    One report per line. Format is a report name followed by a comma-separated list of fields. e.g. newUsersByDay:date`,
 					Required:  false,
 					Optional:  true,
 					Computed:  true,
@@ -165,6 +172,7 @@ func (t *GoogleanalyticsConnectionResource) Schema(ctx context.Context, req reso
 
 type GoogleanalyticsConf struct {
 	Auth_method         string `mapstructure:"auth_method" tfsdk:"auth_method"`
+	Auto_add_properties bool   `mapstructure:"auto_add_properties" tfsdk:"auto_add_properties"`
 	Client_id           string `mapstructure:"client_id" tfsdk:"client_id"`
 	Client_secret       string `mapstructure:"client_secret" tfsdk:"client_secret"`
 	Custom_reports      string `mapstructure:"custom_reports" tfsdk:"custom_reports"`
@@ -252,6 +260,7 @@ func (r *GoogleanalyticsConnectionResource) Create(ctx context.Context, req reso
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"auth_method":         types.StringType,
+		"auto_add_properties": types.BoolType,
 		"client_id":           types.StringType,
 		"client_secret":       types.StringType,
 		"custom_reports":      types.StringType,
@@ -337,6 +346,7 @@ func (r *GoogleanalyticsConnectionResource) Read(ctx context.Context, req resour
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"auth_method":         types.StringType,
+		"auto_add_properties": types.BoolType,
 		"client_id":           types.StringType,
 		"client_secret":       types.StringType,
 		"custom_reports":      types.StringType,
@@ -432,6 +442,7 @@ func (r *GoogleanalyticsConnectionResource) Update(ctx context.Context, req reso
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"auth_method":         types.StringType,
+		"auto_add_properties": types.BoolType,
 		"client_id":           types.StringType,
 		"client_secret":       types.StringType,
 		"custom_reports":      types.StringType,

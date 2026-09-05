@@ -52,7 +52,7 @@ func (d *NetsuiteopenairConnectionDataSource) Schema(ctx context.Context, req da
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"api_namespace": schema.StringAttribute{
-						MarkdownDescription: `API Namespace`,
+						MarkdownDescription: `API namespace`,
 						Computed:            true,
 					},
 					"company_id": schema.StringAttribute{
@@ -60,11 +60,11 @@ func (d *NetsuiteopenairConnectionDataSource) Schema(ctx context.Context, req da
 						Computed:            true,
 					},
 					"per_day_rate_limit": schema.Int64Attribute{
-						MarkdownDescription: `Per Day Rate Limit`,
+						MarkdownDescription: `Per day rate limit`,
 						Computed:            true,
 					},
 					"per_minute_rate_limit": schema.Int64Attribute{
-						MarkdownDescription: `Per Minute Rate Limit`,
+						MarkdownDescription: `Per minute rate limit`,
 						Computed:            true,
 					},
 				},

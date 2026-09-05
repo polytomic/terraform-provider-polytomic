@@ -57,7 +57,7 @@ var PardotSchema = schema.Schema{
 					},
 				},
 				"business_unit_id": schema.StringAttribute{
-					MarkdownDescription: `Business Unit ID`,
+					MarkdownDescription: `Business unit ID`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,

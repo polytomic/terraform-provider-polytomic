@@ -52,7 +52,7 @@ func (d *ShopifyConnectionDataSource) Schema(ctx context.Context, req datasource
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"store": schema.StringAttribute{
-						MarkdownDescription: `Store Slug
+						MarkdownDescription: `Store slug
 
     e.g. 'example' if your store is example.myshopify.com`,
 						Computed: true,

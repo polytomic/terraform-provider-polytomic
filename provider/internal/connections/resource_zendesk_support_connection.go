@@ -94,7 +94,7 @@ var Zendesk_supportSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"domain": schema.StringAttribute{
-					MarkdownDescription: `Zendesk Subdomain`,
+					MarkdownDescription: `Zendesk subdomain`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,

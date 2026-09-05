@@ -52,7 +52,7 @@ func (d *AuturaConnectionDataSource) Schema(ctx context.Context, req datasource.
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"org_keys": schema.StringAttribute{
-						MarkdownDescription: `Org Keys
+						MarkdownDescription: `Org keys
 
     Comma-delimited list`,
 						Computed: true,

@@ -44,7 +44,7 @@ var NetsuiteopenairSchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"api_key": schema.StringAttribute{
-					MarkdownDescription: `API Key`,
+					MarkdownDescription: `API key`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
@@ -54,7 +54,7 @@ var NetsuiteopenairSchema = schema.Schema{
 					},
 				},
 				"api_namespace": schema.StringAttribute{
-					MarkdownDescription: `API Namespace`,
+					MarkdownDescription: `API namespace`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
@@ -71,7 +71,7 @@ var NetsuiteopenairSchema = schema.Schema{
 					},
 				},
 				"client_secret": schema.StringAttribute{
-					MarkdownDescription: `Client Secret`,
+					MarkdownDescription: `Client secret`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
@@ -88,14 +88,14 @@ var NetsuiteopenairSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"per_day_rate_limit": schema.Int64Attribute{
-					MarkdownDescription: `Per Day Rate Limit`,
+					MarkdownDescription: `Per day rate limit`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
 					Sensitive:           false,
 				},
 				"per_minute_rate_limit": schema.Int64Attribute{
-					MarkdownDescription: `Per Minute Rate Limit`,
+					MarkdownDescription: `Per minute rate limit`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,

@@ -54,7 +54,7 @@ state before it will take effect on a destroy operation.
 
 #### Required
 
-- `apikey` (String, Sensitive) API Key
-- `endpoint` (String) Enrichment Endpoint
+- `apikey` (String, Sensitive) API key
+- `endpoint` (String) Enrichment endpoint
 
 

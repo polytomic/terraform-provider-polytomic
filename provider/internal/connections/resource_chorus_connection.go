@@ -47,7 +47,7 @@ var ChorusSchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"api_key": schema.StringAttribute{
-					MarkdownDescription: `API Key`,
+					MarkdownDescription: `API key`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,
@@ -57,7 +57,7 @@ var ChorusSchema = schema.Schema{
 					},
 				},
 				"auth_method": schema.StringAttribute{
-					MarkdownDescription: `Authentication method Valid values: <code>basic</code> (Basic Auth), <code>api_key</code> (API Key). Default: <code>basic</code>.`,
+					MarkdownDescription: `Authentication method Valid values: <code>basic</code> (Basic auth), <code>api_key</code> (API key). Default: <code>basic</code>.`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,

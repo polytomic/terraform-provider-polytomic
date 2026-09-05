@@ -44,7 +44,7 @@ var CustomerioSchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"app_api_key": schema.StringAttribute{
-					MarkdownDescription: `App API Key`,
+					MarkdownDescription: `App API key`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
@@ -68,7 +68,7 @@ var CustomerioSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"tracking_api_key": schema.StringAttribute{
-					MarkdownDescription: `Tracking API Key`,
+					MarkdownDescription: `Tracking API key`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,

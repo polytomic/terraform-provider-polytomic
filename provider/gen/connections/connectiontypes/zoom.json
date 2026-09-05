@@ -1,0 +1,1 @@
+{"$schema":"https://json-schema.org/draft/2020-12/schema","properties":{"account_id":{"type":"string","title":"Account ID"},"client_id":{"type":"string","title":"Client ID"},"client_secret":{"type":"string","title":"Client secret","sensitive":true}},"type":"object","required":["account_id","client_id","client_secret"]}

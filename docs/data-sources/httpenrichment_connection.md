@@ -52,7 +52,7 @@ Read-Only:
 - `input_mappings` (Attributes Set) Input mappings
 
     List of input mappings to be used in the query. Each mapping should be a valid JSONPath expression. (see [below for nested schema](#nestedatt--configuration--input_mappings))
-- `method` (String) HTTP Method Valid values: <code>GET</code>, <code>POST</code>.
+- `method` (String) HTTP method Valid values: <code>GET</code>, <code>POST</code>.
 - `parameters` (Attributes Set) Query string parameters (see [below for nested schema](#nestedatt--configuration--parameters))
 - `url` (String) Base URL
 

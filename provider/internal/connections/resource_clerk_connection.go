@@ -44,7 +44,7 @@ var ClerkSchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"secret_key": schema.StringAttribute{
-					MarkdownDescription: `Secret Key`,
+					MarkdownDescription: `Secret key`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
