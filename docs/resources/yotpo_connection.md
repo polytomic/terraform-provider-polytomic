@@ -54,7 +54,7 @@ state before it will take effect on a destroy operation.
 #### Required
 
 - `secret` (String, Sensitive)
-- `store_id` (String) App Key
+- `store_id` (String) App key
 
     Also known as Client ID or Store ID.
 

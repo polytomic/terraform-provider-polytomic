@@ -52,7 +52,7 @@ func (d *Factors_aiConnectionDataSource) Schema(ctx context.Context, req datasou
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"account_domain": schema.StringAttribute{
-						MarkdownDescription: `Account Domain`,
+						MarkdownDescription: `Account domain`,
 						Computed:            true,
 					},
 				},

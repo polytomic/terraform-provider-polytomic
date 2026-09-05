@@ -60,7 +60,7 @@ func (d *Zendesk_supportConnectionDataSource) Schema(ctx context.Context, req da
 						Computed:            true,
 					},
 					"domain": schema.StringAttribute{
-						MarkdownDescription: `Zendesk Subdomain`,
+						MarkdownDescription: `Zendesk subdomain`,
 						Computed:            true,
 					},
 					"email": schema.StringAttribute{

@@ -53,8 +53,8 @@ state before it will take effect on a destroy operation.
 
 #### Required
 
-- `api_key` (String, Sensitive) API Key
-- `data_client_id` (String) Data Client ID
+- `api_key` (String, Sensitive) API key
+- `data_client_id` (String) Data client ID
 - `instance` (String) Valid values: <code>prod</code> (Production), <code>test</code> (Test). Default: <code>prod</code>.
 
 

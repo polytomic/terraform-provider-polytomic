@@ -56,15 +56,16 @@ state before it will take effect on a destroy operation.
 
 #### Required
 
-- `auth_method` (String) Authentication method Valid values: <code>oauth</code> (OAuth), <code>jwt</code> (Service Account). Default: <code>oauth</code>.
+- `auth_method` (String) Authentication method Valid values: <code>oauth</code> (OAuth), <code>jwt</code> (Service account). Default: <code>oauth</code>.
 
 #### Optional
 
+- `auto_add_properties` (Boolean) Automatically add new properties
 - `client_id` (String, Sensitive)
 - `client_secret` (String, Sensitive)
 - `custom_reports` (String) Custom reports
 
-    One report per line. Format is a report name followed by a comma-separated list of fields. e.g. myReport:field1
+    One report per line. Format is a report name followed by a comma-separated list of fields. e.g. newUsersByDay:date
 - `oauth_refresh_token` (String, Sensitive)
 - `properties` (Attributes Set) See [below for nested schema](#nestedatt--configuration--properties).
 - `service_account` (String, Sensitive) Service account key

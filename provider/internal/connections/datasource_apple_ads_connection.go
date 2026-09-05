@@ -59,6 +59,10 @@ func (d *Apple_adsConnectionDataSource) Schema(ctx context.Context, req datasour
 						MarkdownDescription: `Key ID`,
 						Computed:            true,
 					},
+					"org_id": schema.StringAttribute{
+						MarkdownDescription: `Organization`,
+						Computed:            true,
+					},
 					"public_key": schema.StringAttribute{
 						MarkdownDescription: `Public key`,
 						Computed:            true,
@@ -77,6 +81,7 @@ func (d *Apple_adsConnectionDataSource) Schema(ctx context.Context, req datasour
 type Apple_adsDataSourceConf struct {
 	Client_id  string `mapstructure:"client_id" tfsdk:"client_id"`
 	Key_id     string `mapstructure:"key_id" tfsdk:"key_id"`
+	Org_id     string `mapstructure:"org_id" tfsdk:"org_id"`
 	Public_key string `mapstructure:"public_key" tfsdk:"public_key"`
 	Team_id    string `mapstructure:"team_id" tfsdk:"team_id"`
 }
@@ -118,6 +123,7 @@ func (d *Apple_adsConnectionDataSource) Read(ctx context.Context, req datasource
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"client_id":  types.StringType,
 		"key_id":     types.StringType,
+		"org_id":     types.StringType,
 		"public_key": types.StringType,
 		"team_id":    types.StringType,
 	}, conf)

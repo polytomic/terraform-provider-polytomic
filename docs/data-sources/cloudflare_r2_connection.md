@@ -37,10 +37,10 @@ data "polytomic_cloudflare_r2_connection" "cloudflare_r2" {
 Read-Only:
 
 - `account_id` (String) Account ID
-- `aws_access_key_id` (String) Access Key ID
+- `aws_access_key_id` (String) Access key ID
 
     Access Key ID with read/write access to a bucket.
-- `bucket_name` (String) Bucket Name
+- `bucket_name` (String) Bucket name
 
     Bucket name (folder optional); ex: polytomic/dataset
 - `csv_has_headers` (Boolean) CSV files have headers

@@ -44,7 +44,7 @@ var TowbookSchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"api_token": schema.StringAttribute{
-					MarkdownDescription: `API Token`,
+					MarkdownDescription: `API token`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,

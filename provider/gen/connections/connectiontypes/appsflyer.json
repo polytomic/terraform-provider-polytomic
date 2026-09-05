@@ -1,1 +1,1 @@
-{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://github.com/polytomic/app/services/polytomic/backend/appsflyer/connection-conf","properties":{"api_key":{"type":"string","title":"API Key","sensitive":true},"app_id":{"type":"string","title":"App ID"}},"type":"object","required":["api_key","app_id"]}
+{"$schema":"https://json-schema.org/draft/2020-12/schema","properties":{"api_key":{"type":"string","title":"API key","sensitive":true},"app_id":{"type":"string","title":"App ID"}},"type":"object","required":["api_key","app_id"]}

@@ -54,7 +54,7 @@ var Amazon_selling_partnerSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"client_secret": schema.StringAttribute{
-					MarkdownDescription: `Client Secret`,
+					MarkdownDescription: `Client secret`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
@@ -64,7 +64,7 @@ var Amazon_selling_partnerSchema = schema.Schema{
 					},
 				},
 				"merchant_token": schema.StringAttribute{
-					MarkdownDescription: `Merchant Token`,
+					MarkdownDescription: `Merchant token`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
@@ -74,7 +74,7 @@ var Amazon_selling_partnerSchema = schema.Schema{
 					},
 				},
 				"refresh_token": schema.StringAttribute{
-					MarkdownDescription: `Refresh Token`,
+					MarkdownDescription: `Refresh token`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,

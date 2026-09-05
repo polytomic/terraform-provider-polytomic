@@ -53,7 +53,7 @@ state before it will take effect on a destroy operation.
 
 #### Required
 
-- `account_domain` (String) Account Domain
-- `api_key` (String, Sensitive) API Key
+- `account_domain` (String) Account domain
+- `api_key` (String, Sensitive) API key
 
 

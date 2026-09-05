@@ -54,11 +54,15 @@ state before it will take effect on a destroy operation.
 
 #### Required
 
-- `api_key` (String, Sensitive) Bot API Key
+- `api_key` (String, Sensitive) Bot API key
+
+#### Optional
+
+- `webhook_collections` (Boolean) Enable Slack event updates for bulk syncs
 
 #### Read-Only
 
-- `event_url` (String) Event Subscription Request URL
+- `event_url` (String) Event subscription request URL
 
     Used if ingesting Slack events.
 

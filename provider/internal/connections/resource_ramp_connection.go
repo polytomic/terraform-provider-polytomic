@@ -64,7 +64,7 @@ var RampSchema = schema.Schema{
 					},
 				},
 				"is_sandbox": schema.BoolAttribute{
-					MarkdownDescription: `Is Sandbox`,
+					MarkdownDescription: `Is sandbox`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,

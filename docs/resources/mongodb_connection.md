@@ -61,8 +61,8 @@ state before it will take effect on a destroy operation.
 #### Optional
 
 - `change_detection` (Boolean) Use change stream for bulk syncs Default: <code>false</code>.
-- `database` (String) Auth Database
-- `params` (String) Additional Parameters
+- `database` (String) Auth database
+- `params` (String) Additional parameters
 
     Additional connection parameters, formatted as a query string
 - `password` (String, Sensitive)

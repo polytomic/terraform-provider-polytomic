@@ -72,7 +72,7 @@ func (d *RedditadsConnectionDataSource) Schema(ctx context.Context, req datasour
 						Computed:            true,
 					},
 					"pixel_id": schema.StringAttribute{
-						MarkdownDescription: `Conversion Pixel ID
+						MarkdownDescription: `Conversion pixel ID
 
     Required if syncing conversion events to Reddit Ads.`,
 						Computed: true,

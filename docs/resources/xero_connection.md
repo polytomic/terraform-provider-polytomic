@@ -53,15 +53,20 @@ state before it will take effect on a destroy operation.
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
+#### Required
+
+- `connect_mode` (String) Connection method
+
+    Select client credentials to use a Xero custom connection. Valid values: <code>browser</code> (OAuth), <code>clientcredentials</code> (Client credentials). Default: <code>browser</code>.
+
 #### Optional
 
 - `client_id` (String, Sensitive) Client ID
-- `client_secret` (String, Sensitive) Client Secret
-- `connect_mode` (String) Default: browser. Select client credentials to use a Xero custom connection. Valid values: <code>browser</code> (OAuth), <code>clientcredentials</code> (Client credentials). Default: <code>browser</code>.
+- `client_secret` (String, Sensitive) Client secret
 
 #### Read-Only
 
-- `tenant_name` (String) Organization Name
-- `tenant_type` (String) Organization Type
+- `tenant_name` (String) Organization name
+- `tenant_type` (String) Organization type
 
 

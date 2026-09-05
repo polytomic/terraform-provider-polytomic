@@ -1,0 +1,1 @@
+{"$schema":"https://json-schema.org/draft/2020-12/schema","properties":{"api_key":{"type":"string","title":"API key","sensitive":true},"api_key_type":{"type":"string","enum":[{"value":"personal","label":"Personal"},{"value":"workspace","label":"Workspace"}],"title":"API key type","default":"personal"}},"type":"object","required":["api_key","api_key_type"]}

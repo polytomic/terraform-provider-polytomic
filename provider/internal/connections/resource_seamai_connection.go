@@ -44,7 +44,7 @@ var SeamaiSchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"apikey_id": schema.StringAttribute{
-					MarkdownDescription: `API Key ID`,
+					MarkdownDescription: `API key ID`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
@@ -54,7 +54,7 @@ var SeamaiSchema = schema.Schema{
 					},
 				},
 				"apikey_secret": schema.StringAttribute{
-					MarkdownDescription: `API Key Secret`,
+					MarkdownDescription: `API key secret`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,

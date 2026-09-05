@@ -52,11 +52,11 @@ func (d *AzureblobConnectionDataSource) Schema(ctx context.Context, req datasour
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"account_name": schema.StringAttribute{
-						MarkdownDescription: `Account Name`,
+						MarkdownDescription: `Account name`,
 						Computed:            true,
 					},
 					"auth_method": schema.StringAttribute{
-						MarkdownDescription: `Authentication method Valid values: <code>access_key</code> (Access Key), <code>client_credentials</code> (Client Credentials), <code>oauth</code> (Oauth). Default: <code>access_key</code>.`,
+						MarkdownDescription: `Authentication method Valid values: <code>access_key</code> (Access key), <code>client_credentials</code> (Client credentials), <code>oauth</code> (OAuth). Default: <code>access_key</code>.`,
 						Computed:            true,
 					},
 					"client_id": schema.StringAttribute{
@@ -64,7 +64,7 @@ func (d *AzureblobConnectionDataSource) Schema(ctx context.Context, req datasour
 						Computed:            true,
 					},
 					"container_name": schema.StringAttribute{
-						MarkdownDescription: `Container Name`,
+						MarkdownDescription: `Container name`,
 						Computed:            true,
 					},
 					"csv_has_headers": schema.BoolAttribute{

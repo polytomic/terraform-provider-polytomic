@@ -43,12 +43,33 @@ var Docker_hubSchema = schema.Schema{
 		},
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
+				"access_token": schema.StringAttribute{
+					MarkdownDescription: `Access token
+
+    Personal or organization access token; required to list more than 2000 tags per repository.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
+					},
+				},
 				"namespace": schema.StringAttribute{
 					MarkdownDescription: ``,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
 					Sensitive:           false,
+				},
+				"username": schema.StringAttribute{
+					MarkdownDescription: `Username or organization
+
+    Username when signing in with a personal access token; organization name when using an organization access token.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
 				},
 			},
 
@@ -77,7 +98,9 @@ func (t *Docker_hubConnectionResource) Schema(ctx context.Context, req resource.
 }
 
 type Docker_hubConf struct {
-	Namespace string `mapstructure:"namespace" tfsdk:"namespace"`
+	Access_token string `mapstructure:"access_token" tfsdk:"access_token"`
+	Namespace    string `mapstructure:"namespace" tfsdk:"namespace"`
+	Username     string `mapstructure:"username" tfsdk:"username"`
 }
 
 type Docker_hubConnectionResource struct {
@@ -154,7 +177,9 @@ func (r *Docker_hubConnectionResource) Create(ctx context.Context, req resource.
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"namespace": types.StringType,
+		"access_token": types.StringType,
+		"namespace":    types.StringType,
+		"username":     types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -225,7 +250,9 @@ func (r *Docker_hubConnectionResource) Read(ctx context.Context, req resource.Re
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"namespace": types.StringType,
+		"access_token": types.StringType,
+		"namespace":    types.StringType,
+		"username":     types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -306,7 +333,9 @@ func (r *Docker_hubConnectionResource) Update(ctx context.Context, req resource.
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"namespace": types.StringType,
+		"access_token": types.StringType,
+		"namespace":    types.StringType,
+		"username":     types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

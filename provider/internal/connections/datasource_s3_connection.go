@@ -52,13 +52,13 @@ func (d *S3ConnectionDataSource) Schema(ctx context.Context, req datasource.Sche
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"auth_mode": schema.StringAttribute{
-						MarkdownDescription: `Authentication Method
+						MarkdownDescription: `Authentication method
 
     How to authenticate with AWS. Defaults to Access Key and Secret Valid values: <code>access_key_and_secret</code> (Access Key and Secret), <code>iam_role</code> (IAM role). Default: <code>access_key_and_secret</code>.`,
 						Computed: true,
 					},
 					"aws_access_key_id": schema.StringAttribute{
-						MarkdownDescription: `AWS Access Key ID
+						MarkdownDescription: `AWS access key ID
 
     Access Key ID with read/write access to a bucket.`,
 						Computed: true,
@@ -84,7 +84,7 @@ func (d *S3ConnectionDataSource) Schema(ctx context.Context, req datasource.Sche
 						Computed: true,
 					},
 					"event_queue_arn": schema.StringAttribute{
-						MarkdownDescription: `Event Queue ARN
+						MarkdownDescription: `Event queue ARN
 
     ARN of the SQS queue receiving S3 event notifications`,
 						Computed: true,
@@ -96,7 +96,7 @@ func (d *S3ConnectionDataSource) Schema(ctx context.Context, req datasource.Sche
 						Computed: true,
 					},
 					"iam_role_arn": schema.StringAttribute{
-						MarkdownDescription: `IAM Role ARN`,
+						MarkdownDescription: `IAM role ARN`,
 						Computed:            true,
 					},
 					"is_directory_snapshot": schema.BoolAttribute{
@@ -109,14 +109,20 @@ func (d *S3ConnectionDataSource) Schema(ctx context.Context, req datasource.Sche
     Treat the files as a single table. Default: <code>false</code>.`,
 						Computed: true,
 					},
+					"propagate_file_deletions": schema.BoolAttribute{
+						MarkdownDescription: `Propagate file deletion events
+
+    When a file is deleted from the bucket, soft-delete the corresponding records in supported destinations on the next sync. Requires the record key to be captured from the file path.`,
+						Computed: true,
+					},
 					"s3_bucket_name": schema.StringAttribute{
-						MarkdownDescription: `S3 Bucket Name
+						MarkdownDescription: `S3 bucket name
 
     Bucket name (folder optional); ex: s3://polytomic/dataset`,
 						Computed: true,
 					},
 					"s3_bucket_region": schema.StringAttribute{
-						MarkdownDescription: `S3 Bucket Region`,
+						MarkdownDescription: `S3 bucket region`,
 						Computed:            true,
 					},
 					"single_table_file_format": schema.StringAttribute{
@@ -159,6 +165,7 @@ type S3DataSourceConf struct {
 	Iam_role_arn               string   `mapstructure:"iam_role_arn" tfsdk:"iam_role_arn"`
 	Is_directory_snapshot      bool     `mapstructure:"is_directory_snapshot" tfsdk:"is_directory_snapshot"`
 	Is_single_table            bool     `mapstructure:"is_single_table" tfsdk:"is_single_table"`
+	Propagate_file_deletions   bool     `mapstructure:"propagate_file_deletions" tfsdk:"propagate_file_deletions"`
 	S3_bucket_name             string   `mapstructure:"s3_bucket_name" tfsdk:"s3_bucket_name"`
 	S3_bucket_region           string   `mapstructure:"s3_bucket_region" tfsdk:"s3_bucket_region"`
 	Single_table_file_format   string   `mapstructure:"single_table_file_format" tfsdk:"single_table_file_format"`
@@ -213,6 +220,7 @@ func (d *S3ConnectionDataSource) Read(ctx context.Context, req datasource.ReadRe
 		"iam_role_arn":               types.StringType,
 		"is_directory_snapshot":      types.BoolType,
 		"is_single_table":            types.BoolType,
+		"propagate_file_deletions":   types.BoolType,
 		"s3_bucket_name":             types.StringType,
 		"s3_bucket_region":           types.StringType,
 		"single_table_file_format":   types.StringType,

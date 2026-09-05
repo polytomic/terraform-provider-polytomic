@@ -47,7 +47,7 @@ var RedshiftSchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"auth_mode": schema.StringAttribute{
-					MarkdownDescription: `Authentication Method
+					MarkdownDescription: `Authentication method
 
     How to authenticate with AWS. Defaults to Access Key and Secret Valid values: <code>access_key_and_secret</code> (Access Key and Secret), <code>iam_role</code> (IAM role). Default: <code>access_key_and_secret</code>.`,
 					Required:  true,
@@ -59,7 +59,7 @@ var RedshiftSchema = schema.Schema{
 					},
 				},
 				"aws_access_key_id": schema.StringAttribute{
-					MarkdownDescription: `AWS Access Key ID (destinations only)
+					MarkdownDescription: `AWS access key ID (destinations only)
 
     Access Key ID with read/write access to a bucket. More info: https://docs.polytomic.com/docs/redshift`,
 					Required:  false,
@@ -68,7 +68,7 @@ var RedshiftSchema = schema.Schema{
 					Sensitive: false,
 				},
 				"aws_secret_access_key": schema.StringAttribute{
-					MarkdownDescription: `AWS Secret Access Key (destinations only)`,
+					MarkdownDescription: `AWS secret access key (destinations only)`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,
@@ -115,7 +115,7 @@ var RedshiftSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"iam_role_arn": schema.StringAttribute{
-					MarkdownDescription: `IAM Role ARN`,
+					MarkdownDescription: `IAM role ARN`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,
@@ -139,7 +139,7 @@ var RedshiftSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"s3_bucket_name": schema.StringAttribute{
-					MarkdownDescription: `S3 Bucket Name (destinations only)
+					MarkdownDescription: `S3 bucket name (destinations only)
 
     Name of bucket used for staging data load files`,
 					Required:  false,
@@ -148,7 +148,7 @@ var RedshiftSchema = schema.Schema{
 					Sensitive: false,
 				},
 				"s3_bucket_region": schema.StringAttribute{
-					MarkdownDescription: `S3 Bucket Region (destinations only)
+					MarkdownDescription: `S3 bucket region (destinations only)
 
     Region of bucket. Note: must match region of redshift server`,
 					Required:  false,

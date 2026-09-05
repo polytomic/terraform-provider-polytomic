@@ -47,7 +47,7 @@ var SalesloftSchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"api_key": schema.StringAttribute{
-					MarkdownDescription: `API Key`,
+					MarkdownDescription: `API key`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,
@@ -67,7 +67,7 @@ var SalesloftSchema = schema.Schema{
 					},
 				},
 				"auth_method": schema.StringAttribute{
-					MarkdownDescription: `Authentication method Valid values: <code>oauth</code> (OAuth), <code>api_key</code> (API Key). Default: <code>oauth</code>.`,
+					MarkdownDescription: `Authentication method Valid values: <code>oauth</code> (OAuth), <code>api_key</code> (API key). Default: <code>oauth</code>.`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,

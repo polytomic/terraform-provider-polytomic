@@ -52,13 +52,13 @@ func (d *DatabricksConnectionDataSource) Schema(ctx context.Context, req datasou
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"auth_mode": schema.StringAttribute{
-						MarkdownDescription: `AWS Authentication Method
+						MarkdownDescription: `AWS authentication method
 
     How to authenticate with AWS. Defaults to Access Key and Secret Valid values: <code>access_key_and_secret</code> (Access Key and Secret), <code>iam_role</code> (IAM role). Default: <code>access_key_and_secret</code>.`,
 						Computed: true,
 					},
 					"aws_access_key_id": schema.StringAttribute{
-						MarkdownDescription: `AWS Access Key ID (destinations only)
+						MarkdownDescription: `AWS access key ID (destinations only)
 
     See https://docs.polytomic.com/docs/databricks-connections#writing-to-databricks`,
 						Computed: true,
@@ -68,7 +68,7 @@ func (d *DatabricksConnectionDataSource) Schema(ctx context.Context, req datasou
 						Computed:            true,
 					},
 					"azure_account_name": schema.StringAttribute{
-						MarkdownDescription: `Storage Account Name (destination support only)
+						MarkdownDescription: `Storage account name (destination support only)
 
     The account name of the storage account`,
 						Computed: true,
@@ -78,7 +78,7 @@ func (d *DatabricksConnectionDataSource) Schema(ctx context.Context, req datasou
 						Computed:            true,
 					},
 					"cloud_provider": schema.StringAttribute{
-						MarkdownDescription: `Cloud Provider (destination support only) Valid values: <code>aws</code> (AWS), <code>azure</code> (Azure).`,
+						MarkdownDescription: `Cloud provider (destination support only) Valid values: <code>aws</code> (AWS), <code>azure</code> (Azure).`,
 						Computed:            true,
 					},
 					"concurrent_queries": schema.Int64Attribute{
@@ -86,13 +86,13 @@ func (d *DatabricksConnectionDataSource) Schema(ctx context.Context, req datasou
 						Computed:            true,
 					},
 					"container_name": schema.StringAttribute{
-						MarkdownDescription: `Storage Container Name (destination support only)
+						MarkdownDescription: `Storage container name (destination support only)
 
     The container which we will stage files in`,
 						Computed: true,
 					},
 					"databricks_auth_mode": schema.StringAttribute{
-						MarkdownDescription: `Authentication Method Valid values: <code>access_token</code> (Access Token), <code>oauth_service_principal</code> (OAuth Service Principal). Default: <code>access_token</code>.`,
+						MarkdownDescription: `Authentication method Valid values: <code>access_token</code> (Access Token), <code>oauth_service_principal</code> (OAuth Service Principal). Default: <code>access_token</code>.`,
 						Computed:            true,
 					},
 					"deleted_file_retention_days": schema.Int64Attribute{
@@ -114,11 +114,11 @@ func (d *DatabricksConnectionDataSource) Schema(ctx context.Context, req datasou
 						Computed: true,
 					},
 					"http_path": schema.StringAttribute{
-						MarkdownDescription: `HTTP Path Default: <code>/sql</code>.`,
+						MarkdownDescription: `HTTP path Default: <code>/sql</code>.`,
 						Computed:            true,
 					},
 					"iam_role_arn": schema.StringAttribute{
-						MarkdownDescription: `IAM Role ARN`,
+						MarkdownDescription: `IAM role ARN`,
 						Computed:            true,
 					},
 					"log_file_retention_days": schema.Int64Attribute{
@@ -130,23 +130,23 @@ func (d *DatabricksConnectionDataSource) Schema(ctx context.Context, req datasou
 						Computed:            true,
 					},
 					"s3_bucket_name": schema.StringAttribute{
-						MarkdownDescription: `S3 Bucket Name (destinations only)
+						MarkdownDescription: `S3 bucket name (destinations only)
 
     Name of bucket used for staging data load files`,
 						Computed: true,
 					},
 					"s3_bucket_region": schema.StringAttribute{
-						MarkdownDescription: `S3 Bucket Region (destinations only)
+						MarkdownDescription: `S3 bucket region (destinations only)
 
     Region of bucket`,
 						Computed: true,
 					},
 					"server_hostname": schema.StringAttribute{
-						MarkdownDescription: `Server Hostname`,
+						MarkdownDescription: `Server hostname`,
 						Computed:            true,
 					},
 					"service_principal_id": schema.StringAttribute{
-						MarkdownDescription: `Service Principal ID`,
+						MarkdownDescription: `Service principal ID`,
 						Computed:            true,
 					},
 					"set_retention_properties": schema.BoolAttribute{

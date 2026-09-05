@@ -57,7 +57,7 @@ var XeroSchema = schema.Schema{
 					},
 				},
 				"client_secret": schema.StringAttribute{
-					MarkdownDescription: `Client Secret`,
+					MarkdownDescription: `Client secret`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,
@@ -67,24 +67,26 @@ var XeroSchema = schema.Schema{
 					},
 				},
 				"connect_mode": schema.StringAttribute{
-					MarkdownDescription: `Default: browser. Select client credentials to use a Xero custom connection. Valid values: <code>browser</code> (OAuth), <code>clientcredentials</code> (Client credentials). Default: <code>browser</code>.`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
+					MarkdownDescription: `Connection method
+
+    Select client credentials to use a Xero custom connection. Valid values: <code>browser</code> (OAuth), <code>clientcredentials</code> (Client credentials). Default: <code>browser</code>.`,
+					Required:  true,
+					Optional:  false,
+					Computed:  false,
+					Sensitive: false,
 					Validators: []validator.String{
 						stringvalidator.OneOf("browser", "clientcredentials"),
 					},
 				},
 				"tenant_name": schema.StringAttribute{
-					MarkdownDescription: `Organization Name`,
+					MarkdownDescription: `Organization name`,
 					Required:            false,
 					Optional:            false,
 					Computed:            true,
 					Sensitive:           false,
 				},
 				"tenant_type": schema.StringAttribute{
-					MarkdownDescription: `Organization Type`,
+					MarkdownDescription: `Organization type`,
 					Required:            false,
 					Optional:            false,
 					Computed:            true,

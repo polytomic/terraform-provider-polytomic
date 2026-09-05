@@ -80,13 +80,20 @@ var MsadsSchema = schema.Schema{
 				},
 				"auth_method": schema.StringAttribute{
 					MarkdownDescription: `Authentication method Valid values: <code>microsoft</code> (Microsoft), <code>google</code> (Google). Default: <code>microsoft</code>.`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
 					Sensitive:           false,
 					Validators: []validator.String{
 						stringvalidator.OneOf("microsoft", "google"),
 					},
+				},
+				"auto_add_accounts": schema.BoolAttribute{
+					MarkdownDescription: `Automatically add new accounts`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
 				},
 				"client_id": schema.StringAttribute{
 					MarkdownDescription: ``,
@@ -158,6 +165,7 @@ type MsadsConf struct {
 	} `mapstructure:"accounts" tfsdk:"accounts"`
 	Agree_customer_match_terms bool   `mapstructure:"agree_customer_match_terms" tfsdk:"agree_customer_match_terms"`
 	Auth_method                string `mapstructure:"auth_method" tfsdk:"auth_method"`
+	Auto_add_accounts          bool   `mapstructure:"auto_add_accounts" tfsdk:"auto_add_accounts"`
 	Client_id                  string `mapstructure:"client_id" tfsdk:"client_id"`
 	Client_secret              string `mapstructure:"client_secret" tfsdk:"client_secret"`
 	Oauth_refresh_token        string `mapstructure:"oauth_refresh_token" tfsdk:"oauth_refresh_token"`
@@ -248,6 +256,7 @@ func (r *MsadsConnectionResource) Create(ctx context.Context, req resource.Creat
 		},
 		"agree_customer_match_terms": types.BoolType,
 		"auth_method":                types.StringType,
+		"auto_add_accounts":          types.BoolType,
 		"client_id":                  types.StringType,
 		"client_secret":              types.StringType,
 		"oauth_refresh_token":        types.StringType,
@@ -332,6 +341,7 @@ func (r *MsadsConnectionResource) Read(ctx context.Context, req resource.ReadReq
 		},
 		"agree_customer_match_terms": types.BoolType,
 		"auth_method":                types.StringType,
+		"auto_add_accounts":          types.BoolType,
 		"client_id":                  types.StringType,
 		"client_secret":              types.StringType,
 		"oauth_refresh_token":        types.StringType,
@@ -426,6 +436,7 @@ func (r *MsadsConnectionResource) Update(ctx context.Context, req resource.Updat
 		},
 		"agree_customer_match_terms": types.BoolType,
 		"auth_method":                types.StringType,
+		"auto_add_accounts":          types.BoolType,
 		"client_id":                  types.StringType,
 		"client_secret":              types.StringType,
 		"oauth_refresh_token":        types.StringType,

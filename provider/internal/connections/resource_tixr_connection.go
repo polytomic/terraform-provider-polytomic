@@ -44,7 +44,7 @@ var TixrSchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"client_private_key": schema.StringAttribute{
-					MarkdownDescription: `Client Private Key
+					MarkdownDescription: `Client private key
 
     e.g. MDAwMA==`,
 					Required:  true,
@@ -56,7 +56,7 @@ var TixrSchema = schema.Schema{
 					},
 				},
 				"client_secret": schema.StringAttribute{
-					MarkdownDescription: `Client Secret`,
+					MarkdownDescription: `Client secret`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,

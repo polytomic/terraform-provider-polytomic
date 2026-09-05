@@ -44,7 +44,7 @@ var ShippoSchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"api_key": schema.StringAttribute{
-					MarkdownDescription: `API Key`,
+					MarkdownDescription: `API key`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
@@ -52,6 +52,13 @@ var ShippoSchema = schema.Schema{
 					PlanModifiers: []planmodifier.String{
 						stringplanmodifier.UseStateForUnknown(),
 					},
+				},
+				"enable_webhooks": schema.BoolAttribute{
+					MarkdownDescription: `Enable Shippo webhook updates for bulk syncs`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
 				},
 			},
 
@@ -80,7 +87,8 @@ func (t *ShippoConnectionResource) Schema(ctx context.Context, req resource.Sche
 }
 
 type ShippoConf struct {
-	Api_key string `mapstructure:"api_key" tfsdk:"api_key"`
+	Api_key         string `mapstructure:"api_key" tfsdk:"api_key"`
+	Enable_webhooks bool   `mapstructure:"enable_webhooks" tfsdk:"enable_webhooks"`
 }
 
 type ShippoConnectionResource struct {
@@ -157,7 +165,8 @@ func (r *ShippoConnectionResource) Create(ctx context.Context, req resource.Crea
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"api_key": types.StringType,
+		"api_key":         types.StringType,
+		"enable_webhooks": types.BoolType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -228,7 +237,8 @@ func (r *ShippoConnectionResource) Read(ctx context.Context, req resource.ReadRe
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"api_key": types.StringType,
+		"api_key":         types.StringType,
+		"enable_webhooks": types.BoolType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -309,7 +319,8 @@ func (r *ShippoConnectionResource) Update(ctx context.Context, req resource.Upda
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"api_key": types.StringType,
+		"api_key":         types.StringType,
+		"enable_webhooks": types.BoolType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

@@ -36,7 +36,7 @@ data "polytomic_strackr_connection" "strackr" {
 
 Read-Only:
 
-- `currency_type` (String) Currency Type Valid values: <code>EUR</code>, <code>USD</code>, <code>CAD</code>, <code>GBP</code>, <code>RUB</code>, <code>SEK</code>, <code>AUD</code>, <code>INR</code>, <code>NOK</code>, <code>DKK</code>. Default: <code>USD</code>.
-- `linkbuilder_customs_text` (String) Linkbuilder Customs Text
+- `currency_type` (String) Currency type Valid values: <code>EUR</code>, <code>USD</code>, <code>CAD</code>, <code>GBP</code>, <code>RUB</code>, <code>SEK</code>, <code>AUD</code>, <code>INR</code>, <code>NOK</code>, <code>DKK</code>. Default: <code>USD</code>.
+- `linkbuilder_customs_text` (String) Linkbuilder customs text
 
 

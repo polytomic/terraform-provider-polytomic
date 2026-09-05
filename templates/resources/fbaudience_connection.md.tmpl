@@ -47,11 +47,12 @@ state before it will take effect on a destroy operation.
 
 #### Required
 
-- `auth_method` (String) Authentication Method Valid values: <code>oauth</code> (Oauth), <code>token</code> (Token). Default: <code>oauth</code>.
+- `auth_method` (String) Authentication method Valid values: <code>oauth</code> (OAuth), <code>token</code> (Token). Default: <code>oauth</code>.
 
 #### Optional
 
 - `accounts` (Attributes Set) See [below for nested schema](#nestedatt--configuration--accounts).
+- `auto_add_accounts` (Boolean) Automatically add new accounts
 - `byo_app_token` (String, Sensitive) Token
 - `graph_api_version` (String) Graph API version Default: <code>v24.0</code>.
 

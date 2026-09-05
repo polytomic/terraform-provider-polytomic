@@ -36,15 +36,15 @@ data "polytomic_amazon_keyspaces_connection" "amazon_keyspaces" {
 
 Read-Only:
 
-- `access_key_id` (String) AWS Access Key ID
-- `auth_method` (String) Authentication Method Valid values: <code>access_key_and_secret</code> (Access Key and Secret), <code>iam_role</code> (IAM Role), <code>service_credentials</code> (Service-Specific Credentials). Default: <code>access_key_and_secret</code>.
+- `access_key_id` (String) AWS access key ID
+- `auth_method` (String) Authentication method Valid values: <code>access_key_and_secret</code> (Access Key and Secret), <code>iam_role</code> (IAM Role), <code>service_credentials</code> (Service-Specific Credentials). Default: <code>access_key_and_secret</code>.
 - `change_detection` (Boolean) Use Amazon Keyspaces CDC streams for bulk syncs Default: <code>false</code>.
 - `external_id` (String) External ID
 
     External ID for the IAM role
-- `iam_role_arn` (String) IAM Role ARN
+- `iam_role_arn` (String) IAM role ARN
 - `managed_streams` (Boolean) Let Polytomic manage Amazon Keyspaces CDC stream settings
-- `region` (String) AWS Region
+- `region` (String) AWS region
 - `username` (String)
 
 

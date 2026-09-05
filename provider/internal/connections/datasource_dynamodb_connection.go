@@ -52,7 +52,7 @@ func (d *DynamodbConnectionDataSource) Schema(ctx context.Context, req datasourc
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"auth_mode": schema.StringAttribute{
-						MarkdownDescription: `Authentication Method
+						MarkdownDescription: `Authentication method
 
     How to authenticate with AWS. Defaults to Access Key and Secret Valid values: <code>access_key_and_secret</code> (Access Key and Secret), <code>iam_role</code> (IAM role). Default: <code>access_key_and_secret</code>.`,
 						Computed: true,
@@ -72,11 +72,11 @@ func (d *DynamodbConnectionDataSource) Schema(ctx context.Context, req datasourc
 						Computed: true,
 					},
 					"iam_role_arn": schema.StringAttribute{
-						MarkdownDescription: `IAM Role ARN`,
+						MarkdownDescription: `IAM role ARN`,
 						Computed:            true,
 					},
 					"managed_streams": schema.BoolAttribute{
-						MarkdownDescription: `Let Polytomic manage DynamoDB Stream settings`,
+						MarkdownDescription: `Let Polytomic manage DynamoDB stream settings`,
 						Computed:            true,
 					},
 					"region": schema.StringAttribute{

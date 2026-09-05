@@ -52,7 +52,7 @@ func (d *AwsopensearchConnectionDataSource) Schema(ctx context.Context, req data
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"aws_access_key_id": schema.StringAttribute{
-						MarkdownDescription: `AWS Access Key ID`,
+						MarkdownDescription: `AWS access key ID`,
 						Computed:            true,
 					},
 					"aws_user": schema.StringAttribute{

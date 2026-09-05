@@ -54,9 +54,15 @@ state before it will take effect on a destroy operation.
 #### Optional
 
 - `accounts` (Attributes Set) See [below for nested schema](#nestedatt--configuration--accounts).
+- `blanket_user_consent` (Boolean) All transmitted users consented to ad personalization and information sharing
+
+    Causes Data Manager conversion uploads to signal that every transmitted user has accepted ad personalization and data sharing policies. This includes users in more advertising functions but requires you to have obtained express consent.
 - `client_id` (String, Sensitive)
 - `client_secret` (String, Sensitive)
 - `oauth_refresh_token` (String, Sensitive)
+- `use_data_manager_api` (Boolean) Use Data Manager API
+
+    Authorize this connection for the Google Data Manager API used for conversion uploads.
 
 #### Read-Only
 

@@ -36,10 +36,10 @@ data "polytomic_redshift_connection" "redshift" {
 
 Read-Only:
 
-- `auth_mode` (String) Authentication Method
+- `auth_mode` (String) Authentication method
 
     How to authenticate with AWS. Defaults to Access Key and Secret Valid values: <code>access_key_and_secret</code> (Access Key and Secret), <code>iam_role</code> (IAM role). Default: <code>access_key_and_secret</code>.
-- `aws_access_key_id` (String) AWS Access Key ID (destinations only)
+- `aws_access_key_id` (String) AWS access key ID (destinations only)
 
     Access Key ID with read/write access to a bucket. More info: https://docs.polytomic.com/docs/redshift
 - `aws_user` (String) User ARN
@@ -49,12 +49,12 @@ Read-Only:
 
     External ID for the IAM role
 - `hostname` (String)
-- `iam_role_arn` (String) IAM Role ARN
+- `iam_role_arn` (String) IAM role ARN
 - `port` (Number) Default: <code>5439</code>.
-- `s3_bucket_name` (String) S3 Bucket Name (destinations only)
+- `s3_bucket_name` (String) S3 bucket name (destinations only)
 
     Name of bucket used for staging data load files
-- `s3_bucket_region` (String) S3 Bucket Region (destinations only)
+- `s3_bucket_region` (String) S3 bucket region (destinations only)
 
     Region of bucket. Note: must match region of redshift server
 - `ssh` (Boolean) Connect over SSH tunnel

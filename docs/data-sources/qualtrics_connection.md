@@ -36,6 +36,6 @@ data "polytomic_qualtrics_connection" "qualtrics" {
 
 Read-Only:
 
-- `data_center` (String) Data Center Valid values: <code>portland</code> (Portland, Oregon, USA), <code>washington_dc</code> (Washington, DC, USA), <code>arizona</code> (Arizona, USA (az1)), <code>us_government</code> (US Government), <code>canada</code> (Canada), <code>eu</code> (EU), <code>london</code> (London, UK), <code>singapore</code> (Singapore), <code>sydney</code> (Sydney, Australia), <code>tokyo</code> (Tokyo, Japan). Default: <code>portland</code>.
+- `data_center` (String) Data center Valid values: <code>portland</code> (Portland, Oregon, USA), <code>washington_dc</code> (Washington, DC, USA), <code>arizona</code> (Arizona, USA (az1)), <code>us_government</code> (US Government), <code>canada</code> (Canada), <code>eu</code> (EU), <code>london</code> (London, UK), <code>singapore</code> (Singapore), <code>sydney</code> (Sydney, Australia), <code>tokyo</code> (Tokyo, Japan). Default: <code>portland</code>.
 
 

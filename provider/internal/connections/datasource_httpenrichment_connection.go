@@ -226,7 +226,7 @@ func (d *HttpenrichmentConnectionDataSource) Schema(ctx context.Context, req dat
 						},
 					},
 					"method": schema.StringAttribute{
-						MarkdownDescription: `HTTP Method Valid values: <code>GET</code>, <code>POST</code>.`,
+						MarkdownDescription: `HTTP method Valid values: <code>GET</code>, <code>POST</code>.`,
 						Computed:            true,
 					},
 					"parameters": schema.SetNestedAttribute{

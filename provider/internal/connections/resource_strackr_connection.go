@@ -58,7 +58,7 @@ var StrackrSchema = schema.Schema{
 					},
 				},
 				"api_key": schema.StringAttribute{
-					MarkdownDescription: `API Key`,
+					MarkdownDescription: `API key`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
@@ -68,7 +68,7 @@ var StrackrSchema = schema.Schema{
 					},
 				},
 				"currency_type": schema.StringAttribute{
-					MarkdownDescription: `Currency Type Valid values: <code>EUR</code>, <code>USD</code>, <code>CAD</code>, <code>GBP</code>, <code>RUB</code>, <code>SEK</code>, <code>AUD</code>, <code>INR</code>, <code>NOK</code>, <code>DKK</code>. Default: <code>USD</code>.`,
+					MarkdownDescription: `Currency type Valid values: <code>EUR</code>, <code>USD</code>, <code>CAD</code>, <code>GBP</code>, <code>RUB</code>, <code>SEK</code>, <code>AUD</code>, <code>INR</code>, <code>NOK</code>, <code>DKK</code>. Default: <code>USD</code>.`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
@@ -78,7 +78,7 @@ var StrackrSchema = schema.Schema{
 					},
 				},
 				"linkbuilder_customs_text": schema.StringAttribute{
-					MarkdownDescription: `Linkbuilder Customs Text`,
+					MarkdownDescription: `Linkbuilder customs text`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,

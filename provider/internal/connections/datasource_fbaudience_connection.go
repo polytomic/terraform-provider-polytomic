@@ -68,7 +68,11 @@ func (d *FbaudienceConnectionDataSource) Schema(ctx context.Context, req datasou
 						},
 					},
 					"auth_method": schema.StringAttribute{
-						MarkdownDescription: `Authentication Method Valid values: <code>oauth</code> (Oauth), <code>token</code> (Token). Default: <code>oauth</code>.`,
+						MarkdownDescription: `Authentication method Valid values: <code>oauth</code> (OAuth), <code>token</code> (Token). Default: <code>oauth</code>.`,
+						Computed:            true,
+					},
+					"auto_add_accounts": schema.BoolAttribute{
+						MarkdownDescription: `Automatically add new accounts`,
 						Computed:            true,
 					},
 					"graph_api_version": schema.StringAttribute{
@@ -92,6 +96,7 @@ type FbaudienceDataSourceConf struct {
 		Value string `mapstructure:"value" tfsdk:"value"`
 	} `mapstructure:"accounts" tfsdk:"accounts"`
 	Auth_method       string `mapstructure:"auth_method" tfsdk:"auth_method"`
+	Auto_add_accounts bool   `mapstructure:"auto_add_accounts" tfsdk:"auto_add_accounts"`
 	Graph_api_version string `mapstructure:"graph_api_version" tfsdk:"graph_api_version"`
 	User_name         string `mapstructure:"user_name" tfsdk:"user_name"`
 }
@@ -140,6 +145,7 @@ func (d *FbaudienceConnectionDataSource) Read(ctx context.Context, req datasourc
 			},
 		},
 		"auth_method":       types.StringType,
+		"auto_add_accounts": types.BoolType,
 		"graph_api_version": types.StringType,
 		"user_name":         types.StringType,
 	}, conf)

@@ -53,7 +53,7 @@ state before it will take effect on a destroy operation.
 
 #### Optional
 
-- `api_key` (String, Sensitive) API Key
+- `api_key` (String, Sensitive) API key
 
     Your Circle API key
 

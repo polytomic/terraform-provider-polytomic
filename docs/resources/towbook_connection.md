@@ -53,6 +53,6 @@ state before it will take effect on a destroy operation.
 
 #### Required
 
-- `api_token` (String, Sensitive) API Token
+- `api_token` (String, Sensitive) API token
 
 

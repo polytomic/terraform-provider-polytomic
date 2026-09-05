@@ -47,7 +47,7 @@ var CustomeriowarehouseexportsSchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"auth_mode": schema.StringAttribute{
-					MarkdownDescription: `Authentication Method
+					MarkdownDescription: `Authentication method
 
     How to authenticate with AWS. Defaults to Access Key and Secret Valid values: <code>access_key_and_secret</code> (Access Key and Secret), <code>iam_role</code> (IAM role). Default: <code>access_key_and_secret</code>.`,
 					Required:  true,
@@ -59,7 +59,7 @@ var CustomeriowarehouseexportsSchema = schema.Schema{
 					},
 				},
 				"aws_access_key_id": schema.StringAttribute{
-					MarkdownDescription: `AWS Access Key ID
+					MarkdownDescription: `AWS access key ID
 
     Access Key ID with read/write access to a bucket.`,
 					Required:  false,
@@ -68,7 +68,7 @@ var CustomeriowarehouseexportsSchema = schema.Schema{
 					Sensitive: false,
 				},
 				"aws_secret_access_key": schema.StringAttribute{
-					MarkdownDescription: `AWS Secret Access Key`,
+					MarkdownDescription: `AWS secret access key`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,
@@ -94,14 +94,14 @@ var CustomeriowarehouseexportsSchema = schema.Schema{
 					Sensitive: false,
 				},
 				"iam_role_arn": schema.StringAttribute{
-					MarkdownDescription: `IAM Role ARN`,
+					MarkdownDescription: `IAM role ARN`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,
 					Sensitive:           false,
 				},
 				"s3_bucket_name": schema.StringAttribute{
-					MarkdownDescription: `S3 Bucket Name
+					MarkdownDescription: `S3 bucket name
 
     Bucket name (folder optional); ex: s3://polytomic/dataset`,
 					Required:  true,
@@ -110,7 +110,7 @@ var CustomeriowarehouseexportsSchema = schema.Schema{
 					Sensitive: false,
 				},
 				"s3_bucket_region": schema.StringAttribute{
-					MarkdownDescription: `S3 Bucket Region`,
+					MarkdownDescription: `S3 bucket region`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,

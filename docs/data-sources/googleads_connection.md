@@ -37,6 +37,7 @@ data "polytomic_googleads_connection" "googleads" {
 Read-Only:
 
 - `accounts` (Attributes Set) (see [below for nested schema](#nestedatt--configuration--accounts))
+- `auto_add_accounts` (Boolean) Automatically add new accounts
 - `blanket_user_consent` (Boolean) All transmitted users consented to ad personalization and information sharing with Google Ads
 
     Causes this connection to send signals to Google Ads indicating that every transmitted user has accepted ad personalization and data sharing policies. This will cause the user to be included in more advertising functions

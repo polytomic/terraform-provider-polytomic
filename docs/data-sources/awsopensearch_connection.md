@@ -36,7 +36,7 @@ data "polytomic_awsopensearch_connection" "awsopensearch" {
 
 Read-Only:
 
-- `aws_access_key_id` (String) AWS Access Key ID
+- `aws_access_key_id` (String) AWS access key ID
 - `aws_user` (String) User ARN
 - `endpoint` (String) Endpoint(s)
 - `region` (String)

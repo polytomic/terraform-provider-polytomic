@@ -75,6 +75,10 @@ func (d *MsadsConnectionDataSource) Schema(ctx context.Context, req datasource.S
 						MarkdownDescription: `Authentication method Valid values: <code>microsoft</code> (Microsoft), <code>google</code> (Google). Default: <code>microsoft</code>.`,
 						Computed:            true,
 					},
+					"auto_add_accounts": schema.BoolAttribute{
+						MarkdownDescription: `Automatically add new accounts`,
+						Computed:            true,
+					},
 					"username": schema.StringAttribute{
 						MarkdownDescription: `Connected user`,
 						Computed:            true,
@@ -93,6 +97,7 @@ type MsadsDataSourceConf struct {
 	} `mapstructure:"accounts" tfsdk:"accounts"`
 	Agree_customer_match_terms bool   `mapstructure:"agree_customer_match_terms" tfsdk:"agree_customer_match_terms"`
 	Auth_method                string `mapstructure:"auth_method" tfsdk:"auth_method"`
+	Auto_add_accounts          bool   `mapstructure:"auto_add_accounts" tfsdk:"auto_add_accounts"`
 	Username                   string `mapstructure:"username" tfsdk:"username"`
 }
 
@@ -141,6 +146,7 @@ func (d *MsadsConnectionDataSource) Read(ctx context.Context, req datasource.Rea
 		},
 		"agree_customer_match_terms": types.BoolType,
 		"auth_method":                types.StringType,
+		"auto_add_accounts":          types.BoolType,
 		"username":                   types.StringType,
 	}, conf)
 	if diags.HasError() {

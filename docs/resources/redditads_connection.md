@@ -60,7 +60,7 @@ state before it will take effect on a destroy operation.
 - `application_id` (String, Sensitive)
 - `client_secret` (String, Sensitive)
 - `oauth_refresh_token` (String, Sensitive)
-- `pixel_id` (String) Conversion Pixel ID
+- `pixel_id` (String) Conversion pixel ID
 
     Required if syncing conversion events to Reddit Ads.
 

@@ -48,29 +48,29 @@ var SalesforceSchema = schema.Schema{
 			Attributes: map[string]schema.Attribute{
 				"client_id": schema.StringAttribute{
 					MarkdownDescription: `Client ID`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
 					Sensitive:           true,
 					PlanModifiers: []planmodifier.String{
 						stringplanmodifier.UseStateForUnknown(),
 					},
 				},
 				"client_secret": schema.StringAttribute{
-					MarkdownDescription: `Client Secret`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
+					MarkdownDescription: `Client secret`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
 					Sensitive:           true,
 					PlanModifiers: []planmodifier.String{
 						stringplanmodifier.UseStateForUnknown(),
 					},
 				},
 				"connect_mode": schema.StringAttribute{
-					MarkdownDescription: `Default: browser (i.e. oauth through Polytomic). If 'code' is specified, the response will include an auth_code for the user to enter when completing authorization. NOTE: when supplying client_id and client_secret the connect mode must be 'api'. Valid values: <code>browser</code>, <code>clientcredentials</code>, <code>code</code>, <code>api</code>. Default: <code>browser</code>.`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
+					MarkdownDescription: `Authentication method Valid values: <code>browser</code>, <code>clientcredentials</code>, <code>code</code>, <code>api</code>. Default: <code>browser</code>.`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
 					Sensitive:           false,
 					Validators: []validator.String{
 						stringvalidator.OneOf("browser", "clientcredentials", "code", "api"),

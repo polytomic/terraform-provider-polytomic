@@ -52,7 +52,7 @@ func (d *DayforceConnectionDataSource) Schema(ctx context.Context, req datasourc
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"client_name": schema.StringAttribute{
-						MarkdownDescription: `Client Name`,
+						MarkdownDescription: `Client name`,
 						Computed:            true,
 					},
 					"company_id": schema.StringAttribute{

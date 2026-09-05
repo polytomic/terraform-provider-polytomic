@@ -67,6 +67,10 @@ func (d *GoogleadsConnectionDataSource) Schema(ctx context.Context, req datasour
 							},
 						},
 					},
+					"auto_add_accounts": schema.BoolAttribute{
+						MarkdownDescription: `Automatically add new accounts`,
+						Computed:            true,
+					},
 					"blanket_user_consent": schema.BoolAttribute{
 						MarkdownDescription: `All transmitted users consented to ad personalization and information sharing with Google Ads
 
@@ -101,6 +105,7 @@ type GoogleadsDataSourceConf struct {
 		Label string `mapstructure:"label" tfsdk:"label"`
 		Value string `mapstructure:"value" tfsdk:"value"`
 	} `mapstructure:"accounts" tfsdk:"accounts"`
+	Auto_add_accounts     bool   `mapstructure:"auto_add_accounts" tfsdk:"auto_add_accounts"`
 	Blanket_user_consent  bool   `mapstructure:"blanket_user_consent" tfsdk:"blanket_user_consent"`
 	Connected_user        string `mapstructure:"connected_user" tfsdk:"connected_user"`
 	Custom_reports        string `mapstructure:"custom_reports" tfsdk:"custom_reports"`
@@ -150,6 +155,7 @@ func (d *GoogleadsConnectionDataSource) Read(ctx context.Context, req datasource
 				},
 			},
 		},
+		"auto_add_accounts":     types.BoolType,
 		"blanket_user_consent":  types.BoolType,
 		"connected_user":        types.StringType,
 		"custom_reports":        types.StringType,

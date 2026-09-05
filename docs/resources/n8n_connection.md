@@ -54,7 +54,7 @@ state before it will take effect on a destroy operation.
 
 #### Required
 
-- `api_key` (String, Sensitive) API Key
+- `api_key` (String, Sensitive) API key
 - `url` (String) n8n URL
 
     Base URL for your n8n instance (for example https://your-instance.app.n8n.cloud)

@@ -36,8 +36,8 @@ data "polytomic_tigris_connection" "tigris" {
 
 Read-Only:
 
-- `aws_access_key_id` (String) Access Key ID
-- `bucket_name` (String) Bucket Name
+- `aws_access_key_id` (String) Access key ID
+- `bucket_name` (String) Bucket name
 
     Bucket name (folder optional); ex: polytomic/dataset
 - `csv_has_headers` (Boolean) CSV files have headers

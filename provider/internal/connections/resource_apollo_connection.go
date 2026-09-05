@@ -44,7 +44,7 @@ var ApolloSchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"apikey": schema.StringAttribute{
-					MarkdownDescription: `Apollo API Key`,
+					MarkdownDescription: `Apollo API key`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,

@@ -44,7 +44,7 @@ var IntellimizeSchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"apikey": schema.StringAttribute{
-					MarkdownDescription: `Intellimize API Key`,
+					MarkdownDescription: `Intellimize API key`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,

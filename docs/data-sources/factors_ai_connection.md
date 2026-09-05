@@ -36,6 +36,6 @@ data "polytomic_factors_ai_connection" "factors_ai" {
 
 Read-Only:
 
-- `account_domain` (String) Account Domain
+- `account_domain` (String) Account domain
 
 

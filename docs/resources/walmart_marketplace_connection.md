@@ -56,6 +56,6 @@ state before it will take effect on a destroy operation.
 #### Required
 
 - `client_id` (String, Sensitive) Client ID
-- `client_secret` (String, Sensitive) Client Secret
+- `client_secret` (String, Sensitive) Client secret
 
 

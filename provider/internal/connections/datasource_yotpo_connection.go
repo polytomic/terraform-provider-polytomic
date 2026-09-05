@@ -52,7 +52,7 @@ func (d *YotpoConnectionDataSource) Schema(ctx context.Context, req datasource.S
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"store_id": schema.StringAttribute{
-						MarkdownDescription: `App Key
+						MarkdownDescription: `App key
 
     Also known as Client ID or Store ID.`,
 						Computed: true,

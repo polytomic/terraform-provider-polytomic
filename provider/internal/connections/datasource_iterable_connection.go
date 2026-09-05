@@ -52,7 +52,7 @@ func (d *IterableConnectionDataSource) Schema(ctx context.Context, req datasourc
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"event_types": schema.SetNestedAttribute{
-						MarkdownDescription: `Event Types`,
+						MarkdownDescription: `Event types`,
 						Computed:            true,
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{

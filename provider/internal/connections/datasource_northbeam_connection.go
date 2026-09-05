@@ -52,7 +52,7 @@ func (d *NorthbeamConnectionDataSource) Schema(ctx context.Context, req datasour
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"data_client_id": schema.StringAttribute{
-						MarkdownDescription: `Data Client ID`,
+						MarkdownDescription: `Data client ID`,
 						Computed:            true,
 					},
 					"instance": schema.StringAttribute{

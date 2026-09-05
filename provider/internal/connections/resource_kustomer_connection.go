@@ -44,7 +44,7 @@ var KustomerSchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"apikey": schema.StringAttribute{
-					MarkdownDescription: `API Key`,
+					MarkdownDescription: `API key`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
@@ -54,7 +54,7 @@ var KustomerSchema = schema.Schema{
 					},
 				},
 				"domain": schema.StringAttribute{
-					MarkdownDescription: `Customer Portal Subdomain
+					MarkdownDescription: `Customer portal subdomain
 
     e.g. 'polytomic' if your portal is 'https://polytomic.kustomerapp.com/app'`,
 					Required:  true,

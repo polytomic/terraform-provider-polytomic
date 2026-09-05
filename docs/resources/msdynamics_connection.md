@@ -17,9 +17,12 @@ For detailed configuration guidance, see the [Microsoft Dynamics 365 connection 
 resource "polytomic_msdynamics_connection" "msdynamics" {
   name = "example"
   configuration = {
-    client_id           = "a45gadsfdsafbyorxhugfbhsgllpf12gf56gfds"
-    client_secret       = "ay8d5hdepz62px8lqeoakuea2ccl4rxm13i6tbyorxhu1i20kc8ruvksmzxq"
-    oauth_refresh_token = "dasfdasz62px8lqeoakuea2ccl4rxm13i6tbyorxhu1i20kc8ruvksmzxq"
+    client_credentials_client_id     = "a45gadsfdsafbyorxhugfbhsgllpf12gf56gfds"
+    client_credentials_client_secret = "ay8d5hdepz62px8lqeoakuea2ccl4rxm13i6tbyorxhu1i20kc8ruvksmzxq"
+    client_id                        = "a45gadsfdsafbyorxhugfbhsgllpf12gf56gfds"
+    client_secret                    = "ay8d5hdepz62px8lqeoakuea2ccl4rxm13i6tbyorxhu1i20kc8ruvksmzxq"
+    oauth_refresh_token              = "dasfdasz62px8lqeoakuea2ccl4rxm13i6tbyorxhu1i20kc8ruvksmzxq"
+    tenant_id                        = "3e03e565-ca33-4ef5-8e19-db300c655a40"
   }
 }
 ```
@@ -56,12 +59,16 @@ state before it will take effect on a destroy operation.
 
 #### Required
 
+- `auth_method` (String) Authentication method Valid values: <code>oauth</code> (OAuth), <code>client_credentials</code> (Client credentials). Default: <code>oauth</code>.
 - `dynamics_url` (String) Dynamics URL
 
 #### Optional
 
-- `client_id` (String, Sensitive)
-- `client_secret` (String, Sensitive)
+- `client_credentials_client_id` (String, Sensitive) Client ID
+- `client_credentials_client_secret` (String, Sensitive) Client secret
+- `client_id` (String, Sensitive) Custom OAuth application client ID for the delegated flow.
+- `client_secret` (String, Sensitive) Custom OAuth application client secret for the delegated flow.
 - `oauth_refresh_token` (String, Sensitive)
+- `tenant_id` (String) Directory (tenant) ID
 
 

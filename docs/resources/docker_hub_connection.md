@@ -55,4 +55,13 @@ state before it will take effect on a destroy operation.
 
 - `namespace` (String)
 
+#### Optional
+
+- `access_token` (String, Sensitive) Access token
+
+    Personal or organization access token; required to list more than 2000 tags per repository.
+- `username` (String) Username or organization
+
+    Username when signing in with a personal access token; organization name when using an organization access token.
+
 

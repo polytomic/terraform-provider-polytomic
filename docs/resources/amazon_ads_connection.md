@@ -1,0 +1,64 @@
+---
+page_title: "polytomic_amazon_ads_connection Resource - terraform-provider-polytomic"
+subcategory: "Connections"
+description: |-
+  Amazon Ads Connection
+---
+
+# polytomic_amazon_ads_connection (Resource)
+
+Amazon Ads Connection
+
+For detailed configuration guidance, see the [Amazon Ads connection guide](https://apidocs.polytomic.com/guides/configuring-your-connections/connections/amazon_ads).
+
+## Example Usage
+
+```terraform
+resource "polytomic_amazon_ads_connection" "amazon_ads" {
+  name = "example"
+  configuration = {
+  }
+}
+```
+
+## Schema
+
+### Required
+
+- `name` (String)
+- `configuration` (Attributes) See [below for nested schema](#nestedatt--configuration).
+
+### Optional
+
+- `organization` (String) Organization ID.
+- `force_destroy` (Boolean) Indicates whether dependent models, syncs, and bulk syncs should be
+cascade-deleted when this connection is destroyed.
+
+    This only deletes other resources when the connection is destroyed, not when
+setting this parameter to `true`. Once this parameter is set to `true`, there
+must be a successful `terraform apply` run before a destroy is required to
+update this value in the resource state. Without a successful `terraform apply`
+after this parameter is set, this flag will have no effect. If setting this
+field in the same operation that would require replacing the connection or
+destroying the connection, this flag will not work. Additionally when importing
+a connection, a successful `terraform apply` is required to set this value in
+state before it will take effect on a destroy operation.
+
+### Read-Only
+
+- `id` (String) Amazon Ads Connection identifier.
+
+<a id="nestedatt--configuration"></a>
+### Nested Schema for `configuration`
+
+#### Required
+
+- `region` (String) Valid values: <code>na</code> (North America (NA)), <code>eu</code> (Europe (EU)), <code>fe</code> (Far East (FE)). Default: <code>na</code>.
+
+#### Optional
+
+- `client_id` (String, Sensitive) Client ID
+- `client_secret` (String, Sensitive) Client secret
+- `oauth_refresh_token` (String, Sensitive)
+
+

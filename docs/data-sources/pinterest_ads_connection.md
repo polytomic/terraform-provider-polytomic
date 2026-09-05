@@ -36,7 +36,7 @@ data "polytomic_pinterest_ads_connection" "pinterest_ads" {
 
 Read-Only:
 
-- `accounts` (Attributes Set) Ad Accounts (see [below for nested schema](#nestedatt--configuration--accounts))
+- `accounts` (Attributes Set) Ad accounts (see [below for nested schema](#nestedatt--configuration--accounts))
 - `connected_user` (String) Connected user
 
 <a id="nestedatt--configuration--accounts"></a>
