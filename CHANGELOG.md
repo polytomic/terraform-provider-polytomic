@@ -1,3 +1,8 @@
+## v2.0.1 (9 September 2026)
+
+- Updated `terraform-plugin-framework` to v1.19.0 and `terraform-plugin-go` to v0.31.0.
+- Updated the Go toolchain to 1.26 and refreshed dependencies, including `golang.org/x/*`, `google.golang.org/grpc`, `zerolog`, `go-cty`, and `jsonschema`.
+
 ## v2.0.0 (1 July 2026)
 
 BREAKING CHANGES:
