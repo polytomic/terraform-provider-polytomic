@@ -27,7 +27,7 @@ var ErrNoPartnerKey = errors.New("partner key is required")
 
 const (
 	UserAgent    = "polytomic-terraform-provider"
-	APIVersion   = "2024-02-08"
+	APIVersion   = "2025-09-18"
 	ErrorSummary = "Client Error"
 
 	//PolytomicDeploymentKey is the environment variable name for the Polytomic deployment key

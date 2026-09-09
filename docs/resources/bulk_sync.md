@@ -89,7 +89,7 @@ Required:
 
 Optional:
 
-- `configuration` (String) Integration-specific configuration for the connection. Documentation for settings is available in the [Polytomic API documentation](https://apidocs.polytomic.com/2024-02-08/guides/configuring-your-connections/overview)
+- `configuration` (String) Integration-specific configuration for the connection. Documentation for settings is available in the [Polytomic API documentation](https://apidocs.polytomic.com/2025-09-18/guides/configuring-your-connections/overview)
 
 
 <a id="nestedatt--schedule"></a>
@@ -117,7 +117,7 @@ Required:
 
 Optional:
 
-- `configuration` (String) Integration-specific configuration for the connection. Documentation for settings is available in the [Polytomic API documentation](https://apidocs.polytomic.com/2024-02-08/guides/configuring-your-connections/overview)
+- `configuration` (String) Integration-specific configuration for the connection. Documentation for settings is available in the [Polytomic API documentation](https://apidocs.polytomic.com/2025-09-18/guides/configuring-your-connections/overview)
 
 
 <a id="nestedatt--schemas"></a>
