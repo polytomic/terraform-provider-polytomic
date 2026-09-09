@@ -7,7 +7,7 @@ import (
 
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hclwrite"
-	ptclient "github.com/polytomic/polytomic-go/client"
+	ptclient "github.com/polytomic/polytomic-go/v25/client"
 )
 
 const (

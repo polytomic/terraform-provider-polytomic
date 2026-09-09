@@ -22,8 +22,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
-	"github.com/polytomic/polytomic-go"
-	ptcore "github.com/polytomic/polytomic-go/core"
+	"github.com/polytomic/polytomic-go/v25"
+	ptcore "github.com/polytomic/polytomic-go/v25/core"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
@@ -482,7 +482,7 @@ type syncResourceResourceData struct {
 }
 
 // overrideField is the Terraform-side representation of an override field.
-// This is a subset of polytomic.ModelSyncField — the SDK type includes
+// This is a subset of polytomic.SyncField — the SDK type includes
 // `source` and `encryption_enabled` which are not part of the Terraform schema.
 type overrideField struct {
 	Target        types.String `tfsdk:"target"`
@@ -491,7 +491,7 @@ type overrideField struct {
 	SyncMode      types.String `tfsdk:"sync_mode"`
 }
 
-func overrideFieldsToSDK(ctx context.Context, set types.Set) ([]*polytomic.ModelSyncField, diag.Diagnostics) {
+func overrideFieldsToSDK(ctx context.Context, set types.Set) ([]*polytomic.OverrideFieldInput, diag.Diagnostics) {
 	if set.IsNull() || set.IsUnknown() {
 		return nil, nil
 	}
@@ -502,9 +502,9 @@ func overrideFieldsToSDK(ctx context.Context, set types.Set) ([]*polytomic.Model
 		return nil, diags
 	}
 
-	result := make([]*polytomic.ModelSyncField, len(fields))
+	result := make([]*polytomic.OverrideFieldInput, len(fields))
 	for i, f := range fields {
-		result[i] = &polytomic.ModelSyncField{
+		result[i] = &polytomic.OverrideFieldInput{
 			Target:        f.Target.ValueString(),
 			New:           f.New.ValueBoolPointer(),
 			OverrideValue: f.OverrideValue.ValueStringPointer(),
@@ -665,7 +665,7 @@ func modelFiltersToSDK(ctx context.Context, filtersSet types.Set) ([]*polytomic.
 		}
 
 		f := &polytomic.Filter{
-			Field:     &polytomic.Source{ModelId: source.ModelId, Field: source.Field},
+			Field:     &polytomic.Source{ModelID: source.ModelID, Field: source.Field},
 			FieldType: pointer.To(polytomic.FilterFieldReferenceType("Model")),
 			Function:  polytomic.FilterFunction(filter.Function),
 			Label:     pointer.To(filter.Label),
@@ -701,7 +701,7 @@ func targetFiltersToSDK(ctx context.Context, filtersSet types.Set) ([]*polytomic
 	var result []*polytomic.Filter
 	for _, filter := range filters {
 		f := &polytomic.Filter{
-			FieldId:   pointer.To(filter.Field),
+			FieldID:   pointer.To(filter.Field),
 			FieldType: pointer.To(polytomic.FilterFieldReferenceType("Target")),
 			Function:  polytomic.FilterFunction(filter.Function),
 			Label:     pointer.To(filter.Label),
@@ -745,7 +745,7 @@ func overridesToSDK(ctx context.Context, overridesSet types.Set) ([]*polytomic.O
 		}
 
 		o := &polytomic.Override{
-			Field:    &polytomic.Source{ModelId: source.ModelId, Field: source.Field},
+			Field:    &polytomic.Source{ModelID: source.ModelID, Field: source.Field},
 			Function: pointer.To(polytomic.FilterFunction(override.Function)),
 		}
 
@@ -798,8 +798,8 @@ func (r *syncResource) Create(ctx context.Context, req resource.CreateRequest, r
 		return
 	}
 
-	pt := &polytomic.Target{
-		ConnectionId: target.ConnectionID,
+	pt := &polytomic.ModelSyncV5Target{
+		ConnectionID: target.ConnectionID,
 		Object:       target.Object,
 		NewName:      target.NewName,
 		Create:       target.Create,
@@ -818,7 +818,7 @@ func (r *syncResource) Create(ctx context.Context, req resource.CreateRequest, r
 		pt.Configuration = make(map[string]interface{})
 	}
 
-	var fields []*polytomic.ModelSyncField
+	var fields []*polytomic.SyncField
 	diags = data.Fields.ElementsAs(ctx, &fields, true)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -870,10 +870,10 @@ func (r *syncResource) Create(ctx context.Context, req resource.CreateRequest, r
 		return
 	}
 
-	request := &polytomic.CreateModelSyncRequest{
+	request := &polytomic.CreateModelSyncV5Request{
 		Name:                 data.Name.ValueString(),
 		Target:               pt,
-		Mode:                 polytomic.ModelSyncMode(data.Mode.ValueString()),
+		Mode:                 polytomic.ModelsyncSyncTargetMode(data.Mode.ValueString()),
 		Fields:               fields,
 		OverrideFields:       overrideFields,
 		Filters:              pfilters,
@@ -885,7 +885,7 @@ func (r *syncResource) Create(ctx context.Context, req resource.CreateRequest, r
 	}
 
 	if !data.Organization.IsNull() {
-		request.OrganizationId = data.Organization.ValueStringPointer()
+		request.OrganizationID = data.Organization.ValueStringPointer()
 	}
 	if !data.FilterLogic.IsNull() {
 		request.FilterLogic = data.FilterLogic.ValueStringPointer()
@@ -897,7 +897,7 @@ func (r *syncResource) Create(ctx context.Context, req resource.CreateRequest, r
 		request.Active = data.Active.ValueBoolPointer()
 	}
 
-	if identity.Source != nil && identity.Source.ModelId != "" && identity.Source.Field != "" {
+	if identity.Source != nil && identity.Source.ModelID != "" && identity.Source.Field != "" {
 		request.Identity = &identity
 	}
 	client, err := r.provider.Client(ctx, data.Organization.ValueString())
@@ -1009,8 +1009,8 @@ func (r *syncResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		return
 	}
 
-	pt := &polytomic.Target{
-		ConnectionId: target.ConnectionID,
+	pt := &polytomic.ModelSyncV5Target{
+		ConnectionID: target.ConnectionID,
 		Object:       pointer.To(pointer.Get(target.Object)),
 		NewName:      target.NewName,
 		Create:       target.Create,
@@ -1029,7 +1029,7 @@ func (r *syncResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		pt.Configuration = make(map[string]interface{})
 	}
 
-	var fields []*polytomic.ModelSyncField
+	var fields []*polytomic.SyncField
 	diags = data.Fields.ElementsAs(ctx, &fields, true)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -1081,10 +1081,10 @@ func (r *syncResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		return
 	}
 
-	request := &polytomic.UpdateModelSyncRequest{
+	request := &polytomic.UpdateModelSyncV5Request{
 		Name:                 data.Name.ValueString(),
 		Target:               pt,
-		Mode:                 polytomic.ModelSyncMode(data.Mode.ValueString()),
+		Mode:                 polytomic.ModelsyncSyncTargetMode(data.Mode.ValueString()),
 		Fields:               fields,
 		OverrideFields:       overrideFields,
 		Filters:              pfilters,
@@ -1097,7 +1097,7 @@ func (r *syncResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	}
 
 	if !data.Organization.IsNull() {
-		request.OrganizationId = data.Organization.ValueStringPointer()
+		request.OrganizationID = data.Organization.ValueStringPointer()
 	}
 	if !data.FilterLogic.IsNull() {
 		request.FilterLogic = data.FilterLogic.ValueStringPointer()
@@ -1153,7 +1153,7 @@ func (r *syncResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
-	err = client.ModelSync.Remove(ctx, data.ID.ValueString())
+	err = client.ModelSync.Delete(ctx, data.ID.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Error deleting sync", err.Error())
 		return
@@ -1194,13 +1194,13 @@ func preserveTargetCreate(data *syncResourceResourceData, priorTarget types.Obje
 
 // syncDataFromResponse converts a Polytomic API response to Terraform resource data.
 // This is the single source of truth for all CRUD operations.
-func syncDataFromResponse(ctx context.Context, sync *polytomic.ModelSyncResponse) (syncResourceResourceData, diag.Diagnostics) {
+func syncDataFromResponse(ctx context.Context, sync *polytomic.ModelSyncV5Response) (syncResourceResourceData, diag.Diagnostics) {
 	var data syncResourceResourceData
 	var diags diag.Diagnostics
 
 	// Basic fields
-	data.ID = types.StringPointerValue(sync.Id)
-	data.Organization = types.StringPointerValue(sync.OrganizationId)
+	data.ID = types.StringPointerValue(sync.ID)
+	data.Organization = types.StringPointerValue(sync.OrganizationID)
 	data.Name = types.StringPointerValue(sync.Name)
 	data.Mode = types.StringValue(string(pointer.Get(sync.Mode)))
 	data.Active = types.BoolPointerValue(sync.Active)
@@ -1223,7 +1223,7 @@ func syncDataFromResponse(ctx context.Context, sync *polytomic.ModelSyncResponse
 	}
 
 	targetData := Target{
-		ConnectionID:  sync.Target.ConnectionId,
+		ConnectionID:  sync.Target.ConnectionID,
 		Object:        sync.Target.Object,
 		Configuration: confNormalized,
 		NewName:       sync.Target.NewName,
@@ -1238,12 +1238,12 @@ func syncDataFromResponse(ctx context.Context, sync *polytomic.ModelSyncResponse
 	// Fields and OverrideFields — the API merges override fields into the
 	// regular fields list. Split them back out: fields with an override_value
 	// and no real source are override fields.
-	var regularFields []*polytomic.ModelSyncField
+	var regularFields []*polytomic.SyncField
 	var extractedOverrides []overrideField
 	for _, f := range sync.Fields {
 		isOverride := f.OverrideValue != nil &&
-			(f.Source == nil || (f.Source.ModelId == "" && f.Source.Field == "") ||
-				f.Source.ModelId == "00000000-0000-0000-0000-000000000000")
+			(f.Source == nil || (f.Source.ModelID == "" && f.Source.Field == "") ||
+				f.Source.ModelID == "00000000-0000-0000-0000-000000000000")
 		if isOverride {
 			extractedOverrides = append(extractedOverrides, overrideField{
 				Target:        types.StringValue(f.Target),
@@ -1305,7 +1305,7 @@ func syncDataFromResponse(ctx context.Context, sync *polytomic.ModelSyncResponse
 		fieldType := string(pointer.Get(f.FieldType))
 		if fieldType == "Target" {
 			tfTargetFilters = append(tfTargetFilters, TargetFilter{
-				Field:    pointer.Get(f.FieldId),
+				Field:    pointer.Get(f.FieldID),
 				Function: string(f.Function),
 				Value:    valNormalized,
 				Label:    pointer.GetString(f.Label),
@@ -1323,7 +1323,7 @@ func syncDataFromResponse(ctx context.Context, sync *polytomic.ModelSyncResponse
 				}
 			} else {
 				diags.AddWarning("Filter missing source reference",
-					"A model filter was returned without a source field reference. The filter field_id is: "+pointer.Get(f.FieldId))
+					"A model filter was returned without a source field reference. The filter field_id is: "+pointer.Get(f.FieldID))
 				source = types.ObjectNull(map[string]attr.Type{
 					"model_id": types.StringType,
 					"field":    types.StringType,
@@ -1365,7 +1365,7 @@ func syncDataFromResponse(ctx context.Context, sync *polytomic.ModelSyncResponse
 			}
 		} else {
 			diags.AddWarning("Override missing source reference",
-				"An override was returned without a source field reference. The override field_id is: "+pointer.Get(o.FieldId))
+				"An override was returned without a source field reference. The override field_id is: "+pointer.Get(o.FieldID))
 			source = types.ObjectNull(map[string]attr.Type{
 				"model_id": types.StringType,
 				"field":    types.StringType,
@@ -1410,8 +1410,8 @@ func syncDataFromResponse(ctx context.Context, sync *polytomic.ModelSyncResponse
 	// ModelIds - extract unique model IDs from fields
 	modelIDMap := make(map[string]bool)
 	for _, field := range sync.Fields {
-		if field.Source != nil && field.Source.ModelId != "" {
-			modelIDMap[field.Source.ModelId] = true
+		if field.Source != nil && field.Source.ModelID != "" {
+			modelIDMap[field.Source.ModelID] = true
 		}
 	}
 	modelIDs := make([]string, 0, len(modelIDMap))

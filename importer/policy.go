@@ -8,8 +8,8 @@ import (
 	"github.com/AlekSi/pointer"
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hclwrite"
-	"github.com/polytomic/polytomic-go"
-	ptclient "github.com/polytomic/polytomic-go/client"
+	"github.com/polytomic/polytomic-go/v25"
+	ptclient "github.com/polytomic/polytomic-go/v25/client"
 	"github.com/polytomic/terraform-provider-polytomic/provider"
 	"github.com/zclconf/go-cty/cty"
 )
@@ -47,7 +47,7 @@ func (p *Policies) Init(ctx context.Context) error {
 		if pointer.GetBool(policy.System) {
 			continue
 		}
-		hyrdatedPolicy, err := p.c.Permissions.Policies.Get(ctx, pointer.GetString(policy.Id))
+		hyrdatedPolicy, err := p.c.Permissions.Policies.Get(ctx, pointer.GetString(policy.ID))
 		if err != nil {
 			return err
 		}
@@ -85,7 +85,7 @@ func (p *Policies) GenerateTerraformFiles(ctx context.Context, writer io.Writer,
 		for _, action := range policy.PolicyActions {
 			policyActions = append(policyActions, map[string]interface{}{
 				"action":   action.Action,
-				"role_ids": action.RoleIds,
+				"role_ids": action.RoleIDs,
 			})
 		}
 		resourceBlock.Body().SetAttributeValue("policy_actions", typeConverter(policyActions))
@@ -101,7 +101,7 @@ func (p *Policies) GenerateImports(ctx context.Context, writer io.Writer) error 
 		writer.Write([]byte(fmt.Sprintf("terraform import %s.%s %s",
 			PolicyResource,
 			name,
-			pointer.GetString(policy.Id))))
+			pointer.GetString(policy.ID))))
 		writer.Write([]byte(fmt.Sprintf(" # %s\n", pointer.GetString(policy.Name))))
 	}
 	return nil
@@ -114,7 +114,7 @@ func (p *Policies) Filename() string {
 func (p *Policies) ResourceRefs() map[string]string {
 	result := make(map[string]string)
 	for name, policy := range p.Resources {
-		result[pointer.GetString(policy.Id)] = name
+		result[pointer.GetString(policy.ID)] = name
 	}
 	return result
 }

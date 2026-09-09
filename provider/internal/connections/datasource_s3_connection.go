@@ -189,9 +189,9 @@ func (d *S3ConnectionDataSource) Read(ctx context.Context, req datasource.ReadRe
 		return
 	}
 
-	data.Id = types.StringPointerValue(connection.Data.Id)
+	data.Id = types.StringPointerValue(connection.Data.ID)
 	data.Name = types.StringPointerValue(connection.Data.Name)
-	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
+	data.Organization = types.StringPointerValue(connection.Data.OrganizationID)
 
 	conf := S3DataSourceConf{}
 	err = mapstructure.Decode(connection.Data.Configuration, &conf)

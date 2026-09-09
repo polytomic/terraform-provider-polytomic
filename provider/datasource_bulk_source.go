@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/polytomic/polytomic-go"
+	"github.com/polytomic/polytomic-go/v25"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
@@ -93,13 +93,13 @@ func (d *bulkSourceDatasource) Read(ctx context.Context, req datasource.ReadRequ
 		fields := make([]sourceSchemaField, len(s.Fields))
 		for j, f := range s.Fields {
 			fields[j] = sourceSchemaField{
-				ID:   pointer.Get(f.Id),
+				ID:   pointer.Get(f.ID),
 				Name: pointer.Get(f.Name),
 				Type: string(pointer.Get(f.Type)),
 			}
 		}
 		schemas[i] = sourceSchema{
-			ID:     pointer.Get(s.Id),
+			ID:     pointer.Get(s.ID),
 			Name:   pointer.Get(s.Name),
 			Fields: fields,
 		}

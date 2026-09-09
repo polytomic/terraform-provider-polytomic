@@ -248,9 +248,9 @@ func (d *CsvConnectionDataSource) Read(ctx context.Context, req datasource.ReadR
 		return
 	}
 
-	data.Id = types.StringPointerValue(connection.Data.Id)
+	data.Id = types.StringPointerValue(connection.Data.ID)
 	data.Name = types.StringPointerValue(connection.Data.Name)
-	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
+	data.Organization = types.StringPointerValue(connection.Data.OrganizationID)
 
 	conf := CsvDataSourceConf{}
 	err = mapstructure.Decode(connection.Data.Configuration, &conf)

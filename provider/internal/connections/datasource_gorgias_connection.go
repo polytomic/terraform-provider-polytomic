@@ -93,9 +93,9 @@ func (d *GorgiasConnectionDataSource) Read(ctx context.Context, req datasource.R
 		return
 	}
 
-	data.Id = types.StringPointerValue(connection.Data.Id)
+	data.Id = types.StringPointerValue(connection.Data.ID)
 	data.Name = types.StringPointerValue(connection.Data.Name)
-	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
+	data.Organization = types.StringPointerValue(connection.Data.OrganizationID)
 
 	conf := GorgiasDataSourceConf{}
 	err = mapstructure.Decode(connection.Data.Configuration, &conf)

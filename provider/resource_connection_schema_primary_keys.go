@@ -13,8 +13,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/polytomic/polytomic-go"
-	ptcore "github.com/polytomic/polytomic-go/core"
+	"github.com/polytomic/polytomic-go/v25"
+	ptcore "github.com/polytomic/polytomic-go/v25/core"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
@@ -133,7 +133,7 @@ func (r *connectionSchemaPrimaryKeysResource) Create(ctx context.Context, req re
 	pkFields := make([]*polytomic.SchemaPrimaryKeyOverrideInput, len(fieldIDs))
 	for i, fieldID := range fieldIDs {
 		pkFields[i] = &polytomic.SchemaPrimaryKeyOverrideInput{
-			FieldId:      fieldID,
+			FieldID:      fieldID,
 			IsPrimaryKey: true,
 		}
 	}
@@ -167,8 +167,8 @@ func (r *connectionSchemaPrimaryKeysResource) Create(ctx context.Context, req re
 	// Set organization if not provided
 	if data.Organization.IsNull() {
 		connResp, err := client.Connections.Get(ctx, data.ConnectionID.ValueString())
-		if err == nil && connResp.Data != nil && connResp.Data.OrganizationId != nil {
-			data.Organization = types.StringValue(*connResp.Data.OrganizationId)
+		if err == nil && connResp.Data != nil && connResp.Data.OrganizationID != nil {
+			data.Organization = types.StringValue(*connResp.Data.OrganizationID)
 		} else {
 			data.Organization = types.StringValue("default")
 		}
@@ -231,7 +231,7 @@ func (r *connectionSchemaPrimaryKeysResource) Read(ctx context.Context, req reso
 			// so we need to determine primary keys differently.
 			// For now, we'll preserve the state's field_ids since the API doesn't
 			// return primary key information in a queryable way.
-			if field.Id != nil {
+			if field.ID != nil {
 				// Check if this field ID is in our current state
 				var currentFieldIDs []string
 				diags = data.FieldIDs.ElementsAs(ctx, &currentFieldIDs, false)
@@ -242,8 +242,8 @@ func (r *connectionSchemaPrimaryKeysResource) Read(ctx context.Context, req reso
 				}
 
 				for _, stateFieldID := range currentFieldIDs {
-					if stateFieldID == *field.Id {
-						primaryKeyFieldIDs = append(primaryKeyFieldIDs, *field.Id)
+					if stateFieldID == *field.ID {
+						primaryKeyFieldIDs = append(primaryKeyFieldIDs, *field.ID)
 						break
 					}
 				}
@@ -308,7 +308,7 @@ func (r *connectionSchemaPrimaryKeysResource) Update(ctx context.Context, req re
 	pkFields := make([]*polytomic.SchemaPrimaryKeyOverrideInput, len(fieldIDs))
 	for i, fieldID := range fieldIDs {
 		pkFields[i] = &polytomic.SchemaPrimaryKeyOverrideInput{
-			FieldId:      fieldID,
+			FieldID:      fieldID,
 			IsPrimaryKey: true,
 		}
 	}

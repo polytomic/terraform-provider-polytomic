@@ -13,7 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/mitchellh/mapstructure"
-	ptclient "github.com/polytomic/polytomic-go/client"
+	ptclient "github.com/polytomic/polytomic-go/v25/client"
 	"github.com/polytomic/terraform-provider-polytomic/provider"
 	"github.com/rs/zerolog/log"
 	"github.com/zclconf/go-cty/cty"
@@ -79,7 +79,7 @@ func (c *Connections) Init(ctx context.Context) error {
 	}
 	for _, conn := range conns.Data {
 		name := provider.ValidName(provider.ToSnakeCase(pointer.GetString(conn.Name)))
-		if r, ok := provider.ConnectionsMap[pointer.GetString(conn.Type.Id)]; ok {
+		if r, ok := provider.ConnectionsMap[pointer.GetString(conn.Type.ID)]; ok {
 			resp := &resource.MetadataResponse{}
 			r.Metadata(ctx, resource.MetadataRequest{
 				ProviderTypeName: provider.Name,
@@ -133,7 +133,7 @@ func (c *Connections) Init(ctx context.Context) error {
 				}
 			}
 
-			connTypeID := pointer.GetString(conn.Type.Id)
+			connTypeID := pointer.GetString(conn.Type.ID)
 			if len(missingRequiredFields) > 0 {
 				// True OAuth connections cannot be reproduced from a Terraform
 				// config — the refresh token only exists after an interactive
@@ -177,7 +177,7 @@ func (c *Connections) Init(ctx context.Context) error {
 			// Build field mapping for this connection
 			mapping := map[string]interface{}{
 				"name":          pointer.GetString(conn.Name),
-				"organization":  pointer.GetString(conn.OrganizationId),
+				"organization":  pointer.GetString(conn.OrganizationID),
 				"configuration": config,
 			}
 
@@ -188,14 +188,14 @@ func (c *Connections) Init(ctx context.Context) error {
 			}
 
 			c.Resources[name] = Connection{
-				ID:            conn.Id,
+				ID:            conn.ID,
 				Resource:      resp.TypeName,
 				Name:          conn.Name,
-				Organization:  conn.OrganizationId,
+				Organization:  conn.OrganizationID,
 				Configuration: config,
 			}
 
-		} else if d, ok := provider.ConnectionDatasourcesMap[pointer.GetString(conn.Type.Id)]; ok {
+		} else if d, ok := provider.ConnectionDatasourcesMap[pointer.GetString(conn.Type.ID)]; ok {
 			resp := &datasource.MetadataResponse{}
 			d.Metadata(ctx, datasource.MetadataRequest{
 				ProviderTypeName: provider.Name,
@@ -208,9 +208,9 @@ func (c *Connections) Init(ctx context.Context) error {
 
 			// Build field mapping for this datasource
 			mapping := map[string]interface{}{
-				"id":           pointer.GetString(conn.Id),
+				"id":           pointer.GetString(conn.ID),
 				"name":         pointer.GetString(conn.Name),
-				"organization": pointer.GetString(conn.OrganizationId),
+				"organization": pointer.GetString(conn.OrganizationID),
 			}
 
 			// Validate datasource schema by checking that required fields exist
@@ -221,14 +221,14 @@ func (c *Connections) Init(ctx context.Context) error {
 			}
 
 			c.Datasources[name] = Connection{
-				ID:           conn.Id,
+				ID:           conn.ID,
 				Resource:     resp.TypeName,
 				Name:         conn.Name,
-				Organization: conn.OrganizationId,
+				Organization: conn.OrganizationID,
 			}
 
 		} else {
-			log.Warn().Msgf("connection type %s not supported", pointer.GetString(conn.Type.Id))
+			log.Warn().Msgf("connection type %s not supported", pointer.GetString(conn.Type.ID))
 		}
 	}
 

@@ -88,9 +88,9 @@ func (d *AppsflyerConnectionDataSource) Read(ctx context.Context, req datasource
 		return
 	}
 
-	data.Id = types.StringPointerValue(connection.Data.Id)
+	data.Id = types.StringPointerValue(connection.Data.ID)
 	data.Name = types.StringPointerValue(connection.Data.Name)
-	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
+	data.Organization = types.StringPointerValue(connection.Data.OrganizationID)
 
 	conf := AppsflyerDataSourceConf{}
 	err = mapstructure.Decode(connection.Data.Configuration, &conf)

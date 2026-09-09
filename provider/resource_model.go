@@ -18,8 +18,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/polytomic/polytomic-go"
-	ptcore "github.com/polytomic/polytomic-go/core"
+	"github.com/polytomic/polytomic-go/v25"
+	ptcore "github.com/polytomic/polytomic-go/v25/core"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
@@ -253,7 +253,7 @@ func (r *modelResource) Create(ctx context.Context, req resource.CreateRequest, 
 
 	request := &polytomic.CreateModelRequest{
 		Name:             data.Name.ValueString(),
-		ConnectionId:     data.ConnectionID.ValueString(),
+		ConnectionID:     data.ConnectionID.ValueString(),
 		Configuration:    confRequest,
 		Fields:           requestFields,
 		AdditionalFields: additionalRequestFields,
@@ -264,7 +264,7 @@ func (r *modelResource) Create(ctx context.Context, req resource.CreateRequest, 
 		request.Identifier = data.Identifier.ValueStringPointer()
 	}
 	if !data.Organization.IsNull() && data.Organization.ValueString() != "" {
-		request.OrganizationId = data.Organization.ValueStringPointer()
+		request.OrganizationID = data.Organization.ValueStringPointer()
 	}
 
 	client, err := r.provider.Client(ctx, data.Organization.ValueString())
@@ -395,12 +395,12 @@ func (r *modelResource) Create(ctx context.Context, req resource.CreateRequest, 
 		}
 	}
 
-	data.ID = types.StringPointerValue(model.Data.Id)
-	data.Organization = types.StringPointerValue(model.Data.OrganizationId)
+	data.ID = types.StringPointerValue(model.Data.ID)
+	data.Organization = types.StringPointerValue(model.Data.OrganizationID)
 	data.Name = types.StringPointerValue(model.Data.Name)
 	data.Type = types.StringPointerValue(model.Data.Type)
 	data.Version = types.Int64Value(int64(pointer.GetInt(model.Data.Version)))
-	data.ConnectionID = types.StringPointerValue(model.Data.ConnectionId)
+	data.ConnectionID = types.StringPointerValue(model.Data.ConnectionID)
 	data.Configuration = types.StringValue(string(enc))
 	data.Fields = fields
 	data.Relations = relations
@@ -586,12 +586,12 @@ func (r *modelResource) Read(ctx context.Context, req resource.ReadRequest, resp
 		}
 	}
 
-	data.ID = types.StringPointerValue(model.Data.Id)
-	data.Organization = types.StringPointerValue(model.Data.OrganizationId)
+	data.ID = types.StringPointerValue(model.Data.ID)
+	data.Organization = types.StringPointerValue(model.Data.OrganizationID)
 	data.Name = types.StringPointerValue(model.Data.Name)
 	data.Type = types.StringPointerValue(model.Data.Type)
 	data.Version = types.Int64Value(int64(pointer.GetInt(model.Data.Version)))
-	data.ConnectionID = types.StringPointerValue(model.Data.ConnectionId)
+	data.ConnectionID = types.StringPointerValue(model.Data.ConnectionID)
 	data.Configuration = types.StringValue(string(enc))
 	data.Fields = fields
 	data.Relations = relations
@@ -684,7 +684,7 @@ func (r *modelResource) Update(ctx context.Context, req resource.UpdateRequest, 
 
 	request := &polytomic.UpdateModelRequest{
 		Name:             data.Name.ValueString(),
-		ConnectionId:     data.ConnectionID.ValueString(),
+		ConnectionID:     data.ConnectionID.ValueString(),
 		Configuration:    confRequest,
 		Fields:           requestFields,
 		AdditionalFields: additionalRequestFields,
@@ -695,7 +695,7 @@ func (r *modelResource) Update(ctx context.Context, req resource.UpdateRequest, 
 		request.Identifier = data.Identifier.ValueStringPointer()
 	}
 	if !data.Organization.IsNull() && data.Organization.ValueString() != "" {
-		request.OrganizationId = data.Organization.ValueStringPointer()
+		request.OrganizationID = data.Organization.ValueStringPointer()
 	}
 
 	client, err := r.provider.Client(ctx, data.Organization.ValueString())
@@ -824,12 +824,12 @@ func (r *modelResource) Update(ctx context.Context, req resource.UpdateRequest, 
 		}
 	}
 
-	data.ID = types.StringPointerValue(model.Data.Id)
-	data.Organization = types.StringPointerValue(model.Data.OrganizationId)
+	data.ID = types.StringPointerValue(model.Data.ID)
+	data.Organization = types.StringPointerValue(model.Data.OrganizationID)
 	data.Name = types.StringPointerValue(model.Data.Name)
 	data.Type = types.StringPointerValue(model.Data.Type)
 	data.Version = types.Int64Value(int64(pointer.GetInt(model.Data.Version)))
-	data.ConnectionID = types.StringPointerValue(model.Data.ConnectionId)
+	data.ConnectionID = types.StringPointerValue(model.Data.ConnectionID)
 	data.Configuration = types.StringValue(string(enc))
 	data.Fields = fields
 	data.Relations = relations
@@ -886,7 +886,7 @@ func (r *modelResource) Delete(ctx context.Context, req resource.DeleteRequest, 
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
-	err = client.Models.Remove(ctx, data.ID.ValueString(), &polytomic.ModelsRemoveRequest{})
+	err = client.Models.Delete(ctx, data.ID.ValueString(), &polytomic.ModelsDeleteRequest{})
 	if err != nil {
 		resp.Diagnostics.AddError("Error deleting model", err.Error())
 		return

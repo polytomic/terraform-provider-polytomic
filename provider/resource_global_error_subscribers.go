@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/polytomic/polytomic-go"
+	"github.com/polytomic/polytomic-go/v25"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
@@ -89,7 +89,7 @@ func (r *globalErrorSubscribersResource) Create(ctx context.Context, req resourc
 
 	response, err := client.Notifications.SetGlobalErrorSubscribers(
 		ctx,
-		&polytomic.V4GlobalErrorSubscribersRequest{Emails: emails},
+		&polytomic.GlobalErrorSubscribersRequest{Emails: emails},
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error setting global error subscribers: %s", err))
@@ -171,7 +171,7 @@ func (r *globalErrorSubscribersResource) Update(ctx context.Context, req resourc
 
 	response, err := client.Notifications.SetGlobalErrorSubscribers(
 		ctx,
-		&polytomic.V4GlobalErrorSubscribersRequest{Emails: emails},
+		&polytomic.GlobalErrorSubscribersRequest{Emails: emails},
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error updating global error subscribers: %s", err))
@@ -211,7 +211,7 @@ func (r *globalErrorSubscribersResource) Delete(ctx context.Context, req resourc
 
 	_, err = client.Notifications.SetGlobalErrorSubscribers(
 		ctx,
-		&polytomic.V4GlobalErrorSubscribersRequest{Emails: []string{}},
+		&polytomic.GlobalErrorSubscribersRequest{Emails: []string{}},
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error clearing global error subscribers: %s", err))

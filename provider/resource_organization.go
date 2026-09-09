@@ -13,9 +13,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
-	"github.com/polytomic/polytomic-go"
-	ptclient "github.com/polytomic/polytomic-go/client"
-	ptcore "github.com/polytomic/polytomic-go/core"
+	"github.com/polytomic/polytomic-go/v25"
+	ptclient "github.com/polytomic/polytomic-go/v25/client"
+	ptcore "github.com/polytomic/polytomic-go/v25/core"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
@@ -95,15 +95,15 @@ func (r *organizationResource) Create(ctx context.Context, req resource.CreateRe
 	created, err := r.client.Organization.Create(ctx,
 		&polytomic.CreateOrganizationRequestSchema{
 			Name:      data.Name.ValueString(),
-			SsoDomain: data.SSODomain.ValueStringPointer(),
-			SsoOrgId:  data.SSOOrgId.ValueStringPointer(),
+			SSODomain: data.SSODomain.ValueStringPointer(),
+			SSOOrgID:  data.SSOOrgId.ValueStringPointer(),
 		},
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error creating organization: %s", err))
 		return
 	}
-	data.Id = types.StringPointerValue(created.Data.Id)
+	data.Id = types.StringPointerValue(created.Data.ID)
 	data.Issuer = types.StringPointerValue(created.Data.Issuer)
 	tflog.Trace(ctx, "created a organization")
 
@@ -136,10 +136,10 @@ func (r *organizationResource) Read(ctx context.Context, req resource.ReadReques
 		return
 	}
 
-	data.Id = types.StringPointerValue(organization.Data.Id)
+	data.Id = types.StringPointerValue(organization.Data.ID)
 	data.Name = types.StringPointerValue(organization.Data.Name)
-	data.SSODomain = types.StringPointerValue(organization.Data.SsoDomain)
-	data.SSOOrgId = types.StringPointerValue(organization.Data.SsoOrgId)
+	data.SSODomain = types.StringPointerValue(organization.Data.SSODomain)
+	data.SSOOrgId = types.StringPointerValue(organization.Data.SSOOrgID)
 	data.Issuer = types.StringPointerValue(organization.Data.Issuer)
 
 	diags = resp.State.Set(ctx, &data)
@@ -159,8 +159,8 @@ func (r *organizationResource) Update(ctx context.Context, req resource.UpdateRe
 	updated, err := r.client.Organization.Update(ctx, data.Id.ValueString(),
 		&polytomic.UpdateOrganizationRequestSchema{
 			Name:      data.Name.ValueString(),
-			SsoDomain: data.SSODomain.ValueStringPointer(),
-			SsoOrgId:  data.SSOOrgId.ValueStringPointer(),
+			SSODomain: data.SSODomain.ValueStringPointer(),
+			SSOOrgID:  data.SSOOrgId.ValueStringPointer(),
 		},
 	)
 	if err != nil {
@@ -184,7 +184,7 @@ func (r *organizationResource) Delete(ctx context.Context, req resource.DeleteRe
 		return
 	}
 
-	err := r.client.Organization.Remove(ctx, data.Id.ValueString())
+	err := r.client.Organization.Delete(ctx, data.Id.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Error deleting organization", err.Error())
 		return

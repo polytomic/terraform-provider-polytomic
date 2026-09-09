@@ -21,8 +21,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/mitchellh/mapstructure"
-	"github.com/polytomic/polytomic-go"
-	ptcore "github.com/polytomic/polytomic-go/core"
+	"github.com/polytomic/polytomic-go/v25"
+	ptcore "github.com/polytomic/polytomic-go/v25/core"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
@@ -120,7 +120,7 @@ func (r *NotionConnectionResource) Create(ctx context.Context, req resource.Crea
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "notion",
-		OrganizationId: data.Organization.ValueStringPointer(),
+		OrganizationID: data.Organization.ValueStringPointer(),
 		Configuration:  connConf,
 		Validate:       pointer.ToBool(false),
 	})
@@ -128,9 +128,9 @@ func (r *NotionConnectionResource) Create(ctx context.Context, req resource.Crea
 		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error creating connection: %s", err))
 		return
 	}
-	data.Id = types.StringPointerValue(created.Data.Id)
+	data.Id = types.StringPointerValue(created.Data.ID)
 	data.Name = types.StringPointerValue(created.Data.Name)
-	data.Organization = types.StringPointerValue(created.Data.OrganizationId)
+	data.Organization = types.StringPointerValue(created.Data.OrganizationID)
 
 	configAttributes, ok := getConfigAttributes(NotionSchema)
 	if !ok {
@@ -161,7 +161,7 @@ func (r *NotionConnectionResource) Create(ctx context.Context, req resource.Crea
 		return
 	}
 
-	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Notion", "id": created.Data.Id})
+	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Notion", "id": created.Data.ID})
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -199,9 +199,9 @@ func (r *NotionConnectionResource) Read(ctx context.Context, req resource.ReadRe
 		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error reading connection: %s", err))
 		return
 	}
-	data.Id = types.StringPointerValue(connection.Data.Id)
+	data.Id = types.StringPointerValue(connection.Data.ID)
 	data.Name = types.StringPointerValue(connection.Data.Name)
-	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
+	data.Organization = types.StringPointerValue(connection.Data.OrganizationID)
 
 	configAttributes, ok := getConfigAttributes(NotionSchema)
 	if !ok {
@@ -277,7 +277,7 @@ func (r *NotionConnectionResource) Update(ctx context.Context, req resource.Upda
 		data.Id.ValueString(),
 		&polytomic.UpdateConnectionRequestSchema{
 			Name:           data.Name.ValueString(),
-			OrganizationId: data.Organization.ValueStringPointer(),
+			OrganizationID: data.Organization.ValueStringPointer(),
 			Configuration:  connConf,
 			Validate:       pointer.ToBool(false),
 		})
@@ -286,9 +286,9 @@ func (r *NotionConnectionResource) Update(ctx context.Context, req resource.Upda
 		return
 	}
 
-	data.Id = types.StringPointerValue(updated.Data.Id)
+	data.Id = types.StringPointerValue(updated.Data.ID)
 	data.Name = types.StringPointerValue(updated.Data.Name)
-	data.Organization = types.StringPointerValue(updated.Data.OrganizationId)
+	data.Organization = types.StringPointerValue(updated.Data.OrganizationID)
 
 	planConfData, err := objectMapValue(ctx, data.Configuration)
 	if err != nil {
@@ -332,7 +332,7 @@ func (r *NotionConnectionResource) Delete(ctx context.Context, req resource.Dele
 		return
 	}
 	if data.ForceDestroy.ValueBool() {
-		err := client.Connections.Remove(ctx, data.Id.ValueString(), &polytomic.ConnectionsRemoveRequest{
+		err := client.Connections.Delete(ctx, data.Id.ValueString(), &polytomic.ConnectionsDeleteRequest{
 			Force: pointer.ToBool(true),
 		})
 		if err != nil {
@@ -347,7 +347,7 @@ func (r *NotionConnectionResource) Delete(ctx context.Context, req resource.Dele
 		return
 	}
 
-	err = client.Connections.Remove(ctx, data.Id.ValueString(), &polytomic.ConnectionsRemoveRequest{
+	err = client.Connections.Delete(ctx, data.Id.ValueString(), &polytomic.ConnectionsDeleteRequest{
 		Force: pointer.ToBool(false),
 	})
 	if err != nil {

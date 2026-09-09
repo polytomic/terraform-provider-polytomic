@@ -108,9 +108,9 @@ func (d *Pinterest_adsConnectionDataSource) Read(ctx context.Context, req dataso
 		return
 	}
 
-	data.Id = types.StringPointerValue(connection.Data.Id)
+	data.Id = types.StringPointerValue(connection.Data.ID)
 	data.Name = types.StringPointerValue(connection.Data.Name)
-	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
+	data.Organization = types.StringPointerValue(connection.Data.OrganizationID)
 
 	conf := Pinterest_adsDataSourceConf{}
 	err = mapstructure.Decode(connection.Data.Configuration, &conf)

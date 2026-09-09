@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	ptcore "github.com/polytomic/polytomic-go/core"
+	ptcore "github.com/polytomic/polytomic-go/v25/core"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
@@ -157,8 +157,8 @@ func (d *connectionSchemaDataSource) Read(ctx context.Context, req datasource.Re
 		for _, field := range schemaData.Fields {
 			fieldModel := schemaFieldModel{}
 
-			if field.Id != nil {
-				fieldModel.ID = types.StringValue(*field.Id)
+			if field.ID != nil {
+				fieldModel.ID = types.StringValue(*field.ID)
 			} else {
 				fieldModel.ID = types.StringNull()
 			}
@@ -202,8 +202,8 @@ func (d *connectionSchemaDataSource) Read(ctx context.Context, req datasource.Re
 	if data.Organization.IsNull() {
 		// Try to get organization from connection
 		connResp, err := client.Connections.Get(ctx, data.ConnectionID.ValueString())
-		if err == nil && connResp.Data != nil && connResp.Data.OrganizationId != nil {
-			data.Organization = types.StringValue(*connResp.Data.OrganizationId)
+		if err == nil && connResp.Data != nil && connResp.Data.OrganizationID != nil {
+			data.Organization = types.StringValue(*connResp.Data.OrganizationID)
 		}
 	}
 

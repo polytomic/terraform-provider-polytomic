@@ -76,7 +76,7 @@ func (d *roleDatasource) Read(ctx context.Context, req datasource.ReadRequest, r
 
 	for _, role := range roles.Data {
 		if strings.EqualFold(pointer.GetString(role.Name), data.Name.ValueString()) {
-			data.ID = types.StringPointerValue(role.Id)
+			data.ID = types.StringPointerValue(role.ID)
 			resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 			return
 		}

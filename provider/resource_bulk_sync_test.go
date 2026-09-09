@@ -19,7 +19,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/statecheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
-	polytomic "github.com/polytomic/polytomic-go"
+	polytomic "github.com/polytomic/polytomic-go/v25"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -63,7 +63,7 @@ func getSharedBulkSyncConnections(t *testing.T) bulkSyncTestConnectionIDs {
 		if err == nil {
 			for _, c := range conns.Data {
 				if strings.HasPrefix(pointer.Get(c.Name), "TestAccBulkSync-shared-") {
-					_ = client.Connections.Remove(ctx, pointer.Get(c.Id), &polytomic.ConnectionsRemoveRequest{Force: pointer.ToBool(true)})
+					_ = client.Connections.Delete(ctx, pointer.Get(c.ID), &polytomic.ConnectionsDeleteRequest{Force: pointer.ToBool(true)})
 				}
 			}
 		}
@@ -101,8 +101,8 @@ func getSharedBulkSyncConnections(t *testing.T) bulkSyncTestConnectionIDs {
 		}
 
 		sharedBulkSyncConns = &bulkSyncTestConnectionIDs{
-			SourceID: pointer.Get(source.Data.Id),
-			DestID:   pointer.Get(dest.Data.Id),
+			SourceID: pointer.Get(source.Data.ID),
+			DestID:   pointer.Get(dest.Data.ID),
 		}
 	})
 
@@ -127,7 +127,7 @@ func TestBulkSyncFiltersToSDK(t *testing.T) {
 			},
 			expected: []*polytomic.BulkFilter{
 				{
-					FieldId:  pointer.ToString("createdAt"),
+					FieldID:  pointer.ToString("createdAt"),
 					Function: polytomic.FilterFunction("RelativeOnOrAfter"),
 					Value:    "48 hours ago",
 				},
@@ -143,7 +143,7 @@ func TestBulkSyncFiltersToSDK(t *testing.T) {
 			},
 			expected: []*polytomic.BulkFilter{
 				{
-					FieldId:  pointer.ToString("status"),
+					FieldID:  pointer.ToString("status"),
 					Function: polytomic.FilterFunction("IsNull"),
 					Value:    nil,
 				},
@@ -159,7 +159,7 @@ func TestBulkSyncFiltersToSDK(t *testing.T) {
 			},
 			expected: []*polytomic.BulkFilter{
 				{
-					FieldId:  pointer.ToString("amount"),
+					FieldID:  pointer.ToString("amount"),
 					Function: polytomic.FilterFunction("Between"),
 					Value:    []interface{}{float64(100), float64(200)},
 				},
@@ -175,7 +175,7 @@ func TestBulkSyncFiltersToSDK(t *testing.T) {
 			},
 			expected: []*polytomic.BulkFilter{
 				{
-					FieldId:  pointer.ToString("count"),
+					FieldID:  pointer.ToString("count"),
 					Function: polytomic.FilterFunction("GreaterThan"),
 					Value:    float64(42),
 				},
@@ -197,7 +197,7 @@ func TestBulkSyncFiltersToSDK(t *testing.T) {
 			require.False(t, diags.HasError(), "unexpected diagnostics: %v", diags)
 			require.Equal(t, len(tc.expected), len(result))
 			for i := range tc.expected {
-				assert.Equal(t, tc.expected[i].FieldId, result[i].FieldId)
+				assert.Equal(t, tc.expected[i].FieldID, result[i].FieldID)
 				assert.Equal(t, tc.expected[i].Function, result[i].Function)
 				assert.Equal(t, tc.expected[i].Value, result[i].Value)
 			}
@@ -213,7 +213,7 @@ func TestBulkSyncFiltersFromSDK(t *testing.T) {
 		"string value": {
 			input: []*polytomic.BulkFilter{
 				{
-					FieldId:  pointer.ToString("createdAt"),
+					FieldID:  pointer.ToString("createdAt"),
 					Function: polytomic.FilterFunction("RelativeOnOrAfter"),
 					Value:    "48 hours ago",
 				},
@@ -225,7 +225,7 @@ func TestBulkSyncFiltersFromSDK(t *testing.T) {
 		"nil value": {
 			input: []*polytomic.BulkFilter{
 				{
-					FieldId:  pointer.ToString("status"),
+					FieldID:  pointer.ToString("status"),
 					Function: polytomic.FilterFunction("IsNull"),
 					Value:    nil,
 				},
@@ -237,7 +237,7 @@ func TestBulkSyncFiltersFromSDK(t *testing.T) {
 		"array value": {
 			input: []*polytomic.BulkFilter{
 				{
-					FieldId:  pointer.ToString("amount"),
+					FieldID:  pointer.ToString("amount"),
 					Function: polytomic.FilterFunction("Between"),
 					Value:    []interface{}{float64(100), float64(200)},
 				},
@@ -249,7 +249,7 @@ func TestBulkSyncFiltersFromSDK(t *testing.T) {
 		"number value": {
 			input: []*polytomic.BulkFilter{
 				{
-					FieldId:  pointer.ToString("count"),
+					FieldID:  pointer.ToString("count"),
 					Function: polytomic.FilterFunction("GreaterThan"),
 					Value:    42,
 				},
@@ -279,17 +279,17 @@ func TestBulkSyncFiltersFromSDK(t *testing.T) {
 func TestBulkSyncFiltersRoundTrip(t *testing.T) {
 	sdkFilters := []*polytomic.BulkFilter{
 		{
-			FieldId:  pointer.ToString("createdAt"),
+			FieldID:  pointer.ToString("createdAt"),
 			Function: polytomic.FilterFunction("RelativeOnOrAfter"),
 			Value:    "48 hours ago",
 		},
 		{
-			FieldId:  pointer.ToString("amount"),
+			FieldID:  pointer.ToString("amount"),
 			Function: polytomic.FilterFunction("Between"),
 			Value:    []interface{}{float64(100), float64(200)},
 		},
 		{
-			FieldId:  pointer.ToString("count"),
+			FieldID:  pointer.ToString("count"),
 			Function: polytomic.FilterFunction("GreaterThan"),
 			Value:    float64(42),
 		},
@@ -303,7 +303,7 @@ func TestBulkSyncFiltersRoundTrip(t *testing.T) {
 
 	require.Equal(t, len(sdkFilters), len(roundTripped))
 	for i := range sdkFilters {
-		assert.Equal(t, sdkFilters[i].FieldId, roundTripped[i].FieldId)
+		assert.Equal(t, sdkFilters[i].FieldID, roundTripped[i].FieldID)
 		assert.Equal(t, sdkFilters[i].Function, roundTripped[i].Function)
 		assert.Equal(t, sdkFilters[i].Value, roundTripped[i].Value)
 	}
@@ -319,11 +319,11 @@ func TestBulkSyncSchemasFromSDK(t *testing.T) {
 		"schema with filters and fields": {
 			input: []*polytomic.BulkSchema{
 				{
-					Id:      pointer.ToString("orders"),
+					ID:      pointer.ToString("orders"),
 					Enabled: pointer.ToBool(true),
 					Fields: []*polytomic.BulkField{
 						{
-							Id:             pointer.ToString("id"),
+							ID:             pointer.ToString("id"),
 							Enabled:        pointer.ToBool(true),
 							Obfuscated:     pointer.ToBool(false),
 							OutputName:     pointer.ToString("id"),
@@ -332,7 +332,7 @@ func TestBulkSyncSchemasFromSDK(t *testing.T) {
 					},
 					Filters: []*polytomic.BulkFilter{
 						{
-							FieldId:  pointer.ToString("createdAt"),
+							FieldID:  pointer.ToString("createdAt"),
 							Function: polytomic.FilterFunction("RelativeOnOrAfter"),
 							Value:    "48 hours ago",
 						},
@@ -353,7 +353,7 @@ func TestBulkSyncSchemasFromSDK(t *testing.T) {
 		"schema without filters or fields": {
 			input: []*polytomic.BulkSchema{
 				{
-					Id:      pointer.ToString("users"),
+					ID:      pointer.ToString("users"),
 					Enabled: pointer.ToBool(false),
 				},
 			},
@@ -368,7 +368,7 @@ func TestBulkSyncSchemasFromSDK(t *testing.T) {
 		"schema with data cutoff timestamp": {
 			input: []*polytomic.BulkSchema{
 				{
-					Id:                  pointer.ToString("events"),
+					ID:                  pointer.ToString("events"),
 					DataCutoffTimestamp: &ts,
 				},
 			},
@@ -380,7 +380,7 @@ func TestBulkSyncSchemasFromSDK(t *testing.T) {
 		"schema with nil data cutoff timestamp": {
 			input: []*polytomic.BulkSchema{
 				{
-					Id: pointer.ToString("events"),
+					ID: pointer.ToString("events"),
 				},
 			},
 			validate: func(t *testing.T, result []bulkSyncSchema) {
@@ -391,10 +391,10 @@ func TestBulkSyncSchemasFromSDK(t *testing.T) {
 		"obfuscated maps to obfuscate": {
 			input: []*polytomic.BulkSchema{
 				{
-					Id: pointer.ToString("sensitive"),
+					ID: pointer.ToString("sensitive"),
 					Fields: []*polytomic.BulkField{
 						{
-							Id:         pointer.ToString("ssn"),
+							ID:         pointer.ToString("ssn"),
 							Obfuscated: pointer.ToBool(true),
 						},
 					},

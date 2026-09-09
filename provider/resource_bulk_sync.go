@@ -26,9 +26,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
-	"github.com/polytomic/polytomic-go"
-	"github.com/polytomic/polytomic-go/bulksync"
-	ptcore "github.com/polytomic/polytomic-go/core"
+	"github.com/polytomic/polytomic-go/v25"
+	"github.com/polytomic/polytomic-go/v25/bulksync"
+	ptcore "github.com/polytomic/polytomic-go/v25/core"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
@@ -351,7 +351,7 @@ func bulkSyncFiltersToSDK(filters []bulkSyncFilter) ([]*polytomic.BulkFilter, di
 	result := make([]*polytomic.BulkFilter, len(filters))
 	for i, f := range filters {
 		result[i] = &polytomic.BulkFilter{
-			FieldId:  f.FieldId.ValueStringPointer(),
+			FieldID:  f.FieldId.ValueStringPointer(),
 			Function: polytomic.FilterFunction(f.Function.ValueString()),
 		}
 		if !f.Value.IsNull() && !f.Value.IsUnknown() {
@@ -370,7 +370,7 @@ func bulkSyncFiltersFromSDK(filters []*polytomic.BulkFilter) ([]bulkSyncFilter, 
 	result := make([]bulkSyncFilter, len(filters))
 	for i, f := range filters {
 		result[i] = bulkSyncFilter{
-			FieldId:  types.StringPointerValue(f.FieldId),
+			FieldId:  types.StringPointerValue(f.FieldID),
 			Function: types.StringValue(string(f.Function)),
 		}
 		if f.Value != nil {
@@ -390,6 +390,27 @@ func bulkSyncFiltersFromSDK(filters []*polytomic.BulkFilter) ([]bulkSyncFilter, 
 	return result, nil
 }
 
+// bulkSchemaListItemsToSchemas adapts the schemas list response to the
+// individual schema type used by the rest of this file. The list endpoint no
+// longer returns Fields/Filters in v25; they remain empty here and are
+// preserved from plan data during merging.
+func bulkSchemaListItemsToSchemas(items []*polytomic.BulkSchemaListItem) []*polytomic.BulkSchema {
+	result := make([]*polytomic.BulkSchema, len(items))
+	for i, item := range items {
+		result[i] = &polytomic.BulkSchema{
+			ID:                  item.ID,
+			Enabled:             item.Enabled,
+			DataCutoffTimestamp: item.DataCutoffTimestamp,
+			DisableDataCutoff:   item.DisableDataCutoff,
+			OutputName:          item.OutputName,
+			PartitionKey:        item.PartitionKey,
+			TrackingField:       item.TrackingField,
+			UserOutputName:      item.UserOutputName,
+		}
+	}
+	return result
+}
+
 func bulkSyncSchemasFromSDK(ctx context.Context, schemas []*polytomic.BulkSchema) ([]bulkSyncSchema, diag.Diagnostics) {
 	var diags diag.Diagnostics
 	filterType := types.ObjectType{AttrTypes: bulkSyncFilter{}.AttrTypes()}
@@ -398,7 +419,7 @@ func bulkSyncSchemasFromSDK(ctx context.Context, schemas []*polytomic.BulkSchema
 	result := make([]bulkSyncSchema, len(schemas))
 	for i, s := range schemas {
 		result[i] = bulkSyncSchema{
-			Id:                types.StringPointerValue(s.Id),
+			Id:                types.StringPointerValue(s.ID),
 			Enabled:           types.BoolPointerValue(s.Enabled),
 			PartitionKey:      types.StringPointerValue(s.PartitionKey),
 			TrackingField:     types.StringPointerValue(s.TrackingField),
@@ -417,7 +438,7 @@ func bulkSyncSchemasFromSDK(ctx context.Context, schemas []*polytomic.BulkSchema
 			tfFields := make([]bulkSyncSchemaField, len(s.Fields))
 			for j, f := range s.Fields {
 				tfFields[j] = bulkSyncSchemaField{
-					Id:             types.StringPointerValue(f.Id),
+					Id:             types.StringPointerValue(f.ID),
 					Enabled:        types.BoolPointerValue(f.Enabled),
 					Obfuscate:      types.BoolPointerValue(f.Obfuscated),
 					OutputName:     types.StringPointerValue(f.OutputName),
@@ -619,9 +640,9 @@ func (r *bulkSyncResource) Create(ctx context.Context, req resource.CreateReques
 
 	// Send nil (not empty slice) when no schemas are specified, so the
 	// server applies its default behavior (select all schemas).
-	var schemas []*polytomic.V2CreateBulkSyncRequestSchemasItem
+	var schemas []*polytomic.CreateBulkSyncRequestSchemasItem
 	if len(schemaData) > 0 {
-		schemas = make([]*polytomic.V2CreateBulkSyncRequestSchemasItem, len(schemaData))
+		schemas = make([]*polytomic.CreateBulkSyncRequestSchemasItem, len(schemaData))
 	}
 	for i, s := range schemaData {
 		var cutoff *time.Time
@@ -646,11 +667,11 @@ func (r *bulkSyncResource) Create(ctx context.Context, req resource.CreateReques
 				return cmp.Compare(a.Id.String(), b.Id.String())
 			})
 		}
-		fieldConfs := make([]*polytomic.V2SchemaConfigurationFieldsItem, len(fieldData))
+		fieldConfs := make([]*polytomic.SchemaConfigurationFieldsItem, len(fieldData))
 		for i, f := range fieldData {
-			fieldConfs[i] = &polytomic.V2SchemaConfigurationFieldsItem{
+			fieldConfs[i] = &polytomic.SchemaConfigurationFieldsItem{
 				FieldConfiguration: &polytomic.FieldConfiguration{
-					Id:        f.Id.ValueStringPointer(),
+					ID:        f.Id.ValueStringPointer(),
 					Enabled:   f.Enabled.ValueBoolPointer(),
 					Obfuscate: f.Obfuscate.ValueBoolPointer(),
 				},
@@ -673,9 +694,9 @@ func (r *bulkSyncResource) Create(ctx context.Context, req resource.CreateReques
 			}
 		}
 
-		schemas[i] = &polytomic.V2CreateBulkSyncRequestSchemasItem{
+		schemas[i] = &polytomic.CreateBulkSyncRequestSchemasItem{
 			SchemaConfiguration: &polytomic.SchemaConfiguration{
-				Id:                  s.Id.ValueStringPointer(),
+				ID:                  s.Id.ValueStringPointer(),
 				Enabled:             s.Enabled.ValueBoolPointer(),
 				PartitionKey:        s.PartitionKey.ValueStringPointer(),
 				TrackingField:       s.TrackingField.ValueStringPointer(),
@@ -708,7 +729,7 @@ func (r *bulkSyncResource) Create(ctx context.Context, req resource.CreateReques
 		return
 	}
 
-	sche := &polytomic.BulkSchedule{
+	sche := &polytomic.BulkSyncDefaultScheduleRequest{
 		DayOfMonth: schedule.DayOfMonth,
 		DayOfWeek:  schedule.DayOfWeek,
 		Frequency:  polytomic.ScheduleFrequency(schedule.Frequency),
@@ -797,17 +818,17 @@ func (r *bulkSyncResource) Create(ctx context.Context, req resource.CreateReques
 	}
 
 	createReq := &polytomic.CreateBulkSyncRequest{
-		OrganizationId:             orgID,
+		OrganizationID:             orgID,
 		Name:                       data.Name.ValueString(),
-		DestinationConnectionId:    destination.ConnectionID.ValueString(),
-		SourceConnectionId:         source.ConnectionID.ValueString(),
-		Mode:                       pointer.To(polytomic.BulkSyncMode(data.Mode.ValueString())),
+		DestinationConnectionID:    destination.ConnectionID.ValueString(),
+		SourceConnectionID:         source.ConnectionID.ValueString(),
+		Mode:                       pointer.To(polytomic.BulkSyncTargetMode(data.Mode.ValueString())),
 		Active:                     data.Active.ValueBoolPointer(),
 		AutomaticallyAddNewFields:  pointer.To(polytomic.BulkDiscover(data.AutomaticallyAddNewFields.ValueString())),
 		AutomaticallyAddNewObjects: pointer.To(polytomic.BulkDiscover(data.AutomaticallyAddNewObjects.ValueString())),
 		Schemas:                    schemas,
 		Policies:                   policies,
-		Schedule:                   sche,
+		DefaultSchedule:            sche,
 		DestinationConfiguration:   destConf,
 		SourceConfiguration:        sourceConf,
 		ConcurrencyLimit:           concurrencyLimit,
@@ -823,14 +844,14 @@ func (r *bulkSyncResource) Create(ctx context.Context, req resource.CreateReques
 		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error creating bulk sync: %s", err))
 		return
 	}
-	createdSchemas, err := retryOnCacheRefresh(ctx, "list bulk sync schemas", func() (*polytomic.ListBulkSchema, error) {
-		return client.BulkSync.Schemas.List(ctx, pointer.Get(created.Data.Id), &bulksync.SchemasListRequest{})
+	createdSchemas, err := retryOnCacheRefresh(ctx, "list bulk sync schemas", func() (*polytomic.ListBulkSchemaEnvelope, error) {
+		return client.BulkSync.Schemas.List(ctx, pointer.Get(created.Data.ID), &bulksync.SchemasListRequest{})
 	})
 	if err != nil {
 		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error reading bulk sync schemas: %s", err))
 		return
 	}
-	data, diags = bulkSyncDataFromResponse(ctx, created.Data, createdSchemas.Data, &data)
+	data, diags = bulkSyncDataFromResponse(ctx, created.Data, bulkSchemaListItemsToSchemas(createdSchemas.Data), &data)
 	resp.Diagnostics.Append(diags...)
 	if diags.HasError() {
 		return
@@ -866,14 +887,14 @@ func (r *bulkSyncResource) Read(ctx context.Context, req resource.ReadRequest, r
 		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error reading bulk sync: %s", err))
 		return
 	}
-	bulkSyncSchemas, err := retryOnCacheRefresh(ctx, "list bulk sync schemas", func() (*polytomic.ListBulkSchema, error) {
+	bulkSyncSchemas, err := retryOnCacheRefresh(ctx, "list bulk sync schemas", func() (*polytomic.ListBulkSchemaEnvelope, error) {
 		return client.BulkSync.Schemas.List(ctx, data.Id.ValueString(), &bulksync.SchemasListRequest{})
 	})
 	if err != nil {
 		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error reading bulk sync schemas: %s", err))
 		return
 	}
-	data, diags = bulkSyncDataFromResponse(ctx, bulkSync.Data, bulkSyncSchemas.Data, &data)
+	data, diags = bulkSyncDataFromResponse(ctx, bulkSync.Data, bulkSchemaListItemsToSchemas(bulkSyncSchemas.Data), &data)
 	resp.Diagnostics.Append(diags...)
 	if diags.HasError() {
 		return
@@ -906,9 +927,9 @@ func (r *bulkSyncResource) Update(ctx context.Context, req resource.UpdateReques
 
 	// Send nil (not empty slice) when no schemas are specified, so the
 	// server applies its default behavior (select all schemas).
-	var schemas []*polytomic.V2UpdateBulkSyncRequestSchemasItem
+	var schemas []*polytomic.UpdateBulkSyncRequestSchemasItem
 	if len(schemaData) > 0 {
-		schemas = make([]*polytomic.V2UpdateBulkSyncRequestSchemasItem, len(schemaData))
+		schemas = make([]*polytomic.UpdateBulkSyncRequestSchemasItem, len(schemaData))
 	}
 	for i, s := range schemaData {
 		var cutoff *time.Time
@@ -933,11 +954,11 @@ func (r *bulkSyncResource) Update(ctx context.Context, req resource.UpdateReques
 				return cmp.Compare(a.Id.String(), b.Id.String())
 			})
 		}
-		fieldConfs := make([]*polytomic.V2SchemaConfigurationFieldsItem, len(fieldData))
+		fieldConfs := make([]*polytomic.SchemaConfigurationFieldsItem, len(fieldData))
 		for i, f := range fieldData {
-			fieldConfs[i] = &polytomic.V2SchemaConfigurationFieldsItem{
+			fieldConfs[i] = &polytomic.SchemaConfigurationFieldsItem{
 				FieldConfiguration: &polytomic.FieldConfiguration{
-					Id:        f.Id.ValueStringPointer(),
+					ID:        f.Id.ValueStringPointer(),
 					Enabled:   f.Enabled.ValueBoolPointer(),
 					Obfuscate: f.Obfuscate.ValueBoolPointer(),
 				},
@@ -960,9 +981,9 @@ func (r *bulkSyncResource) Update(ctx context.Context, req resource.UpdateReques
 			}
 		}
 
-		schemas[i] = &polytomic.V2UpdateBulkSyncRequestSchemasItem{
+		schemas[i] = &polytomic.UpdateBulkSyncRequestSchemasItem{
 			SchemaConfiguration: &polytomic.SchemaConfiguration{
-				Id:                  s.Id.ValueStringPointer(),
+				ID:                  s.Id.ValueStringPointer(),
 				Enabled:             s.Enabled.ValueBoolPointer(),
 				PartitionKey:        s.PartitionKey.ValueStringPointer(),
 				TrackingField:       s.TrackingField.ValueStringPointer(),
@@ -995,7 +1016,7 @@ func (r *bulkSyncResource) Update(ctx context.Context, req resource.UpdateReques
 		return
 	}
 
-	sche := &polytomic.BulkSchedule{
+	sche := &polytomic.BulkSyncDefaultScheduleRequest{
 		DayOfMonth: schedule.DayOfMonth,
 		DayOfWeek:  schedule.DayOfWeek,
 		Frequency:  polytomic.ScheduleFrequency(schedule.Frequency),
@@ -1087,17 +1108,17 @@ func (r *bulkSyncResource) Update(ctx context.Context, req resource.UpdateReques
 	updated, err := client.BulkSync.Update(ctx,
 		data.Id.ValueString(),
 		&polytomic.UpdateBulkSyncRequest{
-			OrganizationId:             orgID,
+			OrganizationID:             orgID,
 			Name:                       data.Name.ValueString(),
-			DestinationConnectionId:    destination.ConnectionID.ValueString(),
-			SourceConnectionId:         source.ConnectionID.ValueString(),
-			Mode:                       pointer.To(polytomic.BulkSyncMode(data.Mode.ValueString())),
+			DestinationConnectionID:    destination.ConnectionID.ValueString(),
+			SourceConnectionID:         source.ConnectionID.ValueString(),
+			Mode:                       pointer.To(polytomic.BulkSyncTargetMode(data.Mode.ValueString())),
 			Active:                     data.Active.ValueBoolPointer(),
 			AutomaticallyAddNewFields:  pointer.To(polytomic.BulkDiscover(data.AutomaticallyAddNewFields.ValueString())),
 			AutomaticallyAddNewObjects: pointer.To(polytomic.BulkDiscover(data.AutomaticallyAddNewObjects.ValueString())),
 			Schemas:                    schemas,
 			Policies:                   policies,
-			Schedule:                   sche,
+			DefaultSchedule:            sche,
 			DestinationConfiguration:   destConf,
 			SourceConfiguration:        sourceConf,
 			ConcurrencyLimit:           concurrencyLimit,
@@ -1111,7 +1132,7 @@ func (r *bulkSyncResource) Update(ctx context.Context, req resource.UpdateReques
 		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error creating bulk sync: %s", err))
 		return
 	}
-	updatedSchemas, err := retryOnCacheRefresh(ctx, "list bulk sync schemas", func() (*polytomic.ListBulkSchema, error) {
+	updatedSchemas, err := retryOnCacheRefresh(ctx, "list bulk sync schemas", func() (*polytomic.ListBulkSchemaEnvelope, error) {
 		return client.BulkSync.Schemas.List(ctx, data.Id.ValueString(), &bulksync.SchemasListRequest{})
 	})
 	if err != nil {
@@ -1119,7 +1140,7 @@ func (r *bulkSyncResource) Update(ctx context.Context, req resource.UpdateReques
 		return
 	}
 
-	data, diags = bulkSyncDataFromResponse(ctx, updated.Data, updatedSchemas.Data, &data)
+	data, diags = bulkSyncDataFromResponse(ctx, updated.Data, bulkSchemaListItemsToSchemas(updatedSchemas.Data), &data)
 	resp.Diagnostics.Append(diags...)
 	if diags.HasError() {
 		return
@@ -1145,7 +1166,7 @@ func (r *bulkSyncResource) Delete(ctx context.Context, req resource.DeleteReques
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
-	err = client.BulkSync.Remove(ctx, data.Id.ValueString(), &polytomic.BulkSyncRemoveRequest{})
+	err = client.BulkSync.Delete(ctx, data.Id.ValueString(), &polytomic.BulkSyncDeleteRequest{})
 	if err != nil {
 		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error deleting organization: %s", err))
 		return
@@ -1170,12 +1191,12 @@ func bulkSyncDataFromResponse(ctx context.Context, response *polytomic.BulkSyncR
 		"month":        types.StringType,
 		"day_of_month": types.StringType,
 	}, BulkSchedule{
-		DayOfMonth: response.Schedule.DayOfMonth,
-		DayOfWeek:  response.Schedule.DayOfWeek,
-		Frequency:  string(response.Schedule.Frequency),
-		Hour:       response.Schedule.Hour,
-		Minute:     response.Schedule.Minute,
-		Month:      response.Schedule.Month,
+		DayOfMonth: response.DefaultSchedule.DayOfMonth,
+		DayOfWeek:  response.DefaultSchedule.DayOfWeek,
+		Frequency:  string(response.DefaultSchedule.Frequency),
+		Hour:       response.DefaultSchedule.Hour,
+		Minute:     response.DefaultSchedule.Minute,
+		Month:      response.DefaultSchedule.Month,
 	})
 	if diags.HasError() {
 		return data, diags
@@ -1196,7 +1217,7 @@ func bulkSyncDataFromResponse(ctx context.Context, response *polytomic.BulkSyncR
 			schemas,
 			types.ObjectType{AttrTypes: bulkSyncSchema{}.AttrTypes()},
 			func(s bulkSyncSchema) string { return s.Id.ValueString() },
-			func(s *polytomic.BulkSchema) string { return pointer.GetString(s.Id) },
+			func(s *polytomic.BulkSchema) string { return pointer.GetString(s.ID) },
 			func(ctx context.Context, plan bulkSyncSchema, api *polytomic.BulkSchema) (bulkSyncSchema, diag.Diagnostics) {
 				var mergeDiags diag.Diagnostics
 				merged := plan
@@ -1222,7 +1243,7 @@ func bulkSyncDataFromResponse(ctx context.Context, response *polytomic.BulkSyncR
 						api.Fields,
 						types.ObjectType{AttrTypes: bulkSyncSchemaField{}.AttrTypes()},
 						func(f bulkSyncSchemaField) string { return f.Id.ValueString() },
-						func(f *polytomic.BulkField) string { return pointer.GetString(f.Id) },
+						func(f *polytomic.BulkField) string { return pointer.GetString(f.ID) },
 						func(_ context.Context, planField bulkSyncSchemaField, apiField *polytomic.BulkField) (bulkSyncSchemaField, diag.Diagnostics) {
 							m := planField
 							m.OutputName = PopulateUnknownString(m.OutputName, apiField.OutputName)
@@ -1313,7 +1334,7 @@ func bulkSyncDataFromResponse(ctx context.Context, response *polytomic.BulkSyncR
 
 	sourceVal, diags := types.ObjectValueFrom(ctx, bulkSyncConnection{}.AttrTypes(),
 		bulkSyncConnection{
-			ConnectionID:  types.StringPointerValue(response.SourceConnectionId),
+			ConnectionID:  types.StringPointerValue(response.SourceConnectionID),
 			Configuration: sourceConf,
 		},
 	)
@@ -1348,7 +1369,7 @@ func bulkSyncDataFromResponse(ctx context.Context, response *polytomic.BulkSyncR
 		"configuration": jsontypes.NormalizedType{},
 	},
 		bulkSyncConnection{
-			ConnectionID:  types.StringPointerValue(response.DestinationConnectionId),
+			ConnectionID:  types.StringPointerValue(response.DestinationConnectionID),
 			Configuration: destConf,
 		},
 	)
@@ -1356,8 +1377,8 @@ func bulkSyncDataFromResponse(ctx context.Context, response *polytomic.BulkSyncR
 		return data, diags
 	}
 
-	data.Id = types.StringPointerValue(response.Id)
-	data.Organization = types.StringPointerValue(response.OrganizationId)
+	data.Id = types.StringPointerValue(response.ID)
+	data.Organization = types.StringPointerValue(response.OrganizationID)
 	data.Name = types.StringPointerValue(response.Name)
 	data.Mode = types.StringValue(string(pointer.Get(response.Mode)))
 	data.Active = types.BoolPointerValue(response.Active)

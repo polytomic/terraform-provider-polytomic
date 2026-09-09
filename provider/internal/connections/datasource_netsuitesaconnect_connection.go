@@ -103,9 +103,9 @@ func (d *NetsuitesaconnectConnectionDataSource) Read(ctx context.Context, req da
 		return
 	}
 
-	data.Id = types.StringPointerValue(connection.Data.Id)
+	data.Id = types.StringPointerValue(connection.Data.ID)
 	data.Name = types.StringPointerValue(connection.Data.Name)
-	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
+	data.Organization = types.StringPointerValue(connection.Data.OrganizationID)
 
 	conf := NetsuitesaconnectDataSourceConf{}
 	err = mapstructure.Decode(connection.Data.Configuration, &conf)

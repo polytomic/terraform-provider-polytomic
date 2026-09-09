@@ -3,7 +3,7 @@ package provider
 import (
 	"testing"
 
-	ptclient "github.com/polytomic/polytomic-go/client"
+	ptclient "github.com/polytomic/polytomic-go/v25/client"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 	"github.com/stretchr/testify/require"
 )
