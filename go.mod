@@ -18,7 +18,7 @@ require (
 	github.com/lib/pq v1.12.3
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/pb33f/ordered-map/v2 v2.3.1
-	github.com/polytomic/polytomic-go v1.16.1
+	github.com/polytomic/polytomic-go v1.18.0
 	github.com/rs/zerolog v1.35.1
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/viper v1.21.0

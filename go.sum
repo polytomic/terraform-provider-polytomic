@@ -268,8 +268,8 @@ github.com/pjbgf/sha1cd v0.3.2/go.mod h1:zQWigSxVmsHEZow5qaLtPYxpcKMMQpa09ixqBxu
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 h1:Jamvg5psRIccs7FGNTlIRMkT8wgtp5eCXdBlqhYGL6U=
 github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
-github.com/polytomic/polytomic-go v1.16.1 h1:3yhha16PHcsTZe12yUR0gME/mlUuCqsviNsCpoVoCHE=
-github.com/polytomic/polytomic-go v1.16.1/go.mod h1:C+8UTbTtZa1+l8I93qEFskoMrS+hlCDpfElezI9O8Mo=
+github.com/polytomic/polytomic-go v1.18.0 h1:Psj+BnJHWPafjgUxKscAf+xyt4KuI+KPnMx3pJr4kok=
+github.com/polytomic/polytomic-go v1.18.0/go.mod h1:C+8UTbTtZa1+l8I93qEFskoMrS+hlCDpfElezI9O8Mo=
 github.com/polytomic/terraform-plugin-framework v1.19.0 h1:uatpfvNZABwuFWQcr33BwHljvb1yakVAPY4u8UA1IcU=
 github.com/polytomic/terraform-plugin-framework v1.19.0/go.mod h1:YRXOBu0jvs7xp4AThBbX4mAzYaMJ1JgtFH//oGKxwLc=
 github.com/posener/complete v1.1.1/go.mod h1:em0nMJCgc9GFtwrmVmEMR/ZL6WyhyjMBndrE9hABlRI=
