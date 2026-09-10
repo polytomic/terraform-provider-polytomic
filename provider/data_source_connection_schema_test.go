@@ -4,13 +4,71 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/AlekSi/pointer"
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
 	"github.com/hashicorp/terraform-plugin-testing/statecheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
+	"github.com/polytomic/polytomic-go/v25"
 )
+
+func TestNewSchemaFieldModel(t *testing.T) {
+	t.Run("reports primary key provenance", func(t *testing.T) {
+		fieldType := polytomic.UtilFieldTypeArray
+		m, err := newSchemaFieldModel(&polytomic.SchemaField{
+			ID:                 pointer.To("id"),
+			Type:               &fieldType,
+			TypeSpec:           pointer.To[any]([]any{"array", "string"}),
+			IsPrimaryKey:       pointer.To(false),
+			SourcePrimaryKey:   pointer.To(true),
+			PrimaryKeyOverride: pointer.To(false),
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if m.IsPrimaryKey.ValueBool() {
+			t.Error("is_primary_key: want false")
+		}
+		if !m.SourcePrimaryKey.ValueBool() {
+			t.Error("source_primary_key: want true")
+		}
+		if m.PrimaryKeyOverride.IsNull() || m.PrimaryKeyOverride.ValueBool() {
+			t.Errorf("primary_key_override: want false, got %s", m.PrimaryKeyOverride)
+		}
+		if got := m.TypeSpec.ValueString(); got != `["array","string"]` {
+			t.Errorf("type_spec: got %s", got)
+		}
+		if got := m.Type.ValueString(); got != "array" {
+			t.Errorf("type: got %s", got)
+		}
+	})
+
+	t.Run("leaves unreported values null", func(t *testing.T) {
+		m, err := newSchemaFieldModel(&polytomic.SchemaField{ID: pointer.To("name")})
+		if err != nil {
+			t.Fatal(err)
+		}
+		for name, v := range map[string]interface{ IsNull() bool }{
+			"source_primary_key":   m.SourcePrimaryKey,
+			"primary_key_override": m.PrimaryKeyOverride,
+			"type_spec":            m.TypeSpec,
+			"type":                 m.Type,
+			"path":                 m.Path,
+		} {
+			if !v.IsNull() {
+				t.Errorf("%s: want null", name)
+			}
+		}
+		if m.IsPrimaryKey.IsNull() || m.IsPrimaryKey.ValueBool() {
+			t.Errorf("is_primary_key: want false, got %s", m.IsPrimaryKey)
+		}
+		if m.UserManaged.IsNull() || m.UserManaged.ValueBool() {
+			t.Errorf("user_managed: want false, got %s", m.UserManaged)
+		}
+	})
+}
 
 func TestAccConnectionSchemaDataSource_Basic(t *testing.T) {
 	name := fmt.Sprintf("TestAccConnectionSchema-%s", uuid.NewString())
