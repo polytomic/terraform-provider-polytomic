@@ -108,6 +108,56 @@ func TestWaitForFieldRemoval(t *testing.T) {
 	}
 }
 
+func TestConnectionSchemaFieldCreate(t *testing.T) {
+	for _, tc := range []struct {
+		name        string
+		readBack    schemaResponse
+		wantWarning bool
+		wantPath    types.String
+	}{
+		{"reads the added field back", schemaWithFields(userManagedCity), false, types.StringValue("$.address.city")},
+		// The field exists once added, so it is recorded even though its
+		// computed attributes are unknown.
+		{"records the field when the read fails", schemaReadFailure, true, types.StringNull()},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			srv, _ := schemaServer(t, schemaWithFields(noFields), tc.readBack)
+			r, s := testFieldResource(t, srv)
+			ctx := t.Context()
+
+			plan := tfsdk.Plan{Schema: s.Schema}
+			diags := plan.Set(ctx, &connectionSchemaFieldResourceModel{
+				ID:           types.StringUnknown(),
+				Organization: types.StringUnknown(),
+				ConnectionID: types.StringValue("conn-1"),
+				SchemaID:     types.StringValue("orders"),
+				FieldID:      types.StringValue("city"),
+				Label:        types.StringValue("City"),
+				Type:         types.StringValue("string"),
+				Precision:    types.Int64Unknown(),
+				Scale:        types.Int64Unknown(),
+				TypeSpec:     newTypeSpecUnknown(),
+				Path:         types.StringUnknown(),
+			})
+			require.False(t, diags.HasError(), "%v", diags)
+
+			resp := resource.CreateResponse{State: tfsdk.State{Schema: s.Schema}}
+			r.Create(ctx, resource.CreateRequest{Plan: plan}, &resp)
+			require.False(t, resp.Diagnostics.HasError(), "%v", resp.Diagnostics)
+			assert.Equal(t, tc.wantWarning, resp.Diagnostics.WarningsCount() > 0, "%v", resp.Diagnostics)
+			require.True(t, resp.State.Raw.IsFullyKnown(), "state has unknown values: %v", resp.State.Raw)
+
+			var got connectionSchemaFieldResourceModel
+			diags = resp.State.Get(ctx, &got)
+			require.False(t, diags.HasError(), "%v", diags)
+			assert.Equal(t, "default/conn-1/orders/city", got.ID.ValueString())
+			assert.Equal(t, "City", got.Label.ValueString())
+			assert.Equal(t, "string", got.Type.ValueString())
+			assert.Equal(t, tc.wantPath, got.Path)
+		})
+	}
+}
+
 func TestConnectionSchemaFieldDelete(t *testing.T) {
 	shortenFieldRemovalWait(t)
 

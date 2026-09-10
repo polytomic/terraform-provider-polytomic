@@ -371,18 +371,16 @@ func (r *connectionSchemaFieldResource) Create(ctx context.Context, req resource
 			resp.Diagnostics.AddError("Error adding field", err.Error())
 			return
 		}
-		// Adding a field returns no body, so read the merged field back.
-		schemaData, err = fetchSchema(ctx, client, connectionID, schemaID)
-		if err != nil {
-			addSchemaReadError(&resp.Diagnostics, err, connectionID, schemaID)
-			return
-		}
-		if field = findSchemaField(schemaData, fieldID); field == nil {
-			resp.Diagnostics.AddError(
-				"Error adding field",
-				fmt.Sprintf("Field %s was not found in schema %s after it was added.", fieldID, schemaID),
+		// Adding a field returns no body, so read the merged field back. The
+		// field exists once it is added, so record it even when that read
+		// fails: otherwise the next apply finds it user-defined and refuses
+		// to add it.
+		if field, err = readSchemaField(ctx, client, connectionID, schemaID, fieldID); err != nil {
+			resp.Diagnostics.AddWarning(
+				"Error reading added field",
+				fmt.Sprintf("Field %s was added to schema %s, but reading it back failed: %s. "+
+					"Attributes the API fills in stay unset until the next refresh.", fieldID, schemaID, err),
 			)
-			return
 		}
 	case pointer.GetBool(existing.UserManaged):
 		resp.Diagnostics.AddError(
@@ -414,7 +412,9 @@ func (r *connectionSchemaFieldResource) Create(ctx context.Context, req resource
 		}
 	}
 
-	if err := applySchemaField(&data, field); err != nil {
+	if field == nil {
+		nullUnknownAttributes(&data)
+	} else if err := applySchemaField(&data, field); err != nil {
 		resp.Diagnostics.AddError("Error reading field", err.Error())
 		return
 	}
@@ -601,6 +601,18 @@ func patchSchemaField(ctx context.Context, client *ptclient.Client, connectionID
 	return resp.Data, nil
 }
 
+func readSchemaField(ctx context.Context, client *ptclient.Client, connectionID, schemaID, fieldID string) (*polytomic.SchemaField, error) {
+	schemaData, err := fetchSchema(ctx, client, connectionID, schemaID)
+	if err != nil {
+		return nil, err
+	}
+	field := findSchemaField(schemaData, fieldID)
+	if field == nil {
+		return nil, fmt.Errorf("schema %s has no field %s", schemaID, fieldID)
+	}
+	return field, nil
+}
+
 // Variables so tests can shorten them.
 var (
 	fieldRemovalTimeout  = 5 * time.Minute
@@ -636,6 +648,24 @@ func waitForFieldRemoval(ctx context.Context, client *ptclient.Client, connectio
 			return ctx.Err()
 		case <-time.After(fieldRemovalInterval):
 		}
+	}
+}
+
+// nullUnknownAttributes nulls the attributes a plan leaves for the API to fill
+// in, for recording a field that could not be read back.
+func nullUnknownAttributes(data *connectionSchemaFieldResourceModel) {
+	for _, s := range []*types.String{&data.Label, &data.Type, &data.Path} {
+		if s.IsUnknown() {
+			*s = types.StringNull()
+		}
+	}
+	for _, i := range []*types.Int64{&data.Precision, &data.Scale} {
+		if i.IsUnknown() {
+			*i = types.Int64Null()
+		}
+	}
+	if data.TypeSpec.IsUnknown() {
+		data.TypeSpec = newTypeSpecNull()
 	}
 }
 
