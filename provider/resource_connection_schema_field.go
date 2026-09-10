@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	"github.com/AlekSi/pointer"
-	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -38,17 +37,17 @@ type connectionSchemaFieldResource struct {
 }
 
 type connectionSchemaFieldResourceModel struct {
-	ID           types.String         `tfsdk:"id"`
-	Organization types.String         `tfsdk:"organization"`
-	ConnectionID types.String         `tfsdk:"connection_id"`
-	SchemaID     types.String         `tfsdk:"schema_id"`
-	FieldID      types.String         `tfsdk:"field_id"`
-	Label        types.String         `tfsdk:"label"`
-	Type         types.String         `tfsdk:"type"`
-	Precision    types.Int64          `tfsdk:"precision"`
-	Scale        types.Int64          `tfsdk:"scale"`
-	TypeSpec     jsontypes.Normalized `tfsdk:"type_spec"`
-	Path         types.String         `tfsdk:"path"`
+	ID           types.String  `tfsdk:"id"`
+	Organization types.String  `tfsdk:"organization"`
+	ConnectionID types.String  `tfsdk:"connection_id"`
+	SchemaID     types.String  `tfsdk:"schema_id"`
+	FieldID      types.String  `tfsdk:"field_id"`
+	Label        types.String  `tfsdk:"label"`
+	Type         types.String  `tfsdk:"type"`
+	Precision    types.Int64   `tfsdk:"precision"`
+	Scale        types.Int64   `tfsdk:"scale"`
+	TypeSpec     typeSpecValue `tfsdk:"type_spec"`
+	Path         types.String  `tfsdk:"path"`
 }
 
 func (r *connectionSchemaFieldResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -150,7 +149,7 @@ func (r *connectionSchemaFieldResource) Schema(ctx context.Context, req resource
 			"type_spec": schema.StringAttribute{
 				MarkdownDescription: "The field's detailed type, JSON encoded, for types `type` cannot express, such as " +
 					"`jsonencode([\"array\", \"string\"])`. Always reports the field's current type.",
-				CustomType: jsontypes.NormalizedType{},
+				CustomType: typeSpecType{},
 				Optional:   true,
 				Computed:   true,
 				Validators: []validator.String{
@@ -232,7 +231,7 @@ func planFieldType(ctx context.Context, config, state connectionSchemaFieldResou
 	if config.TypeSpec.IsNull() {
 		plan.TypeSpec = state.TypeSpec
 		if changed {
-			plan.TypeSpec = jsontypes.NewNormalizedUnknown()
+			plan.TypeSpec = newTypeSpecUnknown()
 		}
 	}
 	for _, attr := range []struct {
@@ -566,13 +565,13 @@ func applySchemaField(data *connectionSchemaFieldResourceModel, f *polytomic.Sch
 	data.Precision = types.Int64PointerValue(precision)
 	data.Scale = types.Int64PointerValue(scale)
 
-	data.TypeSpec = jsontypes.NewNormalizedNull()
+	data.TypeSpec = newTypeSpecNull()
 	if f.TypeSpec != nil && *f.TypeSpec != nil {
 		spec, err := json.Marshal(*f.TypeSpec)
 		if err != nil {
 			return fmt.Errorf("encoding type_spec for field %s: %w", pointer.GetString(f.ID), err)
 		}
-		data.TypeSpec = jsontypes.NewNormalizedValue(string(spec))
+		data.TypeSpec = newTypeSpecValue(string(spec))
 	}
 	return nil
 }
