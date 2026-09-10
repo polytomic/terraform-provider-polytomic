@@ -139,8 +139,7 @@ func newSchemaFieldModels(fields []*polytomic.SchemaField) ([]schemaFieldModel, 
 func fetchSchema(ctx context.Context, client *ptclient.Client, connectionID, schemaID string) (*polytomic.Schema, error) {
 	resp, err := client.Schemas.Get(ctx, connectionID, schemaID)
 	if err != nil {
-		pErr := &ptcore.APIError{}
-		if errors.As(err, &pErr) && pErr.StatusCode == http.StatusNotFound {
+		if isNotFound(err) {
 			return nil, errSchemaNotFound
 		}
 		return nil, err
@@ -149,6 +148,20 @@ func fetchSchema(ctx context.Context, client *ptclient.Client, connectionID, sch
 		return nil, errors.New("API returned nil schema data")
 	}
 	return resp.Data, nil
+}
+
+func findSchemaField(s *polytomic.Schema, fieldID string) *polytomic.SchemaField {
+	for _, f := range s.Fields {
+		if f != nil && pointer.GetString(f.ID) == fieldID {
+			return f
+		}
+	}
+	return nil
+}
+
+func isNotFound(err error) bool {
+	pErr := &ptcore.APIError{}
+	return errors.As(err, &pErr) && pErr.StatusCode == http.StatusNotFound
 }
 
 // connectionOrganization returns the ID of the organization that owns a
