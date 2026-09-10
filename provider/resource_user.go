@@ -16,8 +16,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
-	"github.com/polytomic/polytomic-go"
-	ptcore "github.com/polytomic/polytomic-go/core"
+	"github.com/polytomic/polytomic-go/v25"
+	ptcore "github.com/polytomic/polytomic-go/v25/core"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
@@ -120,7 +120,7 @@ func (r *userResource) Create(ctx context.Context, req resource.CreateRequest, r
 		if resp.Diagnostics.HasError() {
 			return
 		}
-		createReq.RoleIds = roleIDs
+		createReq.RoleIDs = roleIDs
 	} else {
 		createReq.Role = data.Role.ValueStringPointer()
 	}
@@ -133,8 +133,8 @@ func (r *userResource) Create(ctx context.Context, req resource.CreateRequest, r
 		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error creating user: %s", err))
 		return
 	}
-	data.Id = types.StringPointerValue(created.Data.Id)
-	data.RoleIDs, diags = types.ListValueFrom(ctx, types.StringType, created.Data.RoleIds)
+	data.Id = types.StringPointerValue(created.Data.ID)
+	data.RoleIDs, diags = types.ListValueFrom(ctx, types.StringType, created.Data.RoleIDs)
 	resp.Diagnostics.Append(diags...)
 	tflog.Trace(ctx, "created a user")
 
@@ -170,19 +170,19 @@ func (r *userResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error reading user: %s", err))
 		return
 	}
-	if user.Data.Id == nil {
+	if user.Data.ID == nil {
 		resp.State.RemoveResource(ctx)
 		return
 	}
 
-	data.Id = types.StringPointerValue(user.Data.Id)
-	data.Organization = types.StringPointerValue(user.Data.OrganizationId)
+	data.Id = types.StringPointerValue(user.Data.ID)
+	data.Organization = types.StringPointerValue(user.Data.OrganizationID)
 	// Our backend normalizes role names (e.g. "Admin" → "admin"). Only
 	// update state if the values differ case-insensitively to avoid drift.
 	if user.Data.Role != nil && !strings.EqualFold(data.Role.ValueString(), *user.Data.Role) {
 		data.Role = types.StringPointerValue(user.Data.Role)
 	}
-	data.RoleIDs, diags = types.ListValueFrom(ctx, types.StringType, user.Data.RoleIds)
+	data.RoleIDs, diags = types.ListValueFrom(ctx, types.StringType, user.Data.RoleIDs)
 	resp.Diagnostics.Append(diags...)
 
 	// Our backend normalizes email addresses to lowercase. As a result,
@@ -232,7 +232,7 @@ func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		if resp.Diagnostics.HasError() {
 			return
 		}
-		updateReq.RoleIds = roleIDs
+		updateReq.RoleIDs = roleIDs
 	} else {
 		updateReq.Role = data.Role.ValueStringPointer()
 	}
@@ -247,13 +247,13 @@ func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		return
 	}
 
-	data.Id = types.StringPointerValue(user.Data.Id)
-	data.Organization = types.StringPointerValue(user.Data.OrganizationId)
+	data.Id = types.StringPointerValue(user.Data.ID)
+	data.Organization = types.StringPointerValue(user.Data.OrganizationID)
 	// Only update role in state if it differs case-insensitively to avoid drift.
 	if user.Data.Role != nil && !strings.EqualFold(data.Role.ValueString(), *user.Data.Role) {
 		data.Role = types.StringPointerValue(user.Data.Role)
 	}
-	data.RoleIDs, diags = types.ListValueFrom(ctx, types.StringType, user.Data.RoleIds)
+	data.RoleIDs, diags = types.ListValueFrom(ctx, types.StringType, user.Data.RoleIDs)
 	resp.Diagnostics.Append(diags...)
 
 	diags = resp.State.Set(ctx, &data)
@@ -274,7 +274,7 @@ func (r *userResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
-	_, err = client.Users.Remove(ctx, data.Id.ValueString(), data.Organization.ValueString())
+	_, err = client.Users.Delete(ctx, data.Id.ValueString(), data.Organization.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error deleting user: %s", err))
 		return
@@ -306,12 +306,12 @@ func (r *userResource) ImportState(ctx context.Context, req resource.ImportState
 			return
 		}
 
-		if identity.Data.OrganizationId == nil {
+		if identity.Data.OrganizationID == nil {
 			resp.Diagnostics.AddError("Error getting organization", "Caller identity does not have an organization ID")
 			return
 		}
 
-		organizationID = *identity.Data.OrganizationId
+		organizationID = *identity.Data.OrganizationID
 	} else {
 		resp.Diagnostics.AddError(
 			"Invalid import ID format",
@@ -362,7 +362,7 @@ func (r *userResource) ImportState(ctx context.Context, req resource.ImportState
 			return
 		}
 
-		if foundUser.Id == nil {
+		if foundUser.ID == nil {
 			resp.Diagnostics.AddError(
 				"Invalid user data",
 				fmt.Sprintf("User with email %s has no ID", identifier),
@@ -370,7 +370,7 @@ func (r *userResource) ImportState(ctx context.Context, req resource.ImportState
 			return
 		}
 
-		userID = *foundUser.Id
+		userID = *foundUser.ID
 		tflog.Debug(ctx, "Found user by email", map[string]any{
 			"email":   identifier,
 			"user_id": userID,

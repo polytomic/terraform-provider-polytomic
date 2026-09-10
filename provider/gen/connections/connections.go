@@ -17,9 +17,9 @@ import (
 
 	"github.com/AlekSi/pointer"
 	"github.com/invopop/jsonschema"
-	"github.com/polytomic/polytomic-go"
-	ptclient "github.com/polytomic/polytomic-go/client"
-	"github.com/polytomic/polytomic-go/option"
+	"github.com/polytomic/polytomic-go/v25"
+	ptclient "github.com/polytomic/polytomic-go/v25/client"
+	"github.com/polytomic/polytomic-go/v25/option"
 )
 
 const (
@@ -237,8 +237,8 @@ var defaultImports = `
 "github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 "github.com/hashicorp/terraform-plugin-framework/types"
 "github.com/hashicorp/terraform-plugin-log/tflog"
-"github.com/polytomic/polytomic-go"
-ptcore "github.com/polytomic/polytomic-go/core"
+"github.com/polytomic/polytomic-go/v25"
+ptcore "github.com/polytomic/polytomic-go/v25/core"
 "github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 `
 
@@ -306,7 +306,7 @@ func GenerateConnections(ctx context.Context) error {
 			result := make([]ConnectionType, len(connTypes.Data))
 			for i, ct := range connTypes.Data {
 				result[i] = ConnectionType{
-					ID:       pointer.Get(ct.Id),
+					ID:       pointer.Get(ct.ID),
 					Name:     pointer.Get(ct.Name),
 					UseOAuth: pointer.Get(ct.UseOauth),
 				}

@@ -6,7 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	ptclient "github.com/polytomic/polytomic-go/client"
+	ptclient "github.com/polytomic/polytomic-go/v25/client"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
@@ -108,10 +108,10 @@ func (id *identityDatasource) Read(ctx context.Context, req datasource.ReadReque
 		return
 	}
 
-	data.ID = types.StringPointerValue(identity.Data.Id)
+	data.ID = types.StringPointerValue(identity.Data.ID)
 	data.Email = types.StringPointerValue(identity.Data.Email)
 	data.Role = types.StringPointerValue(identity.Data.Role)
-	data.OrganizationID = types.StringPointerValue(identity.Data.OrganizationId)
+	data.OrganizationID = types.StringPointerValue(identity.Data.OrganizationID)
 	data.OrganizationName = types.StringPointerValue(identity.Data.OrganizationName)
 	data.IsUser = types.BoolPointerValue(identity.Data.IsUser)
 	data.IsOrganization = types.BoolPointerValue(identity.Data.IsOrganization)

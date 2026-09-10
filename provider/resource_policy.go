@@ -14,9 +14,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/polytomic/polytomic-go"
-	ptcore "github.com/polytomic/polytomic-go/core"
-	"github.com/polytomic/polytomic-go/permissions"
+	"github.com/polytomic/polytomic-go/v25"
+	ptcore "github.com/polytomic/polytomic-go/v25/core"
+	"github.com/polytomic/polytomic-go/v25/permissions"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
@@ -117,7 +117,7 @@ func (r *policyResource) Create(ctx context.Context, req resource.CreateRequest,
 		ctx,
 		&permissions.CreatePolicyRequest{
 			Name:           data.Name.ValueString(),
-			OrganizationId: data.Organization.ValueStringPointer(),
+			OrganizationID: data.Organization.ValueStringPointer(),
 			PolicyActions:  policyActions,
 		},
 	)
@@ -140,7 +140,7 @@ func (r *policyResource) Create(ctx context.Context, req resource.CreateRequest,
 			continue
 		}
 
-		if len(action.RoleIds) > 0 {
+		if len(action.RoleIDs) > 0 {
 			resp.Diagnostics.AddWarning(
 				"Policy has actions not tracked by Terraform",
 				fmt.Sprintf("Policy action %s has roles set but is not tracked in the state. This may cause data to be overwritten",
@@ -159,9 +159,9 @@ func (r *policyResource) Create(ctx context.Context, req resource.CreateRequest,
 		return
 	}
 
-	data.Id = types.StringPointerValue(policy.Data.Id)
+	data.Id = types.StringPointerValue(policy.Data.ID)
 	data.Name = types.StringPointerValue(policy.Data.Name)
-	data.Organization = types.StringPointerValue(policy.Data.OrganizationId)
+	data.Organization = types.StringPointerValue(policy.Data.OrganizationID)
 	data.PolicyActions = resultPolicies
 	data.System = types.BoolPointerValue(policy.Data.System)
 
@@ -218,7 +218,7 @@ func (r *policyResource) Read(ctx context.Context, req resource.ReadRequest, res
 			continue
 		}
 
-		if len(action.RoleIds) > 0 {
+		if len(action.RoleIDs) > 0 {
 			resp.Diagnostics.AddWarning(
 				"Policy has actions not tracked by Terraform",
 				fmt.Sprintf("Policy action %s has roles set but is not tracked in the state. This may cause data to be overwritten",
@@ -238,9 +238,9 @@ func (r *policyResource) Read(ctx context.Context, req resource.ReadRequest, res
 		return
 	}
 
-	data.Id = types.StringPointerValue(policy.Data.Id)
+	data.Id = types.StringPointerValue(policy.Data.ID)
 	data.Name = types.StringPointerValue(policy.Data.Name)
-	data.Organization = types.StringPointerValue(policy.Data.OrganizationId)
+	data.Organization = types.StringPointerValue(policy.Data.OrganizationID)
 	data.PolicyActions = resultPolicies
 	data.System = types.BoolPointerValue(policy.Data.System)
 
@@ -274,7 +274,7 @@ func (r *policyResource) Update(ctx context.Context, req resource.UpdateRequest,
 		data.Id.ValueString(),
 		&permissions.UpdatePolicyRequest{
 			Name:           data.Name.ValueString(),
-			OrganizationId: data.Organization.ValueStringPointer(),
+			OrganizationID: data.Organization.ValueStringPointer(),
 			PolicyActions:  policyActions,
 		},
 	)
@@ -297,7 +297,7 @@ func (r *policyResource) Update(ctx context.Context, req resource.UpdateRequest,
 			continue
 		}
 
-		if len(action.RoleIds) > 0 {
+		if len(action.RoleIDs) > 0 {
 			resp.Diagnostics.AddWarning(
 				"Policy has actions not tracked by Terraform",
 				fmt.Sprintf("Policy action %s has roles set but is not tracked in the state. This may cause data to be overwritten",
@@ -317,9 +317,9 @@ func (r *policyResource) Update(ctx context.Context, req resource.UpdateRequest,
 		return
 	}
 
-	data.Id = types.StringPointerValue(policy.Data.Id)
+	data.Id = types.StringPointerValue(policy.Data.ID)
 	data.Name = types.StringPointerValue(policy.Data.Name)
-	data.Organization = types.StringPointerValue(policy.Data.OrganizationId)
+	data.Organization = types.StringPointerValue(policy.Data.OrganizationID)
 	data.PolicyActions = resultPolicies
 	data.System = types.BoolPointerValue(policy.Data.System)
 
@@ -342,7 +342,7 @@ func (r *policyResource) Delete(ctx context.Context, req resource.DeleteRequest,
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
-	err = client.Permissions.Policies.Remove(ctx, data.Id.ValueString())
+	err = client.Permissions.Policies.Delete(ctx, data.Id.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error deleting policy: %s", err))
 		return

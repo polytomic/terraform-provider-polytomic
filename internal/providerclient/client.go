@@ -15,9 +15,9 @@ import (
 	"github.com/AlekSi/pointer"
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/polytomic/polytomic-go"
-	ptclient "github.com/polytomic/polytomic-go/client"
-	ptoption "github.com/polytomic/polytomic-go/option"
+	"github.com/polytomic/polytomic-go/v25"
+	ptclient "github.com/polytomic/polytomic-go/v25/client"
+	ptoption "github.com/polytomic/polytomic-go/v25/option"
 )
 
 // ErrNoPartnerKey is returned by PartnerClient when no partner or deployment
@@ -27,7 +27,7 @@ var ErrNoPartnerKey = errors.New("partner key is required")
 
 const (
 	UserAgent    = "polytomic-terraform-provider"
-	APIVersion   = "2024-02-08"
+	APIVersion   = "2025-09-18"
 	ErrorSummary = "Client Error"
 
 	//PolytomicDeploymentKey is the environment variable name for the Polytomic deployment key
@@ -143,7 +143,7 @@ func (p *Provider) Client(ctx context.Context, org string) (*ptclient.Client, er
 			if err != nil {
 				return nil, fmt.Errorf("failed to get caller identity for API key: %w", err)
 			}
-			if identity == nil || identity.Data == nil || pointer.Get(identity.Data.OrganizationId) != orgID.String() {
+			if identity == nil || identity.Data == nil || pointer.Get(identity.Data.OrganizationID) != orgID.String() {
 				return nil, fmt.Errorf("API key does not have access to organization %s", orgID)
 			}
 		}

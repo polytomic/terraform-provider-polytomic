@@ -88,9 +88,9 @@ func (d *FreshserviceConnectionDataSource) Read(ctx context.Context, req datasou
 		return
 	}
 
-	data.Id = types.StringPointerValue(connection.Data.Id)
+	data.Id = types.StringPointerValue(connection.Data.ID)
 	data.Name = types.StringPointerValue(connection.Data.Name)
-	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
+	data.Organization = types.StringPointerValue(connection.Data.OrganizationID)
 
 	conf := FreshserviceDataSourceConf{}
 	err = mapstructure.Decode(connection.Data.Configuration, &conf)

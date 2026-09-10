@@ -8,8 +8,8 @@ import (
 	"github.com/AlekSi/pointer"
 	"github.com/hashicorp/hcl/v2/hclwrite"
 	"github.com/mitchellh/mapstructure"
-	"github.com/polytomic/polytomic-go"
-	ptclient "github.com/polytomic/polytomic-go/client"
+	"github.com/polytomic/polytomic-go/v25"
+	ptclient "github.com/polytomic/polytomic-go/v25/client"
 	"github.com/polytomic/terraform-provider-polytomic/provider"
 	"github.com/zclconf/go-cty/cty"
 )
@@ -26,13 +26,13 @@ var (
 type Syncs struct {
 	c *ptclient.Client
 
-	Resources map[string]*polytomic.ModelSyncResponse
+	Resources map[string]*polytomic.ListSyncItem
 }
 
 func NewSyncs(c *ptclient.Client) *Syncs {
 	return &Syncs{
 		c:         c,
-		Resources: make(map[string]*polytomic.ModelSyncResponse),
+		Resources: make(map[string]*polytomic.ListSyncItem),
 	}
 }
 
@@ -59,7 +59,7 @@ func (s *Syncs) GenerateTerraformFiles(ctx context.Context, writer io.Writer, re
 
 	for _, name := range sortedKeys(s.Resources) {
 		syn := s.Resources[name]
-		sync, err := s.c.ModelSync.Get(ctx, pointer.GetString(syn.Id))
+		sync, err := s.c.ModelSync.Get(ctx, pointer.GetString(syn.ID))
 		if err != nil {
 			return err
 		}
@@ -255,7 +255,7 @@ func (s *Syncs) GenerateImports(ctx context.Context, writer io.Writer) error {
 		writer.Write([]byte(fmt.Sprintf("terraform import %s.%s %s",
 			SyncResource,
 			name,
-			pointer.GetString(sync.Id))))
+			pointer.GetString(sync.ID))))
 		writer.Write([]byte(fmt.Sprintf(" # %s\n", pointer.GetString(sync.Name))))
 	}
 	return nil
@@ -268,7 +268,7 @@ func (s *Syncs) Filename() string {
 func (s *Syncs) ResourceRefs() map[string]string {
 	result := make(map[string]string)
 	for name, sync := range s.Resources {
-		result[pointer.GetString(sync.Id)] = fmt.Sprintf("%s.%s.id", SyncResource, name)
+		result[pointer.GetString(sync.ID)] = fmt.Sprintf("%s.%s.id", SyncResource, name)
 	}
 	return result
 }
@@ -283,7 +283,7 @@ func (s *Syncs) Variables() []Variable {
 
 // buildFieldMapping creates a mapping structure for schema validation
 // This represents the HCL structure we're generating
-func (s *Syncs) buildFieldMapping(sync *polytomic.ModelSyncResponse) map[string]interface{} {
+func (s *Syncs) buildFieldMapping(sync *polytomic.ModelSyncV5Response) map[string]interface{} {
 	mapping := map[string]interface{}{
 		"name":             pointer.GetString(sync.Name),
 		"active":           pointer.GetBool(sync.Active),

@@ -88,9 +88,9 @@ func (d *Sharepoint_excelConnectionDataSource) Read(ctx context.Context, req dat
 		return
 	}
 
-	data.Id = types.StringPointerValue(connection.Data.Id)
+	data.Id = types.StringPointerValue(connection.Data.ID)
 	data.Name = types.StringPointerValue(connection.Data.Name)
-	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
+	data.Organization = types.StringPointerValue(connection.Data.OrganizationID)
 
 	conf := Sharepoint_excelDataSourceConf{}
 	err = mapstructure.Decode(connection.Data.Configuration, &conf)

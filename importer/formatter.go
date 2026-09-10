@@ -5,7 +5,7 @@ import (
 	"regexp"
 
 	"github.com/hashicorp/hcl/v2/hclwrite"
-	"github.com/polytomic/polytomic-go"
+	"github.com/polytomic/polytomic-go/v25"
 	"github.com/zclconf/go-cty/cty"
 	"golang.org/x/exp/slices"
 )
@@ -217,7 +217,7 @@ func typeConverter(value any) cty.Value {
 		}
 		config := map[string]cty.Value{
 			"field":    cty.StringVal(value.Field),
-			"model_id": cty.StringVal(value.ModelId),
+			"model_id": cty.StringVal(value.ModelID),
 		}
 		return cty.ObjectVal(config)
 	case polytomic.FilterFunction:

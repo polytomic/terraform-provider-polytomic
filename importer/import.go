@@ -7,8 +7,8 @@ import (
 	"strings"
 
 	"github.com/AlekSi/pointer"
-	"github.com/polytomic/polytomic-go"
-	ptclient "github.com/polytomic/polytomic-go/client"
+	"github.com/polytomic/polytomic-go/v25"
+	ptclient "github.com/polytomic/polytomic-go/v25/client"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 	"github.com/rs/zerolog/log"
 )
@@ -52,7 +52,7 @@ func Init(ctx context.Context, clientProvider *providerclient.Provider, organiza
 	// Filter organizations if specified, otherwise use all discovered
 	// organizations
 	for _, org := range orgs {
-		if len(orgFilter) == 0 || orgFilter[pointer.Get(org.Id)] {
+		if len(orgFilter) == 0 || orgFilter[pointer.Get(org.ID)] {
 			targetOrgs = append(targetOrgs, org)
 		}
 	}
@@ -64,7 +64,7 @@ func Init(ctx context.Context, clientProvider *providerclient.Provider, organiza
 		// Log discovered organizations for user awareness
 		log.Info().Msgf("Discovered %d organization(s) for export:", len(targetOrgs))
 		for _, org := range targetOrgs {
-			log.Info().Str("id", pointer.Get(org.Id)).Str("name", pointer.Get(org.Name)).Msg("  - Organization")
+			log.Info().Str("id", pointer.Get(org.ID)).Str("name", pointer.Get(org.Name)).Msg("  - Organization")
 		}
 	}
 
@@ -75,7 +75,7 @@ func Init(ctx context.Context, clientProvider *providerclient.Provider, organiza
 			orgPath := filepath.Join(outputPath, pointer.Get(org.Name))
 
 			// Import resources for this organization
-			orgClient, err := clientProvider.Client(ctx, pointer.Get(org.Id))
+			orgClient, err := clientProvider.Client(ctx, pointer.Get(org.ID))
 			if err != nil {
 				log.Fatal().AnErr("error", err).Msg("failed to create organization client")
 			}
@@ -83,7 +83,7 @@ func Init(ctx context.Context, clientProvider *providerclient.Provider, organiza
 		}
 	} else {
 		// Single organization - use it directly
-		orgClient, err := clientProvider.Client(ctx, pointer.Get(targetOrgs[0].Id))
+		orgClient, err := clientProvider.Client(ctx, pointer.Get(targetOrgs[0].ID))
 		if err != nil {
 			log.Fatal().AnErr("error", err).Msg("failed to create organization client")
 		}
@@ -94,7 +94,7 @@ func Init(ctx context.Context, clientProvider *providerclient.Provider, organiza
 // importOrganization imports resources for a single organization
 func importOrganization(ctx context.Context, org *polytomic.Organization, c *ptclient.Client, path string, recreate, includePermissions, orgResource bool) {
 	log.Info().
-		Str("org_id", pointer.Get(org.Id)).
+		Str("org_id", pointer.Get(org.ID)).
 		Str("org_name", pointer.Get(org.Name)).
 		Str("path", path).
 		Msg("importing organization")
@@ -133,7 +133,7 @@ func importOrganization(ctx context.Context, org *polytomic.Organization, c *ptc
 		err := i.Init(ctx)
 		if err != nil {
 			log.Fatal().AnErr("error", err).
-				Str("organization_id", *org.Id).
+				Str("organization_id", *org.ID).
 				Str("importable", i.Filename()).
 				Msg("failed to initialize")
 		}

@@ -21,8 +21,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/mitchellh/mapstructure"
-	"github.com/polytomic/polytomic-go"
-	ptcore "github.com/polytomic/polytomic-go/core"
+	"github.com/polytomic/polytomic-go/v25"
+	ptcore "github.com/polytomic/polytomic-go/v25/core"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -167,7 +167,7 @@ func (r *Amazon_selling_partnerConnectionResource) Create(ctx context.Context, r
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "amazon_selling_partner",
-		OrganizationId: data.Organization.ValueStringPointer(),
+		OrganizationID: data.Organization.ValueStringPointer(),
 		Configuration:  connConf,
 		Validate:       pointer.ToBool(false),
 	})
@@ -175,9 +175,9 @@ func (r *Amazon_selling_partnerConnectionResource) Create(ctx context.Context, r
 		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error creating connection: %s", err))
 		return
 	}
-	data.Id = types.StringPointerValue(created.Data.Id)
+	data.Id = types.StringPointerValue(created.Data.ID)
 	data.Name = types.StringPointerValue(created.Data.Name)
-	data.Organization = types.StringPointerValue(created.Data.OrganizationId)
+	data.Organization = types.StringPointerValue(created.Data.OrganizationID)
 
 	configAttributes, ok := getConfigAttributes(Amazon_selling_partnerSchema)
 	if !ok {
@@ -212,7 +212,7 @@ func (r *Amazon_selling_partnerConnectionResource) Create(ctx context.Context, r
 		return
 	}
 
-	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Amazon_selling_partner", "id": created.Data.Id})
+	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Amazon_selling_partner", "id": created.Data.ID})
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -250,9 +250,9 @@ func (r *Amazon_selling_partnerConnectionResource) Read(ctx context.Context, req
 		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error reading connection: %s", err))
 		return
 	}
-	data.Id = types.StringPointerValue(connection.Data.Id)
+	data.Id = types.StringPointerValue(connection.Data.ID)
 	data.Name = types.StringPointerValue(connection.Data.Name)
-	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
+	data.Organization = types.StringPointerValue(connection.Data.OrganizationID)
 
 	configAttributes, ok := getConfigAttributes(Amazon_selling_partnerSchema)
 	if !ok {
@@ -332,7 +332,7 @@ func (r *Amazon_selling_partnerConnectionResource) Update(ctx context.Context, r
 		data.Id.ValueString(),
 		&polytomic.UpdateConnectionRequestSchema{
 			Name:           data.Name.ValueString(),
-			OrganizationId: data.Organization.ValueStringPointer(),
+			OrganizationID: data.Organization.ValueStringPointer(),
 			Configuration:  connConf,
 			Validate:       pointer.ToBool(false),
 		})
@@ -341,9 +341,9 @@ func (r *Amazon_selling_partnerConnectionResource) Update(ctx context.Context, r
 		return
 	}
 
-	data.Id = types.StringPointerValue(updated.Data.Id)
+	data.Id = types.StringPointerValue(updated.Data.ID)
 	data.Name = types.StringPointerValue(updated.Data.Name)
-	data.Organization = types.StringPointerValue(updated.Data.OrganizationId)
+	data.Organization = types.StringPointerValue(updated.Data.OrganizationID)
 
 	planConfData, err := objectMapValue(ctx, data.Configuration)
 	if err != nil {
@@ -391,7 +391,7 @@ func (r *Amazon_selling_partnerConnectionResource) Delete(ctx context.Context, r
 		return
 	}
 	if data.ForceDestroy.ValueBool() {
-		err := client.Connections.Remove(ctx, data.Id.ValueString(), &polytomic.ConnectionsRemoveRequest{
+		err := client.Connections.Delete(ctx, data.Id.ValueString(), &polytomic.ConnectionsDeleteRequest{
 			Force: pointer.ToBool(true),
 		})
 		if err != nil {
@@ -406,7 +406,7 @@ func (r *Amazon_selling_partnerConnectionResource) Delete(ctx context.Context, r
 		return
 	}
 
-	err = client.Connections.Remove(ctx, data.Id.ValueString(), &polytomic.ConnectionsRemoveRequest{
+	err = client.Connections.Delete(ctx, data.Id.ValueString(), &polytomic.ConnectionsDeleteRequest{
 		Force: pointer.ToBool(false),
 	})
 	if err != nil {

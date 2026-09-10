@@ -21,8 +21,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/mitchellh/mapstructure"
-	"github.com/polytomic/polytomic-go"
-	ptcore "github.com/polytomic/polytomic-go/core"
+	"github.com/polytomic/polytomic-go/v25"
+	ptcore "github.com/polytomic/polytomic-go/v25/core"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
@@ -123,7 +123,7 @@ func (r *HerondataConnectionResource) Create(ctx context.Context, req resource.C
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
 		Type:           "herondata",
-		OrganizationId: data.Organization.ValueStringPointer(),
+		OrganizationID: data.Organization.ValueStringPointer(),
 		Configuration:  connConf,
 		Validate:       pointer.ToBool(false),
 	})
@@ -131,9 +131,9 @@ func (r *HerondataConnectionResource) Create(ctx context.Context, req resource.C
 		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error creating connection: %s", err))
 		return
 	}
-	data.Id = types.StringPointerValue(created.Data.Id)
+	data.Id = types.StringPointerValue(created.Data.ID)
 	data.Name = types.StringPointerValue(created.Data.Name)
-	data.Organization = types.StringPointerValue(created.Data.OrganizationId)
+	data.Organization = types.StringPointerValue(created.Data.OrganizationID)
 
 	configAttributes, ok := getConfigAttributes(HerondataSchema)
 	if !ok {
@@ -164,7 +164,7 @@ func (r *HerondataConnectionResource) Create(ctx context.Context, req resource.C
 		return
 	}
 
-	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Herondata", "id": created.Data.Id})
+	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Herondata", "id": created.Data.ID})
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -202,9 +202,9 @@ func (r *HerondataConnectionResource) Read(ctx context.Context, req resource.Rea
 		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error reading connection: %s", err))
 		return
 	}
-	data.Id = types.StringPointerValue(connection.Data.Id)
+	data.Id = types.StringPointerValue(connection.Data.ID)
 	data.Name = types.StringPointerValue(connection.Data.Name)
-	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
+	data.Organization = types.StringPointerValue(connection.Data.OrganizationID)
 
 	configAttributes, ok := getConfigAttributes(HerondataSchema)
 	if !ok {
@@ -280,7 +280,7 @@ func (r *HerondataConnectionResource) Update(ctx context.Context, req resource.U
 		data.Id.ValueString(),
 		&polytomic.UpdateConnectionRequestSchema{
 			Name:           data.Name.ValueString(),
-			OrganizationId: data.Organization.ValueStringPointer(),
+			OrganizationID: data.Organization.ValueStringPointer(),
 			Configuration:  connConf,
 			Validate:       pointer.ToBool(false),
 		})
@@ -289,9 +289,9 @@ func (r *HerondataConnectionResource) Update(ctx context.Context, req resource.U
 		return
 	}
 
-	data.Id = types.StringPointerValue(updated.Data.Id)
+	data.Id = types.StringPointerValue(updated.Data.ID)
 	data.Name = types.StringPointerValue(updated.Data.Name)
-	data.Organization = types.StringPointerValue(updated.Data.OrganizationId)
+	data.Organization = types.StringPointerValue(updated.Data.OrganizationID)
 
 	planConfData, err := objectMapValue(ctx, data.Configuration)
 	if err != nil {
@@ -335,7 +335,7 @@ func (r *HerondataConnectionResource) Delete(ctx context.Context, req resource.D
 		return
 	}
 	if data.ForceDestroy.ValueBool() {
-		err := client.Connections.Remove(ctx, data.Id.ValueString(), &polytomic.ConnectionsRemoveRequest{
+		err := client.Connections.Delete(ctx, data.Id.ValueString(), &polytomic.ConnectionsDeleteRequest{
 			Force: pointer.ToBool(true),
 		})
 		if err != nil {
@@ -350,7 +350,7 @@ func (r *HerondataConnectionResource) Delete(ctx context.Context, req resource.D
 		return
 	}
 
-	err = client.Connections.Remove(ctx, data.Id.ValueString(), &polytomic.ConnectionsRemoveRequest{
+	err = client.Connections.Delete(ctx, data.Id.ValueString(), &polytomic.ConnectionsDeleteRequest{
 		Force: pointer.ToBool(false),
 	})
 	if err != nil {

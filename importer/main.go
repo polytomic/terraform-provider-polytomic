@@ -10,7 +10,7 @@ import (
 
 	"github.com/AlekSi/pointer"
 	"github.com/hashicorp/hcl/v2/hclwrite"
-	"github.com/polytomic/polytomic-go"
+	"github.com/polytomic/polytomic-go/v25"
 )
 
 var (
@@ -59,8 +59,8 @@ func NewMain(org *polytomic.Organization, orgResource bool) *Main {
 		Slug:        pointer.Get(org.Name),
 		Name:        pointer.Get(org.Name),
 	}
-	if orgResource && pointer.Get(org.Id) != "" {
-		m.ID = pointer.Get(org.Id)
+	if orgResource && pointer.Get(org.ID) != "" {
+		m.ID = pointer.Get(org.ID)
 	}
 
 	return m

@@ -93,9 +93,9 @@ func (d *Auth0ConnectionDataSource) Read(ctx context.Context, req datasource.Rea
 		return
 	}
 
-	data.Id = types.StringPointerValue(connection.Data.Id)
+	data.Id = types.StringPointerValue(connection.Data.ID)
 	data.Name = types.StringPointerValue(connection.Data.Name)
-	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
+	data.Organization = types.StringPointerValue(connection.Data.OrganizationID)
 
 	conf := Auth0DataSourceConf{}
 	err = mapstructure.Decode(connection.Data.Configuration, &conf)

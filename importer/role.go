@@ -8,8 +8,8 @@ import (
 	"github.com/AlekSi/pointer"
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hclwrite"
-	"github.com/polytomic/polytomic-go"
-	ptclient "github.com/polytomic/polytomic-go/client"
+	"github.com/polytomic/polytomic-go/v25"
+	ptclient "github.com/polytomic/polytomic-go/v25/client"
 	"github.com/polytomic/terraform-provider-polytomic/provider"
 	"github.com/zclconf/go-cty/cty"
 )
@@ -86,7 +86,7 @@ func (r *Roles) GenerateImports(ctx context.Context, writer io.Writer) error {
 		writer.Write([]byte(fmt.Sprintf("terraform import %s.%s %s",
 			RoleResource,
 			name,
-			pointer.GetString(role.Id))))
+			pointer.GetString(role.ID))))
 		writer.Write([]byte(fmt.Sprintf(" # %s\n", pointer.GetString(role.Name))))
 	}
 	return nil
@@ -99,7 +99,7 @@ func (r *Roles) Filename() string {
 func (r *Roles) ResourceRefs() map[string]string {
 	result := make(map[string]string)
 	for name, role := range r.Resources {
-		result[pointer.GetString(role.Id)] = fmt.Sprintf("polytomic_role.%s.id", name)
+		result[pointer.GetString(role.ID)] = fmt.Sprintf("polytomic_role.%s.id", name)
 	}
 	return result
 }

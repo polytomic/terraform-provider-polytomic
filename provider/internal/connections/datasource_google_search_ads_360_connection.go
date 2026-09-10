@@ -108,9 +108,9 @@ func (d *Google_search_ads_360ConnectionDataSource) Read(ctx context.Context, re
 		return
 	}
 
-	data.Id = types.StringPointerValue(connection.Data.Id)
+	data.Id = types.StringPointerValue(connection.Data.ID)
 	data.Name = types.StringPointerValue(connection.Data.Name)
-	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
+	data.Organization = types.StringPointerValue(connection.Data.OrganizationID)
 
 	conf := Google_search_ads_360DataSourceConf{}
 	err = mapstructure.Decode(connection.Data.Configuration, &conf)

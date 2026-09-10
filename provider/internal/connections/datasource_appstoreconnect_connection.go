@@ -98,9 +98,9 @@ func (d *AppstoreconnectConnectionDataSource) Read(ctx context.Context, req data
 		return
 	}
 
-	data.Id = types.StringPointerValue(connection.Data.Id)
+	data.Id = types.StringPointerValue(connection.Data.ID)
 	data.Name = types.StringPointerValue(connection.Data.Name)
-	data.Organization = types.StringPointerValue(connection.Data.OrganizationId)
+	data.Organization = types.StringPointerValue(connection.Data.OrganizationID)
 
 	conf := AppstoreconnectDataSourceConf{}
 	err = mapstructure.Decode(connection.Data.Configuration, &conf)

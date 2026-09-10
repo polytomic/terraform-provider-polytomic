@@ -7,8 +7,8 @@ import (
 
 	"github.com/AlekSi/pointer"
 	"github.com/hashicorp/hcl/v2/hclwrite"
-	"github.com/polytomic/polytomic-go"
-	ptclient "github.com/polytomic/polytomic-go/client"
+	"github.com/polytomic/polytomic-go/v25"
+	ptclient "github.com/polytomic/polytomic-go/v25/client"
 	"github.com/polytomic/terraform-provider-polytomic/provider"
 	"github.com/zclconf/go-cty/cty"
 )
@@ -47,7 +47,7 @@ func (m *Models) Init(ctx context.Context) error {
 	}
 
 	for _, model := range models.Data {
-		hydratedModel, err := m.c.Models.Get(ctx, pointer.GetString(model.Id), &polytomic.ModelsGetRequest{})
+		hydratedModel, err := m.c.Models.Get(ctx, pointer.GetString(model.ID), &polytomic.ModelsGetRequest{})
 		if err != nil {
 			return err
 		}
@@ -59,7 +59,7 @@ func (m *Models) Init(ctx context.Context) error {
 			name = fmt.Sprintf("%s_%s", name, pointer.GetString(model.Type))
 		}
 		m.uniqueNames[name] = true
-		m.modelNames[pointer.GetString(model.Id)] = name
+		m.modelNames[pointer.GetString(model.ID)] = name
 		m.Resources[name] = hydratedModel.Data
 	}
 
@@ -74,7 +74,7 @@ func (m *Models) GenerateTerraformFiles(ctx context.Context, writer io.Writer, r
 		body := hclFile.Body()
 
 		resourceBlock := body.AppendNewBlock("resource", []string{ModelResource, name})
-		resourceBlock.Body().SetAttributeValue("connection_id", cty.StringVal(pointer.GetString(model.ConnectionId)))
+		resourceBlock.Body().SetAttributeValue("connection_id", cty.StringVal(pointer.GetString(model.ConnectionID)))
 		resourceBlock.Body().SetAttributeValue("name", cty.StringVal(pointer.GetString(model.Name)))
 
 		// Clean model configuration values before converting to cty types
@@ -107,7 +107,7 @@ func (m *Models) GenerateTerraformFiles(ctx context.Context, writer io.Writer, r
 		for _, relation := range model.Relations {
 			modelRelations = append(modelRelations, map[string]interface{}{
 				"to": map[string]interface{}{
-					"model_id": relation.To.ModelId,
+					"model_id": relation.To.ModelID,
 					"field":    relation.To.Field,
 				},
 				"from": relation.From,
@@ -130,8 +130,8 @@ func (m *Models) GenerateImports(ctx context.Context, writer io.Writer) error {
 		model := m.Resources[name]
 		writer.Write([]byte(fmt.Sprintf("terraform import %s.%s %s",
 			ModelResource,
-			m.modelNames[pointer.GetString(model.Id)],
-			pointer.GetString(model.Id))))
+			m.modelNames[pointer.GetString(model.ID)],
+			pointer.GetString(model.ID))))
 		writer.Write([]byte(fmt.Sprintf(" # %s\n", pointer.GetString(model.Name))))
 	}
 	return nil
@@ -144,7 +144,7 @@ func (m *Models) Filename() string {
 func (m *Models) ResourceRefs() map[string]string {
 	result := make(map[string]string)
 	for name, model := range m.Resources {
-		result[pointer.GetString(model.Id)] = fmt.Sprintf("%s.%s.id", ModelResource, name)
+		result[pointer.GetString(model.ID)] = fmt.Sprintf("%s.%s.id", ModelResource, name)
 	}
 	return result
 }

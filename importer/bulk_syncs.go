@@ -9,9 +9,9 @@ import (
 	"github.com/AlekSi/pointer"
 	"github.com/hashicorp/hcl/v2/hclwrite"
 	"github.com/mitchellh/mapstructure"
-	"github.com/polytomic/polytomic-go"
-	"github.com/polytomic/polytomic-go/bulksync"
-	ptclient "github.com/polytomic/polytomic-go/client"
+	"github.com/polytomic/polytomic-go/v25"
+	"github.com/polytomic/polytomic-go/v25/bulksync"
+	ptclient "github.com/polytomic/polytomic-go/v25/client"
 	"github.com/polytomic/terraform-provider-polytomic/provider"
 	"github.com/zclconf/go-cty/cty"
 )
@@ -46,7 +46,7 @@ func (b *BulkSyncs) Init(ctx context.Context) error {
 	for _, bulk := range bulkSyncs.Data {
 		// Bulk sync names are not unique, so we need to a slug to the name
 		// to make it unique.
-		name := provider.ValidName(provider.ToSnakeCase(pointer.GetString(bulk.Name)) + "_" + pointer.GetString(bulk.Id)[:8])
+		name := provider.ValidName(provider.ToSnakeCase(pointer.GetString(bulk.Name)) + "_" + pointer.GetString(bulk.ID)[:8])
 		b.Resources[name] = bulk
 	}
 
@@ -62,14 +62,14 @@ func (b *BulkSyncs) GenerateTerraformFiles(ctx context.Context, writer io.Writer
 
 	for _, name := range sortedKeys(b.Resources) {
 		bulkSync := b.Resources[name]
-		bulkSchemas, err := b.c.BulkSync.Schemas.List(ctx, pointer.GetString(bulkSync.Id), &bulksync.SchemasListRequest{})
+		bulkSchemas, err := b.c.BulkSync.Schemas.List(ctx, pointer.GetString(bulkSync.ID), &bulksync.SchemasListRequest{})
 		if err != nil {
 			return err
 		}
 		schemas := make([]string, 0, len(bulkSchemas.Data))
 		for _, schema := range bulkSchemas.Data {
 			if pointer.GetBool(schema.Enabled) {
-				schemas = append(schemas, pointer.GetString(schema.Id))
+				schemas = append(schemas, pointer.GetString(schema.ID))
 			}
 		}
 
@@ -98,7 +98,7 @@ func (b *BulkSyncs) GenerateTerraformFiles(ctx context.Context, writer io.Writer
 		sourceTokens := hclwrite.Tokens{
 			&hclwrite.Token{Bytes: []byte("{\n")},
 			&hclwrite.Token{Bytes: []byte("    connection_id = ")},
-			&hclwrite.Token{Bytes: []byte(fmt.Sprintf(`"%s"`, pointer.GetString(bulkSync.SourceConnectionId)))},
+			&hclwrite.Token{Bytes: []byte(fmt.Sprintf(`"%s"`, pointer.GetString(bulkSync.SourceConnectionID)))},
 			&hclwrite.Token{Bytes: []byte("\n")},
 			&hclwrite.Token{Bytes: []byte("    configuration = ")},
 		}
@@ -115,7 +115,7 @@ func (b *BulkSyncs) GenerateTerraformFiles(ctx context.Context, writer io.Writer
 		destTokens := hclwrite.Tokens{
 			&hclwrite.Token{Bytes: []byte("{\n")},
 			&hclwrite.Token{Bytes: []byte("    connection_id = ")},
-			&hclwrite.Token{Bytes: []byte(fmt.Sprintf(`"%s"`, pointer.GetString(bulkSync.DestinationConnectionId)))},
+			&hclwrite.Token{Bytes: []byte(fmt.Sprintf(`"%s"`, pointer.GetString(bulkSync.DestinationConnectionID)))},
 			&hclwrite.Token{Bytes: []byte("\n")},
 			&hclwrite.Token{Bytes: []byte("    configuration = ")},
 		}
@@ -189,7 +189,7 @@ func (b *BulkSyncs) GenerateTerraformFiles(ctx context.Context, writer io.Writer
 		if err != nil {
 			return err
 		}
-		err = decoder.Decode(bulkSync.Schedule)
+		err = decoder.Decode(bulkSync.DefaultSchedule)
 		if err != nil {
 			return err
 		}
@@ -214,11 +214,11 @@ func (b *BulkSyncs) buildFieldMapping(bulkSync *polytomic.BulkSyncResponse, sche
 		"active": pointer.GetBool(bulkSync.Active),
 		"mode":   string(pointer.Get(bulkSync.Mode)),
 		"source": map[string]interface{}{
-			"connection_id": pointer.GetString(bulkSync.SourceConnectionId),
+			"connection_id": pointer.GetString(bulkSync.SourceConnectionID),
 			"configuration": "{}", // Placeholder for validation
 		},
 		"destination": map[string]interface{}{
-			"connection_id": pointer.GetString(bulkSync.DestinationConnectionId),
+			"connection_id": pointer.GetString(bulkSync.DestinationConnectionID),
 			"configuration": "{}", // Placeholder for validation
 		},
 		"schemas":  schemas,
@@ -260,7 +260,7 @@ func (b *BulkSyncs) GenerateImports(ctx context.Context, writer io.Writer) error
 		writer.Write([]byte(fmt.Sprintf("terraform import %s.%s %s",
 			BulkSyncResource,
 			name,
-			pointer.GetString(bulkSync.Id))))
+			pointer.GetString(bulkSync.ID))))
 		writer.Write([]byte(fmt.Sprintf(" # %s\n", pointer.GetString(bulkSync.Name))))
 	}
 	return nil
@@ -273,7 +273,7 @@ func (b *BulkSyncs) Filename() string {
 func (b *BulkSyncs) ResourceRefs() map[string]string {
 	result := make(map[string]string)
 	for name, bulk := range b.Resources {
-		result[pointer.GetString(bulk.Id)] = fmt.Sprintf("%s.%s.id", BulkSyncResource, name)
+		result[pointer.GetString(bulk.ID)] = fmt.Sprintf("%s.%s.id", BulkSyncResource, name)
 	}
 	return result
 }
