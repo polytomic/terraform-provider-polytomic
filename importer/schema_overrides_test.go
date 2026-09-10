@@ -4,6 +4,9 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"reflect"
 	"regexp"
 	"testing"
@@ -12,6 +15,8 @@ import (
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hclsyntax"
 	"github.com/polytomic/polytomic-go/v25"
+	ptclient "github.com/polytomic/polytomic-go/v25/client"
+	"github.com/polytomic/polytomic-go/v25/option"
 	"github.com/zclconf/go-cty/cty/function"
 	"github.com/zclconf/go-cty/cty/function/stdlib"
 )
@@ -85,6 +90,42 @@ func TestSchemaOverridesAdd(t *testing.T) {
 			t.Errorf("fields: got %v", got)
 		}
 	})
+}
+
+func TestSchemaOverridesInit(t *testing.T) {
+	for _, tc := range []struct {
+		status  int
+		wantErr bool
+	}{
+		// Connections the API cannot list source schemas for are skipped.
+		{http.StatusBadRequest, false},
+		{http.StatusNotFound, false},
+		{http.StatusUnauthorized, true},
+		{http.StatusForbidden, true},
+		{http.StatusTooManyRequests, true},
+	} {
+		t.Run(http.StatusText(tc.status), func(t *testing.T) {
+			srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.Header().Set("Content-Type", "application/json")
+				switch r.URL.Path {
+				case "/api/connections":
+					fmt.Fprint(w, `{"data":[{"id":"conn-1","name":"Shop"}]}`)
+				case "/api/connections/conn-1/bulksync/source":
+					w.WriteHeader(tc.status)
+					fmt.Fprint(w, `{"message":"failed"}`)
+				default:
+					http.NotFound(w, r)
+				}
+			}))
+			defer srv.Close()
+
+			c := ptclient.NewClient(option.WithBaseURL(srv.URL), option.WithToken("token"), option.WithMaxAttempts(1))
+			err := NewSchemaOverrides(c, "org").Init(context.Background())
+			if tc.wantErr != (err != nil) {
+				t.Errorf("got error %v, want error: %t", err, tc.wantErr)
+			}
+		})
+	}
 }
 
 func TestSchemaOverridesGenerate(t *testing.T) {

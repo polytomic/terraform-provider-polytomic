@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net/http"
 	"sort"
 	"strings"
 	"unicode"
@@ -72,7 +73,7 @@ func (s *SchemaOverrides) Init(ctx context.Context) error {
 			IncludeFields: pointer.To(true),
 		})
 		if err != nil {
-			if isClientError(err) {
+			if isUnsupportedSource(err) {
 				// Connections that cannot be read from have no schemas.
 				log.Debug().Str("connection_id", connectionID).AnErr("error", err).Msg("skipping connection schemas")
 				continue
@@ -310,9 +311,14 @@ func uniqueName[V any](taken map[string]V, parts ...string) string {
 	}
 }
 
-func isClientError(err error) bool {
+// isUnsupportedSource reports whether err is the API's response for a
+// connection it cannot list source schemas for: one whose backend has no
+// schemas (400), or one with none (404). Other errors, such as authorization
+// failures and rate limits, mean the connection's overrides could not be read.
+func isUnsupportedSource(err error) bool {
 	apiErr := &ptcore.APIError{}
-	return errors.As(err, &apiErr) && apiErr.StatusCode >= 400 && apiErr.StatusCode < 500
+	return errors.As(err, &apiErr) &&
+		(apiErr.StatusCode == http.StatusBadRequest || apiErr.StatusCode == http.StatusNotFound)
 }
 
 // shellQuote quotes s for import.sh when it contains characters the shell
