@@ -155,6 +155,57 @@ func TestPlanFieldType(t *testing.T) {
 	})
 }
 
+func TestFieldTypeChanged(t *testing.T) {
+	// field returns type attributes with typ and spec, when not empty, set.
+	field := func(typ, spec string) connectionSchemaFieldResourceModel {
+		m := connectionSchemaFieldResourceModel{
+			Type:      types.StringNull(),
+			Precision: types.Int64Null(),
+			Scale:     types.Int64Null(),
+			TypeSpec:  newTypeSpecNull(),
+		}
+		if typ != "" {
+			m.Type = types.StringValue(typ)
+		}
+		if spec != "" {
+			m.TypeSpec = newTypeSpecValue(spec)
+		}
+		return m
+	}
+	decimal := func(precision, scale int64, spec string) connectionSchemaFieldResourceModel {
+		m := field("decimal", spec)
+		m.Precision = types.Int64Value(precision)
+		m.Scale = types.Int64Value(scale)
+		return m
+	}
+	decimalSpec := `["decimal",{"precision":12,"scale":2}]`
+
+	for _, tc := range []struct {
+		name          string
+		config, state connectionSchemaFieldResourceModel
+		want          bool
+	}{
+		{"no type configured", field("", ""), field("array", `["array","string"]`), false},
+		{"type matching the stored definition", field("array", ""), field("array", `["jsonarray"]`), false},
+		{"array type over a detailed array definition", field("array", ""), field("array", `["array","string"]`), true},
+		{"object type over a map definition", field("object", ""), field("object", `["map","string"]`), true},
+		{"string type over a sized string", field("string", ""), field("string", `["string",{"length":12,"unit":"characters"}]`), true},
+		{"new type name", field("bigint", ""), field("number", `"number"`), true},
+		{"decimal matching the stored definition", decimal(12, 2, ""), decimal(12, 2, decimalSpec), false},
+		{"decimal with a new scale", decimal(12, 3, ""), decimal(12, 2, decimalSpec), true},
+		{"type name without a stored definition", field("number", ""), field("number", ""), false},
+		{"new type name without a stored definition", field("bigint", ""), field("number", ""), true},
+		{"type_spec matching the stored definition", field("", `["array", "string"]`), field("array", `["array","string"]`), false},
+		{"type_spec over a basic definition", field("", `["array", "string"]`), field("array", `["jsonarray"]`), true},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			if got := fieldTypeChanged(context.Background(), tc.config, tc.state); got != tc.want {
+				t.Errorf("got %t, want %t", got, tc.want)
+			}
+		})
+	}
+}
+
 func TestTypeSpecSemanticEquals(t *testing.T) {
 	for _, tc := range []struct {
 		a, b string

@@ -258,16 +258,37 @@ func planFieldType(ctx context.Context, config, state connectionSchemaFieldResou
 // fieldTypeChanged reports whether the configuration sets the field's type to
 // something other than its current value.
 func fieldTypeChanged(ctx context.Context, config, state connectionSchemaFieldResourceModel) bool {
-	if !config.TypeSpec.IsNull() {
-		if config.TypeSpec.IsUnknown() || state.TypeSpec.IsNull() || state.TypeSpec.IsUnknown() {
+	want := config.TypeSpec
+	switch {
+	case !want.IsNull():
+	case config.Type.IsNull():
+		return false
+	case state.TypeSpec.IsNull():
+		// Without a stored definition, only the type attributes can be compared.
+		return !config.Type.Equal(state.Type) ||
+			(!config.Precision.IsNull() && !config.Precision.Equal(state.Precision)) ||
+			(!config.Scale.IsNull() && !config.Scale.Equal(state.Scale))
+	case config.Type.IsUnknown() || config.Precision.IsUnknown() || config.Scale.IsUnknown():
+		return true
+	default:
+		// State reports the basic type of a detailed definition, such as array
+		// for ["array", "string"], so compare the definition the configured
+		// type stands for instead.
+		_, spec, err := fieldTypeSpec(config.Type.ValueString(), config.Precision.ValueInt64(), config.Scale.ValueInt64())
+		if err != nil {
 			return true
 		}
-		equal, diags := config.TypeSpec.StringSemanticEquals(ctx, state.TypeSpec)
-		return diags.HasError() || !equal
+		buf, err := json.Marshal(spec)
+		if err != nil {
+			return true
+		}
+		want = newTypeSpecValue(string(buf))
 	}
-	return (!config.Type.IsNull() && !config.Type.Equal(state.Type)) ||
-		(!config.Precision.IsNull() && !config.Precision.Equal(state.Precision)) ||
-		(!config.Scale.IsNull() && !config.Scale.Equal(state.Scale))
+	if want.IsUnknown() || state.TypeSpec.IsNull() || state.TypeSpec.IsUnknown() {
+		return true
+	}
+	equal, diags := want.StringSemanticEquals(ctx, state.TypeSpec)
+	return diags.HasError() || !equal
 }
 
 // fieldTypeRequest returns the API type and definition for the configured type
