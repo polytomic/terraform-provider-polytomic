@@ -45,3 +45,21 @@ resource "polytomic_connection_schema_field" "tags" {
   path          = "$.tags"
   type_spec     = jsonencode(["array", "string"])
 }
+
+# Make an added field the schema's primary key. Referencing the field's
+# field_id, rather than repeating the ID, makes Terraform add the field
+# before setting the key.
+resource "polytomic_connection_schema_field" "order_number" {
+  connection_id = polytomic_mongodb_connection.orders.id
+  schema_id     = "shop.orders"
+  field_id      = "order_number"
+  label         = "Order number"
+  type          = "string"
+  path          = "$.order.number"
+}
+
+resource "polytomic_connection_schema_primary_keys" "orders" {
+  connection_id = polytomic_mongodb_connection.orders.id
+  schema_id     = "shop.orders"
+  field_ids     = [polytomic_connection_schema_field.order_number.field_id]
+}
