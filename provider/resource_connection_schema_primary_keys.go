@@ -123,10 +123,7 @@ func (r *connectionSchemaPrimaryKeysResource) Create(ctx context.Context, req re
 		return
 	}
 
-	if data.Organization.IsNull() || data.Organization.IsUnknown() {
-		data.Organization = types.StringValue(connectionOrganization(ctx, client, data.ConnectionID.ValueString()))
-	}
-	data.Organization = types.StringValue(orgOrDefault(data.Organization))
+	data.Organization = types.StringValue(resourceOrganization(ctx, client, data.Organization, data.ConnectionID.ValueString()))
 	data.ID = types.StringValue(fmt.Sprintf("%s/%s/%s",
 		data.Organization.ValueString(),
 		data.ConnectionID.ValueString(),

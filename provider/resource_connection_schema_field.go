@@ -386,7 +386,7 @@ func (r *connectionSchemaFieldResource) Create(ctx context.Context, req resource
 		resp.Diagnostics.AddError(
 			"Field already has a user-defined definition",
 			fmt.Sprintf("Field %s in schema %s is already user-defined or overridden. Import it with the ID %s instead.",
-				fieldID, schemaID, SchemaFieldResourceID(orgOrDefault(data.Organization), connectionID, schemaID, fieldID)),
+				fieldID, schemaID, SchemaFieldResourceID(resourceOrganization(ctx, client, data.Organization, connectionID), connectionID, schemaID, fieldID)),
 		)
 		return
 	default:
@@ -419,10 +419,7 @@ func (r *connectionSchemaFieldResource) Create(ctx context.Context, req resource
 		return
 	}
 
-	if data.Organization.IsNull() || data.Organization.IsUnknown() {
-		data.Organization = types.StringValue(connectionOrganization(ctx, client, connectionID))
-	}
-	data.Organization = types.StringValue(orgOrDefault(data.Organization))
+	data.Organization = types.StringValue(resourceOrganization(ctx, client, data.Organization, connectionID))
 	data.ID = types.StringValue(SchemaFieldResourceID(data.Organization.ValueString(), connectionID, schemaID, fieldID))
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -712,11 +709,4 @@ func knownStringPointer(v types.String) *string {
 		return nil
 	}
 	return pointer.To(v.ValueString())
-}
-
-func orgOrDefault(v types.String) string {
-	if v.IsNull() || v.IsUnknown() || v.ValueString() == "" {
-		return "default"
-	}
-	return v.ValueString()
 }

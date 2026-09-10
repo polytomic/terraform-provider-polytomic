@@ -34,10 +34,12 @@ var (
 	detectedCity       = `{"id":"city","name":"city","type":"string"}`
 	noFields           = ""
 	testFieldSchemaURL = "/api/connections/conn-1/schemas/orders"
+	testOrgID          = "22c86135-fc64-4d26-8d32-c9c79079f070"
 )
 
 // schemaServer answers schema reads with responses in order, repeating the
-// last, and accepts field changes. It returns the number of schema reads.
+// last, accepts field changes, and reports that conn-1 belongs to testOrgID.
+// It returns the number of schema reads.
 func schemaServer(t *testing.T, responses ...schemaResponse) (*httptest.Server, *atomic.Int32) {
 	t.Helper()
 	var reads atomic.Int32
@@ -48,6 +50,8 @@ func schemaServer(t *testing.T, responses ...schemaResponse) (*httptest.Server, 
 			resp := responses[min(int(reads.Add(1))-1, len(responses)-1)]
 			w.WriteHeader(resp.status)
 			fmt.Fprint(w, resp.body)
+		case r.Method == http.MethodGet && r.URL.Path == "/api/connections/conn-1":
+			fmt.Fprintf(w, `{"data":{"id":"conn-1","organization_id":%q}}`, testOrgID)
 		case r.Method == http.MethodPost && r.URL.Path == testFieldSchemaURL+"/fields",
 			r.Method == http.MethodDelete && r.URL.Path == testFieldSchemaURL+"/fields/city":
 			w.WriteHeader(http.StatusAccepted)
@@ -75,6 +79,27 @@ func testFieldResource(t *testing.T, srv *httptest.Server) (*connectionSchemaFie
 	r.Schema(t.Context(), resource.SchemaRequest{}, &s)
 	require.False(t, s.Diagnostics.HasError(), "%v", s.Diagnostics)
 	return r, s
+}
+
+// cityPlan plans adding the city field without an organization.
+func cityPlan(t *testing.T, s resource.SchemaResponse) tfsdk.Plan {
+	t.Helper()
+	plan := tfsdk.Plan{Schema: s.Schema}
+	diags := plan.Set(t.Context(), &connectionSchemaFieldResourceModel{
+		ID:           types.StringUnknown(),
+		Organization: types.StringUnknown(),
+		ConnectionID: types.StringValue("conn-1"),
+		SchemaID:     types.StringValue("orders"),
+		FieldID:      types.StringValue("city"),
+		Label:        types.StringValue("City"),
+		Type:         types.StringValue("string"),
+		Precision:    types.Int64Unknown(),
+		Scale:        types.Int64Unknown(),
+		TypeSpec:     newTypeSpecUnknown(),
+		Path:         types.StringUnknown(),
+	})
+	require.False(t, diags.HasError(), "%v", diags)
+	return plan
 }
 
 func TestWaitForFieldRemoval(t *testing.T) {
@@ -125,32 +150,17 @@ func TestConnectionSchemaFieldCreate(t *testing.T) {
 			r, s := testFieldResource(t, srv)
 			ctx := t.Context()
 
-			plan := tfsdk.Plan{Schema: s.Schema}
-			diags := plan.Set(ctx, &connectionSchemaFieldResourceModel{
-				ID:           types.StringUnknown(),
-				Organization: types.StringUnknown(),
-				ConnectionID: types.StringValue("conn-1"),
-				SchemaID:     types.StringValue("orders"),
-				FieldID:      types.StringValue("city"),
-				Label:        types.StringValue("City"),
-				Type:         types.StringValue("string"),
-				Precision:    types.Int64Unknown(),
-				Scale:        types.Int64Unknown(),
-				TypeSpec:     newTypeSpecUnknown(),
-				Path:         types.StringUnknown(),
-			})
-			require.False(t, diags.HasError(), "%v", diags)
-
 			resp := resource.CreateResponse{State: tfsdk.State{Schema: s.Schema}}
-			r.Create(ctx, resource.CreateRequest{Plan: plan}, &resp)
+			r.Create(ctx, resource.CreateRequest{Plan: cityPlan(t, s)}, &resp)
 			require.False(t, resp.Diagnostics.HasError(), "%v", resp.Diagnostics)
 			assert.Equal(t, tc.wantWarning, resp.Diagnostics.WarningsCount() > 0, "%v", resp.Diagnostics)
 			require.True(t, resp.State.Raw.IsFullyKnown(), "state has unknown values: %v", resp.State.Raw)
 
 			var got connectionSchemaFieldResourceModel
-			diags = resp.State.Get(ctx, &got)
+			diags := resp.State.Get(ctx, &got)
 			require.False(t, diags.HasError(), "%v", diags)
-			assert.Equal(t, "default/conn-1/orders/city", got.ID.ValueString())
+			assert.Equal(t, testOrgID, got.Organization.ValueString())
+			assert.Equal(t, testOrgID+"/conn-1/orders/city", got.ID.ValueString())
 			assert.Equal(t, "City", got.Label.ValueString())
 			assert.Equal(t, "string", got.Type.ValueString())
 			assert.Equal(t, tc.wantPath, got.Path)
@@ -176,8 +186,9 @@ func TestConnectionSchemaFieldDelete(t *testing.T) {
 
 			state := tfsdk.State{Schema: s.Schema}
 			diags := state.Set(ctx, &connectionSchemaFieldResourceModel{
-				ID:           types.StringValue("default/conn-1/orders/city"),
-				Organization: types.StringValue(""),
+				ID: types.StringValue("default/conn-1/orders/city"),
+				// Recorded when Create could not determine the organization.
+				Organization: types.StringValue(providerclient.DefaultOrganization),
 				ConnectionID: types.StringValue("conn-1"),
 				SchemaID:     types.StringValue("orders"),
 				FieldID:      types.StringValue("city"),
@@ -195,6 +206,37 @@ func TestConnectionSchemaFieldDelete(t *testing.T) {
 			require.False(t, resp.Diagnostics.HasError(), "%v", resp.Diagnostics)
 			assert.Equal(t, tc.wantWarning, resp.Diagnostics.WarningsCount() > 0, "%v", resp.Diagnostics)
 			assert.GreaterOrEqual(t, reads.Load(), int32(2), "schema reads")
+		})
+	}
+}
+
+func TestConnectionSchemaFieldCreateUserManaged(t *testing.T) {
+	srv, _ := schemaServer(t, schemaWithFields(userManagedCity))
+	r, s := testFieldResource(t, srv)
+
+	resp := resource.CreateResponse{State: tfsdk.State{Schema: s.Schema}}
+	r.Create(t.Context(), resource.CreateRequest{Plan: cityPlan(t, s)}, &resp)
+	require.True(t, resp.Diagnostics.HasError())
+	// The suggested import ID names the connection's organization.
+	assert.Contains(t, resp.Diagnostics.Errors()[0].Detail(), testOrgID+"/conn-1/orders/city")
+}
+
+func TestResourceOrganization(t *testing.T) {
+	srv, _ := schemaServer(t, schemaWithFields(noFields))
+	client := ptclient.NewClient(option.WithBaseURL(srv.URL), option.WithToken("token"), option.WithMaxAttempts(1))
+
+	for _, tc := range []struct {
+		name         string
+		org          types.String
+		connectionID string
+		want         string
+	}{
+		{"configured", types.StringValue("org-1"), "conn-1", "org-1"},
+		{"connection's", types.StringUnknown(), "conn-1", testOrgID},
+		{"lookup fails", types.StringNull(), "conn-2", providerclient.DefaultOrganization},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			assert.Equal(t, tc.want, resourceOrganization(t.Context(), client, tc.org, tc.connectionID))
 		})
 	}
 }

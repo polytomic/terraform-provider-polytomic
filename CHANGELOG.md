@@ -18,6 +18,8 @@ BUG FIXES:
 
 - `polytomic_connection_schema` reported `is_primary_key` as `false` for every field.
 
+- `polytomic_connection_schema_primary_keys` recorded its organization as `default` when it could not look up the connection's organization, and every later plan failed with `invalid organization ID default`. `default` now selects the API key's own organization, so affected resources recover without changes.
+
 IMPORTER:
 
 - `--include-schema-overrides` exports user-defined schema fields, field type overrides, and primary key overrides. It is off by default because it fetches every field of every schema on each connection.

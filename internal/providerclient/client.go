@@ -38,6 +38,11 @@ const (
 	PolytomicPartnerKey = "POLYTOMIC_PARTNER_KEY"
 	//PolytomicDeploymentURL is the environment variable name for the Polytomic deployment URL
 	PolytomicDeploymentURL = "POLYTOMIC_DEPLOYMENT_URL"
+
+	// DefaultOrganization stands in for an organization ID in resource IDs and
+	// state when a resource could not determine its organization. Client
+	// treats it as no organization, which selects the API key's own.
+	DefaultOrganization = "default"
 )
 
 type Options struct {
@@ -119,7 +124,7 @@ func (p *Provider) Client(ctx context.Context, org string) (*ptclient.Client, er
 	defer p.mu.Unlock()
 
 	orgID := uuid.Nil
-	if org != "" {
+	if org != "" && org != DefaultOrganization {
 		var err error
 		orgID, err = uuid.Parse(org)
 		if err != nil {

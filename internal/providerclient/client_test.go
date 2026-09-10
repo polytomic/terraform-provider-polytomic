@@ -157,6 +157,26 @@ func TestClient_APIKeyOrgMismatchRejected(t *testing.T) {
 		"error should name the rejected organization id")
 }
 
+// TestClient_DefaultOrganization verifies that the "default" organization the
+// schema resources record when they cannot determine one selects the API
+// key's own organization, instead of failing to parse as a UUID.
+func TestClient_DefaultOrganization(t *testing.T) {
+	provider, err := NewClientProvider(Options{APIKey: "test-api-key", DeploymentURL: "http://localhost"})
+	require.NoError(t, err)
+
+	c, err := provider.Client(context.Background(), DefaultOrganization)
+	require.NoError(t, err)
+	unscoped, err := provider.Client(context.Background(), "")
+	require.NoError(t, err)
+	assert.Same(t, unscoped, c, "default should select the API key's client")
+
+	// Partner keys have no organization of their own.
+	partner, err := NewClientProvider(Options{PartnerKey: "test-partner-key", DeploymentURL: "http://localhost"})
+	require.NoError(t, err)
+	_, err = partner.Client(context.Background(), DefaultOrganization)
+	assert.ErrorContains(t, err, "organization ID must be specified")
+}
+
 func TestNewClientProvider_InvalidURL(t *testing.T) {
 	tests := []struct {
 		name     string

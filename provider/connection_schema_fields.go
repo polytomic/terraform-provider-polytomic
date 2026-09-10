@@ -14,6 +14,7 @@ import (
 	"github.com/polytomic/polytomic-go/v25"
 	ptclient "github.com/polytomic/polytomic-go/v25/client"
 	ptcore "github.com/polytomic/polytomic-go/v25/core"
+	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
 var errSchemaNotFound = errors.New("schema not found")
@@ -172,4 +173,17 @@ func connectionOrganization(ctx context.Context, client *ptclient.Client, connec
 		return ""
 	}
 	return pointer.GetString(conn.Data.OrganizationID)
+}
+
+// resourceOrganization returns the organization to record for a resource on a
+// connection: the configured one, else the connection's, else
+// providerclient.DefaultOrganization.
+func resourceOrganization(ctx context.Context, client *ptclient.Client, org types.String, connectionID string) string {
+	if !org.IsNull() && !org.IsUnknown() && org.ValueString() != "" {
+		return org.ValueString()
+	}
+	if id := connectionOrganization(ctx, client, connectionID); id != "" {
+		return id
+	}
+	return providerclient.DefaultOrganization
 }

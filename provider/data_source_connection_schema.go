@@ -144,7 +144,7 @@ func (d *connectionSchemaDataSource) Read(ctx context.Context, req datasource.Re
 	// Set ID in composite format
 	orgID := data.Organization.ValueString()
 	if orgID == "" {
-		orgID = "default"
+		orgID = providerclient.DefaultOrganization
 	}
 	data.ID = types.StringValue(fmt.Sprintf("%s/%s/%s", orgID, data.ConnectionID.ValueString(), data.SchemaID.ValueString()))
 
