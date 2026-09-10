@@ -124,6 +124,7 @@ func (p *Provider) DataSources(ctx context.Context) []func() datasource.DataSour
 		func() datasource.DataSource { return &identityDatasource{} },
 		func() datasource.DataSource { return &roleDatasource{} },
 		NewConnectionSchemaDataSource,
+		NewConnectionSchemasDataSource,
 	}
 	all := append(connections.Datasources, datasources...)
 	return all

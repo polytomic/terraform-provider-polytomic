@@ -143,6 +143,8 @@ type TestCaseTfArgs struct {
 	Name     string
 	APIKey   bool
 	Postgres postgresTestConfig
+	// Extra carries test-specific template values.
+	Extra map[string]any
 }
 
 // TestCaseTfResource generates the Terraform configuration for a test case from
