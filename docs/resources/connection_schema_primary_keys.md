@@ -4,22 +4,25 @@ page_title: "polytomic_connection_schema_primary_keys Resource - terraform-provi
 subcategory: "Connections"
 description: |-
   Connection Schema Primary Keys
-  Manages primary key overrides for a connection schema. Primary keys can be set to override the auto-detected keys from the source connection. Deleting this resource will reset the schema to use auto-detected primary keys.
+  Sets the primary key of a connection schema, overriding the keys detected from the source connection. field_ids is the schema's complete primary key: listed fields are marked as keys, and any other field the source reports as a key is unmarked.
+  Deleting this resource removes every primary key override on the schema, restoring the detected keys.
 ---
 
 # polytomic_connection_schema_primary_keys (Resource)
 
 Connection Schema Primary Keys
 
-Manages primary key overrides for a connection schema. Primary keys can be set to override the auto-detected keys from the source connection. Deleting this resource will reset the schema to use auto-detected primary keys.
+Sets the primary key of a connection schema, overriding the keys detected from the source connection. `field_ids` is the schema's complete primary key: listed fields are marked as keys, and any other field the source reports as a key is unmarked.
+
+Deleting this resource removes every primary key override on the schema, restoring the detected keys.
 
 ## Example Usage
 
 ```terraform
 # Example: Override primary keys for a connection schema
 #
-# This resource allows you to specify which fields should be used as primary keys
-# for a connection schema, overriding the auto-detected primary keys from the source.
+# field_ids is the schema's complete primary key: listed fields become keys,
+# and any key detected from the source that is not listed is unmarked.
 
 # First, create or reference a connection
 resource "polytomic_salesforce_connection" "example" {
@@ -72,7 +75,7 @@ resource "polytomic_connection_schema_primary_keys" "multi_field_pk" {
 ### Required
 
 - `connection_id` (String) Connection ID
-- `field_ids` (Set of String) Set of field IDs to use as primary keys. These IDs can be found using the polytomic_connection_schema data source.
+- `field_ids` (Set of String) IDs of the fields that make up the schema's primary key. Fields the source reports as keys are unmarked unless listed here. These IDs can be found using the polytomic_connection_schema data source.
 - `schema_id` (String) Schema ID
 
 ### Optional
@@ -83,4 +86,11 @@ resource "polytomic_connection_schema_primary_keys" "multi_field_pk" {
 
 - `id` (String) Resource identifier in the format: organization/connection_id/schema_id
 
+## Import
 
+Import is supported using the following syntax:
+
+```shell
+# Import by organization ID, connection ID, and schema ID
+terraform import polytomic_connection_schema_primary_keys.accounts_pk 22c86135-fc64-4d26-8d32-c9c79079f070/7f1638a2-f6c8-42f7-924c-8eecd84ad8e2/Account
+```
