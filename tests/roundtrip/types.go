@@ -2,10 +2,11 @@ package roundtrip
 
 // RoundTripOptions configures round-trip validation behavior
 type RoundTripOptions struct {
-	IncludePermissions bool
-	ValidateSensitive  bool
-	IgnoreFields       []string
-	ExpectedVariables  []string
+	IncludePermissions     bool
+	IncludeSchemaOverrides bool
+	ValidateSensitive      bool
+	IgnoreFields           []string
+	ExpectedVariables      []string
 	// OrgName contains the name of the organization being tested; this will be
 	// empty if tests are running with an API key.
 	OrgName string

@@ -42,6 +42,7 @@ page.
 
 - `--replace`: Replace existing files (otherwise the command will fail if files exist)
 - `--include-permissions`: Include role and policy resources in the import
+- `--include-schema-overrides`: Include user-defined schema fields, field type overrides, and primary key overrides. This fetches every field of every schema on each connection, which can be slow for connections with many schemas.
 
 ## Authentication Options
 

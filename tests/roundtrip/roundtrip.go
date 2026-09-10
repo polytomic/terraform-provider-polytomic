@@ -57,7 +57,7 @@ func ImportAndValidate(ctx context.Context, resourceNames []string, opts RoundTr
 			}
 		}()
 
-		err = runImporter(ctx, exportDir, opts.IncludePermissions)
+		err = runImporter(ctx, exportDir, opts.IncludePermissions, opts.IncludeSchemaOverrides)
 		if err != nil {
 			return fmt.Errorf("importer failed: %w", err)
 		}
@@ -164,7 +164,7 @@ func ImportAndValidate(ctx context.Context, resourceNames []string, opts RoundTr
 }
 
 // runImporter executes the importer using the importer package
-func runImporter(ctx context.Context, outputDir string, includePermissions bool) error {
+func runImporter(ctx context.Context, outputDir string, includePermissions, includeSchemaOverrides bool) error {
 	client, err := providerclient.NewClientProvider(providerclient.OptionsFromEnv())
 	if err != nil {
 		return fmt.Errorf("failed to create client provider: %w", err)
@@ -175,7 +175,7 @@ func runImporter(ctx context.Context, outputDir string, includePermissions bool)
 
 	// Initialize and run importer directly
 	// Note: importer.Init uses log.Fatal on errors, so if we get here it succeeded
-	importer.Init(ctx, client, "", outputDir, true, includePermissions)
+	importer.Init(ctx, client, "", outputDir, true, includePermissions, includeSchemaOverrides)
 
 	return nil
 }

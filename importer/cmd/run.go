@@ -23,6 +23,7 @@ var runCmd = &cobra.Command{
 		path := viper.GetString("output")
 		replace := viper.GetBool("replace")
 		includePermissions := viper.GetBool("include-permissions")
+		includeSchemaOverrides := viper.GetBool("include-schema-overrides")
 
 		if apiKey == "" && partnerKey == "" && deploymentKey == "" {
 			log.Fatal().Msg("either --api-key, --partner-key, or --deployment-key must be provided")
@@ -46,6 +47,6 @@ var runCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal().Err(err).Msg("failed to create client provider")
 		}
-		importer.Init(ctx, clientProvider, organizations, path, replace, includePermissions)
+		importer.Init(ctx, clientProvider, organizations, path, replace, includePermissions, includeSchemaOverrides)
 	},
 }

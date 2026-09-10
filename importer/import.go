@@ -28,7 +28,7 @@ type Importable interface {
 	Variables() []Variable
 }
 
-func Init(ctx context.Context, clientProvider *providerclient.Provider, organizations, outputPath string, recreate, includePermissions bool) {
+func Init(ctx context.Context, clientProvider *providerclient.Provider, organizations, outputPath string, recreate, includePermissions, includeSchemaOverrides bool) {
 	err := createDirectory(outputPath)
 	if err != nil {
 		log.Fatal().AnErr("error", err).Msg("failed to create directory")
@@ -79,7 +79,7 @@ func Init(ctx context.Context, clientProvider *providerclient.Provider, organiza
 			if err != nil {
 				log.Fatal().AnErr("error", err).Msg("failed to create organization client")
 			}
-			importOrganization(ctx, org, orgClient, orgPath, recreate, includePermissions, true)
+			importOrganization(ctx, org, orgClient, orgPath, recreate, includePermissions, includeSchemaOverrides, true)
 		}
 	} else {
 		// Single organization - use it directly
@@ -87,12 +87,12 @@ func Init(ctx context.Context, clientProvider *providerclient.Provider, organiza
 		if err != nil {
 			log.Fatal().AnErr("error", err).Msg("failed to create organization client")
 		}
-		importOrganization(ctx, targetOrgs[0], orgClient, outputPath, recreate, includePermissions, false)
+		importOrganization(ctx, targetOrgs[0], orgClient, outputPath, recreate, includePermissions, includeSchemaOverrides, false)
 	}
 }
 
 // importOrganization imports resources for a single organization
-func importOrganization(ctx context.Context, org *polytomic.Organization, c *ptclient.Client, path string, recreate, includePermissions, orgResource bool) {
+func importOrganization(ctx context.Context, org *polytomic.Organization, c *ptclient.Client, path string, recreate, includePermissions, includeSchemaOverrides, orgResource bool) {
 	log.Info().
 		Str("org_id", pointer.Get(org.ID)).
 		Str("org_name", pointer.Get(org.Name)).
@@ -116,6 +116,10 @@ func importOrganization(ctx context.Context, org *polytomic.Organization, c *ptc
 	if includePermissions {
 		importables = append(importables, NewRoles(c))
 		importables = append(importables, NewPolicies(c))
+	}
+
+	if includeSchemaOverrides {
+		importables = append(importables, NewSchemaOverrides(c, pointer.Get(org.ID)))
 	}
 
 	// Create import.sh
