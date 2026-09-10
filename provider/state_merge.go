@@ -3,7 +3,6 @@ package provider
 import (
 	"context"
 
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -92,27 +91,4 @@ func PopulateUnknownBool(field basetypes.BoolValue, value *bool) basetypes.BoolV
 		return types.BoolPointerValue(value)
 	}
 	return field
-}
-
-// PopulateUnknownSet sets a set field from API data if it's currently unknown.
-// This is useful for populating computed collection fields.
-func PopulateUnknownSet[T any](
-	ctx context.Context,
-	field basetypes.SetValue,
-	apiData []T,
-	elementType attr.Type,
-) (basetypes.SetValue, diag.Diagnostics) {
-	var diags diag.Diagnostics
-
-	if !field.IsUnknown() {
-		return field, diags
-	}
-
-	if len(apiData) > 0 {
-		result, resultDiags := types.SetValueFrom(ctx, elementType, apiData)
-		diags.Append(resultDiags...)
-		return result, diags
-	}
-
-	return types.SetNull(elementType), diags
 }

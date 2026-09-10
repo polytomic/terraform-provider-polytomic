@@ -13,7 +13,10 @@ import (
 	"github.com/AlekSi/pointer"
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
+	"github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
 	"github.com/hashicorp/terraform-plugin-testing/statecheck"
@@ -424,6 +427,224 @@ func TestBulkSyncSchemasFromSDK(t *testing.T) {
 			tc.validate(t, result)
 		})
 	}
+}
+
+// bulkSyncSchemaPlan builds the plan value for a single schema, so the merge
+// tests can express "the user named this schema and left the rest computed".
+func bulkSyncSchemaPlan(t *testing.T, id string, fields basetypes.SetValue) basetypes.SetValue {
+	t.Helper()
+
+	schema, diags := types.ObjectValue(bulkSyncSchema{}.AttrTypes(), map[string]attr.Value{
+		"id":                    types.StringValue(id),
+		"enabled":               types.BoolValue(true),
+		"fields":                fields,
+		"filters":               types.SetUnknown(types.ObjectType{AttrTypes: bulkSyncFilter{}.AttrTypes()}),
+		"partition_key":         types.StringUnknown(),
+		"tracking_field":        types.StringUnknown(),
+		"output_name":           types.StringUnknown(),
+		"user_output_name":      types.StringUnknown(),
+		"data_cutoff_timestamp": timetypes.NewRFC3339Null(),
+		"disable_data_cutoff":   types.BoolUnknown(),
+	})
+	require.False(t, diags.HasError(), "%v", diags)
+
+	set, diags := types.SetValue(types.ObjectType{AttrTypes: bulkSyncSchema{}.AttrTypes()}, []attr.Value{schema})
+	require.False(t, diags.HasError(), "%v", diags)
+	return set
+}
+
+// bulkSyncPlanField builds the plan value for a field the user named without
+// setting any of its optional+computed attributes.
+func bulkSyncPlanField(t *testing.T, id string) basetypes.SetValue {
+	t.Helper()
+
+	field, diags := types.ObjectValue(bulkSyncSchemaField{}.AttrTypes(), map[string]attr.Value{
+		"id":               types.StringValue(id),
+		"enabled":          types.BoolUnknown(),
+		"obfuscate":        types.BoolUnknown(),
+		"output_name":      types.StringUnknown(),
+		"user_output_name": types.StringUnknown(),
+	})
+	require.False(t, diags.HasError(), "%v", diags)
+
+	set, diags := types.SetValue(types.ObjectType{AttrTypes: bulkSyncSchemaField{}.AttrTypes()}, []attr.Value{field})
+	require.False(t, diags.HasError(), "%v", diags)
+	return set
+}
+
+func bulkSyncTestResponse() *polytomic.BulkSyncResponse {
+	return &polytomic.BulkSyncResponse{
+		ID:   pointer.ToString("248df4b7-aa70-47b8-a036-33ac447e668d"),
+		Name: pointer.ToString("test"),
+		DefaultSchedule: &polytomic.BulkSyncDefaultScheduleResponse{
+			Frequency: polytomic.ScheduleFrequencyManual,
+		},
+	}
+}
+
+// Terraform rejects an applied state that still contains unknown values, so
+// every optional+computed attribute has to come out of the merge known. The
+// schemas passed in must therefore carry their fields, which the list endpoint
+// does not return -- see fetchBulkSyncSchemas.
+func TestBulkSyncDataFromResponseResolvesFieldUnknowns(t *testing.T) {
+	tests := map[string]struct {
+		apiFields []*polytomic.BulkField
+		validate  func(t *testing.T, field bulkSyncSchemaField)
+	}{
+		"populated from the API when the field is returned": {
+			apiFields: []*polytomic.BulkField{
+				{
+					ID:             pointer.ToString("email"),
+					Enabled:        pointer.ToBool(true),
+					Obfuscated:     pointer.ToBool(true),
+					OutputName:     pointer.ToString("email"),
+					UserOutputName: pointer.ToString("my_email"),
+				},
+			},
+			validate: func(t *testing.T, field bulkSyncSchemaField) {
+				assert.True(t, field.Enabled.ValueBool())
+				assert.True(t, field.Obfuscate.ValueBool())
+				assert.Equal(t, "email", field.OutputName.ValueString())
+				assert.Equal(t, "my_email", field.UserOutputName.ValueString())
+			},
+		},
+		"nulled out when the API has not discovered the field": {
+			apiFields: nil,
+			validate: func(t *testing.T, field bulkSyncSchemaField) {
+				assert.True(t, field.Enabled.IsNull())
+				assert.True(t, field.Obfuscate.IsNull())
+				assert.True(t, field.OutputName.IsNull())
+				assert.True(t, field.UserOutputName.IsNull())
+			},
+		},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			ctx := t.Context()
+			plan := &bulkSyncResourceData{
+				Schemas: bulkSyncSchemaPlan(t, "orders", bulkSyncPlanField(t, "email")),
+			}
+			schemas := []*polytomic.BulkSchema{
+				{
+					ID:         pointer.ToString("orders"),
+					Enabled:    pointer.ToBool(true),
+					OutputName: pointer.ToString("orders"),
+					Fields:     tc.apiFields,
+				},
+			}
+
+			data, diags := bulkSyncDataFromResponse(ctx, bulkSyncTestResponse(), schemas, plan)
+			require.False(t, diags.HasError(), "unexpected diagnostics: %v", diags)
+
+			var stateSchemas []bulkSyncSchema
+			require.False(t, data.Schemas.ElementsAs(ctx, &stateSchemas, false).HasError())
+			require.Len(t, stateSchemas, 1)
+
+			var fields []bulkSyncSchemaField
+			require.False(t, stateSchemas[0].Fields.ElementsAs(ctx, &fields, false).HasError())
+			require.Len(t, fields, 1)
+
+			assert.False(t, fields[0].Enabled.IsUnknown(), "enabled left unknown")
+			assert.False(t, fields[0].Obfuscate.IsUnknown(), "obfuscate left unknown")
+			assert.False(t, fields[0].OutputName.IsUnknown(), "output_name left unknown")
+			assert.False(t, fields[0].UserOutputName.IsUnknown(), "user_output_name left unknown")
+			tc.validate(t, fields[0])
+		})
+	}
+}
+
+// A schema configured without a fields list leaves the whole set unknown, and
+// the API's fields have to be converted to their Terraform models before they
+// can fill it in.
+func TestBulkSyncDataFromResponseFillsUnknownFieldSet(t *testing.T) {
+	ctx := t.Context()
+	fieldType := types.ObjectType{AttrTypes: bulkSyncSchemaField{}.AttrTypes()}
+
+	plan := &bulkSyncResourceData{
+		Schemas: bulkSyncSchemaPlan(t, "orders", types.SetUnknown(fieldType)),
+	}
+	schemas := []*polytomic.BulkSchema{
+		{
+			ID:      pointer.ToString("orders"),
+			Enabled: pointer.ToBool(true),
+			Fields: []*polytomic.BulkField{
+				{ID: pointer.ToString("email"), Enabled: pointer.ToBool(true), Obfuscated: pointer.ToBool(false)},
+			},
+		},
+	}
+
+	data, diags := bulkSyncDataFromResponse(ctx, bulkSyncTestResponse(), schemas, plan)
+	require.False(t, diags.HasError(), "unexpected diagnostics: %v", diags)
+
+	var stateSchemas []bulkSyncSchema
+	require.False(t, data.Schemas.ElementsAs(ctx, &stateSchemas, false).HasError())
+	require.Len(t, stateSchemas, 1)
+	require.False(t, stateSchemas[0].Fields.IsUnknown(), "fields left unknown")
+
+	var fields []bulkSyncSchemaField
+	require.False(t, stateSchemas[0].Fields.ElementsAs(ctx, &fields, false).HasError())
+	require.Len(t, fields, 1)
+	assert.Equal(t, "email", fields[0].Id.ValueString())
+	assert.True(t, fields[0].Enabled.ValueBool())
+}
+
+// A configuration that leaves schemas to the server plans them as unknown,
+// which the merge cannot read; the API response has to stand on its own.
+func TestBulkSyncDataFromResponseUnknownSchemas(t *testing.T) {
+	ctx := t.Context()
+
+	plan := &bulkSyncResourceData{
+		Schemas: types.SetUnknown(types.ObjectType{AttrTypes: bulkSyncSchema{}.AttrTypes()}),
+	}
+	schemas := []*polytomic.BulkSchema{
+		{
+			ID:      pointer.ToString("orders"),
+			Enabled: pointer.ToBool(true),
+			Fields: []*polytomic.BulkField{
+				{ID: pointer.ToString("email"), Enabled: pointer.ToBool(true)},
+			},
+		},
+	}
+
+	data, diags := bulkSyncDataFromResponse(ctx, bulkSyncTestResponse(), schemas, plan)
+	require.False(t, diags.HasError(), "unexpected diagnostics: %v", diags)
+	require.False(t, data.Schemas.IsUnknown(), "schemas left unknown")
+
+	var stateSchemas []bulkSyncSchema
+	require.False(t, data.Schemas.ElementsAs(ctx, &stateSchemas, false).HasError())
+	require.Len(t, stateSchemas, 1)
+	assert.Equal(t, "orders", stateSchemas[0].Id.ValueString())
+	assert.Equal(t, 1, len(stateSchemas[0].Fields.Elements()))
+}
+
+func TestBulkSyncSchemaIDs(t *testing.T) {
+	schemaType := types.ObjectType{AttrTypes: bulkSyncSchema{}.AttrTypes()}
+
+	tests := map[string]struct {
+		set      basetypes.SetValue
+		expected []string
+	}{
+		// nil means "every schema on the sync", which is what an import needs.
+		"null set":    {set: types.SetNull(schemaType), expected: nil},
+		"unknown set": {set: types.SetUnknown(schemaType), expected: nil},
+		"empty set":   {set: types.SetValueMust(schemaType, []attr.Value{}), expected: []string{}},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			ids, diags := bulkSyncSchemaIDs(t.Context(), tc.set)
+			require.False(t, diags.HasError(), "unexpected diagnostics: %v", diags)
+			assert.Equal(t, tc.expected, ids)
+		})
+	}
+
+	t.Run("configured schemas", func(t *testing.T) {
+		set := bulkSyncSchemaPlan(t, "orders", bulkSyncPlanField(t, "email"))
+		ids, diags := bulkSyncSchemaIDs(t.Context(), set)
+		require.False(t, diags.HasError(), "unexpected diagnostics: %v", diags)
+		assert.Equal(t, []string{"orders"}, ids)
+	})
 }
 
 func TestAccBulkSyncResource(t *testing.T) {
@@ -897,6 +1118,44 @@ func TestAccBulkSyncResourceSchemaFields(t *testing.T) {
 }
 
 // ---------------------------------------------------------------------------
+// Test: Schema fields left to the server
+// ---------------------------------------------------------------------------
+
+// A field named without any of its optional+computed attributes has to come
+// back from apply with those attributes known, which means the provider has to
+// read the schema's fields from the API rather than the schema list.
+func TestAccBulkSyncResourceSchemaFieldsComputed(t *testing.T) {
+	name := fmt.Sprintf("TestAccBulkSyncFieldsComputed-%s", uuid.NewString())
+	conns := getSharedBulkSyncConnections(t)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV6ProviderFactories: TestAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: bulkSyncAdvancedTestConfig(t, bulkSyncAdvancedTestArgs{
+					Name:               name,
+					SourceConnectionID: conns.SourceID,
+					DestConnectionID:   conns.DestID,
+					Mode:               "replicate",
+					Active:             "true",
+					Schemas: `[{
+    id      = "polytomic.sync_test_source"
+    enabled = true
+    fields = [{
+      id = "email"
+    }]
+  }]`,
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccBulkSyncExists(t, name),
+				),
+			},
+		},
+	})
+}
+
+// ---------------------------------------------------------------------------
 // Test: Multiple schemas
 // ---------------------------------------------------------------------------
 
@@ -1049,4 +1308,19 @@ func TestAccBulkSyncResourceSchemaTrackingField(t *testing.T) {
 			},
 		},
 	})
+}
+
+// A bulk sync without a default schedule -- one configured with only
+// additional schedules -- comes back with default_schedule omitted, which the
+// read must report as a null schedule rather than panicking on it.
+func TestBulkSyncDataFromResponseNilDefaultSchedule(t *testing.T) {
+	ctx := t.Context()
+
+	response := bulkSyncTestResponse()
+	response.DefaultSchedule = nil
+
+	data, diags := bulkSyncDataFromResponse(ctx, response, nil, nil)
+	require.False(t, diags.HasError(), "unexpected diagnostics: %v", diags)
+	assert.True(t, data.Schedule.IsNull(), "expected a null schedule, got %v", data.Schedule)
+	assert.Equal(t, "248df4b7-aa70-47b8-a036-33ac447e668d", data.Id.ValueString())
 }

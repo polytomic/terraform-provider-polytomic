@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"slices"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/AlekSi/pointer"
@@ -28,6 +29,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/polytomic/polytomic-go/v25"
 	"github.com/polytomic/polytomic-go/v25/bulksync"
+	ptclient "github.com/polytomic/polytomic-go/v25/client"
 	ptcore "github.com/polytomic/polytomic-go/v25/core"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
@@ -390,22 +392,99 @@ func bulkSyncFiltersFromSDK(filters []*polytomic.BulkFilter) ([]bulkSyncFilter, 
 	return result, nil
 }
 
-// bulkSchemaListItemsToSchemas adapts the schemas list response to the
-// individual schema type used by the rest of this file. The list endpoint no
-// longer returns Fields/Filters in v25; they remain empty here and are
-// preserved from plan data during merging.
-func bulkSchemaListItemsToSchemas(items []*polytomic.BulkSchemaListItem) []*polytomic.BulkSchema {
-	result := make([]*polytomic.BulkSchema, len(items))
-	for i, item := range items {
-		result[i] = &polytomic.BulkSchema{
-			ID:                  item.ID,
-			Enabled:             item.Enabled,
-			DataCutoffTimestamp: item.DataCutoffTimestamp,
-			DisableDataCutoff:   item.DisableDataCutoff,
-			OutputName:          item.OutputName,
-			PartitionKey:        item.PartitionKey,
-			TrackingField:       item.TrackingField,
-			UserOutputName:      item.UserOutputName,
+// bulkSyncSchemaIDs returns the schema IDs held in a bulk sync's schema set. A
+// nil result means the set is null or unknown, i.e. the caller has no schema
+// selection of its own and needs every schema on the sync.
+func bulkSyncSchemaIDs(ctx context.Context, set basetypes.SetValue) ([]string, diag.Diagnostics) {
+	var diags diag.Diagnostics
+	if set.IsNull() || set.IsUnknown() {
+		return nil, diags
+	}
+
+	var schemas []bulkSyncSchema
+	diags = set.ElementsAs(ctx, &schemas, false)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	ids := make([]string, 0, len(schemas))
+	for _, s := range schemas {
+		if !s.Id.IsNull() && !s.Id.IsUnknown() {
+			ids = append(ids, s.Id.ValueString())
+		}
+	}
+	return ids, diags
+}
+
+// maxConcurrentSchemaGets bounds the requests fetchBulkSyncSchemas has in
+// flight, since a sync over a large database can have many schemas.
+const maxConcurrentSchemaGets = 8
+
+// fetchBulkSyncSchemas returns the full configuration of a bulk sync's schemas.
+// The list endpoint does not populate fields or filters, so each schema of
+// interest is retrieved individually. Pass the IDs the caller needs -- state
+// holds only the schemas named in the plan -- or nil for every schema on the
+// sync, which is what an import needs.
+func fetchBulkSyncSchemas(ctx context.Context, client *ptclient.Client, syncID string, ids []string) ([]*polytomic.BulkSchema, error) {
+	listed, err := retryOnCacheRefresh(ctx, "list bulk sync schemas", func() (*polytomic.ListBulkSchemaEnvelope, error) {
+		return client.BulkSync.Schemas.List(ctx, syncID, &bulksync.SchemasListRequest{})
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	wanted := make([]string, 0, len(listed.Data))
+	for _, item := range listed.Data {
+		id := pointer.GetString(item.ID)
+		if id == "" {
+			continue
+		}
+		if ids != nil && !slices.Contains(ids, id) {
+			continue
+		}
+		wanted = append(wanted, id)
+	}
+
+	schemas := make([]*polytomic.BulkSchema, len(wanted))
+	errs := make([]error, len(wanted))
+
+	sem := make(chan struct{}, maxConcurrentSchemaGets)
+	var wg sync.WaitGroup
+	for i, id := range wanted {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			sem <- struct{}{}
+			defer func() { <-sem }()
+
+			got, err := retryOnCacheRefresh(ctx, "get bulk sync schema", func() (*polytomic.BulkSchemaEnvelope, error) {
+				return client.BulkSync.Schemas.Get(ctx, syncID, id)
+			})
+			if err != nil {
+				errs[i] = fmt.Errorf("schema %q: %w", id, err)
+				return
+			}
+			schemas[i] = got.Data
+		}()
+	}
+	wg.Wait()
+
+	if err := errors.Join(errs...); err != nil {
+		return nil, err
+	}
+	return slices.DeleteFunc(schemas, func(s *polytomic.BulkSchema) bool { return s == nil }), nil
+}
+
+// bulkSyncFieldsFromSDK converts a schema's fields to their Terraform models.
+func bulkSyncFieldsFromSDK(fields []*polytomic.BulkField) []bulkSyncSchemaField {
+	result := make([]bulkSyncSchemaField, len(fields))
+	for i, f := range fields {
+		result[i] = bulkSyncSchemaField{
+			Id:             types.StringPointerValue(f.ID),
+			Enabled:        types.BoolPointerValue(f.Enabled),
+			Obfuscate:      types.BoolPointerValue(f.Obfuscated),
+			OutputName:     types.StringPointerValue(f.OutputName),
+			UserOutputName: types.StringPointerValue(f.UserOutputName),
 		}
 	}
 	return result
@@ -435,17 +514,7 @@ func bulkSyncSchemasFromSDK(ctx context.Context, schemas []*polytomic.BulkSchema
 		}
 
 		if len(s.Fields) > 0 {
-			tfFields := make([]bulkSyncSchemaField, len(s.Fields))
-			for j, f := range s.Fields {
-				tfFields[j] = bulkSyncSchemaField{
-					Id:             types.StringPointerValue(f.ID),
-					Enabled:        types.BoolPointerValue(f.Enabled),
-					Obfuscate:      types.BoolPointerValue(f.Obfuscated),
-					OutputName:     types.StringPointerValue(f.OutputName),
-					UserOutputName: types.StringPointerValue(f.UserOutputName),
-				}
-			}
-			result[i].Fields, diags = types.SetValueFrom(ctx, fieldType, tfFields)
+			result[i].Fields, diags = types.SetValueFrom(ctx, fieldType, bulkSyncFieldsFromSDK(s.Fields))
 			if diags.HasError() {
 				return nil, diags
 			}
@@ -844,14 +913,17 @@ func (r *bulkSyncResource) Create(ctx context.Context, req resource.CreateReques
 		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error creating bulk sync: %s", err))
 		return
 	}
-	createdSchemas, err := retryOnCacheRefresh(ctx, "list bulk sync schemas", func() (*polytomic.ListBulkSchemaEnvelope, error) {
-		return client.BulkSync.Schemas.List(ctx, pointer.Get(created.Data.ID), &bulksync.SchemasListRequest{})
-	})
+	schemaIDs, diags := bulkSyncSchemaIDs(ctx, data.Schemas)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+	createdSchemas, err := fetchBulkSyncSchemas(ctx, client, pointer.Get(created.Data.ID), schemaIDs)
 	if err != nil {
 		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error reading bulk sync schemas: %s", err))
 		return
 	}
-	data, diags = bulkSyncDataFromResponse(ctx, created.Data, bulkSchemaListItemsToSchemas(createdSchemas.Data), &data)
+	data, diags = bulkSyncDataFromResponse(ctx, created.Data, createdSchemas, &data)
 	resp.Diagnostics.Append(diags...)
 	if diags.HasError() {
 		return
@@ -887,14 +959,17 @@ func (r *bulkSyncResource) Read(ctx context.Context, req resource.ReadRequest, r
 		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error reading bulk sync: %s", err))
 		return
 	}
-	bulkSyncSchemas, err := retryOnCacheRefresh(ctx, "list bulk sync schemas", func() (*polytomic.ListBulkSchemaEnvelope, error) {
-		return client.BulkSync.Schemas.List(ctx, data.Id.ValueString(), &bulksync.SchemasListRequest{})
-	})
+	schemaIDs, diags := bulkSyncSchemaIDs(ctx, data.Schemas)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+	bulkSyncSchemas, err := fetchBulkSyncSchemas(ctx, client, data.Id.ValueString(), schemaIDs)
 	if err != nil {
 		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error reading bulk sync schemas: %s", err))
 		return
 	}
-	data, diags = bulkSyncDataFromResponse(ctx, bulkSync.Data, bulkSchemaListItemsToSchemas(bulkSyncSchemas.Data), &data)
+	data, diags = bulkSyncDataFromResponse(ctx, bulkSync.Data, bulkSyncSchemas, &data)
 	resp.Diagnostics.Append(diags...)
 	if diags.HasError() {
 		return
@@ -1073,6 +1148,25 @@ func (r *bulkSyncResource) Update(ctx context.Context, req resource.UpdateReques
 		return
 	}
 
+	schemaIDs, diags := bulkSyncSchemaIDs(ctx, data.Schemas)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
+	// The update endpoint reconciles schedules by ID: a default schedule sent
+	// without one replaces the sync's existing schedule instead of updating it
+	// in place, so the schedule takes on a new identity on every update. Carry
+	// the current ID over to keep it.
+	current, err := client.BulkSync.Get(ctx, data.Id.ValueString(), &polytomic.BulkSyncGetRequest{})
+	if err != nil {
+		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error reading bulk sync: %s", err))
+		return
+	}
+	if current.Data != nil && current.Data.DefaultSchedule != nil {
+		sche.ID = current.Data.DefaultSchedule.ID
+	}
+
 	// Convert int64 concurrency limits to int
 	var concurrencyLimit *int
 	if !data.ConcurrencyLimit.IsNull() {
@@ -1132,15 +1226,13 @@ func (r *bulkSyncResource) Update(ctx context.Context, req resource.UpdateReques
 		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error creating bulk sync: %s", err))
 		return
 	}
-	updatedSchemas, err := retryOnCacheRefresh(ctx, "list bulk sync schemas", func() (*polytomic.ListBulkSchemaEnvelope, error) {
-		return client.BulkSync.Schemas.List(ctx, data.Id.ValueString(), &bulksync.SchemasListRequest{})
-	})
+	updatedSchemas, err := fetchBulkSyncSchemas(ctx, client, data.Id.ValueString(), schemaIDs)
 	if err != nil {
 		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error reading bulk sync schemas: %s", err))
 		return
 	}
 
-	data, diags = bulkSyncDataFromResponse(ctx, updated.Data, bulkSchemaListItemsToSchemas(updatedSchemas.Data), &data)
+	data, diags = bulkSyncDataFromResponse(ctx, updated.Data, updatedSchemas, &data)
 	resp.Diagnostics.Append(diags...)
 	if diags.HasError() {
 		return
@@ -1182,32 +1274,43 @@ func (r *bulkSyncResource) ImportState(ctx context.Context, req resource.ImportS
 // configurations from the plan to avoid state inconsistencies from API-added defaults.
 func bulkSyncDataFromResponse(ctx context.Context, response *polytomic.BulkSyncResponse, schemas []*polytomic.BulkSchema, planData *bulkSyncResourceData) (bulkSyncResourceData, diag.Diagnostics) {
 	var data bulkSyncResourceData
+	var diags diag.Diagnostics
+
 	// schedule result
-	sch, diags := types.ObjectValueFrom(ctx, map[string]attr.Type{
+	// A bulk sync need not have a default schedule -- one configured with only
+	// additional schedules comes back with default_schedule omitted -- so the
+	// absent case reports a null schedule instead of dereferencing it.
+	scheduleAttrTypes := map[string]attr.Type{
 		"frequency":    types.StringType,
 		"day_of_week":  types.StringType,
 		"hour":         types.StringType,
 		"minute":       types.StringType,
 		"month":        types.StringType,
 		"day_of_month": types.StringType,
-	}, BulkSchedule{
-		DayOfMonth: response.DefaultSchedule.DayOfMonth,
-		DayOfWeek:  response.DefaultSchedule.DayOfWeek,
-		Frequency:  string(response.DefaultSchedule.Frequency),
-		Hour:       response.DefaultSchedule.Hour,
-		Minute:     response.DefaultSchedule.Minute,
-		Month:      response.DefaultSchedule.Month,
-	})
-	if diags.HasError() {
-		return data, diags
+	}
+	sch := types.ObjectNull(scheduleAttrTypes)
+	if response.DefaultSchedule != nil {
+		sch, diags = types.ObjectValueFrom(ctx, scheduleAttrTypes, BulkSchedule{
+			DayOfMonth: response.DefaultSchedule.DayOfMonth,
+			DayOfWeek:  response.DefaultSchedule.DayOfWeek,
+			Frequency:  string(response.DefaultSchedule.Frequency),
+			Hour:       response.DefaultSchedule.Hour,
+			Minute:     response.DefaultSchedule.Minute,
+			Month:      response.DefaultSchedule.Month,
+		})
+		if diags.HasError() {
+			return data, diags
+		}
 	}
 
 	// schemas result
-	// If planData is provided, merge plan schemas with API response to:
+	// If the plan names the schemas, merge them with the API response to:
 	// 1. Preserve user-specified values (id, enabled, etc.)
 	// 2. Populate computed fields with API values (output_name, fields, etc.)
+	// A null or unknown plan value means the configuration left schemas to the
+	// server, so the API response stands on its own.
 	var schemaVal basetypes.SetValue
-	if planData != nil && !planData.Schemas.IsNull() {
+	if planData != nil && !planData.Schemas.IsNull() && !planData.Schemas.IsUnknown() {
 		filterType := types.ObjectType{AttrTypes: bulkSyncFilter{}.AttrTypes()}
 		fieldType := types.ObjectType{AttrTypes: bulkSyncSchemaField{}.AttrTypes()}
 
@@ -1232,10 +1335,14 @@ func bulkSyncDataFromResponse(ctx context.Context, response *polytomic.BulkSyncR
 				merged.Enabled = PopulateUnknownBool(merged.Enabled, api.Enabled)
 				merged.DisableDataCutoff = PopulateUnknownBool(merged.DisableDataCutoff, api.DisableDataCutoff)
 
-				// Merge fields: when user specifies fields, populate computed
-				// values (output_name, user_output_name) from the API response.
+				// Merge fields: when the user names fields, populate the
+				// computed values for each of them from the API response.
 				if merged.Fields.IsUnknown() {
-					merged.Fields, mergeDiags = PopulateUnknownSet(ctx, merged.Fields, api.Fields, fieldType)
+					if len(api.Fields) > 0 {
+						merged.Fields, mergeDiags = types.SetValueFrom(ctx, fieldType, bulkSyncFieldsFromSDK(api.Fields))
+					} else {
+						merged.Fields = types.SetNull(fieldType)
+					}
 				} else if !merged.Fields.IsNull() {
 					merged.Fields, mergeDiags = MergeSetElements(
 						ctx,
@@ -1249,6 +1356,7 @@ func bulkSyncDataFromResponse(ctx context.Context, response *polytomic.BulkSyncR
 							m.OutputName = PopulateUnknownString(m.OutputName, apiField.OutputName)
 							m.UserOutputName = PopulateUnknownString(m.UserOutputName, apiField.UserOutputName)
 							m.Enabled = PopulateUnknownBool(m.Enabled, apiField.Enabled)
+							m.Obfuscate = PopulateUnknownBool(m.Obfuscate, apiField.Obfuscated)
 							return m, nil
 						},
 					)
@@ -1259,6 +1367,7 @@ func bulkSyncDataFromResponse(ctx context.Context, response *polytomic.BulkSyncR
 
 				// Ensure no unknown values remain on fields that weren't matched
 				// by the API (e.g., the API hadn't discovered the field yet).
+				// Terraform rejects an applied state that still holds unknowns.
 				if !merged.Fields.IsNull() && !merged.Fields.IsUnknown() {
 					var fields []bulkSyncSchemaField
 					mergeDiags = merged.Fields.ElementsAs(ctx, &fields, false)
@@ -1271,6 +1380,12 @@ func bulkSyncDataFromResponse(ctx context.Context, response *polytomic.BulkSyncR
 						}
 						if fields[i].UserOutputName.IsUnknown() {
 							fields[i].UserOutputName = types.StringNull()
+						}
+						if fields[i].Enabled.IsUnknown() {
+							fields[i].Enabled = types.BoolNull()
+						}
+						if fields[i].Obfuscate.IsUnknown() {
+							fields[i].Obfuscate = types.BoolNull()
 						}
 					}
 					merged.Fields, mergeDiags = types.SetValueFrom(ctx, fieldType, fields)
@@ -1298,7 +1413,7 @@ func bulkSyncDataFromResponse(ctx context.Context, response *polytomic.BulkSyncR
 			return data, diags
 		}
 	} else {
-		// No plan data (e.g., during import), use API response
+		// No schemas in the plan (e.g. during import), use the API response
 		tfSchemas, convDiags := bulkSyncSchemasFromSDK(ctx, schemas)
 		diags.Append(convDiags...)
 		if diags.HasError() {
