@@ -2,13 +2,13 @@
 
 ENHANCEMENTS:
 
-- Added the `polytomic_connection_schema_field` resource, which adds a field to a connection schema or overrides the label, type, or path of a field the source already reports. It is available on connections that support user-defined fields, such as MongoDB, DynamoDB, Stripe, and file storage connections.
+- Added the `polytomic_connection_schema_field` resource, which adds a field to a connection schema or overrides the label, type, or path of a field the source already reports. `type` accepts detailed types such as `bigint`, `date`, and `decimal` (with `precision` and `scale`), and `type_spec` sets any other detailed type as JSON. It is available on connections that support user-defined fields, such as MongoDB, DynamoDB, Stripe, and file storage connections.
 
 - Added the `polytomic_connection_schemas` data source, which lists a connection's schemas and, optionally, their fields.
 
 - `polytomic_connection_schema` now reports each field's `source_primary_key`, `primary_key_override`, `remote_type`, `path`, `type_spec`, and `user_managed`, and adds `fields_by_id` for looking up a field by ID. `source_primary_key` and `primary_key_override` are null on Polytomic deployments that do not report them.
 
-- Upgraded to the `polytomic-go` SDK v25.9.5.
+- Upgraded to the `polytomic-go` SDK v25.9.6.
 
 BUG FIXES:
 

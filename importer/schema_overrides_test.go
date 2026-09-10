@@ -85,6 +85,8 @@ func TestSchemaOverridesAdd(t *testing.T) {
 func TestSchemaOverridesGenerate(t *testing.T) {
 	yes, no := pointer.To(true), pointer.To(false)
 	stringType := polytomic.UtilFieldTypeString
+	numberType := polytomic.UtilFieldTypeNumber
+	arrayType := polytomic.UtilFieldTypeArray
 	const connectionID = "0b6f3a52-7d1e-4c8a-9f2b-3e5d7c9a1b24"
 
 	s := NewSchemaOverrides(nil, "org-1")
@@ -93,6 +95,10 @@ func TestSchemaOverridesGenerate(t *testing.T) {
 			{ID: pointer.To("id"), IsPrimaryKey: no, SourcePrimaryKey: yes, PrimaryKeyOverride: no},
 			{ID: pointer.To("order_no"), IsPrimaryKey: yes, SourcePrimaryKey: no, PrimaryKeyOverride: yes},
 			{ID: pointer.To("city"), Name: pointer.To("City"), Type: &stringType, Path: pointer.To("$.address.city"), UserManaged: yes, SourcePrimaryKey: no},
+			{ID: pointer.To("total"), Name: pointer.To("Total"), Type: &numberType, UserManaged: yes, SourcePrimaryKey: no,
+				TypeSpec: pointer.To[any]([]any{"decimal", map[string]any{"precision": 12.0, "scale": 2.0}})},
+			{ID: pointer.To("tags"), Name: pointer.To("Tags"), Type: &arrayType, UserManaged: yes, SourcePrimaryKey: no,
+				TypeSpec: pointer.To[any]([]any{"array", "string"})},
 		}},
 		{ID: pointer.To("exports/2026 orders.csv"), Fields: []*polytomic.SchemaField{
 			{ID: pointer.To("total"), Name: pointer.To("total"), Type: &stringType, UserManaged: yes, SourcePrimaryKey: no},
@@ -115,6 +121,10 @@ func TestSchemaOverridesGenerate(t *testing.T) {
 		`connection_id\s+= polytomic_mongodb_connection\.orders\.id`,
 		`organization\s+= local\.organization_id`,
 		`path\s+= "\$\.address\.city"`,
+		`type\s+= "decimal"`,
+		`precision\s+= 12`,
+		`scale\s+= 2`,
+		`type_spec\s+= jsonencode\(\["array", "string"\]\)`,
 	} {
 		if !regexp.MustCompile(want).Match(tf.Bytes()) {
 			t.Errorf("missing %s in:\n%s", want, tf.String())
@@ -126,7 +136,9 @@ func TestSchemaOverridesGenerate(t *testing.T) {
 
 	wantImports := "terraform import polytomic_connection_schema_primary_keys.orders_shop_orders org-1/" + connectionID + "/shop.orders\n" +
 		"terraform import polytomic_connection_schema_field.orders_exports_2026_orders_csv_total 'org-1/" + connectionID + "/exports/2026 orders.csv/total'\n" +
-		"terraform import polytomic_connection_schema_field.orders_shop_orders_city org-1/" + connectionID + "/shop.orders/city\n"
+		"terraform import polytomic_connection_schema_field.orders_shop_orders_city org-1/" + connectionID + "/shop.orders/city\n" +
+		"terraform import polytomic_connection_schema_field.orders_shop_orders_tags org-1/" + connectionID + "/shop.orders/tags\n" +
+		"terraform import polytomic_connection_schema_field.orders_shop_orders_total org-1/" + connectionID + "/shop.orders/total\n"
 	if got := imports.String(); got != wantImports {
 		t.Errorf("imports: got\n%s\nwant\n%s", got, wantImports)
 	}

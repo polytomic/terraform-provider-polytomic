@@ -2,11 +2,14 @@ package provider
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
 
 	"github.com/AlekSi/pointer"
+	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
+	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -23,9 +26,8 @@ import (
 // Ensure provider defined types fully satisfy framework interfaces
 var _ resource.Resource = &connectionSchemaFieldResource{}
 var _ resource.ResourceWithImportState = &connectionSchemaFieldResource{}
-
-// schemaFieldTypes are the types a user-defined field or override may take.
-var schemaFieldTypes = []string{"string", "number", "boolean", "datetime", "array", "object", "binary"}
+var _ resource.ResourceWithModifyPlan = &connectionSchemaFieldResource{}
+var _ resource.ResourceWithValidateConfig = &connectionSchemaFieldResource{}
 
 func NewConnectionSchemaFieldResource() resource.Resource {
 	return &connectionSchemaFieldResource{}
@@ -36,14 +38,17 @@ type connectionSchemaFieldResource struct {
 }
 
 type connectionSchemaFieldResourceModel struct {
-	ID           types.String `tfsdk:"id"`
-	Organization types.String `tfsdk:"organization"`
-	ConnectionID types.String `tfsdk:"connection_id"`
-	SchemaID     types.String `tfsdk:"schema_id"`
-	FieldID      types.String `tfsdk:"field_id"`
-	Label        types.String `tfsdk:"label"`
-	Type         types.String `tfsdk:"type"`
-	Path         types.String `tfsdk:"path"`
+	ID           types.String         `tfsdk:"id"`
+	Organization types.String         `tfsdk:"organization"`
+	ConnectionID types.String         `tfsdk:"connection_id"`
+	SchemaID     types.String         `tfsdk:"schema_id"`
+	FieldID      types.String         `tfsdk:"field_id"`
+	Label        types.String         `tfsdk:"label"`
+	Type         types.String         `tfsdk:"type"`
+	Precision    types.Int64          `tfsdk:"precision"`
+	Scale        types.Int64          `tfsdk:"scale"`
+	TypeSpec     jsontypes.Normalized `tfsdk:"type_spec"`
+	Path         types.String         `tfsdk:"path"`
 }
 
 func (r *connectionSchemaFieldResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -51,17 +56,21 @@ func (r *connectionSchemaFieldResource) Metadata(ctx context.Context, req resour
 }
 
 func (r *connectionSchemaFieldResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-	fieldTypes := make([]string, len(schemaFieldTypes))
-	for i, t := range schemaFieldTypes {
-		fieldTypes[i] = "`" + t + "`"
+	quoted := func(names []string) string {
+		q := make([]string, len(names))
+		for i, n := range names {
+			q[i] = "`" + n + "`"
+		}
+		return strings.Join(q, ", ")
 	}
+	basicCount := len(basicFieldTypes)
 
 	resp.Schema = schema.Schema{
 		MarkdownDescription: ":meta:subcategory:Connections: Connection Schema Field\n\n" +
 			"Adds a field to a connection schema, or overrides the label, type, or path of a field the source already reports. " +
 			"Available on connections that support user-defined fields, such as MongoDB, DynamoDB, Stripe, and file storage connections.\n\n" +
 			"Deleting this resource removes an added field, or reverts an overridden field to its detected definition. " +
-			"Removing `label`, `type`, or `path` from the configuration keeps the last applied value.",
+			"Removing `label`, `type`, `type_spec`, or `path` from the configuration keeps the last applied value.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				MarkdownDescription: "Resource identifier in the format: organization/connection_id/schema_id/field_id",
@@ -112,15 +121,40 @@ func (r *connectionSchemaFieldResource) Schema(ctx context.Context, req resource
 				},
 			},
 			"type": schema.StringAttribute{
-				MarkdownDescription: fmt.Sprintf("Field type, one of %s. Required when adding a field; defaults to the detected type when overriding one.",
-					strings.Join(fieldTypes, ", ")),
+				MarkdownDescription: fmt.Sprintf("Field type: one of %s, or a detailed type: %s. "+
+					"`decimal` also requires `precision` and `scale`. "+
+					"Adding a field requires `type` or `type_spec`; overriding one defaults to the detected type.",
+					quoted(fieldTypeNames[:basicCount]), quoted(fieldTypeNames[basicCount:])),
 				Optional: true,
 				Computed: true,
 				Validators: []validator.String{
-					stringvalidator.OneOf(schemaFieldTypes...),
+					stringvalidator.OneOf(fieldTypeNames...),
 				},
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
+			},
+			"precision": schema.Int64Attribute{
+				MarkdownDescription: "Total number of digits of a `decimal` field",
+				Optional:            true,
+				Computed:            true,
+				Validators: []validator.Int64{
+					int64validator.AtLeast(1),
+				},
+			},
+			"scale": schema.Int64Attribute{
+				MarkdownDescription: "Number of digits after the decimal point of a `decimal` field",
+				Optional:            true,
+				Computed:            true,
+				Validators: []validator.Int64{
+					int64validator.AtLeast(0),
+				},
+			},
+			"type_spec": schema.StringAttribute{
+				MarkdownDescription: "The field's detailed type, JSON encoded, for types `type` cannot express, such as " +
+					"`jsonencode([\"array\", \"string\"])`. Always reports the field's current type.",
+				CustomType: jsontypes.NormalizedType{},
+				Optional:   true,
+				Computed:   true,
+				Validators: []validator.String{
+					stringvalidator.ConflictsWith(path.MatchRoot("type"), path.MatchRoot("precision"), path.MatchRoot("scale")),
 				},
 			},
 			"path": schema.StringAttribute{
@@ -144,10 +178,135 @@ func (r *connectionSchemaFieldResource) Configure(ctx context.Context, req resou
 	}
 }
 
+func (r *connectionSchemaFieldResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+	var data connectionSchemaFieldResourceModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() || data.Type.IsUnknown() || data.Precision.IsUnknown() || data.Scale.IsUnknown() {
+		return
+	}
+
+	decimal := data.Type.ValueString() == "decimal"
+	switch {
+	case decimal && (data.Precision.IsNull() || data.Scale.IsNull()):
+		resp.Diagnostics.AddAttributeError(path.Root("type"), "Missing precision or scale",
+			"A decimal field requires both precision and scale.")
+	case !decimal && (!data.Precision.IsNull() || !data.Scale.IsNull()):
+		resp.Diagnostics.AddAttributeError(path.Root("precision"), "Precision and scale require decimal",
+			"precision and scale can only be set when type is decimal.")
+	case decimal && data.Scale.ValueInt64() > data.Precision.ValueInt64():
+		resp.Diagnostics.AddAttributeError(path.Root("scale"), "Scale exceeds precision",
+			"scale cannot be greater than precision.")
+	}
+}
+
+func (r *connectionSchemaFieldResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+	if req.State.Raw.IsNull() || req.Plan.Raw.IsNull() {
+		return
+	}
+
+	var config, state, plan connectionSchemaFieldResourceModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	planFieldType(ctx, config, state, &plan)
+	resp.Diagnostics.Append(resp.Plan.Set(ctx, &plan)...)
+}
+
+// planFieldType plans the type attributes the configuration leaves unset: they
+// keep their state while the type is unchanged, and are unknown once it
+// changes, except that precision and scale are null for any type but decimal.
+func planFieldType(ctx context.Context, config, state connectionSchemaFieldResourceModel, plan *connectionSchemaFieldResourceModel) {
+	changed := fieldTypeChanged(ctx, config, state)
+	notDecimal := !config.Type.IsNull() && !config.Type.IsUnknown() && config.Type.ValueString() != "decimal"
+
+	if config.Type.IsNull() {
+		plan.Type = state.Type
+		if changed {
+			plan.Type = types.StringUnknown()
+		}
+	}
+	if config.TypeSpec.IsNull() {
+		plan.TypeSpec = state.TypeSpec
+		if changed {
+			plan.TypeSpec = jsontypes.NewNormalizedUnknown()
+		}
+	}
+	for _, attr := range []struct {
+		config, state types.Int64
+		plan          *types.Int64
+	}{
+		{config.Precision, state.Precision, &plan.Precision},
+		{config.Scale, state.Scale, &plan.Scale},
+	} {
+		if !attr.config.IsNull() {
+			continue
+		}
+		switch {
+		case !changed:
+			*attr.plan = attr.state
+		case notDecimal:
+			*attr.plan = types.Int64Null()
+		default:
+			*attr.plan = types.Int64Unknown()
+		}
+	}
+}
+
+// fieldTypeChanged reports whether the configuration sets the field's type to
+// something other than its current value.
+func fieldTypeChanged(ctx context.Context, config, state connectionSchemaFieldResourceModel) bool {
+	if !config.TypeSpec.IsNull() {
+		if config.TypeSpec.IsUnknown() || state.TypeSpec.IsNull() || state.TypeSpec.IsUnknown() {
+			return true
+		}
+		equal, diags := config.TypeSpec.StringSemanticEquals(ctx, state.TypeSpec)
+		return diags.HasError() || !equal
+	}
+	return (!config.Type.IsNull() && !config.Type.Equal(state.Type)) ||
+		(!config.Precision.IsNull() && !config.Precision.Equal(state.Precision)) ||
+		(!config.Scale.IsNull() && !config.Scale.Equal(state.Scale))
+}
+
+// fieldTypeRequest returns the API type and definition for the configured type
+// attributes, or an empty type when none are set.
+func fieldTypeRequest(m connectionSchemaFieldResourceModel) (string, *polytomic.TypesDefinition, error) {
+	var basic string
+	var spec any
+	switch {
+	case !m.TypeSpec.IsNull() && !m.TypeSpec.IsUnknown():
+		if err := json.Unmarshal([]byte(m.TypeSpec.ValueString()), &spec); err != nil {
+			return "", nil, fmt.Errorf("type_spec: %w", err)
+		}
+		var err error
+		if basic, err = specBasicType(spec); err != nil {
+			return "", nil, err
+		}
+	case !m.Type.IsNull() && !m.Type.IsUnknown():
+		var err error
+		if basic, spec, err = fieldTypeSpec(m.Type.ValueString(), m.Precision.ValueInt64(), m.Scale.ValueInt64()); err != nil {
+			return "", nil, err
+		}
+	default:
+		return "", nil, nil
+	}
+	def, err := newTypesDefinition(spec)
+	return basic, def, err
+}
+
 func (r *connectionSchemaFieldResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data connectionSchemaFieldResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	basic, def, err := fieldTypeRequest(data)
+	if err != nil {
+		resp.Diagnostics.AddError("Invalid field type", err.Error())
 		return
 	}
 
@@ -170,19 +329,20 @@ func (r *connectionSchemaFieldResource) Create(ctx context.Context, req resource
 	var field *polytomic.SchemaField
 	switch existing := findSchemaField(schemaData, fieldID); {
 	case existing == nil:
-		if knownStringPointer(data.Label) == nil || knownStringPointer(data.Type) == nil {
+		if knownStringPointer(data.Label) == nil || basic == "" {
 			resp.Diagnostics.AddError(
 				"Missing label or type",
-				fmt.Sprintf("Schema %s has no field %s, so adding it requires both label and type.", schemaID, fieldID),
+				fmt.Sprintf("Schema %s has no field %s, so adding it requires a label and either type or type_spec.", schemaID, fieldID),
 			)
 			return
 		}
 		err = client.Schemas.UpsertField(ctx, connectionID, schemaID, &polytomic.UpsertSchemaFieldRequest{
 			Fields: []*polytomic.UserFieldRequest{{
-				FieldID: fieldID,
-				Label:   data.Label.ValueString(),
-				Type:    data.Type.ValueString(),
-				Path:    knownStringPointer(data.Path),
+				FieldID:    fieldID,
+				Label:      data.Label.ValueString(),
+				Type:       basic,
+				Definition: def,
+				Path:       knownStringPointer(data.Path),
 			}},
 		})
 		if err != nil {
@@ -211,14 +371,17 @@ func (r *connectionSchemaFieldResource) Create(ctx context.Context, req resource
 		return
 	default:
 		patch := &polytomic.PatchSchemaFieldRequest{
-			Label: knownStringPointer(data.Label),
-			Type:  knownStringPointer(data.Type),
-			Path:  knownStringPointer(data.Path),
+			Label:      knownStringPointer(data.Label),
+			Path:       knownStringPointer(data.Path),
+			Definition: def,
+		}
+		if basic != "" {
+			patch.Type = pointer.To(basic)
 		}
 		if patch.Label == nil && patch.Type == nil && patch.Path == nil {
 			resp.Diagnostics.AddError(
 				"Nothing to override",
-				fmt.Sprintf("Set at least one of label, type, or path to override field %s.", fieldID),
+				fmt.Sprintf("Set at least one of label, type, type_spec, or path to override field %s.", fieldID),
 			)
 			return
 		}
@@ -229,7 +392,10 @@ func (r *connectionSchemaFieldResource) Create(ctx context.Context, req resource
 		}
 	}
 
-	applySchemaField(&data, field)
+	if err := applySchemaField(&data, field); err != nil {
+		resp.Diagnostics.AddError("Error reading field", err.Error())
+		return
+	}
 
 	if data.Organization.IsNull() || data.Organization.IsUnknown() {
 		data.Organization = types.StringValue(connectionOrganization(ctx, client, connectionID))
@@ -268,13 +434,17 @@ func (r *connectionSchemaFieldResource) Read(ctx context.Context, req resource.R
 		resp.State.RemoveResource(ctx)
 		return
 	}
-	applySchemaField(&data, field)
+	if err := applySchemaField(&data, field); err != nil {
+		resp.Diagnostics.AddError("Error reading field", err.Error())
+		return
+	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
 func (r *connectionSchemaFieldResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var plan, state connectionSchemaFieldResourceModel
+	var config, plan, state connectionSchemaFieldResourceModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 	if resp.Diagnostics.HasError() {
@@ -285,14 +455,22 @@ func (r *connectionSchemaFieldResource) Update(ctx context.Context, req resource
 	if !plan.Label.Equal(state.Label) {
 		patch.Label = knownStringPointer(plan.Label)
 	}
-	if !plan.Type.Equal(state.Type) {
-		patch.Type = knownStringPointer(plan.Type)
-	}
 	if !plan.Path.Equal(state.Path) {
 		patch.Path = knownStringPointer(plan.Path)
 	}
+	if fieldTypeChanged(ctx, config, state) {
+		basic, def, err := fieldTypeRequest(config)
+		if err != nil {
+			resp.Diagnostics.AddError("Invalid field type", err.Error())
+			return
+		}
+		if basic != "" {
+			patch.Type = pointer.To(basic)
+		}
+		patch.Definition = def
+	}
 
-	if patch.Label != nil || patch.Type != nil || patch.Path != nil {
+	if patch.Label != nil || patch.Type != nil || patch.Path != nil || patch.Definition != nil {
 		client, err := r.provider.Client(ctx, plan.Organization.ValueString())
 		if err != nil {
 			resp.Diagnostics.AddError("Error getting client", err.Error())
@@ -303,7 +481,10 @@ func (r *connectionSchemaFieldResource) Update(ctx context.Context, req resource
 			resp.Diagnostics.AddError("Error updating field", err.Error())
 			return
 		}
-		applySchemaField(&plan, field)
+		if err := applySchemaField(&plan, field); err != nil {
+			resp.Diagnostics.AddError("Error reading field", err.Error())
+			return
+		}
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
@@ -367,13 +548,33 @@ func patchSchemaField(ctx context.Context, client *ptclient.Client, connectionID
 	return resp.Data, nil
 }
 
-func applySchemaField(data *connectionSchemaFieldResourceModel, f *polytomic.SchemaField) {
+func applySchemaField(data *connectionSchemaFieldResourceModel, f *polytomic.SchemaField) error {
 	data.Label = types.StringPointerValue(f.Name)
-	data.Type = types.StringNull()
-	if f.Type != nil {
-		data.Type = types.StringValue(string(*f.Type))
-	}
 	data.Path = types.StringPointerValue(f.Path)
+
+	name, precision, scale, _, err := SchemaFieldTypeAttributes(f)
+	if err != nil {
+		return err
+	}
+	if name == "" && f.Type != nil {
+		name = string(*f.Type)
+	}
+	data.Type = types.StringNull()
+	if name != "" {
+		data.Type = types.StringValue(name)
+	}
+	data.Precision = types.Int64PointerValue(precision)
+	data.Scale = types.Int64PointerValue(scale)
+
+	data.TypeSpec = jsontypes.NewNormalizedNull()
+	if f.TypeSpec != nil && *f.TypeSpec != nil {
+		spec, err := json.Marshal(*f.TypeSpec)
+		if err != nil {
+			return fmt.Errorf("encoding type_spec for field %s: %w", pointer.GetString(f.ID), err)
+		}
+		data.TypeSpec = jsontypes.NewNormalizedValue(string(spec))
+	}
+	return nil
 }
 
 func addSchemaReadError(diags interface{ AddError(string, string) }, err error, connectionID, schemaID string) {

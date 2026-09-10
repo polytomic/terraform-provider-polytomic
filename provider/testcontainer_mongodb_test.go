@@ -18,7 +18,7 @@ const (
 )
 
 // mongoFixtureJS seeds the collection the schema field tests override.
-const mongoFixtureJS = `db.orders.insertOne({_id: "order-1", amount: "12.50", address: {city: "Paris"}})`
+const mongoFixtureJS = `db.orders.insertOne({_id: "order-1", amount: "12.50", tags: ["new", "gift"], address: {city: "Paris"}})`
 
 type mongoTestConfig struct {
 	Hosts    string

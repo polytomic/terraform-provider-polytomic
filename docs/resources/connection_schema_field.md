@@ -5,7 +5,7 @@ subcategory: "Connections"
 description: |-
   Connection Schema Field
   Adds a field to a connection schema, or overrides the label, type, or path of a field the source already reports. Available on connections that support user-defined fields, such as MongoDB, DynamoDB, Stripe, and file storage connections.
-  Deleting this resource removes an added field, or reverts an overridden field to its detected definition. Removing label, type, or path from the configuration keeps the last applied value.
+  Deleting this resource removes an added field, or reverts an overridden field to its detected definition. Removing label, type, type_spec, or path from the configuration keeps the last applied value.
 ---
 
 # polytomic_connection_schema_field (Resource)
@@ -14,7 +14,7 @@ Connection Schema Field
 
 Adds a field to a connection schema, or overrides the label, type, or path of a field the source already reports. Available on connections that support user-defined fields, such as MongoDB, DynamoDB, Stripe, and file storage connections.
 
-Deleting this resource removes an added field, or reverts an overridden field to its detected definition. Removing `label`, `type`, or `path` from the configuration keeps the last applied value.
+Deleting this resource removes an added field, or reverts an overridden field to its detected definition. Removing `label`, `type`, `type_spec`, or `path` from the configuration keeps the last applied value.
 
 ## Example Usage
 
@@ -52,7 +52,19 @@ resource "polytomic_connection_schema_field" "amount" {
   connection_id = polytomic_mongodb_connection.orders.id
   schema_id     = "shop.orders"
   field_id      = "amount"
-  type          = "number"
+  type          = "decimal"
+  precision     = 12
+  scale         = 2
+}
+
+# Detailed types that type cannot express are set with type_spec
+resource "polytomic_connection_schema_field" "tags" {
+  connection_id = polytomic_mongodb_connection.orders.id
+  schema_id     = "shop.orders"
+  field_id      = "tag_list"
+  label         = "Tags"
+  path          = "$.tags"
+  type_spec     = jsonencode(["array", "string"])
 }
 ```
 
@@ -70,7 +82,10 @@ resource "polytomic_connection_schema_field" "amount" {
 - `label` (String) Field label. Required when adding a field; defaults to the detected label when overriding one.
 - `organization` (String) Organization ID
 - `path` (String) JSONPath used to extract the field's value from each source record, such as `$.address.city`
-- `type` (String) Field type, one of `string`, `number`, `boolean`, `datetime`, `array`, `object`, `binary`. Required when adding a field; defaults to the detected type when overriding one.
+- `precision` (Number) Total number of digits of a `decimal` field
+- `scale` (Number) Number of digits after the decimal point of a `decimal` field
+- `type` (String) Field type: one of `string`, `number`, `boolean`, `datetime`, `array`, `object`, `binary`, or a detailed type: `smallint`, `int`, `bigint`, `single`, `double`, `decimal`, `date`, `time`, `datetime_tz`. `decimal` also requires `precision` and `scale`. Adding a field requires `type` or `type_spec`; overriding one defaults to the detected type.
+- `type_spec` (String) The field's detailed type, JSON encoded, for types `type` cannot express, such as `jsonencode(["array", "string"])`. Always reports the field's current type.
 
 ### Read-Only
 

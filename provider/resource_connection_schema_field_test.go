@@ -1,11 +1,14 @@
 package provider
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"testing"
 
 	"github.com/google/uuid"
+	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
 	"github.com/hashicorp/terraform-plugin-testing/statecheck"
@@ -43,17 +46,93 @@ func TestParseSchemaFieldID(t *testing.T) {
 	}
 }
 
+func TestPlanFieldType(t *testing.T) {
+	ctx := context.Background()
+	state := connectionSchemaFieldResourceModel{
+		Type:      types.StringValue("number"),
+		Precision: types.Int64Null(),
+		Scale:     types.Int64Null(),
+		TypeSpec:  jsontypes.NewNormalizedValue(`"number"`),
+	}
+	// unset returns a configuration that sets none of the type attributes.
+	unset := func() connectionSchemaFieldResourceModel {
+		return connectionSchemaFieldResourceModel{
+			Type:      types.StringNull(),
+			Precision: types.Int64Null(),
+			Scale:     types.Int64Null(),
+			TypeSpec:  jsontypes.NewNormalizedNull(),
+		}
+	}
+	// planFor mimics the framework: configured values carry over, and
+	// unconfigured computed values are unknown.
+	planFor := func(config connectionSchemaFieldResourceModel) connectionSchemaFieldResourceModel {
+		plan := config
+		if config.Type.IsNull() {
+			plan.Type = types.StringUnknown()
+		}
+		if config.Precision.IsNull() {
+			plan.Precision = types.Int64Unknown()
+		}
+		if config.Scale.IsNull() {
+			plan.Scale = types.Int64Unknown()
+		}
+		if config.TypeSpec.IsNull() {
+			plan.TypeSpec = jsontypes.NewNormalizedUnknown()
+		}
+		return plan
+	}
+
+	t.Run("keeps state while the type is unchanged", func(t *testing.T) {
+		config := unset()
+		plan := planFor(config)
+		planFieldType(ctx, config, state, &plan)
+		if !plan.Type.Equal(state.Type) || !plan.TypeSpec.Equal(state.TypeSpec) || !plan.Precision.IsNull() || !plan.Scale.IsNull() {
+			t.Errorf("got %+v", plan)
+		}
+	})
+
+	t.Run("a new type name makes type_spec unknown", func(t *testing.T) {
+		config := unset()
+		config.Type = types.StringValue("bigint")
+		plan := planFor(config)
+		planFieldType(ctx, config, state, &plan)
+		if !plan.TypeSpec.IsUnknown() || !plan.Precision.IsNull() || !plan.Scale.IsNull() {
+			t.Errorf("got %+v", plan)
+		}
+	})
+
+	t.Run("a new type_spec makes the other type attributes unknown", func(t *testing.T) {
+		config := unset()
+		config.TypeSpec = jsontypes.NewNormalizedValue(`["decimal", {"precision": 12, "scale": 2}]`)
+		plan := planFor(config)
+		planFieldType(ctx, config, state, &plan)
+		if !plan.Type.IsUnknown() || !plan.Precision.IsUnknown() || !plan.Scale.IsUnknown() {
+			t.Errorf("got %+v", plan)
+		}
+	})
+
+	t.Run("an equivalent type_spec is not a change", func(t *testing.T) {
+		config := unset()
+		config.TypeSpec = jsontypes.NewNormalizedValue(` "number" `)
+		plan := planFor(config)
+		planFieldType(ctx, config, state, &plan)
+		if !plan.Type.Equal(state.Type) {
+			t.Errorf("got %+v", plan)
+		}
+	})
+}
+
 func TestAccConnectionSchemaField(t *testing.T) {
 	if os.Getenv(resource.EnvTfAcc) == "" {
 		t.Skipf("%s must be set for acceptance tests", resource.EnvTfAcc)
 	}
 	name := fmt.Sprintf("TestAccSchemaField-%s", uuid.NewString())
 	mongo := testMongoConfig(t)
-	args := func(cityLabel string) TestCaseTfArgs {
+	args := func(cityLabel, amountType string) TestCaseTfArgs {
 		return TestCaseTfArgs{
 			Name:   name,
 			APIKey: APIKey(),
-			Extra:  map[string]any{"Mongo": mongo, "CityLabel": cityLabel},
+			Extra:  map[string]any{"Mongo": mongo, "CityLabel": cityLabel, "AmountType": amountType},
 		}
 	}
 	orders := "data.polytomic_connection_schema.orders"
@@ -63,7 +142,7 @@ func TestAccConnectionSchemaField(t *testing.T) {
 		ProtoV6ProviderFactories: TestAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: TestCaseTfResource(t, connectionSchemaFieldTemplate, args("City")),
+				Config: TestCaseTfResource(t, connectionSchemaFieldTemplate, args("City", "number")),
 				ConfigStateChecks: []statecheck.StateCheck{
 					statecheck.ExpectKnownValue("polytomic_connection_schema_field.city",
 						tfjsonpath.New("path"), knownvalue.StringExact("$.address.city")),
@@ -85,10 +164,14 @@ func TestAccConnectionSchemaField(t *testing.T) {
 				},
 			},
 			{
-				Config: TestCaseTfResource(t, connectionSchemaFieldTemplate, args("Town")),
+				Config: TestCaseTfResource(t, connectionSchemaFieldTemplate, args("Town", "decimal")),
 				ConfigStateChecks: []statecheck.StateCheck{
 					statecheck.ExpectKnownValue("polytomic_connection_schema_field.city",
 						tfjsonpath.New("label"), knownvalue.StringExact("Town")),
+					statecheck.ExpectKnownValue("polytomic_connection_schema_field.amount",
+						tfjsonpath.New("type_spec"), knownvalue.StringExact(`["decimal",{"precision":12,"scale":2}]`)),
+					statecheck.ExpectKnownValue("polytomic_connection_schema_field.tags",
+						tfjsonpath.New("type"), knownvalue.StringExact("array")),
 				},
 			},
 			{
@@ -155,7 +238,23 @@ resource "polytomic_connection_schema_field" "amount" {
   connection_id = polytomic_mongodb_connection.test.id
   schema_id     = local.orders_schema
   field_id      = "amount"
-  type          = "number"
+  type          = "{{.Extra.AmountType}}"
+{{if eq .Extra.AmountType "decimal"}}
+  precision     = 12
+  scale         = 2
+{{end}}
+{{if not .APIKey}}
+  organization  = polytomic_organization.test.id
+{{end}}
+}
+
+resource "polytomic_connection_schema_field" "tags" {
+  connection_id = polytomic_mongodb_connection.test.id
+  schema_id     = local.orders_schema
+  field_id      = "tag_list"
+  label         = "Tags"
+  path          = "$.tags"
+  type_spec     = jsonencode(["array", "string"])
 {{if not .APIKey}}
   organization  = polytomic_organization.test.id
 {{end}}
@@ -170,6 +269,7 @@ data "polytomic_connection_schema" "orders" {
   depends_on = [
     polytomic_connection_schema_field.city,
     polytomic_connection_schema_field.amount,
+    polytomic_connection_schema_field.tags,
   ]
 }
 `

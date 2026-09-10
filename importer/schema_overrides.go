@@ -2,6 +2,7 @@ package importer
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -185,7 +186,7 @@ func (s *SchemaOverrides) GenerateTerraformFiles(ctx context.Context, writer io.
 		block.SetAttributeValue("field_ids", cty.ListVal(fieldIDs))
 		body.AppendNewline()
 
-		if _, err := writer.Write(ReplaceRefs(hclFile.Bytes(), refs)); err != nil {
+		if _, err := writer.Write(hclwrite.Format(ReplaceRefs(hclFile.Bytes(), refs))); err != nil {
 			return err
 		}
 	}
@@ -201,8 +202,21 @@ func (s *SchemaOverrides) GenerateTerraformFiles(ctx context.Context, writer io.
 		if pointer.GetString(f.Name) != "" {
 			mapping["label"] = pointer.GetString(f.Name)
 		}
-		if f.Type != nil {
-			mapping["type"] = string(*f.Type)
+		typeName, precision, scale, typeSpec, err := provider.SchemaFieldTypeAttributes(f)
+		if err != nil {
+			return err
+		}
+		if typeName != "" {
+			mapping["type"] = typeName
+		}
+		if precision != nil {
+			mapping["precision"] = *precision
+		}
+		if scale != nil {
+			mapping["scale"] = *scale
+		}
+		if typeSpec != "" {
+			mapping["type_spec"] = typeSpec
 		}
 		if pointer.GetString(f.Path) != "" {
 			mapping["path"] = pointer.GetString(f.Path)
@@ -223,9 +237,21 @@ func (s *SchemaOverrides) GenerateTerraformFiles(ctx context.Context, writer io.
 				block.SetAttributeValue(attr, cty.StringVal(v.(string)))
 			}
 		}
+		for _, attr := range []string{"precision", "scale"} {
+			if v, ok := mapping[attr]; ok {
+				block.SetAttributeValue(attr, cty.NumberIntVal(v.(int64)))
+			}
+		}
+		if typeSpec != "" {
+			var spec any
+			if err := json.Unmarshal([]byte(typeSpec), &spec); err != nil {
+				return err
+			}
+			block.SetAttributeRaw("type_spec", wrapJSONEncode(spec))
+		}
 		body.AppendNewline()
 
-		if _, err := writer.Write(ReplaceRefs(hclFile.Bytes(), refs)); err != nil {
+		if _, err := writer.Write(hclwrite.Format(ReplaceRefs(hclFile.Bytes(), refs))); err != nil {
 			return err
 		}
 	}
