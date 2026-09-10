@@ -291,6 +291,15 @@ func TestAccConnectionSchemaField(t *testing.T) {
 				},
 			},
 			{
+				// Replacing an added field deletes it and adds it again.
+				Taint:  []string{"polytomic_connection_schema_field.city"},
+				Config: TestCaseTfResource(t, connectionSchemaFieldTemplate, args("Town", "decimal")),
+				ConfigStateChecks: []statecheck.StateCheck{
+					statecheck.ExpectKnownValue("polytomic_connection_schema_field.city",
+						tfjsonpath.New("label"), knownvalue.StringExact("Town")),
+				},
+			},
+			{
 				ResourceName:      "polytomic_connection_schema_field.city",
 				ImportState:       true,
 				ImportStateVerify: true,

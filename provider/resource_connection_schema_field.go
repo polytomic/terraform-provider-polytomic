@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/AlekSi/pointer"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
@@ -17,6 +18,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/polytomic/polytomic-go/v25"
 	ptclient "github.com/polytomic/polytomic-go/v25/client"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
@@ -523,9 +525,26 @@ func (r *connectionSchemaFieldResource) Delete(ctx context.Context, req resource
 		return
 	}
 
-	err = client.Schemas.DeleteField(ctx, data.ConnectionID.ValueString(), data.SchemaID.ValueString(), data.FieldID.ValueString())
+	connectionID := data.ConnectionID.ValueString()
+	schemaID := data.SchemaID.ValueString()
+	fieldID := data.FieldID.ValueString()
+
+	err = client.Schemas.DeleteField(ctx, connectionID, schemaID, fieldID)
 	if err != nil && !isNotFound(err) {
 		resp.Diagnostics.AddError("Error deleting field", err.Error())
+		return
+	}
+
+	// The API refreshes the schema in the background after deleting a field,
+	// and reports the field as user-defined until then, so adding it again,
+	// as replacing this resource does, would fail.
+	if err := waitForFieldRemoval(ctx, client, connectionID, schemaID, fieldID); err != nil {
+		resp.Diagnostics.AddWarning(
+			"Deleted field still reported",
+			fmt.Sprintf("Field %s was deleted from schema %s, but the schema did not reflect it within %s: %s. "+
+				"Adding the field again fails until the connection's schemas are refreshed.",
+				fieldID, schemaID, fieldRemovalTimeout, err),
+		)
 	}
 }
 
@@ -580,6 +599,44 @@ func patchSchemaField(ctx context.Context, client *ptclient.Client, connectionID
 		return nil, errors.New("API returned nil field data")
 	}
 	return resp.Data, nil
+}
+
+// Variables so tests can shorten them.
+var (
+	fieldRemovalTimeout  = 5 * time.Minute
+	fieldRemovalInterval = 2 * time.Second
+)
+
+// waitForFieldRemoval polls a schema until it no longer reports a deleted field
+// as user-defined, and returns the last error once fieldRemovalTimeout passes.
+func waitForFieldRemoval(ctx context.Context, client *ptclient.Client, connectionID, schemaID, fieldID string) error {
+	deadline := time.Now().Add(fieldRemovalTimeout)
+	for {
+		schemaData, err := fetchSchema(ctx, client, connectionID, schemaID)
+		if errors.Is(err, errSchemaNotFound) {
+			return nil
+		}
+		if err == nil {
+			field := findSchemaField(schemaData, fieldID)
+			if field == nil || !pointer.GetBool(field.UserManaged) {
+				return nil
+			}
+			err = errors.New("the field is still reported as user-defined")
+		}
+		if time.Now().After(deadline) {
+			return err
+		}
+		tflog.Debug(ctx, "Waiting for deleted field to leave the schema", map[string]any{
+			"schema_id": schemaID,
+			"field_id":  fieldID,
+			"reason":    err.Error(),
+		})
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-time.After(fieldRemovalInterval):
+		}
+	}
 }
 
 func applySchemaField(data *connectionSchemaFieldResourceModel, f *polytomic.SchemaField) error {
