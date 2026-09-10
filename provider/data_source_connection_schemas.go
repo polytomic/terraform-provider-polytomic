@@ -53,7 +53,7 @@ func (d *connectionSchemasDataSource) Metadata(ctx context.Context, req datasour
 
 func (d *connectionSchemasDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: ":meta:subcategory:Connections: Connection Schemas Data Source\n\n" +
+		MarkdownDescription: ":meta:subcategory:Schemas: Connection Schemas Data Source\n\n" +
 			"Lists the schemas available on a connection, optionally with their fields.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{

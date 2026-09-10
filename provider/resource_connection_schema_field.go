@@ -67,7 +67,7 @@ func (r *connectionSchemaFieldResource) Schema(ctx context.Context, req resource
 	basicCount := len(basicFieldTypes)
 
 	resp.Schema = schema.Schema{
-		MarkdownDescription: ":meta:subcategory:Connections: Connection Schema Field\n\n" +
+		MarkdownDescription: ":meta:subcategory:Schemas: Connection Schema Field\n\n" +
 			"Adds a field to a connection schema, or overrides the label, type, or path of a field the source already reports. " +
 			"Available on connections that support user-defined fields, such as MongoDB, DynamoDB, Stripe, and file storage connections.\n\n" +
 			"Deleting this resource removes an added field, or reverts an overridden field to its detected definition. " +

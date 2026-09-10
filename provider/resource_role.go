@@ -22,7 +22,7 @@ var _ resource.ResourceWithImportState = &roleResource{}
 
 func (r *roleResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: ":meta:subcategory:Organizations: A role in a Polytomic organization",
+		MarkdownDescription: ":meta:subcategory:Permissions: A role in a Polytomic organization",
 		Attributes: map[string]schema.Attribute{
 			"organization": schema.StringAttribute{
 				MarkdownDescription: "Organization ID",

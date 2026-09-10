@@ -48,7 +48,7 @@ func (r *connectionSchemaPrimaryKeysResource) Metadata(ctx context.Context, req 
 
 func (r *connectionSchemaPrimaryKeysResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: ":meta:subcategory:Connections: Connection Schema Primary Keys\n\n" +
+		MarkdownDescription: ":meta:subcategory:Schemas: Connection Schema Primary Keys\n\n" +
 			"Sets the primary key of a connection schema, overriding the keys detected from the source connection. " +
 			"`field_ids` is the schema's complete primary key: listed fields are marked as keys, and any other field the source reports as a key is unmarked.\n\n" +
 			"Deleting this resource removes every primary key override on the schema, restoring the detected keys.",
