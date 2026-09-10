@@ -2,7 +2,6 @@ package importer
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -243,11 +242,11 @@ func (s *SchemaOverrides) GenerateTerraformFiles(ctx context.Context, writer io.
 			}
 		}
 		if typeSpec != "" {
-			var spec any
-			if err := json.Unmarshal([]byte(typeSpec), &spec); err != nil {
-				return err
+			tokens, err := jsonEncodeTokens([]byte(typeSpec))
+			if err != nil {
+				return fmt.Errorf("encoding type_spec for field '%s' of schema '%s': %w", pointer.GetString(f.ID), o.SchemaID, err)
 			}
-			block.SetAttributeRaw("type_spec", wrapJSONEncode(spec))
+			block.SetAttributeRaw("type_spec", tokens)
 		}
 		body.AppendNewline()
 

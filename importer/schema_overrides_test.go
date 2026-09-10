@@ -3,12 +3,17 @@ package importer
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"reflect"
 	"regexp"
 	"testing"
 
 	"github.com/AlekSi/pointer"
+	"github.com/hashicorp/hcl/v2"
+	"github.com/hashicorp/hcl/v2/hclsyntax"
 	"github.com/polytomic/polytomic-go/v25"
+	"github.com/zclconf/go-cty/cty/function"
+	"github.com/zclconf/go-cty/cty/function/stdlib"
 )
 
 func TestSchemaOverridesAdd(t *testing.T) {
@@ -141,5 +146,55 @@ func TestSchemaOverridesGenerate(t *testing.T) {
 		"terraform import polytomic_connection_schema_field.orders_shop_orders_total org-1/" + connectionID + "/shop.orders/total\n"
 	if got := imports.String(); got != wantImports {
 		t.Errorf("imports: got\n%s\nwant\n%s", got, wantImports)
+	}
+}
+
+func TestSchemaOverridesTypeSpec(t *testing.T) {
+	yes := pointer.To(true)
+	arrayType := polytomic.UtilFieldTypeArray
+	evalCtx := &hcl.EvalContext{Functions: map[string]function.Function{"jsonencode": stdlib.JSONEncodeFunc}}
+
+	for _, spec := range []string{
+		`["array",["array","string"]]`,
+		`["string",{"length":12,"unit":"characters"}]`,
+		`["object",{"city":"string","tags":["array","string"]}]`,
+		`["versioned",[["string",{"length":12,"unit":"bytes"}],"string"]]`,
+		`["map",["decimal",{"precision":10,"scale":2}]]`,
+	} {
+		t.Run(spec, func(t *testing.T) {
+			var want any
+			if err := json.Unmarshal([]byte(spec), &want); err != nil {
+				t.Fatal(err)
+			}
+			s := NewSchemaOverrides(nil, "org")
+			s.add("Shop", "conn", []*polytomic.Schema{{ID: pointer.To("orders"), Fields: []*polytomic.SchemaField{
+				{ID: pointer.To("f"), Name: pointer.To("F"), Type: &arrayType, UserManaged: yes, TypeSpec: pointer.To(want)},
+			}}})
+			var tf bytes.Buffer
+			if err := s.GenerateTerraformFiles(context.Background(), &tf, nil); err != nil {
+				t.Fatal(err)
+			}
+
+			// Evaluate the exported type_spec as Terraform would.
+			file, diags := hclsyntax.ParseConfig(tf.Bytes(), SchemaOverridesFileName, hcl.InitialPos)
+			if diags.HasErrors() {
+				t.Fatalf("%s\n%s", diags, tf.String())
+			}
+			attr, ok := file.Body.(*hclsyntax.Body).Blocks[0].Body.Attributes["type_spec"]
+			if !ok {
+				t.Fatalf("missing type_spec in:\n%s", tf.String())
+			}
+			v, diags := attr.Expr.Value(evalCtx)
+			if diags.HasErrors() {
+				t.Fatalf("%s\n%s", diags, tf.String())
+			}
+			var got any
+			if err := json.Unmarshal([]byte(v.AsString()), &got); err != nil {
+				t.Fatal(err)
+			}
+			if !reflect.DeepEqual(got, want) {
+				t.Errorf("got %s, want %s, from:\n%s", v.AsString(), spec, tf.String())
+			}
+		})
 	}
 }
