@@ -18,6 +18,8 @@ BUG FIXES:
 
 - `polytomic_connection_schema` reported `is_primary_key` as `false` for every field.
 
+- `polytomic_connection_schema` and `polytomic_connection_schema_primary_keys` now wait up to five minutes for a new connection's first schema inspection, rather than reporting its schemas as missing. This lets them be used in the same apply that creates the connection. `polytomic_connection_schemas` and `polytomic_connection_schema_field` wait the same way.
+
 - `polytomic_connection_schema_primary_keys` recorded its organization as `default` when it could not look up the connection's organization, and every later plan failed with `invalid organization ID default`. `default` now selects the API key's own organization, so affected resources recover without changes.
 
 IMPORTER:

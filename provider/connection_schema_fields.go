@@ -6,11 +6,13 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/AlekSi/pointer"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/polytomic/polytomic-go/v25"
 	ptclient "github.com/polytomic/polytomic-go/v25/client"
 	ptcore "github.com/polytomic/polytomic-go/v25/core"
@@ -136,19 +138,70 @@ func newSchemaFieldModels(fields []*polytomic.SchemaField) ([]schemaFieldModel, 
 }
 
 // fetchSchema returns a connection schema, or errSchemaNotFound when the
-// connection or schema does not exist.
+// connection or schema does not exist. On a new connection, it waits for the
+// first schema inspection before reporting a schema missing.
 func fetchSchema(ctx context.Context, client *ptclient.Client, connectionID, schemaID string) (*polytomic.Schema, error) {
-	resp, err := client.Schemas.Get(ctx, connectionID, schemaID)
+	schemaData, err := retryUntilSchemaCached(ctx, client, connectionID, func() (*polytomic.Schema, error) {
+		resp, err := client.Schemas.Get(ctx, connectionID, schemaID)
+		if err != nil {
+			return nil, err
+		}
+		return resp.Data, nil
+	})
 	if err != nil {
 		if isNotFound(err) {
 			return nil, errSchemaNotFound
 		}
 		return nil, err
 	}
-	if resp.Data == nil {
+	if schemaData == nil {
 		return nil, errors.New("API returned nil schema data")
 	}
-	return resp.Data, nil
+	return schemaData, nil
+}
+
+// Variables so tests can shorten them.
+var (
+	schemaCacheTimeout  = 5 * time.Minute
+	schemaCacheInterval = 2 * time.Second
+)
+
+// retryUntilSchemaCached calls fn again while it returns 404 and the
+// connection's schema cache has not finished its first refresh. The API
+// inspects a new connection's schemas in the background and reports every
+// schema missing until then. The 404 is returned as is once the cache has been
+// refreshed, when the cache status can't be read (for example, because the
+// connection is gone), or after schemaCacheTimeout.
+func retryUntilSchemaCached[T any](ctx context.Context, client *ptclient.Client, connectionID string, fn func() (T, error)) (T, error) {
+	deadline := time.Now().Add(schemaCacheTimeout)
+	cached := false
+	for {
+		result, err := fn()
+		if !isNotFound(err) || cached {
+			return result, err
+		}
+		status, statusErr := client.Schemas.GetStatus(ctx, connectionID)
+		if statusErr != nil {
+			return result, err
+		}
+		if status.GetData().GetLastRefreshFinished() != nil {
+			// Call fn once more, in case the refresh finished after it ran.
+			cached = true
+			continue
+		}
+		if time.Now().After(deadline) {
+			return result, err
+		}
+		tflog.Debug(ctx, "Waiting for the connection's first schema inspection", map[string]any{
+			"connection_id": connectionID,
+			"cache_status":  pointer.GetString(status.GetData().GetCacheStatus()),
+		})
+		select {
+		case <-ctx.Done():
+			return result, ctx.Err()
+		case <-time.After(schemaCacheInterval):
+		}
+	}
 }
 
 func findSchemaField(s *polytomic.Schema, fieldID string) *polytomic.SchemaField {

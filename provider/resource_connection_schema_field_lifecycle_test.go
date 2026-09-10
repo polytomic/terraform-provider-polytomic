@@ -133,6 +133,58 @@ func TestWaitForFieldRemoval(t *testing.T) {
 	}
 }
 
+func TestFetchSchemaWaitsForSchemaCache(t *testing.T) {
+	timeout, interval := schemaCacheTimeout, schemaCacheInterval
+	schemaCacheTimeout, schemaCacheInterval = 50*time.Millisecond, time.Millisecond
+	t.Cleanup(func() { schemaCacheTimeout, schemaCacheInterval = timeout, interval })
+
+	const (
+		uncached = `{"data":{"cache_status":"initializing"}}`
+		cached   = `{"data":{"cache_status":"cached","last_refresh_finished":"2026-09-10T23:03:20Z"}}`
+	)
+	notFound := func(t require.TestingT, err error, _ ...any) { require.ErrorIs(t, err, errSchemaNotFound) }
+	for _, tc := range []struct {
+		name     string
+		schemas  []schemaResponse
+		statuses []string // none answers 404, as for a deleted connection
+		// wantReads is the number of schema reads; 0 skips the check.
+		wantReads int32
+		wantErr   require.ErrorAssertionFunc
+	}{
+		{"waits for the first inspection", []schemaResponse{schemaNotFound, schemaNotFound, schemaWithFields(noFields)}, []string{uncached, cached}, 3, require.NoError},
+		{"schema is missing after inspection", []schemaResponse{schemaNotFound}, []string{cached}, 2, notFound},
+		{"connection is gone", []schemaResponse{schemaNotFound}, nil, 1, notFound},
+		{"inspection never finishes", []schemaResponse{schemaNotFound}, []string{uncached}, 0, notFound},
+		{"a read fails", []schemaResponse{schemaReadFailure}, []string{uncached}, 1, require.Error},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			var reads, statusReads atomic.Int32
+			srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.Header().Set("Content-Type", "application/json")
+				switch {
+				case r.URL.Path == testFieldSchemaURL:
+					resp := tc.schemas[min(int(reads.Add(1))-1, len(tc.schemas)-1)]
+					w.WriteHeader(resp.status)
+					fmt.Fprint(w, resp.body)
+				case r.URL.Path == "/api/connections/conn-1/schemas/status" && len(tc.statuses) > 0:
+					fmt.Fprint(w, tc.statuses[min(int(statusReads.Add(1))-1, len(tc.statuses)-1)])
+				default:
+					w.WriteHeader(http.StatusNotFound)
+					fmt.Fprint(w, `{"message":"connection not found"}`)
+				}
+			}))
+			t.Cleanup(srv.Close)
+			client := ptclient.NewClient(option.WithBaseURL(srv.URL), option.WithToken("token"), option.WithMaxAttempts(1))
+
+			_, err := fetchSchema(t.Context(), client, "conn-1", "orders")
+			tc.wantErr(t, err)
+			if tc.wantReads != 0 {
+				assert.Equal(t, tc.wantReads, reads.Load(), "schema reads")
+			}
+		})
+	}
+}
+
 func TestConnectionSchemaFieldCreate(t *testing.T) {
 	for _, tc := range []struct {
 		name        string

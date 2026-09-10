@@ -121,8 +121,10 @@ func (d *connectionSchemasDataSource) Read(ctx context.Context, req datasource.R
 	}
 
 	includeFields := data.IncludeFields.ValueBool()
-	source, err := client.BulkSync.GetSource(ctx, data.ConnectionID.ValueString(), &polytomic.BulkSyncGetSourceRequest{
-		IncludeFields: pointer.To(includeFields),
+	source, err := retryUntilSchemaCached(ctx, client, data.ConnectionID.ValueString(), func() (*polytomic.BulkSyncSourceEnvelope, error) {
+		return client.BulkSync.GetSource(ctx, data.ConnectionID.ValueString(), &polytomic.BulkSyncGetSourceRequest{
+			IncludeFields: pointer.To(includeFields),
+		})
 	})
 	if err != nil {
 		resp.Diagnostics.AddError("Error listing schemas", err.Error())
