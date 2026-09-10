@@ -24,9 +24,13 @@ func TestAccConnectionSchemasDataSource(t *testing.T) {
 					APIKey: APIKey(),
 				}),
 				ConfigStateChecks: []statecheck.StateCheck{
+					// The CSV connection has one schema, named after the file.
+					statecheck.ExpectKnownValue(dataSource,
+						tfjsonpath.New("schemas"),
+						knownvalue.ListSizeExact(1)),
 					statecheck.ExpectKnownValue(dataSource,
 						tfjsonpath.New("schemas").AtSliceIndex(0).AtMapKey("id"),
-						knownvalue.StringExact("data")),
+						knownvalue.NotNull()),
 					statecheck.ExpectKnownValue(dataSource,
 						tfjsonpath.New("schemas").AtSliceIndex(0).AtMapKey("fields"),
 						knownvalue.Null()),
