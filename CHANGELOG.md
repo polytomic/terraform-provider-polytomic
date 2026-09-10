@@ -1,3 +1,60 @@
+## v3.0.0 (unreleased)
+
+BREAKING CHANGES:
+
+- The provider now targets the Polytomic `2025-09-18` API version, up from `2024-02-08`. There is no setting to pin the older version.
+
+- Renamed the Sage Intacct connection from `polytomic_sageintacct_connection` to `polytomic_sage_intacct_connection`, following the backend ID change. The schemas are otherwise identical, but Terraform cannot `state mv` between resource types, so the resource must be removed from state and re-imported at the new address.
+
+- Seven connection types now require a configuration field that was previously optional or absent: `org_id` on Apple Ads; `auth_method` on Attio, Google Workspace, MS Ads, and MS Dynamics; and `connect_mode` on Salesforce and Xero. Configurations that omit these fail at plan time.
+
+See the [v3.0.0 upgrade guide](docs/guides/upgrading-to-v3.0.0.md) for migration steps.
+
+ENHANCEMENTS:
+
+- Upgraded to the `polytomic-go` SDK v25.9.4. Terraform attribute names and state layouts are unchanged.
+
+- Added support for new connection types:
+  - Amazon Ads
+  - Amazon RDS PostgreSQL
+  - Anrok
+  - Bill
+  - Brex
+  - Clarify
+  - Claude Analytics
+  - Coupa
+  - Fakturownia
+  - Granola
+  - InvoiceOcean
+  - LinkedIn Company Pages
+  - Measure
+  - Meridian
+  - Neon
+  - Nooks
+  - PlanetScale Vitess
+  - Podscribe
+  - Railway
+  - Resend
+  - Rokt
+  - S3-Compatible
+  - Snapchat Ads
+  - StackAdapt
+  - Supabase
+  - Vibe
+  - X Ads
+  - Zoom
+- Added Apple Ads Attribution and Polytomic Harbor as data sources.
+- Relaxed previously required configuration fields: `commit_exposures`, `oauth_access_token`, and `repository` on dbt project repository; `bucket` on Dropbox; `oauth_access_token` on GitHub; and `client_id` and `client_secret` on Salesforce.
+- Added configuration fields to Attio, BigQuery, ClickHouse, Docker Hub, Facebook Audience, GitHub, Google Ads, Google Analytics, Google Search Ads 360, MS Ads, MS Dynamics, S3, Shippo, and Slack. ClickHouse `cloud_provider` now also accepts `gcp`.
+- Refreshed connection schemas and documentation for 226 existing connection types.
+
+BUG FIXES:
+
+- Bulk sync schemas are now fetched individually rather than from the list endpoint, which no longer returns fields or filters. Previously a configured field left its computed values unresolved, failing the apply, and an import recorded schemas with no fields, so the next apply re-enabled every field.
+- Bulk sync updates carry the existing default schedule ID, so a sync keeps its schedule identity across updates instead of having the schedule replaced on every apply, including a rename.
+- Reading a bulk sync with no default schedule no longer panics the provider; it reports a null schedule instead.
+- A bulk sync whose `schemas` are left to the server no longer fails with a conversion error when the planned value is unknown.
+
 ## v2.0.1 (9 September 2026)
 
 - Updated `terraform-plugin-framework` to v1.19.0 and `terraform-plugin-go` to v0.31.0.
