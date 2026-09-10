@@ -1,7 +1,7 @@
 # Example: Override primary keys for a connection schema
 #
-# This resource allows you to specify which fields should be used as primary keys
-# for a connection schema, overriding the auto-detected primary keys from the source.
+# field_ids is the schema's complete primary key: listed fields become keys,
+# and any key detected from the source that is not listed is unmarked.
 
 # First, create or reference a connection
 resource "polytomic_salesforce_connection" "example" {

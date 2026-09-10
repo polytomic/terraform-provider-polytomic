@@ -18,36 +18,36 @@ Retrieves information about a connection schema, including its fields and primar
 ```terraform
 # Example: Retrieve connection schema information
 #
-# This data source allows you to discover schema details including
-# available fields and their current primary key configuration.
+# This data source reports a schema's fields, including their primary key
+# status and any user-defined overrides.
 
-# Reference an existing connection
 data "polytomic_connection_schema" "example" {
   connection_id = var.connection_id
   schema_id     = "Account" # Schema/table/object name
 }
 
-# Access the schema information
 output "schema_name" {
   value = data.polytomic_connection_schema.example.name
 }
 
-output "schema_fields" {
-  description = "List of all fields in the schema"
-  value       = data.polytomic_connection_schema.example.fields
+# Look up a single field by ID
+output "id_field_type" {
+  value = data.polytomic_connection_schema.example.fields_by_id["Id"].type
 }
 
-# Example: Use the data source to configure primary keys
-resource "polytomic_connection_schema_primary_keys" "example_pk" {
-  connection_id = data.polytomic_connection_schema.example.connection_id
-  schema_id     = data.polytomic_connection_schema.example.schema_id
-
-  # Extract field IDs from the data source
-  field_ids = [
-    # You can reference specific fields from the data source
-    # This example shows how you might dynamically select fields
+# The schema's primary key, including any override
+output "primary_key" {
+  value = [
     for field in data.polytomic_connection_schema.example.fields :
-    field.id if field.name == "UniqueIdentifier"
+    field.id if field.is_primary_key
+  ]
+}
+
+# The primary key the source reports, ignoring overrides
+output "source_primary_key" {
+  value = [
+    for field in data.polytomic_connection_schema.example.fields :
+    field.id if coalesce(field.source_primary_key, false)
   ]
 }
 ```
@@ -67,6 +67,7 @@ resource "polytomic_connection_schema_primary_keys" "example_pk" {
 ### Read-Only
 
 - `fields` (Attributes Set) Schema fields (see [below for nested schema](#nestedatt--fields))
+- `fields_by_id` (Attributes Map) Schema fields, keyed by field ID (see [below for nested schema](#nestedatt--fields_by_id))
 - `id` (String) Data source identifier in the format: organization/connection_id/schema_id
 - `name` (String) Schema name
 
@@ -76,8 +77,31 @@ resource "polytomic_connection_schema_primary_keys" "example_pk" {
 Read-Only:
 
 - `id` (String) Field ID
-- `is_primary_key` (Boolean) Whether this field is marked as a primary key
-- `name` (String) Field name
-- `type` (String) Field type
+- `is_primary_key` (Boolean) Whether the field is part of the schema's primary key, including any override
+- `name` (String) Field name, including any label override
+- `path` (String) JSONPath used to extract the field from each source record; only set on document-style sources
+- `primary_key_override` (Boolean) Primary key status set by an override, such as `polytomic_connection_schema_primary_keys`; null when the field has no override
+- `remote_type` (String) Type of the field in the source system
+- `source_primary_key` (Boolean) Whether the source reports the field as part of the schema's primary key; null when the Polytomic deployment does not report it
+- `type` (String) Field type, including any type override
+- `type_spec` (String) Detailed type specification, JSON encoded; null when the source does not report one
+- `user_managed` (Boolean) Whether the field's definition comes from a user-defined field or override, such as `polytomic_connection_schema_field`
+
+
+<a id="nestedatt--fields_by_id"></a>
+### Nested Schema for `fields_by_id`
+
+Read-Only:
+
+- `id` (String) Field ID
+- `is_primary_key` (Boolean) Whether the field is part of the schema's primary key, including any override
+- `name` (String) Field name, including any label override
+- `path` (String) JSONPath used to extract the field from each source record; only set on document-style sources
+- `primary_key_override` (Boolean) Primary key status set by an override, such as `polytomic_connection_schema_primary_keys`; null when the field has no override
+- `remote_type` (String) Type of the field in the source system
+- `source_primary_key` (Boolean) Whether the source reports the field as part of the schema's primary key; null when the Polytomic deployment does not report it
+- `type` (String) Field type, including any type override
+- `type_spec` (String) Detailed type specification, JSON encoded; null when the source does not report one
+- `user_managed` (Boolean) Whether the field's definition comes from a user-defined field or override, such as `polytomic_connection_schema_field`
 
 

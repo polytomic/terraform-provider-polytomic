@@ -1,3 +1,31 @@
+## v3.1.0 (Unreleased)
+
+ENHANCEMENTS:
+
+- Added the `polytomic_connection_schema_field` resource, which adds a field to a connection schema or overrides the label, type, or path of a field the source already reports. `type` accepts detailed types such as `bigint`, `date`, and `decimal` (with `precision` and `scale`), and `type_spec` sets any other detailed type as JSON. It is available on connections that support user-defined fields, such as MongoDB, DynamoDB, Stripe, and file storage connections.
+
+- Added the `polytomic_connection_schemas` data source, which lists a connection's schemas and, optionally, their fields.
+
+- `polytomic_connection_schema` now reports each field's `source_primary_key`, `primary_key_override`, `remote_type`, `path`, `type_spec`, and `user_managed`, and adds `fields_by_id` for looking up a field by ID. `source_primary_key` and `primary_key_override` are null on Polytomic deployments that do not report them.
+
+- Upgraded to the `polytomic-go` SDK v25.9.6.
+
+BUG FIXES:
+
+- `polytomic_connection_schema_primary_keys` now treats `field_ids` as the schema's complete primary key, as documented. Previously a key detected from the source stayed a key even when it was not listed; it is now unmarked, which changes how syncs deduplicate that schema. The first plan after upgrading shows an update for any schema whose primary key differs from `field_ids`.
+
+- `polytomic_connection_schema_primary_keys` now detects primary key changes made outside Terraform.
+
+- `polytomic_connection_schema` reported `is_primary_key` as `false` for every field.
+
+- `polytomic_connection_schema` and `polytomic_connection_schema_primary_keys` now wait up to five minutes for a new connection's first schema inspection, rather than reporting its schemas as missing. This lets them be used in the same apply that creates the connection. `polytomic_connection_schemas` and `polytomic_connection_schema_field` wait the same way.
+
+- `polytomic_connection_schema_primary_keys` recorded its organization as `default` when it could not look up the connection's organization, and every later plan failed with `invalid organization ID default`. `default` now selects the API key's own organization, so affected resources recover without changes.
+
+IMPORTER:
+
+- `--include-schema-overrides` exports user-defined schema fields, field type overrides, and primary key overrides. It is off by default because it fetches every field of every schema on each connection.
+
 ## v3.0.0 (9 September 2026)
 
 BREAKING CHANGES:

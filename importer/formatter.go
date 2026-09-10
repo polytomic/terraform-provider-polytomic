@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/hcl/v2/hclwrite"
 	"github.com/polytomic/polytomic-go/v25"
 	"github.com/zclconf/go-cty/cty"
+	ctyjson "github.com/zclconf/go-cty/cty/json"
 	"golang.org/x/exp/slices"
 )
 
@@ -261,6 +262,23 @@ func wrapJSONEncode(v interface{}, wrapped ...string) hclwrite.Tokens {
 	}
 
 	return tokens
+}
+
+// jsonEncodeTokens returns a jsonencode call that reproduces the JSON in buf.
+// Unlike typeConverter, it preserves arrays whose elements differ in type and
+// arrays nested in arrays.
+func jsonEncodeTokens(buf []byte) (hclwrite.Tokens, error) {
+	ty, err := ctyjson.ImpliedType(buf)
+	if err != nil {
+		return nil, err
+	}
+	v, err := ctyjson.Unmarshal(buf, ty)
+	if err != nil {
+		return nil, err
+	}
+	tokens := hclwrite.Tokens{{Bytes: []byte("jsonencode(")}}
+	tokens = append(tokens, hclwrite.TokensForValue(v)...)
+	return append(tokens, &hclwrite.Token{Bytes: []byte(")")}), nil
 }
 
 // jsonEncodeMap wraps the given attribute names with a jsonencode function.

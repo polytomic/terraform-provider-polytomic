@@ -32,10 +32,12 @@ func newRootCmd(version string) *cobra.Command {
 	runCmd.PersistentFlags().StringVar(&organizations, "organizations", "", "Comma-separated list of organization IDs to import (partner-key or deployment-key only)")
 	runCmd.PersistentFlags().Bool("replace", false, "Replace existing files")
 	runCmd.PersistentFlags().Bool("include-permissions", false, "Include permission resources")
+	runCmd.PersistentFlags().Bool("include-schema-overrides", false, "Include connection schema field and primary key overrides (fetches every field of every schema)")
 	viper.BindPFlag("output", runCmd.PersistentFlags().Lookup("output"))
 	viper.BindPFlag("organizations", runCmd.PersistentFlags().Lookup("organizations"))
 	viper.BindPFlag("replace", runCmd.PersistentFlags().Lookup("replace"))
 	viper.BindPFlag("include-permissions", runCmd.PersistentFlags().Lookup("include-permissions"))
+	viper.BindPFlag("include-schema-overrides", runCmd.PersistentFlags().Lookup("include-schema-overrides"))
 
 	// Register commands
 	rootCmd.AddCommand(runCmd)
