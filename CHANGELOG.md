@@ -1,4 +1,4 @@
-## v3.1.0 (Unreleased)
+## v3.1.0 (10 September 2026)
 
 ENHANCEMENTS:
 
