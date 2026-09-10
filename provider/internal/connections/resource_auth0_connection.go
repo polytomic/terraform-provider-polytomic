@@ -44,14 +44,14 @@ var Auth0Schema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"client_id": schema.StringAttribute{
-					MarkdownDescription: `App Client ID`,
+					MarkdownDescription: `App client ID`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
 					Sensitive:           false,
 				},
 				"client_secret": schema.StringAttribute{
-					MarkdownDescription: `App Client Secret`,
+					MarkdownDescription: `App client secret`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,

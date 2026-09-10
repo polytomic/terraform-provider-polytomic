@@ -47,46 +47,46 @@ state before it will take effect on a destroy operation.
 
 #### Required
 
-- `databricks_auth_mode` (String) Authentication Method Valid values: <code>access_token</code> (Access Token), <code>oauth_service_principal</code> (OAuth Service Principal). Default: <code>access_token</code>.
-- `http_path` (String) HTTP Path Default: <code>/sql</code>.
+- `databricks_auth_mode` (String) Authentication method Valid values: <code>access_token</code> (Access Token), <code>oauth_service_principal</code> (OAuth Service Principal). Default: <code>access_token</code>.
+- `http_path` (String) HTTP path Default: <code>/sql</code>.
 - `port` (Number) Default: <code>443</code>.
-- `server_hostname` (String) Server Hostname
+- `server_hostname` (String) Server hostname
 
 #### Optional
 
-- `access_token` (String, Sensitive) Access Token
-- `auth_mode` (String) AWS Authentication Method
+- `access_token` (String, Sensitive) Access token
+- `auth_mode` (String) AWS authentication method
 
     How to authenticate with AWS. Defaults to Access Key and Secret Valid values: <code>access_key_and_secret</code> (Access Key and Secret), <code>iam_role</code> (IAM role). Default: <code>access_key_and_secret</code>.
-- `aws_access_key_id` (String) AWS Access Key ID (destinations only)
+- `aws_access_key_id` (String) AWS access key ID (destinations only)
 
     See https://docs.polytomic.com/docs/databricks-connections#writing-to-databricks
-- `aws_secret_access_key` (String, Sensitive) AWS Secret Access Key (destinations only)
-- `azure_access_key` (String, Sensitive) Storage Account Access Key (destination support only)
+- `aws_secret_access_key` (String, Sensitive) AWS secret access key (destinations only)
+- `azure_access_key` (String, Sensitive) Storage account access key (destination support only)
 
     The access key associated with this storage account
-- `azure_account_name` (String) Storage Account Name (destination support only)
+- `azure_account_name` (String) Storage account name (destination support only)
 
     The account name of the storage account
 - `bulk_sync_staging_schema` (String) Staging schema name
-- `cloud_provider` (String) Cloud Provider (destination support only) Valid values: <code>aws</code> (AWS), <code>azure</code> (Azure).
+- `cloud_provider` (String) Cloud provider (destination support only) Valid values: <code>aws</code> (AWS), <code>azure</code> (Azure).
 - `concurrent_queries` (Number) Concurrent query limit
-- `container_name` (String) Storage Container Name (destination support only)
+- `container_name` (String) Storage container name (destination support only)
 
     The container which we will stage files in
 - `deleted_file_retention_days` (Number) Deleted file retention
 - `enable_delta_uniform` (Boolean) Enable Delta UniForm tables Default: <code>false</code>.
 - `enforce_query_limit` (Boolean) Limit concurrent queries Default: <code>false</code>.
-- `iam_role_arn` (String) IAM Role ARN
+- `iam_role_arn` (String) IAM role ARN
 - `log_file_retention_days` (Number) Log retention
-- `s3_bucket_name` (String) S3 Bucket Name (destinations only)
+- `s3_bucket_name` (String) S3 bucket name (destinations only)
 
     Name of bucket used for staging data load files
-- `s3_bucket_region` (String) S3 Bucket Region (destinations only)
+- `s3_bucket_region` (String) S3 bucket region (destinations only)
 
     Region of bucket
-- `service_principal_id` (String) Service Principal ID
-- `service_principal_secret` (String, Sensitive) Service Principal Secret
+- `service_principal_id` (String) Service principal ID
+- `service_principal_secret` (String, Sensitive) Service principal secret
 - `set_retention_properties` (Boolean) Configure data retention for tables
 - `ssh` (Boolean) Connect over SSH tunnel
 - `ssh_blob_storage` (Boolean) Use SSH for cloud storage bucket Default: <code>false</code>.

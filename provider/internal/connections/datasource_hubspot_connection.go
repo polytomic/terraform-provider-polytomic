@@ -60,7 +60,7 @@ func (d *HubspotConnectionDataSource) Schema(ctx context.Context, req datasource
 						Computed:            true,
 					},
 					"include_static_list_support": schema.BoolAttribute{
-						MarkdownDescription: `Include static list support`,
+						MarkdownDescription: `Enable segment (list) support`,
 						Computed:            true,
 					},
 					"use_search_api": schema.BoolAttribute{

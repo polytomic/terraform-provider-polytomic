@@ -36,7 +36,7 @@ data "polytomic_autura_connection" "autura" {
 
 Read-Only:
 
-- `org_keys` (String) Org Keys
+- `org_keys` (String) Org keys
 
     Comma-delimited list
 

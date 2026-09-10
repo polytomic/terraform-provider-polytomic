@@ -52,11 +52,11 @@ func (d *PaycorConnectionDataSource) Schema(ctx context.Context, req datasource.
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"scopes": schema.StringAttribute{
-						MarkdownDescription: `Scope Name`,
+						MarkdownDescription: `Scope name`,
 						Computed:            true,
 					},
 					"use_sandbox": schema.BoolAttribute{
-						MarkdownDescription: `Use Sandbox`,
+						MarkdownDescription: `Use sandbox`,
 						Computed:            true,
 					},
 				},

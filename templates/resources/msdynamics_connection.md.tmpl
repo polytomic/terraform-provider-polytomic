@@ -47,12 +47,16 @@ state before it will take effect on a destroy operation.
 
 #### Required
 
+- `auth_method` (String) Authentication method Valid values: <code>oauth</code> (OAuth), <code>client_credentials</code> (Client credentials). Default: <code>oauth</code>.
 - `dynamics_url` (String) Dynamics URL
 
 #### Optional
 
-- `client_id` (String, Sensitive)
-- `client_secret` (String, Sensitive)
+- `client_credentials_client_id` (String, Sensitive) Client ID
+- `client_credentials_client_secret` (String, Sensitive) Client secret
+- `client_id` (String, Sensitive) Custom OAuth application client ID for the delegated flow.
+- `client_secret` (String, Sensitive) Custom OAuth application client secret for the delegated flow.
 - `oauth_refresh_token` (String, Sensitive)
+- `tenant_id` (String) Directory (tenant) ID
 
 

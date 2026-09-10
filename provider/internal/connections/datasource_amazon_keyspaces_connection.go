@@ -52,11 +52,11 @@ func (d *Amazon_keyspacesConnectionDataSource) Schema(ctx context.Context, req d
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"access_key_id": schema.StringAttribute{
-						MarkdownDescription: `AWS Access Key ID`,
+						MarkdownDescription: `AWS access key ID`,
 						Computed:            true,
 					},
 					"auth_method": schema.StringAttribute{
-						MarkdownDescription: `Authentication Method Valid values: <code>access_key_and_secret</code> (Access Key and Secret), <code>iam_role</code> (IAM Role), <code>service_credentials</code> (Service-Specific Credentials). Default: <code>access_key_and_secret</code>.`,
+						MarkdownDescription: `Authentication method Valid values: <code>access_key_and_secret</code> (Access Key and Secret), <code>iam_role</code> (IAM Role), <code>service_credentials</code> (Service-Specific Credentials). Default: <code>access_key_and_secret</code>.`,
 						Computed:            true,
 					},
 					"change_detection": schema.BoolAttribute{
@@ -70,7 +70,7 @@ func (d *Amazon_keyspacesConnectionDataSource) Schema(ctx context.Context, req d
 						Computed: true,
 					},
 					"iam_role_arn": schema.StringAttribute{
-						MarkdownDescription: `IAM Role ARN`,
+						MarkdownDescription: `IAM role ARN`,
 						Computed:            true,
 					},
 					"managed_streams": schema.BoolAttribute{
@@ -78,7 +78,7 @@ func (d *Amazon_keyspacesConnectionDataSource) Schema(ctx context.Context, req d
 						Computed:            true,
 					},
 					"region": schema.StringAttribute{
-						MarkdownDescription: `AWS Region`,
+						MarkdownDescription: `AWS region`,
 						Computed:            true,
 					},
 					"username": schema.StringAttribute{

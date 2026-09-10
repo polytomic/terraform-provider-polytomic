@@ -36,7 +36,7 @@ data "polytomic_kustomer_connection" "kustomer" {
 
 Read-Only:
 
-- `domain` (String) Customer Portal Subdomain
+- `domain` (String) Customer portal subdomain
 
     e.g. 'polytomic' if your portal is 'https://polytomic.kustomerapp.com/app'
 

@@ -67,7 +67,7 @@ var GreenhouseSchema = schema.Schema{
 					},
 				},
 				"client_secret": schema.StringAttribute{
-					MarkdownDescription: `Client Secret`,
+					MarkdownDescription: `Client secret`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,

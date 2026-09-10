@@ -1,0 +1,1 @@
+{"$schema":"https://json-schema.org/draft/2020-12/schema","properties":{"api_key":{"type":"string","title":"API key","sensitive":true},"environment":{"type":"string","enum":[{"value":"production","label":"Production"},{"value":"sandbox","label":"Sandbox"}],"title":"Environment","default":"production"}},"type":"object","required":["api_key","environment"]}

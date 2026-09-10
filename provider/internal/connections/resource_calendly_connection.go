@@ -44,7 +44,7 @@ var CalendlySchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"api_key": schema.StringAttribute{
-					MarkdownDescription: `Personal Access Token`,
+					MarkdownDescription: `Personal access token`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,

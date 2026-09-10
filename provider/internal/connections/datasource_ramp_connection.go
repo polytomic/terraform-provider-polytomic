@@ -52,7 +52,7 @@ func (d *RampConnectionDataSource) Schema(ctx context.Context, req datasource.Sc
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"is_sandbox": schema.BoolAttribute{
-						MarkdownDescription: `Is Sandbox`,
+						MarkdownDescription: `Is sandbox`,
 						Computed:            true,
 					},
 				},

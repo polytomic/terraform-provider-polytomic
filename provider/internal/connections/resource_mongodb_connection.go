@@ -51,7 +51,7 @@ var MongodbSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"database": schema.StringAttribute{
-					MarkdownDescription: `Auth Database`,
+					MarkdownDescription: `Auth database`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,
@@ -65,7 +65,7 @@ var MongodbSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"params": schema.StringAttribute{
-					MarkdownDescription: `Additional Parameters
+					MarkdownDescription: `Additional parameters
 
     Additional connection parameters, formatted as a query string`,
 					Required:  false,

@@ -37,5 +37,8 @@ data "polytomic_docker_hub_connection" "docker_hub" {
 Read-Only:
 
 - `namespace` (String)
+- `username` (String) Username or organization
+
+    Username when signing in with a personal access token; organization name when using an organization access token.
 
 

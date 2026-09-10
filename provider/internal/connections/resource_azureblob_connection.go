@@ -47,7 +47,7 @@ var AzureblobSchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"access_key": schema.StringAttribute{
-					MarkdownDescription: `Access Key`,
+					MarkdownDescription: `Access key`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,
@@ -57,14 +57,14 @@ var AzureblobSchema = schema.Schema{
 					},
 				},
 				"account_name": schema.StringAttribute{
-					MarkdownDescription: `Account Name`,
+					MarkdownDescription: `Account name`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
 					Sensitive:           false,
 				},
 				"auth_method": schema.StringAttribute{
-					MarkdownDescription: `Authentication method Valid values: <code>access_key</code> (Access Key), <code>client_credentials</code> (Client Credentials), <code>oauth</code> (Oauth). Default: <code>access_key</code>.`,
+					MarkdownDescription: `Authentication method Valid values: <code>access_key</code> (Access key), <code>client_credentials</code> (Client credentials), <code>oauth</code> (OAuth). Default: <code>access_key</code>.`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
@@ -81,7 +81,7 @@ var AzureblobSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"client_secret": schema.StringAttribute{
-					MarkdownDescription: `Client Secret`,
+					MarkdownDescription: `Client secret`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,
@@ -91,7 +91,7 @@ var AzureblobSchema = schema.Schema{
 					},
 				},
 				"container_name": schema.StringAttribute{
-					MarkdownDescription: `Container Name`,
+					MarkdownDescription: `Container name`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,

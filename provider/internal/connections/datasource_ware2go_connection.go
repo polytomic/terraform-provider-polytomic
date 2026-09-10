@@ -56,7 +56,7 @@ func (d *Ware2goConnectionDataSource) Schema(ctx context.Context, req datasource
 						Computed:            true,
 					},
 					"staging": schema.BoolAttribute{
-						MarkdownDescription: `Use Staging Environment`,
+						MarkdownDescription: `Use staging environment`,
 						Computed:            true,
 					},
 				},

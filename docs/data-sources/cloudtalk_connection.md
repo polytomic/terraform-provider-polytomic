@@ -36,6 +36,6 @@ data "polytomic_cloudtalk_connection" "cloudtalk" {
 
 Read-Only:
 
-- `access_key_id` (String) Access Key ID
+- `access_key_id` (String) Access key ID
 
 

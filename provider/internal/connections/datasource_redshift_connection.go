@@ -52,13 +52,13 @@ func (d *RedshiftConnectionDataSource) Schema(ctx context.Context, req datasourc
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"auth_mode": schema.StringAttribute{
-						MarkdownDescription: `Authentication Method
+						MarkdownDescription: `Authentication method
 
     How to authenticate with AWS. Defaults to Access Key and Secret Valid values: <code>access_key_and_secret</code> (Access Key and Secret), <code>iam_role</code> (IAM role). Default: <code>access_key_and_secret</code>.`,
 						Computed: true,
 					},
 					"aws_access_key_id": schema.StringAttribute{
-						MarkdownDescription: `AWS Access Key ID (destinations only)
+						MarkdownDescription: `AWS access key ID (destinations only)
 
     Access Key ID with read/write access to a bucket. More info: https://docs.polytomic.com/docs/redshift`,
 						Computed: true,
@@ -86,7 +86,7 @@ func (d *RedshiftConnectionDataSource) Schema(ctx context.Context, req datasourc
 						Computed:            true,
 					},
 					"iam_role_arn": schema.StringAttribute{
-						MarkdownDescription: `IAM Role ARN`,
+						MarkdownDescription: `IAM role ARN`,
 						Computed:            true,
 					},
 					"port": schema.Int64Attribute{
@@ -94,13 +94,13 @@ func (d *RedshiftConnectionDataSource) Schema(ctx context.Context, req datasourc
 						Computed:            true,
 					},
 					"s3_bucket_name": schema.StringAttribute{
-						MarkdownDescription: `S3 Bucket Name (destinations only)
+						MarkdownDescription: `S3 bucket name (destinations only)
 
     Name of bucket used for staging data load files`,
 						Computed: true,
 					},
 					"s3_bucket_region": schema.StringAttribute{
-						MarkdownDescription: `S3 Bucket Region (destinations only)
+						MarkdownDescription: `S3 bucket region (destinations only)
 
     Region of bucket. Note: must match region of redshift server`,
 						Computed: true,

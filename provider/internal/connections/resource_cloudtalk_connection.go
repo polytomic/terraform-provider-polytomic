@@ -44,14 +44,14 @@ var CloudtalkSchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"access_key_id": schema.StringAttribute{
-					MarkdownDescription: `Access Key ID`,
+					MarkdownDescription: `Access key ID`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
 					Sensitive:           false,
 				},
 				"access_key_secret": schema.StringAttribute{
-					MarkdownDescription: `Access Key Secret`,
+					MarkdownDescription: `Access key secret`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,

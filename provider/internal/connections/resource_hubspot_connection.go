@@ -78,7 +78,7 @@ var HubspotSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"include_static_list_support": schema.BoolAttribute{
-					MarkdownDescription: `Include static list support`,
+					MarkdownDescription: `Enable segment (list) support`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,

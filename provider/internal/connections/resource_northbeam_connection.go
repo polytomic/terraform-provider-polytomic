@@ -47,7 +47,7 @@ var NorthbeamSchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"api_key": schema.StringAttribute{
-					MarkdownDescription: `API Key`,
+					MarkdownDescription: `API key`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
@@ -57,7 +57,7 @@ var NorthbeamSchema = schema.Schema{
 					},
 				},
 				"data_client_id": schema.StringAttribute{
-					MarkdownDescription: `Data Client ID`,
+					MarkdownDescription: `Data client ID`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,

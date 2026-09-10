@@ -36,15 +36,15 @@ data "polytomic_awsathena_connection" "awsathena" {
 
 Read-Only:
 
-- `access_id` (String) AWS Access ID
-- `auth_mode` (String) Authentication Method
+- `access_id` (String) AWS access ID
+- `auth_mode` (String) Authentication method
 
     How to authenticate with AWS. Defaults to Access Key and Secret Valid values: <code>access_key_and_secret</code> (Access Key and Secret), <code>iam_role</code> (IAM role). Default: <code>access_key_and_secret</code>.
 - `aws_user` (String) User ARN
 - `external_id` (String) External ID
 
     External ID for the IAM role
-- `iam_role_arn` (String) IAM Role ARN
+- `iam_role_arn` (String) IAM role ARN
 - `outputbucket` (String) AWS S3 output bucket
 
     A pre-existing bucket (folder optional) that AWS can use to store query results. ex: s3://polytomic-athena-results/customer-dataset

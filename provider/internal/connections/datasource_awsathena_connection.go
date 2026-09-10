@@ -52,11 +52,11 @@ func (d *AwsathenaConnectionDataSource) Schema(ctx context.Context, req datasour
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"access_id": schema.StringAttribute{
-						MarkdownDescription: `AWS Access ID`,
+						MarkdownDescription: `AWS access ID`,
 						Computed:            true,
 					},
 					"auth_mode": schema.StringAttribute{
-						MarkdownDescription: `Authentication Method
+						MarkdownDescription: `Authentication method
 
     How to authenticate with AWS. Defaults to Access Key and Secret Valid values: <code>access_key_and_secret</code> (Access Key and Secret), <code>iam_role</code> (IAM role). Default: <code>access_key_and_secret</code>.`,
 						Computed: true,
@@ -72,7 +72,7 @@ func (d *AwsathenaConnectionDataSource) Schema(ctx context.Context, req datasour
 						Computed: true,
 					},
 					"iam_role_arn": schema.StringAttribute{
-						MarkdownDescription: `IAM Role ARN`,
+						MarkdownDescription: `IAM role ARN`,
 						Computed:            true,
 					},
 					"outputbucket": schema.StringAttribute{

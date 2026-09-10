@@ -54,7 +54,7 @@ var ShopifySchema = schema.Schema{
 					},
 				},
 				"store": schema.StringAttribute{
-					MarkdownDescription: `Store Slug
+					MarkdownDescription: `Store slug
 
     e.g. 'example' if your store is example.myshopify.com`,
 					Required:  true,

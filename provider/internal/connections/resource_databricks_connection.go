@@ -47,7 +47,7 @@ var DatabricksSchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"access_token": schema.StringAttribute{
-					MarkdownDescription: `Access Token`,
+					MarkdownDescription: `Access token`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,
@@ -57,7 +57,7 @@ var DatabricksSchema = schema.Schema{
 					},
 				},
 				"auth_mode": schema.StringAttribute{
-					MarkdownDescription: `AWS Authentication Method
+					MarkdownDescription: `AWS authentication method
 
     How to authenticate with AWS. Defaults to Access Key and Secret Valid values: <code>access_key_and_secret</code> (Access Key and Secret), <code>iam_role</code> (IAM role). Default: <code>access_key_and_secret</code>.`,
 					Required:  false,
@@ -69,7 +69,7 @@ var DatabricksSchema = schema.Schema{
 					},
 				},
 				"aws_access_key_id": schema.StringAttribute{
-					MarkdownDescription: `AWS Access Key ID (destinations only)
+					MarkdownDescription: `AWS access key ID (destinations only)
 
     See https://docs.polytomic.com/docs/databricks-connections#writing-to-databricks`,
 					Required:  false,
@@ -78,7 +78,7 @@ var DatabricksSchema = schema.Schema{
 					Sensitive: false,
 				},
 				"aws_secret_access_key": schema.StringAttribute{
-					MarkdownDescription: `AWS Secret Access Key (destinations only)`,
+					MarkdownDescription: `AWS secret access key (destinations only)`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,
@@ -95,7 +95,7 @@ var DatabricksSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"azure_access_key": schema.StringAttribute{
-					MarkdownDescription: `Storage Account Access Key (destination support only)
+					MarkdownDescription: `Storage account access key (destination support only)
 
     The access key associated with this storage account`,
 					Required:  false,
@@ -107,7 +107,7 @@ var DatabricksSchema = schema.Schema{
 					},
 				},
 				"azure_account_name": schema.StringAttribute{
-					MarkdownDescription: `Storage Account Name (destination support only)
+					MarkdownDescription: `Storage account name (destination support only)
 
     The account name of the storage account`,
 					Required:  false,
@@ -123,7 +123,7 @@ var DatabricksSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"cloud_provider": schema.StringAttribute{
-					MarkdownDescription: `Cloud Provider (destination support only) Valid values: <code>aws</code> (AWS), <code>azure</code> (Azure).`,
+					MarkdownDescription: `Cloud provider (destination support only) Valid values: <code>aws</code> (AWS), <code>azure</code> (Azure).`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,
@@ -140,7 +140,7 @@ var DatabricksSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"container_name": schema.StringAttribute{
-					MarkdownDescription: `Storage Container Name (destination support only)
+					MarkdownDescription: `Storage container name (destination support only)
 
     The container which we will stage files in`,
 					Required:  false,
@@ -149,7 +149,7 @@ var DatabricksSchema = schema.Schema{
 					Sensitive: false,
 				},
 				"databricks_auth_mode": schema.StringAttribute{
-					MarkdownDescription: `Authentication Method Valid values: <code>access_token</code> (Access Token), <code>oauth_service_principal</code> (OAuth Service Principal). Default: <code>access_token</code>.`,
+					MarkdownDescription: `Authentication method Valid values: <code>access_token</code> (Access Token), <code>oauth_service_principal</code> (OAuth Service Principal). Default: <code>access_token</code>.`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
@@ -189,14 +189,14 @@ var DatabricksSchema = schema.Schema{
 					Sensitive: false,
 				},
 				"http_path": schema.StringAttribute{
-					MarkdownDescription: `HTTP Path Default: <code>/sql</code>.`,
+					MarkdownDescription: `HTTP path Default: <code>/sql</code>.`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
 					Sensitive:           false,
 				},
 				"iam_role_arn": schema.StringAttribute{
-					MarkdownDescription: `IAM Role ARN`,
+					MarkdownDescription: `IAM role ARN`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,
@@ -217,7 +217,7 @@ var DatabricksSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"s3_bucket_name": schema.StringAttribute{
-					MarkdownDescription: `S3 Bucket Name (destinations only)
+					MarkdownDescription: `S3 bucket name (destinations only)
 
     Name of bucket used for staging data load files`,
 					Required:  false,
@@ -226,7 +226,7 @@ var DatabricksSchema = schema.Schema{
 					Sensitive: false,
 				},
 				"s3_bucket_region": schema.StringAttribute{
-					MarkdownDescription: `S3 Bucket Region (destinations only)
+					MarkdownDescription: `S3 bucket region (destinations only)
 
     Region of bucket`,
 					Required:  false,
@@ -235,21 +235,21 @@ var DatabricksSchema = schema.Schema{
 					Sensitive: false,
 				},
 				"server_hostname": schema.StringAttribute{
-					MarkdownDescription: `Server Hostname`,
+					MarkdownDescription: `Server hostname`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
 					Sensitive:           false,
 				},
 				"service_principal_id": schema.StringAttribute{
-					MarkdownDescription: `Service Principal ID`,
+					MarkdownDescription: `Service principal ID`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,
 					Sensitive:           false,
 				},
 				"service_principal_secret": schema.StringAttribute{
-					MarkdownDescription: `Service Principal Secret`,
+					MarkdownDescription: `Service principal secret`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,

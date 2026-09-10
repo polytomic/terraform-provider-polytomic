@@ -52,7 +52,7 @@ func (d *Polytomic_metadataConnectionDataSource) Schema(ctx context.Context, req
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"auth_mode": schema.StringAttribute{
-						MarkdownDescription: `Authentication Method
+						MarkdownDescription: `Authentication method
 
     Type of API key to use for authentication Valid values: <code>personal_api_key</code> (Personal API Key), <code>partner_api_key</code> (Partner API Key). Default: <code>personal_api_key</code>.`,
 						Computed: true,

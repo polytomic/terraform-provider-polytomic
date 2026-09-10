@@ -58,9 +58,9 @@ state before it will take effect on a destroy operation.
 
 #### Required
 
-- `aws_access_key_id` (String) Access Key ID
-- `aws_secret_access_key` (String, Sensitive) Secret Access Key
-- `bucket_name` (String) Bucket Name
+- `aws_access_key_id` (String) Access key ID
+- `aws_secret_access_key` (String, Sensitive) Secret access key
+- `bucket_name` (String) Bucket name
 
     Bucket name (folder optional); ex: polytomic/dataset
 

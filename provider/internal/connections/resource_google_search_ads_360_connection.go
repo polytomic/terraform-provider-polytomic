@@ -68,6 +68,15 @@ var Google_search_ads_360Schema = schema.Schema{
 						},
 					},
 				},
+				"blanket_user_consent": schema.BoolAttribute{
+					MarkdownDescription: `All transmitted users consented to ad personalization and information sharing
+
+    Causes Data Manager conversion uploads to signal that every transmitted user has accepted ad personalization and data sharing policies. This includes users in more advertising functions but requires you to have obtained express consent.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
+				},
 				"client_id": schema.StringAttribute{
 					MarkdownDescription: ``,
 					Required:            false,
@@ -105,6 +114,15 @@ var Google_search_ads_360Schema = schema.Schema{
 						stringplanmodifier.UseStateForUnknown(),
 					},
 				},
+				"use_data_manager_api": schema.BoolAttribute{
+					MarkdownDescription: `Use Data Manager API
+
+    Authorize this connection for the Google Data Manager API used for conversion uploads.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
+				},
 			},
 
 			Required: true,
@@ -136,10 +154,12 @@ type Google_search_ads_360Conf struct {
 		Label string `mapstructure:"label" tfsdk:"label"`
 		Value string `mapstructure:"value" tfsdk:"value"`
 	} `mapstructure:"accounts" tfsdk:"accounts"`
-	Client_id           string `mapstructure:"client_id" tfsdk:"client_id"`
-	Client_secret       string `mapstructure:"client_secret" tfsdk:"client_secret"`
-	Connected_user      string `mapstructure:"connected_user" tfsdk:"connected_user"`
-	Oauth_refresh_token string `mapstructure:"oauth_refresh_token" tfsdk:"oauth_refresh_token"`
+	Blanket_user_consent bool   `mapstructure:"blanket_user_consent" tfsdk:"blanket_user_consent"`
+	Client_id            string `mapstructure:"client_id" tfsdk:"client_id"`
+	Client_secret        string `mapstructure:"client_secret" tfsdk:"client_secret"`
+	Connected_user       string `mapstructure:"connected_user" tfsdk:"connected_user"`
+	Oauth_refresh_token  string `mapstructure:"oauth_refresh_token" tfsdk:"oauth_refresh_token"`
+	Use_data_manager_api bool   `mapstructure:"use_data_manager_api" tfsdk:"use_data_manager_api"`
 }
 
 type Google_search_ads_360ConnectionResource struct {
@@ -224,10 +244,12 @@ func (r *Google_search_ads_360ConnectionResource) Create(ctx context.Context, re
 				},
 			},
 		},
-		"client_id":           types.StringType,
-		"client_secret":       types.StringType,
-		"connected_user":      types.StringType,
-		"oauth_refresh_token": types.StringType,
+		"blanket_user_consent": types.BoolType,
+		"client_id":            types.StringType,
+		"client_secret":        types.StringType,
+		"connected_user":       types.StringType,
+		"oauth_refresh_token":  types.StringType,
+		"use_data_manager_api": types.BoolType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -306,10 +328,12 @@ func (r *Google_search_ads_360ConnectionResource) Read(ctx context.Context, req 
 				},
 			},
 		},
-		"client_id":           types.StringType,
-		"client_secret":       types.StringType,
-		"connected_user":      types.StringType,
-		"oauth_refresh_token": types.StringType,
+		"blanket_user_consent": types.BoolType,
+		"client_id":            types.StringType,
+		"client_secret":        types.StringType,
+		"connected_user":       types.StringType,
+		"oauth_refresh_token":  types.StringType,
+		"use_data_manager_api": types.BoolType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -398,10 +422,12 @@ func (r *Google_search_ads_360ConnectionResource) Update(ctx context.Context, re
 				},
 			},
 		},
-		"client_id":           types.StringType,
-		"client_secret":       types.StringType,
-		"connected_user":      types.StringType,
-		"oauth_refresh_token": types.StringType,
+		"blanket_user_consent": types.BoolType,
+		"client_id":            types.StringType,
+		"client_secret":        types.StringType,
+		"connected_user":       types.StringType,
+		"oauth_refresh_token":  types.StringType,
+		"use_data_manager_api": types.BoolType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

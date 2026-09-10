@@ -54,7 +54,7 @@ var PaycorSchema = schema.Schema{
 					},
 				},
 				"client_secret": schema.StringAttribute{
-					MarkdownDescription: `Client Secret`,
+					MarkdownDescription: `Client secret`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,
@@ -64,14 +64,14 @@ var PaycorSchema = schema.Schema{
 					},
 				},
 				"scopes": schema.StringAttribute{
-					MarkdownDescription: `Scope Name`,
+					MarkdownDescription: `Scope name`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,
 					Sensitive:           false,
 				},
 				"subscription_key": schema.StringAttribute{
-					MarkdownDescription: `APIm Subscription Key`,
+					MarkdownDescription: `APIm subscription key`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,
@@ -81,7 +81,7 @@ var PaycorSchema = schema.Schema{
 					},
 				},
 				"use_sandbox": schema.BoolAttribute{
-					MarkdownDescription: `Use Sandbox`,
+					MarkdownDescription: `Use sandbox`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,

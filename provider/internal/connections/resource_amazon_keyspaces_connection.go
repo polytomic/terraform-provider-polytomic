@@ -47,14 +47,14 @@ var Amazon_keyspacesSchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"access_key_id": schema.StringAttribute{
-					MarkdownDescription: `AWS Access Key ID`,
+					MarkdownDescription: `AWS access key ID`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,
 					Sensitive:           false,
 				},
 				"auth_method": schema.StringAttribute{
-					MarkdownDescription: `Authentication Method Valid values: <code>access_key_and_secret</code> (Access Key and Secret), <code>iam_role</code> (IAM Role), <code>service_credentials</code> (Service-Specific Credentials). Default: <code>access_key_and_secret</code>.`,
+					MarkdownDescription: `Authentication method Valid values: <code>access_key_and_secret</code> (Access Key and Secret), <code>iam_role</code> (IAM Role), <code>service_credentials</code> (Service-Specific Credentials). Default: <code>access_key_and_secret</code>.`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
@@ -80,7 +80,7 @@ var Amazon_keyspacesSchema = schema.Schema{
 					Sensitive: false,
 				},
 				"iam_role_arn": schema.StringAttribute{
-					MarkdownDescription: `IAM Role ARN`,
+					MarkdownDescription: `IAM role ARN`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,
@@ -104,14 +104,14 @@ var Amazon_keyspacesSchema = schema.Schema{
 					},
 				},
 				"region": schema.StringAttribute{
-					MarkdownDescription: `AWS Region`,
+					MarkdownDescription: `AWS region`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
 					Sensitive:           false,
 				},
 				"secret_access_key": schema.StringAttribute{
-					MarkdownDescription: `AWS Secret Access Key`,
+					MarkdownDescription: `AWS secret access key`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,

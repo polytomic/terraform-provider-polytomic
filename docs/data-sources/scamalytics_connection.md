@@ -36,6 +36,6 @@ data "polytomic_scamalytics_connection" "scamalytics" {
 
 Read-Only:
 
-- `endpoint` (String) Enrichment Endpoint
+- `endpoint` (String) Enrichment endpoint
 
 

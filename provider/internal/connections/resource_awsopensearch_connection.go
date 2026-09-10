@@ -44,14 +44,14 @@ var AwsopensearchSchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"aws_access_key_id": schema.StringAttribute{
-					MarkdownDescription: `AWS Access Key ID`,
+					MarkdownDescription: `AWS access key ID`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
 					Sensitive:           false,
 				},
 				"aws_secret_access_key": schema.StringAttribute{
-					MarkdownDescription: `AWS Secret Access Key`,
+					MarkdownDescription: `AWS secret access key`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,

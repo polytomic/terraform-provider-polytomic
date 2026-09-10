@@ -52,13 +52,13 @@ func (d *ClickhouseConnectionDataSource) Schema(ctx context.Context, req datasou
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"auth_mode": schema.StringAttribute{
-						MarkdownDescription: `AWS Authentication Method
+						MarkdownDescription: `AWS authentication method
 
     How to authenticate with AWS for the staging bucket Valid values: <code>access_key_and_secret</code> (Access Key and Secret), <code>iam_role</code> (IAM role). Default: <code>access_key_and_secret</code>.`,
 						Computed: true,
 					},
 					"aws_access_key_id": schema.StringAttribute{
-						MarkdownDescription: `AWS Access Key ID (destinations only)`,
+						MarkdownDescription: `AWS access key ID (destinations only)`,
 						Computed:            true,
 					},
 					"aws_user": schema.StringAttribute{
@@ -66,15 +66,15 @@ func (d *ClickhouseConnectionDataSource) Schema(ctx context.Context, req datasou
 						Computed:            true,
 					},
 					"azure_account_name": schema.StringAttribute{
-						MarkdownDescription: `Storage Account Name (destinations only)`,
+						MarkdownDescription: `Storage account name (destinations only)`,
 						Computed:            true,
 					},
 					"cloud_provider": schema.StringAttribute{
-						MarkdownDescription: `Cloud Provider (destination support only) Valid values: <code>aws</code> (AWS), <code>azure</code> (Azure).`,
+						MarkdownDescription: `Cloud provider (destination support only) Valid values: <code>aws</code> (AWS), <code>azure</code> (Azure), <code>gcp</code> (Google Cloud).`,
 						Computed:            true,
 					},
 					"container_name": schema.StringAttribute{
-						MarkdownDescription: `Storage Container Name (destinations only)
+						MarkdownDescription: `Storage container name (destinations only)
 
     Container used for staging data load files (may be "container" or "container/prefix")`,
 						Computed: true,
@@ -89,12 +89,22 @@ func (d *ClickhouseConnectionDataSource) Schema(ctx context.Context, req datasou
     External ID for the IAM role`,
 						Computed: true,
 					},
+					"gcs_bucket_name": schema.StringAttribute{
+						MarkdownDescription: `GCS bucket name (destinations only)
+
+    Bucket used for staging data (may be "bucket" or "bucket/prefix")`,
+						Computed: true,
+					},
+					"gcs_hmac_access_id": schema.StringAttribute{
+						MarkdownDescription: `HMAC access ID (destinations only)`,
+						Computed:            true,
+					},
 					"hostname": schema.StringAttribute{
 						MarkdownDescription: ``,
 						Computed:            true,
 					},
 					"iam_role_arn": schema.StringAttribute{
-						MarkdownDescription: `IAM Role ARN`,
+						MarkdownDescription: `IAM role ARN`,
 						Computed:            true,
 					},
 					"port": schema.Int64Attribute{
@@ -102,13 +112,13 @@ func (d *ClickhouseConnectionDataSource) Schema(ctx context.Context, req datasou
 						Computed:            true,
 					},
 					"s3_bucket_name": schema.StringAttribute{
-						MarkdownDescription: `S3 Bucket Name (destinations only)
+						MarkdownDescription: `S3 bucket name (destinations only)
 
     Name of bucket used for staging data load files`,
 						Computed: true,
 					},
 					"s3_bucket_region": schema.StringAttribute{
-						MarkdownDescription: `S3 Bucket Region (destinations only)`,
+						MarkdownDescription: `S3 bucket region (destinations only)`,
 						Computed:            true,
 					},
 					"skip_verify": schema.BoolAttribute{
@@ -155,6 +165,8 @@ type ClickhouseDataSourceConf struct {
 	Container_name     string `mapstructure:"container_name" tfsdk:"container_name"`
 	Database           string `mapstructure:"database" tfsdk:"database"`
 	External_id        string `mapstructure:"external_id" tfsdk:"external_id"`
+	Gcs_bucket_name    string `mapstructure:"gcs_bucket_name" tfsdk:"gcs_bucket_name"`
+	Gcs_hmac_access_id string `mapstructure:"gcs_hmac_access_id" tfsdk:"gcs_hmac_access_id"`
 	Hostname           string `mapstructure:"hostname" tfsdk:"hostname"`
 	Iam_role_arn       string `mapstructure:"iam_role_arn" tfsdk:"iam_role_arn"`
 	Port               int64  `mapstructure:"port" tfsdk:"port"`
@@ -212,6 +224,8 @@ func (d *ClickhouseConnectionDataSource) Read(ctx context.Context, req datasourc
 		"container_name":     types.StringType,
 		"database":           types.StringType,
 		"external_id":        types.StringType,
+		"gcs_bucket_name":    types.StringType,
+		"gcs_hmac_access_id": types.StringType,
 		"hostname":           types.StringType,
 		"iam_role_arn":       types.StringType,
 		"port":               types.NumberType,

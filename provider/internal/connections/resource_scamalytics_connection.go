@@ -44,7 +44,7 @@ var ScamalyticsSchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"apikey": schema.StringAttribute{
-					MarkdownDescription: `API Key`,
+					MarkdownDescription: `API key`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
@@ -54,7 +54,7 @@ var ScamalyticsSchema = schema.Schema{
 					},
 				},
 				"endpoint": schema.StringAttribute{
-					MarkdownDescription: `Enrichment Endpoint`,
+					MarkdownDescription: `Enrichment endpoint`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,

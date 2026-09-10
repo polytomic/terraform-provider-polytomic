@@ -56,7 +56,7 @@ func (d *PardotConnectionDataSource) Schema(ctx context.Context, req datasource.
 						Computed:            true,
 					},
 					"business_unit_id": schema.StringAttribute{
-						MarkdownDescription: `Business Unit ID`,
+						MarkdownDescription: `Business unit ID`,
 						Computed:            true,
 					},
 					"daily_api_calls": schema.Int64Attribute{

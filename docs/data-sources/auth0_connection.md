@@ -36,7 +36,7 @@ data "polytomic_auth0_connection" "auth0" {
 
 Read-Only:
 
-- `client_id` (String) App Client ID
+- `client_id` (String) App client ID
 - `domain` (String) The domain of the Auth0 instance
 
 

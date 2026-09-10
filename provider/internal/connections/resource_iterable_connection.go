@@ -44,7 +44,7 @@ var IterableSchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"api_key": schema.StringAttribute{
-					MarkdownDescription: `API Key`,
+					MarkdownDescription: `API key`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
@@ -54,7 +54,7 @@ var IterableSchema = schema.Schema{
 					},
 				},
 				"event_types": schema.SetNestedAttribute{
-					MarkdownDescription: `Event Types`,
+					MarkdownDescription: `Event types`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,

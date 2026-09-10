@@ -36,8 +36,9 @@ data "polytomic_slack_connection" "slack" {
 
 Read-Only:
 
-- `event_url` (String) Event Subscription Request URL
+- `event_url` (String) Event subscription request URL
 
     Used if ingesting Slack events.
+- `webhook_collections` (Boolean) Enable Slack event updates for bulk syncs
 
 

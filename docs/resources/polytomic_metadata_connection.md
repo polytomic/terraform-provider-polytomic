@@ -54,17 +54,17 @@ state before it will take effect on a destroy operation.
 
 #### Required
 
-- `auth_mode` (String) Authentication Method
+- `auth_mode` (String) Authentication method
 
     Type of API key to use for authentication Valid values: <code>personal_api_key</code> (Personal API Key), <code>partner_api_key</code> (Partner API Key). Default: <code>personal_api_key</code>.
 
 #### Optional
 
-- `deployment_api_key` (String, Sensitive) Deployment API Key
-- `partner_api_key` (String, Sensitive) Partner API Key
+- `deployment_api_key` (String, Sensitive) Deployment API key
+- `partner_api_key` (String, Sensitive) Partner API key
 
     Partner API key provided by Polytomic
-- `personal_api_key` (String, Sensitive) Personal API Key
+- `personal_api_key` (String, Sensitive) Personal API key
 
     Your personal API key from Polytomic settings
 

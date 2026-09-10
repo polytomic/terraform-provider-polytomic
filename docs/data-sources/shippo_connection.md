@@ -34,4 +34,8 @@ data "polytomic_shippo_connection" "shippo" {
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
+Read-Only:
+
+- `enable_webhooks` (Boolean) Enable Shippo webhook updates for bulk syncs
+
 

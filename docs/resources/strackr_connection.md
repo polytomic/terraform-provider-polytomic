@@ -55,11 +55,11 @@ state before it will take effect on a destroy operation.
 #### Required
 
 - `api_id` (Number, Sensitive) API ID
-- `api_key` (String, Sensitive) API Key
-- `currency_type` (String) Currency Type Valid values: <code>EUR</code>, <code>USD</code>, <code>CAD</code>, <code>GBP</code>, <code>RUB</code>, <code>SEK</code>, <code>AUD</code>, <code>INR</code>, <code>NOK</code>, <code>DKK</code>. Default: <code>USD</code>.
+- `api_key` (String, Sensitive) API key
+- `currency_type` (String) Currency type Valid values: <code>EUR</code>, <code>USD</code>, <code>CAD</code>, <code>GBP</code>, <code>RUB</code>, <code>SEK</code>, <code>AUD</code>, <code>INR</code>, <code>NOK</code>, <code>DKK</code>. Default: <code>USD</code>.
 
 #### Optional
 
-- `linkbuilder_customs_text` (String) Linkbuilder Customs Text
+- `linkbuilder_customs_text` (String) Linkbuilder customs text
 
 

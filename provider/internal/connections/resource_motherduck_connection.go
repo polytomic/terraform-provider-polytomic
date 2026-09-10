@@ -44,7 +44,7 @@ var MotherduckSchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"access_token": schema.StringAttribute{
-					MarkdownDescription: `Access Token`,
+					MarkdownDescription: `Access token`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
@@ -54,7 +54,7 @@ var MotherduckSchema = schema.Schema{
 					},
 				},
 				"aws_access_key_id": schema.StringAttribute{
-					MarkdownDescription: `AWS Access Key ID (destinations only)
+					MarkdownDescription: `AWS access key ID (destinations only)
 
     Access Key ID with read/write access to a bucket.`,
 					Required:  false,
@@ -63,7 +63,7 @@ var MotherduckSchema = schema.Schema{
 					Sensitive: false,
 				},
 				"aws_secret_access_key": schema.StringAttribute{
-					MarkdownDescription: `AWS Secret Access Key (destinations only)`,
+					MarkdownDescription: `AWS secret access key (destinations only)`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,
@@ -87,7 +87,7 @@ var MotherduckSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"s3_bucket_name": schema.StringAttribute{
-					MarkdownDescription: `S3 Bucket Name (destinations only)
+					MarkdownDescription: `S3 bucket name (destinations only)
 
     Bucket name (folder optional); ex: s3://polytomic/dataset`,
 					Required:  false,
@@ -96,7 +96,7 @@ var MotherduckSchema = schema.Schema{
 					Sensitive: false,
 				},
 				"s3_bucket_region": schema.StringAttribute{
-					MarkdownDescription: `S3 Bucket Region (destinations only)`,
+					MarkdownDescription: `S3 bucket region (destinations only)`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,

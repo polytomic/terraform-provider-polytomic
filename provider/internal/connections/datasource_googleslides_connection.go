@@ -52,8 +52,10 @@ func (d *GoogleslidesConnectionDataSource) Schema(ctx context.Context, req datas
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"connect_mode": schema.StringAttribute{
-						MarkdownDescription: `Default: browser Valid values: <code>browser</code>, <code>jwt</code>. Default: <code>browser</code>.`,
-						Computed:            true,
+						MarkdownDescription: `Authentication method
+
+    Default: browser Valid values: <code>browser</code>, <code>jwt</code>. Default: <code>browser</code>.`,
+						Computed: true,
 					},
 					"folder_id": schema.SingleNestedAttribute{
 						MarkdownDescription: `Folder`,
@@ -70,7 +72,7 @@ func (d *GoogleslidesConnectionDataSource) Schema(ctx context.Context, req datas
 						},
 					},
 					"include_subdirectories": schema.BoolAttribute{
-						MarkdownDescription: `Include Subdirectories Default: <code>false</code>.`,
+						MarkdownDescription: `Include subdirectories Default: <code>false</code>.`,
 						Computed:            true,
 					},
 					"user_email": schema.StringAttribute{

@@ -36,20 +36,20 @@ data "polytomic_customeriowarehouseexports_connection" "customeriowarehouseexpor
 
 Read-Only:
 
-- `auth_mode` (String) Authentication Method
+- `auth_mode` (String) Authentication method
 
     How to authenticate with AWS. Defaults to Access Key and Secret Valid values: <code>access_key_and_secret</code> (Access Key and Secret), <code>iam_role</code> (IAM role). Default: <code>access_key_and_secret</code>.
-- `aws_access_key_id` (String) AWS Access Key ID
+- `aws_access_key_id` (String) AWS access key ID
 
     Access Key ID with read/write access to a bucket.
 - `aws_user` (String) User ARN
 - `external_id` (String) External ID
 
     External ID for the IAM role
-- `iam_role_arn` (String) IAM Role ARN
-- `s3_bucket_name` (String) S3 Bucket Name
+- `iam_role_arn` (String) IAM role ARN
+- `s3_bucket_name` (String) S3 bucket name
 
     Bucket name (folder optional); ex: s3://polytomic/dataset
-- `s3_bucket_region` (String) S3 Bucket Region
+- `s3_bucket_region` (String) S3 bucket region
 
 

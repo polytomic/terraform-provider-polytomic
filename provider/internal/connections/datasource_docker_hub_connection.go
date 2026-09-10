@@ -55,6 +55,12 @@ func (d *Docker_hubConnectionDataSource) Schema(ctx context.Context, req datasou
 						MarkdownDescription: ``,
 						Computed:            true,
 					},
+					"username": schema.StringAttribute{
+						MarkdownDescription: `Username or organization
+
+    Username when signing in with a personal access token; organization name when using an organization access token.`,
+						Computed: true,
+					},
 				},
 				Optional: true,
 			},
@@ -64,6 +70,7 @@ func (d *Docker_hubConnectionDataSource) Schema(ctx context.Context, req datasou
 
 type Docker_hubDataSourceConf struct {
 	Namespace string `mapstructure:"namespace" tfsdk:"namespace"`
+	Username  string `mapstructure:"username" tfsdk:"username"`
 }
 
 func (d *Docker_hubConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
@@ -102,6 +109,7 @@ func (d *Docker_hubConnectionDataSource) Read(ctx context.Context, req datasourc
 	var diags diag.Diagnostics
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"namespace": types.StringType,
+		"username":  types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

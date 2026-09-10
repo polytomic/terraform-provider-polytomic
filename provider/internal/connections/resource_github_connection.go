@@ -43,6 +43,13 @@ var GithubSchema = schema.Schema{
 		},
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
+				"auto_add_repositories": schema.BoolAttribute{
+					MarkdownDescription: `Automatically add new repositories`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
 				"client_id": schema.StringAttribute{
 					MarkdownDescription: ``,
 					Required:            false,
@@ -65,9 +72,9 @@ var GithubSchema = schema.Schema{
 				},
 				"oauth_access_token": schema.StringAttribute{
 					MarkdownDescription: ``,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
 					Sensitive:           true,
 					PlanModifiers: []planmodifier.String{
 						stringplanmodifier.UseStateForUnknown(),
@@ -125,10 +132,11 @@ func (t *GithubConnectionResource) Schema(ctx context.Context, req resource.Sche
 }
 
 type GithubConf struct {
-	Client_id          string `mapstructure:"client_id" tfsdk:"client_id"`
-	Client_secret      string `mapstructure:"client_secret" tfsdk:"client_secret"`
-	Oauth_access_token string `mapstructure:"oauth_access_token" tfsdk:"oauth_access_token"`
-	Repositories       []struct {
+	Auto_add_repositories bool   `mapstructure:"auto_add_repositories" tfsdk:"auto_add_repositories"`
+	Client_id             string `mapstructure:"client_id" tfsdk:"client_id"`
+	Client_secret         string `mapstructure:"client_secret" tfsdk:"client_secret"`
+	Oauth_access_token    string `mapstructure:"oauth_access_token" tfsdk:"oauth_access_token"`
+	Repositories          []struct {
 		Label string `mapstructure:"label" tfsdk:"label"`
 		Value string `mapstructure:"value" tfsdk:"value"`
 	} `mapstructure:"repositories" tfsdk:"repositories"`
@@ -208,9 +216,10 @@ func (r *GithubConnectionResource) Create(ctx context.Context, req resource.Crea
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"client_id":          types.StringType,
-		"client_secret":      types.StringType,
-		"oauth_access_token": types.StringType,
+		"auto_add_repositories": types.BoolType,
+		"client_id":             types.StringType,
+		"client_secret":         types.StringType,
+		"oauth_access_token":    types.StringType,
 		"repositories": types.SetType{
 			ElemType: types.ObjectType{
 				AttrTypes: map[string]attr.Type{
@@ -289,9 +298,10 @@ func (r *GithubConnectionResource) Read(ctx context.Context, req resource.ReadRe
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"client_id":          types.StringType,
-		"client_secret":      types.StringType,
-		"oauth_access_token": types.StringType,
+		"auto_add_repositories": types.BoolType,
+		"client_id":             types.StringType,
+		"client_secret":         types.StringType,
+		"oauth_access_token":    types.StringType,
 		"repositories": types.SetType{
 			ElemType: types.ObjectType{
 				AttrTypes: map[string]attr.Type{
@@ -380,9 +390,10 @@ func (r *GithubConnectionResource) Update(ctx context.Context, req resource.Upda
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"client_id":          types.StringType,
-		"client_secret":      types.StringType,
-		"oauth_access_token": types.StringType,
+		"auto_add_repositories": types.BoolType,
+		"client_id":             types.StringType,
+		"client_secret":         types.StringType,
+		"oauth_access_token":    types.StringType,
 		"repositories": types.SetType{
 			ElemType: types.ObjectType{
 				AttrTypes: map[string]attr.Type{

@@ -36,14 +36,14 @@ data "polytomic_motherduck_connection" "motherduck" {
 
 Read-Only:
 
-- `aws_access_key_id` (String) AWS Access Key ID (destinations only)
+- `aws_access_key_id` (String) AWS access key ID (destinations only)
 
     Access Key ID with read/write access to a bucket.
 - `aws_user` (String) User ARN
 - `database` (String)
-- `s3_bucket_name` (String) S3 Bucket Name (destinations only)
+- `s3_bucket_name` (String) S3 bucket name (destinations only)
 
     Bucket name (folder optional); ex: s3://polytomic/dataset
-- `s3_bucket_region` (String) S3 Bucket Region (destinations only)
+- `s3_bucket_region` (String) S3 bucket region (destinations only)
 
 

@@ -1,0 +1,1 @@
+{"$schema":"https://json-schema.org/draft/2020-12/schema","properties":{"subdomain":{"type":"string","title":"Subdomain","examples":["acme"]},"api_token":{"type":"string","title":"API token","sensitive":true}},"type":"object","required":["subdomain","api_token"]}

@@ -47,7 +47,7 @@ var DealcloudSchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"api_key": schema.StringAttribute{
-					MarkdownDescription: `API Key`,
+					MarkdownDescription: `API key`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,
@@ -74,7 +74,7 @@ var DealcloudSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"client_secret": schema.StringAttribute{
-					MarkdownDescription: `Client Secret`,
+					MarkdownDescription: `Client secret`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,

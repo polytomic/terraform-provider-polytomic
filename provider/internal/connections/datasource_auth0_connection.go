@@ -52,7 +52,7 @@ func (d *Auth0ConnectionDataSource) Schema(ctx context.Context, req datasource.S
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"client_id": schema.StringAttribute{
-						MarkdownDescription: `App Client ID`,
+						MarkdownDescription: `App client ID`,
 						Computed:            true,
 					},
 					"domain": schema.StringAttribute{

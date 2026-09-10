@@ -54,7 +54,7 @@ state before it will take effect on a destroy operation.
 
 #### Required
 
-- `domain` (String) Zendesk Support Subdomain
+- `domain` (String) Zendesk Support subdomain
 
 #### Optional
 

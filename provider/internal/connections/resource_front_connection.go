@@ -44,7 +44,7 @@ var FrontSchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"api_key": schema.StringAttribute{
-					MarkdownDescription: `API Token`,
+					MarkdownDescription: `API token`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,

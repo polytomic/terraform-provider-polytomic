@@ -78,7 +78,7 @@ func (d *RedshiftserverlessConnectionDataSource) Schema(ctx context.Context, req
 						Computed:            true,
 					},
 					"iam_role_arn": schema.StringAttribute{
-						MarkdownDescription: `IAM Role ARN`,
+						MarkdownDescription: `IAM role ARN`,
 						Computed:            true,
 					},
 					"override_endpoint": schema.BoolAttribute{
@@ -102,7 +102,7 @@ func (d *RedshiftserverlessConnectionDataSource) Schema(ctx context.Context, req
 						Computed:            true,
 					},
 					"use_unload": schema.BoolAttribute{
-						MarkdownDescription: `Read data using Unload`,
+						MarkdownDescription: `Read data using unload`,
 						Computed:            true,
 					},
 					"workgroup": schema.StringAttribute{

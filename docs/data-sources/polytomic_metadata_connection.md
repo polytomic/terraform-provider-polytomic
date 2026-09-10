@@ -36,7 +36,7 @@ data "polytomic_polytomic_metadata_connection" "polytomic_metadata" {
 
 Read-Only:
 
-- `auth_mode` (String) Authentication Method
+- `auth_mode` (String) Authentication method
 
     Type of API key to use for authentication Valid values: <code>personal_api_key</code> (Personal API Key), <code>partner_api_key</code> (Partner API Key). Default: <code>personal_api_key</code>.
 - `connected_org` (String) Connected organization

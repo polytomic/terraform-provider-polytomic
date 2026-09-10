@@ -47,7 +47,7 @@ var QualtricsSchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"api_key": schema.StringAttribute{
-					MarkdownDescription: `API Token`,
+					MarkdownDescription: `API token`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
@@ -57,7 +57,7 @@ var QualtricsSchema = schema.Schema{
 					},
 				},
 				"data_center": schema.StringAttribute{
-					MarkdownDescription: `Data Center Valid values: <code>portland</code> (Portland, Oregon, USA), <code>washington_dc</code> (Washington, DC, USA), <code>arizona</code> (Arizona, USA (az1)), <code>us_government</code> (US Government), <code>canada</code> (Canada), <code>eu</code> (EU), <code>london</code> (London, UK), <code>singapore</code> (Singapore), <code>sydney</code> (Sydney, Australia), <code>tokyo</code> (Tokyo, Japan). Default: <code>portland</code>.`,
+					MarkdownDescription: `Data center Valid values: <code>portland</code> (Portland, Oregon, USA), <code>washington_dc</code> (Washington, DC, USA), <code>arizona</code> (Arizona, USA (az1)), <code>us_government</code> (US Government), <code>canada</code> (Canada), <code>eu</code> (EU), <code>london</code> (London, UK), <code>singapore</code> (Singapore), <code>sydney</code> (Sydney, Australia), <code>tokyo</code> (Tokyo, Japan). Default: <code>portland</code>.`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,

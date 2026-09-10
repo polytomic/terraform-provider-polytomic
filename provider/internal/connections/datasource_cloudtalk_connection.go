@@ -52,7 +52,7 @@ func (d *CloudtalkConnectionDataSource) Schema(ctx context.Context, req datasour
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"access_key_id": schema.StringAttribute{
-						MarkdownDescription: `Access Key ID`,
+						MarkdownDescription: `Access key ID`,
 						Computed:            true,
 					},
 				},

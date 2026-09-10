@@ -54,7 +54,7 @@ state before it will take effect on a destroy operation.
 #### Required
 
 - `account_id` (String) Account ID
-- `api_key` (String, Sensitive) API Key
-- `api_secret` (String, Sensitive) API Secret
+- `api_key` (String, Sensitive) API key
+- `api_secret` (String, Sensitive) API secret
 
 

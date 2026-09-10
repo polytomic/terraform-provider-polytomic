@@ -72,7 +72,7 @@ var FbaudienceSchema = schema.Schema{
 					},
 				},
 				"auth_method": schema.StringAttribute{
-					MarkdownDescription: `Authentication Method Valid values: <code>oauth</code> (Oauth), <code>token</code> (Token). Default: <code>oauth</code>.`,
+					MarkdownDescription: `Authentication method Valid values: <code>oauth</code> (OAuth), <code>token</code> (Token). Default: <code>oauth</code>.`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
@@ -80,6 +80,13 @@ var FbaudienceSchema = schema.Schema{
 					Validators: []validator.String{
 						stringvalidator.OneOf("oauth", "token"),
 					},
+				},
+				"auto_add_accounts": schema.BoolAttribute{
+					MarkdownDescription: `Automatically add new accounts`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
 				},
 				"byo_app_token": schema.StringAttribute{
 					MarkdownDescription: `Token`,
@@ -137,6 +144,7 @@ type FbaudienceConf struct {
 		Value string `mapstructure:"value" tfsdk:"value"`
 	} `mapstructure:"accounts" tfsdk:"accounts"`
 	Auth_method       string `mapstructure:"auth_method" tfsdk:"auth_method"`
+	Auto_add_accounts bool   `mapstructure:"auto_add_accounts" tfsdk:"auto_add_accounts"`
 	Byo_app_token     string `mapstructure:"byo_app_token" tfsdk:"byo_app_token"`
 	Graph_api_version string `mapstructure:"graph_api_version" tfsdk:"graph_api_version"`
 	User_name         string `mapstructure:"user_name" tfsdk:"user_name"`
@@ -225,6 +233,7 @@ func (r *FbaudienceConnectionResource) Create(ctx context.Context, req resource.
 			},
 		},
 		"auth_method":       types.StringType,
+		"auto_add_accounts": types.BoolType,
 		"byo_app_token":     types.StringType,
 		"graph_api_version": types.StringType,
 		"user_name":         types.StringType,
@@ -307,6 +316,7 @@ func (r *FbaudienceConnectionResource) Read(ctx context.Context, req resource.Re
 			},
 		},
 		"auth_method":       types.StringType,
+		"auto_add_accounts": types.BoolType,
 		"byo_app_token":     types.StringType,
 		"graph_api_version": types.StringType,
 		"user_name":         types.StringType,
@@ -399,6 +409,7 @@ func (r *FbaudienceConnectionResource) Update(ctx context.Context, req resource.
 			},
 		},
 		"auth_method":       types.StringType,
+		"auto_add_accounts": types.BoolType,
 		"byo_app_token":     types.StringType,
 		"graph_api_version": types.StringType,
 		"user_name":         types.StringType,

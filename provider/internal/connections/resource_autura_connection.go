@@ -44,7 +44,7 @@ var AuturaSchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"authentication_key": schema.StringAttribute{
-					MarkdownDescription: `Authentication Key`,
+					MarkdownDescription: `Authentication key`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
@@ -54,7 +54,7 @@ var AuturaSchema = schema.Schema{
 					},
 				},
 				"org_keys": schema.StringAttribute{
-					MarkdownDescription: `Org Keys
+					MarkdownDescription: `Org keys
 
     Comma-delimited list`,
 					Required:  true,

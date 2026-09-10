@@ -324,7 +324,7 @@ var HttpenrichmentSchema = schema.Schema{
 					},
 				},
 				"method": schema.StringAttribute{
-					MarkdownDescription: `HTTP Method Valid values: <code>GET</code>, <code>POST</code>.`,
+					MarkdownDescription: `HTTP method Valid values: <code>GET</code>, <code>POST</code>.`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,

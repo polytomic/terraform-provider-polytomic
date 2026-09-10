@@ -47,7 +47,7 @@ var DynamodbSchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"access_id": schema.StringAttribute{
-					MarkdownDescription: `AWS Access ID`,
+					MarkdownDescription: `AWS access ID`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,
@@ -57,7 +57,7 @@ var DynamodbSchema = schema.Schema{
 					},
 				},
 				"auth_mode": schema.StringAttribute{
-					MarkdownDescription: `Authentication Method
+					MarkdownDescription: `Authentication method
 
     How to authenticate with AWS. Defaults to Access Key and Secret Valid values: <code>access_key_and_secret</code> (Access Key and Secret), <code>iam_role</code> (IAM role). Default: <code>access_key_and_secret</code>.`,
 					Required:  true,
@@ -92,14 +92,14 @@ var DynamodbSchema = schema.Schema{
 					Sensitive: false,
 				},
 				"iam_role_arn": schema.StringAttribute{
-					MarkdownDescription: `IAM Role ARN`,
+					MarkdownDescription: `IAM role ARN`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,
 					Sensitive:           false,
 				},
 				"managed_streams": schema.BoolAttribute{
-					MarkdownDescription: `Let Polytomic manage DynamoDB Stream settings`,
+					MarkdownDescription: `Let Polytomic manage DynamoDB stream settings`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,
@@ -113,7 +113,7 @@ var DynamodbSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"secret_access_key": schema.StringAttribute{
-					MarkdownDescription: `AWS Secret Access Key`,
+					MarkdownDescription: `AWS secret access key`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,

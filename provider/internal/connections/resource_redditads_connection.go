@@ -106,7 +106,7 @@ var RedditadsSchema = schema.Schema{
 					},
 				},
 				"pixel_id": schema.StringAttribute{
-					MarkdownDescription: `Conversion Pixel ID
+					MarkdownDescription: `Conversion pixel ID
 
     Required if syncing conversion events to Reddit Ads.`,
 					Required:  false,

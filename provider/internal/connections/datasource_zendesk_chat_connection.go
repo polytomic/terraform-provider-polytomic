@@ -56,7 +56,7 @@ func (d *Zendesk_chatConnectionDataSource) Schema(ctx context.Context, req datas
 						Computed:            true,
 					},
 					"domain": schema.StringAttribute{
-						MarkdownDescription: `Zendesk Support Subdomain`,
+						MarkdownDescription: `Zendesk Support subdomain`,
 						Computed:            true,
 					},
 					"ratelimit_rpm": schema.Int64Attribute{

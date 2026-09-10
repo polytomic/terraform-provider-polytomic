@@ -36,6 +36,8 @@ data "polytomic_msdynamics_connection" "msdynamics" {
 
 Read-Only:
 
+- `auth_method` (String) Authentication method Valid values: <code>oauth</code> (OAuth), <code>client_credentials</code> (Client credentials). Default: <code>oauth</code>.
 - `dynamics_url` (String) Dynamics URL
+- `tenant_id` (String) Directory (tenant) ID
 
 

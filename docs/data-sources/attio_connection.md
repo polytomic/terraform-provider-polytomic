@@ -36,7 +36,9 @@ data "polytomic_attio_connection" "attio" {
 
 Read-Only:
 
+- `auth_method` (String) Authentication method Valid values: <code>oauth</code> (OAuth), <code>api_key</code> (API key).
 - `disable_list_entry_projection` (Boolean) Skip parent fields when pulling lists
+- `enable_attribute_history` (Boolean) Enable Attio attribute change history
 - `enable_webhooks` (Boolean) Enable Attio webhook updates for bulk syncs
 - `workspace_name` (String) Workspace name
 

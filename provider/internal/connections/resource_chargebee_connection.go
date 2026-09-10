@@ -57,7 +57,7 @@ var ChargebeeSchema = schema.Schema{
 					},
 				},
 				"product_catalog": schema.StringAttribute{
-					MarkdownDescription: `Product Catalog version Valid values: <code>1.0</code> (1.0), <code>2.0</code> (2.0).`,
+					MarkdownDescription: `Product catalog version Valid values: <code>1.0</code> (1.0), <code>2.0</code> (2.0).`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
@@ -67,7 +67,7 @@ var ChargebeeSchema = schema.Schema{
 					},
 				},
 				"ratelimit_rpm": schema.Int64Attribute{
-					MarkdownDescription: `Maximum Requests Per Minute
+					MarkdownDescription: `Maximum requests per minute
 
     Default rate limits can be found at https://www.chargebee.com/docs/2.0/site-configuration/articles-and-faq/what-are-the-chargebee-api-limits.html`,
 					Required:  false,

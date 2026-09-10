@@ -37,9 +37,9 @@ data "polytomic_mongodb_connection" "mongodb" {
 Read-Only:
 
 - `change_detection` (Boolean) Use change stream for bulk syncs Default: <code>false</code>.
-- `database` (String) Auth Database
+- `database` (String) Auth database
 - `hosts` (String) Hostname(s)
-- `params` (String) Additional Parameters
+- `params` (String) Additional parameters
 
     Additional connection parameters, formatted as a query string
 - `srv` (Boolean) Connect using SRV record?

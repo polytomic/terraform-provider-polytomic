@@ -44,7 +44,7 @@ var Seal_subscriptionsSchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"seal_token": schema.StringAttribute{
-					MarkdownDescription: `Seal Token`,
+					MarkdownDescription: `Seal token`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,

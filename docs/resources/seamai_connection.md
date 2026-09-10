@@ -55,8 +55,8 @@ state before it will take effect on a destroy operation.
 
 #### Required
 
-- `apikey_id` (String, Sensitive) API Key ID
-- `apikey_secret` (String, Sensitive) API Key Secret
+- `apikey_id` (String, Sensitive) API key ID
+- `apikey_secret` (String, Sensitive) API key secret
 
 #### Optional
 

@@ -58,7 +58,7 @@ state before it will take effect on a destroy operation.
 
 #### Required
 
-- `auth_mode` (String) Authentication Method
+- `auth_mode` (String) Authentication method
 
     How to authenticate with AWS. Defaults to Access Key and Secret Valid values: <code>access_key_and_secret</code> (Access Key and Secret), <code>iam_role</code> (IAM role). Default: <code>access_key_and_secret</code>.
 - `outputbucket` (String) AWS S3 output bucket
@@ -68,12 +68,12 @@ state before it will take effect on a destroy operation.
 
 #### Optional
 
-- `access_id` (String) AWS Access ID
+- `access_id` (String) AWS access ID
 - `external_id` (String) External ID
 
     External ID for the IAM role
-- `iam_role_arn` (String) IAM Role ARN
-- `secret_access_key` (String, Sensitive) AWS Secret Access Key
+- `iam_role_arn` (String) IAM role ARN
+- `secret_access_key` (String, Sensitive) AWS secret access key
 - `tags` (Map of String) Additional tags to apply during role assumption
 
 #### Read-Only

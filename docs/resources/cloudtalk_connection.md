@@ -53,7 +53,7 @@ state before it will take effect on a destroy operation.
 
 #### Required
 
-- `access_key_id` (String) Access Key ID
-- `access_key_secret` (String, Sensitive) Access Key Secret
+- `access_key_id` (String) Access key ID
+- `access_key_secret` (String, Sensitive) Access key secret
 
 

@@ -44,7 +44,7 @@ var DayforceSchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"client_name": schema.StringAttribute{
-					MarkdownDescription: `Client Name`,
+					MarkdownDescription: `Client name`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,

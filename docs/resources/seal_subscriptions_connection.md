@@ -53,6 +53,6 @@ state before it will take effect on a destroy operation.
 
 #### Required
 
-- `seal_token` (String, Sensitive) Seal Token
+- `seal_token` (String, Sensitive) Seal token
 
 

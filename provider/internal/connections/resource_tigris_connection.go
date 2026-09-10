@@ -47,14 +47,14 @@ var TigrisSchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"aws_access_key_id": schema.StringAttribute{
-					MarkdownDescription: `Access Key ID`,
+					MarkdownDescription: `Access key ID`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
 					Sensitive:           false,
 				},
 				"aws_secret_access_key": schema.StringAttribute{
-					MarkdownDescription: `Secret Access Key`,
+					MarkdownDescription: `Secret access key`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
@@ -64,7 +64,7 @@ var TigrisSchema = schema.Schema{
 					},
 				},
 				"bucket_name": schema.StringAttribute{
-					MarkdownDescription: `Bucket Name
+					MarkdownDescription: `Bucket name
 
     Bucket name (folder optional); ex: polytomic/dataset`,
 					Required:  true,

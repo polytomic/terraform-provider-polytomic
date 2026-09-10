@@ -44,7 +44,7 @@ var KnockSchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"api_key": schema.StringAttribute{
-					MarkdownDescription: `Service Token
+					MarkdownDescription: `Service token
 
     Knock management API service token (knock_st_...). Required to sync workspace configuration collections.`,
 					Required:  false,
@@ -56,7 +56,7 @@ var KnockSchema = schema.Schema{
 					},
 				},
 				"secret_key": schema.StringAttribute{
-					MarkdownDescription: `Secret Key
+					MarkdownDescription: `Secret key
 
     Knock standard API secret key (sk_...). Required to sync runtime data-plane collections.`,
 					Required:  false,

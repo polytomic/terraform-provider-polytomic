@@ -57,7 +57,7 @@ var IroncladSchema = schema.Schema{
 					},
 				},
 				"auth_method": schema.StringAttribute{
-					MarkdownDescription: `Authentication method Valid values: <code>oauth</code> (OAuth Client Credentials), <code>api_key</code> (API Key). Default: <code>oauth</code>.`,
+					MarkdownDescription: `Authentication method Valid values: <code>oauth</code> (OAuth client credentials), <code>api_key</code> (API key). Default: <code>oauth</code>.`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,

@@ -53,11 +53,11 @@ state before it will take effect on a destroy operation.
 
 #### Required
 
-- `auth_method` (String) Authentication method Valid values: <code>basic</code> (Basic Auth), <code>api_key</code> (API Key). Default: <code>basic</code>.
+- `auth_method` (String) Authentication method Valid values: <code>basic</code> (Basic auth), <code>api_key</code> (API key). Default: <code>basic</code>.
 
 #### Optional
 
-- `api_key` (String, Sensitive) API Key
+- `api_key` (String, Sensitive) API key
 - `password` (String, Sensitive)
 - `username` (String)
 

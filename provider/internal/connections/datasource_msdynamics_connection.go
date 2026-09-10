@@ -51,8 +51,16 @@ func (d *MsdynamicsConnectionDataSource) Schema(ctx context.Context, req datasou
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
+					"auth_method": schema.StringAttribute{
+						MarkdownDescription: `Authentication method Valid values: <code>oauth</code> (OAuth), <code>client_credentials</code> (Client credentials). Default: <code>oauth</code>.`,
+						Computed:            true,
+					},
 					"dynamics_url": schema.StringAttribute{
 						MarkdownDescription: `Dynamics URL`,
+						Computed:            true,
+					},
+					"tenant_id": schema.StringAttribute{
+						MarkdownDescription: `Directory (tenant) ID`,
 						Computed:            true,
 					},
 				},
@@ -63,7 +71,9 @@ func (d *MsdynamicsConnectionDataSource) Schema(ctx context.Context, req datasou
 }
 
 type MsdynamicsDataSourceConf struct {
+	Auth_method  string `mapstructure:"auth_method" tfsdk:"auth_method"`
 	Dynamics_url string `mapstructure:"dynamics_url" tfsdk:"dynamics_url"`
+	Tenant_id    string `mapstructure:"tenant_id" tfsdk:"tenant_id"`
 }
 
 func (d *MsdynamicsConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
@@ -101,7 +111,9 @@ func (d *MsdynamicsConnectionDataSource) Read(ctx context.Context, req datasourc
 
 	var diags diag.Diagnostics
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"auth_method":  types.StringType,
 		"dynamics_url": types.StringType,
+		"tenant_id":    types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

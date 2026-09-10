@@ -47,17 +47,17 @@ state before it will take effect on a destroy operation.
 
 #### Required
 
-- `auth_method` (String) Authentication Method Valid values: <code>access_key_and_secret</code> (Access Key and Secret), <code>iam_role</code> (IAM Role), <code>service_credentials</code> (Service-Specific Credentials). Default: <code>access_key_and_secret</code>.
-- `region` (String) AWS Region
+- `auth_method` (String) Authentication method Valid values: <code>access_key_and_secret</code> (Access Key and Secret), <code>iam_role</code> (IAM Role), <code>service_credentials</code> (Service-Specific Credentials). Default: <code>access_key_and_secret</code>.
+- `region` (String) AWS region
 
 #### Optional
 
-- `access_key_id` (String) AWS Access Key ID
+- `access_key_id` (String) AWS access key ID
 - `change_detection` (Boolean) Use Amazon Keyspaces CDC streams for bulk syncs Default: <code>false</code>.
-- `iam_role_arn` (String) IAM Role ARN
+- `iam_role_arn` (String) IAM role ARN
 - `managed_streams` (Boolean) Let Polytomic manage Amazon Keyspaces CDC stream settings
 - `password` (String, Sensitive)
-- `secret_access_key` (String, Sensitive) AWS Secret Access Key
+- `secret_access_key` (String, Sensitive) AWS secret access key
 - `username` (String)
 
 #### Read-Only

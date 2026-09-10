@@ -47,7 +47,7 @@ var S3Schema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"auth_mode": schema.StringAttribute{
-					MarkdownDescription: `Authentication Method
+					MarkdownDescription: `Authentication method
 
     How to authenticate with AWS. Defaults to Access Key and Secret Valid values: <code>access_key_and_secret</code> (Access Key and Secret), <code>iam_role</code> (IAM role). Default: <code>access_key_and_secret</code>.`,
 					Required:  true,
@@ -59,7 +59,7 @@ var S3Schema = schema.Schema{
 					},
 				},
 				"aws_access_key_id": schema.StringAttribute{
-					MarkdownDescription: `AWS Access Key ID
+					MarkdownDescription: `AWS access key ID
 
     Access Key ID with read/write access to a bucket.`,
 					Required:  false,
@@ -68,7 +68,7 @@ var S3Schema = schema.Schema{
 					Sensitive: false,
 				},
 				"aws_secret_access_key": schema.StringAttribute{
-					MarkdownDescription: `AWS Secret Access Key`,
+					MarkdownDescription: `AWS secret access key`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,
@@ -110,7 +110,7 @@ var S3Schema = schema.Schema{
 					Sensitive: false,
 				},
 				"event_queue_arn": schema.StringAttribute{
-					MarkdownDescription: `Event Queue ARN
+					MarkdownDescription: `Event queue ARN
 
     ARN of the SQS queue receiving S3 event notifications`,
 					Required:  false,
@@ -128,7 +128,7 @@ var S3Schema = schema.Schema{
 					Sensitive: false,
 				},
 				"iam_role_arn": schema.StringAttribute{
-					MarkdownDescription: `IAM Role ARN`,
+					MarkdownDescription: `IAM role ARN`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,
@@ -150,8 +150,17 @@ var S3Schema = schema.Schema{
 					Computed:  true,
 					Sensitive: false,
 				},
+				"propagate_file_deletions": schema.BoolAttribute{
+					MarkdownDescription: `Propagate file deletion events
+
+    When a file is deleted from the bucket, soft-delete the corresponding records in supported destinations on the next sync. Requires the record key to be captured from the file path.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
+				},
 				"s3_bucket_name": schema.StringAttribute{
-					MarkdownDescription: `S3 Bucket Name
+					MarkdownDescription: `S3 bucket name
 
     Bucket name (folder optional); ex: s3://polytomic/dataset`,
 					Required:  true,
@@ -160,7 +169,7 @@ var S3Schema = schema.Schema{
 					Sensitive: false,
 				},
 				"s3_bucket_region": schema.StringAttribute{
-					MarkdownDescription: `S3 Bucket Region`,
+					MarkdownDescription: `S3 bucket region`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
@@ -242,6 +251,7 @@ type S3Conf struct {
 	Iam_role_arn               string   `mapstructure:"iam_role_arn" tfsdk:"iam_role_arn"`
 	Is_directory_snapshot      bool     `mapstructure:"is_directory_snapshot" tfsdk:"is_directory_snapshot"`
 	Is_single_table            bool     `mapstructure:"is_single_table" tfsdk:"is_single_table"`
+	Propagate_file_deletions   bool     `mapstructure:"propagate_file_deletions" tfsdk:"propagate_file_deletions"`
 	S3_bucket_name             string   `mapstructure:"s3_bucket_name" tfsdk:"s3_bucket_name"`
 	S3_bucket_region           string   `mapstructure:"s3_bucket_region" tfsdk:"s3_bucket_region"`
 	Single_table_file_format   string   `mapstructure:"single_table_file_format" tfsdk:"single_table_file_format"`
@@ -336,6 +346,7 @@ func (r *S3ConnectionResource) Create(ctx context.Context, req resource.CreateRe
 		"iam_role_arn":               types.StringType,
 		"is_directory_snapshot":      types.BoolType,
 		"is_single_table":            types.BoolType,
+		"propagate_file_deletions":   types.BoolType,
 		"s3_bucket_name":             types.StringType,
 		"s3_bucket_region":           types.StringType,
 		"single_table_file_format":   types.StringType,
@@ -426,6 +437,7 @@ func (r *S3ConnectionResource) Read(ctx context.Context, req resource.ReadReques
 		"iam_role_arn":               types.StringType,
 		"is_directory_snapshot":      types.BoolType,
 		"is_single_table":            types.BoolType,
+		"propagate_file_deletions":   types.BoolType,
 		"s3_bucket_name":             types.StringType,
 		"s3_bucket_region":           types.StringType,
 		"single_table_file_format":   types.StringType,
@@ -526,6 +538,7 @@ func (r *S3ConnectionResource) Update(ctx context.Context, req resource.UpdateRe
 		"iam_role_arn":               types.StringType,
 		"is_directory_snapshot":      types.BoolType,
 		"is_single_table":            types.BoolType,
+		"propagate_file_deletions":   types.BoolType,
 		"s3_bucket_name":             types.StringType,
 		"s3_bucket_region":           types.StringType,
 		"single_table_file_format":   types.StringType,

@@ -55,7 +55,7 @@ state before it will take effect on a destroy operation.
 
 #### Required
 
-- `token` (String, Sensitive) Service Account Token
+- `token` (String, Sensitive) Service account token
 - `url` (String) URL of dbt Cloud instance e.g. https://cloud.getdbt.com
 
 

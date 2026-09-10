@@ -38,7 +38,7 @@ Read-Only:
 
 - `auth_method` (String) Authentication method Valid values: <code>apitoken</code> (API token), <code>clientcredentials</code> (Client credentials), <code>oauth</code> (OAuth). Default: <code>oauth</code>.
 - `custom_api_limits` (Boolean) Enforce custom API limits
-- `domain` (String) Zendesk Subdomain
+- `domain` (String) Zendesk subdomain
 - `email` (String)
 - `ratelimit_rpm` (Number) Maximum requests per minute
 

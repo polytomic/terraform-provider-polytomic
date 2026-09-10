@@ -36,6 +36,7 @@ data "polytomic_github_connection" "github" {
 
 Read-Only:
 
+- `auto_add_repositories` (Boolean) Automatically add new repositories
 - `repositories` (Attributes Set) (see [below for nested schema](#nestedatt--configuration--repositories))
 
 <a id="nestedatt--configuration--repositories"></a>

@@ -68,9 +68,9 @@ var DropboxSchema = schema.Schema{
 				},
 				"bucket": schema.StringAttribute{
 					MarkdownDescription: `Folder`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
 					Sensitive:           false,
 				},
 				"csv_has_headers": schema.BoolAttribute{

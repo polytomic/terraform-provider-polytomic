@@ -44,7 +44,7 @@ var AmplitudeSchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"api_key": schema.StringAttribute{
-					MarkdownDescription: `API Key`,
+					MarkdownDescription: `API key`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
@@ -54,7 +54,7 @@ var AmplitudeSchema = schema.Schema{
 					},
 				},
 				"secret_key": schema.StringAttribute{
-					MarkdownDescription: `Secret Key`,
+					MarkdownDescription: `Secret key`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,

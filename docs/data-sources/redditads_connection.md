@@ -38,7 +38,7 @@ Read-Only:
 
 - `accounts` (Attributes Set) (see [below for nested schema](#nestedatt--configuration--accounts))
 - `connected_user` (String) Connected user's email
-- `pixel_id` (String) Conversion Pixel ID
+- `pixel_id` (String) Conversion pixel ID
 
     Required if syncing conversion events to Reddit Ads.
 

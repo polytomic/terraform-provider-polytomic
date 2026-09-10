@@ -51,7 +51,7 @@ var AppcuesSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"api_key": schema.StringAttribute{
-					MarkdownDescription: `API Key`,
+					MarkdownDescription: `API key`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
@@ -61,7 +61,7 @@ var AppcuesSchema = schema.Schema{
 					},
 				},
 				"api_secret": schema.StringAttribute{
-					MarkdownDescription: `API Secret`,
+					MarkdownDescription: `API secret`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,

@@ -44,7 +44,7 @@ var DbtcloudSchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"token": schema.StringAttribute{
-					MarkdownDescription: `Service Account Token`,
+					MarkdownDescription: `Service account token`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,

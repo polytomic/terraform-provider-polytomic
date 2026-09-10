@@ -52,7 +52,7 @@ func (d *MotherduckConnectionDataSource) Schema(ctx context.Context, req datasou
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"aws_access_key_id": schema.StringAttribute{
-						MarkdownDescription: `AWS Access Key ID (destinations only)
+						MarkdownDescription: `AWS access key ID (destinations only)
 
     Access Key ID with read/write access to a bucket.`,
 						Computed: true,
@@ -66,13 +66,13 @@ func (d *MotherduckConnectionDataSource) Schema(ctx context.Context, req datasou
 						Computed:            true,
 					},
 					"s3_bucket_name": schema.StringAttribute{
-						MarkdownDescription: `S3 Bucket Name (destinations only)
+						MarkdownDescription: `S3 bucket name (destinations only)
 
     Bucket name (folder optional); ex: s3://polytomic/dataset`,
 						Computed: true,
 					},
 					"s3_bucket_region": schema.StringAttribute{
-						MarkdownDescription: `S3 Bucket Region (destinations only)`,
+						MarkdownDescription: `S3 bucket region (destinations only)`,
 						Computed:            true,
 					},
 				},

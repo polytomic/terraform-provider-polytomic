@@ -44,7 +44,7 @@ var PredictleadsSchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"api_key": schema.StringAttribute{
-					MarkdownDescription: `API Key`,
+					MarkdownDescription: `API key`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
@@ -54,7 +54,7 @@ var PredictleadsSchema = schema.Schema{
 					},
 				},
 				"api_token": schema.StringAttribute{
-					MarkdownDescription: `API Token`,
+					MarkdownDescription: `API token`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,

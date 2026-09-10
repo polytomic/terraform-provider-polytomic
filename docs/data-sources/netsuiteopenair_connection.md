@@ -36,9 +36,9 @@ data "polytomic_netsuiteopenair_connection" "netsuiteopenair" {
 
 Read-Only:
 
-- `api_namespace` (String) API Namespace
+- `api_namespace` (String) API namespace
 - `company_id` (String) Company ID
-- `per_day_rate_limit` (Number) Per Day Rate Limit
-- `per_minute_rate_limit` (Number) Per Minute Rate Limit
+- `per_day_rate_limit` (Number) Per day rate limit
+- `per_minute_rate_limit` (Number) Per minute rate limit
 
 

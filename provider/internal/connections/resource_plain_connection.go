@@ -44,7 +44,7 @@ var PlainSchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"api_key": schema.StringAttribute{
-					MarkdownDescription: `API Key
+					MarkdownDescription: `API key
 
     The API key for your Plain machine user.`,
 					Required:  true,
@@ -56,7 +56,7 @@ var PlainSchema = schema.Schema{
 					},
 				},
 				"workspace_public_name": schema.StringAttribute{
-					MarkdownDescription: `Workspace Name`,
+					MarkdownDescription: `Workspace name`,
 					Required:            false,
 					Optional:            false,
 					Computed:            true,

@@ -52,7 +52,7 @@ func (d *ChorusConnectionDataSource) Schema(ctx context.Context, req datasource.
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"auth_method": schema.StringAttribute{
-						MarkdownDescription: `Authentication method Valid values: <code>basic</code> (Basic Auth), <code>api_key</code> (API Key). Default: <code>basic</code>.`,
+						MarkdownDescription: `Authentication method Valid values: <code>basic</code> (Basic auth), <code>api_key</code> (API key). Default: <code>basic</code>.`,
 						Computed:            true,
 					},
 					"username": schema.StringAttribute{

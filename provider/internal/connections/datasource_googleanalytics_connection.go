@@ -52,13 +52,17 @@ func (d *GoogleanalyticsConnectionDataSource) Schema(ctx context.Context, req da
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"auth_method": schema.StringAttribute{
-						MarkdownDescription: `Authentication method Valid values: <code>oauth</code> (OAuth), <code>jwt</code> (Service Account). Default: <code>oauth</code>.`,
+						MarkdownDescription: `Authentication method Valid values: <code>oauth</code> (OAuth), <code>jwt</code> (Service account). Default: <code>oauth</code>.`,
+						Computed:            true,
+					},
+					"auto_add_properties": schema.BoolAttribute{
+						MarkdownDescription: `Automatically add new properties`,
 						Computed:            true,
 					},
 					"custom_reports": schema.StringAttribute{
 						MarkdownDescription: `Custom reports
 
-    One report per line. Format is a report name followed by a comma-separated list of fields. e.g. myReport:field1`,
+    One report per line. Format is a report name followed by a comma-separated list of fields. e.g. newUsersByDay:date`,
 						Computed: true,
 					},
 					"properties": schema.SetNestedAttribute{
@@ -89,9 +93,10 @@ func (d *GoogleanalyticsConnectionDataSource) Schema(ctx context.Context, req da
 }
 
 type GoogleanalyticsDataSourceConf struct {
-	Auth_method    string `mapstructure:"auth_method" tfsdk:"auth_method"`
-	Custom_reports string `mapstructure:"custom_reports" tfsdk:"custom_reports"`
-	Properties     []struct {
+	Auth_method         string `mapstructure:"auth_method" tfsdk:"auth_method"`
+	Auto_add_properties bool   `mapstructure:"auto_add_properties" tfsdk:"auto_add_properties"`
+	Custom_reports      string `mapstructure:"custom_reports" tfsdk:"custom_reports"`
+	Properties          []struct {
 		Label string `mapstructure:"label" tfsdk:"label"`
 		Value string `mapstructure:"value" tfsdk:"value"`
 	} `mapstructure:"properties" tfsdk:"properties"`
@@ -133,8 +138,9 @@ func (d *GoogleanalyticsConnectionDataSource) Read(ctx context.Context, req data
 
 	var diags diag.Diagnostics
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"auth_method":    types.StringType,
-		"custom_reports": types.StringType,
+		"auth_method":         types.StringType,
+		"auto_add_properties": types.BoolType,
+		"custom_reports":      types.StringType,
 		"properties": types.SetType{
 			ElemType: types.ObjectType{
 				AttrTypes: map[string]attr.Type{

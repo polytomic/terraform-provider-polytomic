@@ -52,11 +52,11 @@ func (d *TigrisConnectionDataSource) Schema(ctx context.Context, req datasource.
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"aws_access_key_id": schema.StringAttribute{
-						MarkdownDescription: `Access Key ID`,
+						MarkdownDescription: `Access key ID`,
 						Computed:            true,
 					},
 					"bucket_name": schema.StringAttribute{
-						MarkdownDescription: `Bucket Name
+						MarkdownDescription: `Bucket name
 
     Bucket name (folder optional); ex: polytomic/dataset`,
 						Computed: true,

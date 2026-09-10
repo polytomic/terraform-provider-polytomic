@@ -54,7 +54,7 @@ var YotpoSchema = schema.Schema{
 					},
 				},
 				"store_id": schema.StringAttribute{
-					MarkdownDescription: `App Key
+					MarkdownDescription: `App key
 
     Also known as Client ID or Store ID.`,
 					Required:  true,

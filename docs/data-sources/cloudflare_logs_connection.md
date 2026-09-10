@@ -37,10 +37,10 @@ data "polytomic_cloudflare_logs_connection" "cloudflare_logs" {
 Read-Only:
 
 - `account_id` (String) Account ID
-- `aws_access_key_id` (String) Access Key ID
+- `aws_access_key_id` (String) Access key ID
 
     Access Key ID with read/write access to a bucket.
-- `bucket_name` (String) Bucket Name
+- `bucket_name` (String) Bucket name
 
     Bucket name (folder optional); ex: polytomic/dataset
 

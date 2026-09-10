@@ -1,0 +1,1 @@
+{"$schema":"https://json-schema.org/draft/2020-12/schema","properties":{"company_id":{"type":"string","title":"Company ID"},"api_key":{"type":"string","title":"API key","sensitive":true}},"type":"object","required":["company_id","api_key"]}

@@ -36,7 +36,7 @@ data "polytomic_sftp_connection" "sftp" {
 
 Read-Only:
 
-- `auth_mode` (String) Authentication Method Valid values: <code>private_key</code> (Private key), <code>password</code> (Password). Default: <code>private_key</code>.
+- `auth_mode` (String) Authentication method Valid values: <code>private_key</code> (Private key), <code>password</code> (Password). Default: <code>private_key</code>.
 - `is_single_table` (Boolean) Files are time-based snapshots
 
     Treat the files as a single table.

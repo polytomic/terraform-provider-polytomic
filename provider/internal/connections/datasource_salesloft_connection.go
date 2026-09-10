@@ -52,7 +52,7 @@ func (d *SalesloftConnectionDataSource) Schema(ctx context.Context, req datasour
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"auth_method": schema.StringAttribute{
-						MarkdownDescription: `Authentication method Valid values: <code>oauth</code> (OAuth), <code>api_key</code> (API Key). Default: <code>oauth</code>.`,
+						MarkdownDescription: `Authentication method Valid values: <code>oauth</code> (OAuth), <code>api_key</code> (API key). Default: <code>oauth</code>.`,
 						Computed:            true,
 					},
 					"connected_user": schema.StringAttribute{

@@ -57,7 +57,7 @@ state before it will take effect on a destroy operation.
 
 #### Required
 
-- `auth_mode` (String) Authentication Method Valid values: <code>private_key</code> (Private key), <code>password</code> (Password). Default: <code>private_key</code>.
+- `auth_mode` (String) Authentication method Valid values: <code>private_key</code> (Private key), <code>password</code> (Password). Default: <code>private_key</code>.
 
 #### Optional
 

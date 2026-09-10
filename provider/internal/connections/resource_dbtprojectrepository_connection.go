@@ -52,9 +52,9 @@ var DbtprojectrepositorySchema = schema.Schema{
 				},
 				"commit_exposures": schema.BoolAttribute{
 					MarkdownDescription: `Commit exposures file`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
 					Sensitive:           false,
 				},
 				"connected_user": schema.StringAttribute{
@@ -89,9 +89,9 @@ var DbtprojectrepositorySchema = schema.Schema{
 				},
 				"oauth_access_token": schema.StringAttribute{
 					MarkdownDescription: ``,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
 					Sensitive:           true,
 					PlanModifiers: []planmodifier.String{
 						stringplanmodifier.UseStateForUnknown(),
@@ -111,9 +111,9 @@ var DbtprojectrepositorySchema = schema.Schema{
 					MarkdownDescription: `dbt project repository
 
     Only repositories with the Polytomic app installed will be listed.`,
-					Required:  true,
-					Optional:  false,
-					Computed:  false,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
 					Sensitive: false,
 				},
 			},

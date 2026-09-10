@@ -44,7 +44,7 @@ var Gainsight_csSchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"access_key": schema.StringAttribute{
-					MarkdownDescription: `Access Key
+					MarkdownDescription: `Access key
 
     Gainsight CS API Access Key`,
 					Required:  true,

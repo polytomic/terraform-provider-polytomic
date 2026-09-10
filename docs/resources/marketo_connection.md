@@ -57,8 +57,8 @@ state before it will take effect on a destroy operation.
 #### Required
 
 - `client_id` (String) Client ID
-- `client_secret` (String, Sensitive) Client Secret
-- `rest_endpoint` (String) REST Endpoint
+- `client_secret` (String, Sensitive) Client secret
+- `rest_endpoint` (String) REST endpoint
 
 #### Optional
 

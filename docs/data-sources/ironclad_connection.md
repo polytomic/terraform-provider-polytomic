@@ -36,7 +36,7 @@ data "polytomic_ironclad_connection" "ironclad" {
 
 Read-Only:
 
-- `auth_method` (String) Authentication method Valid values: <code>oauth</code> (OAuth Client Credentials), <code>api_key</code> (API Key). Default: <code>oauth</code>.
+- `auth_method` (String) Authentication method Valid values: <code>oauth</code> (OAuth client credentials), <code>api_key</code> (API key). Default: <code>oauth</code>.
 - `client_id` (String) Client ID
 - `environment` (String) Valid values: <code>prod</code> (Prod), <code>demo</code> (Demo). Default: <code>prod</code>.
 - `user_as_email` (String) Ironclad user email

@@ -56,7 +56,7 @@ func (d *MongodbConnectionDataSource) Schema(ctx context.Context, req datasource
 						Computed:            true,
 					},
 					"database": schema.StringAttribute{
-						MarkdownDescription: `Auth Database`,
+						MarkdownDescription: `Auth database`,
 						Computed:            true,
 					},
 					"hosts": schema.StringAttribute{
@@ -64,7 +64,7 @@ func (d *MongodbConnectionDataSource) Schema(ctx context.Context, req datasource
 						Computed:            true,
 					},
 					"params": schema.StringAttribute{
-						MarkdownDescription: `Additional Parameters
+						MarkdownDescription: `Additional parameters
 
     Additional connection parameters, formatted as a query string`,
 						Computed: true,

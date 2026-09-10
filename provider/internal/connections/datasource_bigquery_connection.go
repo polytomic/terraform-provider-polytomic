@@ -52,11 +52,15 @@ func (d *BigqueryConnectionDataSource) Schema(ctx context.Context, req datasourc
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"auth_method": schema.StringAttribute{
-						MarkdownDescription: `Authentication method Valid values: <code>service_account_key</code> (Service Account Key), <code>workload_identity_federation</code> (Workload Identity Federation), <code>application_default_credentials</code> (Application Default Credentials). Default: <code>service_account_key</code>.`,
+						MarkdownDescription: `Authentication method Valid values: <code>service_account_key</code> (Service account key), <code>workload_identity_federation</code> (Workload Identity Federation), <code>application_default_credentials</code> (Application Default Credentials). Default: <code>service_account_key</code>.`,
 						Computed:            true,
 					},
 					"bucket": schema.StringAttribute{
 						MarkdownDescription: `Google Cloud Storage bucket`,
+						Computed:            true,
+					},
+					"bulk_sync_staging_schema": schema.StringAttribute{
+						MarkdownDescription: `Staging schema name`,
 						Computed:            true,
 					},
 					"client_email": schema.StringAttribute{
@@ -81,8 +85,12 @@ func (d *BigqueryConnectionDataSource) Schema(ctx context.Context, req datasourc
 						MarkdownDescription: `Write object and array values as JSON Default: <code>false</code>.`,
 						Computed:            true,
 					},
+					"use_bulk_sync_staging_schema": schema.BoolAttribute{
+						MarkdownDescription: `Use custom bulk sync staging schema Default: <code>false</code>.`,
+						Computed:            true,
+					},
 					"use_extract": schema.BoolAttribute{
-						MarkdownDescription: `Use Extract for bulk sync from BigQuery`,
+						MarkdownDescription: `Use extract for bulk sync from BigQuery`,
 						Computed:            true,
 					},
 					"wif_project_id": schema.StringAttribute{
@@ -97,15 +105,17 @@ func (d *BigqueryConnectionDataSource) Schema(ctx context.Context, req datasourc
 }
 
 type BigqueryDataSourceConf struct {
-	Auth_method               string `mapstructure:"auth_method" tfsdk:"auth_method"`
-	Bucket                    string `mapstructure:"bucket" tfsdk:"bucket"`
-	Client_email              string `mapstructure:"client_email" tfsdk:"client_email"`
-	Location                  string `mapstructure:"location" tfsdk:"location"`
-	Override_project_id       string `mapstructure:"override_project_id" tfsdk:"override_project_id"`
-	Project_id                string `mapstructure:"project_id" tfsdk:"project_id"`
-	Structured_values_as_json bool   `mapstructure:"structured_values_as_json" tfsdk:"structured_values_as_json"`
-	Use_extract               bool   `mapstructure:"use_extract" tfsdk:"use_extract"`
-	Wif_project_id            string `mapstructure:"wif_project_id" tfsdk:"wif_project_id"`
+	Auth_method                  string `mapstructure:"auth_method" tfsdk:"auth_method"`
+	Bucket                       string `mapstructure:"bucket" tfsdk:"bucket"`
+	Bulk_sync_staging_schema     string `mapstructure:"bulk_sync_staging_schema" tfsdk:"bulk_sync_staging_schema"`
+	Client_email                 string `mapstructure:"client_email" tfsdk:"client_email"`
+	Location                     string `mapstructure:"location" tfsdk:"location"`
+	Override_project_id          string `mapstructure:"override_project_id" tfsdk:"override_project_id"`
+	Project_id                   string `mapstructure:"project_id" tfsdk:"project_id"`
+	Structured_values_as_json    bool   `mapstructure:"structured_values_as_json" tfsdk:"structured_values_as_json"`
+	Use_bulk_sync_staging_schema bool   `mapstructure:"use_bulk_sync_staging_schema" tfsdk:"use_bulk_sync_staging_schema"`
+	Use_extract                  bool   `mapstructure:"use_extract" tfsdk:"use_extract"`
+	Wif_project_id               string `mapstructure:"wif_project_id" tfsdk:"wif_project_id"`
 }
 
 func (d *BigqueryConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
@@ -143,15 +153,17 @@ func (d *BigqueryConnectionDataSource) Read(ctx context.Context, req datasource.
 
 	var diags diag.Diagnostics
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"auth_method":               types.StringType,
-		"bucket":                    types.StringType,
-		"client_email":              types.StringType,
-		"location":                  types.StringType,
-		"override_project_id":       types.StringType,
-		"project_id":                types.StringType,
-		"structured_values_as_json": types.BoolType,
-		"use_extract":               types.BoolType,
-		"wif_project_id":            types.StringType,
+		"auth_method":                  types.StringType,
+		"bucket":                       types.StringType,
+		"bulk_sync_staging_schema":     types.StringType,
+		"client_email":                 types.StringType,
+		"location":                     types.StringType,
+		"override_project_id":          types.StringType,
+		"project_id":                   types.StringType,
+		"structured_values_as_json":    types.BoolType,
+		"use_bulk_sync_staging_schema": types.BoolType,
+		"use_extract":                  types.BoolType,
+		"wif_project_id":               types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

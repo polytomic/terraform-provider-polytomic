@@ -53,7 +53,7 @@ state before it will take effect on a destroy operation.
 
 #### Required
 
-- `client_name` (String) Client Name
+- `client_name` (String) Client name
 - `company_id` (String) Company ID
 - `password` (String, Sensitive)
 - `username` (String)

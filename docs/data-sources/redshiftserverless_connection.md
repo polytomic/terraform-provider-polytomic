@@ -44,13 +44,13 @@ Read-Only:
 - `database` (String)
 - `endpoint` (String) Redshift Serverless endpoint
 - `external_id` (String) External ID
-- `iam_role_arn` (String) IAM Role ARN
+- `iam_role_arn` (String) IAM role ARN
 - `override_endpoint` (Boolean) Override Redshift Data API endpoint
 - `region` (String)
 - `s3_bucket_name` (String) S3 bucket name (destination/unload support only)
 - `s3_bucket_region` (String) S3 bucket region (destination/unload support only)
 - `use_bulk_sync_staging_schema` (Boolean) Use custom bulk sync staging schema Default: <code>false</code>.
-- `use_unload` (Boolean) Read data using Unload
+- `use_unload` (Boolean) Read data using unload
 - `workgroup` (String)
 
 

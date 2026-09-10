@@ -68,6 +68,13 @@ var GoogleadsSchema = schema.Schema{
 						},
 					},
 				},
+				"auto_add_accounts": schema.BoolAttribute{
+					MarkdownDescription: `Automatically add new accounts`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
 				"blanket_user_consent": schema.BoolAttribute{
 					MarkdownDescription: `All transmitted users consented to ad personalization and information sharing with Google Ads
 
@@ -163,6 +170,7 @@ type GoogleadsConf struct {
 		Label string `mapstructure:"label" tfsdk:"label"`
 		Value string `mapstructure:"value" tfsdk:"value"`
 	} `mapstructure:"accounts" tfsdk:"accounts"`
+	Auto_add_accounts     bool   `mapstructure:"auto_add_accounts" tfsdk:"auto_add_accounts"`
 	Blanket_user_consent  bool   `mapstructure:"blanket_user_consent" tfsdk:"blanket_user_consent"`
 	Client_id             string `mapstructure:"client_id" tfsdk:"client_id"`
 	Client_secret         string `mapstructure:"client_secret" tfsdk:"client_secret"`
@@ -254,6 +262,7 @@ func (r *GoogleadsConnectionResource) Create(ctx context.Context, req resource.C
 				},
 			},
 		},
+		"auto_add_accounts":     types.BoolType,
 		"blanket_user_consent":  types.BoolType,
 		"client_id":             types.StringType,
 		"client_secret":         types.StringType,
@@ -339,6 +348,7 @@ func (r *GoogleadsConnectionResource) Read(ctx context.Context, req resource.Rea
 				},
 			},
 		},
+		"auto_add_accounts":     types.BoolType,
 		"blanket_user_consent":  types.BoolType,
 		"client_id":             types.StringType,
 		"client_secret":         types.StringType,
@@ -434,6 +444,7 @@ func (r *GoogleadsConnectionResource) Update(ctx context.Context, req resource.U
 				},
 			},
 		},
+		"auto_add_accounts":     types.BoolType,
 		"blanket_user_consent":  types.BoolType,
 		"client_id":             types.StringType,
 		"client_secret":         types.StringType,

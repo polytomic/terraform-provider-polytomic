@@ -36,27 +36,31 @@ data "polytomic_clickhouse_connection" "clickhouse" {
 
 Read-Only:
 
-- `auth_mode` (String) AWS Authentication Method
+- `auth_mode` (String) AWS authentication method
 
     How to authenticate with AWS for the staging bucket Valid values: <code>access_key_and_secret</code> (Access Key and Secret), <code>iam_role</code> (IAM role). Default: <code>access_key_and_secret</code>.
-- `aws_access_key_id` (String) AWS Access Key ID (destinations only)
+- `aws_access_key_id` (String) AWS access key ID (destinations only)
 - `aws_user` (String) User ARN (destinations only)
-- `azure_account_name` (String) Storage Account Name (destinations only)
-- `cloud_provider` (String) Cloud Provider (destination support only) Valid values: <code>aws</code> (AWS), <code>azure</code> (Azure).
-- `container_name` (String) Storage Container Name (destinations only)
+- `azure_account_name` (String) Storage account name (destinations only)
+- `cloud_provider` (String) Cloud provider (destination support only) Valid values: <code>aws</code> (AWS), <code>azure</code> (Azure), <code>gcp</code> (Google Cloud).
+- `container_name` (String) Storage container name (destinations only)
 
     Container used for staging data load files (may be "container" or "container/prefix")
 - `database` (String)
 - `external_id` (String) External ID
 
     External ID for the IAM role
+- `gcs_bucket_name` (String) GCS bucket name (destinations only)
+
+    Bucket used for staging data (may be "bucket" or "bucket/prefix")
+- `gcs_hmac_access_id` (String) HMAC access ID (destinations only)
 - `hostname` (String)
-- `iam_role_arn` (String) IAM Role ARN
+- `iam_role_arn` (String) IAM role ARN
 - `port` (Number) Default: <code>9440</code>.
-- `s3_bucket_name` (String) S3 Bucket Name (destinations only)
+- `s3_bucket_name` (String) S3 bucket name (destinations only)
 
     Name of bucket used for staging data load files
-- `s3_bucket_region` (String) S3 Bucket Region (destinations only)
+- `s3_bucket_region` (String) S3 bucket region (destinations only)
 - `skip_verify` (Boolean) Skip certificate verification Default: <code>true</code>.
 - `ssh` (Boolean) Connect over SSH tunnel
 - `ssh_host` (String) SSH host

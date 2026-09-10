@@ -47,7 +47,7 @@ var SftpSchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"auth_mode": schema.StringAttribute{
-					MarkdownDescription: `Authentication Method Valid values: <code>private_key</code> (Private key), <code>password</code> (Password). Default: <code>private_key</code>.`,
+					MarkdownDescription: `Authentication method Valid values: <code>private_key</code> (Private key), <code>password</code> (Password). Default: <code>private_key</code>.`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,

@@ -55,7 +55,7 @@ state before it will take effect on a destroy operation.
 
 #### Required
 
-- `apikey` (String, Sensitive) API Key
+- `apikey` (String, Sensitive) API key
 - `subdomain` (String) e.g. 'polytomic' if your helpdesk is at https://polytomic.freshdesk.com
 
 

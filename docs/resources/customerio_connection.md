@@ -56,9 +56,9 @@ state before it will take effect on a destroy operation.
 
 #### Required
 
-- `app_api_key` (String, Sensitive) App API Key
+- `app_api_key` (String, Sensitive) App API key
 - `site_id` (String) Site ID
-- `tracking_api_key` (String, Sensitive) Tracking API Key
+- `tracking_api_key` (String, Sensitive) Tracking API key
 
 #### Read-Only
 

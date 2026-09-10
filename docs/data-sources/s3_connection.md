@@ -36,10 +36,10 @@ data "polytomic_s3_connection" "s3" {
 
 Read-Only:
 
-- `auth_mode` (String) Authentication Method
+- `auth_mode` (String) Authentication method
 
     How to authenticate with AWS. Defaults to Access Key and Secret Valid values: <code>access_key_and_secret</code> (Access Key and Secret), <code>iam_role</code> (IAM role). Default: <code>access_key_and_secret</code>.
-- `aws_access_key_id` (String) AWS Access Key ID
+- `aws_access_key_id` (String) AWS access key ID
 
     Access Key ID with read/write access to a bucket.
 - `aws_user` (String) User ARN
@@ -50,21 +50,24 @@ Read-Only:
 - `enable_event_notifications` (Boolean) Enable event notifications
 
     Enable S3 event notifications for incremental sync
-- `event_queue_arn` (String) Event Queue ARN
+- `event_queue_arn` (String) Event queue ARN
 
     ARN of the SQS queue receiving S3 event notifications
 - `external_id` (String) External ID
 
     External ID for the IAM role
-- `iam_role_arn` (String) IAM Role ARN
+- `iam_role_arn` (String) IAM role ARN
 - `is_directory_snapshot` (Boolean) Multi-directory multi-table Default: <code>false</code>.
 - `is_single_table` (Boolean) Files are time-based snapshots
 
     Treat the files as a single table. Default: <code>false</code>.
-- `s3_bucket_name` (String) S3 Bucket Name
+- `propagate_file_deletions` (Boolean) Propagate file deletion events
+
+    When a file is deleted from the bucket, soft-delete the corresponding records in supported destinations on the next sync. Requires the record key to be captured from the file path.
+- `s3_bucket_name` (String) S3 bucket name
 
     Bucket name (folder optional); ex: s3://polytomic/dataset
-- `s3_bucket_region` (String) S3 Bucket Region
+- `s3_bucket_region` (String) S3 bucket region
 - `single_table_file_format` (String) File format Valid values: <code>csv</code> (CSV), <code>json</code> (JSON), <code>parquet</code> (Parquet). Default: <code>csv</code>.
 - `single_table_file_formats` (Set of String) File formats
 

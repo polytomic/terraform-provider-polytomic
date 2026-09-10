@@ -94,7 +94,7 @@ var RedshiftserverlessSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"iam_role_arn": schema.StringAttribute{
-					MarkdownDescription: `IAM Role ARN`,
+					MarkdownDescription: `IAM role ARN`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
@@ -136,7 +136,7 @@ var RedshiftserverlessSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"use_unload": schema.BoolAttribute{
-					MarkdownDescription: `Read data using Unload`,
+					MarkdownDescription: `Read data using unload`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,
