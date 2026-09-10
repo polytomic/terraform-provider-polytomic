@@ -86,7 +86,9 @@ func (r *connectionSchemaPrimaryKeysResource) Schema(ctx context.Context, req re
 			"field_ids": schema.SetAttribute{
 				MarkdownDescription: "IDs of the fields that make up the schema's primary key. " +
 					"Fields the source reports as keys are unmarked unless listed here. " +
-					"These IDs can be found using the polytomic_connection_schema data source.",
+					"These IDs can be found using the polytomic_connection_schema data source. " +
+					"To make a field added with `polytomic_connection_schema_field` a key, reference its `field_id` " +
+					"so that Terraform adds the field first.",
 				ElementType: types.StringType,
 				Required:    true,
 				Validators: []validator.Set{

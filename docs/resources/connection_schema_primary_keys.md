@@ -75,7 +75,7 @@ resource "polytomic_connection_schema_primary_keys" "multi_field_pk" {
 ### Required
 
 - `connection_id` (String) Connection ID
-- `field_ids` (Set of String) IDs of the fields that make up the schema's primary key. Fields the source reports as keys are unmarked unless listed here. These IDs can be found using the polytomic_connection_schema data source.
+- `field_ids` (Set of String) IDs of the fields that make up the schema's primary key. Fields the source reports as keys are unmarked unless listed here. These IDs can be found using the polytomic_connection_schema data source. To make a field added with `polytomic_connection_schema_field` a key, reference its `field_id` so that Terraform adds the field first.
 - `schema_id` (String) Schema ID
 
 ### Optional

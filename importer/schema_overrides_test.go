@@ -140,7 +140,8 @@ func TestSchemaOverridesGenerate(t *testing.T) {
 		{ID: pointer.To("shop.orders"), Fields: []*polytomic.SchemaField{
 			{ID: pointer.To("id"), IsPrimaryKey: no, SourcePrimaryKey: yes, PrimaryKeyOverride: no},
 			{ID: pointer.To("order_no"), IsPrimaryKey: yes, SourcePrimaryKey: no, PrimaryKeyOverride: yes},
-			{ID: pointer.To("city"), Name: pointer.To("City"), Type: &stringType, Path: pointer.To("$.address.city"), UserManaged: yes, SourcePrimaryKey: no},
+			{ID: pointer.To("city"), Name: pointer.To("City"), Type: &stringType, Path: pointer.To("$.address.city"), UserManaged: yes,
+				IsPrimaryKey: yes, SourcePrimaryKey: no, PrimaryKeyOverride: yes},
 			{ID: pointer.To("total"), Name: pointer.To("Total"), Type: &numberType, UserManaged: yes, SourcePrimaryKey: no,
 				TypeSpec: pointer.To[any]([]any{"decimal", map[string]any{"precision": 12.0, "scale": 2.0}})},
 			{ID: pointer.To("tags"), Name: pointer.To("Tags"), Type: &arrayType, UserManaged: yes, SourcePrimaryKey: no,
@@ -148,7 +149,8 @@ func TestSchemaOverridesGenerate(t *testing.T) {
 			{ID: pointer.To("price/unit"), Name: pointer.To("Price per unit"), Type: &numberType, UserManaged: yes, SourcePrimaryKey: no},
 		}},
 		{ID: pointer.To("exports/2026 orders.csv"), Fields: []*polytomic.SchemaField{
-			{ID: pointer.To("total"), Name: pointer.To("total"), Type: &stringType, UserManaged: yes, SourcePrimaryKey: no},
+			{ID: pointer.To("total"), Name: pointer.To("total"), Type: &stringType, UserManaged: yes,
+				IsPrimaryKey: yes, SourcePrimaryKey: no, PrimaryKeyOverride: yes},
 		}},
 	})
 
@@ -163,7 +165,9 @@ func TestSchemaOverridesGenerate(t *testing.T) {
 
 	for _, want := range []string{
 		`resource "polytomic_connection_schema_primary_keys" "orders_shop_orders" {`,
-		`field_ids\s+= \["order_no"\]`,
+		// Keys reference the exported fields in the same schema.
+		`field_ids\s+= \[polytomic_connection_schema_field\.orders_shop_orders_city\.field_id, "order_no"\]`,
+		`field_ids\s+= \[polytomic_connection_schema_field\.orders_exports_2026_orders_csv_total\.field_id\]`,
 		`resource "polytomic_connection_schema_field" "orders_shop_orders_city" {`,
 		`connection_id\s+= polytomic_mongodb_connection\.orders\.id`,
 		`organization\s+= local\.organization_id`,
@@ -181,7 +185,8 @@ func TestSchemaOverridesGenerate(t *testing.T) {
 		t.Errorf("connection ID was not replaced with a reference:\n%s", tf.String())
 	}
 
-	wantImports := "terraform import polytomic_connection_schema_primary_keys.orders_shop_orders org-1/" + connectionID + "/shop.orders\n" +
+	wantImports := "terraform import polytomic_connection_schema_primary_keys.orders_exports_2026_orders_csv 'org-1/" + connectionID + "/exports/2026 orders.csv'\n" +
+		"terraform import polytomic_connection_schema_primary_keys.orders_shop_orders org-1/" + connectionID + "/shop.orders\n" +
 		"terraform import polytomic_connection_schema_field.orders_exports_2026_orders_csv_total 'org-1/" + connectionID + "/exports/2026 orders.csv/total'\n" +
 		"terraform import polytomic_connection_schema_field.orders_shop_orders_city org-1/" + connectionID + "/shop.orders/city\n" +
 		"terraform import polytomic_connection_schema_field.orders_shop_orders_price_unit 'org-1/" + connectionID + "/shop.orders/price%2Funit'\n" +

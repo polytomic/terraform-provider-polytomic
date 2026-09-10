@@ -161,6 +161,17 @@ func (s *SchemaOverrides) GenerateTerraformFiles(ctx context.Context, writer io.
 		return fmt.Errorf("failed to create schema validator: %w", err)
 	}
 
+	// Primary keys reference the exported fields they include, so Terraform
+	// adds a field before making it a key.
+	fieldRefs := make(map[[3]string]hcl.Traversal, len(s.Fields))
+	for name, o := range s.Fields {
+		fieldRefs[[3]string{o.ConnectionID, o.SchemaID, pointer.GetString(o.Field.ID)}] = hcl.Traversal{
+			hcl.TraverseRoot{Name: SchemaFieldResource},
+			hcl.TraverseAttr{Name: name},
+			hcl.TraverseAttr{Name: "field_id"},
+		}
+	}
+
 	for _, name := range sortedKeys(s.PrimaryKeys) {
 		pk := s.PrimaryKeys[name]
 		err := pkValidator.ValidateMapping(map[string]interface{}{
@@ -172,9 +183,13 @@ func (s *SchemaOverrides) GenerateTerraformFiles(ctx context.Context, writer io.
 			return fmt.Errorf("schema validation failed for primary keys of schema '%s': %w", pk.SchemaID, err)
 		}
 
-		fieldIDs := make([]cty.Value, len(pk.FieldIDs))
+		fieldIDs := make([]hclwrite.Tokens, len(pk.FieldIDs))
 		for i, id := range pk.FieldIDs {
-			fieldIDs[i] = cty.StringVal(id)
+			if ref, ok := fieldRefs[[3]string{pk.ConnectionID, pk.SchemaID, id}]; ok {
+				fieldIDs[i] = hclwrite.TokensForTraversal(ref)
+			} else {
+				fieldIDs[i] = hclwrite.TokensForValue(cty.StringVal(id))
+			}
 		}
 
 		hclFile := hclwrite.NewEmptyFile()
@@ -183,7 +198,7 @@ func (s *SchemaOverrides) GenerateTerraformFiles(ctx context.Context, writer io.
 		block.SetAttributeValue("connection_id", cty.StringVal(pk.ConnectionID))
 		setOrganizationLocal(block)
 		block.SetAttributeValue("schema_id", cty.StringVal(pk.SchemaID))
-		block.SetAttributeValue("field_ids", cty.ListVal(fieldIDs))
+		block.SetAttributeRaw("field_ids", hclwrite.TokensForTuple(fieldIDs))
 		body.AppendNewline()
 
 		if _, err := writer.Write(hclwrite.Format(ReplaceRefs(hclFile.Bytes(), refs))); err != nil {
