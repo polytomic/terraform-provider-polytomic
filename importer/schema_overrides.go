@@ -269,7 +269,7 @@ func (s *SchemaOverrides) GenerateImports(ctx context.Context, writer io.Writer)
 		o := s.Fields[name]
 		fmt.Fprintf(writer, "terraform import %s.%s %s\n",
 			SchemaFieldResource, name,
-			shellQuote(strings.Join([]string{s.organizationID, o.ConnectionID, o.SchemaID, pointer.GetString(o.Field.ID)}, "/")))
+			shellQuote(provider.SchemaFieldResourceID(s.organizationID, o.ConnectionID, o.SchemaID, pointer.GetString(o.Field.ID))))
 	}
 	return nil
 }

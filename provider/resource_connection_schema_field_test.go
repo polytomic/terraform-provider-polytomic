@@ -23,6 +23,11 @@ func TestParseSchemaFieldID(t *testing.T) {
 	}{
 		{id: "org/conn/shop.orders/city", org: "org", connection: "conn", schema: "shop.orders", field: "city"},
 		{id: "org/conn/exports/2026/orders.csv/city", org: "org", connection: "conn", schema: "exports/2026/orders.csv", field: "city"},
+		{id: "org/conn/orders/price%2Funit", org: "org", connection: "conn", schema: "orders", field: "price/unit"},
+		{id: "org/conn/orders/price%2funit", org: "org", connection: "conn", schema: "orders", field: "price/unit"},
+		{id: "org/conn/exports/orders.csv/100%25", org: "org", connection: "conn", schema: "exports/orders.csv", field: "100%"},
+		// An unescaped "%" is kept.
+		{id: "org/conn/orders/pct%", org: "org", connection: "conn", schema: "orders", field: "pct%"},
 		{id: "org/conn/shop.orders", wantErr: true},
 		{id: "org/conn//city", wantErr: true},
 		{id: "/conn/shop.orders/city", wantErr: true},
@@ -40,6 +45,22 @@ func TestParseSchemaFieldID(t *testing.T) {
 			}
 			if org != tc.org || connection != tc.connection || schema != tc.schema || field != tc.field {
 				t.Errorf("got %q %q %q %q", org, connection, schema, field)
+			}
+		})
+	}
+}
+
+func TestSchemaFieldResourceIDRoundTrip(t *testing.T) {
+	const schemaID = "exports/2026/orders.csv"
+	for _, fieldID := range []string{"city", "price/unit", "100%", "a%2Fb", "%252F", "/"} {
+		t.Run(fieldID, func(t *testing.T) {
+			id := SchemaFieldResourceID("org", "conn", schemaID, fieldID)
+			org, connection, schema, field, err := parseSchemaFieldID(id)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if org != "org" || connection != "conn" || schema != schemaID || field != fieldID {
+				t.Errorf("%s: got %q %q %q %q", id, org, connection, schema, field)
 			}
 		})
 	}

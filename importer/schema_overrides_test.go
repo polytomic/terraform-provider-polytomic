@@ -104,6 +104,7 @@ func TestSchemaOverridesGenerate(t *testing.T) {
 				TypeSpec: pointer.To[any]([]any{"decimal", map[string]any{"precision": 12.0, "scale": 2.0}})},
 			{ID: pointer.To("tags"), Name: pointer.To("Tags"), Type: &arrayType, UserManaged: yes, SourcePrimaryKey: no,
 				TypeSpec: pointer.To[any]([]any{"array", "string"})},
+			{ID: pointer.To("price/unit"), Name: pointer.To("Price per unit"), Type: &numberType, UserManaged: yes, SourcePrimaryKey: no},
 		}},
 		{ID: pointer.To("exports/2026 orders.csv"), Fields: []*polytomic.SchemaField{
 			{ID: pointer.To("total"), Name: pointer.To("total"), Type: &stringType, UserManaged: yes, SourcePrimaryKey: no},
@@ -142,6 +143,7 @@ func TestSchemaOverridesGenerate(t *testing.T) {
 	wantImports := "terraform import polytomic_connection_schema_primary_keys.orders_shop_orders org-1/" + connectionID + "/shop.orders\n" +
 		"terraform import polytomic_connection_schema_field.orders_exports_2026_orders_csv_total 'org-1/" + connectionID + "/exports/2026 orders.csv/total'\n" +
 		"terraform import polytomic_connection_schema_field.orders_shop_orders_city org-1/" + connectionID + "/shop.orders/city\n" +
+		"terraform import polytomic_connection_schema_field.orders_shop_orders_price_unit 'org-1/" + connectionID + "/shop.orders/price%2Funit'\n" +
 		"terraform import polytomic_connection_schema_field.orders_shop_orders_tags org-1/" + connectionID + "/shop.orders/tags\n" +
 		"terraform import polytomic_connection_schema_field.orders_shop_orders_total org-1/" + connectionID + "/shop.orders/total\n"
 	if got := imports.String(); got != wantImports {

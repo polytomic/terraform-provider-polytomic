@@ -72,7 +72,7 @@ func (r *connectionSchemaFieldResource) Schema(ctx context.Context, req resource
 			"Removing `label`, `type`, `type_spec`, or `path` from the configuration keeps the last applied value.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
-				MarkdownDescription: "Resource identifier in the format: organization/connection_id/schema_id/field_id",
+				MarkdownDescription: "Resource identifier in the format: organization/connection_id/schema_id/field_id, with `%` and `/` in the field ID escaped as `%25` and `%2F`",
 				Computed:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -364,8 +364,8 @@ func (r *connectionSchemaFieldResource) Create(ctx context.Context, req resource
 	case pointer.GetBool(existing.UserManaged):
 		resp.Diagnostics.AddError(
 			"Field already has a user-defined definition",
-			fmt.Sprintf("Field %s in schema %s is already user-defined or overridden. Import it with the ID %s/%s/%s/%s instead.",
-				fieldID, schemaID, orgOrDefault(data.Organization), connectionID, schemaID, fieldID),
+			fmt.Sprintf("Field %s in schema %s is already user-defined or overridden. Import it with the ID %s instead.",
+				fieldID, schemaID, SchemaFieldResourceID(orgOrDefault(data.Organization), connectionID, schemaID, fieldID)),
 		)
 		return
 	default:
@@ -400,7 +400,7 @@ func (r *connectionSchemaFieldResource) Create(ctx context.Context, req resource
 		data.Organization = types.StringValue(connectionOrganization(ctx, client, connectionID))
 	}
 	data.Organization = types.StringValue(orgOrDefault(data.Organization))
-	data.ID = types.StringValue(fmt.Sprintf("%s/%s/%s/%s", data.Organization.ValueString(), connectionID, schemaID, fieldID))
+	data.ID = types.StringValue(SchemaFieldResourceID(data.Organization.ValueString(), connectionID, schemaID, fieldID))
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
@@ -522,13 +522,27 @@ func (r *connectionSchemaFieldResource) ImportState(ctx context.Context, req res
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), req.ID)...)
 }
 
-// parseSchemaFieldID splits an organization/connection_id/schema_id/field_id
-// identifier. Schema IDs may themselves contain slashes.
+// Schema IDs may contain slashes, so resource IDs escape the field ID to keep
+// their last segment unambiguous.
+var (
+	fieldIDEscaper   = strings.NewReplacer("%", "%25", "/", "%2F")
+	fieldIDUnescaper = strings.NewReplacer("%2F", "/", "%2f", "/", "%25", "%")
+)
+
+// SchemaFieldResourceID returns the ID of a polytomic_connection_schema_field
+// resource: organization/connection_id/schema_id/field_id, with "%" and "/" in
+// the field ID escaped as %25 and %2F.
+func SchemaFieldResourceID(org, connectionID, schemaID, fieldID string) string {
+	return strings.Join([]string{org, connectionID, schemaID, fieldIDEscaper.Replace(fieldID)}, "/")
+}
+
+// parseSchemaFieldID splits an identifier built by SchemaFieldResourceID.
 func parseSchemaFieldID(id string) (org, connectionID, schemaID, fieldID string, err error) {
 	parts := strings.Split(id, "/")
 	if len(parts) >= 4 {
-		org, connectionID, fieldID = parts[0], parts[1], parts[len(parts)-1]
+		org, connectionID = parts[0], parts[1]
 		schemaID = strings.Join(parts[2:len(parts)-1], "/")
+		fieldID = fieldIDUnescaper.Replace(parts[len(parts)-1])
 	}
 	if org == "" || connectionID == "" || schemaID == "" || fieldID == "" {
 		return "", "", "", "", fmt.Errorf("expected import ID in format: organization/connection_id/schema_id/field_id, got: %s", id)
