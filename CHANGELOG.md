@@ -1,3 +1,15 @@
+## v1.5.6 (16 September 2026)
+
+BUG FIXES:
+
+- `polytomic_sync` read `override_fields` back as null on Polytomic releases from rel2026.07.29 onward, which report override fields separately from `fields`. Creating a sync with override fields failed with `Provider produced inconsistent result after apply`, and existing syncs showed a permanent diff. The provider now reads `override_fields` from the response.
+
+- `polytomic_sync` now requires `source` on every `fields` entry. The documentation said a field could set `override_value` and omit `source`, but Polytomic stores such a field as an override field, so apply failed with `Provider produced inconsistent result after apply`. Set static values in `override_fields` instead.
+
+IMPORTER:
+
+- Sync field mappings that set `override_value` were left out of the export, so the first apply after import removed them from the sync. They are now exported.
+
 ## v1.5.5 (29 May 2026)
 
 - Added support for new connection types:
