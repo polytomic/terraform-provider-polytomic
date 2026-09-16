@@ -110,7 +110,7 @@ func (r *syncResource) Schema(ctx context.Context, req resource.SchemaRequest, r
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						"source": schema.SingleNestedAttribute{
-							MarkdownDescription: "Source model field reference. Required unless `override_value` is set.",
+							MarkdownDescription: "Source model field reference. To write a static value without a source, use `override_fields`.",
 							Attributes: map[string]schema.Attribute{
 								"model_id": schema.StringAttribute{
 									MarkdownDescription: "Source model identifier.",
@@ -121,7 +121,7 @@ func (r *syncResource) Schema(ctx context.Context, req resource.SchemaRequest, r
 									Required:            true,
 								},
 							},
-							Optional: true,
+							Required: true,
 						},
 						"target": schema.StringAttribute{
 							MarkdownDescription: "Target field identifier that the source value will be written to.",
@@ -482,8 +482,7 @@ type syncResourceResourceData struct {
 }
 
 // overrideField is the Terraform-side representation of an override field.
-// This is a subset of polytomic.SyncField — the SDK type includes
-// `source` and `encryption_enabled` which are not part of the Terraform schema.
+// It matches polytomic.OverrideField.
 type overrideField struct {
 	Target        types.String `tfsdk:"target"`
 	New           types.Bool   `tfsdk:"new"`
@@ -1235,26 +1234,7 @@ func syncDataFromResponse(ctx context.Context, sync *polytomic.ModelSyncV5Respon
 		return data, diags
 	}
 
-	// Fields and OverrideFields — the API merges override fields into the
-	// regular fields list. Split them back out: fields with an override_value
-	// and no real source are override fields.
-	var regularFields []*polytomic.SyncField
-	var extractedOverrides []overrideField
-	for _, f := range sync.Fields {
-		isOverride := f.OverrideValue != nil &&
-			(f.Source == nil || (f.Source.ModelID == "" && f.Source.Field == "") ||
-				f.Source.ModelID == "00000000-0000-0000-0000-000000000000")
-		if isOverride {
-			extractedOverrides = append(extractedOverrides, overrideField{
-				Target:        types.StringValue(f.Target),
-				New:           types.BoolPointerValue(f.New),
-				OverrideValue: types.StringPointerValue(f.OverrideValue),
-				SyncMode:      types.StringPointerValue(f.SyncMode),
-			})
-		} else {
-			regularFields = append(regularFields, f)
-		}
-	}
+	// Fields
 	data.Fields, diags = types.SetValueFrom(ctx, types.ObjectType{
 		AttrTypes: map[string]attr.Type{
 			"source": types.ObjectType{
@@ -1267,7 +1247,7 @@ func syncDataFromResponse(ctx context.Context, sync *polytomic.ModelSyncV5Respon
 			"override_value":     types.StringType,
 			"sync_mode":          types.StringType,
 			"encryption_enabled": types.BoolType,
-		}}, regularFields)
+		}}, sync.Fields)
 	if diags.HasError() {
 		return data, diags
 	}
@@ -1279,9 +1259,18 @@ func syncDataFromResponse(ctx context.Context, sync *polytomic.ModelSyncV5Respon
 		"override_value": types.StringType,
 		"sync_mode":      types.StringType,
 	}
-	if len(extractedOverrides) > 0 {
+	if len(sync.OverrideFields) > 0 {
+		overrides := make([]overrideField, len(sync.OverrideFields))
+		for i, f := range sync.OverrideFields {
+			overrides[i] = overrideField{
+				Target:        types.StringValue(f.Target),
+				New:           types.BoolPointerValue(f.New),
+				OverrideValue: types.StringValue(f.OverrideValue),
+				SyncMode:      types.StringPointerValue(f.SyncMode),
+			}
+		}
 		data.OverrideFields, diags = types.SetValueFrom(ctx, types.ObjectType{
-			AttrTypes: overrideFieldAttrTypes}, extractedOverrides)
+			AttrTypes: overrideFieldAttrTypes}, overrides)
 		if diags.HasError() {
 			return data, diags
 		}

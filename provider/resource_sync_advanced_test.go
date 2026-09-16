@@ -212,8 +212,7 @@ func testAccSyncMode(t *testing.T, apiKey bool, expected string) resource.TestCh
 }
 
 // testAccSyncOverrideFieldCount verifies the number of override fields via the
-// API. The server merges override fields into the regular fields list, so we
-// count fields that have an override_value and no real source.
+// API.
 func testAccSyncOverrideFieldCount(t *testing.T, apiKey bool, expected int) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		var orgID string
@@ -233,14 +232,7 @@ func testAccSyncOverrideFieldCount(t *testing.T, apiKey bool, expected int) reso
 		if err != nil {
 			return err
 		}
-		count := 0
-		for _, f := range sync.Data.Fields {
-			if f.OverrideValue != nil &&
-				(f.Source == nil || f.Source.ModelID == "" || f.Source.ModelID == "00000000-0000-0000-0000-000000000000") {
-				count++
-			}
-		}
-		if count != expected {
+		if count := len(sync.Data.OverrideFields); count != expected {
 			return fmt.Errorf("expected %d override fields, got %d", expected, count)
 		}
 		return nil

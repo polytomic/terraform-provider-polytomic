@@ -1,5 +1,11 @@
 ## v3.1.1 (Unreleased)
 
+BUG FIXES:
+
+- `polytomic_sync` read `override_fields` back as null on Polytomic releases from rel2026.07.29 onward, which report override fields separately from `fields`. Creating a sync with override fields failed with `Provider produced inconsistent result after apply`, and existing syncs showed a permanent diff. The provider now reads `override_fields` from the response.
+
+- `polytomic_sync` now requires `source` on every `fields` entry. The documentation said a field could set `override_value` and omit `source`, but Polytomic stores such a field as an override field, so apply failed with `Provider produced inconsistent result after apply`. Set static values in `override_fields` instead.
+
 IMPORTER:
 
 - The importer failed with `failed to list organizations: 401: Unauthorized` when run with an API key. Since v3.0.0 it listed organizations through an endpoint that only accepts partner keys. With an API key, it now exports the key's own organization.
@@ -7,6 +13,8 @@ IMPORTER:
 - The importer failed with `field 'configuration.tags' is not a nested object in schema` for connections with a map field, such as AWS Athena's `tags`.
 
 - Sync target filters were exported as model filters, which failed `terraform plan` with `attribute "field" is required`. They are now exported as `target_filters`.
+
+- Sync field mappings that set `override_value` were left out of the export, so the first apply after import removed them from the sync. They are now exported.
 
 - Connection data sources no longer set `name`, which is read-only and failed `terraform plan`.
 
