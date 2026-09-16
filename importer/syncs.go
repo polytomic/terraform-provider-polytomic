@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"slices"
 
 	"github.com/AlekSi/pointer"
 	"github.com/hashicorp/hcl/v2/hclwrite"
@@ -11,6 +12,7 @@ import (
 	"github.com/polytomic/polytomic-go/v25"
 	ptclient "github.com/polytomic/polytomic-go/v25/client"
 	"github.com/polytomic/terraform-provider-polytomic/provider"
+	"github.com/rs/zerolog/log"
 	"github.com/zclconf/go-cty/cty"
 )
 
@@ -26,13 +28,13 @@ var (
 type Syncs struct {
 	c *ptclient.Client
 
-	Resources map[string]*polytomic.ListSyncItem
+	Resources map[string]*polytomic.ModelSyncV5Response
 }
 
 func NewSyncs(c *ptclient.Client) *Syncs {
 	return &Syncs{
 		c:         c,
-		Resources: make(map[string]*polytomic.ListSyncItem),
+		Resources: make(map[string]*polytomic.ModelSyncV5Response),
 	}
 }
 
@@ -42,9 +44,21 @@ func (s *Syncs) Init(ctx context.Context) error {
 		return err
 	}
 
-	for _, sync := range syncs.Data {
-		name := provider.ValidName(provider.ToSnakeCase(pointer.GetString(sync.Name)))
-		s.Resources[name] = sync
+	for _, item := range syncs.Data {
+		sync, err := s.c.ModelSync.Get(ctx, pointer.GetString(item.ID))
+		if err != nil {
+			return err
+		}
+		// The provider's target filters have no value_field, so exporting
+		// the sync would drop the comparison on the next apply.
+		if slices.ContainsFunc(sync.Data.Filters, func(f *polytomic.Filter) bool { return f.ValueField != nil }) {
+			log.Warn().
+				Str("sync", pointer.GetString(sync.Data.Name)).
+				Msg("skipping sync (filters that compare against a model field are not supported by the provider)")
+			continue
+		}
+		name := provider.ValidName(provider.ToSnakeCase(pointer.GetString(sync.Data.Name)))
+		s.Resources[name] = sync.Data
 	}
 
 	return nil
@@ -58,27 +72,23 @@ func (s *Syncs) GenerateTerraformFiles(ctx context.Context, writer io.Writer, re
 	}
 
 	for _, name := range sortedKeys(s.Resources) {
-		syn := s.Resources[name]
-		sync, err := s.c.ModelSync.Get(ctx, pointer.GetString(syn.ID))
-		if err != nil {
-			return err
-		}
+		sync := s.Resources[name]
 
 		// Build the field mapping for this sync
-		mapping := s.buildFieldMapping(sync.Data)
+		mapping := s.buildFieldMapping(sync)
 
 		// Validate the mapping against the actual provider schema
 		if err := validator.ValidateMapping(mapping); err != nil {
-			return fmt.Errorf("schema validation failed for sync '%s': %w", pointer.GetString(sync.Data.Name), err)
+			return fmt.Errorf("schema validation failed for sync '%s': %w", pointer.GetString(sync.Name), err)
 		}
 
 		// Generate HCL file
 		hclFile := hclwrite.NewEmptyFile()
 		body := hclFile.Body()
 		resourceBlock := body.AppendNewBlock("resource", []string{SyncResource, name})
-		resourceBlock.Body().SetAttributeValue("name", cty.StringVal(pointer.GetString(sync.Data.Name)))
-		resourceBlock.Body().SetAttributeValue("active", cty.BoolVal(pointer.GetBool(sync.Data.Active)))
-		resourceBlock.Body().SetAttributeValue("mode", cty.StringVal(string(pointer.Get(sync.Data.Mode))))
+		resourceBlock.Body().SetAttributeValue("name", cty.StringVal(pointer.GetString(sync.Name)))
+		resourceBlock.Body().SetAttributeValue("active", cty.BoolVal(pointer.GetBool(sync.Active)))
+		resourceBlock.Body().SetAttributeValue("mode", cty.StringVal(string(pointer.Get(sync.Mode))))
 		var schedule map[string]interface{}
 		decoder, err := mapstructure.NewDecoder(
 			&mapstructure.DecoderConfig{
@@ -88,7 +98,7 @@ func (s *Syncs) GenerateTerraformFiles(ctx context.Context, writer io.Writer, re
 		if err != nil {
 			return err
 		}
-		err = decoder.Decode(sync.Data.Schedule)
+		err = decoder.Decode(sync.Schedule)
 		if err != nil {
 			return err
 		}
@@ -102,7 +112,7 @@ func (s *Syncs) GenerateTerraformFiles(ctx context.Context, writer io.Writer, re
 		if err != nil {
 			return err
 		}
-		err = decoder.Decode(sync.Data.Fields)
+		err = decoder.Decode(sync.Fields)
 		if err != nil {
 			return err
 		}
@@ -120,7 +130,7 @@ func (s *Syncs) GenerateTerraformFiles(ctx context.Context, writer io.Writer, re
 		if err != nil {
 			return err
 		}
-		err = decoder.Decode(sync.Data.Target)
+		err = decoder.Decode(sync.Target)
 		if err != nil {
 			return err
 		}
@@ -128,15 +138,15 @@ func (s *Syncs) GenerateTerraformFiles(ctx context.Context, writer io.Writer, re
 		tokens := wrapJSONEncode(target, "configuration")
 		resourceBlock.Body().SetAttributeRaw("target", tokens)
 
-		if sync.Data.FilterLogic != nil {
-			resourceBlock.Body().SetAttributeValue("filter_logic", cty.StringVal(pointer.GetString(sync.Data.FilterLogic)))
+		if sync.FilterLogic != nil {
+			resourceBlock.Body().SetAttributeValue("filter_logic", cty.StringVal(pointer.GetString(sync.FilterLogic)))
 		}
 
-		if len(sync.Data.Filters) > 0 {
+		if len(sync.Filters) > 0 {
 			// Split filters by type: model filters → "filters", target filters → "target_filters"
 			var modelFilters []map[string]interface{}
 			var targetFilters []map[string]interface{}
-			for _, f := range sync.Data.Filters {
+			for _, f := range sync.Filters {
 				var m map[string]interface{}
 				dec, decErr := mapstructure.NewDecoder(&mapstructure.DecoderConfig{TagName: "json", Result: &m})
 				if decErr != nil {
@@ -145,8 +155,7 @@ func (s *Syncs) GenerateTerraformFiles(ctx context.Context, writer io.Writer, re
 				if decErr = dec.Decode(f); decErr != nil {
 					return decErr
 				}
-				fieldType, _ := m["field_type"].(string)
-				if fieldType == "Target" {
+				if pointer.Get(f.FieldType) == polytomic.FilterFieldReferenceTypeTarget {
 					// Target filter: use field_id as "field", drop field_id/field_type/field
 					tf := map[string]interface{}{
 						"field":    m["field_id"],
@@ -180,7 +189,7 @@ func (s *Syncs) GenerateTerraformFiles(ctx context.Context, writer io.Writer, re
 			}
 		}
 
-		if sync.Data.Identity != nil {
+		if sync.Identity != nil {
 			var identity map[string]interface{}
 			decoder, err = mapstructure.NewDecoder(
 				&mapstructure.DecoderConfig{
@@ -190,13 +199,13 @@ func (s *Syncs) GenerateTerraformFiles(ctx context.Context, writer io.Writer, re
 			if err != nil {
 				return err
 			}
-			err = decoder.Decode(sync.Data.Identity)
+			err = decoder.Decode(sync.Identity)
 			if err != nil {
 				return err
 			}
 			resourceBlock.Body().SetAttributeValue("identity", typeConverter(identity))
 		}
-		if len(sync.Data.OverrideFields) > 0 {
+		if len(sync.OverrideFields) > 0 {
 			var overrideFields []map[string]interface{}
 			decoder, err = mapstructure.NewDecoder(
 				&mapstructure.DecoderConfig{
@@ -206,7 +215,7 @@ func (s *Syncs) GenerateTerraformFiles(ctx context.Context, writer io.Writer, re
 			if err != nil {
 				return err
 			}
-			err = decoder.Decode(sync.Data.OverrideFields)
+			err = decoder.Decode(sync.OverrideFields)
 			if err != nil {
 				return err
 			}
@@ -217,9 +226,9 @@ func (s *Syncs) GenerateTerraformFiles(ctx context.Context, writer io.Writer, re
 			}
 			resourceBlock.Body().SetAttributeValue("override_fields", typeConverter(overrideFields))
 		}
-		if len(sync.Data.Overrides) > 0 {
+		if len(sync.Overrides) > 0 {
 			var overrides []map[string]interface{}
-			for _, o := range sync.Data.Overrides {
+			for _, o := range sync.Overrides {
 				var m map[string]interface{}
 				dec, decErr := mapstructure.NewDecoder(&mapstructure.DecoderConfig{TagName: "json", Result: &m})
 				if decErr != nil {
@@ -240,7 +249,7 @@ func (s *Syncs) GenerateTerraformFiles(ctx context.Context, writer io.Writer, re
 			overrideTokens := wrapJSONEncode(overrides, "value")
 			resourceBlock.Body().SetAttributeRaw("overrides", overrideTokens)
 		}
-		resourceBlock.Body().SetAttributeValue("sync_all_records", cty.BoolVal(pointer.GetBool(sync.Data.SyncAllRecords)))
+		resourceBlock.Body().SetAttributeValue("sync_all_records", cty.BoolVal(pointer.GetBool(sync.SyncAllRecords)))
 		body.AppendNewline()
 
 		writer.Write(ReplaceRefs(hclFile.Bytes(), refs))

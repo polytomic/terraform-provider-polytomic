@@ -10,8 +10,11 @@ import (
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hclwrite"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/mitchellh/mapstructure"
 	ptclient "github.com/polytomic/polytomic-go/v25/client"
 	"github.com/polytomic/terraform-provider-polytomic/provider"
@@ -107,7 +110,6 @@ func (c *Connections) Init(ctx context.Context) error {
 			// computed-only fields (server-managed; the provider rejects them
 			// in config).
 			filteredConfig := make(map[string]interface{})
-			missingRequiredFields := []string{}
 			for k, v := range config {
 				attr, exists := configSchema.Attributes[k]
 				if !exists {
@@ -122,14 +124,34 @@ func (c *Connections) Init(ctx context.Context) error {
 				filteredConfig[k] = v
 			}
 
-			// Check if any required fields are missing after filtering
-			for fieldName, attr := range configSchema.Attributes {
-				if attr.IsRequired() {
-					if _, exists := filteredConfig[fieldName]; !exists {
-						if attr.IsSensitive() {
-							missingRequiredFields = append(missingRequiredFields, fieldName)
-						}
-					}
+			// A connection can hold a value the provider's connection
+			// definition does not accept, such as an auth mode the public
+			// definition omits. The generated config would fail validation.
+			if invalid := invalidConfigValues(ctx, configSchema.Attributes, filteredConfig); len(invalid) > 0 {
+				log.Warn().
+					Str("connection", pointer.GetString(conn.Name)).
+					Str("type", resp.TypeName).
+					Strs("invalid_fields", invalid).
+					Msg("skipping connection (configuration not accepted by the provider)")
+				continue
+			}
+
+			// Required fields can be missing after filtering: the API never
+			// returns sensitive fields, and a connection can predate a field
+			// that is now required.
+			missingRequiredFields := []string{}
+			unsupportedFields := []string{}
+			for _, fieldName := range sortedKeys(configSchema.Attributes) {
+				attr := configSchema.Attributes[fieldName]
+				if !attr.IsRequired() {
+					continue
+				}
+				if _, exists := filteredConfig[fieldName]; exists {
+					continue
+				}
+				missingRequiredFields = append(missingRequiredFields, fieldName)
+				if _, ok := varTypeMap[attr.GetType().String()]; !ok {
+					unsupportedFields = append(unsupportedFields, fieldName)
 				}
 			}
 
@@ -146,24 +168,33 @@ func (c *Connections) Init(ctx context.Context) error {
 						Msg("skipping OAuth connection (credentials not retrievable from API)")
 					continue
 				}
+				if len(unsupportedFields) > 0 {
+					log.Warn().
+						Str("connection", pointer.GetString(conn.Name)).
+						Str("type", resp.TypeName).
+						Strs("missing_fields", unsupportedFields).
+						Msg("skipping connection (missing required fields cannot be input variables)")
+					continue
+				}
 
 				// For non-OAuth connections, generate input variables for the
-				// missing required sensitive fields so the user can supply
-				// them at apply time.
+				// missing required fields so the user can supply them at
+				// apply time.
 				for _, fieldName := range missingRequiredFields {
+					attr := configSchema.Attributes[fieldName]
 					varName := fmt.Sprintf("%s_%s", name, fieldName)
 					filteredConfig[fieldName] = varRefSentinel(varName)
 					c.variables = append(c.variables, Variable{
 						Name:      varName,
-						Type:      "string",
-						Sensitive: true,
+						Type:      varTypeMap[attr.GetType().String()],
+						Sensitive: attr.IsSensitive(),
 					})
 				}
 				log.Info().
 					Str("connection", pointer.GetString(conn.Name)).
 					Str("type", resp.TypeName).
 					Strs("fields", missingRequiredFields).
-					Msg("generating input variables for required sensitive fields")
+					Msg("generating input variables for missing required fields")
 			}
 
 			config = filteredConfig
@@ -206,10 +237,10 @@ func (c *Connections) Init(ctx context.Context) error {
 			schemaResp := &datasource.SchemaResponse{}
 			d.Schema(ctx, schemaReq, schemaResp)
 
-			// Build field mapping for this datasource
+			// Build field mapping for this datasource. The data source reads
+			// name, so it is not part of the configuration.
 			mapping := map[string]interface{}{
 				"id":           pointer.GetString(conn.ID),
-				"name":         pointer.GetString(conn.Name),
 				"organization": pointer.GetString(conn.OrganizationID),
 			}
 
@@ -247,7 +278,6 @@ func (c *Connections) GenerateTerraformFiles(ctx context.Context, writer io.Writ
 		body := hclFile.Body()
 		resourceBlock := body.AppendNewBlock("data", []string{conn.Resource, name})
 		resourceBlock.Body().SetAttributeValue("id", cty.StringVal(pointer.GetString(conn.ID)))
-		resourceBlock.Body().SetAttributeValue("name", cty.StringVal(pointer.GetString(conn.Name)))
 		resourceBlock.Body().SetAttributeTraversal("organization",
 			hcl.Traversal{
 				hcl.TraverseRoot{
@@ -325,6 +355,35 @@ func (c *Connections) DatasourceRefs() map[string]string {
 
 func (c *Connections) Variables() []Variable {
 	return c.variables
+}
+
+// invalidConfigValues returns the configuration fields whose string values the
+// schema's validators reject, formatted as field="value".
+func invalidConfigValues(ctx context.Context, attrs map[string]schema.Attribute, config map[string]interface{}) []string {
+	var invalid []string
+	for _, k := range sortedKeys(config) {
+		attr, ok := attrs[k].(schema.StringAttribute)
+		if !ok {
+			continue
+		}
+		// Empty strings are omitted from the generated configuration.
+		s, ok := config[k].(string)
+		if !ok || s == "" {
+			continue
+		}
+		for _, v := range attr.Validators {
+			resp := &validator.StringResponse{}
+			v.ValidateString(ctx, validator.StringRequest{
+				Path:        path.Root("configuration").AtName(k),
+				ConfigValue: types.StringValue(s),
+			}, resp)
+			if resp.Diagnostics.HasError() {
+				invalid = append(invalid, fmt.Sprintf("%s=%q", k, s))
+				break
+			}
+		}
+	}
+	return invalid
 }
 
 // normalizeConfigKeys converts configuration keys from camelCase to snake_case

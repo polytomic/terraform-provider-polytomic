@@ -13,6 +13,7 @@ import (
 	"github.com/polytomic/polytomic-go/v25/bulksync"
 	ptclient "github.com/polytomic/polytomic-go/v25/client"
 	"github.com/polytomic/terraform-provider-polytomic/provider"
+	"github.com/rs/zerolog/log"
 	"github.com/zclconf/go-cty/cty"
 )
 
@@ -44,6 +45,14 @@ func (b *BulkSyncs) Init(ctx context.Context) error {
 		return err
 	}
 	for _, bulk := range bulkSyncs.Data {
+		// The provider requires a default schedule, and a bulk sync that
+		// runs only on additional schedules has none.
+		if bulk.DefaultSchedule == nil {
+			log.Warn().
+				Str("bulk_sync", pointer.GetString(bulk.Name)).
+				Msg("skipping bulk sync (no default schedule; the provider requires one)")
+			continue
+		}
 		// Bulk sync names are not unique, so we need to a slug to the name
 		// to make it unique.
 		name := provider.ValidName(provider.ToSnakeCase(pointer.GetString(bulk.Name)) + "_" + pointer.GetString(bulk.ID)[:8])

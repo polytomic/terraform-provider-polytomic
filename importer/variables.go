@@ -16,9 +16,11 @@ var varTmpl = `variable "{{ .Name }}" {
 `
 
 var varTypeMap = map[string]string{
-	"basetypes.StringType": "string",
-	"basetypes.NumberType": "number",
-	"basetypes.BoolType":   "bool",
+	"basetypes.StringType":  "string",
+	"basetypes.NumberType":  "number",
+	"basetypes.Int64Type":   "number",
+	"basetypes.Float64Type": "number",
+	"basetypes.BoolType":    "bool",
 }
 
 type Variable struct {

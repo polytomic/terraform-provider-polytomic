@@ -53,6 +53,12 @@ func (v *SchemaValidator) validateLevel(mapping map[string]interface{}, attrs ma
 			return fmt.Errorf("field '%s' not found in schema%s", currentPath, v.suggestAlternative(fieldName, attrs))
 		}
 
+		// A map attribute takes arbitrary keys, so there are no nested
+		// attributes to check them against.
+		if _, ok := attr.(schema.MapAttribute); ok {
+			continue
+		}
+
 		// If value is a nested map, recursively validate
 		if nestedMap, ok := value.(map[string]interface{}); ok {
 			nestedAttrs := v.getNestedAttributes(attr)

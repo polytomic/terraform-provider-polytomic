@@ -4,6 +4,16 @@ IMPORTER:
 
 - The importer failed with `failed to list organizations: 401: Unauthorized` when run with an API key. Since v3.0.0 it listed organizations through an endpoint that only accepts partner keys. With an API key, it now exports the key's own organization.
 
+- The importer failed with `field 'configuration.tags' is not a nested object in schema` for connections with a map field, such as AWS Athena's `tags`.
+
+- Sync target filters were exported as model filters, which failed `terraform plan` with `attribute "field" is required`. They are now exported as `target_filters`.
+
+- Connection data sources no longer set `name`, which is read-only and failed `terraform plan`.
+
+- A required connection field the API does not return, such as `org_id` on an Apple Ads connection created before the field was required, now becomes an input variable, as required sensitive fields already did.
+
+- The importer now skips, with a warning, resources the provider cannot represent, whose exported configuration failed `terraform plan`: connections with a value the provider does not accept, such as a `deployment_api_key` auth mode; syncs with filters that compare against a model field; and bulk syncs without a default schedule.
+
 ## v3.1.0 (10 September 2026)
 
 ENHANCEMENTS:
