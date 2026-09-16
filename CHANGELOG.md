@@ -1,3 +1,9 @@
+## v3.1.1 (Unreleased)
+
+IMPORTER:
+
+- The importer failed with `failed to list organizations: 401: Unauthorized` when run with an API key. Since v3.0.0 it listed organizations through an endpoint that only accepts partner keys. With an API key, it now exports the key's own organization.
+
 ## v3.1.0 (10 September 2026)
 
 ENHANCEMENTS:

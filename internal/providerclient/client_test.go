@@ -157,6 +157,42 @@ func TestClient_APIKeyOrgMismatchRejected(t *testing.T) {
 		"error should name the rejected organization id")
 }
 
+// TestListOrganizations_APIKeyUsesCurrentOrganization pins the importer
+// regression where ListOrganizations called /api/organizations with an API key.
+// That endpoint requires a partner key on current API versions and returns 401,
+// so the API key's own organization must come from /api/organization instead.
+func TestListOrganizations_APIKeyUsesCurrentOrganization(t *testing.T) {
+	orgID := uuid.NewString()
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/api/organization" {
+			t.Errorf("unexpected request to %s", r.URL.Path)
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(map[string]any{
+			"data": map[string]any{
+				"id":   orgID,
+				"name": "Acme",
+			},
+		})
+	}))
+	defer server.Close()
+
+	provider, err := NewClientProvider(Options{
+		APIKey:        "test-api-key",
+		DeploymentURL: server.URL,
+	})
+	require.NoError(t, err)
+
+	orgs, err := provider.ListOrganizations(context.Background())
+	require.NoError(t, err)
+	require.Len(t, orgs, 1)
+	assert.Equal(t, orgID, *orgs[0].ID)
+	assert.Equal(t, "Acme", *orgs[0].Name)
+}
+
 // TestClient_DefaultOrganization verifies that the "default" organization the
 // schema resources record when they cannot determine one selects the API
 // key's own organization, instead of failing to parse as a UUID.

@@ -229,6 +229,19 @@ func (ic *Provider) ListOrganizations(ctx context.Context) ([]*polytomic.Organiz
 		return nil, fmt.Errorf("failed to get Polytomic client: %w", err)
 	}
 
+	if ic.opts.APIKey != "" {
+		// The /organizations list endpoint requires a partner key; an API key
+		// can only access its own organization, which /organization returns.
+		orgResp, err := c.Organization.GetCurrent(ctx)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get organization: %w", err)
+		}
+		if orgResp.Data == nil {
+			return nil, nil
+		}
+		return []*polytomic.Organization{orgResp.Data}, nil
+	}
+
 	orgsResp, err := c.Organization.List(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list organizations: %w", err)
