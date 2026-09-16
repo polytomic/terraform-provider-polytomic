@@ -39,7 +39,7 @@ jobs:
         with:
           go-version-file: "go.mod"
           cache: true
-      - run: go install golang.org/x/tools/cmd/goimports@latest
+      - run: go install golang.org/x/tools/cmd/goimports@v0.41.0
       - run: go generate main.go
       - name: git diff
         run: |
