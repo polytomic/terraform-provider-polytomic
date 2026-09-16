@@ -36,7 +36,7 @@ The `target` block specifies _where_ data is written. Provide either `object` (a
 
 Each entry in `fields` maps a source model field to a target field. Use `override_fields` for fields whose values should be set unconditionally (e.g. a constant label or timestamp).
 
-If you need to set a static value instead of reading from a source field, use `override_value` and omit `source`.
+Every entry in `fields` needs a `source`. To write a static value instead of reading from a source field, add the field to `override_fields`.
 
 ### Filters and Overrides
 
@@ -118,6 +118,7 @@ resource "polytomic_sync" "sync" {
 
 Required:
 
+- `source` (Attributes) Source model field reference. To write a static value without a source, use `override_fields`. (see [below for nested schema](#nestedatt--fields--source))
 - `target` (String) Target field identifier that the source value will be written to.
 
 Optional:
@@ -125,7 +126,6 @@ Optional:
 - `encryption_enabled` (Boolean) Whether the field should be encrypted
 - `new` (Boolean) Set to `true` if the target field should be created by Polytomic.
 - `override_value` (String) Static value to set in the target field. When provided, `source` is ignored.
-- `source` (Attributes) Source model field reference. Required unless `override_value` is set. (see [below for nested schema](#nestedatt--fields--source))
 - `sync_mode` (String) Field-level sync mode. Defaults to the sync's `mode`.
 
 <a id="nestedatt--fields--source"></a>

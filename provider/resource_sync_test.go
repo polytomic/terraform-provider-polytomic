@@ -1,17 +1,84 @@
 package provider
 
 import (
+	"encoding/json"
 	"fmt"
 	"testing"
 
 	"github.com/AlekSi/pointer"
 	"github.com/google/uuid"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
 	"github.com/hashicorp/terraform-plugin-testing/statecheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
+	polytomic "github.com/polytomic/polytomic-go"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
+
+func TestSyncDataFromResponseOverrideFields(t *testing.T) {
+	tests := map[string]struct {
+		response string
+		expected []overrideField
+	}{
+		"reported in override_fields": {
+			response: `{
+				"fields": [
+					{"source": {"model_id": "0b9a3a5e-6c1f-4d1e-9f0a-2d6c1b1e4a01", "field": "email"}, "target": "email"}
+				],
+				"override_fields": [
+					{"target": "name", "override_value": "default"},
+					{"target": "status", "override_value": "active", "new": true, "sync_mode": "create"}
+				]
+			}`,
+			expected: []overrideField{
+				{
+					Target:        types.StringValue("name"),
+					New:           types.BoolNull(),
+					OverrideValue: types.StringValue("default"),
+					SyncMode:      types.StringNull(),
+				},
+				{
+					Target:        types.StringValue("status"),
+					New:           types.BoolValue(true),
+					OverrideValue: types.StringValue("active"),
+					SyncMode:      types.StringValue("create"),
+				},
+			},
+		},
+		"none": {
+			response: `{
+				"fields": [
+					{"source": {"model_id": "0b9a3a5e-6c1f-4d1e-9f0a-2d6c1b1e4a01", "field": "email"}, "target": "email"}
+				]
+			}`,
+		},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			ctx := t.Context()
+			var sync polytomic.ModelSyncResponse
+			require.NoError(t, json.Unmarshal([]byte(tc.response), &sync))
+			sync.Target = &polytomic.Target{ConnectionId: "conn", Object: pointer.ToString("contacts")}
+
+			data, diags := syncDataFromResponse(ctx, &sync)
+			require.False(t, diags.HasError(), "unexpected diagnostics: %v", diags)
+
+			assert.Len(t, data.Fields.Elements(), 1)
+
+			if tc.expected == nil {
+				assert.True(t, data.OverrideFields.IsNull(), "override_fields should be null")
+				return
+			}
+			var overrides []overrideField
+			require.False(t, data.OverrideFields.ElementsAs(ctx, &overrides, false).HasError())
+			assert.ElementsMatch(t, tc.expected, overrides)
+		})
+	}
+}
 
 func TestAccSyncResource(t *testing.T) {
 	name := fmt.Sprintf("TestAccSync-%s", uuid.NewString())

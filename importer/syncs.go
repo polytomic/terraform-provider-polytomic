@@ -324,8 +324,8 @@ func normalizeAndFilterFields(fields []map[string]interface{}) []map[string]inte
 		field = normalizeConfigKeys(field)
 
 		// Check if this field has the required attributes according to Terraform schema
-		// Required: source (with model_id and field), target
-		// Exception: if override_value is present, source.field is not required
+		// Required: source (with model_id and field), target. A field with no
+		// source is an override field, which the API reports in override_fields.
 
 		// Check if target exists
 		target, hasTarget := field["target"]
@@ -351,14 +351,6 @@ func normalizeAndFilterFields(fields []map[string]interface{}) []map[string]inte
 		sourceField, hasSourceField := source["field"]
 		if !hasSourceField || sourceField == nil || sourceField == "" {
 			// Skip fields without source.field
-			// Note: The Terraform schema requires source.field even when override_value is present
-			// This is likely a schema bug, but we need to skip these fields for now
-			continue
-		}
-
-		// Skip fields with override_value since they cause validation errors
-		// due to the schema requiring source.field even when override_value is present
-		if _, hasOverrideValue := field["override_value"]; hasOverrideValue {
 			continue
 		}
 

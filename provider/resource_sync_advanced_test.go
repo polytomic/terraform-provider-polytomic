@@ -233,14 +233,7 @@ func testAccSyncOverrideFieldCount(t *testing.T, apiKey bool, expected int) reso
 		if err != nil {
 			return err
 		}
-		count := 0
-		for _, f := range sync.Data.Fields {
-			if f.OverrideValue != nil &&
-				(f.Source == nil || f.Source.ModelId == "" || f.Source.ModelId == "00000000-0000-0000-0000-000000000000") {
-				count++
-			}
-		}
-		if count != expected {
+		if count := len(sync.Data.OverrideFields); count != expected {
 			return fmt.Errorf("expected %d override fields, got %d", expected, count)
 		}
 		return nil
