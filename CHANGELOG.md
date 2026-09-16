@@ -1,4 +1,4 @@
-## v3.1.1 (Unreleased)
+## v3.1.1 (16 September 2026)
 
 BUG FIXES:
 
