@@ -45,10 +45,14 @@ state before it will take effect on a destroy operation.
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
+#### Required
+
+- `auth_method` (String) Authentication method Valid values: <code>oauth</code> (OAuth), <code>private_app</code> (Private application). Default: <code>oauth</code>.
+
 #### Optional
 
-- `application_id` (String, Sensitive)
-- `client_secret` (String, Sensitive)
+- `application_id` (String) Client ID
+- `client_secret` (String, Sensitive) Client secret
 - `oauth_refresh_token` (String, Sensitive)
 
 

@@ -67,13 +67,11 @@ var Amazon_rds_postgresqlSchema = schema.Schema{
 					Sensitive: false,
 				},
 				"hostname": schema.StringAttribute{
-					MarkdownDescription: `RDS endpoint
-
-    The Amazon RDS endpoint; custom DNS names cannot be used to generate IAM authentication tokens`,
-					Required:  true,
-					Optional:  false,
-					Computed:  false,
-					Sensitive: false,
+					MarkdownDescription: `Hostname used to connect to the Amazon RDS database`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
 				},
 				"iam_role_arn": schema.StringAttribute{
 					MarkdownDescription: `IAM role ARN
@@ -97,6 +95,24 @@ var Amazon_rds_postgresqlSchema = schema.Schema{
 					Optional:            true,
 					Computed:            true,
 					Sensitive:           false,
+				},
+				"rds_endpoint_hostname": schema.StringAttribute{
+					MarkdownDescription: `RDS endpoint hostname
+
+    RDS hostname used to sign IAM tokens and for TLS server name. Defaults to Hostname when omitted.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
+				},
+				"rds_endpoint_port": schema.Int64Attribute{
+					MarkdownDescription: `RDS endpoint port
+
+    RDS port used to sign IAM tokens. Defaults to Port when omitted.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
 				},
 				"region": schema.StringAttribute{
 					MarkdownDescription: `AWS region`,
@@ -185,21 +201,23 @@ func (t *Amazon_rds_postgresqlConnectionResource) Schema(ctx context.Context, re
 }
 
 type Amazon_rds_postgresqlConf struct {
-	Change_detection bool              `mapstructure:"change_detection" tfsdk:"change_detection"`
-	Database         string            `mapstructure:"database" tfsdk:"database"`
-	External_id      string            `mapstructure:"external_id" tfsdk:"external_id"`
-	Hostname         string            `mapstructure:"hostname" tfsdk:"hostname"`
-	Iam_role_arn     string            `mapstructure:"iam_role_arn" tfsdk:"iam_role_arn"`
-	Port             int64             `mapstructure:"port" tfsdk:"port"`
-	Publication      string            `mapstructure:"publication" tfsdk:"publication"`
-	Region           string            `mapstructure:"region" tfsdk:"region"`
-	Ssh              bool              `mapstructure:"ssh" tfsdk:"ssh"`
-	Ssh_host         string            `mapstructure:"ssh_host" tfsdk:"ssh_host"`
-	Ssh_port         int64             `mapstructure:"ssh_port" tfsdk:"ssh_port"`
-	Ssh_private_key  string            `mapstructure:"ssh_private_key" tfsdk:"ssh_private_key"`
-	Ssh_user         string            `mapstructure:"ssh_user" tfsdk:"ssh_user"`
-	Tags             map[string]string `mapstructure:"tags" tfsdk:"tags"`
-	Username         string            `mapstructure:"username" tfsdk:"username"`
+	Change_detection      bool              `mapstructure:"change_detection" tfsdk:"change_detection"`
+	Database              string            `mapstructure:"database" tfsdk:"database"`
+	External_id           string            `mapstructure:"external_id" tfsdk:"external_id"`
+	Hostname              string            `mapstructure:"hostname" tfsdk:"hostname"`
+	Iam_role_arn          string            `mapstructure:"iam_role_arn" tfsdk:"iam_role_arn"`
+	Port                  int64             `mapstructure:"port" tfsdk:"port"`
+	Publication           string            `mapstructure:"publication" tfsdk:"publication"`
+	Rds_endpoint_hostname string            `mapstructure:"rds_endpoint_hostname" tfsdk:"rds_endpoint_hostname"`
+	Rds_endpoint_port     int64             `mapstructure:"rds_endpoint_port" tfsdk:"rds_endpoint_port"`
+	Region                string            `mapstructure:"region" tfsdk:"region"`
+	Ssh                   bool              `mapstructure:"ssh" tfsdk:"ssh"`
+	Ssh_host              string            `mapstructure:"ssh_host" tfsdk:"ssh_host"`
+	Ssh_port              int64             `mapstructure:"ssh_port" tfsdk:"ssh_port"`
+	Ssh_private_key       string            `mapstructure:"ssh_private_key" tfsdk:"ssh_private_key"`
+	Ssh_user              string            `mapstructure:"ssh_user" tfsdk:"ssh_user"`
+	Tags                  map[string]string `mapstructure:"tags" tfsdk:"tags"`
+	Username              string            `mapstructure:"username" tfsdk:"username"`
 }
 
 type Amazon_rds_postgresqlConnectionResource struct {
@@ -276,19 +294,21 @@ func (r *Amazon_rds_postgresqlConnectionResource) Create(ctx context.Context, re
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"change_detection": types.BoolType,
-		"database":         types.StringType,
-		"external_id":      types.StringType,
-		"hostname":         types.StringType,
-		"iam_role_arn":     types.StringType,
-		"port":             types.NumberType,
-		"publication":      types.StringType,
-		"region":           types.StringType,
-		"ssh":              types.BoolType,
-		"ssh_host":         types.StringType,
-		"ssh_port":         types.NumberType,
-		"ssh_private_key":  types.StringType,
-		"ssh_user":         types.StringType,
+		"change_detection":      types.BoolType,
+		"database":              types.StringType,
+		"external_id":           types.StringType,
+		"hostname":              types.StringType,
+		"iam_role_arn":          types.StringType,
+		"port":                  types.NumberType,
+		"publication":           types.StringType,
+		"rds_endpoint_hostname": types.StringType,
+		"rds_endpoint_port":     types.NumberType,
+		"region":                types.StringType,
+		"ssh":                   types.BoolType,
+		"ssh_host":              types.StringType,
+		"ssh_port":              types.NumberType,
+		"ssh_private_key":       types.StringType,
+		"ssh_user":              types.StringType,
 		"tags": types.MapType{
 			ElemType: types.StringType,
 		}, "username": types.StringType,
@@ -362,19 +382,21 @@ func (r *Amazon_rds_postgresqlConnectionResource) Read(ctx context.Context, req 
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"change_detection": types.BoolType,
-		"database":         types.StringType,
-		"external_id":      types.StringType,
-		"hostname":         types.StringType,
-		"iam_role_arn":     types.StringType,
-		"port":             types.NumberType,
-		"publication":      types.StringType,
-		"region":           types.StringType,
-		"ssh":              types.BoolType,
-		"ssh_host":         types.StringType,
-		"ssh_port":         types.NumberType,
-		"ssh_private_key":  types.StringType,
-		"ssh_user":         types.StringType,
+		"change_detection":      types.BoolType,
+		"database":              types.StringType,
+		"external_id":           types.StringType,
+		"hostname":              types.StringType,
+		"iam_role_arn":          types.StringType,
+		"port":                  types.NumberType,
+		"publication":           types.StringType,
+		"rds_endpoint_hostname": types.StringType,
+		"rds_endpoint_port":     types.NumberType,
+		"region":                types.StringType,
+		"ssh":                   types.BoolType,
+		"ssh_host":              types.StringType,
+		"ssh_port":              types.NumberType,
+		"ssh_private_key":       types.StringType,
+		"ssh_user":              types.StringType,
 		"tags": types.MapType{
 			ElemType: types.StringType,
 		}, "username": types.StringType,
@@ -458,19 +480,21 @@ func (r *Amazon_rds_postgresqlConnectionResource) Update(ctx context.Context, re
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"change_detection": types.BoolType,
-		"database":         types.StringType,
-		"external_id":      types.StringType,
-		"hostname":         types.StringType,
-		"iam_role_arn":     types.StringType,
-		"port":             types.NumberType,
-		"publication":      types.StringType,
-		"region":           types.StringType,
-		"ssh":              types.BoolType,
-		"ssh_host":         types.StringType,
-		"ssh_port":         types.NumberType,
-		"ssh_private_key":  types.StringType,
-		"ssh_user":         types.StringType,
+		"change_detection":      types.BoolType,
+		"database":              types.StringType,
+		"external_id":           types.StringType,
+		"hostname":              types.StringType,
+		"iam_role_arn":          types.StringType,
+		"port":                  types.NumberType,
+		"publication":           types.StringType,
+		"rds_endpoint_hostname": types.StringType,
+		"rds_endpoint_port":     types.NumberType,
+		"region":                types.StringType,
+		"ssh":                   types.BoolType,
+		"ssh_host":              types.StringType,
+		"ssh_port":              types.NumberType,
+		"ssh_private_key":       types.StringType,
+		"ssh_user":              types.StringType,
 		"tags": types.MapType{
 			ElemType: types.StringType,
 		}, "username": types.StringType,

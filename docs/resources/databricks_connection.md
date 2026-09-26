@@ -100,6 +100,7 @@ state before it will take effect on a destroy operation.
 - `enable_delta_uniform` (Boolean) Enable Delta UniForm tables Default: <code>false</code>.
 - `enforce_query_limit` (Boolean) Limit concurrent queries Default: <code>false</code>.
 - `iam_role_arn` (String) IAM role ARN
+- `include_hive_metastore` (Boolean) Include legacy Hive metastore tables Default: <code>false</code>.
 - `log_file_retention_days` (Number) Log retention
 - `s3_bucket_name` (String) S3 bucket name (destinations only)
 

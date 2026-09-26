@@ -34,4 +34,9 @@ data "polytomic_sage_intacct_connection" "sage_intacct" {
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
+Read-Only:
+
+- `application_id` (String) Client ID
+- `auth_method` (String) Authentication method Valid values: <code>oauth</code> (OAuth), <code>private_app</code> (Private application). Default: <code>oauth</code>.
+
 

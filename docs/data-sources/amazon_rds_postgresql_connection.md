@@ -41,14 +41,18 @@ Read-Only:
 - `external_id` (String) External ID
 
     External ID for the IAM role
-- `hostname` (String) RDS endpoint
-
-    The Amazon RDS endpoint; custom DNS names cannot be used to generate IAM authentication tokens
+- `hostname` (String) Hostname used to connect to the Amazon RDS database
 - `iam_role_arn` (String) IAM role ARN
 
     Role that grants rds-db:connect access to this database user
 - `port` (Number) Default: <code>5432</code>.
 - `publication` (String)
+- `rds_endpoint_hostname` (String) RDS endpoint hostname
+
+    RDS hostname used to sign IAM tokens and for TLS server name. Defaults to Hostname when omitted.
+- `rds_endpoint_port` (Number) RDS endpoint port
+
+    RDS port used to sign IAM tokens. Defaults to Port when omitted.
 - `region` (String) AWS region
 - `ssh` (Boolean) Connect over SSH tunnel
 - `ssh_host` (String) SSH host

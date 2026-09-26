@@ -1,0 +1,1 @@
+{"$schema":"https://json-schema.org/draft/2020-12/schema","properties":{"instance":{"type":"string","enum":[{"value":"default","label":"Default"},{"value":"eu","label":"EU"},{"value":"federal","label":"Federal"}],"title":"Instance","default":"default"},"access_token":{"type":"string","title":"Access token","sensitive":true}},"type":"object","required":["instance","access_token"]}
