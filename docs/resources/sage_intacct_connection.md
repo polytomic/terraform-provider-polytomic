@@ -17,8 +17,8 @@ For detailed configuration guidance, see the [Sage Intacct connection guide](htt
 resource "polytomic_sage_intacct_connection" "sage_intacct" {
   name = "example"
   configuration = {
-    application_id      = "a45gadsfdsaf47byor2ugfbhsgllpf12gf56gfds"
-    client_secret       = "ay8d5hdepz62px8lqeoakuea2ccl4rxm13i6tbyorxhu1i20kc8ruvksmzxq"
+    application_id      = "c873a91dfd9183d78143.app.sage.com"
+    client_secret       = "f4d4b3b9010a33a83928dd5035c541d7cc1be91b"
     oauth_refresh_token = "dasfdasz62px8lqeoakuea2ccl4rxm13i6tbyorxhu1i20kc8ruvksmzxq"
   }
 }
@@ -54,10 +54,14 @@ state before it will take effect on a destroy operation.
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
+#### Required
+
+- `auth_method` (String) Authentication method Valid values: <code>oauth</code> (OAuth), <code>private_app</code> (Private application). Default: <code>oauth</code>.
+
 #### Optional
 
-- `application_id` (String, Sensitive)
-- `client_secret` (String, Sensitive)
+- `application_id` (String) Client ID
+- `client_secret` (String, Sensitive) Client secret
 - `oauth_refresh_token` (String, Sensitive)
 
 

@@ -6,9 +6,12 @@ package connections
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
@@ -47,14 +50,25 @@ func (d *Sage_intacctConnectionDataSource) Schema(ctx context.Context, req datas
 				Computed:            true,
 			},
 			"configuration": schema.SingleNestedAttribute{
-				Attributes: map[string]schema.Attribute{},
-				Optional:   true,
+				Attributes: map[string]schema.Attribute{
+					"application_id": schema.StringAttribute{
+						MarkdownDescription: `Client ID`,
+						Computed:            true,
+					},
+					"auth_method": schema.StringAttribute{
+						MarkdownDescription: `Authentication method Valid values: <code>oauth</code> (OAuth), <code>private_app</code> (Private application). Default: <code>oauth</code>.`,
+						Computed:            true,
+					},
+				},
+				Optional: true,
 			},
 		},
 	}
 }
 
 type Sage_intacctDataSourceConf struct {
+	Application_id string `mapstructure:"application_id" tfsdk:"application_id"`
+	Auth_method    string `mapstructure:"auth_method" tfsdk:"auth_method"`
 }
 
 func (d *Sage_intacctConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
@@ -82,6 +96,23 @@ func (d *Sage_intacctConnectionDataSource) Read(ctx context.Context, req datasou
 	data.Id = types.StringPointerValue(connection.Data.ID)
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationID)
+
+	conf := Sage_intacctDataSourceConf{}
+	err = mapstructure.Decode(connection.Data.Configuration, &conf)
+	if err != nil {
+		resp.Diagnostics.AddError("Error decoding connection configuration", err.Error())
+		return
+	}
+
+	var diags diag.Diagnostics
+	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"application_id": types.StringType,
+		"auth_method":    types.StringType,
+	}, conf)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
 
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)

@@ -55,4 +55,10 @@ state before it will take effect on a destroy operation.
 
 - `api_key` (String, Sensitive) API key
 
+#### Optional
+
+- `conversions_api_key` (String, Sensitive) Conversions API key
+
+    Required only for sending conversion events
+
 

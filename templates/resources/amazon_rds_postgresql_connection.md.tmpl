@@ -48,9 +48,7 @@ state before it will take effect on a destroy operation.
 #### Required
 
 - `database` (String)
-- `hostname` (String) RDS endpoint
-
-    The Amazon RDS endpoint; custom DNS names cannot be used to generate IAM authentication tokens
+- `hostname` (String) Hostname used to connect to the Amazon RDS database
 - `iam_role_arn` (String) IAM role ARN
 
     Role that grants rds-db:connect access to this database user
@@ -62,6 +60,12 @@ state before it will take effect on a destroy operation.
 
 - `change_detection` (Boolean) Use logical replication for bulk syncs Default: <code>false</code>.
 - `publication` (String)
+- `rds_endpoint_hostname` (String) RDS endpoint hostname
+
+    RDS hostname used to sign IAM tokens and for TLS server name. Defaults to Hostname when omitted.
+- `rds_endpoint_port` (Number) RDS endpoint port
+
+    RDS port used to sign IAM tokens. Defaults to Port when omitted.
 - `ssh` (Boolean) Connect over SSH tunnel
 - `ssh_host` (String) SSH host
 - `ssh_port` (Number) SSH port Default: <code>22</code>.
