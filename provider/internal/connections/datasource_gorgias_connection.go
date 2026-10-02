@@ -51,6 +51,14 @@ func (d *GorgiasConnectionDataSource) Schema(ctx context.Context, req datasource
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
+					"auth_method": schema.StringAttribute{
+						MarkdownDescription: `Authentication method Valid values: <code>api_key</code> (API key), <code>private_app</code> (Private application). Default: <code>api_key</code>.`,
+						Computed:            true,
+					},
+					"client_id": schema.StringAttribute{
+						MarkdownDescription: `Client ID`,
+						Computed:            true,
+					},
 					"domain": schema.StringAttribute{
 						MarkdownDescription: `Your Gorgias subdomain (e.g. 'acme' for acme.gorgias.com)`,
 						Computed:            true,
@@ -67,8 +75,10 @@ func (d *GorgiasConnectionDataSource) Schema(ctx context.Context, req datasource
 }
 
 type GorgiasDataSourceConf struct {
-	Domain string `mapstructure:"domain" tfsdk:"domain"`
-	Email  string `mapstructure:"email" tfsdk:"email"`
+	Auth_method string `mapstructure:"auth_method" tfsdk:"auth_method"`
+	Client_id   string `mapstructure:"client_id" tfsdk:"client_id"`
+	Domain      string `mapstructure:"domain" tfsdk:"domain"`
+	Email       string `mapstructure:"email" tfsdk:"email"`
 }
 
 func (d *GorgiasConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
@@ -106,8 +116,10 @@ func (d *GorgiasConnectionDataSource) Read(ctx context.Context, req datasource.R
 
 	var diags diag.Diagnostics
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"domain": types.StringType,
-		"email":  types.StringType,
+		"auth_method": types.StringType,
+		"client_id":   types.StringType,
+		"domain":      types.StringType,
+		"email":       types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

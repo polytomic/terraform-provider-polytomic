@@ -202,6 +202,13 @@ var DatabricksSchema = schema.Schema{
 					Computed:            true,
 					Sensitive:           false,
 				},
+				"include_hive_metastore": schema.BoolAttribute{
+					MarkdownDescription: `Include legacy Hive metastore tables Default: <code>false</code>.`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
 				"log_file_retention_days": schema.Int64Attribute{
 					MarkdownDescription: `Log retention`,
 					Required:            false,
@@ -376,6 +383,7 @@ type DatabricksConf struct {
 	External_id                  string `mapstructure:"external_id" tfsdk:"external_id"`
 	Http_path                    string `mapstructure:"http_path" tfsdk:"http_path"`
 	Iam_role_arn                 string `mapstructure:"iam_role_arn" tfsdk:"iam_role_arn"`
+	Include_hive_metastore       bool   `mapstructure:"include_hive_metastore" tfsdk:"include_hive_metastore"`
 	Log_file_retention_days      int64  `mapstructure:"log_file_retention_days" tfsdk:"log_file_retention_days"`
 	Port                         int64  `mapstructure:"port" tfsdk:"port"`
 	S3_bucket_name               string `mapstructure:"s3_bucket_name" tfsdk:"s3_bucket_name"`
@@ -487,6 +495,7 @@ func (r *DatabricksConnectionResource) Create(ctx context.Context, req resource.
 		"external_id":                  types.StringType,
 		"http_path":                    types.StringType,
 		"iam_role_arn":                 types.StringType,
+		"include_hive_metastore":       types.BoolType,
 		"log_file_retention_days":      types.NumberType,
 		"port":                         types.NumberType,
 		"s3_bucket_name":               types.StringType,
@@ -592,6 +601,7 @@ func (r *DatabricksConnectionResource) Read(ctx context.Context, req resource.Re
 		"external_id":                  types.StringType,
 		"http_path":                    types.StringType,
 		"iam_role_arn":                 types.StringType,
+		"include_hive_metastore":       types.BoolType,
 		"log_file_retention_days":      types.NumberType,
 		"port":                         types.NumberType,
 		"s3_bucket_name":               types.StringType,
@@ -707,6 +717,7 @@ func (r *DatabricksConnectionResource) Update(ctx context.Context, req resource.
 		"external_id":                  types.StringType,
 		"http_path":                    types.StringType,
 		"iam_role_arn":                 types.StringType,
+		"include_hive_metastore":       types.BoolType,
 		"log_file_retention_days":      types.NumberType,
 		"port":                         types.NumberType,
 		"s3_bucket_name":               types.StringType,

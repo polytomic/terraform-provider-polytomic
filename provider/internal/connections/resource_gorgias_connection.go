@@ -24,6 +24,9 @@ import (
 	"github.com/polytomic/polytomic-go/v25"
 	ptcore "github.com/polytomic/polytomic-go/v25/core"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
+
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -45,9 +48,36 @@ var GorgiasSchema = schema.Schema{
 			Attributes: map[string]schema.Attribute{
 				"apikey": schema.StringAttribute{
 					MarkdownDescription: `API key`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
+					},
+				},
+				"auth_method": schema.StringAttribute{
+					MarkdownDescription: `Authentication method Valid values: <code>api_key</code> (API key), <code>private_app</code> (Private application). Default: <code>api_key</code>.`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
+					Sensitive:           false,
+					Validators: []validator.String{
+						stringvalidator.OneOf("api_key", "private_app"),
+					},
+				},
+				"client_id": schema.StringAttribute{
+					MarkdownDescription: `Client ID`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
+				"client_secret": schema.StringAttribute{
+					MarkdownDescription: `Client secret`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
 					Sensitive:           true,
 					PlanModifiers: []planmodifier.String{
 						stringplanmodifier.UseStateForUnknown(),
@@ -62,9 +92,9 @@ var GorgiasSchema = schema.Schema{
 				},
 				"email": schema.StringAttribute{
 					MarkdownDescription: `Your Gorgias account email address`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
 					Sensitive:           false,
 				},
 			},
@@ -94,9 +124,12 @@ func (t *GorgiasConnectionResource) Schema(ctx context.Context, req resource.Sch
 }
 
 type GorgiasConf struct {
-	Apikey string `mapstructure:"apikey" tfsdk:"apikey"`
-	Domain string `mapstructure:"domain" tfsdk:"domain"`
-	Email  string `mapstructure:"email" tfsdk:"email"`
+	Apikey        string `mapstructure:"apikey" tfsdk:"apikey"`
+	Auth_method   string `mapstructure:"auth_method" tfsdk:"auth_method"`
+	Client_id     string `mapstructure:"client_id" tfsdk:"client_id"`
+	Client_secret string `mapstructure:"client_secret" tfsdk:"client_secret"`
+	Domain        string `mapstructure:"domain" tfsdk:"domain"`
+	Email         string `mapstructure:"email" tfsdk:"email"`
 }
 
 type GorgiasConnectionResource struct {
@@ -173,9 +206,12 @@ func (r *GorgiasConnectionResource) Create(ctx context.Context, req resource.Cre
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"apikey": types.StringType,
-		"domain": types.StringType,
-		"email":  types.StringType,
+		"apikey":        types.StringType,
+		"auth_method":   types.StringType,
+		"client_id":     types.StringType,
+		"client_secret": types.StringType,
+		"domain":        types.StringType,
+		"email":         types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -246,9 +282,12 @@ func (r *GorgiasConnectionResource) Read(ctx context.Context, req resource.ReadR
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"apikey": types.StringType,
-		"domain": types.StringType,
-		"email":  types.StringType,
+		"apikey":        types.StringType,
+		"auth_method":   types.StringType,
+		"client_id":     types.StringType,
+		"client_secret": types.StringType,
+		"domain":        types.StringType,
+		"email":         types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -329,9 +368,12 @@ func (r *GorgiasConnectionResource) Update(ctx context.Context, req resource.Upd
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"apikey": types.StringType,
-		"domain": types.StringType,
-		"email":  types.StringType,
+		"apikey":        types.StringType,
+		"auth_method":   types.StringType,
+		"client_id":     types.StringType,
+		"client_secret": types.StringType,
+		"domain":        types.StringType,
+		"email":         types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

@@ -36,6 +36,8 @@ data "polytomic_gorgias_connection" "gorgias" {
 
 Read-Only:
 
+- `auth_method` (String) Authentication method Valid values: <code>api_key</code> (API key), <code>private_app</code> (Private application). Default: <code>api_key</code>.
+- `client_id` (String) Client ID
 - `domain` (String) Your Gorgias subdomain (e.g. 'acme' for acme.gorgias.com)
 - `email` (String) Your Gorgias account email address
 

@@ -17,9 +17,11 @@ For detailed configuration guidance, see the [Gorgias connection guide](https://
 resource "polytomic_gorgias_connection" "gorgias" {
   name = "example"
   configuration = {
-    apikey = "secret-key"
-    domain = "acme"
-    email  = "user@example.com"
+    apikey        = "secret-key"
+    client_id     = "6218fa8cfe1b2a3c4d5e6f70"
+    client_secret = "secret"
+    domain        = "acme"
+    email         = "user@example.com"
   }
 }
 ```
@@ -56,8 +58,14 @@ state before it will take effect on a destroy operation.
 
 #### Required
 
-- `apikey` (String, Sensitive) API key
+- `auth_method` (String) Authentication method Valid values: <code>api_key</code> (API key), <code>private_app</code> (Private application). Default: <code>api_key</code>.
 - `domain` (String) Your Gorgias subdomain (e.g. 'acme' for acme.gorgias.com)
+
+#### Optional
+
+- `apikey` (String, Sensitive) API key
+- `client_id` (String) Client ID
+- `client_secret` (String, Sensitive) Client secret
 - `email` (String) Your Gorgias account email address
 
 

@@ -61,6 +61,7 @@ Read-Only:
     External ID for the IAM role
 - `http_path` (String) HTTP path Default: <code>/sql</code>.
 - `iam_role_arn` (String) IAM role ARN
+- `include_hive_metastore` (Boolean) Include legacy Hive metastore tables Default: <code>false</code>.
 - `log_file_retention_days` (Number) Log retention
 - `port` (Number) Default: <code>443</code>.
 - `s3_bucket_name` (String) S3 bucket name (destinations only)
