@@ -1,3 +1,48 @@
+## v3.2.0 (2 October 2026)
+
+BREAKING CHANGES:
+
+- `auth_method` is now required on `polytomic_gorgias_connection` and `polytomic_sage_intacct_connection`. Configurations that omit it fail at plan time. Set `auth_method = "api_key"` on Gorgias and `auth_method = "oauth"` on Sage Intacct to keep the existing behavior.
+
+ENHANCEMENTS:
+
+- Added support for new connection types:
+  - Anaplan
+  - LaunchDarkly
+  - Microsoft Outlook 365 (`polytomic_outlook_connection`)
+
+- Added the `polytomic_granola_mcp_connection` data source.
+
+- Gorgias and Sage Intacct connections can authenticate as a private application, with `auth_method = "private_app"`. On Gorgias this adds `client_id` and `client_secret`, and `apikey` is now optional. On Sage Intacct `application_id` is no longer marked sensitive.
+
+- Added configuration fields: `rds_endpoint_hostname` and `rds_endpoint_port` on Amazon RDS PostgreSQL, for connecting through a hostname other than the RDS endpoint; `include_hive_metastore` on Databricks; and `conversions_api_key` on OpenAI Ads.
+
+- `realm_id` is now optional on QuickBooks connections.
+
+- Upgraded to the `polytomic-go` SDK v25.9.9.
+
+BUG FIXES:
+
+- `polytomic_bulk_sync` did not send `user_output_name` to Polytomic, so output table and column name overrides on `schemas` and their `fields` had no effect.
+
+- `polytomic_bulk_sync` planned an update with every computed value shown as `(known after apply)` when nothing had changed, if a `schemas` entry or one of its fields omitted a computed attribute such as `user_output_name`. This affected imported bulk syncs in particular. Such plans are now empty.
+
+- Importing a `polytomic_bulk_sync`, or reading one whose `schemas` are left to the server, recorded a disabled schema for every source table that was not selected. Only enabled schemas are now recorded.
+
+- `polytomic_sync` kept the previous `target.configuration` in the plan when the attribute was omitted, so an update that changed the defaults Polytomic fills in for the destination failed to apply. The value is now recomputed on each update.
+
+- `polytomic_sync` read `filters`, `target_filters`, `overrides`, and `override_fields` back as null when they were set to an empty list, because the API reports an empty list and an absent one the same way. An explicit empty list is now kept in state.
+
+IMPORTER:
+
+- Sync exports dropped empty strings, nulls, empty collections, and mixed-type arrays from `target.configuration`, filter values, and override values, and dropped empty strings from `fields` and `override_fields`. These values are now exported as they are stored.
+
+- Sync exports now include `only_enrich_updates` and `skip_initial_backfill`.
+
+- Bulk sync exports dropped the same values from the source and destination `configuration`. These are now exported as they are stored.
+
+- Bulk sync exports now write only the settable `schedule` attributes, leaving out the schedule's ID and audit metadata.
+
 ## v3.1.1 (16 September 2026)
 
 BUG FIXES:
