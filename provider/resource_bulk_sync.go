@@ -394,7 +394,7 @@ func bulkSyncFiltersFromSDK(filters []*polytomic.BulkFilter) ([]bulkSyncFilter, 
 
 // bulkSyncSchemaIDs returns the schema IDs held in a bulk sync's schema set. A
 // nil result means the set is null or unknown, i.e. the caller has no schema
-// selection of its own and needs every schema on the sync.
+// selection of its own and needs the enabled schemas on the sync.
 func bulkSyncSchemaIDs(ctx context.Context, set basetypes.SetValue) ([]string, diag.Diagnostics) {
 	var diags diag.Diagnostics
 	if set.IsNull() || set.IsUnknown() {
@@ -423,11 +423,15 @@ const maxConcurrentSchemaGets = 8
 // fetchBulkSyncSchemas returns the full configuration of a bulk sync's schemas.
 // The list endpoint does not populate fields or filters, so each schema of
 // interest is retrieved individually. Pass the IDs the caller needs -- state
-// holds only the schemas named in the plan -- or nil for every schema on the
-// sync, which is what an import needs.
+// holds only the schemas named in the plan -- or nil for the enabled schema
+// selections on the sync. Import omits disabled placeholders for unselected source tables.
 func fetchBulkSyncSchemas(ctx context.Context, client *ptclient.Client, syncID string, ids []string) ([]*polytomic.BulkSchema, error) {
 	listed, err := retryOnCacheRefresh(ctx, "list bulk sync schemas", func() (*polytomic.ListBulkSchemaEnvelope, error) {
-		return client.BulkSync.Schemas.List(ctx, syncID, &bulksync.SchemasListRequest{})
+		request := &bulksync.SchemasListRequest{}
+		if ids == nil {
+			request.Filters = map[string]*string{"enabled": pointer.ToString("true")}
+		}
+		return client.BulkSync.Schemas.List(ctx, syncID, request)
 	})
 	if err != nil {
 		return nil, err
@@ -740,9 +744,10 @@ func (r *bulkSyncResource) Create(ctx context.Context, req resource.CreateReques
 		for i, f := range fieldData {
 			fieldConfs[i] = &polytomic.SchemaConfigurationFieldsItem{
 				FieldConfiguration: &polytomic.FieldConfiguration{
-					ID:        f.Id.ValueStringPointer(),
-					Enabled:   f.Enabled.ValueBoolPointer(),
-					Obfuscate: f.Obfuscate.ValueBoolPointer(),
+					ID:             f.Id.ValueStringPointer(),
+					Enabled:        f.Enabled.ValueBoolPointer(),
+					Obfuscate:      f.Obfuscate.ValueBoolPointer(),
+					UserOutputName: f.UserOutputName.ValueStringPointer(),
 				},
 			}
 		}
@@ -769,6 +774,7 @@ func (r *bulkSyncResource) Create(ctx context.Context, req resource.CreateReques
 				Enabled:             s.Enabled.ValueBoolPointer(),
 				PartitionKey:        s.PartitionKey.ValueStringPointer(),
 				TrackingField:       s.TrackingField.ValueStringPointer(),
+				UserOutputName:      s.UserOutputName.ValueStringPointer(),
 				DataCutoffTimestamp: cutoff,
 				DisableDataCutoff:   s.DisableDataCutoff.ValueBoolPointer(),
 				Fields:              fieldConfs,
@@ -1033,9 +1039,10 @@ func (r *bulkSyncResource) Update(ctx context.Context, req resource.UpdateReques
 		for i, f := range fieldData {
 			fieldConfs[i] = &polytomic.SchemaConfigurationFieldsItem{
 				FieldConfiguration: &polytomic.FieldConfiguration{
-					ID:        f.Id.ValueStringPointer(),
-					Enabled:   f.Enabled.ValueBoolPointer(),
-					Obfuscate: f.Obfuscate.ValueBoolPointer(),
+					ID:             f.Id.ValueStringPointer(),
+					Enabled:        f.Enabled.ValueBoolPointer(),
+					Obfuscate:      f.Obfuscate.ValueBoolPointer(),
+					UserOutputName: f.UserOutputName.ValueStringPointer(),
 				},
 			}
 		}
@@ -1062,6 +1069,7 @@ func (r *bulkSyncResource) Update(ctx context.Context, req resource.UpdateReques
 				Enabled:             s.Enabled.ValueBoolPointer(),
 				PartitionKey:        s.PartitionKey.ValueStringPointer(),
 				TrackingField:       s.TrackingField.ValueStringPointer(),
+				UserOutputName:      s.UserOutputName.ValueStringPointer(),
 				DataCutoffTimestamp: cutoff,
 				DisableDataCutoff:   s.DisableDataCutoff.ValueBoolPointer(),
 				Fields:              fieldConfs,

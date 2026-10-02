@@ -29,11 +29,11 @@ type syncFilterTestArgs struct {
 // syncFilterTestConfig renders the full Terraform config for a sync test step.
 func syncFilterTestConfig(t *testing.T, args syncFilterTestArgs) string {
 	t.Helper()
-	args.Postgres = testPostgresConfig(t)
+	args.Postgres = syncTestPostgresConfig(t)
 	tmpl := texttemplate.Must(texttemplate.New("sync-filter-test").Parse(syncFilterTestTemplate))
 	var buf strings.Builder
 	require.NoError(t, tmpl.Execute(&buf, args))
-	return buf.String()
+	return syncTestConfig(t, buf.String())
 }
 
 const syncFilterTestTemplate = `

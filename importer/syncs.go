@@ -120,7 +120,11 @@ func (s *Syncs) GenerateTerraformFiles(ctx context.Context, writer io.Writer, re
 		// Normalize and filter fields to match Terraform schema requirements
 		fields = normalizeAndFilterFields(fields)
 
-		resourceBlock.Body().SetAttributeValue("fields", typeConverter(fields))
+		fieldTokens, err := wrapJSONAttributes(fields)
+		if err != nil {
+			return err
+		}
+		resourceBlock.Body().SetAttributeRaw("fields", fieldTokens)
 		var target map[string]interface{}
 		decoder, err = mapstructure.NewDecoder(
 			&mapstructure.DecoderConfig{
@@ -135,7 +139,10 @@ func (s *Syncs) GenerateTerraformFiles(ctx context.Context, writer io.Writer, re
 			return err
 		}
 		delete(target, "search_values")
-		tokens := wrapJSONEncode(target, "configuration")
+		tokens, err := wrapJSONAttributes(target, "configuration")
+		if err != nil {
+			return err
+		}
 		resourceBlock.Body().SetAttributeRaw("target", tokens)
 
 		if sync.FilterLogic != nil {
@@ -165,6 +172,9 @@ func (s *Syncs) GenerateTerraformFiles(ctx context.Context, writer io.Writer, re
 					if label, ok := m["label"]; ok && label != nil && label != "" {
 						tf["label"] = label
 					}
+					if m["value"] == nil {
+						delete(tf, "value")
+					}
 					targetFilters = append(targetFilters, tf)
 				} else {
 					// Model filter: use "field" source reference as "source", drop field_id/field_type
@@ -176,15 +186,24 @@ func (s *Syncs) GenerateTerraformFiles(ctx context.Context, writer io.Writer, re
 					if label, ok := m["label"]; ok && label != nil && label != "" {
 						mf["label"] = label
 					}
+					if m["value"] == nil {
+						delete(mf, "value")
+					}
 					modelFilters = append(modelFilters, mf)
 				}
 			}
 			if len(modelFilters) > 0 {
-				filterTokens := wrapJSONEncode(modelFilters, "value")
+				filterTokens, err := wrapJSONAttributes(modelFilters, "value")
+				if err != nil {
+					return err
+				}
 				resourceBlock.Body().SetAttributeRaw("filters", filterTokens)
 			}
 			if len(targetFilters) > 0 {
-				tfTokens := wrapJSONEncode(targetFilters, "value")
+				tfTokens, err := wrapJSONAttributes(targetFilters, "value")
+				if err != nil {
+					return err
+				}
 				resourceBlock.Body().SetAttributeRaw("target_filters", tfTokens)
 			}
 		}
@@ -224,7 +243,11 @@ func (s *Syncs) GenerateTerraformFiles(ctx context.Context, writer io.Writer, re
 				delete(overrideFields[i], "source")
 				delete(overrideFields[i], "encryption_enabled")
 			}
-			resourceBlock.Body().SetAttributeValue("override_fields", typeConverter(overrideFields))
+			overrideFieldTokens, err := wrapJSONAttributes(overrideFields)
+			if err != nil {
+				return err
+			}
+			resourceBlock.Body().SetAttributeRaw("override_fields", overrideFieldTokens)
 		}
 		if len(sync.Overrides) > 0 {
 			var overrides []map[string]interface{}
@@ -244,12 +267,24 @@ func (s *Syncs) GenerateTerraformFiles(ctx context.Context, writer io.Writer, re
 					"value":    m["value"],
 					"override": m["override"],
 				}
+				if m["value"] == nil {
+					delete(ov, "value")
+				}
 				overrides = append(overrides, ov)
 			}
-			overrideTokens := wrapJSONEncode(overrides, "value")
+			overrideTokens, err := wrapJSONAttributes(overrides, "value", "override")
+			if err != nil {
+				return err
+			}
 			resourceBlock.Body().SetAttributeRaw("overrides", overrideTokens)
 		}
 		resourceBlock.Body().SetAttributeValue("sync_all_records", cty.BoolVal(pointer.GetBool(sync.SyncAllRecords)))
+		if sync.OnlyEnrichUpdates != nil {
+			resourceBlock.Body().SetAttributeValue("only_enrich_updates", cty.BoolVal(*sync.OnlyEnrichUpdates))
+		}
+		if sync.SkipInitialBackfill != nil {
+			resourceBlock.Body().SetAttributeValue("skip_initial_backfill", cty.BoolVal(*sync.SkipInitialBackfill))
+		}
 		body.AppendNewline()
 
 		writer.Write(ReplaceRefs(hclFile.Bytes(), refs))

@@ -2,6 +2,7 @@ package provider
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 	"testing"
 	texttemplate "text/template"
@@ -62,11 +63,11 @@ const identityModelQuery = "SELECT email, email as name FROM polytomic.sync_test
 
 func syncAdvancedTestConfig(t *testing.T, args syncAdvancedTestArgs) string {
 	t.Helper()
-	args.Postgres = testPostgresConfig(t)
+	args.Postgres = syncTestPostgresConfig(t)
 	tmpl := texttemplate.Must(texttemplate.New("sync-advanced").Parse(syncAdvancedTestTemplate))
 	var buf strings.Builder
 	require.NoError(t, tmpl.Execute(&buf, args))
-	return buf.String()
+	return syncTestConfig(t, buf.String())
 }
 
 const syncAdvancedTestTemplate = `
@@ -487,7 +488,7 @@ func TestAccSyncResourceTargetCreate(t *testing.T) {
 // Test: target_filters (target-side filters, requires mode=update + identity)
 // ---------------------------------------------------------------------------
 
-func TestAccSyncResourceTargetFilters(t *testing.T) {
+func TestAccSyncResourcePostgresTargetFiltersRejected(t *testing.T) {
 	name := fmt.Sprintf("TestAccSyncTgtFilter-%s", uuid.NewString())
 	apiKey := APIKey()
 
@@ -518,15 +519,8 @@ func TestAccSyncResourceTargetFilters(t *testing.T) {
     }
   ]`,
 				}),
-				ConfigStateChecks: []statecheck.StateCheck{
-					statecheck.ExpectKnownValue("polytomic_sync.test",
-						tfjsonpath.New("target_filters"),
-						knownvalue.SetSizeExact(1),
-					),
-				},
-				Check: resource.ComposeTestCheckFunc(
-					testAccSyncExists(t, name, apiKey),
-				),
+				// PostgreSQL reports that target filters are unsupported in Update mode.
+				ExpectError: regexp.MustCompile("target filters are not[\\s]+supported by this destination"),
 			},
 		},
 	})
@@ -960,9 +954,9 @@ func syncRunAfterTestConfig(t *testing.T, name string, apiKey bool) string {
 	}{
 		Name:     name,
 		APIKey:   apiKey,
-		Postgres: testPostgresConfig(t),
+		Postgres: syncTestPostgresConfig(t),
 	}))
-	return buf.String()
+	return syncTestConfig(t, buf.String())
 }
 
 const syncRunAfterTemplate = `

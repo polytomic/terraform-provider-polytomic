@@ -2,13 +2,13 @@ package importer
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"time"
 
 	"github.com/AlekSi/pointer"
 	"github.com/hashicorp/hcl/v2/hclwrite"
-	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/polytomic-go/v25"
 	"github.com/polytomic/polytomic-go/v25/bulksync"
 	ptclient "github.com/polytomic/polytomic-go/v25/client"
@@ -103,7 +103,14 @@ func (b *BulkSyncs) GenerateTerraformFiles(ctx context.Context, writer io.Writer
 
 		// Source connection (nested object attribute, not a block)
 		// Configuration must be a jsonencoded string
-		sourceConfigTokens := wrapJSONEncode(bulkSync.SourceConfiguration) // Wrap entire config
+		sourceJSON, err := json.Marshal(bulkSync.SourceConfiguration)
+		if err != nil {
+			return fmt.Errorf("encoding bulk sync source configuration: %w", err)
+		}
+		sourceConfigTokens, err := jsonEncodeTokens(sourceJSON)
+		if err != nil {
+			return err
+		}
 		sourceTokens := hclwrite.Tokens{
 			&hclwrite.Token{Bytes: []byte("{\n")},
 			&hclwrite.Token{Bytes: []byte("    connection_id = ")},
@@ -120,7 +127,14 @@ func (b *BulkSyncs) GenerateTerraformFiles(ctx context.Context, writer io.Writer
 
 		// Destination connection (nested object attribute, not a block)
 		// Configuration must be a jsonencoded string
-		destConfigTokens := wrapJSONEncode(bulkSync.DestinationConfiguration) // Wrap entire config
+		destJSON, err := json.Marshal(bulkSync.DestinationConfiguration)
+		if err != nil {
+			return fmt.Errorf("encoding bulk sync destination configuration: %w", err)
+		}
+		destConfigTokens, err := jsonEncodeTokens(destJSON)
+		if err != nil {
+			return err
+		}
 		destTokens := hclwrite.Tokens{
 			&hclwrite.Token{Bytes: []byte("{\n")},
 			&hclwrite.Token{Bytes: []byte("    connection_id = ")},
@@ -188,24 +202,16 @@ func (b *BulkSyncs) GenerateTerraformFiles(ctx context.Context, writer io.Writer
 		}
 		resourceBlock.Body().SetAttributeValue("schemas", typeConverter(schemaObjects))
 
-		// Schedule
-		var schedule map[string]interface{}
-		decoder, err := mapstructure.NewDecoder(
-			&mapstructure.DecoderConfig{
-				TagName: "json",
-				Result:  &schedule,
-			})
-		if err != nil {
-			return err
-		}
-		err = decoder.Decode(bulkSync.DefaultSchedule)
-		if err != nil {
-			return err
-		}
-		// TODO: @JakeNeyer - multi schedule is not supported
-		// add once multi schedule is supported in the provider
-		delete(schedule, "multi")
-		resourceBlock.Body().SetAttributeValue("schedule", typeConverter(schedule))
+		// Export only writable schedule settings, excluding IDs and audit metadata.
+		schedule := bulkSync.DefaultSchedule
+		resourceBlock.Body().SetAttributeValue("schedule", typeConverter(map[string]any{
+			"frequency":    string(schedule.Frequency),
+			"day_of_month": schedule.DayOfMonth,
+			"day_of_week":  schedule.DayOfWeek,
+			"hour":         schedule.Hour,
+			"minute":       schedule.Minute,
+			"month":        schedule.Month,
+		}))
 
 		body.AppendNewline()
 

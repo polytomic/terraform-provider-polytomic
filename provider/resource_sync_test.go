@@ -82,17 +82,17 @@ func TestSyncDataFromResponseOverrideFields(t *testing.T) {
 
 func TestAccSyncResource(t *testing.T) {
 	name := fmt.Sprintf("TestAccSync-%s", uuid.NewString())
-	postgres := testPostgresConfig(t)
+	postgres := syncTestPostgresConfig(t)
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: TestAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: TestCaseTfResource(t, syncResourceTemplate, TestCaseTfArgs{
+				Config: syncTestConfig(t, TestCaseTfResource(t, syncResourceTemplate, TestCaseTfArgs{
 					Name:     name,
 					APIKey:   APIKey(),
 					Postgres: postgres,
-				}),
+				})),
 				ConfigStateChecks: []statecheck.StateCheck{
 					statecheck.ExpectKnownValue(
 						"polytomic_sync.test",

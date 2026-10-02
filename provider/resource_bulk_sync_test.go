@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"strings"
-	"sync"
 	"testing"
 	texttemplate "text/template"
 	"time"
@@ -27,91 +26,52 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// bulkSyncTestConnectionIDs holds pre-created connection IDs shared across all
-// bulk sync acceptance tests. This avoids creating new PostgreSQL connections
-// per test, which exhausts the connection pool.
+// bulkSyncTestConnectionIDs identifies PostgreSQL fixture connections.
 type bulkSyncTestConnectionIDs struct {
 	SourceID string
 	DestID   string
 }
 
-var (
-	sharedBulkSyncConns     *bulkSyncTestConnectionIDs
-	sharedBulkSyncConnsOnce sync.Once
-	sharedBulkSyncConnsErr  error
-)
-
-// getSharedBulkSyncConnections creates (or reuses) a pair of PostgreSQL
-// connections for bulk sync tests. The connections are created once and shared
-// across all tests in the package. They are cleaned up via
-// POLYTOMIC_BULK_SYNC_TEST_SOURCE_ID / POLYTOMIC_BULK_SYNC_TEST_DEST_ID env
-// vars if pre-existing connections are preferred.
-func getSharedBulkSyncConnections(t *testing.T) bulkSyncTestConnectionIDs {
+// getBulkSyncConnections uses caller-supplied connections or creates connections
+// owned by this test. Cleanup never sweeps other test runs or existing resources.
+func getBulkSyncConnections(t *testing.T) bulkSyncTestConnectionIDs {
 	t.Helper()
-
-	// Allow overriding with pre-existing connection IDs
+	if os.Getenv("TF_ACC") != "1" {
+		t.Skip("TF_ACC=1 is required for acceptance tests")
+	}
+	testAccPreCheck(t)
 	if src := os.Getenv("POLYTOMIC_BULK_SYNC_TEST_SOURCE_ID"); src != "" {
 		dest := os.Getenv("POLYTOMIC_BULK_SYNC_TEST_DEST_ID")
 		require.NotEmpty(t, dest, "POLYTOMIC_BULK_SYNC_TEST_DEST_ID must be set when POLYTOMIC_BULK_SYNC_TEST_SOURCE_ID is set")
 		return bulkSyncTestConnectionIDs{SourceID: src, DestID: dest}
 	}
-
-	sharedBulkSyncConnsOnce.Do(func() {
-		client := testClient(t, "")
-		ctx := context.Background()
-		postgres := testPostgresConfig(t)
-
-		// Clean up stale shared connections from prior test runs
-		conns, err := client.Connections.List(ctx)
-		if err == nil {
-			for _, c := range conns.Data {
-				if strings.HasPrefix(pointer.Get(c.Name), "TestAccBulkSync-shared-") {
-					_ = client.Connections.Delete(ctx, pointer.Get(c.ID), &polytomic.ConnectionsDeleteRequest{Force: pointer.ToBool(true)})
-				}
+	client := testClient(t, "")
+	postgres := testPostgresConfig(t)
+	create := func(role string) string {
+		response, err := client.Connections.Create(t.Context(), &polytomic.CreateConnectionRequestSchema{
+			Name:          fmt.Sprintf("TestAccBulkSync-%s-%s", uuid.NewString(), role),
+			Type:          "postgresql",
+			Configuration: map[string]any{"hostname": postgres.Host, "database": postgres.Database, "username": postgres.Username, "password": postgres.Password, "port": postgres.Port},
+		})
+		require.NoError(t, err)
+		id := pointer.GetString(response.Data.ID)
+		t.Cleanup(func() {
+			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+			defer cancel()
+			if err := client.Connections.Delete(ctx, id, &polytomic.ConnectionsDeleteRequest{}); err != nil {
+				t.Errorf("deleting test %s connection %s: %v", role, id, err)
 			}
-		}
-
-		source, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
-			Name: fmt.Sprintf("TestAccBulkSync-shared-%s-source", uuid.NewString()),
-			Type: "postgresql",
-			Configuration: map[string]any{
-				"hostname": postgres.Host,
-				"database": postgres.Database,
-				"username": postgres.Username,
-				"password": postgres.Password,
-				"port":     postgres.Port,
-			},
 		})
-		if err != nil {
-			sharedBulkSyncConnsErr = fmt.Errorf("creating shared source connection: %w", err)
-			return
-		}
+		return id
+	}
+	return bulkSyncTestConnectionIDs{SourceID: create("source"), DestID: create("destination")}
+}
 
-		dest, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
-			Name: fmt.Sprintf("TestAccBulkSync-shared-%s-dest", uuid.NewString()),
-			Type: "postgresql",
-			Configuration: map[string]any{
-				"hostname": postgres.Host,
-				"database": postgres.Database,
-				"username": postgres.Username,
-				"password": postgres.Password,
-				"port":     postgres.Port,
-			},
-		})
-		if err != nil {
-			sharedBulkSyncConnsErr = fmt.Errorf("creating shared dest connection: %w", err)
-			return
-		}
-
-		sharedBulkSyncConns = &bulkSyncTestConnectionIDs{
-			SourceID: pointer.Get(source.Data.ID),
-			DestID:   pointer.Get(dest.Data.ID),
-		}
-	})
-
-	require.NoError(t, sharedBulkSyncConnsErr, "failed to create shared bulk sync connections")
-	require.NotNil(t, sharedBulkSyncConns, "shared bulk sync connections not initialized")
-	return *sharedBulkSyncConns
+// BulkSyncAcceptanceConnections shares fixture setup with external tests that
+// exercise the importer without introducing a provider/importer import cycle.
+func BulkSyncAcceptanceConnections(t *testing.T) (string, string) {
+	conns := getBulkSyncConnections(t)
+	return conns.SourceID, conns.DestID
 }
 
 func TestBulkSyncFiltersToSDK(t *testing.T) {
@@ -649,7 +609,7 @@ func TestBulkSyncSchemaIDs(t *testing.T) {
 
 func TestAccBulkSyncResource(t *testing.T) {
 	name := fmt.Sprintf("TestAccBulkSync-%s", uuid.NewString())
-	conns := getSharedBulkSyncConnections(t)
+	conns := getBulkSyncConnections(t)
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: TestAccProtoV6ProviderFactories,
@@ -713,7 +673,7 @@ func testAccBulkSyncExists(t *testing.T, name string) resource.TestCheckFunc {
 
 func TestAccBulkSyncResourceWithFilters(t *testing.T) {
 	name := fmt.Sprintf("TestAccBulkSyncFilters-%s", uuid.NewString())
-	conns := getSharedBulkSyncConnections(t)
+	conns := getBulkSyncConnections(t)
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: TestAccProtoV6ProviderFactories,
@@ -784,7 +744,7 @@ resource "polytomic_bulk_sync" "test" {
     })
   }
 
-  schemas = []
+  schemas = [{id = "polytomic.sync_test_source", enabled = true}]
 }
 `
 
@@ -798,9 +758,10 @@ type bulkSyncAdvancedTestArgs struct {
 	DestConnectionID           string
 	Mode                       string
 	Active                     string // "true" or "false"
-	Schemas                    string // Raw HCL for schemas (empty = use empty list)
+	Schemas                    string // Raw HCL for schemas (empty = select fixture source table)
 	AutomaticallyAddNewObjects string // "all", "none", etc. (empty = omit)
 	AutomaticallyAddNewFields  string
+	ResyncConcurrencyLimit     string // integer as string (empty = omit)
 	ConcurrencyLimit           string // integer as string (empty = omit)
 	NormalizeNames             string // "enabled", "disabled", "legacy" (empty = omit)
 	DisableRecordTimestamps    string // "true" or "false" (empty = omit)
@@ -839,7 +800,7 @@ resource "polytomic_bulk_sync" "test" {
 {{- if .Schemas}}
   schemas = {{.Schemas}}
 {{- else}}
-  schemas = []
+  schemas = [{id = "polytomic.sync_test_source", enabled = true}]
 {{- end}}
 {{- if .AutomaticallyAddNewObjects}}
   automatically_add_new_objects = "{{.AutomaticallyAddNewObjects}}"
@@ -849,6 +810,9 @@ resource "polytomic_bulk_sync" "test" {
 {{- end}}
 {{- if .ConcurrencyLimit}}
   concurrency_limit = {{.ConcurrencyLimit}}
+{{- end}}
+{{- if .ResyncConcurrencyLimit}}
+  resync_concurrency_limit = {{.ResyncConcurrencyLimit}}
 {{- end}}
 {{- if .NormalizeNames}}
   normalize_names = "{{.NormalizeNames}}"
@@ -879,7 +843,7 @@ func TestAccBulkSyncResourceSnapshot(t *testing.T) {
 
 func TestAccBulkSyncResourceAutoDiscovery(t *testing.T) {
 	name := fmt.Sprintf("TestAccBulkSyncDisc-%s", uuid.NewString())
-	conns := getSharedBulkSyncConnections(t)
+	conns := getBulkSyncConnections(t)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
@@ -919,7 +883,7 @@ func TestAccBulkSyncResourceAutoDiscovery(t *testing.T) {
 
 func TestAccBulkSyncResourceUpdateLifecycle(t *testing.T) {
 	name := fmt.Sprintf("TestAccBulkSyncUpd-%s", uuid.NewString())
-	conns := getSharedBulkSyncConnections(t)
+	conns := getBulkSyncConnections(t)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
@@ -1006,7 +970,7 @@ func TestAccBulkSyncResourceUpdateLifecycle(t *testing.T) {
 
 func TestAccBulkSyncResourceImport(t *testing.T) {
 	name := fmt.Sprintf("TestAccBulkSyncImp-%s", uuid.NewString())
-	conns := getSharedBulkSyncConnections(t)
+	conns := getBulkSyncConnections(t)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
@@ -1040,7 +1004,7 @@ func TestAccBulkSyncResourceImport(t *testing.T) {
 
 func TestAccBulkSyncResourceOptions(t *testing.T) {
 	name := fmt.Sprintf("TestAccBulkSyncOpts-%s", uuid.NewString())
-	conns := getSharedBulkSyncConnections(t)
+	conns := getBulkSyncConnections(t)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
@@ -1080,7 +1044,7 @@ func TestAccBulkSyncResourceOptions(t *testing.T) {
 
 func TestAccBulkSyncResourceSchemaFields(t *testing.T) {
 	name := fmt.Sprintf("TestAccBulkSyncFields-%s", uuid.NewString())
-	conns := getSharedBulkSyncConnections(t)
+	conns := getBulkSyncConnections(t)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
@@ -1126,7 +1090,7 @@ func TestAccBulkSyncResourceSchemaFields(t *testing.T) {
 // read the schema's fields from the API rather than the schema list.
 func TestAccBulkSyncResourceSchemaFieldsComputed(t *testing.T) {
 	name := fmt.Sprintf("TestAccBulkSyncFieldsComputed-%s", uuid.NewString())
-	conns := getSharedBulkSyncConnections(t)
+	conns := getBulkSyncConnections(t)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
@@ -1161,7 +1125,7 @@ func TestAccBulkSyncResourceSchemaFieldsComputed(t *testing.T) {
 
 func TestAccBulkSyncResourceMultipleSchemas(t *testing.T) {
 	name := fmt.Sprintf("TestAccBulkSyncMulti-%s", uuid.NewString())
-	conns := getSharedBulkSyncConnections(t)
+	conns := getBulkSyncConnections(t)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
@@ -1205,7 +1169,7 @@ func TestAccBulkSyncResourceMultipleSchemas(t *testing.T) {
 
 func TestAccBulkSyncResourceDisableRecordTimestamps(t *testing.T) {
 	name := fmt.Sprintf("TestAccBulkSyncDRT-%s", uuid.NewString())
-	conns := getSharedBulkSyncConnections(t)
+	conns := getBulkSyncConnections(t)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
@@ -1242,7 +1206,7 @@ func TestAccBulkSyncResourceDataCutoffTimestamp(t *testing.T) {
 	t.Skip("Skipped: PostgreSQL source does not support data_cutoff_timestamp")
 
 	name := fmt.Sprintf("TestAccBulkSyncCutoff-%s", uuid.NewString())
-	conns := getSharedBulkSyncConnections(t)
+	conns := getBulkSyncConnections(t)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
@@ -1277,7 +1241,7 @@ func TestAccBulkSyncResourceDataCutoffTimestamp(t *testing.T) {
 
 func TestAccBulkSyncResourceSchemaTrackingField(t *testing.T) {
 	name := fmt.Sprintf("TestAccBulkSyncTrack-%s", uuid.NewString())
-	conns := getSharedBulkSyncConnections(t)
+	conns := getBulkSyncConnections(t)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },

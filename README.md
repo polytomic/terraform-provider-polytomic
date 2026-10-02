@@ -116,6 +116,30 @@ TF_ACC=1 \
   go test ./provider/... -run TestAccSyncResourceWithIdentity -count=1 -v
 ```
 
+To reuse existing Polytomic connections with an organization API key, set:
+
+- `POLYTOMIC_SYNC_TEST_CONNECTION_ID` for the model sync Postgres connection.
+- `POLYTOMIC_BULK_SYNC_TEST_SOURCE_ID` and `POLYTOMIC_BULK_SYNC_TEST_DEST_ID`
+  for the bulk sync connections (both may reference the same Postgres connection).
+- `POLYTOMIC_SYNC_TEST_SALESFORCE_CONNECTION_ID` to include Salesforce Contact
+  target-filter lifecycle and importer tests.
+
+These connections remain outside Terraform ownership. Tests create and delete
+only their own models and syncs. Prepare the Postgres tables in `fixtureSQL` in
+`provider/testing.go` before using existing connection IDs; this mode skips
+container startup and database fixture setup. Salesforce sync fixtures are inactive.
+
+```shell
+TF_ACC=1 \
+  POLYTOMIC_API_KEY="$POLYTOMIC_LOCAL_API_KEY" \
+  POLYTOMIC_DEPLOYMENT_URL=https://app.polytomic-local.com \
+  POLYTOMIC_SYNC_TEST_CONNECTION_ID=... \
+  POLYTOMIC_BULK_SYNC_TEST_SOURCE_ID=... \
+  POLYTOMIC_BULK_SYNC_TEST_DEST_ID=... \
+  POLYTOMIC_SYNC_TEST_SALESFORCE_CONNECTION_ID=... \
+  go test ./provider -run '^TestAcc(BulkSync|Sync)' -count=1 -v
+```
+
 ### Requirements
 
 - [Terraform](https://www.terraform.io/downloads.html) >= 1.5

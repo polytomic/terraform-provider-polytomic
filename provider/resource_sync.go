@@ -72,14 +72,13 @@ func (r *syncResource) Schema(ctx context.Context, req resource.SchemaRequest, r
 						Optional:            true,
 						Computed:            true,
 					},
+					// Destination defaults can change on update. Omitted configuration
+					// must remain unknown when other settings change.
 					"configuration": schema.StringAttribute{
 						MarkdownDescription: "Connection-specific target options, as a JSON object.",
 						CustomType:          jsontypes.NormalizedType{},
 						Optional:            true,
 						Computed:            true,
-						PlanModifiers: []planmodifier.String{
-							stringplanmodifier.UseStateForUnknown(),
-						},
 					},
 					"new_name": schema.StringAttribute{
 						MarkdownDescription: "Name for a new target object to create in the destination.",
@@ -913,11 +912,13 @@ func (r *syncResource) Create(ctx context.Context, req resource.CreateRequest, r
 		return
 	}
 
+	priorData := data
 	data, diags = syncDataFromResponse(ctx, sync.Data)
 	resp.Diagnostics.Append(diags...)
 	if diags.HasError() {
 		return
 	}
+	preserveEmptySyncSets(&data, priorData)
 
 	diags = preserveTargetCreate(&data, configTarget)
 	resp.Diagnostics.Append(diags...)
@@ -963,11 +964,13 @@ func (r *syncResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 		return
 	}
 
+	priorData := data
 	data, diags = syncDataFromResponse(ctx, sync.Data)
 	resp.Diagnostics.Append(diags...)
 	if diags.HasError() {
 		return
 	}
+	preserveEmptySyncSets(&data, priorData)
 
 	diags = preserveTargetCreate(&data, priorTarget)
 	resp.Diagnostics.Append(diags...)
@@ -1122,11 +1125,13 @@ func (r *syncResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		return
 	}
 
+	priorData := data
 	data, diags = syncDataFromResponse(ctx, sync.Data)
 	resp.Diagnostics.Append(diags...)
 	if diags.HasError() {
 		return
 	}
+	preserveEmptySyncSets(&data, priorData)
 
 	diags = preserveTargetCreate(&data, planTarget)
 	resp.Diagnostics.Append(diags...)
@@ -1166,6 +1171,22 @@ func (r *syncResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 
 func (r *syncResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+}
+
+// The API represents absent and explicitly empty collections identically.
+// Preserve an explicit empty set only when the API also returned no members.
+func preserveEmptySyncSets(data *syncResourceResourceData, prior syncResourceResourceData) {
+	for _, pair := range []struct {
+		current *types.Set
+		prior   types.Set
+	}{
+		{&data.Filters, prior.Filters}, {&data.TargetFilters, prior.TargetFilters},
+		{&data.Overrides, prior.Overrides}, {&data.OverrideFields, prior.OverrideFields},
+	} {
+		if !pair.current.IsUnknown() && len(pair.current.Elements()) == 0 && !pair.prior.IsNull() && !pair.prior.IsUnknown() && len(pair.prior.Elements()) == 0 {
+			*pair.current = pair.prior
+		}
+	}
 }
 
 // preserveTargetCreate copies the "create" attribute from priorTarget into data.Target,
