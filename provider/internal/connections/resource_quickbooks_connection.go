@@ -75,9 +75,9 @@ var QuickbooksSchema = schema.Schema{
 				},
 				"realm_id": schema.StringAttribute{
 					MarkdownDescription: `Company ID`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
 					Sensitive:           false,
 				},
 			},

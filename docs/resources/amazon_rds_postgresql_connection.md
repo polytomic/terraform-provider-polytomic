@@ -17,13 +17,14 @@ For detailed configuration guidance, see the [Amazon RDS PostgreSQL connection g
 resource "polytomic_amazon_rds_postgresql_connection" "amazon_rds_postgresql" {
   name = "example"
   configuration = {
-    database     = "sampledb"
-    hostname     = "database.123456789012.us-east-1.rds.amazonaws.com"
-    iam_role_arn = "arn:aws:iam::123456789012:role/polytomic-rds"
-    publication  = "polytomic"
-    region       = "us-east-1"
-    ssh_host     = "bastion.example.com"
-    username     = "polytomic"
+    database              = "sampledb"
+    hostname              = "database.123456789012.us-east-1.rds.amazonaws.com"
+    iam_role_arn          = "arn:aws:iam::123456789012:role/polytomic-rds"
+    publication           = "polytomic"
+    rds_endpoint_hostname = "database.123456789012.us-east-1.rds.amazonaws.com"
+    region                = "us-east-1"
+    ssh_host              = "bastion.example.com"
+    username              = "polytomic"
   }
 }
 ```
@@ -61,9 +62,7 @@ state before it will take effect on a destroy operation.
 #### Required
 
 - `database` (String)
-- `hostname` (String) RDS endpoint
-
-    The Amazon RDS endpoint; custom DNS names cannot be used to generate IAM authentication tokens
+- `hostname` (String) Hostname used to connect to the Amazon RDS database
 - `iam_role_arn` (String) IAM role ARN
 
     Role that grants rds-db:connect access to this database user
@@ -75,6 +74,12 @@ state before it will take effect on a destroy operation.
 
 - `change_detection` (Boolean) Use logical replication for bulk syncs Default: <code>false</code>.
 - `publication` (String)
+- `rds_endpoint_hostname` (String) RDS endpoint hostname
+
+    RDS hostname used to sign IAM tokens and for TLS server name. Defaults to Hostname when omitted.
+- `rds_endpoint_port` (Number) RDS endpoint port
+
+    RDS port used to sign IAM tokens. Defaults to Port when omitted.
 - `ssh` (Boolean) Connect over SSH tunnel
 - `ssh_host` (String) SSH host
 - `ssh_port` (Number) SSH port Default: <code>22</code>.

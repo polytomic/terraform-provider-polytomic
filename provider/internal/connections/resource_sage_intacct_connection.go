@@ -24,6 +24,9 @@ import (
 	"github.com/polytomic/polytomic-go/v25"
 	ptcore "github.com/polytomic/polytomic-go/v25/core"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
+
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -44,17 +47,24 @@ var Sage_intacctSchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"application_id": schema.StringAttribute{
-					MarkdownDescription: ``,
+					MarkdownDescription: `Client ID`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,
-					Sensitive:           true,
-					PlanModifiers: []planmodifier.String{
-						stringplanmodifier.UseStateForUnknown(),
+					Sensitive:           false,
+				},
+				"auth_method": schema.StringAttribute{
+					MarkdownDescription: `Authentication method Valid values: <code>oauth</code> (OAuth), <code>private_app</code> (Private application). Default: <code>oauth</code>.`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
+					Validators: []validator.String{
+						stringvalidator.OneOf("oauth", "private_app"),
 					},
 				},
 				"client_secret": schema.StringAttribute{
-					MarkdownDescription: ``,
+					MarkdownDescription: `Client secret`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,
@@ -101,6 +111,7 @@ func (t *Sage_intacctConnectionResource) Schema(ctx context.Context, req resourc
 
 type Sage_intacctConf struct {
 	Application_id      string `mapstructure:"application_id" tfsdk:"application_id"`
+	Auth_method         string `mapstructure:"auth_method" tfsdk:"auth_method"`
 	Client_secret       string `mapstructure:"client_secret" tfsdk:"client_secret"`
 	Oauth_refresh_token string `mapstructure:"oauth_refresh_token" tfsdk:"oauth_refresh_token"`
 }
@@ -180,6 +191,7 @@ func (r *Sage_intacctConnectionResource) Create(ctx context.Context, req resourc
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"application_id":      types.StringType,
+		"auth_method":         types.StringType,
 		"client_secret":       types.StringType,
 		"oauth_refresh_token": types.StringType,
 	}, conf)
@@ -253,6 +265,7 @@ func (r *Sage_intacctConnectionResource) Read(ctx context.Context, req resource.
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"application_id":      types.StringType,
+		"auth_method":         types.StringType,
 		"client_secret":       types.StringType,
 		"oauth_refresh_token": types.StringType,
 	}, conf)
@@ -336,6 +349,7 @@ func (r *Sage_intacctConnectionResource) Update(ctx context.Context, req resourc
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"application_id":      types.StringType,
+		"auth_method":         types.StringType,
 		"client_secret":       types.StringType,
 		"oauth_refresh_token": types.StringType,
 	}, conf)

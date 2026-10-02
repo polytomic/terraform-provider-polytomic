@@ -47,8 +47,14 @@ state before it will take effect on a destroy operation.
 
 #### Required
 
-- `apikey` (String, Sensitive) API key
+- `auth_method` (String) Authentication method Valid values: <code>api_key</code> (API key), <code>private_app</code> (Private application). Default: <code>api_key</code>.
 - `domain` (String) Your Gorgias subdomain (e.g. 'acme' for acme.gorgias.com)
+
+#### Optional
+
+- `apikey` (String, Sensitive) API key
+- `client_id` (String) Client ID
+- `client_secret` (String, Sensitive) Client secret
 - `email` (String) Your Gorgias account email address
 
 

@@ -53,6 +53,18 @@ var Openai_adsSchema = schema.Schema{
 						stringplanmodifier.UseStateForUnknown(),
 					},
 				},
+				"conversions_api_key": schema.StringAttribute{
+					MarkdownDescription: `Conversions API key
+
+    Required only for sending conversion events`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
+					},
+				},
 			},
 
 			Required: true,
@@ -80,7 +92,8 @@ func (t *Openai_adsConnectionResource) Schema(ctx context.Context, req resource.
 }
 
 type Openai_adsConf struct {
-	Api_key string `mapstructure:"api_key" tfsdk:"api_key"`
+	Api_key             string `mapstructure:"api_key" tfsdk:"api_key"`
+	Conversions_api_key string `mapstructure:"conversions_api_key" tfsdk:"conversions_api_key"`
 }
 
 type Openai_adsConnectionResource struct {
@@ -157,7 +170,8 @@ func (r *Openai_adsConnectionResource) Create(ctx context.Context, req resource.
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"api_key": types.StringType,
+		"api_key":             types.StringType,
+		"conversions_api_key": types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -228,7 +242,8 @@ func (r *Openai_adsConnectionResource) Read(ctx context.Context, req resource.Re
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"api_key": types.StringType,
+		"api_key":             types.StringType,
+		"conversions_api_key": types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -309,7 +324,8 @@ func (r *Openai_adsConnectionResource) Update(ctx context.Context, req resource.
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"api_key": types.StringType,
+		"api_key":             types.StringType,
+		"conversions_api_key": types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
