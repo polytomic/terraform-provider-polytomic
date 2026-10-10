@@ -17,9 +17,10 @@ For detailed configuration guidance, see the [PlanetScale Vitess connection guid
 resource "polytomic_planetscale_vitess_connection" "planetscale_vitess" {
   name = "example"
   configuration = {
-    database = "mydb"
-    hostname = "aws.connect.psdb.cloud"
-    ssh_host = "bastion.example.com"
+    hostname    = "aws.connect.psdb.cloud"
+    keyspace    = "mykeyspace"
+    ssh_host    = "bastion.example.com"
+    tablet_type = "primary"
   }
 }
 ```
@@ -56,8 +57,8 @@ state before it will take effect on a destroy operation.
 
 #### Required
 
-- `database` (String)
 - `hostname` (String)
+- `keyspace` (String)
 - `password` (String, Sensitive)
 - `port` (Number) Default: <code>3306</code>.
 - `username` (String)
@@ -70,5 +71,8 @@ state before it will take effect on a destroy operation.
 - `ssh_port` (Number) SSH port Default: <code>22</code>.
 - `ssh_private_key` (String, Sensitive) Private key
 - `ssh_user` (String) SSH user Default: <code>root</code>.
+- `tablet_type` (String) Tablet type
+
+    Tablets that queries and replication read from. Valid values: <code>primary</code> (Primary), <code>replica</code> (Replica), <code>rdonly</code> (Read-only (rdonly)). Default: <code>primary</code>.
 
 

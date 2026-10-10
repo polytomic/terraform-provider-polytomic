@@ -1,27 +1,19 @@
 ---
-page_title: "polytomic_seamai_connection Resource - terraform-provider-polytomic"
+page_title: "{{ .Name }} {{ .Type }} - {{ .ProviderName }}"
 subcategory: "Connections"
 description: |-
-  Seam AI Connection
+{{ .Description | plainmarkdown | trimspace | prefixlines "  " }}
 ---
 
-# polytomic_seamai_connection (Resource)
+# {{ .Name }} ({{ .Type }})
 
-Seam AI Connection
+{{ .Description | trimspace }}
 
-For detailed configuration guidance, see the [Seam AI connection guide](https://apidocs.polytomic.com/guides/configuring-your-connections/connections/seamai).
+For detailed configuration guidance, see the [Voucherify connection guide](https://apidocs.polytomic.com/guides/configuring-your-connections/connections/voucherify).
 
 ## Example Usage
 
-```terraform
-resource "polytomic_seamai_connection" "seamai" {
-  name = "example"
-  configuration = {
-    apikey_id     = "9snbax8ij4hvAvBv3ap3EpQ"
-    apikey_secret = "9snbax8ij4hvAvBv3ap3EpQ"
-  }
-}
-```
+{{ tffile .ExampleFile }}
 
 ## Schema
 
@@ -48,20 +40,15 @@ state before it will take effect on a destroy operation.
 
 ### Read-Only
 
-- `id` (String) Seam AI Connection identifier.
+- `id` (String) Voucherify Connection identifier.
 
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
 #### Required
 
-- `apikey_id` (String, Sensitive) API key ID
-- `apikey_secret` (String, Sensitive) API key secret
-
-#### Optional
-
-- `base_url` (String) Alternative base URL
-
-    Alternate environment API URL (including any necessary paths
+- `application_id` (String) Application ID
+- `region` (String) Valid values: <code>na</code> (North America), <code>eu</code> (Europe), <code>asia</code> (Asia). Default: <code>na</code>.
+- `secret_key` (String, Sensitive) Application secret key
 
 

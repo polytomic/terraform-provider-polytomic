@@ -36,6 +36,7 @@ data "polytomic_github_connection" "github" {
 
 Read-Only:
 
+- `auth_method` (String) Authentication method Valid values: <code>oauth</code> (OAuth), <code>app</code> (GitHub App). Default: <code>oauth</code>.
 - `auto_add_repositories` (Boolean) Automatically add new repositories
 - `repositories` (Attributes Set) (see [below for nested schema](#nestedatt--configuration--repositories))
 

@@ -95,6 +95,10 @@ func (d *SupabaseConnectionDataSource) Schema(ctx context.Context, req datasourc
 						MarkdownDescription: `Use SSL Default: <code>true</code>.`,
 						Computed:            true,
 					},
+					"ssl_mode": schema.StringAttribute{
+						MarkdownDescription: `SSL mode Valid values: <code>require</code>, <code>verify-ca</code>, <code>verify-full</code>. Default: <code>verify-full</code>.`,
+						Computed:            true,
+					},
 					"username": schema.StringAttribute{
 						MarkdownDescription: ``,
 						Computed:            true,
@@ -118,6 +122,7 @@ type SupabaseDataSourceConf struct {
 	Ssh_port         int64  `mapstructure:"ssh_port" tfsdk:"ssh_port"`
 	Ssh_user         string `mapstructure:"ssh_user" tfsdk:"ssh_user"`
 	Ssl              bool   `mapstructure:"ssl" tfsdk:"ssl"`
+	Ssl_mode         string `mapstructure:"ssl_mode" tfsdk:"ssl_mode"`
 	Username         string `mapstructure:"username" tfsdk:"username"`
 }
 
@@ -167,6 +172,7 @@ func (d *SupabaseConnectionDataSource) Read(ctx context.Context, req datasource.
 		"ssh_port":         types.NumberType,
 		"ssh_user":         types.StringType,
 		"ssl":              types.BoolType,
+		"ssl_mode":         types.StringType,
 		"username":         types.StringType,
 	}, conf)
 	if diags.HasError() {

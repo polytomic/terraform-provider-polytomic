@@ -24,6 +24,9 @@ import (
 	"github.com/polytomic/polytomic-go/v25"
 	ptcore "github.com/polytomic/polytomic-go/v25/core"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
+
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -43,6 +46,16 @@ var GithubSchema = schema.Schema{
 		},
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
+				"auth_method": schema.StringAttribute{
+					MarkdownDescription: `Authentication method Valid values: <code>oauth</code> (OAuth), <code>app</code> (GitHub App). Default: <code>oauth</code>.`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+					Validators: []validator.String{
+						stringvalidator.OneOf("oauth", "app"),
+					},
+				},
 				"auto_add_repositories": schema.BoolAttribute{
 					MarkdownDescription: `Automatically add new repositories`,
 					Required:            false,
@@ -132,6 +145,7 @@ func (t *GithubConnectionResource) Schema(ctx context.Context, req resource.Sche
 }
 
 type GithubConf struct {
+	Auth_method           string `mapstructure:"auth_method" tfsdk:"auth_method"`
 	Auto_add_repositories bool   `mapstructure:"auto_add_repositories" tfsdk:"auto_add_repositories"`
 	Client_id             string `mapstructure:"client_id" tfsdk:"client_id"`
 	Client_secret         string `mapstructure:"client_secret" tfsdk:"client_secret"`
@@ -216,6 +230,7 @@ func (r *GithubConnectionResource) Create(ctx context.Context, req resource.Crea
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"auth_method":           types.StringType,
 		"auto_add_repositories": types.BoolType,
 		"client_id":             types.StringType,
 		"client_secret":         types.StringType,
@@ -298,6 +313,7 @@ func (r *GithubConnectionResource) Read(ctx context.Context, req resource.ReadRe
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"auth_method":           types.StringType,
 		"auto_add_repositories": types.BoolType,
 		"client_id":             types.StringType,
 		"client_secret":         types.StringType,
@@ -390,6 +406,7 @@ func (r *GithubConnectionResource) Update(ctx context.Context, req resource.Upda
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"auth_method":           types.StringType,
 		"auto_add_repositories": types.BoolType,
 		"client_id":             types.StringType,
 		"client_secret":         types.StringType,
