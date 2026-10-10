@@ -1,19 +1,25 @@
 ---
-page_title: "{{ .Name }} {{ .Type }} - {{ .ProviderName }}"
+page_title: "polytomic_voucherify_connection Resource - terraform-provider-polytomic"
 subcategory: "Connections"
 description: |-
-{{ .Description | plainmarkdown | trimspace | prefixlines "  " }}
+  Voucherify Connection
 ---
 
-# {{ .Name }} ({{ .Type }})
+# polytomic_voucherify_connection (Resource)
 
-{{ .Description | trimspace }}
+Voucherify Connection
 
-For detailed configuration guidance, see the [Seam AI connection guide](https://apidocs.polytomic.com/guides/configuring-your-connections/connections/seamai).
+For detailed configuration guidance, see the [Voucherify connection guide](https://apidocs.polytomic.com/guides/configuring-your-connections/connections/voucherify).
 
 ## Example Usage
 
-{{ tffile .ExampleFile }}
+```terraform
+resource "polytomic_voucherify_connection" "voucherify" {
+  name = "example"
+  configuration = {
+  }
+}
+```
 
 ## Schema
 
@@ -40,20 +46,15 @@ state before it will take effect on a destroy operation.
 
 ### Read-Only
 
-- `id` (String) Seam AI Connection identifier.
+- `id` (String) Voucherify Connection identifier.
 
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
 #### Required
 
-- `apikey_id` (String, Sensitive) API key ID
-- `apikey_secret` (String, Sensitive) API key secret
-
-#### Optional
-
-- `base_url` (String) Alternative base URL
-
-    Alternate environment API URL (including any necessary paths
+- `application_id` (String) Application ID
+- `region` (String) Valid values: <code>na</code> (North America), <code>eu</code> (Europe), <code>asia</code> (Asia). Default: <code>na</code>.
+- `secret_key` (String, Sensitive) Application secret key
 
 

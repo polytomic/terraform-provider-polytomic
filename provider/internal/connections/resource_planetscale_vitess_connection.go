@@ -24,6 +24,9 @@ import (
 	"github.com/polytomic/polytomic-go/v25"
 	ptcore "github.com/polytomic/polytomic-go/v25/core"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
+
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -50,14 +53,14 @@ var Planetscale_vitessSchema = schema.Schema{
 					Computed:            true,
 					Sensitive:           false,
 				},
-				"database": schema.StringAttribute{
+				"hostname": schema.StringAttribute{
 					MarkdownDescription: ``,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
 					Sensitive:           false,
 				},
-				"hostname": schema.StringAttribute{
+				"keyspace": schema.StringAttribute{
 					MarkdownDescription: ``,
 					Required:            true,
 					Optional:            false,
@@ -119,6 +122,18 @@ var Planetscale_vitessSchema = schema.Schema{
 					Computed:            true,
 					Sensitive:           false,
 				},
+				"tablet_type": schema.StringAttribute{
+					MarkdownDescription: `Tablet type
+
+    Tablets that queries and replication read from. Valid values: <code>primary</code> (Primary), <code>replica</code> (Replica), <code>rdonly</code> (Read-only (rdonly)). Default: <code>primary</code>.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
+					Validators: []validator.String{
+						stringvalidator.OneOf("primary", "replica", "rdonly"),
+					},
+				},
 				"username": schema.StringAttribute{
 					MarkdownDescription: ``,
 					Required:            true,
@@ -154,8 +169,8 @@ func (t *Planetscale_vitessConnectionResource) Schema(ctx context.Context, req r
 
 type Planetscale_vitessConf struct {
 	Change_detection bool   `mapstructure:"change_detection" tfsdk:"change_detection"`
-	Database         string `mapstructure:"database" tfsdk:"database"`
 	Hostname         string `mapstructure:"hostname" tfsdk:"hostname"`
+	Keyspace         string `mapstructure:"keyspace" tfsdk:"keyspace"`
 	Password         string `mapstructure:"password" tfsdk:"password"`
 	Port             int64  `mapstructure:"port" tfsdk:"port"`
 	Ssh              bool   `mapstructure:"ssh" tfsdk:"ssh"`
@@ -163,6 +178,7 @@ type Planetscale_vitessConf struct {
 	Ssh_port         int64  `mapstructure:"ssh_port" tfsdk:"ssh_port"`
 	Ssh_private_key  string `mapstructure:"ssh_private_key" tfsdk:"ssh_private_key"`
 	Ssh_user         string `mapstructure:"ssh_user" tfsdk:"ssh_user"`
+	Tablet_type      string `mapstructure:"tablet_type" tfsdk:"tablet_type"`
 	Username         string `mapstructure:"username" tfsdk:"username"`
 }
 
@@ -241,8 +257,8 @@ func (r *Planetscale_vitessConnectionResource) Create(ctx context.Context, req r
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"change_detection": types.BoolType,
-		"database":         types.StringType,
 		"hostname":         types.StringType,
+		"keyspace":         types.StringType,
 		"password":         types.StringType,
 		"port":             types.NumberType,
 		"ssh":              types.BoolType,
@@ -250,6 +266,7 @@ func (r *Planetscale_vitessConnectionResource) Create(ctx context.Context, req r
 		"ssh_port":         types.NumberType,
 		"ssh_private_key":  types.StringType,
 		"ssh_user":         types.StringType,
+		"tablet_type":      types.StringType,
 		"username":         types.StringType,
 	}, conf)
 	if diags.HasError() {
@@ -322,8 +339,8 @@ func (r *Planetscale_vitessConnectionResource) Read(ctx context.Context, req res
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"change_detection": types.BoolType,
-		"database":         types.StringType,
 		"hostname":         types.StringType,
+		"keyspace":         types.StringType,
 		"password":         types.StringType,
 		"port":             types.NumberType,
 		"ssh":              types.BoolType,
@@ -331,6 +348,7 @@ func (r *Planetscale_vitessConnectionResource) Read(ctx context.Context, req res
 		"ssh_port":         types.NumberType,
 		"ssh_private_key":  types.StringType,
 		"ssh_user":         types.StringType,
+		"tablet_type":      types.StringType,
 		"username":         types.StringType,
 	}, conf)
 	if diags.HasError() {
@@ -413,8 +431,8 @@ func (r *Planetscale_vitessConnectionResource) Update(ctx context.Context, req r
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"change_detection": types.BoolType,
-		"database":         types.StringType,
 		"hostname":         types.StringType,
+		"keyspace":         types.StringType,
 		"password":         types.StringType,
 		"port":             types.NumberType,
 		"ssh":              types.BoolType,
@@ -422,6 +440,7 @@ func (r *Planetscale_vitessConnectionResource) Update(ctx context.Context, req r
 		"ssh_port":         types.NumberType,
 		"ssh_private_key":  types.StringType,
 		"ssh_user":         types.StringType,
+		"tablet_type":      types.StringType,
 		"username":         types.StringType,
 	}, conf)
 	if diags.HasError() {

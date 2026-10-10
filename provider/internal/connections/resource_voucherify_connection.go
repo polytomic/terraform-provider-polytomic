@@ -24,14 +24,17 @@ import (
 	"github.com/polytomic/polytomic-go/v25"
 	ptcore "github.com/polytomic/polytomic-go/v25/core"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
+
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
-var _ resource.Resource = &SeamaiConnectionResource{}
-var _ resource.ResourceWithImportState = &SeamaiConnectionResource{}
+var _ resource.Resource = &VoucherifyConnectionResource{}
+var _ resource.ResourceWithImportState = &VoucherifyConnectionResource{}
 
-var SeamaiSchema = schema.Schema{
-	MarkdownDescription: ":meta:subcategory:Connections: Seam AI Connection",
+var VoucherifySchema = schema.Schema{
+	MarkdownDescription: ":meta:subcategory:Connections: Voucherify Connection",
 	Attributes: map[string]schema.Attribute{
 		"organization": schema.StringAttribute{
 			MarkdownDescription: "Organization ID",
@@ -43,8 +46,25 @@ var SeamaiSchema = schema.Schema{
 		},
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
-				"apikey_id": schema.StringAttribute{
-					MarkdownDescription: `API key ID`,
+				"application_id": schema.StringAttribute{
+					MarkdownDescription: `Application ID`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
+				},
+				"region": schema.StringAttribute{
+					MarkdownDescription: `Valid values: <code>na</code> (North America), <code>eu</code> (Europe), <code>asia</code> (Asia). Default: <code>na</code>.`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
+					Validators: []validator.String{
+						stringvalidator.OneOf("na", "eu", "asia"),
+					},
+				},
+				"secret_key": schema.StringAttribute{
+					MarkdownDescription: `Application secret key`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
@@ -52,25 +72,6 @@ var SeamaiSchema = schema.Schema{
 					PlanModifiers: []planmodifier.String{
 						stringplanmodifier.UseStateForUnknown(),
 					},
-				},
-				"apikey_secret": schema.StringAttribute{
-					MarkdownDescription: `API key secret`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
-					Sensitive:           true,
-					PlanModifiers: []planmodifier.String{
-						stringplanmodifier.UseStateForUnknown(),
-					},
-				},
-				"base_url": schema.StringAttribute{
-					MarkdownDescription: `Alternative base URL
-
-    Alternate environment API URL (including any necessary paths`,
-					Required:  false,
-					Optional:  true,
-					Computed:  true,
-					Sensitive: false,
 				},
 			},
 
@@ -86,7 +87,7 @@ var SeamaiSchema = schema.Schema{
 		},
 		"id": schema.StringAttribute{
 			Computed:            true,
-			MarkdownDescription: "Seam AI Connection identifier",
+			MarkdownDescription: "Voucherify Connection identifier",
 			PlanModifiers: []planmodifier.String{
 				stringplanmodifier.UseStateForUnknown(),
 			},
@@ -94,31 +95,31 @@ var SeamaiSchema = schema.Schema{
 	},
 }
 
-func (t *SeamaiConnectionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = SeamaiSchema
+func (t *VoucherifyConnectionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = VoucherifySchema
 }
 
-type SeamaiConf struct {
-	Apikey_id     string `mapstructure:"apikey_id" tfsdk:"apikey_id"`
-	Apikey_secret string `mapstructure:"apikey_secret" tfsdk:"apikey_secret"`
-	Base_url      string `mapstructure:"base_url" tfsdk:"base_url"`
+type VoucherifyConf struct {
+	Application_id string `mapstructure:"application_id" tfsdk:"application_id"`
+	Region         string `mapstructure:"region" tfsdk:"region"`
+	Secret_key     string `mapstructure:"secret_key" tfsdk:"secret_key"`
 }
 
-type SeamaiConnectionResource struct {
+type VoucherifyConnectionResource struct {
 	provider *providerclient.Provider
 }
 
-func (r *SeamaiConnectionResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *VoucherifyConnectionResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if provider := providerclient.GetProvider(req.ProviderData, resp.Diagnostics); provider != nil {
 		r.provider = provider
 	}
 }
 
-func (r *SeamaiConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_seamai_connection"
+func (r *VoucherifyConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_voucherify_connection"
 }
 
-func (r *SeamaiConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *VoucherifyConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data connectionData
 
 	diags := req.Config.Get(ctx, &data)
@@ -133,17 +134,17 @@ func (r *SeamaiConnectionResource) Create(ctx context.Context, req resource.Crea
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
-	connConf, err := objectMapValue(ctx, data.Configuration, getOptionalFields(SeamaiSchema))
+	connConf, err := objectMapValue(ctx, data.Configuration, getOptionalFields(VoucherifySchema))
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
-	for k := range getComputedOnlyFields(SeamaiSchema) {
+	for k := range getComputedOnlyFields(VoucherifySchema) {
 		delete(connConf, k)
 	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
-		Type:           "seamai",
+		Type:           "voucherify",
 		OrganizationID: data.Organization.ValueStringPointer(),
 		Configuration:  connConf,
 		Validate:       pointer.ToBool(false),
@@ -156,7 +157,7 @@ func (r *SeamaiConnectionResource) Create(ctx context.Context, req resource.Crea
 	data.Name = types.StringPointerValue(created.Data.Name)
 	data.Organization = types.StringPointerValue(created.Data.OrganizationID)
 
-	configAttributes, ok := getConfigAttributes(SeamaiSchema)
+	configAttributes, ok := getConfigAttributes(VoucherifySchema)
 	if !ok {
 		resp.Diagnostics.AddError("Error getting connection configuration attributes", "Could not get configuration attributes")
 		return
@@ -171,29 +172,29 @@ func (r *SeamaiConnectionResource) Create(ctx context.Context, req resource.Crea
 	// the API masks sensitive values in responses; restore them from the user's config
 	// so terraform doesn't see the masked values as drift
 	created.Data.Configuration = resetSensitiveValues(configAttributes, originalConfData, created.Data.Configuration)
-	conf := SeamaiConf{}
+	conf := VoucherifyConf{}
 	err = mapstructure.Decode(created.Data.Configuration, &conf)
 	if err != nil {
 		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error decoding connection configuration: %s", err))
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"apikey_id":     types.StringType,
-		"apikey_secret": types.StringType,
-		"base_url":      types.StringType,
+		"application_id": types.StringType,
+		"region":         types.StringType,
+		"secret_key":     types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Seamai", "id": created.Data.ID})
+	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Voucherify", "id": created.Data.ID})
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r *SeamaiConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *VoucherifyConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data connectionData
 
 	diags := req.State.Get(ctx, &data)
@@ -229,7 +230,7 @@ func (r *SeamaiConnectionResource) Read(ctx context.Context, req resource.ReadRe
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationID)
 
-	configAttributes, ok := getConfigAttributes(SeamaiSchema)
+	configAttributes, ok := getConfigAttributes(VoucherifySchema)
 	if !ok {
 		resp.Diagnostics.AddError("Error getting connection configuration attributes", "Could not get configuration attributes")
 		return
@@ -244,16 +245,16 @@ func (r *SeamaiConnectionResource) Read(ctx context.Context, req resource.ReadRe
 	// reset sensitive values so terraform doesn't think we have changes
 	connection.Data.Configuration = resetSensitiveValues(configAttributes, originalConfData, connection.Data.Configuration)
 
-	conf := SeamaiConf{}
+	conf := VoucherifyConf{}
 	err = mapstructure.Decode(connection.Data.Configuration, &conf)
 	if err != nil {
 		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error decoding connection configuration: %s", err))
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"apikey_id":     types.StringType,
-		"apikey_secret": types.StringType,
-		"base_url":      types.StringType,
+		"application_id": types.StringType,
+		"region":         types.StringType,
+		"secret_key":     types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -264,7 +265,7 @@ func (r *SeamaiConnectionResource) Read(ctx context.Context, req resource.ReadRe
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r *SeamaiConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *VoucherifyConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var data connectionData
 
 	diags := req.Plan.Get(ctx, &data)
@@ -279,16 +280,16 @@ func (r *SeamaiConnectionResource) Update(ctx context.Context, req resource.Upda
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
-	connConf, err := objectMapValue(ctx, data.Configuration, getOptionalFields(SeamaiSchema))
+	connConf, err := objectMapValue(ctx, data.Configuration, getOptionalFields(VoucherifySchema))
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
-	for k := range getComputedOnlyFields(SeamaiSchema) {
+	for k := range getComputedOnlyFields(VoucherifySchema) {
 		delete(connConf, k)
 	}
 
-	configAttributes, ok := getConfigAttributes(SeamaiSchema)
+	configAttributes, ok := getConfigAttributes(VoucherifySchema)
 	if !ok {
 		resp.Diagnostics.AddError("Error getting connection configuration attributes", "Could not get configuration attributes")
 		return
@@ -327,16 +328,16 @@ func (r *SeamaiConnectionResource) Update(ctx context.Context, req resource.Upda
 	// the API masks sensitive values in responses; restore them from the plan's config
 	// so terraform doesn't see the masked values as drift
 	updated.Data.Configuration = resetSensitiveValues(configAttributes, planConfData, updated.Data.Configuration)
-	conf := SeamaiConf{}
+	conf := VoucherifyConf{}
 	err = mapstructure.Decode(updated.Data.Configuration, &conf)
 	if err != nil {
 		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error decoding connection configuration: %s", err))
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"apikey_id":     types.StringType,
-		"apikey_secret": types.StringType,
-		"base_url":      types.StringType,
+		"application_id": types.StringType,
+		"region":         types.StringType,
+		"secret_key":     types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -346,7 +347,7 @@ func (r *SeamaiConnectionResource) Update(ctx context.Context, req resource.Upda
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r *SeamaiConnectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *VoucherifyConnectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var data connectionData
 
 	diags := req.State.Get(ctx, &data)
@@ -409,6 +410,6 @@ func (r *SeamaiConnectionResource) Delete(ctx context.Context, req resource.Dele
 	}
 }
 
-func (r *SeamaiConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *VoucherifyConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

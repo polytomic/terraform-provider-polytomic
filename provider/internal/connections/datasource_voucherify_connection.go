@@ -16,26 +16,26 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
-var _ datasource.DataSource = &SeamaiConnectionDataSource{}
+var _ datasource.DataSource = &VoucherifyConnectionDataSource{}
 
 // ExampleDataSource defines the data source implementation.
-type SeamaiConnectionDataSource struct {
+type VoucherifyConnectionDataSource struct {
 	provider *providerclient.Provider
 }
 
-func (d *SeamaiConnectionDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *VoucherifyConnectionDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	if provider := providerclient.GetProvider(req.ProviderData, resp.Diagnostics); provider != nil {
 		d.provider = provider
 	}
 }
 
-func (d *SeamaiConnectionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_seamai_connection"
+func (d *VoucherifyConnectionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_voucherify_connection"
 }
 
-func (d *SeamaiConnectionDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+func (d *VoucherifyConnectionDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: ":meta:subcategory:Connections: Seam AI Connection",
+		MarkdownDescription: ":meta:subcategory:Connections: Voucherify Connection",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				MarkdownDescription: "",
@@ -51,11 +51,13 @@ func (d *SeamaiConnectionDataSource) Schema(ctx context.Context, req datasource.
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
-					"base_url": schema.StringAttribute{
-						MarkdownDescription: `Alternative base URL
-
-    Alternate environment API URL (including any necessary paths`,
-						Computed: true,
+					"application_id": schema.StringAttribute{
+						MarkdownDescription: `Application ID`,
+						Computed:            true,
+					},
+					"region": schema.StringAttribute{
+						MarkdownDescription: `Valid values: <code>na</code> (North America), <code>eu</code> (Europe), <code>asia</code> (Asia). Default: <code>na</code>.`,
+						Computed:            true,
 					},
 				},
 				Optional: true,
@@ -64,11 +66,12 @@ func (d *SeamaiConnectionDataSource) Schema(ctx context.Context, req datasource.
 	}
 }
 
-type SeamaiDataSourceConf struct {
-	Base_url string `mapstructure:"base_url" tfsdk:"base_url"`
+type VoucherifyDataSourceConf struct {
+	Application_id string `mapstructure:"application_id" tfsdk:"application_id"`
+	Region         string `mapstructure:"region" tfsdk:"region"`
 }
 
-func (d *SeamaiConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+func (d *VoucherifyConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data connectionDataSourceData
 
 	// Read Terraform configuration data into the model
@@ -94,7 +97,7 @@ func (d *SeamaiConnectionDataSource) Read(ctx context.Context, req datasource.Re
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationID)
 
-	conf := SeamaiDataSourceConf{}
+	conf := VoucherifyDataSourceConf{}
 	err = mapstructure.Decode(connection.Data.Configuration, &conf)
 	if err != nil {
 		resp.Diagnostics.AddError("Error decoding connection configuration", err.Error())
@@ -103,7 +106,8 @@ func (d *SeamaiConnectionDataSource) Read(ctx context.Context, req datasource.Re
 
 	var diags diag.Diagnostics
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"base_url": types.StringType,
+		"application_id": types.StringType,
+		"region":         types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

@@ -51,6 +51,10 @@ func (d *GithubConnectionDataSource) Schema(ctx context.Context, req datasource.
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
+					"auth_method": schema.StringAttribute{
+						MarkdownDescription: `Authentication method Valid values: <code>oauth</code> (OAuth), <code>app</code> (GitHub App). Default: <code>oauth</code>.`,
+						Computed:            true,
+					},
 					"auto_add_repositories": schema.BoolAttribute{
 						MarkdownDescription: `Automatically add new repositories`,
 						Computed:            true,
@@ -79,7 +83,8 @@ func (d *GithubConnectionDataSource) Schema(ctx context.Context, req datasource.
 }
 
 type GithubDataSourceConf struct {
-	Auto_add_repositories bool `mapstructure:"auto_add_repositories" tfsdk:"auto_add_repositories"`
+	Auth_method           string `mapstructure:"auth_method" tfsdk:"auth_method"`
+	Auto_add_repositories bool   `mapstructure:"auto_add_repositories" tfsdk:"auto_add_repositories"`
 	Repositories          []struct {
 		Label string `mapstructure:"label" tfsdk:"label"`
 		Value string `mapstructure:"value" tfsdk:"value"`
@@ -121,6 +126,7 @@ func (d *GithubConnectionDataSource) Read(ctx context.Context, req datasource.Re
 
 	var diags diag.Diagnostics
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"auth_method":           types.StringType,
 		"auto_add_repositories": types.BoolType,
 		"repositories": types.SetType{
 			ElemType: types.ObjectType{
