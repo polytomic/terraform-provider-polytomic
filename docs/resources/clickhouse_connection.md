@@ -82,6 +82,9 @@ state before it will take effect on a destroy operation.
 - `aws_secret_access_key` (String, Sensitive) AWS secret access key (destinations only)
 - `azure_access_key` (String, Sensitive) Storage account access key (destinations only)
 - `azure_account_name` (String) Storage account name (destinations only)
+- `ca_cert` (String, Sensitive) Additional CA certificate
+
+    PEM root certificate trusted in addition to the system roots.
 - `cloud_provider` (String) Cloud provider (destination support only) Valid values: <code>aws</code> (AWS), <code>azure</code> (Azure), <code>gcp</code> (Google Cloud).
 - `container_name` (String) Storage container name (destinations only)
 
@@ -98,13 +101,13 @@ state before it will take effect on a destroy operation.
 
     Name of bucket used for staging data load files
 - `s3_bucket_region` (String) S3 bucket region (destinations only)
-- `skip_verify` (Boolean) Skip certificate verification Default: <code>true</code>.
 - `ssh` (Boolean) Connect over SSH tunnel
 - `ssh_host` (String) SSH host
 - `ssh_port` (Number) SSH port Default: <code>22</code>.
 - `ssh_private_key` (String, Sensitive) Private key
 - `ssh_user` (String) SSH user Default: <code>root</code>.
 - `ssl` (Boolean) Use SSL Default: <code>true</code>.
+- `ssl_mode` (String) SSL mode Valid values: <code>TRUST</code> (Encrypt only), <code>VERIFY_CA</code> (Encrypt, require certificate), <code>STRICT</code> (Encrypt, verify certificate). Default: <code>STRICT</code>.
 
 #### Read-Only
 

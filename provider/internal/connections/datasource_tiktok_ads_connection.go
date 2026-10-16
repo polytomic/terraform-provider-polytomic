@@ -74,7 +74,7 @@ func (d *Tiktok_adsConnectionDataSource) Schema(ctx context.Context, req datasou
 					"custom_reports": schema.StringAttribute{
 						MarkdownDescription: `Custom reports
 
-    One report per line. Format: name:report_level:aggregate:dimensions:metrics. Example: my_report:auction_basic_campaign:daily:campaign_id`,
+    One report per line. Format: name:report_level:aggregate:dimensions:metrics. Example: my_report:auction_basic_campaign:daily:campaign_id,country_code:spend,impressions,clicks`,
 						Computed: true,
 					},
 				},

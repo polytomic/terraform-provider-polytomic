@@ -56,9 +56,13 @@ state before it will take effect on a destroy operation.
 
 #### Optional
 
+- `auth_method` (String) Authentication method Valid values: <code>oauth</code> (OAuth), <code>app</code> (GitHub App). Default: <code>oauth</code>.
 - `auto_add_repositories` (Boolean) Automatically add new repositories
 - `client_id` (String, Sensitive)
 - `client_secret` (String, Sensitive)
+- `installation_id` (String) GitHub organization
+
+    Organizations where the Polytomic GitHub App is installed. Install the app on another organization in GitHub, then use Force reconnect to add it.
 - `oauth_access_token` (String, Sensitive)
 - `repositories` (Attributes Set) See [below for nested schema](#nestedatt--configuration--repositories).
 
