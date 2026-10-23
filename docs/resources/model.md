@@ -31,7 +31,7 @@ resource "polytomic_model" "model" {
 
 ### Required
 
-- `connection_id` (String)
+- `connection_id` (String) Connection ID of the model's source. Changing it replaces the model.
 - `name` (String)
 
 ### Optional

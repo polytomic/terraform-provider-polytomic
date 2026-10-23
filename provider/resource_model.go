@@ -46,8 +46,11 @@ func (r *modelResource) Schema(ctx context.Context, req resource.SchemaRequest, 
 				Computed:            true,
 			},
 			"connection_id": schema.StringAttribute{
-				MarkdownDescription: "",
+				MarkdownDescription: "Connection ID of the model's source. Changing it replaces the model.",
 				Required:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
 			},
 			"name": schema.StringAttribute{
 				MarkdownDescription: "",

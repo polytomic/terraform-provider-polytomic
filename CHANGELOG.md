@@ -1,3 +1,9 @@
+## v3.2.1 (Unreleased)
+
+BUG FIXES:
+
+- Changing `connection_id` on a `polytomic_model` now replaces the model. Polytomic ignored the new connection on update, so the change never applied and the plan never settled; newer API releases reject the update instead.
+
 ## v3.2.0 (2 October 2026)
 
 BREAKING CHANGES:
