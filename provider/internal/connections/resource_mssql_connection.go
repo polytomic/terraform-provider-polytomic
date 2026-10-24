@@ -43,6 +43,16 @@ var MssqlSchema = schema.Schema{
 		},
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
+				"ca_cert": schema.StringAttribute{
+					MarkdownDescription: `CA certificate`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
+					},
+				},
 				"change_detection": schema.BoolAttribute{
 					MarkdownDescription: `Use change data capture for bulk syncs Default: <code>false</code>.`,
 					Required:            false,
@@ -126,6 +136,13 @@ var MssqlSchema = schema.Schema{
 					Computed:            true,
 					Sensitive:           false,
 				},
+				"trust_server_certificate": schema.BoolAttribute{
+					MarkdownDescription: `Trust server certificate Default: <code>false</code>.`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
 				"username": schema.StringAttribute{
 					MarkdownDescription: ``,
 					Required:            true,
@@ -160,18 +177,20 @@ func (t *MssqlConnectionResource) Schema(ctx context.Context, req resource.Schem
 }
 
 type MssqlConf struct {
-	Change_detection bool   `mapstructure:"change_detection" tfsdk:"change_detection"`
-	Database         string `mapstructure:"database" tfsdk:"database"`
-	Hostname         string `mapstructure:"hostname" tfsdk:"hostname"`
-	Password         string `mapstructure:"password" tfsdk:"password"`
-	Port             int64  `mapstructure:"port" tfsdk:"port"`
-	Ssh              bool   `mapstructure:"ssh" tfsdk:"ssh"`
-	Ssh_host         string `mapstructure:"ssh_host" tfsdk:"ssh_host"`
-	Ssh_port         int64  `mapstructure:"ssh_port" tfsdk:"ssh_port"`
-	Ssh_private_key  string `mapstructure:"ssh_private_key" tfsdk:"ssh_private_key"`
-	Ssh_user         string `mapstructure:"ssh_user" tfsdk:"ssh_user"`
-	Ssl              bool   `mapstructure:"ssl" tfsdk:"ssl"`
-	Username         string `mapstructure:"username" tfsdk:"username"`
+	Ca_cert                  string `mapstructure:"ca_cert" tfsdk:"ca_cert"`
+	Change_detection         bool   `mapstructure:"change_detection" tfsdk:"change_detection"`
+	Database                 string `mapstructure:"database" tfsdk:"database"`
+	Hostname                 string `mapstructure:"hostname" tfsdk:"hostname"`
+	Password                 string `mapstructure:"password" tfsdk:"password"`
+	Port                     int64  `mapstructure:"port" tfsdk:"port"`
+	Ssh                      bool   `mapstructure:"ssh" tfsdk:"ssh"`
+	Ssh_host                 string `mapstructure:"ssh_host" tfsdk:"ssh_host"`
+	Ssh_port                 int64  `mapstructure:"ssh_port" tfsdk:"ssh_port"`
+	Ssh_private_key          string `mapstructure:"ssh_private_key" tfsdk:"ssh_private_key"`
+	Ssh_user                 string `mapstructure:"ssh_user" tfsdk:"ssh_user"`
+	Ssl                      bool   `mapstructure:"ssl" tfsdk:"ssl"`
+	Trust_server_certificate bool   `mapstructure:"trust_server_certificate" tfsdk:"trust_server_certificate"`
+	Username                 string `mapstructure:"username" tfsdk:"username"`
 }
 
 type MssqlConnectionResource struct {
@@ -248,18 +267,20 @@ func (r *MssqlConnectionResource) Create(ctx context.Context, req resource.Creat
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"change_detection": types.BoolType,
-		"database":         types.StringType,
-		"hostname":         types.StringType,
-		"password":         types.StringType,
-		"port":             types.NumberType,
-		"ssh":              types.BoolType,
-		"ssh_host":         types.StringType,
-		"ssh_port":         types.NumberType,
-		"ssh_private_key":  types.StringType,
-		"ssh_user":         types.StringType,
-		"ssl":              types.BoolType,
-		"username":         types.StringType,
+		"ca_cert":                  types.StringType,
+		"change_detection":         types.BoolType,
+		"database":                 types.StringType,
+		"hostname":                 types.StringType,
+		"password":                 types.StringType,
+		"port":                     types.NumberType,
+		"ssh":                      types.BoolType,
+		"ssh_host":                 types.StringType,
+		"ssh_port":                 types.NumberType,
+		"ssh_private_key":          types.StringType,
+		"ssh_user":                 types.StringType,
+		"ssl":                      types.BoolType,
+		"trust_server_certificate": types.BoolType,
+		"username":                 types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -330,18 +351,20 @@ func (r *MssqlConnectionResource) Read(ctx context.Context, req resource.ReadReq
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"change_detection": types.BoolType,
-		"database":         types.StringType,
-		"hostname":         types.StringType,
-		"password":         types.StringType,
-		"port":             types.NumberType,
-		"ssh":              types.BoolType,
-		"ssh_host":         types.StringType,
-		"ssh_port":         types.NumberType,
-		"ssh_private_key":  types.StringType,
-		"ssh_user":         types.StringType,
-		"ssl":              types.BoolType,
-		"username":         types.StringType,
+		"ca_cert":                  types.StringType,
+		"change_detection":         types.BoolType,
+		"database":                 types.StringType,
+		"hostname":                 types.StringType,
+		"password":                 types.StringType,
+		"port":                     types.NumberType,
+		"ssh":                      types.BoolType,
+		"ssh_host":                 types.StringType,
+		"ssh_port":                 types.NumberType,
+		"ssh_private_key":          types.StringType,
+		"ssh_user":                 types.StringType,
+		"ssl":                      types.BoolType,
+		"trust_server_certificate": types.BoolType,
+		"username":                 types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -422,18 +445,20 @@ func (r *MssqlConnectionResource) Update(ctx context.Context, req resource.Updat
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"change_detection": types.BoolType,
-		"database":         types.StringType,
-		"hostname":         types.StringType,
-		"password":         types.StringType,
-		"port":             types.NumberType,
-		"ssh":              types.BoolType,
-		"ssh_host":         types.StringType,
-		"ssh_port":         types.NumberType,
-		"ssh_private_key":  types.StringType,
-		"ssh_user":         types.StringType,
-		"ssl":              types.BoolType,
-		"username":         types.StringType,
+		"ca_cert":                  types.StringType,
+		"change_detection":         types.BoolType,
+		"database":                 types.StringType,
+		"hostname":                 types.StringType,
+		"password":                 types.StringType,
+		"port":                     types.NumberType,
+		"ssh":                      types.BoolType,
+		"ssh_host":                 types.StringType,
+		"ssh_port":                 types.NumberType,
+		"ssh_private_key":          types.StringType,
+		"ssh_user":                 types.StringType,
+		"ssl":                      types.BoolType,
+		"trust_server_certificate": types.BoolType,
+		"username":                 types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

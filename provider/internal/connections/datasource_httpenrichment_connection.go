@@ -204,7 +204,7 @@ func (d *HttpenrichmentConnectionDataSource) Schema(ctx context.Context, req dat
 						Computed: true,
 					},
 					"input_mappings": schema.SetNestedAttribute{
-						MarkdownDescription: `Input mappings
+						MarkdownDescription: `Input variables
 
     List of input mappings to be used in the query. Each mapping should be a valid JSONPath expression.`,
 						Computed: true,
@@ -226,7 +226,7 @@ func (d *HttpenrichmentConnectionDataSource) Schema(ctx context.Context, req dat
 						},
 					},
 					"method": schema.StringAttribute{
-						MarkdownDescription: `HTTP method Valid values: <code>GET</code>, <code>POST</code>.`,
+						MarkdownDescription: `HTTP method Valid values: <code>GET</code>, <code>POST</code>. Default: <code>GET</code>.`,
 						Computed:            true,
 					},
 					"parameters": schema.SetNestedAttribute{
@@ -246,7 +246,7 @@ func (d *HttpenrichmentConnectionDataSource) Schema(ctx context.Context, req dat
 						},
 					},
 					"url": schema.StringAttribute{
-						MarkdownDescription: `Base URL`,
+						MarkdownDescription: `Request URL`,
 						Computed:            true,
 					},
 				},

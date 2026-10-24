@@ -54,7 +54,7 @@ func (d *GoogleslidesConnectionDataSource) Schema(ctx context.Context, req datas
 					"connect_mode": schema.StringAttribute{
 						MarkdownDescription: `Authentication method
 
-    Default: browser Valid values: <code>browser</code>, <code>jwt</code>. Default: <code>browser</code>.`,
+    Default: browser Valid values: <code>browser</code> (OAuth), <code>jwt</code> (Service account). Default: <code>browser</code>.`,
 						Computed: true,
 					},
 					"folder_id": schema.SingleNestedAttribute{

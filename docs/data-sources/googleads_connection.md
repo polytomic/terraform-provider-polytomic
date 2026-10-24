@@ -40,11 +40,11 @@ Read-Only:
 - `auto_add_accounts` (Boolean) Automatically add new accounts
 - `blanket_user_consent` (Boolean) All transmitted users consented to ad personalization and information sharing with Google Ads
 
-    Causes this connection to send signals to Google Ads indicating that every transmitted user has accepted ad personalization and data sharing policies. This will cause the user to be included in more advertising functions
+    Causes this connection to send signals to Google Ads indicating that every transmitted user has accepted ad personalization and data sharing policies. This will cause the user to be included in more advertising functions, but requires you to have obtained express consent.
 - `connected_user` (String) Connected user's email
 - `custom_reports` (String) Custom reports
 
-    One report per line. Format is a report name:ads object:field list. e.g. myReport:ad_groups:campaign.id
+    One report per line. Format is a report name:ads object:field list. e.g. myReport:ad_groups:campaign.id,metrics.clicks
 - `use_data_manager_apis` (Boolean) Use Data Manager APIs
 
     Use Google Data Manager APIs for user list operations and conversion uploads. Requires a token granted the Data Manager OAuth scope.

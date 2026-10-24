@@ -61,12 +61,12 @@ Read-Only:
 
     Name of bucket used for staging data load files
 - `s3_bucket_region` (String) S3 bucket region (destinations only)
-- `skip_verify` (Boolean) Skip certificate verification Default: <code>true</code>.
 - `ssh` (Boolean) Connect over SSH tunnel
 - `ssh_host` (String) SSH host
 - `ssh_port` (Number) SSH port Default: <code>22</code>.
 - `ssh_user` (String) SSH user Default: <code>root</code>.
 - `ssl` (Boolean) Use SSL Default: <code>true</code>.
+- `ssl_mode` (String) SSL mode Valid values: <code>TRUST</code> (Encrypt only), <code>VERIFY_CA</code> (Encrypt, require certificate), <code>STRICT</code> (Encrypt, verify certificate). Default: <code>STRICT</code>.
 - `username` (String)
 
 
