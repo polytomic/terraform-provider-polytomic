@@ -74,18 +74,22 @@ var AzureblobSchema = schema.Schema{
 					},
 				},
 				"client_id": schema.StringAttribute{
-					MarkdownDescription: `Client ID`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
+					MarkdownDescription: `Client ID
+
+    Can be used with auth_method oauth to use custom oauth`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
 				},
 				"client_secret": schema.StringAttribute{
-					MarkdownDescription: `Client secret`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           true,
+					MarkdownDescription: `Client secret
+
+    Can be used with auth_method oauth to use custom oauth`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: true,
 					PlanModifiers: []planmodifier.String{
 						stringplanmodifier.UseStateForUnknown(),
 					},
@@ -130,7 +134,7 @@ var AzureblobSchema = schema.Schema{
 					Sensitive: false,
 				},
 				"oauth_refresh_token": schema.StringAttribute{
-					MarkdownDescription: ``,
+					MarkdownDescription: `Can be used with auth_method oauth to use custom oauth`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,

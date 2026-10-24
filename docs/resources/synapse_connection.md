@@ -63,4 +63,8 @@ state before it will take effect on a destroy operation.
 - `port` (Number) Default: <code>1433</code>.
 - `username` (String)
 
+#### Optional
+
+- `trust_server_certificate` (Boolean) Trust server certificate Default: <code>false</code>.
+
 

@@ -24,6 +24,9 @@ import (
 	"github.com/polytomic/polytomic-go/v25"
 	ptcore "github.com/polytomic/polytomic-go/v25/core"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
+
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -43,6 +46,18 @@ var Amazon_rds_postgresqlSchema = schema.Schema{
 		},
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
+				"ca_cert": schema.StringAttribute{
+					MarkdownDescription: `CA certificate
+
+    Optional PEM root certificate trusted in addition to the system and Amazon RDS roots. Used by verify-ca and verify-full.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
+					},
+				},
 				"change_detection": schema.BoolAttribute{
 					MarkdownDescription: `Use logical replication for bulk syncs Default: <code>false</code>.`,
 					Required:            false,
@@ -159,6 +174,16 @@ var Amazon_rds_postgresqlSchema = schema.Schema{
 					Computed:            true,
 					Sensitive:           false,
 				},
+				"ssl_mode": schema.StringAttribute{
+					MarkdownDescription: `SSL mode Valid values: <code>require</code>, <code>verify-ca</code>, <code>verify-full</code>. Default: <code>verify-full</code>.`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+					Validators: []validator.String{
+						stringvalidator.OneOf("require", "verify-ca", "verify-full"),
+					},
+				},
 				"tags": schema.MapAttribute{
 					MarkdownDescription: `Additional tags to apply during role assumption`,
 					Required:            false,
@@ -201,6 +226,7 @@ func (t *Amazon_rds_postgresqlConnectionResource) Schema(ctx context.Context, re
 }
 
 type Amazon_rds_postgresqlConf struct {
+	Ca_cert               string            `mapstructure:"ca_cert" tfsdk:"ca_cert"`
 	Change_detection      bool              `mapstructure:"change_detection" tfsdk:"change_detection"`
 	Database              string            `mapstructure:"database" tfsdk:"database"`
 	External_id           string            `mapstructure:"external_id" tfsdk:"external_id"`
@@ -216,6 +242,7 @@ type Amazon_rds_postgresqlConf struct {
 	Ssh_port              int64             `mapstructure:"ssh_port" tfsdk:"ssh_port"`
 	Ssh_private_key       string            `mapstructure:"ssh_private_key" tfsdk:"ssh_private_key"`
 	Ssh_user              string            `mapstructure:"ssh_user" tfsdk:"ssh_user"`
+	Ssl_mode              string            `mapstructure:"ssl_mode" tfsdk:"ssl_mode"`
 	Tags                  map[string]string `mapstructure:"tags" tfsdk:"tags"`
 	Username              string            `mapstructure:"username" tfsdk:"username"`
 }
@@ -294,6 +321,7 @@ func (r *Amazon_rds_postgresqlConnectionResource) Create(ctx context.Context, re
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"ca_cert":               types.StringType,
 		"change_detection":      types.BoolType,
 		"database":              types.StringType,
 		"external_id":           types.StringType,
@@ -309,6 +337,7 @@ func (r *Amazon_rds_postgresqlConnectionResource) Create(ctx context.Context, re
 		"ssh_port":              types.NumberType,
 		"ssh_private_key":       types.StringType,
 		"ssh_user":              types.StringType,
+		"ssl_mode":              types.StringType,
 		"tags": types.MapType{
 			ElemType: types.StringType,
 		}, "username": types.StringType,
@@ -382,6 +411,7 @@ func (r *Amazon_rds_postgresqlConnectionResource) Read(ctx context.Context, req 
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"ca_cert":               types.StringType,
 		"change_detection":      types.BoolType,
 		"database":              types.StringType,
 		"external_id":           types.StringType,
@@ -397,6 +427,7 @@ func (r *Amazon_rds_postgresqlConnectionResource) Read(ctx context.Context, req 
 		"ssh_port":              types.NumberType,
 		"ssh_private_key":       types.StringType,
 		"ssh_user":              types.StringType,
+		"ssl_mode":              types.StringType,
 		"tags": types.MapType{
 			ElemType: types.StringType,
 		}, "username": types.StringType,
@@ -480,6 +511,7 @@ func (r *Amazon_rds_postgresqlConnectionResource) Update(ctx context.Context, re
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"ca_cert":               types.StringType,
 		"change_detection":      types.BoolType,
 		"database":              types.StringType,
 		"external_id":           types.StringType,
@@ -495,6 +527,7 @@ func (r *Amazon_rds_postgresqlConnectionResource) Update(ctx context.Context, re
 		"ssh_port":              types.NumberType,
 		"ssh_private_key":       types.StringType,
 		"ssh_user":              types.StringType,
+		"ssl_mode":              types.StringType,
 		"tags": types.MapType{
 			ElemType: types.StringType,
 		}, "username": types.StringType,
