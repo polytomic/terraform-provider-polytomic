@@ -69,7 +69,7 @@ var GoogleslidesSchema = schema.Schema{
 				"connect_mode": schema.StringAttribute{
 					MarkdownDescription: `Authentication method
 
-    Default: browser Valid values: <code>browser</code>, <code>jwt</code>. Default: <code>browser</code>.`,
+    Default: browser Valid values: <code>browser</code> (OAuth), <code>jwt</code> (Service account). Default: <code>browser</code>.`,
 					Required:  false,
 					Optional:  true,
 					Computed:  true,
@@ -80,9 +80,9 @@ var GoogleslidesSchema = schema.Schema{
 				},
 				"folder_id": schema.SingleNestedAttribute{
 					MarkdownDescription: `Folder`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
 					Sensitive:           false,
 					Attributes: map[string]schema.Attribute{
 						"label": schema.StringAttribute{

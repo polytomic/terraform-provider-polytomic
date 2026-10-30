@@ -36,7 +36,9 @@ data "polytomic_gsheets_connection" "gsheets" {
 
 Read-Only:
 
-- `connect_mode` (String) Default: browser Valid values: <code>browser</code>, <code>jwt</code>. Default: <code>browser</code>.
+- `connect_mode` (String) Authentication method
+
+    Default: browser Valid values: <code>browser</code> (OAuth), <code>jwt</code> (Service account). Default: <code>browser</code>.
 - `has_headers` (Boolean) Columns have headers
 - `spreadsheet_id` (Attributes) Spreadsheet (see [below for nested schema](#nestedatt--configuration--spreadsheet_id))
 - `user_email` (String) Connected user's email

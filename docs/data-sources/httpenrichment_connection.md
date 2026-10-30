@@ -49,12 +49,12 @@ Read-Only:
 - `healthcheck` (String) Health check endpoint
 
     Path to request when checking the health of this connection. No health check will be performed if left empty.
-- `input_mappings` (Attributes Set) Input mappings
+- `input_mappings` (Attributes Set) Input variables
 
     List of input mappings to be used in the query. Each mapping should be a valid JSONPath expression. (see [below for nested schema](#nestedatt--configuration--input_mappings))
-- `method` (String) HTTP method Valid values: <code>GET</code>, <code>POST</code>.
+- `method` (String) HTTP method Valid values: <code>GET</code>, <code>POST</code>. Default: <code>GET</code>.
 - `parameters` (Attributes Set) Query string parameters (see [below for nested schema](#nestedatt--configuration--parameters))
-- `url` (String) Base URL
+- `url` (String) Request URL
 
 <a id="nestedatt--configuration--auth"></a>
 ### Nested Schema for `configuration.auth`
