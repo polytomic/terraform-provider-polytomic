@@ -65,6 +65,9 @@ state before it will take effect on a destroy operation.
 
 #### Optional
 
+- `ca_cert` (String, Sensitive) Additional CA certificate
+
+    PEM root certificate trusted in addition to the system and Amazon RDS roots.
 - `change_detection` (Boolean) Use replication for bulk syncs Default: <code>false</code>.
 - `dbname` (String) Database
 - `ssh` (Boolean) Connect over SSH tunnel
@@ -73,5 +76,6 @@ state before it will take effect on a destroy operation.
 - `ssh_private_key` (String, Sensitive) Private key
 - `ssh_user` (String) SSH user Default: <code>root</code>.
 - `ssl` (Boolean) Use SSL Default: <code>true</code>.
+- `ssl_mode` (String) SSL mode Valid values: <code>REQUIRED</code>, <code>VERIFY_CA</code>, <code>VERIFY_IDENTITY</code>. Default: <code>VERIFY_IDENTITY</code>.
 
 

@@ -24,6 +24,9 @@ import (
 	"github.com/polytomic/polytomic-go/v25"
 	ptcore "github.com/polytomic/polytomic-go/v25/core"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
+
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -49,6 +52,18 @@ var MysqlSchema = schema.Schema{
 					Optional:            false,
 					Computed:            false,
 					Sensitive:           false,
+				},
+				"ca_cert": schema.StringAttribute{
+					MarkdownDescription: `Additional CA certificate
+
+    PEM root certificate trusted in addition to the system and Amazon RDS roots.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
+					},
 				},
 				"change_detection": schema.BoolAttribute{
 					MarkdownDescription: `Use replication for bulk syncs Default: <code>false</code>.`,
@@ -133,6 +148,16 @@ var MysqlSchema = schema.Schema{
 					Computed:            true,
 					Sensitive:           false,
 				},
+				"ssl_mode": schema.StringAttribute{
+					MarkdownDescription: `SSL mode Valid values: <code>REQUIRED</code>, <code>VERIFY_CA</code>, <code>VERIFY_IDENTITY</code>. Default: <code>VERIFY_IDENTITY</code>.`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+					Validators: []validator.String{
+						stringvalidator.OneOf("REQUIRED", "VERIFY_CA", "VERIFY_IDENTITY"),
+					},
+				},
 			},
 
 			Required: true,
@@ -161,6 +186,7 @@ func (t *MysqlConnectionResource) Schema(ctx context.Context, req resource.Schem
 
 type MysqlConf struct {
 	Account          string `mapstructure:"account" tfsdk:"account"`
+	Ca_cert          string `mapstructure:"ca_cert" tfsdk:"ca_cert"`
 	Change_detection bool   `mapstructure:"change_detection" tfsdk:"change_detection"`
 	Dbname           string `mapstructure:"dbname" tfsdk:"dbname"`
 	Hostname         string `mapstructure:"hostname" tfsdk:"hostname"`
@@ -172,6 +198,7 @@ type MysqlConf struct {
 	Ssh_private_key  string `mapstructure:"ssh_private_key" tfsdk:"ssh_private_key"`
 	Ssh_user         string `mapstructure:"ssh_user" tfsdk:"ssh_user"`
 	Ssl              bool   `mapstructure:"ssl" tfsdk:"ssl"`
+	Ssl_mode         string `mapstructure:"ssl_mode" tfsdk:"ssl_mode"`
 }
 
 type MysqlConnectionResource struct {
@@ -249,6 +276,7 @@ func (r *MysqlConnectionResource) Create(ctx context.Context, req resource.Creat
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"account":          types.StringType,
+		"ca_cert":          types.StringType,
 		"change_detection": types.BoolType,
 		"dbname":           types.StringType,
 		"hostname":         types.StringType,
@@ -260,6 +288,7 @@ func (r *MysqlConnectionResource) Create(ctx context.Context, req resource.Creat
 		"ssh_private_key":  types.StringType,
 		"ssh_user":         types.StringType,
 		"ssl":              types.BoolType,
+		"ssl_mode":         types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -331,6 +360,7 @@ func (r *MysqlConnectionResource) Read(ctx context.Context, req resource.ReadReq
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"account":          types.StringType,
+		"ca_cert":          types.StringType,
 		"change_detection": types.BoolType,
 		"dbname":           types.StringType,
 		"hostname":         types.StringType,
@@ -342,6 +372,7 @@ func (r *MysqlConnectionResource) Read(ctx context.Context, req resource.ReadReq
 		"ssh_private_key":  types.StringType,
 		"ssh_user":         types.StringType,
 		"ssl":              types.BoolType,
+		"ssl_mode":         types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -423,6 +454,7 @@ func (r *MysqlConnectionResource) Update(ctx context.Context, req resource.Updat
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"account":          types.StringType,
+		"ca_cert":          types.StringType,
 		"change_detection": types.BoolType,
 		"dbname":           types.StringType,
 		"hostname":         types.StringType,
@@ -434,6 +466,7 @@ func (r *MysqlConnectionResource) Update(ctx context.Context, req resource.Updat
 		"ssh_private_key":  types.StringType,
 		"ssh_user":         types.StringType,
 		"ssl":              types.BoolType,
+		"ssl_mode":         types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

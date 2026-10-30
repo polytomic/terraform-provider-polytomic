@@ -60,8 +60,10 @@ func (d *AzureblobConnectionDataSource) Schema(ctx context.Context, req datasour
 						Computed:            true,
 					},
 					"client_id": schema.StringAttribute{
-						MarkdownDescription: `Client ID`,
-						Computed:            true,
+						MarkdownDescription: `Client ID
+
+    Can be used with auth_method oauth to use custom oauth`,
+						Computed: true,
 					},
 					"container_name": schema.StringAttribute{
 						MarkdownDescription: `Container name`,

@@ -63,6 +63,10 @@ func (d *SynapseConnectionDataSource) Schema(ctx context.Context, req datasource
 						MarkdownDescription: `Default: <code>1433</code>.`,
 						Computed:            true,
 					},
+					"trust_server_certificate": schema.BoolAttribute{
+						MarkdownDescription: `Trust server certificate Default: <code>false</code>.`,
+						Computed:            true,
+					},
 					"username": schema.StringAttribute{
 						MarkdownDescription: ``,
 						Computed:            true,
@@ -75,10 +79,11 @@ func (d *SynapseConnectionDataSource) Schema(ctx context.Context, req datasource
 }
 
 type SynapseDataSourceConf struct {
-	Database string `mapstructure:"database" tfsdk:"database"`
-	Hostname string `mapstructure:"hostname" tfsdk:"hostname"`
-	Port     int64  `mapstructure:"port" tfsdk:"port"`
-	Username string `mapstructure:"username" tfsdk:"username"`
+	Database                 string `mapstructure:"database" tfsdk:"database"`
+	Hostname                 string `mapstructure:"hostname" tfsdk:"hostname"`
+	Port                     int64  `mapstructure:"port" tfsdk:"port"`
+	Trust_server_certificate bool   `mapstructure:"trust_server_certificate" tfsdk:"trust_server_certificate"`
+	Username                 string `mapstructure:"username" tfsdk:"username"`
 }
 
 func (d *SynapseConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
@@ -116,10 +121,11 @@ func (d *SynapseConnectionDataSource) Read(ctx context.Context, req datasource.R
 
 	var diags diag.Diagnostics
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"database": types.StringType,
-		"hostname": types.StringType,
-		"port":     types.NumberType,
-		"username": types.StringType,
+		"database":                 types.StringType,
+		"hostname":                 types.StringType,
+		"port":                     types.NumberType,
+		"trust_server_certificate": types.BoolType,
+		"username":                 types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

@@ -60,7 +60,7 @@ state before it will take effect on a destroy operation.
 - `client_secret` (String, Sensitive)
 - `custom_reports` (String) Custom reports
 
-    One report per line. Format: name:report_level:aggregate:dimensions:metrics. Example: my_report:auction_basic_campaign:daily:campaign_id
+    One report per line. Format: name:report_level:aggregate:dimensions:metrics. Example: my_report:auction_basic_campaign:daily:campaign_id,country_code:spend,impressions,clicks
 
 #### Read-Only
 
