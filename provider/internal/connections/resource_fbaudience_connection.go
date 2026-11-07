@@ -99,11 +99,13 @@ var FbaudienceSchema = schema.Schema{
 					},
 				},
 				"graph_api_version": schema.StringAttribute{
-					MarkdownDescription: `Graph API version Default: <code>v24.0</code>.`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
+					MarkdownDescription: `Graph API version (deprecated)
+
+    Deprecated. Accepted and returned for compatibility, but ignored. The connector manages the Graph API version automatically.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
 				},
 				"user_name": schema.StringAttribute{
 					MarkdownDescription: `Connected as`,

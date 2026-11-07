@@ -54,6 +54,8 @@ Read-Only:
     The container which we will stage files in
 - `databricks_auth_mode` (String) Authentication method Valid values: <code>access_token</code> (Access Token), <code>oauth_service_principal</code> (OAuth Service Principal). Default: <code>access_token</code>.
 - `deleted_file_retention_days` (Number) Deleted file retention
+
+    Used to set number of days to retain deleted files for. Will only be enforced if set_retention_properties is true
 - `enable_delta_uniform` (Boolean) Enable Delta UniForm tables Default: <code>false</code>.
 - `enforce_query_limit` (Boolean) Limit concurrent queries Default: <code>false</code>.
 - `external_id` (String) External ID
@@ -63,6 +65,8 @@ Read-Only:
 - `iam_role_arn` (String) IAM role ARN
 - `include_hive_metastore` (Boolean) Include legacy Hive metastore tables Default: <code>false</code>.
 - `log_file_retention_days` (Number) Log retention
+
+    Used to set number of days to retain logs for. Will only be enforced if set_retention_properties is true
 - `port` (Number) Default: <code>443</code>.
 - `s3_bucket_name` (String) S3 bucket name (destinations only)
 
@@ -73,6 +77,8 @@ Read-Only:
 - `server_hostname` (String) Server hostname
 - `service_principal_id` (String) Service principal ID
 - `set_retention_properties` (Boolean) Configure data retention for tables
+
+    Used to set retention properties for tables. deleted_file_retention_days and/or log_file_retention_days must be set, as well.
 - `ssh` (Boolean) Connect over SSH tunnel
 - `ssh_blob_storage` (Boolean) Use SSH for cloud storage bucket Default: <code>false</code>.
 - `ssh_host` (String) SSH host

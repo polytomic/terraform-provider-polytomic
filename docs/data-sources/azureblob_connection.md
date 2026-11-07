@@ -39,6 +39,8 @@ Read-Only:
 - `account_name` (String) Account name
 - `auth_method` (String) Authentication method Valid values: <code>access_key</code> (Access key), <code>client_credentials</code> (Client credentials), <code>oauth</code> (OAuth). Default: <code>access_key</code>.
 - `client_id` (String) Client ID
+
+    Can be used with auth_method oauth to use custom oauth
 - `container_name` (String) Container name
 - `csv_has_headers` (Boolean) CSV files have headers
 

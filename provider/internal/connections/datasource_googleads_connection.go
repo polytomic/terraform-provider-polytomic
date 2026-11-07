@@ -74,7 +74,7 @@ func (d *GoogleadsConnectionDataSource) Schema(ctx context.Context, req datasour
 					"blanket_user_consent": schema.BoolAttribute{
 						MarkdownDescription: `All transmitted users consented to ad personalization and information sharing with Google Ads
 
-    Causes this connection to send signals to Google Ads indicating that every transmitted user has accepted ad personalization and data sharing policies. This will cause the user to be included in more advertising functions`,
+    Causes this connection to send signals to Google Ads indicating that every transmitted user has accepted ad personalization and data sharing policies. This will cause the user to be included in more advertising functions, but requires you to have obtained express consent.`,
 						Computed: true,
 					},
 					"connected_user": schema.StringAttribute{
@@ -84,7 +84,7 @@ func (d *GoogleadsConnectionDataSource) Schema(ctx context.Context, req datasour
 					"custom_reports": schema.StringAttribute{
 						MarkdownDescription: `Custom reports
 
-    One report per line. Format is a report name:ads object:field list. e.g. myReport:ad_groups:campaign.id`,
+    One report per line. Format is a report name:ads object:field list. e.g. myReport:ad_groups:campaign.id,metrics.clicks`,
 						Computed: true,
 					},
 					"use_data_manager_apis": schema.BoolAttribute{

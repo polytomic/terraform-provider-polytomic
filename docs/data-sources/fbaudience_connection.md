@@ -39,7 +39,9 @@ Read-Only:
 - `accounts` (Attributes Set) (see [below for nested schema](#nestedatt--configuration--accounts))
 - `auth_method` (String) Authentication method Valid values: <code>oauth</code> (OAuth), <code>token</code> (Token). Default: <code>oauth</code>.
 - `auto_add_accounts` (Boolean) Automatically add new accounts
-- `graph_api_version` (String) Graph API version Default: <code>v24.0</code>.
+- `graph_api_version` (String) Graph API version (deprecated)
+
+    Deprecated. Accepted and returned for compatibility, but ignored. The connector manages the Graph API version automatically.
 - `user_name` (String) Connected as
 
 <a id="nestedatt--configuration--accounts"></a>

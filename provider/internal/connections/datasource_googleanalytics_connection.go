@@ -62,7 +62,7 @@ func (d *GoogleanalyticsConnectionDataSource) Schema(ctx context.Context, req da
 					"custom_reports": schema.StringAttribute{
 						MarkdownDescription: `Custom reports
 
-    One report per line. Format is a report name followed by a comma-separated list of fields. e.g. newUsersByDay:date`,
+    One report per line. Format is a report name followed by a comma-separated list of fields. e.g. newUsersByDay:date,newUsers`,
 						Computed: true,
 					},
 					"properties": schema.SetNestedAttribute{

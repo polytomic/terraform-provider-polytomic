@@ -61,6 +61,7 @@ Read-Only:
 - `ssh_host` (String) SSH host
 - `ssh_port` (Number) SSH port Default: <code>22</code>.
 - `ssh_user` (String) SSH user Default: <code>root</code>.
+- `ssl_mode` (String) SSL mode Valid values: <code>require</code>, <code>verify-ca</code>, <code>verify-full</code>. Default: <code>verify-full</code>.
 - `use_bulk_sync_staging_schema` (Boolean) Use custom bulk sync staging schema Default: <code>false</code>.
 - `username` (String)
 

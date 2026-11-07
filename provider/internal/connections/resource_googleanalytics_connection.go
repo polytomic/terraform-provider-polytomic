@@ -86,7 +86,7 @@ var GoogleanalyticsSchema = schema.Schema{
 				"custom_reports": schema.StringAttribute{
 					MarkdownDescription: `Custom reports
 
-    One report per line. Format is a report name followed by a comma-separated list of fields. e.g. newUsersByDay:date`,
+    One report per line. Format is a report name followed by a comma-separated list of fields. e.g. newUsersByDay:date,newUsers`,
 					Required:  false,
 					Optional:  true,
 					Computed:  true,

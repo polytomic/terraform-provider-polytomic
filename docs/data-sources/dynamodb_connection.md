@@ -45,7 +45,7 @@ Read-Only:
 
     External ID for the IAM role
 - `iam_role_arn` (String) IAM role ARN
-- `managed_streams` (Boolean) Let Polytomic manage DynamoDB stream settings
+- `managed_streams` (Boolean) Let Polytomic manage DynamoDB Streams settings
 - `region` (String) AWS region
 
 

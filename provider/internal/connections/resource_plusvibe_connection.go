@@ -55,9 +55,9 @@ var PlusvibeSchema = schema.Schema{
 				},
 				"workspaces": schema.SetNestedAttribute{
 					MarkdownDescription: ``,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
 					Sensitive:           false,
 					NestedObject: schema.NestedAttributeObject{
 						Attributes: map[string]schema.Attribute{

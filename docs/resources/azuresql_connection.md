@@ -79,5 +79,6 @@ state before it will take effect on a destroy operation.
 - `ssh_private_key` (String, Sensitive) Private key
 - `ssh_user` (String) SSH user Default: <code>root</code>.
 - `ssl` (Boolean) Use SSL Default: <code>true</code>.
+- `trust_server_certificate` (Boolean) Trust server certificate Default: <code>false</code>.
 
 

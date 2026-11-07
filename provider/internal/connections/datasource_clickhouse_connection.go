@@ -121,10 +121,6 @@ func (d *ClickhouseConnectionDataSource) Schema(ctx context.Context, req datasou
 						MarkdownDescription: `S3 bucket region (destinations only)`,
 						Computed:            true,
 					},
-					"skip_verify": schema.BoolAttribute{
-						MarkdownDescription: `Skip certificate verification Default: <code>true</code>.`,
-						Computed:            true,
-					},
 					"ssh": schema.BoolAttribute{
 						MarkdownDescription: `Connect over SSH tunnel`,
 						Computed:            true,
@@ -143,6 +139,10 @@ func (d *ClickhouseConnectionDataSource) Schema(ctx context.Context, req datasou
 					},
 					"ssl": schema.BoolAttribute{
 						MarkdownDescription: `Use SSL Default: <code>true</code>.`,
+						Computed:            true,
+					},
+					"ssl_mode": schema.StringAttribute{
+						MarkdownDescription: `SSL mode Valid values: <code>TRUST</code> (Encrypt only), <code>VERIFY_CA</code> (Encrypt, require certificate), <code>STRICT</code> (Encrypt, verify certificate). Default: <code>STRICT</code>.`,
 						Computed:            true,
 					},
 					"username": schema.StringAttribute{
@@ -172,12 +172,12 @@ type ClickhouseDataSourceConf struct {
 	Port               int64  `mapstructure:"port" tfsdk:"port"`
 	S3_bucket_name     string `mapstructure:"s3_bucket_name" tfsdk:"s3_bucket_name"`
 	S3_bucket_region   string `mapstructure:"s3_bucket_region" tfsdk:"s3_bucket_region"`
-	Skip_verify        bool   `mapstructure:"skip_verify" tfsdk:"skip_verify"`
 	Ssh                bool   `mapstructure:"ssh" tfsdk:"ssh"`
 	Ssh_host           string `mapstructure:"ssh_host" tfsdk:"ssh_host"`
 	Ssh_port           int64  `mapstructure:"ssh_port" tfsdk:"ssh_port"`
 	Ssh_user           string `mapstructure:"ssh_user" tfsdk:"ssh_user"`
 	Ssl                bool   `mapstructure:"ssl" tfsdk:"ssl"`
+	Ssl_mode           string `mapstructure:"ssl_mode" tfsdk:"ssl_mode"`
 	Username           string `mapstructure:"username" tfsdk:"username"`
 }
 
@@ -231,12 +231,12 @@ func (d *ClickhouseConnectionDataSource) Read(ctx context.Context, req datasourc
 		"port":               types.NumberType,
 		"s3_bucket_name":     types.StringType,
 		"s3_bucket_region":   types.StringType,
-		"skip_verify":        types.BoolType,
 		"ssh":                types.BoolType,
 		"ssh_host":           types.StringType,
 		"ssh_port":           types.NumberType,
 		"ssh_user":           types.StringType,
 		"ssl":                types.BoolType,
+		"ssl_mode":           types.StringType,
 		"username":           types.StringType,
 	}, conf)
 	if diags.HasError() {

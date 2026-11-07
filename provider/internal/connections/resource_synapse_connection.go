@@ -74,6 +74,13 @@ var SynapseSchema = schema.Schema{
 					Computed:            false,
 					Sensitive:           false,
 				},
+				"trust_server_certificate": schema.BoolAttribute{
+					MarkdownDescription: `Trust server certificate Default: <code>false</code>.`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+				},
 				"username": schema.StringAttribute{
 					MarkdownDescription: ``,
 					Required:            true,
@@ -108,11 +115,12 @@ func (t *SynapseConnectionResource) Schema(ctx context.Context, req resource.Sch
 }
 
 type SynapseConf struct {
-	Database string `mapstructure:"database" tfsdk:"database"`
-	Hostname string `mapstructure:"hostname" tfsdk:"hostname"`
-	Password string `mapstructure:"password" tfsdk:"password"`
-	Port     int64  `mapstructure:"port" tfsdk:"port"`
-	Username string `mapstructure:"username" tfsdk:"username"`
+	Database                 string `mapstructure:"database" tfsdk:"database"`
+	Hostname                 string `mapstructure:"hostname" tfsdk:"hostname"`
+	Password                 string `mapstructure:"password" tfsdk:"password"`
+	Port                     int64  `mapstructure:"port" tfsdk:"port"`
+	Trust_server_certificate bool   `mapstructure:"trust_server_certificate" tfsdk:"trust_server_certificate"`
+	Username                 string `mapstructure:"username" tfsdk:"username"`
 }
 
 type SynapseConnectionResource struct {
@@ -189,11 +197,12 @@ func (r *SynapseConnectionResource) Create(ctx context.Context, req resource.Cre
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"database": types.StringType,
-		"hostname": types.StringType,
-		"password": types.StringType,
-		"port":     types.NumberType,
-		"username": types.StringType,
+		"database":                 types.StringType,
+		"hostname":                 types.StringType,
+		"password":                 types.StringType,
+		"port":                     types.NumberType,
+		"trust_server_certificate": types.BoolType,
+		"username":                 types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -264,11 +273,12 @@ func (r *SynapseConnectionResource) Read(ctx context.Context, req resource.ReadR
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"database": types.StringType,
-		"hostname": types.StringType,
-		"password": types.StringType,
-		"port":     types.NumberType,
-		"username": types.StringType,
+		"database":                 types.StringType,
+		"hostname":                 types.StringType,
+		"password":                 types.StringType,
+		"port":                     types.NumberType,
+		"trust_server_certificate": types.BoolType,
+		"username":                 types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -349,11 +359,12 @@ func (r *SynapseConnectionResource) Update(ctx context.Context, req resource.Upd
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"database": types.StringType,
-		"hostname": types.StringType,
-		"password": types.StringType,
-		"port":     types.NumberType,
-		"username": types.StringType,
+		"database":                 types.StringType,
+		"hostname":                 types.StringType,
+		"password":                 types.StringType,
+		"port":                     types.NumberType,
+		"trust_server_certificate": types.BoolType,
+		"username":                 types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
