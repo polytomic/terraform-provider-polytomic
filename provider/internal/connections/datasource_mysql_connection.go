@@ -91,6 +91,10 @@ func (d *MysqlConnectionDataSource) Schema(ctx context.Context, req datasource.S
 						MarkdownDescription: `Use SSL Default: <code>true</code>.`,
 						Computed:            true,
 					},
+					"ssl_mode": schema.StringAttribute{
+						MarkdownDescription: `SSL mode Valid values: <code>REQUIRED</code>, <code>VERIFY_CA</code>, <code>VERIFY_IDENTITY</code>. Default: <code>VERIFY_IDENTITY</code>.`,
+						Computed:            true,
+					},
 				},
 				Optional: true,
 			},
@@ -109,6 +113,7 @@ type MysqlDataSourceConf struct {
 	Ssh_port         int64  `mapstructure:"ssh_port" tfsdk:"ssh_port"`
 	Ssh_user         string `mapstructure:"ssh_user" tfsdk:"ssh_user"`
 	Ssl              bool   `mapstructure:"ssl" tfsdk:"ssl"`
+	Ssl_mode         string `mapstructure:"ssl_mode" tfsdk:"ssl_mode"`
 }
 
 func (d *MysqlConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
@@ -156,6 +161,7 @@ func (d *MysqlConnectionDataSource) Read(ctx context.Context, req datasource.Rea
 		"ssh_port":         types.NumberType,
 		"ssh_user":         types.StringType,
 		"ssl":              types.BoolType,
+		"ssl_mode":         types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

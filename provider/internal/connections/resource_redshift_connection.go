@@ -194,6 +194,16 @@ var RedshiftSchema = schema.Schema{
 					Computed:            true,
 					Sensitive:           false,
 				},
+				"ssl_mode": schema.StringAttribute{
+					MarkdownDescription: `SSL mode Valid values: <code>require</code>, <code>verify-ca</code>, <code>verify-full</code>. Default: <code>verify-full</code>.`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+					Validators: []validator.String{
+						stringvalidator.OneOf("require", "verify-ca", "verify-full"),
+					},
+				},
 				"use_bulk_sync_staging_schema": schema.BoolAttribute{
 					MarkdownDescription: `Use custom bulk sync staging schema Default: <code>false</code>.`,
 					Required:            false,
@@ -253,6 +263,7 @@ type RedshiftConf struct {
 	Ssh_port                     int64  `mapstructure:"ssh_port" tfsdk:"ssh_port"`
 	Ssh_private_key              string `mapstructure:"ssh_private_key" tfsdk:"ssh_private_key"`
 	Ssh_user                     string `mapstructure:"ssh_user" tfsdk:"ssh_user"`
+	Ssl_mode                     string `mapstructure:"ssl_mode" tfsdk:"ssl_mode"`
 	Use_bulk_sync_staging_schema bool   `mapstructure:"use_bulk_sync_staging_schema" tfsdk:"use_bulk_sync_staging_schema"`
 	Username                     string `mapstructure:"username" tfsdk:"username"`
 }
@@ -349,6 +360,7 @@ func (r *RedshiftConnectionResource) Create(ctx context.Context, req resource.Cr
 		"ssh_port":                     types.NumberType,
 		"ssh_private_key":              types.StringType,
 		"ssh_user":                     types.StringType,
+		"ssl_mode":                     types.StringType,
 		"use_bulk_sync_staging_schema": types.BoolType,
 		"username":                     types.StringType,
 	}, conf)
@@ -439,6 +451,7 @@ func (r *RedshiftConnectionResource) Read(ctx context.Context, req resource.Read
 		"ssh_port":                     types.NumberType,
 		"ssh_private_key":              types.StringType,
 		"ssh_user":                     types.StringType,
+		"ssl_mode":                     types.StringType,
 		"use_bulk_sync_staging_schema": types.BoolType,
 		"username":                     types.StringType,
 	}, conf)
@@ -539,6 +552,7 @@ func (r *RedshiftConnectionResource) Update(ctx context.Context, req resource.Up
 		"ssh_port":                     types.NumberType,
 		"ssh_private_key":              types.StringType,
 		"ssh_user":                     types.StringType,
+		"ssl_mode":                     types.StringType,
 		"use_bulk_sync_staging_schema": types.BoolType,
 		"username":                     types.StringType,
 	}, conf)

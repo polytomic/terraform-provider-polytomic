@@ -290,7 +290,7 @@ var HttpenrichmentSchema = schema.Schema{
 					Sensitive: false,
 				},
 				"input_mappings": schema.SetNestedAttribute{
-					MarkdownDescription: `Input mappings
+					MarkdownDescription: `Input variables
 
     List of input mappings to be used in the query. Each mapping should be a valid JSONPath expression.`,
 					Required:  false,
@@ -324,7 +324,7 @@ var HttpenrichmentSchema = schema.Schema{
 					},
 				},
 				"method": schema.StringAttribute{
-					MarkdownDescription: `HTTP method Valid values: <code>GET</code>, <code>POST</code>.`,
+					MarkdownDescription: `HTTP method Valid values: <code>GET</code>, <code>POST</code>. Default: <code>GET</code>.`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
@@ -359,7 +359,7 @@ var HttpenrichmentSchema = schema.Schema{
 					},
 				},
 				"url": schema.StringAttribute{
-					MarkdownDescription: `Base URL`,
+					MarkdownDescription: `Request URL`,
 					Required:            true,
 					Optional:            false,
 					Computed:            false,

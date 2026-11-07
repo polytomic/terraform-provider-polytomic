@@ -47,6 +47,7 @@ Read-Only:
 - `ssh_port` (Number) SSH port Default: <code>22</code>.
 - `ssh_user` (String) SSH user Default: <code>root</code>.
 - `ssl` (Boolean) Use SSL Default: <code>true</code>.
+- `trust_server_certificate` (Boolean) Trust server certificate Default: <code>false</code>.
 - `username` (String)
 
 

@@ -97,6 +97,10 @@ func (d *RedshiftserverlessConnectionDataSource) Schema(ctx context.Context, req
 						MarkdownDescription: `S3 bucket region (destination/unload support only)`,
 						Computed:            true,
 					},
+					"ssl_mode": schema.StringAttribute{
+						MarkdownDescription: `SSL mode Valid values: <code>require</code>, <code>verify-ca</code>, <code>verify-full</code>. Default: <code>verify-full</code>.`,
+						Computed:            true,
+					},
 					"use_bulk_sync_staging_schema": schema.BoolAttribute{
 						MarkdownDescription: `Use custom bulk sync staging schema Default: <code>false</code>.`,
 						Computed:            true,
@@ -128,6 +132,7 @@ type RedshiftserverlessDataSourceConf struct {
 	Region                       string `mapstructure:"region" tfsdk:"region"`
 	S3_bucket_name               string `mapstructure:"s3_bucket_name" tfsdk:"s3_bucket_name"`
 	S3_bucket_region             string `mapstructure:"s3_bucket_region" tfsdk:"s3_bucket_region"`
+	Ssl_mode                     string `mapstructure:"ssl_mode" tfsdk:"ssl_mode"`
 	Use_bulk_sync_staging_schema bool   `mapstructure:"use_bulk_sync_staging_schema" tfsdk:"use_bulk_sync_staging_schema"`
 	Use_unload                   bool   `mapstructure:"use_unload" tfsdk:"use_unload"`
 	Workgroup                    string `mapstructure:"workgroup" tfsdk:"workgroup"`
@@ -179,6 +184,7 @@ func (d *RedshiftserverlessConnectionDataSource) Read(ctx context.Context, req d
 		"region":                       types.StringType,
 		"s3_bucket_name":               types.StringType,
 		"s3_bucket_region":             types.StringType,
+		"ssl_mode":                     types.StringType,
 		"use_bulk_sync_staging_schema": types.BoolType,
 		"use_unload":                   types.BoolType,
 		"workgroup":                    types.StringType,

@@ -115,6 +115,10 @@ func (d *Amazon_rds_postgresqlConnectionDataSource) Schema(ctx context.Context, 
 						MarkdownDescription: `SSH user Default: <code>root</code>.`,
 						Computed:            true,
 					},
+					"ssl_mode": schema.StringAttribute{
+						MarkdownDescription: `SSL mode Valid values: <code>require</code>, <code>verify-ca</code>, <code>verify-full</code>. Default: <code>verify-full</code>.`,
+						Computed:            true,
+					},
 					"tags": schema.MapAttribute{
 						MarkdownDescription: `Additional tags to apply during role assumption`,
 						Computed:            true,
@@ -146,6 +150,7 @@ type Amazon_rds_postgresqlDataSourceConf struct {
 	Ssh_host              string            `mapstructure:"ssh_host" tfsdk:"ssh_host"`
 	Ssh_port              int64             `mapstructure:"ssh_port" tfsdk:"ssh_port"`
 	Ssh_user              string            `mapstructure:"ssh_user" tfsdk:"ssh_user"`
+	Ssl_mode              string            `mapstructure:"ssl_mode" tfsdk:"ssl_mode"`
 	Tags                  map[string]string `mapstructure:"tags" tfsdk:"tags"`
 	Username              string            `mapstructure:"username" tfsdk:"username"`
 }
@@ -199,6 +204,7 @@ func (d *Amazon_rds_postgresqlConnectionDataSource) Read(ctx context.Context, re
 		"ssh_host":              types.StringType,
 		"ssh_port":              types.NumberType,
 		"ssh_user":              types.StringType,
+		"ssl_mode":              types.StringType,
 		"tags": types.MapType{
 			ElemType: types.StringType,
 		}, "username": types.StringType,

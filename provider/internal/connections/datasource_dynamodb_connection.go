@@ -76,7 +76,7 @@ func (d *DynamodbConnectionDataSource) Schema(ctx context.Context, req datasourc
 						Computed:            true,
 					},
 					"managed_streams": schema.BoolAttribute{
-						MarkdownDescription: `Let Polytomic manage DynamoDB stream settings`,
+						MarkdownDescription: `Let Polytomic manage DynamoDB Streams settings`,
 						Computed:            true,
 					},
 					"region": schema.StringAttribute{

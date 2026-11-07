@@ -57,11 +57,11 @@ state before it will take effect on a destroy operation.
 
 #### Optional
 
-- `auto_add_profiles` (Boolean) Automatically add new profiles
+- `auto_add_profiles` (Boolean) Automatically add new accounts
 - `client_id` (String, Sensitive) Client ID
 - `client_secret` (String, Sensitive) Client secret
 - `oauth_refresh_token` (String, Sensitive)
-- `profiles` (Attributes Set) See [below for nested schema](#nestedatt--configuration--profiles).
+- `profiles` (Attributes Set) Accounts See [below for nested schema](#nestedatt--configuration--profiles).
 
 
 <a id="nestedatt--configuration--profiles"></a>

@@ -52,11 +52,11 @@ func (d *Amazon_adsConnectionDataSource) Schema(ctx context.Context, req datasou
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"auto_add_profiles": schema.BoolAttribute{
-						MarkdownDescription: `Automatically add new profiles`,
+						MarkdownDescription: `Automatically add new accounts`,
 						Computed:            true,
 					},
 					"profiles": schema.SetNestedAttribute{
-						MarkdownDescription: ``,
+						MarkdownDescription: `Accounts`,
 						Computed:            true,
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{

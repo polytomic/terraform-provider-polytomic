@@ -17,9 +17,8 @@ For detailed configuration guidance, see the [Facebook Ads connection guide](htt
 resource "polytomic_fbaudience_connection" "fbaudience" {
   name = "example"
   configuration = {
-    auth_method       = "token"
-    byo_app_token     = "secret"
-    graph_api_version = "v24.0"
+    auth_method   = "token"
+    byo_app_token = "secret"
   }
 }
 ```
@@ -63,7 +62,9 @@ state before it will take effect on a destroy operation.
 - `accounts` (Attributes Set) See [below for nested schema](#nestedatt--configuration--accounts).
 - `auto_add_accounts` (Boolean) Automatically add new accounts
 - `byo_app_token` (String, Sensitive) Token
-- `graph_api_version` (String) Graph API version Default: <code>v24.0</code>.
+- `graph_api_version` (String) Graph API version (deprecated)
+
+    Deprecated. Accepted and returned for compatibility, but ignored. The connector manages the Graph API version automatically.
 
 #### Read-Only
 

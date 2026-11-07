@@ -54,7 +54,9 @@ state before it will take effect on a destroy operation.
 - `accounts` (Attributes Set) See [below for nested schema](#nestedatt--configuration--accounts).
 - `auto_add_accounts` (Boolean) Automatically add new accounts
 - `byo_app_token` (String, Sensitive) Token
-- `graph_api_version` (String) Graph API version Default: <code>v24.0</code>.
+- `graph_api_version` (String) Graph API version (deprecated)
+
+    Deprecated. Accepted and returned for compatibility, but ignored. The connector manages the Graph API version automatically.
 
 #### Read-Only
 
