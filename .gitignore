@@ -37,3 +37,6 @@ website/vendor
 *.winfile eol=crlf
 
 terraform-provider-polytomic
+
+# Amp's per-orb portal metadata
+.amp/portals/*

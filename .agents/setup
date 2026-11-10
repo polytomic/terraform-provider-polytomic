@@ -1,0 +1,74 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+cd "$(dirname "${BASH_SOURCE[0]}")/.."
+SECONDS=0
+trap 'echo "Orb setup finished after ${SECONDS}s (exit $?)"' EXIT
+
+echo '==> Checking system prerequisites'
+packages=()
+for package in ca-certificates curl jq unzip tar build-essential; do
+  if ! dpkg-query -W -f='${Status}' "$package" 2>/dev/null | grep -qx 'install ok installed'; then
+    packages+=("$package")
+  fi
+done
+if ((${#packages[@]})); then
+  sudo apt-get update
+  sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y "${packages[@]}"
+fi
+
+case "$(uname -m)" in
+  x86_64) arch=amd64 ;;
+  aarch64) arch=arm64 ;;
+  *) echo 'Unsupported orb architecture' >&2; exit 1 ;;
+esac
+
+tmp="$(mktemp -d)"
+trap 'status=$?; rm -rf "$tmp"; echo "Orb setup finished after ${SECONDS}s (exit $status)"' EXIT
+
+# Match CI: go.mod owns the Go version. Install in the standard system PATH so
+# subsequent non-interactive login shells and supervised services see the tools.
+go_version="$(awk '$1 == "go" {print $2}' go.mod)"
+echo "==> Preparing Go $go_version (${SECONDS}s)"
+if ! command -v go >/dev/null || [[ "$(GOTOOLCHAIN=local go version)" != "go version go${go_version} linux/${arch}" ]]; then
+  archive="go${go_version}.linux-${arch}.tar.gz"
+  checksum="$(curl -fsSL --retry 3 'https://go.dev/dl/?mode=json&include=all' |
+    jq -er --arg archive "$archive" '.[] | .files[] | select(.filename == $archive) | .sha256')"
+  curl -fsSL --retry 3 "https://go.dev/dl/$archive" -o "$tmp/$archive"
+  (cd "$tmp"; printf '%s  %s\n' "$checksum" "$archive" | sha256sum -c -)
+  sudo rm -rf /usr/local/go
+  sudo tar -C /usr/local -xzf "$tmp/$archive"
+  sudo ln -sf /usr/local/go/bin/go /usr/local/bin/go
+  sudo ln -sf /usr/local/go/bin/gofmt /usr/local/bin/gofmt
+fi
+
+# Terraform has no repository version pin; keep orb installs reproducible.
+terraform_version=1.17.1
+echo "==> Preparing Terraform $terraform_version (${SECONDS}s)"
+if ! command -v terraform >/dev/null || [[ "$(terraform version -json | jq -r .terraform_version)" != "$terraform_version" ]]; then
+  archive="terraform_${terraform_version}_linux_${arch}.zip"
+  base="https://releases.hashicorp.com/terraform/$terraform_version"
+  curl -fsSL --retry 3 "$base/$archive" -o "$tmp/$archive"
+  curl -fsSL --retry 3 "$base/terraform_${terraform_version}_SHA256SUMS" -o "$tmp/SHA256SUMS"
+  (cd "$tmp"; grep "  $archive\$" SHA256SUMS | sha256sum -c -; unzip -q "$archive")
+  sudo install -m 0755 "$tmp/terraform" /usr/local/bin/terraform
+fi
+
+echo "==> Downloading locked Go modules (${SECONDS}s)"
+go mod download
+
+echo "==> Preparing goimports (${SECONDS}s)"
+tools_version="$(go list -m -f '{{.Version}}' golang.org/x/tools)"
+installed_version=''
+if command -v goimports >/dev/null; then
+  installed_version="$(go version -m "$(command -v goimports)" | awk '$1 == "mod" && $2 == "golang.org/x/tools" {print $3}')"
+fi
+if [[ "$installed_version" != "$tools_version" ]]; then
+  GOBIN="$tmp" go install "golang.org/x/tools/cmd/goimports@$tools_version"
+  sudo install -m 0755 "$tmp/goimports" /usr/local/bin/goimports
+fi
+
+# Cache compilation without running generators (which rewrite tracked files) or
+# acceptance tests (which require credentials and an external Polytomic stack).
+echo "==> Warming Go build cache (${SECONDS}s)"
+go build ./...

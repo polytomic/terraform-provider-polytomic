@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Tools and caches survive pause/resume; no downloads or authentication needed.
+for tool in go terraform goimports; do
+  command -v "$tool" >/dev/null || {
+    echo "Missing $tool; rerun .agents/setup" >&2
+    exit 1
+  }
+done
