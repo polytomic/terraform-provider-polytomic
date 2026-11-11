@@ -78,6 +78,8 @@ func typeConverter(value any) cty.Value {
 					continue
 				}
 				config[k] = cty.ListVal(vals)
+			case []map[string]any:
+				config[k] = typeConverter(v)
 			case []any:
 				if len(v) == 0 {
 					continue

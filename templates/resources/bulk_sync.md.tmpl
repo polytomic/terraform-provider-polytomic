@@ -11,6 +11,10 @@ A bulk sync replicates entire tables or objects from a source connection to a de
 
 For connection-specific configuration details, see the [Polytomic connection guides](https://apidocs.polytomic.com/guides/configuring-your-connections).
 
+To sync newly discovered columns while permanently excluding specific columns, set `automatically_add_new_fields = "all"` and configure `schemas[].excluded_fields`. Leave `schemas[].fields` unset instead of building a field list from the bulk source data source. This avoids making the discovered column list part of the configuration.
+
+Omitting `excluded_fields` preserves the current exclusions; setting it to `[]` clears them. Primary key, tracking, and partition fields cannot be excluded. The importer preserves these exclusions without exporting a fixed field list unless other field overrides require one.
+
 ## Example Usage
 
 {{ tffile .ExampleFile }}

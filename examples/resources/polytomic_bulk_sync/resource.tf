@@ -3,7 +3,8 @@ data "polytomic_bulk_source" "source" {
 }
 
 data "polytomic_bulk_destination" "dest" {
-  connection_id = "bbd321bb-abc1-27f3-1111-abcde123a1bb"
+  connection_id        = "bbd321bb-abc1-27f3-1111-abcde123a1bb"
+  source_connection_id = data.polytomic_bulk_source.source.connection_id
 }
 
 resource "polytomic_bulk_sync" "sync" {
@@ -19,13 +20,17 @@ resource "polytomic_bulk_sync" "sync" {
   }
   destination = {
     connection_id = data.polytomic_bulk_destination.dest.connection_id
-    configuration = {
+    configuration = jsonencode({
       "schema" = "terraform"
-    }
+    })
   }
-  schemas = data.polytomic_bulk_source.source.schemas.*.id
 
-  discovery = {
-    enabled = false
-  }
+  # Newly discovered columns are included without maintaining a fixed fields list.
+  automatically_add_new_fields  = "all"
+  automatically_add_new_objects = "none"
+  schemas = [{
+    id              = "public.contacts"
+    enabled         = true
+    excluded_fields = ["ssn", "internal_notes"]
+  }]
 }

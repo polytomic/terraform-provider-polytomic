@@ -32,6 +32,7 @@ data "polytomic_bulk_source" "source" {
 ### Read-Only
 
 - `schemas` (List of Object) (see [below for nested schema](#nestedatt--schemas))
+- `supports_selective_modes` (Boolean) Whether bulk sync schedules from this source support selective modes other than none.
 
 <a id="nestedatt--schemas"></a>
 ### Nested Schema for `schemas`
@@ -50,5 +51,4 @@ Read-Only:
 - `id` (String)
 - `name` (String)
 - `type` (String)
-
 

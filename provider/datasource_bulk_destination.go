@@ -2,12 +2,14 @@ package provider
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/polytomic/polytomic-go/v25"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
@@ -33,6 +35,18 @@ func (d *bulkDestinationDatasource) Schema(ctx context.Context, req datasource.S
 	resp.Schema = schema.Schema{
 		MarkdownDescription: ":meta:subcategory:Bulk Syncs: Bulk Destination",
 		Attributes: map[string]schema.Attribute{
+			"source_connection_id": schema.StringAttribute{
+				MarkdownDescription: "Source connection used to suggest initial destination configuration values.",
+				Optional:            true,
+			},
+			"initial_configuration": schema.StringAttribute{
+				MarkdownDescription: "Suggested initial destination configuration as JSON. Requires source_connection_id; preserve explicit choices and existing configurations.",
+				Computed:            true,
+			},
+			"supports_history_mode": schema.BoolAttribute{
+				MarkdownDescription: "Whether the destination supports companion history tables in replicate mode.",
+				Computed:            true,
+			},
 			"connection_id": schema.StringAttribute{
 				MarkdownDescription: "",
 				Required:            true,
@@ -76,19 +90,38 @@ func (d *bulkDestinationDatasource) Read(ctx context.Context, req datasource.Rea
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
-	dest, err := client.BulkSync.GetDestination(ctx, data.ConnectionID.ValueString())
+	dest, err := client.BulkSync.GetDestination(ctx, data.ConnectionID.ValueString(), &polytomic.BulkSyncGetDestinationRequest{
+		SourceConnectionID: data.SourceConnectionID.ValueStringPointer(),
+	})
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection", err.Error())
 		return
 	}
+	data.SupportsHistoryMode = types.BoolPointerValue(dest.Data.SupportsHistoryMode)
+	data.InitialConfiguration = types.StringNull()
+	if dest.Data.InitialConfiguration != nil {
+		configuration, err := json.Marshal(dest.Data.InitialConfiguration)
+		if err != nil {
+			resp.Diagnostics.AddError("Error reading initial configuration", err.Error())
+			return
+		}
+		data.InitialConfiguration = types.StringValue(string(configuration))
+	}
 	var diags diag.Diagnostics
-	data.Modes, diags = types.SetValueFrom(ctx, types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"id":          types.StringType,
-			"label":       types.StringType,
-			"description": types.StringType,
-		},
-	}, dest.Data.Modes)
+	modeTypes := map[string]attr.Type{
+		"id":          types.StringType,
+		"label":       types.StringType,
+		"description": types.StringType,
+	}
+	modes := make([]attr.Value, len(dest.Data.Modes))
+	for i, mode := range dest.Data.Modes {
+		modes[i] = types.ObjectValueMust(modeTypes, map[string]attr.Value{
+			"id":          types.StringPointerValue((*string)(mode.ID)),
+			"label":       types.StringPointerValue(mode.Label),
+			"description": types.StringPointerValue(mode.Description),
+		})
+	}
+	data.Modes, diags = types.SetValue(types.ObjectType{AttrTypes: modeTypes}, modes)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return

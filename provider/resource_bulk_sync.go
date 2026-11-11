@@ -24,6 +24,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -502,13 +503,20 @@ func bulkSyncSchemasFromSDK(ctx context.Context, schemas []*polytomic.BulkSchema
 	result := make([]bulkSyncSchema, len(schemas))
 	for i, s := range schemas {
 		result[i] = bulkSyncSchema{
-			Id:                types.StringPointerValue(s.ID),
-			Enabled:           types.BoolPointerValue(s.Enabled),
-			PartitionKey:      types.StringPointerValue(s.PartitionKey),
-			TrackingField:     types.StringPointerValue(s.TrackingField),
-			OutputName:        types.StringPointerValue(s.OutputName),
-			UserOutputName:    types.StringPointerValue(s.UserOutputName),
-			DisableDataCutoff: types.BoolPointerValue(s.DisableDataCutoff),
+			Id:                           types.StringPointerValue(s.ID),
+			Enabled:                      types.BoolPointerValue(s.Enabled),
+			PartitionKey:                 types.StringPointerValue(s.PartitionKey),
+			TrackingField:                types.StringPointerValue(s.TrackingField),
+			OutputName:                   types.StringPointerValue(s.OutputName),
+			UserOutputName:               types.StringPointerValue(s.UserOutputName),
+			DisableDataCutoff:            types.BoolPointerValue(s.DisableDataCutoff),
+			HistoryEnabled:               types.BoolPointerValue(s.HistoryEnabled),
+			DestinationHistoryOutputName: types.StringPointerValue(s.DestinationHistoryOutputName),
+		}
+
+		result[i].ExcludedFields, diags = types.SetValueFrom(ctx, types.StringType, append([]string{}, s.ExcludedFields...))
+		if diags.HasError() {
+			return nil, diags
 		}
 
 		if s.DataCutoffTimestamp != nil {
@@ -544,16 +552,19 @@ func bulkSyncSchemasFromSDK(ctx context.Context, schemas []*polytomic.BulkSchema
 }
 
 type bulkSyncSchema struct {
-	Id                  types.String      `tfsdk:"id"`
-	Enabled             types.Bool        `tfsdk:"enabled"`
-	PartitionKey        types.String      `tfsdk:"partition_key"`
-	TrackingField       types.String      `tfsdk:"tracking_field"`
-	OutputName          types.String      `tfsdk:"output_name"`
-	UserOutputName      types.String      `tfsdk:"user_output_name"`
-	Fields              types.Set         `tfsdk:"fields"`
-	Filters             types.Set         `tfsdk:"filters"`
-	DataCutoffTimestamp timetypes.RFC3339 `tfsdk:"data_cutoff_timestamp"`
-	DisableDataCutoff   types.Bool        `tfsdk:"disable_data_cutoff"`
+	Id                           types.String      `tfsdk:"id"`
+	Enabled                      types.Bool        `tfsdk:"enabled"`
+	PartitionKey                 types.String      `tfsdk:"partition_key"`
+	TrackingField                types.String      `tfsdk:"tracking_field"`
+	OutputName                   types.String      `tfsdk:"output_name"`
+	UserOutputName               types.String      `tfsdk:"user_output_name"`
+	Fields                       types.Set         `tfsdk:"fields"`
+	ExcludedFields               types.Set         `tfsdk:"excluded_fields"`
+	HistoryEnabled               types.Bool        `tfsdk:"history_enabled"`
+	DestinationHistoryOutputName types.String      `tfsdk:"destination_history_output_name"`
+	Filters                      types.Set         `tfsdk:"filters"`
+	DataCutoffTimestamp          timetypes.RFC3339 `tfsdk:"data_cutoff_timestamp"`
+	DisableDataCutoff            types.Bool        `tfsdk:"disable_data_cutoff"`
 }
 
 func (bulkSyncSchema) SchemaAttributes() map[string]schema.Attribute {
@@ -598,6 +609,21 @@ func (bulkSyncSchema) SchemaAttributes() map[string]schema.Attribute {
 				Attributes: bulkSyncSchemaField{}.SchemaAttributes(),
 			},
 		},
+		"excluded_fields": schema.SetAttribute{
+			MarkdownDescription: "IDs of columns that must never be synced, including when automatically_add_new_fields adds newly discovered columns. Omit fields to avoid managing a fixed column list. Primary key, tracking, and partition fields cannot be excluded. Omit to keep the current exclusions; set to [] to clear them.",
+			Optional:            true,
+			Computed:            true,
+			ElementType:         types.StringType,
+		},
+		"history_enabled": schema.BoolAttribute{
+			MarkdownDescription: "Maintain a companion history table for this schema. Requires replicate mode and a destination that supports history mode. Omit to keep the current setting.",
+			Optional:            true,
+			Computed:            true,
+		},
+		"destination_history_output_name": schema.StringAttribute{
+			MarkdownDescription: "Destination name of the companion history table.",
+			Computed:            true,
+		},
 		"filters": schema.SetNestedAttribute{
 			Optional: true,
 			Computed: true,
@@ -634,12 +660,15 @@ func (bulkSyncSchema) AttrTypes() map[string]attr.Type {
 				AttrTypes: bulkSyncFilter{}.AttrTypes(),
 			},
 		},
-		"data_cutoff_timestamp": timetypes.RFC3339Type{},
-		"disable_data_cutoff":   types.BoolType,
-		"partition_key":         types.StringType,
-		"tracking_field":        types.StringType,
-		"output_name":           types.StringType,
-		"user_output_name":      types.StringType,
+		"data_cutoff_timestamp":           timetypes.RFC3339Type{},
+		"disable_data_cutoff":             types.BoolType,
+		"excluded_fields":                 types.SetType{ElemType: types.StringType},
+		"history_enabled":                 types.BoolType,
+		"destination_history_output_name": types.StringType,
+		"partition_key":                   types.StringType,
+		"tracking_field":                  types.StringType,
+		"output_name":                     types.StringType,
+		"user_output_name":                types.StringType,
 	}
 }
 
@@ -690,11 +719,34 @@ type BulkSchedule struct {
 	Month      *string `json:"month" url:"month,omitempty" tfsdk:"month"`
 }
 
+// Computed fields in the plan are an observed snapshot, not a column
+// selection. Only send fields when they were explicitly configured.
+func bulkSyncConfiguredFields(ctx context.Context, config tfsdk.Config) (map[string]bool, diag.Diagnostics) {
+	var schemas types.Set
+	diags := config.GetAttribute(ctx, path.Root("schemas"), &schemas)
+	configured := make(map[string]bool)
+	if diags.HasError() || schemas.IsNull() || schemas.IsUnknown() {
+		return configured, diags
+	}
+	var values []bulkSyncSchema
+	diags.Append(schemas.ElementsAs(ctx, &values, false)...)
+	for _, s := range values {
+		configured[s.Id.ValueString()] = !s.Fields.IsNull()
+	}
+	return configured, diags
+}
+
 func (r *bulkSyncResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data bulkSyncResourceData
 
 	diags := req.Plan.Get(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	configuredFields, configDiags := bulkSyncConfiguredFields(ctx, req.Config)
+	resp.Diagnostics.Append(configDiags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -730,7 +782,7 @@ func (r *bulkSyncResource) Create(ctx context.Context, req resource.CreateReques
 
 		// fields
 		var fieldData []bulkSyncSchemaField
-		if !s.Fields.IsUnknown() {
+		if configuredFields[s.Id.ValueString()] && !s.Fields.IsUnknown() {
 			diags = s.Fields.ElementsAs(ctx, &fieldData, false)
 			if diags.HasError() {
 				resp.Diagnostics.Append(diags...)
@@ -777,9 +829,20 @@ func (r *bulkSyncResource) Create(ctx context.Context, req resource.CreateReques
 				UserOutputName:      s.UserOutputName.ValueStringPointer(),
 				DataCutoffTimestamp: cutoff,
 				DisableDataCutoff:   s.DisableDataCutoff.ValueBoolPointer(),
+				HistoryEnabled:      s.HistoryEnabled.ValueBoolPointer(),
 				Fields:              fieldConfs,
 				Filters:             sdkFilters,
 			},
+		}
+		if !s.ExcludedFields.IsNull() && !s.ExcludedFields.IsUnknown() {
+			excluded := make([]string, 0)
+			resp.Diagnostics.Append(s.ExcludedFields.ElementsAs(ctx, &excluded, false)...)
+			if resp.Diagnostics.HasError() {
+				return
+			}
+			// The SDK otherwise omits an empty slice, which would keep the
+			// existing exclusions instead of clearing them.
+			schemas[i].SchemaConfiguration.SetExcludedFields(excluded)
 		}
 	}
 
@@ -994,6 +1057,12 @@ func (r *bulkSyncResource) Update(ctx context.Context, req resource.UpdateReques
 		return
 	}
 
+	configuredFields, configDiags := bulkSyncConfiguredFields(ctx, req.Config)
+	resp.Diagnostics.Append(configDiags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var schemaData []bulkSyncSchema
 	if !data.Schemas.IsNull() && !data.Schemas.IsUnknown() {
 		diags = data.Schemas.ElementsAs(ctx, &schemaData, false)
@@ -1025,7 +1094,7 @@ func (r *bulkSyncResource) Update(ctx context.Context, req resource.UpdateReques
 
 		// fields
 		var fieldData []bulkSyncSchemaField
-		if !s.Fields.IsUnknown() {
+		if configuredFields[s.Id.ValueString()] && !s.Fields.IsUnknown() {
 			diags = s.Fields.ElementsAs(ctx, &fieldData, false)
 			if diags.HasError() {
 				resp.Diagnostics.Append(diags...)
@@ -1072,9 +1141,18 @@ func (r *bulkSyncResource) Update(ctx context.Context, req resource.UpdateReques
 				UserOutputName:      s.UserOutputName.ValueStringPointer(),
 				DataCutoffTimestamp: cutoff,
 				DisableDataCutoff:   s.DisableDataCutoff.ValueBoolPointer(),
+				HistoryEnabled:      s.HistoryEnabled.ValueBoolPointer(),
 				Fields:              fieldConfs,
 				Filters:             sdkFilters,
 			},
+		}
+		if !s.ExcludedFields.IsNull() && !s.ExcludedFields.IsUnknown() {
+			excluded := make([]string, 0)
+			resp.Diagnostics.Append(s.ExcludedFields.ElementsAs(ctx, &excluded, false)...)
+			if resp.Diagnostics.HasError() {
+				return
+			}
+			schemas[i].SchemaConfiguration.SetExcludedFields(excluded)
 		}
 	}
 
@@ -1338,6 +1416,12 @@ func bulkSyncDataFromResponse(ctx context.Context, response *polytomic.BulkSyncR
 				merged.UserOutputName = PopulateUnknownString(merged.UserOutputName, api.UserOutputName)
 				merged.PartitionKey = PopulateUnknownString(merged.PartitionKey, api.PartitionKey)
 				merged.TrackingField = PopulateUnknownString(merged.TrackingField, api.TrackingField)
+				merged.DestinationHistoryOutputName = types.StringPointerValue(api.DestinationHistoryOutputName)
+				merged.HistoryEnabled = types.BoolPointerValue(api.HistoryEnabled)
+				merged.ExcludedFields, mergeDiags = types.SetValueFrom(ctx, types.StringType, append([]string{}, api.ExcludedFields...))
+				if mergeDiags.HasError() {
+					return merged, mergeDiags
+				}
 
 				// Populate computed bool fields
 				merged.Enabled = PopulateUnknownBool(merged.Enabled, api.Enabled)

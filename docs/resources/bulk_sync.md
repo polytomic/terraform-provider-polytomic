@@ -11,6 +11,10 @@ A bulk sync replicates entire tables or objects from a source connection to a de
 
 For connection-specific configuration details, see the [Polytomic connection guides](https://apidocs.polytomic.com/guides/configuring-your-connections).
 
+To sync newly discovered columns while permanently excluding specific columns, set `automatically_add_new_fields = "all"` and configure `schemas[].excluded_fields`. Leave `schemas[].fields` unset instead of building a field list from the bulk source data source. This avoids making the discovered column list part of the configuration.
+
+Omitting `excluded_fields` preserves the current exclusions; setting it to `[]` clears them. Primary key, tracking, and partition fields cannot be excluded. The importer preserves these exclusions without exporting a fixed field list unless other field overrides require one.
+
 ## Example Usage
 
 ```terraform
@@ -19,7 +23,8 @@ data "polytomic_bulk_source" "source" {
 }
 
 data "polytomic_bulk_destination" "dest" {
-  connection_id = "bbd321bb-abc1-27f3-1111-abcde123a1bb"
+  connection_id        = "bbd321bb-abc1-27f3-1111-abcde123a1bb"
+  source_connection_id = data.polytomic_bulk_source.source.connection_id
 }
 
 resource "polytomic_bulk_sync" "sync" {
@@ -35,15 +40,19 @@ resource "polytomic_bulk_sync" "sync" {
   }
   destination = {
     connection_id = data.polytomic_bulk_destination.dest.connection_id
-    configuration = {
+    configuration = jsonencode({
       "schema" = "terraform"
-    }
+    })
   }
-  schemas = data.polytomic_bulk_source.source.schemas.*.id
 
-  discovery = {
-    enabled = false
-  }
+  # Newly discovered columns are included without maintaining a fixed fields list.
+  automatically_add_new_fields  = "all"
+  automatically_add_new_objects = "none"
+  schemas = [{
+    id              = "public.contacts"
+    enabled         = true
+    excluded_fields = ["ssn", "internal_notes"]
+  }]
 }
 ```
 
@@ -128,13 +137,19 @@ Optional:
 - `data_cutoff_timestamp` (String)
 - `disable_data_cutoff` (Boolean)
 - `enabled` (Boolean)
+- `excluded_fields` (Set of String) IDs of columns that must never be synced, including when automatically_add_new_fields adds newly discovered columns. Omit fields to avoid managing a fixed column list. Primary key, tracking, and partition fields cannot be excluded. Omit to keep the current exclusions; set to [] to clear them.
 - `fields` (Attributes Set) (see [below for nested schema](#nestedatt--schemas--fields))
 - `filters` (Attributes Set) (see [below for nested schema](#nestedatt--schemas--filters))
+- `history_enabled` (Boolean) Maintain a companion history table for this schema. Requires replicate mode and a destination that supports history mode. Omit to keep the current setting.
 - `id` (String)
 - `output_name` (String)
 - `partition_key` (String)
 - `tracking_field` (String)
 - `user_output_name` (String) User-specified override for the output table name
+
+Read-Only:
+
+- `destination_history_output_name` (String) Destination name of the companion history table.
 
 <a id="nestedatt--schemas--fields"></a>
 ### Nested Schema for `schemas.fields`
