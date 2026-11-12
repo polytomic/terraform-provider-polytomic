@@ -25,11 +25,17 @@ data "polytomic_bulk_destination" "dest" {
 
 - `connection_id` (String)
 
+### Optional
+
+- `source_connection_id` (String) Source connection used to suggest initial destination configuration values.
+
 ### Read-Only
 
+- `initial_configuration` (String) Suggested initial destination configuration as JSON. Requires source_connection_id; preserve explicit choices and existing configurations.
 - `modes` (Set of Object) (see [below for nested schema](#nestedatt--modes))
 - `organization` (String)
 - `required_configuration` (Set of String)
+- `supports_history_mode` (Boolean) Whether the destination supports companion history tables in replicate mode.
 
 <a id="nestedatt--modes"></a>
 ### Nested Schema for `modes`

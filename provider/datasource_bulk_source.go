@@ -35,6 +35,10 @@ func (d *bulkSourceDatasource) Schema(ctx context.Context, req datasource.Schema
 	resp.Schema = schema.Schema{
 		MarkdownDescription: ":meta:subcategory:Bulk Syncs: Bulk Source",
 		Attributes: map[string]schema.Attribute{
+			"supports_selective_modes": schema.BoolAttribute{
+				MarkdownDescription: "Whether bulk sync schedules from this source support selective modes other than none.",
+				Computed:            true,
+			},
 			"connection_id": schema.StringAttribute{
 				MarkdownDescription: "",
 				Required:            true,
@@ -86,6 +90,11 @@ func (d *bulkSourceDatasource) Read(ctx context.Context, req datasource.ReadRequ
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection", err.Error())
 		return
+	}
+
+	data.SupportsSelectiveModes = types.BoolNull()
+	if source.Data.Capabilities != nil {
+		data.SupportsSelectiveModes = types.BoolPointerValue(source.Data.Capabilities.SupportsSelectiveModes)
 	}
 
 	schemas := make([]sourceSchema, len(source.Data.Schemas))

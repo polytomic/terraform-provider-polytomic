@@ -395,16 +395,19 @@ func bulkSyncSchemaPlan(t *testing.T, id string, fields basetypes.SetValue) base
 	t.Helper()
 
 	schema, diags := types.ObjectValue(bulkSyncSchema{}.AttrTypes(), map[string]attr.Value{
-		"id":                    types.StringValue(id),
-		"enabled":               types.BoolValue(true),
-		"fields":                fields,
-		"filters":               types.SetUnknown(types.ObjectType{AttrTypes: bulkSyncFilter{}.AttrTypes()}),
-		"partition_key":         types.StringUnknown(),
-		"tracking_field":        types.StringUnknown(),
-		"output_name":           types.StringUnknown(),
-		"user_output_name":      types.StringUnknown(),
-		"data_cutoff_timestamp": timetypes.NewRFC3339Null(),
-		"disable_data_cutoff":   types.BoolUnknown(),
+		"id":                              types.StringValue(id),
+		"enabled":                         types.BoolValue(true),
+		"fields":                          fields,
+		"filters":                         types.SetUnknown(types.ObjectType{AttrTypes: bulkSyncFilter{}.AttrTypes()}),
+		"partition_key":                   types.StringUnknown(),
+		"tracking_field":                  types.StringUnknown(),
+		"output_name":                     types.StringUnknown(),
+		"user_output_name":                types.StringUnknown(),
+		"data_cutoff_timestamp":           timetypes.NewRFC3339Null(),
+		"disable_data_cutoff":             types.BoolUnknown(),
+		"excluded_fields":                 types.SetUnknown(types.StringType),
+		"history_enabled":                 types.BoolUnknown(),
+		"destination_history_output_name": types.StringUnknown(),
 	})
 	require.False(t, diags.HasError(), "%v", diags)
 

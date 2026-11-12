@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"slices"
 	"time"
 
 	"github.com/AlekSi/pointer"
@@ -75,10 +76,19 @@ func (b *BulkSyncs) GenerateTerraformFiles(ctx context.Context, writer io.Writer
 		if err != nil {
 			return err
 		}
-		schemas := make([]string, 0, len(bulkSchemas.Data))
+		schemas := make([]map[string]interface{}, 0, len(bulkSchemas.Data))
 		for _, schema := range bulkSchemas.Data {
 			if pointer.GetBool(schema.Enabled) {
-				schemas = append(schemas, pointer.GetString(schema.ID))
+				// The list endpoint omits fields, filters, and exclusions.
+				detail, err := b.c.BulkSync.Schemas.Get(ctx, pointer.GetString(bulkSync.ID), pointer.GetString(schema.ID))
+				if err != nil {
+					return err
+				}
+				mapping, err := bulkSyncSchemaMapping(detail.Data)
+				if err != nil {
+					return err
+				}
+				schemas = append(schemas, mapping)
 			}
 		}
 
@@ -192,15 +202,7 @@ func (b *BulkSyncs) GenerateTerraformFiles(ctx context.Context, writer io.Writer
 			resourceBlock.Body().SetAttributeValue("policies", typeConverter(bulkSync.Policies))
 		}
 
-		// Schemas - convert to array of objects with id and enabled fields
-		schemaObjects := make([]map[string]interface{}, 0, len(schemas))
-		for _, schemaID := range schemas {
-			schemaObjects = append(schemaObjects, map[string]interface{}{
-				"id":      schemaID,
-				"enabled": true, // If it's in the list, it's enabled
-			})
-		}
-		resourceBlock.Body().SetAttributeValue("schemas", typeConverter(schemaObjects))
+		resourceBlock.Body().SetAttributeValue("schemas", typeConverter(schemas))
 
 		// Export only writable schedule settings, excluding IDs and audit metadata.
 		schedule := bulkSync.DefaultSchedule
@@ -223,7 +225,7 @@ func (b *BulkSyncs) GenerateTerraformFiles(ctx context.Context, writer io.Writer
 
 // buildFieldMapping creates a mapping structure for schema validation
 // This represents the HCL structure we're generating
-func (b *BulkSyncs) buildFieldMapping(bulkSync *polytomic.BulkSyncResponse, schemas []string) map[string]interface{} {
+func (b *BulkSyncs) buildFieldMapping(bulkSync *polytomic.BulkSyncResponse, schemas []map[string]interface{}) map[string]interface{} {
 	mapping := map[string]interface{}{
 		"name":   pointer.GetString(bulkSync.Name),
 		"active": pointer.GetBool(bulkSync.Active),
@@ -267,6 +269,62 @@ func (b *BulkSyncs) buildFieldMapping(bulkSync *polytomic.BulkSyncResponse, sche
 	}
 
 	return mapping
+}
+
+// Export writable schema settings, not computed output names or a snapshot of
+// all discovered columns. Exclusion-only syncs must remain open to new columns.
+func bulkSyncSchemaMapping(s *polytomic.BulkSchema) (map[string]interface{}, error) {
+	mapping := map[string]interface{}{
+		"id":                  s.ID,
+		"enabled":             s.Enabled,
+		"partition_key":       s.PartitionKey,
+		"tracking_field":      s.TrackingField,
+		"user_output_name":    s.UserOutputName,
+		"disable_data_cutoff": s.DisableDataCutoff,
+		"history_enabled":     s.HistoryEnabled,
+	}
+	if s.DataCutoffTimestamp != nil {
+		mapping["data_cutoff_timestamp"] = s.DataCutoffTimestamp.Format(time.RFC3339)
+	}
+	if len(s.ExcludedFields) > 0 {
+		mapping["excluded_fields"] = s.ExcludedFields
+	}
+	// A disabled field already represented by excluded_fields is not a
+	// separate column selection. Other overrides still need to be exported.
+	var fields []map[string]interface{}
+	customFields := false
+	for _, f := range s.Fields {
+		if (!pointer.GetBool(f.Enabled) && !slices.Contains(s.ExcludedFields, pointer.GetString(f.ID))) || pointer.GetBool(f.Obfuscated) || pointer.GetString(f.UserOutputName) != "" {
+			customFields = true
+		}
+		fields = append(fields, map[string]interface{}{
+			"id":               f.ID,
+			"enabled":          f.Enabled,
+			"obfuscate":        f.Obfuscated,
+			"user_output_name": f.UserOutputName,
+		})
+	}
+	if customFields {
+		// Import reads the complete field set into state. Export the same
+		// set when overrides require explicit field management.
+		mapping["fields"] = fields
+	}
+	var filters []map[string]interface{}
+	for _, f := range s.Filters {
+		filter := map[string]interface{}{"field_id": f.FieldID, "function": string(f.Function)}
+		if f.Value != nil {
+			value, err := json.Marshal(f.Value)
+			if err != nil {
+				return nil, fmt.Errorf("encoding bulk sync filter value: %w", err)
+			}
+			filter["value"] = string(value)
+		}
+		filters = append(filters, filter)
+	}
+	if len(filters) > 0 {
+		mapping["filters"] = filters
+	}
+	return mapping, nil
 }
 
 func (b *BulkSyncs) GenerateImports(ctx context.Context, writer io.Writer) error {
