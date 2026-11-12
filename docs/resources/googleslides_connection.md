@@ -54,17 +54,14 @@ state before it will take effect on a destroy operation.
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
-#### Required
-
-- `folder_id` (Attributes) Folder See [below for nested schema](#nestedatt--configuration--folder_id).
-
 #### Optional
 
 - `client_id` (String, Sensitive)
 - `client_secret` (String, Sensitive)
 - `connect_mode` (String) Authentication method
 
-    Default: browser Valid values: <code>browser</code>, <code>jwt</code>. Default: <code>browser</code>.
+    Default: browser Valid values: <code>browser</code> (OAuth), <code>jwt</code> (Service account). Default: <code>browser</code>.
+- `folder_id` (Attributes) Folder See [below for nested schema](#nestedatt--configuration--folder_id).
 - `include_subdirectories` (Boolean) Include subdirectories Default: <code>false</code>.
 - `oauth_refresh_token` (String, Sensitive)
 - `service_account` (String, Sensitive) Service account key

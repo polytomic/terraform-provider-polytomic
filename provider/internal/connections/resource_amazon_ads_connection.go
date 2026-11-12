@@ -47,7 +47,7 @@ var Amazon_adsSchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"auto_add_profiles": schema.BoolAttribute{
-					MarkdownDescription: `Automatically add new profiles`,
+					MarkdownDescription: `Automatically add new accounts`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,
@@ -84,7 +84,7 @@ var Amazon_adsSchema = schema.Schema{
 					},
 				},
 				"profiles": schema.SetNestedAttribute{
-					MarkdownDescription: ``,
+					MarkdownDescription: `Accounts`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,

@@ -37,13 +37,16 @@ data "polytomic_planetscale_vitess_connection" "planetscale_vitess" {
 Read-Only:
 
 - `change_detection` (Boolean) Use replication for bulk syncs Default: <code>false</code>.
-- `database` (String)
 - `hostname` (String)
+- `keyspace` (String)
 - `port` (Number) Default: <code>3306</code>.
 - `ssh` (Boolean) Connect over SSH tunnel
 - `ssh_host` (String) SSH host
 - `ssh_port` (Number) SSH port Default: <code>22</code>.
 - `ssh_user` (String) SSH user Default: <code>root</code>.
+- `tablet_type` (String) Tablet type
+
+    Tablets that queries and replication read from. Valid values: <code>primary</code> (Primary), <code>replica</code> (Replica), <code>rdonly</code> (Read-only (rdonly)). Default: <code>primary</code>.
 - `username` (String)
 
 

@@ -40,7 +40,7 @@ Read-Only:
 - `auto_add_properties` (Boolean) Automatically add new properties
 - `custom_reports` (String) Custom reports
 
-    One report per line. Format is a report name followed by a comma-separated list of fields. e.g. newUsersByDay:date
+    One report per line. Format is a report name followed by a comma-separated list of fields. e.g. newUsersByDay:date,newUsers
 - `properties` (Attributes Set) (see [below for nested schema](#nestedatt--configuration--properties))
 - `user_email` (String) Connected user's email
 

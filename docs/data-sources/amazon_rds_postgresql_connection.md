@@ -58,6 +58,7 @@ Read-Only:
 - `ssh_host` (String) SSH host
 - `ssh_port` (Number) SSH port Default: <code>22</code>.
 - `ssh_user` (String) SSH user Default: <code>root</code>.
+- `ssl_mode` (String) SSL mode Valid values: <code>require</code>, <code>verify-ca</code>, <code>verify-full</code>. Default: <code>verify-full</code>.
 - `tags` (Map of String) Additional tags to apply during role assumption
 - `username` (String)
 

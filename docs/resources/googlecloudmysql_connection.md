@@ -66,7 +66,7 @@ state before it will take effect on a destroy operation.
 #### Optional
 
 - `change_detection` (Boolean) Use replication for bulk syncs Default: <code>false</code>.
-- `password` (String, Sensitive) May be omitted when authenticating to Postgres using the service account key.
+- `password` (String, Sensitive) May be omitted when authenticating to MySQL with the service account key.
 - `username` (String)
 
 

@@ -45,18 +45,17 @@ state before it will take effect on a destroy operation.
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
-#### Required
-
-- `spreadsheet_id` (Attributes) Spreadsheet See [below for nested schema](#nestedatt--configuration--spreadsheet_id).
-
 #### Optional
 
 - `client_id` (String, Sensitive)
 - `client_secret` (String, Sensitive)
-- `connect_mode` (String) Default: browser Valid values: <code>browser</code>, <code>jwt</code>. Default: <code>browser</code>.
+- `connect_mode` (String) Authentication method
+
+    Default: browser Valid values: <code>browser</code> (OAuth), <code>jwt</code> (Service account). Default: <code>browser</code>.
 - `has_headers` (Boolean) Columns have headers
 - `oauth_refresh_token` (String, Sensitive)
 - `service_account` (String, Sensitive) Service account key
+- `spreadsheet_id` (Attributes) Spreadsheet See [below for nested schema](#nestedatt--configuration--spreadsheet_id).
 
 #### Read-Only
 

@@ -55,11 +55,11 @@ func (d *Planetscale_vitessConnectionDataSource) Schema(ctx context.Context, req
 						MarkdownDescription: `Use replication for bulk syncs Default: <code>false</code>.`,
 						Computed:            true,
 					},
-					"database": schema.StringAttribute{
+					"hostname": schema.StringAttribute{
 						MarkdownDescription: ``,
 						Computed:            true,
 					},
-					"hostname": schema.StringAttribute{
+					"keyspace": schema.StringAttribute{
 						MarkdownDescription: ``,
 						Computed:            true,
 					},
@@ -83,6 +83,12 @@ func (d *Planetscale_vitessConnectionDataSource) Schema(ctx context.Context, req
 						MarkdownDescription: `SSH user Default: <code>root</code>.`,
 						Computed:            true,
 					},
+					"tablet_type": schema.StringAttribute{
+						MarkdownDescription: `Tablet type
+
+    Tablets that queries and replication read from. Valid values: <code>primary</code> (Primary), <code>replica</code> (Replica), <code>rdonly</code> (Read-only (rdonly)). Default: <code>primary</code>.`,
+						Computed: true,
+					},
 					"username": schema.StringAttribute{
 						MarkdownDescription: ``,
 						Computed:            true,
@@ -96,13 +102,14 @@ func (d *Planetscale_vitessConnectionDataSource) Schema(ctx context.Context, req
 
 type Planetscale_vitessDataSourceConf struct {
 	Change_detection bool   `mapstructure:"change_detection" tfsdk:"change_detection"`
-	Database         string `mapstructure:"database" tfsdk:"database"`
 	Hostname         string `mapstructure:"hostname" tfsdk:"hostname"`
+	Keyspace         string `mapstructure:"keyspace" tfsdk:"keyspace"`
 	Port             int64  `mapstructure:"port" tfsdk:"port"`
 	Ssh              bool   `mapstructure:"ssh" tfsdk:"ssh"`
 	Ssh_host         string `mapstructure:"ssh_host" tfsdk:"ssh_host"`
 	Ssh_port         int64  `mapstructure:"ssh_port" tfsdk:"ssh_port"`
 	Ssh_user         string `mapstructure:"ssh_user" tfsdk:"ssh_user"`
+	Tablet_type      string `mapstructure:"tablet_type" tfsdk:"tablet_type"`
 	Username         string `mapstructure:"username" tfsdk:"username"`
 }
 
@@ -142,13 +149,14 @@ func (d *Planetscale_vitessConnectionDataSource) Read(ctx context.Context, req d
 	var diags diag.Diagnostics
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"change_detection": types.BoolType,
-		"database":         types.StringType,
 		"hostname":         types.StringType,
+		"keyspace":         types.StringType,
 		"port":             types.NumberType,
 		"ssh":              types.BoolType,
 		"ssh_host":         types.StringType,
 		"ssh_port":         types.NumberType,
 		"ssh_user":         types.StringType,
+		"tablet_type":      types.StringType,
 		"username":         types.StringType,
 	}, conf)
 	if diags.HasError() {

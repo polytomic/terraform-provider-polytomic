@@ -24,6 +24,9 @@ import (
 	"github.com/polytomic/polytomic-go/v25"
 	ptcore "github.com/polytomic/polytomic-go/v25/core"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
+
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -44,11 +47,13 @@ var SupabaseSchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"ca_cert": schema.StringAttribute{
-					MarkdownDescription: `CA certificate`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           true,
+					MarkdownDescription: `CA certificate
+
+    Optional PEM root certificate trusted in addition to the system and Amazon RDS roots. Used by verify-ca and verify-full.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: true,
 					PlanModifiers: []planmodifier.String{
 						stringplanmodifier.UseStateForUnknown(),
 					},
@@ -170,6 +175,16 @@ var SupabaseSchema = schema.Schema{
 					Computed:            true,
 					Sensitive:           false,
 				},
+				"ssl_mode": schema.StringAttribute{
+					MarkdownDescription: `SSL mode Valid values: <code>require</code>, <code>verify-ca</code>, <code>verify-full</code>. Default: <code>verify-full</code>.`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+					Validators: []validator.String{
+						stringvalidator.OneOf("require", "verify-ca", "verify-full"),
+					},
+				},
 				"username": schema.StringAttribute{
 					MarkdownDescription: ``,
 					Required:            true,
@@ -220,6 +235,7 @@ type SupabaseConf struct {
 	Ssh_private_key    string `mapstructure:"ssh_private_key" tfsdk:"ssh_private_key"`
 	Ssh_user           string `mapstructure:"ssh_user" tfsdk:"ssh_user"`
 	Ssl                bool   `mapstructure:"ssl" tfsdk:"ssl"`
+	Ssl_mode           string `mapstructure:"ssl_mode" tfsdk:"ssl_mode"`
 	Username           string `mapstructure:"username" tfsdk:"username"`
 }
 
@@ -313,6 +329,7 @@ func (r *SupabaseConnectionResource) Create(ctx context.Context, req resource.Cr
 		"ssh_private_key":    types.StringType,
 		"ssh_user":           types.StringType,
 		"ssl":                types.BoolType,
+		"ssl_mode":           types.StringType,
 		"username":           types.StringType,
 	}, conf)
 	if diags.HasError() {
@@ -400,6 +417,7 @@ func (r *SupabaseConnectionResource) Read(ctx context.Context, req resource.Read
 		"ssh_private_key":    types.StringType,
 		"ssh_user":           types.StringType,
 		"ssl":                types.BoolType,
+		"ssl_mode":           types.StringType,
 		"username":           types.StringType,
 	}, conf)
 	if diags.HasError() {
@@ -497,6 +515,7 @@ func (r *SupabaseConnectionResource) Update(ctx context.Context, req resource.Up
 		"ssh_private_key":    types.StringType,
 		"ssh_user":           types.StringType,
 		"ssl":                types.BoolType,
+		"ssl_mode":           types.StringType,
 		"username":           types.StringType,
 	}, conf)
 	if diags.HasError() {

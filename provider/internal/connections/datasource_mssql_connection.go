@@ -87,6 +87,10 @@ func (d *MssqlConnectionDataSource) Schema(ctx context.Context, req datasource.S
 						MarkdownDescription: `Use SSL Default: <code>true</code>.`,
 						Computed:            true,
 					},
+					"trust_server_certificate": schema.BoolAttribute{
+						MarkdownDescription: `Trust server certificate Default: <code>false</code>.`,
+						Computed:            true,
+					},
 					"username": schema.StringAttribute{
 						MarkdownDescription: ``,
 						Computed:            true,
@@ -99,16 +103,17 @@ func (d *MssqlConnectionDataSource) Schema(ctx context.Context, req datasource.S
 }
 
 type MssqlDataSourceConf struct {
-	Change_detection bool   `mapstructure:"change_detection" tfsdk:"change_detection"`
-	Database         string `mapstructure:"database" tfsdk:"database"`
-	Hostname         string `mapstructure:"hostname" tfsdk:"hostname"`
-	Port             int64  `mapstructure:"port" tfsdk:"port"`
-	Ssh              bool   `mapstructure:"ssh" tfsdk:"ssh"`
-	Ssh_host         string `mapstructure:"ssh_host" tfsdk:"ssh_host"`
-	Ssh_port         int64  `mapstructure:"ssh_port" tfsdk:"ssh_port"`
-	Ssh_user         string `mapstructure:"ssh_user" tfsdk:"ssh_user"`
-	Ssl              bool   `mapstructure:"ssl" tfsdk:"ssl"`
-	Username         string `mapstructure:"username" tfsdk:"username"`
+	Change_detection         bool   `mapstructure:"change_detection" tfsdk:"change_detection"`
+	Database                 string `mapstructure:"database" tfsdk:"database"`
+	Hostname                 string `mapstructure:"hostname" tfsdk:"hostname"`
+	Port                     int64  `mapstructure:"port" tfsdk:"port"`
+	Ssh                      bool   `mapstructure:"ssh" tfsdk:"ssh"`
+	Ssh_host                 string `mapstructure:"ssh_host" tfsdk:"ssh_host"`
+	Ssh_port                 int64  `mapstructure:"ssh_port" tfsdk:"ssh_port"`
+	Ssh_user                 string `mapstructure:"ssh_user" tfsdk:"ssh_user"`
+	Ssl                      bool   `mapstructure:"ssl" tfsdk:"ssl"`
+	Trust_server_certificate bool   `mapstructure:"trust_server_certificate" tfsdk:"trust_server_certificate"`
+	Username                 string `mapstructure:"username" tfsdk:"username"`
 }
 
 func (d *MssqlConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
@@ -146,16 +151,17 @@ func (d *MssqlConnectionDataSource) Read(ctx context.Context, req datasource.Rea
 
 	var diags diag.Diagnostics
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"change_detection": types.BoolType,
-		"database":         types.StringType,
-		"hostname":         types.StringType,
-		"port":             types.NumberType,
-		"ssh":              types.BoolType,
-		"ssh_host":         types.StringType,
-		"ssh_port":         types.NumberType,
-		"ssh_user":         types.StringType,
-		"ssl":              types.BoolType,
-		"username":         types.StringType,
+		"change_detection":         types.BoolType,
+		"database":                 types.StringType,
+		"hostname":                 types.StringType,
+		"port":                     types.NumberType,
+		"ssh":                      types.BoolType,
+		"ssh_host":                 types.StringType,
+		"ssh_port":                 types.NumberType,
+		"ssh_user":                 types.StringType,
+		"ssl":                      types.BoolType,
+		"trust_server_certificate": types.BoolType,
+		"username":                 types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

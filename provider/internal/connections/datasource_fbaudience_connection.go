@@ -76,8 +76,10 @@ func (d *FbaudienceConnectionDataSource) Schema(ctx context.Context, req datasou
 						Computed:            true,
 					},
 					"graph_api_version": schema.StringAttribute{
-						MarkdownDescription: `Graph API version Default: <code>v24.0</code>.`,
-						Computed:            true,
+						MarkdownDescription: `Graph API version (deprecated)
+
+    Deprecated. Accepted and returned for compatibility, but ignored. The connector manages the Graph API version automatically.`,
+						Computed: true,
 					},
 					"user_name": schema.StringAttribute{
 						MarkdownDescription: `Connected as`,

@@ -36,6 +36,12 @@ data "polytomic_plain_connection" "plain" {
 
 Read-Only:
 
+- `enforce_api_limits` (Boolean) Enforce API limits
+
+    If true, Polytomic will restrict itself to the per-minute cap of Plain API calls in minute_api_calls.
+- `minute_api_calls` (Number) Per-minute call limit
+
+    The maximum number of Plain API calls Polytomic may make per minute across all syncs using this connection. Connection setup and health checks are excluded.
 - `workspace_public_name` (String) Workspace name
 
 

@@ -1,19 +1,25 @@
 ---
-page_title: "{{ .Name }} {{ .Type }} - {{ .ProviderName }}"
+page_title: "polytomic_openrouter_connection Resource - terraform-provider-polytomic"
 subcategory: "Connections"
 description: |-
-{{ .Description | plainmarkdown | trimspace | prefixlines "  " }}
+  OpenRouter Connection
 ---
 
-# {{ .Name }} ({{ .Type }})
+# polytomic_openrouter_connection (Resource)
 
-{{ .Description | trimspace }}
+OpenRouter Connection
 
-For detailed configuration guidance, see the [Seam AI connection guide](https://apidocs.polytomic.com/guides/configuring-your-connections/connections/seamai).
+For detailed configuration guidance, see the [OpenRouter connection guide](https://apidocs.polytomic.com/guides/configuring-your-connections/connections/openrouter).
 
 ## Example Usage
 
-{{ tffile .ExampleFile }}
+```terraform
+resource "polytomic_openrouter_connection" "openrouter" {
+  name = "example"
+  configuration = {
+  }
+}
+```
 
 ## Schema
 
@@ -40,20 +46,15 @@ state before it will take effect on a destroy operation.
 
 ### Read-Only
 
-- `id` (String) Seam AI Connection identifier.
+- `id` (String) OpenRouter Connection identifier.
 
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
 #### Required
 
-- `apikey_id` (String, Sensitive) API key ID
-- `apikey_secret` (String, Sensitive) API key secret
+- `api_key` (String, Sensitive) API key
 
-#### Optional
-
-- `base_url` (String) Alternative base URL
-
-    Alternate environment API URL (including any necessary paths
+    The OpenRouter API key used to authenticate requests.
 
 
