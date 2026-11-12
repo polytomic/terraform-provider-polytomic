@@ -49,6 +49,7 @@ Read-Only:
 - `region` (String)
 - `s3_bucket_name` (String) S3 bucket name (destination/unload support only)
 - `s3_bucket_region` (String) S3 bucket region (destination/unload support only)
+- `ssl_mode` (String) SSL mode Valid values: <code>require</code>, <code>verify-ca</code>, <code>verify-full</code>. Default: <code>verify-full</code>.
 - `use_bulk_sync_staging_schema` (Boolean) Use custom bulk sync staging schema Default: <code>false</code>.
 - `use_unload` (Boolean) Read data using unload
 - `workgroup` (String)

@@ -51,6 +51,18 @@ func (d *PlainConnectionDataSource) Schema(ctx context.Context, req datasource.S
 			},
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
+					"enforce_api_limits": schema.BoolAttribute{
+						MarkdownDescription: `Enforce API limits
+
+    If true, Polytomic will restrict itself to the per-minute cap of Plain API calls in minute_api_calls.`,
+						Computed: true,
+					},
+					"minute_api_calls": schema.Int64Attribute{
+						MarkdownDescription: `Per-minute call limit
+
+    The maximum number of Plain API calls Polytomic may make per minute across all syncs using this connection. Connection setup and health checks are excluded.`,
+						Computed: true,
+					},
 					"workspace_public_name": schema.StringAttribute{
 						MarkdownDescription: `Workspace name`,
 						Computed:            true,
@@ -63,6 +75,8 @@ func (d *PlainConnectionDataSource) Schema(ctx context.Context, req datasource.S
 }
 
 type PlainDataSourceConf struct {
+	Enforce_api_limits    bool   `mapstructure:"enforce_api_limits" tfsdk:"enforce_api_limits"`
+	Minute_api_calls      int64  `mapstructure:"minute_api_calls" tfsdk:"minute_api_calls"`
 	Workspace_public_name string `mapstructure:"workspace_public_name" tfsdk:"workspace_public_name"`
 }
 
@@ -101,6 +115,8 @@ func (d *PlainConnectionDataSource) Read(ctx context.Context, req datasource.Rea
 
 	var diags diag.Diagnostics
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"enforce_api_limits":    types.BoolType,
+		"minute_api_calls":      types.NumberType,
 		"workspace_public_name": types.StringType,
 	}, conf)
 	if diags.HasError() {

@@ -27,11 +27,11 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
-var _ resource.Resource = &SeamaiConnectionResource{}
-var _ resource.ResourceWithImportState = &SeamaiConnectionResource{}
+var _ resource.Resource = &WheniworkConnectionResource{}
+var _ resource.ResourceWithImportState = &WheniworkConnectionResource{}
 
-var SeamaiSchema = schema.Schema{
-	MarkdownDescription: ":meta:subcategory:Connections: Seam AI Connection",
+var WheniworkSchema = schema.Schema{
+	MarkdownDescription: ":meta:subcategory:Connections: When I Work Connection",
 	Attributes: map[string]schema.Attribute{
 		"organization": schema.StringAttribute{
 			MarkdownDescription: "Organization ID",
@@ -43,30 +43,57 @@ var SeamaiSchema = schema.Schema{
 		},
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
-				"apikey_id": schema.StringAttribute{
-					MarkdownDescription: `API key ID`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
-					Sensitive:           true,
-					PlanModifiers: []planmodifier.String{
-						stringplanmodifier.UseStateForUnknown(),
-					},
-				},
-				"apikey_secret": schema.StringAttribute{
-					MarkdownDescription: `API key secret`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
-					Sensitive:           true,
-					PlanModifiers: []planmodifier.String{
-						stringplanmodifier.UseStateForUnknown(),
-					},
-				},
-				"base_url": schema.StringAttribute{
-					MarkdownDescription: `Alternative base URL
+				"developer_key": schema.StringAttribute{
+					MarkdownDescription: `Developer key
 
-    Alternate environment API URL (including any necessary paths`,
+    The When I Work developer key used to authenticate login requests.`,
+					Required:  true,
+					Optional:  false,
+					Computed:  false,
+					Sensitive: true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
+					},
+				},
+				"email": schema.StringAttribute{
+					MarkdownDescription: `The email address of the When I Work person to authenticate.`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           false,
+				},
+				"end_date": schema.StringAttribute{
+					MarkdownDescription: `Coverage end date
+
+    The end boundary for date-bounded collections; defaults to 90 days after the read, with at most 20 years of coverage.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
+				},
+				"password": schema.StringAttribute{
+					MarkdownDescription: `The password of the When I Work person to authenticate.`,
+					Required:            true,
+					Optional:            false,
+					Computed:            false,
+					Sensitive:           true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
+					},
+				},
+				"start_date": schema.StringAttribute{
+					MarkdownDescription: `History start date
+
+    The inclusive start date for date-bounded collections; defaults to 365 days before the read.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
+				},
+				"workplace_user_id": schema.StringAttribute{
+					MarkdownDescription: `Workplace user ID
+
+    The optional workplace user ID sent as W-UserId to select the account.`,
 					Required:  false,
 					Optional:  true,
 					Computed:  true,
@@ -86,7 +113,7 @@ var SeamaiSchema = schema.Schema{
 		},
 		"id": schema.StringAttribute{
 			Computed:            true,
-			MarkdownDescription: "Seam AI Connection identifier",
+			MarkdownDescription: "When I Work Connection identifier",
 			PlanModifiers: []planmodifier.String{
 				stringplanmodifier.UseStateForUnknown(),
 			},
@@ -94,31 +121,34 @@ var SeamaiSchema = schema.Schema{
 	},
 }
 
-func (t *SeamaiConnectionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = SeamaiSchema
+func (t *WheniworkConnectionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = WheniworkSchema
 }
 
-type SeamaiConf struct {
-	Apikey_id     string `mapstructure:"apikey_id" tfsdk:"apikey_id"`
-	Apikey_secret string `mapstructure:"apikey_secret" tfsdk:"apikey_secret"`
-	Base_url      string `mapstructure:"base_url" tfsdk:"base_url"`
+type WheniworkConf struct {
+	Developer_key     string `mapstructure:"developer_key" tfsdk:"developer_key"`
+	Email             string `mapstructure:"email" tfsdk:"email"`
+	End_date          string `mapstructure:"end_date" tfsdk:"end_date"`
+	Password          string `mapstructure:"password" tfsdk:"password"`
+	Start_date        string `mapstructure:"start_date" tfsdk:"start_date"`
+	Workplace_user_id string `mapstructure:"workplace_user_id" tfsdk:"workplace_user_id"`
 }
 
-type SeamaiConnectionResource struct {
+type WheniworkConnectionResource struct {
 	provider *providerclient.Provider
 }
 
-func (r *SeamaiConnectionResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *WheniworkConnectionResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if provider := providerclient.GetProvider(req.ProviderData, resp.Diagnostics); provider != nil {
 		r.provider = provider
 	}
 }
 
-func (r *SeamaiConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_seamai_connection"
+func (r *WheniworkConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_wheniwork_connection"
 }
 
-func (r *SeamaiConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *WheniworkConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data connectionData
 
 	diags := req.Config.Get(ctx, &data)
@@ -133,17 +163,17 @@ func (r *SeamaiConnectionResource) Create(ctx context.Context, req resource.Crea
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
-	connConf, err := objectMapValue(ctx, data.Configuration, getOptionalFields(SeamaiSchema))
+	connConf, err := objectMapValue(ctx, data.Configuration, getOptionalFields(WheniworkSchema))
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
-	for k := range getComputedOnlyFields(SeamaiSchema) {
+	for k := range getComputedOnlyFields(WheniworkSchema) {
 		delete(connConf, k)
 	}
 	created, err := client.Connections.Create(ctx, &polytomic.CreateConnectionRequestSchema{
 		Name:           data.Name.ValueString(),
-		Type:           "seamai",
+		Type:           "wheniwork",
 		OrganizationID: data.Organization.ValueStringPointer(),
 		Configuration:  connConf,
 		Validate:       pointer.ToBool(false),
@@ -156,7 +186,7 @@ func (r *SeamaiConnectionResource) Create(ctx context.Context, req resource.Crea
 	data.Name = types.StringPointerValue(created.Data.Name)
 	data.Organization = types.StringPointerValue(created.Data.OrganizationID)
 
-	configAttributes, ok := getConfigAttributes(SeamaiSchema)
+	configAttributes, ok := getConfigAttributes(WheniworkSchema)
 	if !ok {
 		resp.Diagnostics.AddError("Error getting connection configuration attributes", "Could not get configuration attributes")
 		return
@@ -171,29 +201,32 @@ func (r *SeamaiConnectionResource) Create(ctx context.Context, req resource.Crea
 	// the API masks sensitive values in responses; restore them from the user's config
 	// so terraform doesn't see the masked values as drift
 	created.Data.Configuration = resetSensitiveValues(configAttributes, originalConfData, created.Data.Configuration)
-	conf := SeamaiConf{}
+	conf := WheniworkConf{}
 	err = mapstructure.Decode(created.Data.Configuration, &conf)
 	if err != nil {
 		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error decoding connection configuration: %s", err))
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"apikey_id":     types.StringType,
-		"apikey_secret": types.StringType,
-		"base_url":      types.StringType,
+		"developer_key":     types.StringType,
+		"email":             types.StringType,
+		"end_date":          types.StringType,
+		"password":          types.StringType,
+		"start_date":        types.StringType,
+		"workplace_user_id": types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Seamai", "id": created.Data.ID})
+	tflog.Trace(ctx, "created a connection", map[string]interface{}{"type": "Wheniwork", "id": created.Data.ID})
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r *SeamaiConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *WheniworkConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data connectionData
 
 	diags := req.State.Get(ctx, &data)
@@ -229,7 +262,7 @@ func (r *SeamaiConnectionResource) Read(ctx context.Context, req resource.ReadRe
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationID)
 
-	configAttributes, ok := getConfigAttributes(SeamaiSchema)
+	configAttributes, ok := getConfigAttributes(WheniworkSchema)
 	if !ok {
 		resp.Diagnostics.AddError("Error getting connection configuration attributes", "Could not get configuration attributes")
 		return
@@ -244,16 +277,19 @@ func (r *SeamaiConnectionResource) Read(ctx context.Context, req resource.ReadRe
 	// reset sensitive values so terraform doesn't think we have changes
 	connection.Data.Configuration = resetSensitiveValues(configAttributes, originalConfData, connection.Data.Configuration)
 
-	conf := SeamaiConf{}
+	conf := WheniworkConf{}
 	err = mapstructure.Decode(connection.Data.Configuration, &conf)
 	if err != nil {
 		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error decoding connection configuration: %s", err))
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"apikey_id":     types.StringType,
-		"apikey_secret": types.StringType,
-		"base_url":      types.StringType,
+		"developer_key":     types.StringType,
+		"email":             types.StringType,
+		"end_date":          types.StringType,
+		"password":          types.StringType,
+		"start_date":        types.StringType,
+		"workplace_user_id": types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -264,7 +300,7 @@ func (r *SeamaiConnectionResource) Read(ctx context.Context, req resource.ReadRe
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r *SeamaiConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *WheniworkConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var data connectionData
 
 	diags := req.Plan.Get(ctx, &data)
@@ -279,16 +315,16 @@ func (r *SeamaiConnectionResource) Update(ctx context.Context, req resource.Upda
 		resp.Diagnostics.AddError("Error getting client", err.Error())
 		return
 	}
-	connConf, err := objectMapValue(ctx, data.Configuration, getOptionalFields(SeamaiSchema))
+	connConf, err := objectMapValue(ctx, data.Configuration, getOptionalFields(WheniworkSchema))
 	if err != nil {
 		resp.Diagnostics.AddError("Error getting connection configuration", err.Error())
 		return
 	}
-	for k := range getComputedOnlyFields(SeamaiSchema) {
+	for k := range getComputedOnlyFields(WheniworkSchema) {
 		delete(connConf, k)
 	}
 
-	configAttributes, ok := getConfigAttributes(SeamaiSchema)
+	configAttributes, ok := getConfigAttributes(WheniworkSchema)
 	if !ok {
 		resp.Diagnostics.AddError("Error getting connection configuration attributes", "Could not get configuration attributes")
 		return
@@ -327,16 +363,19 @@ func (r *SeamaiConnectionResource) Update(ctx context.Context, req resource.Upda
 	// the API masks sensitive values in responses; restore them from the plan's config
 	// so terraform doesn't see the masked values as drift
 	updated.Data.Configuration = resetSensitiveValues(configAttributes, planConfData, updated.Data.Configuration)
-	conf := SeamaiConf{}
+	conf := WheniworkConf{}
 	err = mapstructure.Decode(updated.Data.Configuration, &conf)
 	if err != nil {
 		resp.Diagnostics.AddError(providerclient.ErrorSummary, fmt.Sprintf("Error decoding connection configuration: %s", err))
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"apikey_id":     types.StringType,
-		"apikey_secret": types.StringType,
-		"base_url":      types.StringType,
+		"developer_key":     types.StringType,
+		"email":             types.StringType,
+		"end_date":          types.StringType,
+		"password":          types.StringType,
+		"start_date":        types.StringType,
+		"workplace_user_id": types.StringType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -346,7 +385,7 @@ func (r *SeamaiConnectionResource) Update(ctx context.Context, req resource.Upda
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r *SeamaiConnectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *WheniworkConnectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var data connectionData
 
 	diags := req.State.Get(ctx, &data)
@@ -409,6 +448,6 @@ func (r *SeamaiConnectionResource) Delete(ctx context.Context, req resource.Dele
 	}
 }
 
-func (r *SeamaiConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *WheniworkConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

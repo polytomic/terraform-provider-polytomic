@@ -121,6 +121,10 @@ func (d *RedshiftConnectionDataSource) Schema(ctx context.Context, req datasourc
 						MarkdownDescription: `SSH user Default: <code>root</code>.`,
 						Computed:            true,
 					},
+					"ssl_mode": schema.StringAttribute{
+						MarkdownDescription: `SSL mode Valid values: <code>require</code>, <code>verify-ca</code>, <code>verify-full</code>. Default: <code>verify-full</code>.`,
+						Computed:            true,
+					},
 					"use_bulk_sync_staging_schema": schema.BoolAttribute{
 						MarkdownDescription: `Use custom bulk sync staging schema Default: <code>false</code>.`,
 						Computed:            true,
@@ -152,6 +156,7 @@ type RedshiftDataSourceConf struct {
 	Ssh_host                     string `mapstructure:"ssh_host" tfsdk:"ssh_host"`
 	Ssh_port                     int64  `mapstructure:"ssh_port" tfsdk:"ssh_port"`
 	Ssh_user                     string `mapstructure:"ssh_user" tfsdk:"ssh_user"`
+	Ssl_mode                     string `mapstructure:"ssl_mode" tfsdk:"ssl_mode"`
 	Use_bulk_sync_staging_schema bool   `mapstructure:"use_bulk_sync_staging_schema" tfsdk:"use_bulk_sync_staging_schema"`
 	Username                     string `mapstructure:"username" tfsdk:"username"`
 }
@@ -206,6 +211,7 @@ func (d *RedshiftConnectionDataSource) Read(ctx context.Context, req datasource.
 		"ssh_host":                     types.StringType,
 		"ssh_port":                     types.NumberType,
 		"ssh_user":                     types.StringType,
+		"ssl_mode":                     types.StringType,
 		"use_bulk_sync_staging_schema": types.BoolType,
 		"username":                     types.StringType,
 	}, conf)

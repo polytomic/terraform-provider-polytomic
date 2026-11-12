@@ -39,6 +39,7 @@ Read-Only:
 - `database` (String)
 - `hostname` (String) Server
 - `port` (Number) Default: <code>1433</code>.
+- `trust_server_certificate` (Boolean) Trust server certificate Default: <code>false</code>.
 - `username` (String)
 
 

@@ -99,6 +99,18 @@ var ClickhouseSchema = schema.Schema{
 					Computed:            true,
 					Sensitive:           false,
 				},
+				"ca_cert": schema.StringAttribute{
+					MarkdownDescription: `Additional CA certificate
+
+    PEM root certificate trusted in addition to the system roots.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
+					},
+				},
 				"cloud_provider": schema.StringAttribute{
 					MarkdownDescription: `Cloud provider (destination support only) Valid values: <code>aws</code> (AWS), <code>azure</code> (Azure), <code>gcp</code> (Google Cloud).`,
 					Required:            false,
@@ -207,13 +219,6 @@ var ClickhouseSchema = schema.Schema{
 					Computed:            true,
 					Sensitive:           false,
 				},
-				"skip_verify": schema.BoolAttribute{
-					MarkdownDescription: `Skip certificate verification Default: <code>true</code>.`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
-				},
 				"ssh": schema.BoolAttribute{
 					MarkdownDescription: `Connect over SSH tunnel`,
 					Required:            false,
@@ -259,6 +264,16 @@ var ClickhouseSchema = schema.Schema{
 					Computed:            true,
 					Sensitive:           false,
 				},
+				"ssl_mode": schema.StringAttribute{
+					MarkdownDescription: `SSL mode Valid values: <code>TRUST</code> (Encrypt only), <code>VERIFY_CA</code> (Encrypt, require certificate), <code>STRICT</code> (Encrypt, verify certificate). Default: <code>STRICT</code>.`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
+					Sensitive:           false,
+					Validators: []validator.String{
+						stringvalidator.OneOf("TRUST", "VERIFY_CA", "STRICT"),
+					},
+				},
 				"username": schema.StringAttribute{
 					MarkdownDescription: ``,
 					Required:            true,
@@ -299,6 +314,7 @@ type ClickhouseConf struct {
 	Aws_user              string `mapstructure:"aws_user" tfsdk:"aws_user"`
 	Azure_access_key      string `mapstructure:"azure_access_key" tfsdk:"azure_access_key"`
 	Azure_account_name    string `mapstructure:"azure_account_name" tfsdk:"azure_account_name"`
+	Ca_cert               string `mapstructure:"ca_cert" tfsdk:"ca_cert"`
 	Cloud_provider        string `mapstructure:"cloud_provider" tfsdk:"cloud_provider"`
 	Container_name        string `mapstructure:"container_name" tfsdk:"container_name"`
 	Database              string `mapstructure:"database" tfsdk:"database"`
@@ -312,13 +328,13 @@ type ClickhouseConf struct {
 	Port                  int64  `mapstructure:"port" tfsdk:"port"`
 	S3_bucket_name        string `mapstructure:"s3_bucket_name" tfsdk:"s3_bucket_name"`
 	S3_bucket_region      string `mapstructure:"s3_bucket_region" tfsdk:"s3_bucket_region"`
-	Skip_verify           bool   `mapstructure:"skip_verify" tfsdk:"skip_verify"`
 	Ssh                   bool   `mapstructure:"ssh" tfsdk:"ssh"`
 	Ssh_host              string `mapstructure:"ssh_host" tfsdk:"ssh_host"`
 	Ssh_port              int64  `mapstructure:"ssh_port" tfsdk:"ssh_port"`
 	Ssh_private_key       string `mapstructure:"ssh_private_key" tfsdk:"ssh_private_key"`
 	Ssh_user              string `mapstructure:"ssh_user" tfsdk:"ssh_user"`
 	Ssl                   bool   `mapstructure:"ssl" tfsdk:"ssl"`
+	Ssl_mode              string `mapstructure:"ssl_mode" tfsdk:"ssl_mode"`
 	Username              string `mapstructure:"username" tfsdk:"username"`
 }
 
@@ -402,6 +418,7 @@ func (r *ClickhouseConnectionResource) Create(ctx context.Context, req resource.
 		"aws_user":              types.StringType,
 		"azure_access_key":      types.StringType,
 		"azure_account_name":    types.StringType,
+		"ca_cert":               types.StringType,
 		"cloud_provider":        types.StringType,
 		"container_name":        types.StringType,
 		"database":              types.StringType,
@@ -415,13 +432,13 @@ func (r *ClickhouseConnectionResource) Create(ctx context.Context, req resource.
 		"port":                  types.NumberType,
 		"s3_bucket_name":        types.StringType,
 		"s3_bucket_region":      types.StringType,
-		"skip_verify":           types.BoolType,
 		"ssh":                   types.BoolType,
 		"ssh_host":              types.StringType,
 		"ssh_port":              types.NumberType,
 		"ssh_private_key":       types.StringType,
 		"ssh_user":              types.StringType,
 		"ssl":                   types.BoolType,
+		"ssl_mode":              types.StringType,
 		"username":              types.StringType,
 	}, conf)
 	if diags.HasError() {
@@ -499,6 +516,7 @@ func (r *ClickhouseConnectionResource) Read(ctx context.Context, req resource.Re
 		"aws_user":              types.StringType,
 		"azure_access_key":      types.StringType,
 		"azure_account_name":    types.StringType,
+		"ca_cert":               types.StringType,
 		"cloud_provider":        types.StringType,
 		"container_name":        types.StringType,
 		"database":              types.StringType,
@@ -512,13 +530,13 @@ func (r *ClickhouseConnectionResource) Read(ctx context.Context, req resource.Re
 		"port":                  types.NumberType,
 		"s3_bucket_name":        types.StringType,
 		"s3_bucket_region":      types.StringType,
-		"skip_verify":           types.BoolType,
 		"ssh":                   types.BoolType,
 		"ssh_host":              types.StringType,
 		"ssh_port":              types.NumberType,
 		"ssh_private_key":       types.StringType,
 		"ssh_user":              types.StringType,
 		"ssl":                   types.BoolType,
+		"ssl_mode":              types.StringType,
 		"username":              types.StringType,
 	}, conf)
 	if diags.HasError() {
@@ -606,6 +624,7 @@ func (r *ClickhouseConnectionResource) Update(ctx context.Context, req resource.
 		"aws_user":              types.StringType,
 		"azure_access_key":      types.StringType,
 		"azure_account_name":    types.StringType,
+		"ca_cert":               types.StringType,
 		"cloud_provider":        types.StringType,
 		"container_name":        types.StringType,
 		"database":              types.StringType,
@@ -619,13 +638,13 @@ func (r *ClickhouseConnectionResource) Update(ctx context.Context, req resource.
 		"port":                  types.NumberType,
 		"s3_bucket_name":        types.StringType,
 		"s3_bucket_region":      types.StringType,
-		"skip_verify":           types.BoolType,
 		"ssh":                   types.BoolType,
 		"ssh_host":              types.StringType,
 		"ssh_port":              types.NumberType,
 		"ssh_private_key":       types.StringType,
 		"ssh_user":              types.StringType,
 		"ssl":                   types.BoolType,
+		"ssl_mode":              types.StringType,
 		"username":              types.StringType,
 	}, conf)
 	if diags.HasError() {

@@ -159,11 +159,13 @@ var DatabricksSchema = schema.Schema{
 					},
 				},
 				"deleted_file_retention_days": schema.Int64Attribute{
-					MarkdownDescription: `Deleted file retention`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
+					MarkdownDescription: `Deleted file retention
+
+    Used to set number of days to retain deleted files for. Will only be enforced if set_retention_properties is true`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
 				},
 				"enable_delta_uniform": schema.BoolAttribute{
 					MarkdownDescription: `Enable Delta UniForm tables Default: <code>false</code>.`,
@@ -210,11 +212,13 @@ var DatabricksSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"log_file_retention_days": schema.Int64Attribute{
-					MarkdownDescription: `Log retention`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
+					MarkdownDescription: `Log retention
+
+    Used to set number of days to retain logs for. Will only be enforced if set_retention_properties is true`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
 				},
 				"port": schema.Int64Attribute{
 					MarkdownDescription: `Default: <code>443</code>.`,
@@ -266,11 +270,13 @@ var DatabricksSchema = schema.Schema{
 					},
 				},
 				"set_retention_properties": schema.BoolAttribute{
-					MarkdownDescription: `Configure data retention for tables`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
+					MarkdownDescription: `Configure data retention for tables
+
+    Used to set retention properties for tables. deleted_file_retention_days and/or log_file_retention_days must be set, as well.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
 				},
 				"ssh": schema.BoolAttribute{
 					MarkdownDescription: `Connect over SSH tunnel`,

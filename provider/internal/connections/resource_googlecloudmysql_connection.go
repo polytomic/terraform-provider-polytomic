@@ -77,7 +77,7 @@ var GooglecloudmysqlSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"password": schema.StringAttribute{
-					MarkdownDescription: `May be omitted when authenticating to Postgres using the service account key.`,
+					MarkdownDescription: `May be omitted when authenticating to MySQL with the service account key.`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,

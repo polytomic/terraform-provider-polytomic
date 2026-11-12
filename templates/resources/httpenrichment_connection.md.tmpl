@@ -47,8 +47,8 @@ state before it will take effect on a destroy operation.
 
 #### Required
 
-- `method` (String) HTTP method Valid values: <code>GET</code>, <code>POST</code>.
-- `url` (String) Base URL
+- `method` (String) HTTP method Valid values: <code>GET</code>, <code>POST</code>. Default: <code>GET</code>.
+- `url` (String) Request URL
 
 #### Optional
 
@@ -65,7 +65,7 @@ state before it will take effect on a destroy operation.
 - `healthcheck` (String) Health check endpoint
 
     Path to request when checking the health of this connection. No health check will be performed if left empty.
-- `input_mappings` (Attributes Set) Input mappings
+- `input_mappings` (Attributes Set) Input variables
 
     List of input mappings to be used in the query. Each mapping should be a valid JSONPath expression. See [below for nested schema](#nestedatt--configuration--input_mappings).
 - `parameters` (Attributes Set) Query string parameters See [below for nested schema](#nestedatt--configuration--parameters).

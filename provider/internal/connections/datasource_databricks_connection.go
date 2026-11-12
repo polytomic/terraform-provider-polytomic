@@ -96,8 +96,10 @@ func (d *DatabricksConnectionDataSource) Schema(ctx context.Context, req datasou
 						Computed:            true,
 					},
 					"deleted_file_retention_days": schema.Int64Attribute{
-						MarkdownDescription: `Deleted file retention`,
-						Computed:            true,
+						MarkdownDescription: `Deleted file retention
+
+    Used to set number of days to retain deleted files for. Will only be enforced if set_retention_properties is true`,
+						Computed: true,
 					},
 					"enable_delta_uniform": schema.BoolAttribute{
 						MarkdownDescription: `Enable Delta UniForm tables Default: <code>false</code>.`,
@@ -126,8 +128,10 @@ func (d *DatabricksConnectionDataSource) Schema(ctx context.Context, req datasou
 						Computed:            true,
 					},
 					"log_file_retention_days": schema.Int64Attribute{
-						MarkdownDescription: `Log retention`,
-						Computed:            true,
+						MarkdownDescription: `Log retention
+
+    Used to set number of days to retain logs for. Will only be enforced if set_retention_properties is true`,
+						Computed: true,
 					},
 					"port": schema.Int64Attribute{
 						MarkdownDescription: `Default: <code>443</code>.`,
@@ -154,8 +158,10 @@ func (d *DatabricksConnectionDataSource) Schema(ctx context.Context, req datasou
 						Computed:            true,
 					},
 					"set_retention_properties": schema.BoolAttribute{
-						MarkdownDescription: `Configure data retention for tables`,
-						Computed:            true,
+						MarkdownDescription: `Configure data retention for tables
+
+    Used to set retention properties for tables. deleted_file_retention_days and/or log_file_retention_days must be set, as well.`,
+						Computed: true,
 					},
 					"ssh": schema.BoolAttribute{
 						MarkdownDescription: `Connect over SSH tunnel`,

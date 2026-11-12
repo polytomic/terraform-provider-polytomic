@@ -55,6 +55,24 @@ var PlainSchema = schema.Schema{
 						stringplanmodifier.UseStateForUnknown(),
 					},
 				},
+				"enforce_api_limits": schema.BoolAttribute{
+					MarkdownDescription: `Enforce API limits
+
+    If true, Polytomic will restrict itself to the per-minute cap of Plain API calls in minute_api_calls.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
+				},
+				"minute_api_calls": schema.Int64Attribute{
+					MarkdownDescription: `Per-minute call limit
+
+    The maximum number of Plain API calls Polytomic may make per minute across all syncs using this connection. Connection setup and health checks are excluded.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
+				},
 				"workspace_public_name": schema.StringAttribute{
 					MarkdownDescription: `Workspace name`,
 					Required:            false,
@@ -90,6 +108,8 @@ func (t *PlainConnectionResource) Schema(ctx context.Context, req resource.Schem
 
 type PlainConf struct {
 	Api_key               string `mapstructure:"api_key" tfsdk:"api_key"`
+	Enforce_api_limits    bool   `mapstructure:"enforce_api_limits" tfsdk:"enforce_api_limits"`
+	Minute_api_calls      int64  `mapstructure:"minute_api_calls" tfsdk:"minute_api_calls"`
 	Workspace_public_name string `mapstructure:"workspace_public_name" tfsdk:"workspace_public_name"`
 }
 
@@ -168,6 +188,8 @@ func (r *PlainConnectionResource) Create(ctx context.Context, req resource.Creat
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"api_key":               types.StringType,
+		"enforce_api_limits":    types.BoolType,
+		"minute_api_calls":      types.NumberType,
 		"workspace_public_name": types.StringType,
 	}, conf)
 	if diags.HasError() {
@@ -240,6 +262,8 @@ func (r *PlainConnectionResource) Read(ctx context.Context, req resource.ReadReq
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"api_key":               types.StringType,
+		"enforce_api_limits":    types.BoolType,
+		"minute_api_calls":      types.NumberType,
 		"workspace_public_name": types.StringType,
 	}, conf)
 	if diags.HasError() {
@@ -322,6 +346,8 @@ func (r *PlainConnectionResource) Update(ctx context.Context, req resource.Updat
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"api_key":               types.StringType,
+		"enforce_api_limits":    types.BoolType,
+		"minute_api_calls":      types.NumberType,
 		"workspace_public_name": types.StringType,
 	}, conf)
 	if diags.HasError() {

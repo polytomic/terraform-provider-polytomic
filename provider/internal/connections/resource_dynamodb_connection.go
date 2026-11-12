@@ -99,7 +99,7 @@ var DynamodbSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"managed_streams": schema.BoolAttribute{
-					MarkdownDescription: `Let Polytomic manage DynamoDB stream settings`,
+					MarkdownDescription: `Let Polytomic manage DynamoDB Streams settings`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,

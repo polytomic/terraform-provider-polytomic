@@ -36,8 +36,8 @@ data "polytomic_amazon_ads_connection" "amazon_ads" {
 
 Read-Only:
 
-- `auto_add_profiles` (Boolean) Automatically add new profiles
-- `profiles` (Attributes Set) (see [below for nested schema](#nestedatt--configuration--profiles))
+- `auto_add_profiles` (Boolean) Automatically add new accounts
+- `profiles` (Attributes Set) Accounts (see [below for nested schema](#nestedatt--configuration--profiles))
 - `region` (String) Valid values: <code>na</code> (North America (NA)), <code>eu</code> (Europe (EU)), <code>fe</code> (Far East (FE)). Default: <code>na</code>.
 
 <a id="nestedatt--configuration--profiles"></a>
