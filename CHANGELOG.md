@@ -1,8 +1,56 @@
-## v3.2.1 (Unreleased)
+## v3.3.0 (12 November 2026)
+
+BREAKING CHANGES:
+
+- Removed the `polytomic_seamai_connection` resource and data source, because Polytomic no longer supports Seam AI connections. Remove them from configuration, and run `terraform state rm` on any managed Seam AI connections, before upgrading.
+
+- Removed `skip_verify` from `polytomic_clickhouse_connection`. Use `ssl_mode` instead: `ssl_mode = "TRUST"` encrypts without verifying the server certificate, which matches the previous `skip_verify = true`.
+
+- Renamed `database` to `keyspace` on `polytomic_planetscale_vitess_connection`.
+
+ENHANCEMENTS:
+
+- Added support for new connection types:
+  - Amazon RDS MySQL (`polytomic_amazon_rds_mysql_connection`)
+  - AWS CloudWatch Metrics (`polytomic_aws_cloudwatch_metrics_connection`)
+  - Expensify
+  - OpenRouter
+  - PlanetScale Postgres (`polytomic_planetscale_postgres_connection`)
+  - Voucherify
+  - When I Work (`polytomic_wheniwork_connection`)
+
+- Added the `polytomic_csvupload_connection` data source.
+
+- Added TLS settings to database connections:
+  - `ssl_mode` on Amazon RDS PostgreSQL, Neon, PostgreSQL, Redshift, Redshift Serverless, and Supabase (`require`, `verify-ca`, or `verify-full`), on MySQL (`REQUIRED`, `VERIFY_CA`, or `VERIFY_IDENTITY`), and on ClickHouse (`TRUST`, `VERIFY_CA`, or `STRICT`).
+  - `ca_cert`, for trusting an additional root certificate, on Amazon RDS PostgreSQL, ClickHouse, MySQL, and SQL Server.
+  - `trust_server_certificate` on Azure SQL, SQL Server, and Synapse.
+
+- Added configuration fields: `auth_method` and `installation_id` on GitHub, for authenticating as the Polytomic GitHub App; `tablet_type` on PlanetScale Vitess; and `enforce_api_limits` and `minute_api_calls` on Plain.
+
+- `spreadsheet_id` on Google Sheets, `folder_id` on Google Slides, and `workspaces` on PlusVibe are now optional.
+
+- `graph_api_version` on Facebook Audiences is deprecated and ignored. Polytomic now manages the Graph API version.
+
+- `polytomic_bulk_sync` schemas accept `excluded_fields`, a list of columns that are never synced. Combined with `automatically_add_new_fields = "all"` and no `fields`, this syncs newly discovered columns while still leaving out the excluded ones. Omitting `excluded_fields` keeps the current exclusions; set it to `[]` to clear them.
+
+- `polytomic_bulk_sync` schemas accept `history_enabled`, which keeps a companion history table in replicate mode, and report the table's name in `destination_history_output_name`.
+
+- `polytomic_bulk_destination` accepts `source_connection_id` and returns `initial_configuration`, the destination configuration Polytomic suggests for that source, as JSON. It also reports `supports_history_mode`.
+
+- `polytomic_bulk_source` reports `supports_selective_modes`.
+
+- Upgraded to the `polytomic-go` SDK v25.9.13.
 
 BUG FIXES:
 
 - Changing `connection_id` on a `polytomic_model` now replaces the model. Polytomic ignored the new connection on update, so the change never applied and the plan never settled; newer API releases reject the update instead.
+
+- `polytomic_bulk_sync` sent the field list stored in state when a schema omitted `fields`. This turned the columns known at the last refresh into a fixed column selection. Fields are now sent only when they are set in configuration.
+
+IMPORTER:
+
+- Bulk sync exports now include each schema's settings: `excluded_fields`, `history_enabled`, `partition_key`, `tracking_field`, `user_output_name`, data cutoff, and `filters`. A schema's `fields` are exported only when a field is obfuscated, renamed, or disabled without being excluded. Otherwise they're left out, so newly discovered columns are still added.
 
 ## v3.2.0 (2 October 2026)
 
