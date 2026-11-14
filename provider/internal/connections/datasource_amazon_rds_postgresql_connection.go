@@ -52,8 +52,10 @@ func (d *Amazon_rds_postgresqlConnectionDataSource) Schema(ctx context.Context, 
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"change_detection": schema.BoolAttribute{
-						MarkdownDescription: `Use logical replication for bulk syncs Default: <code>false</code>.`,
-						Computed:            true,
+						MarkdownDescription: `Use logical replication for bulk syncs
+
+    Read changes for bulk syncs from PostgreSQL logical replication. Default: <code>false</code>.`,
+						Computed: true,
 					},
 					"database": schema.StringAttribute{
 						MarkdownDescription: ``,
@@ -80,7 +82,7 @@ func (d *Amazon_rds_postgresqlConnectionDataSource) Schema(ctx context.Context, 
 						Computed:            true,
 					},
 					"publication": schema.StringAttribute{
-						MarkdownDescription: ``,
+						MarkdownDescription: `Publication that logical replication reads changes from; required when change_detection is true.`,
 						Computed:            true,
 					},
 					"rds_endpoint_hostname": schema.StringAttribute{
@@ -98,6 +100,12 @@ func (d *Amazon_rds_postgresqlConnectionDataSource) Schema(ctx context.Context, 
 					"region": schema.StringAttribute{
 						MarkdownDescription: `AWS region`,
 						Computed:            true,
+					},
+					"slot_failover": schema.BoolAttribute{
+						MarkdownDescription: `Enable replication slot failover
+
+    Create Polytomic-managed replication slots with failover so they are synchronized to standbys; requires PostgreSQL 17 or later, and a failover slot cannot be used for logical decoding on a replica. Default: <code>false</code>.`,
+						Computed: true,
 					},
 					"ssh": schema.BoolAttribute{
 						MarkdownDescription: `Connect over SSH tunnel`,
@@ -146,6 +154,7 @@ type Amazon_rds_postgresqlDataSourceConf struct {
 	Rds_endpoint_hostname string            `mapstructure:"rds_endpoint_hostname" tfsdk:"rds_endpoint_hostname"`
 	Rds_endpoint_port     int64             `mapstructure:"rds_endpoint_port" tfsdk:"rds_endpoint_port"`
 	Region                string            `mapstructure:"region" tfsdk:"region"`
+	Slot_failover         bool              `mapstructure:"slot_failover" tfsdk:"slot_failover"`
 	Ssh                   bool              `mapstructure:"ssh" tfsdk:"ssh"`
 	Ssh_host              string            `mapstructure:"ssh_host" tfsdk:"ssh_host"`
 	Ssh_port              int64             `mapstructure:"ssh_port" tfsdk:"ssh_port"`
@@ -200,6 +209,7 @@ func (d *Amazon_rds_postgresqlConnectionDataSource) Read(ctx context.Context, re
 		"rds_endpoint_hostname": types.StringType,
 		"rds_endpoint_port":     types.NumberType,
 		"region":                types.StringType,
+		"slot_failover":         types.BoolType,
 		"ssh":                   types.BoolType,
 		"ssh_host":              types.StringType,
 		"ssh_port":              types.NumberType,

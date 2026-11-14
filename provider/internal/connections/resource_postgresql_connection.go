@@ -59,11 +59,13 @@ var PostgresqlSchema = schema.Schema{
 					},
 				},
 				"change_detection": schema.BoolAttribute{
-					MarkdownDescription: `Use logical replication for bulk syncs Default: <code>false</code>.`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
+					MarkdownDescription: `Use logical replication for bulk syncs
+
+    Read changes for bulk syncs from PostgreSQL logical replication. Default: <code>false</code>.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
 				},
 				"client_certificate": schema.StringAttribute{
 					MarkdownDescription: `Client certificate`,
@@ -124,11 +126,20 @@ var PostgresqlSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"publication": schema.StringAttribute{
-					MarkdownDescription: ``,
+					MarkdownDescription: `Publication that logical replication reads changes from; required when change_detection is true.`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,
 					Sensitive:           false,
+				},
+				"slot_failover": schema.BoolAttribute{
+					MarkdownDescription: `Enable replication slot failover
+
+    Create Polytomic-managed replication slots with failover so they are synchronized to standbys; requires PostgreSQL 17 or later, and a failover slot cannot be used for logical decoding on a replica. Default: <code>false</code>.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
 				},
 				"ssh": schema.BoolAttribute{
 					MarkdownDescription: `Connect over SSH tunnel`,
@@ -229,6 +240,7 @@ type PostgresqlConf struct {
 	Password           string `mapstructure:"password" tfsdk:"password"`
 	Port               int64  `mapstructure:"port" tfsdk:"port"`
 	Publication        string `mapstructure:"publication" tfsdk:"publication"`
+	Slot_failover      bool   `mapstructure:"slot_failover" tfsdk:"slot_failover"`
 	Ssh                bool   `mapstructure:"ssh" tfsdk:"ssh"`
 	Ssh_host           string `mapstructure:"ssh_host" tfsdk:"ssh_host"`
 	Ssh_port           int64  `mapstructure:"ssh_port" tfsdk:"ssh_port"`
@@ -323,6 +335,7 @@ func (r *PostgresqlConnectionResource) Create(ctx context.Context, req resource.
 		"password":           types.StringType,
 		"port":               types.NumberType,
 		"publication":        types.StringType,
+		"slot_failover":      types.BoolType,
 		"ssh":                types.BoolType,
 		"ssh_host":           types.StringType,
 		"ssh_port":           types.NumberType,
@@ -411,6 +424,7 @@ func (r *PostgresqlConnectionResource) Read(ctx context.Context, req resource.Re
 		"password":           types.StringType,
 		"port":               types.NumberType,
 		"publication":        types.StringType,
+		"slot_failover":      types.BoolType,
 		"ssh":                types.BoolType,
 		"ssh_host":           types.StringType,
 		"ssh_port":           types.NumberType,
@@ -509,6 +523,7 @@ func (r *PostgresqlConnectionResource) Update(ctx context.Context, req resource.
 		"password":           types.StringType,
 		"port":               types.NumberType,
 		"publication":        types.StringType,
+		"slot_failover":      types.BoolType,
 		"ssh":                types.BoolType,
 		"ssh_host":           types.StringType,
 		"ssh_port":           types.NumberType,
