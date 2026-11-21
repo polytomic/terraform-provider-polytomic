@@ -53,6 +53,15 @@ var StripeSchema = schema.Schema{
 						stringplanmodifier.UseStateForUnknown(),
 					},
 				},
+				"use_v2_objects": schema.BoolAttribute{
+					MarkdownDescription: `Use v2 objects
+
+    Use Stripe API v2 instead of v1 for supported bulk source schemas, currently Accounts. Disabled by default. Default: <code>false</code>.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
+				},
 			},
 
 			Required: true,
@@ -80,7 +89,8 @@ func (t *StripeConnectionResource) Schema(ctx context.Context, req resource.Sche
 }
 
 type StripeConf struct {
-	Api_key string `mapstructure:"api_key" tfsdk:"api_key"`
+	Api_key        string `mapstructure:"api_key" tfsdk:"api_key"`
+	Use_v2_objects bool   `mapstructure:"use_v2_objects" tfsdk:"use_v2_objects"`
 }
 
 type StripeConnectionResource struct {
@@ -157,7 +167,8 @@ func (r *StripeConnectionResource) Create(ctx context.Context, req resource.Crea
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"api_key": types.StringType,
+		"api_key":        types.StringType,
+		"use_v2_objects": types.BoolType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -228,7 +239,8 @@ func (r *StripeConnectionResource) Read(ctx context.Context, req resource.ReadRe
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"api_key": types.StringType,
+		"api_key":        types.StringType,
+		"use_v2_objects": types.BoolType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -309,7 +321,8 @@ func (r *StripeConnectionResource) Update(ctx context.Context, req resource.Upda
 	}
 
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"api_key": types.StringType,
+		"api_key":        types.StringType,
+		"use_v2_objects": types.BoolType,
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

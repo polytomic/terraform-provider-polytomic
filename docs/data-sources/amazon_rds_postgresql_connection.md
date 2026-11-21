@@ -36,7 +36,9 @@ data "polytomic_amazon_rds_postgresql_connection" "amazon_rds_postgresql" {
 
 Read-Only:
 
-- `change_detection` (Boolean) Use logical replication for bulk syncs Default: <code>false</code>.
+- `change_detection` (Boolean) Use logical replication for bulk syncs
+
+    Read changes for bulk syncs from PostgreSQL logical replication. Default: <code>false</code>.
 - `database` (String)
 - `external_id` (String) External ID
 
@@ -46,7 +48,7 @@ Read-Only:
 
     Role that grants rds-db:connect access to this database user
 - `port` (Number) Default: <code>5432</code>.
-- `publication` (String)
+- `publication` (String) Publication that logical replication reads changes from; required when change_detection is true.
 - `rds_endpoint_hostname` (String) RDS endpoint hostname
 
     RDS hostname used to sign IAM tokens and for TLS server name. Defaults to Hostname when omitted.
@@ -54,6 +56,9 @@ Read-Only:
 
     RDS port used to sign IAM tokens. Defaults to Port when omitted.
 - `region` (String) AWS region
+- `slot_failover` (Boolean) Enable replication slot failover
+
+    Create Polytomic-managed replication slots with failover so they are synchronized to standbys; requires PostgreSQL 17 or later, and a failover slot cannot be used for logical decoding on a replica. Default: <code>false</code>.
 - `ssh` (Boolean) Connect over SSH tunnel
 - `ssh_host` (String) SSH host
 - `ssh_port` (Number) SSH port Default: <code>22</code>.

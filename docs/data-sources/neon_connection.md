@@ -36,12 +36,17 @@ data "polytomic_neon_connection" "neon" {
 
 Read-Only:
 
-- `change_detection` (Boolean) Use logical replication for bulk syncs Default: <code>false</code>.
+- `change_detection` (Boolean) Use logical replication for bulk syncs
+
+    Read changes for bulk syncs from PostgreSQL logical replication. Default: <code>false</code>.
 - `client_certs` (Boolean) Use client certificates Default: <code>false</code>.
 - `database` (String)
 - `hostname` (String)
 - `port` (Number) Default: <code>5432</code>.
-- `publication` (String)
+- `publication` (String) Publication that logical replication reads changes from; required when change_detection is true.
+- `slot_failover` (Boolean) Enable replication slot failover
+
+    Create Polytomic-managed replication slots with failover so they are synchronized to standbys; requires PostgreSQL 17 or later, and a failover slot cannot be used for logical decoding on a replica. Default: <code>false</code>.
 - `ssh` (Boolean) Connect over SSH tunnel
 - `ssh_host` (String) SSH host
 - `ssh_port` (Number) SSH port Default: <code>22</code>.

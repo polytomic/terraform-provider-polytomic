@@ -6,9 +6,12 @@ package connections
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/mitchellh/mapstructure"
 	"github.com/polytomic/terraform-provider-polytomic/internal/providerclient"
 )
 
@@ -47,14 +50,22 @@ func (d *StripeConnectionDataSource) Schema(ctx context.Context, req datasource.
 				Computed:            true,
 			},
 			"configuration": schema.SingleNestedAttribute{
-				Attributes: map[string]schema.Attribute{},
-				Optional:   true,
+				Attributes: map[string]schema.Attribute{
+					"use_v2_objects": schema.BoolAttribute{
+						MarkdownDescription: `Use v2 objects
+
+    Use Stripe API v2 instead of v1 for supported bulk source schemas, currently Accounts. Disabled by default. Default: <code>false</code>.`,
+						Computed: true,
+					},
+				},
+				Optional: true,
 			},
 		},
 	}
 }
 
 type StripeDataSourceConf struct {
+	Use_v2_objects bool `mapstructure:"use_v2_objects" tfsdk:"use_v2_objects"`
 }
 
 func (d *StripeConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
@@ -82,6 +93,22 @@ func (d *StripeConnectionDataSource) Read(ctx context.Context, req datasource.Re
 	data.Id = types.StringPointerValue(connection.Data.ID)
 	data.Name = types.StringPointerValue(connection.Data.Name)
 	data.Organization = types.StringPointerValue(connection.Data.OrganizationID)
+
+	conf := StripeDataSourceConf{}
+	err = mapstructure.Decode(connection.Data.Configuration, &conf)
+	if err != nil {
+		resp.Diagnostics.AddError("Error decoding connection configuration", err.Error())
+		return
+	}
+
+	var diags diag.Diagnostics
+	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"use_v2_objects": types.BoolType,
+	}, conf)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
 
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)

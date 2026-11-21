@@ -34,4 +34,10 @@ data "polytomic_stripe_connection" "stripe" {
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
+Read-Only:
+
+- `use_v2_objects` (Boolean) Use v2 objects
+
+    Use Stripe API v2 instead of v1 for supported bulk source schemas, currently Accounts. Disabled by default. Default: <code>false</code>.
+
 
