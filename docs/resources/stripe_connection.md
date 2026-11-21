@@ -56,4 +56,10 @@ state before it will take effect on a destroy operation.
 
 - `api_key` (String, Sensitive) Secret API key
 
+#### Optional
+
+- `use_v2_objects` (Boolean) Use v2 objects
+
+    Use Stripe API v2 instead of v1 for supported bulk source schemas, currently Accounts. Disabled by default. Default: <code>false</code>.
+
 

@@ -44,11 +44,13 @@ var GooglecloudsqlSchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"change_detection": schema.BoolAttribute{
-					MarkdownDescription: `Use logical replication for bulk syncs Default: <code>false</code>.`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
+					MarkdownDescription: `Use logical replication for bulk syncs
+
+    Read changes for bulk syncs from PostgreSQL logical replication. Default: <code>false</code>.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
 				},
 				"connection_name": schema.StringAttribute{
 					MarkdownDescription: `Cloud SQL connection name
@@ -87,11 +89,20 @@ var GooglecloudsqlSchema = schema.Schema{
 					},
 				},
 				"publication": schema.StringAttribute{
-					MarkdownDescription: ``,
+					MarkdownDescription: `Publication that logical replication reads changes from; required when change_detection is true.`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,
 					Sensitive:           false,
+				},
+				"slot_failover": schema.BoolAttribute{
+					MarkdownDescription: `Enable replication slot failover
+
+    Create Polytomic-managed replication slots with failover so they are synchronized to standbys; requires PostgreSQL 17 or later, and a failover slot cannot be used for logical decoding on a replica. Default: <code>false</code>.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
 				},
 				"username": schema.StringAttribute{
 					MarkdownDescription: ``,
@@ -133,6 +144,7 @@ type GooglecloudsqlConf struct {
 	Database         string `mapstructure:"database" tfsdk:"database"`
 	Password         string `mapstructure:"password" tfsdk:"password"`
 	Publication      string `mapstructure:"publication" tfsdk:"publication"`
+	Slot_failover    bool   `mapstructure:"slot_failover" tfsdk:"slot_failover"`
 	Username         string `mapstructure:"username" tfsdk:"username"`
 }
 
@@ -216,6 +228,7 @@ func (r *GooglecloudsqlConnectionResource) Create(ctx context.Context, req resou
 		"database":         types.StringType,
 		"password":         types.StringType,
 		"publication":      types.StringType,
+		"slot_failover":    types.BoolType,
 		"username":         types.StringType,
 	}, conf)
 	if diags.HasError() {
@@ -293,6 +306,7 @@ func (r *GooglecloudsqlConnectionResource) Read(ctx context.Context, req resourc
 		"database":         types.StringType,
 		"password":         types.StringType,
 		"publication":      types.StringType,
+		"slot_failover":    types.BoolType,
 		"username":         types.StringType,
 	}, conf)
 	if diags.HasError() {
@@ -380,6 +394,7 @@ func (r *GooglecloudsqlConnectionResource) Update(ctx context.Context, req resou
 		"database":         types.StringType,
 		"password":         types.StringType,
 		"publication":      types.StringType,
+		"slot_failover":    types.BoolType,
 		"username":         types.StringType,
 	}, conf)
 	if diags.HasError() {

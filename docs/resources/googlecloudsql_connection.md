@@ -66,9 +66,14 @@ state before it will take effect on a destroy operation.
 
 #### Optional
 
-- `change_detection` (Boolean) Use logical replication for bulk syncs Default: <code>false</code>.
+- `change_detection` (Boolean) Use logical replication for bulk syncs
+
+    Read changes for bulk syncs from PostgreSQL logical replication. Default: <code>false</code>.
 - `password` (String, Sensitive) May be omitted when authenticating to Postgres using the service account key.
-- `publication` (String)
+- `publication` (String) Publication that logical replication reads changes from; required when change_detection is true.
+- `slot_failover` (Boolean) Enable replication slot failover
+
+    Create Polytomic-managed replication slots with failover so they are synchronized to standbys; requires PostgreSQL 17 or later, and a failover slot cannot be used for logical decoding on a replica. Default: <code>false</code>.
 - `username` (String)
 
 
