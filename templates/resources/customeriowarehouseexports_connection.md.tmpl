@@ -45,23 +45,29 @@ state before it will take effect on a destroy operation.
 <a id="nestedatt--configuration"></a>
 ### Nested Schema for `configuration`
 
-#### Required
+#### Optional
 
 - `auth_mode` (String) Authentication method
 
     How to authenticate with AWS. Defaults to Access Key and Secret Valid values: <code>access_key_and_secret</code> (Access Key and Secret), <code>iam_role</code> (IAM role). Default: <code>access_key_and_secret</code>.
-- `s3_bucket_name` (String) S3 bucket name
-
-    Bucket name (folder optional); ex: s3://polytomic/dataset
-- `s3_bucket_region` (String) S3 bucket region
-
-#### Optional
-
 - `aws_access_key_id` (String) AWS access key ID
 
     Access Key ID with read/write access to a bucket.
 - `aws_secret_access_key` (String, Sensitive) AWS secret access key
+- `cloud_provider` (String) Cloud provider
+
+    Cloud provider that stores the exports. Defaults to AWS when omitted. Valid values: <code>aws</code> (AWS), <code>gcp</code> (GCP). Default: <code>aws</code>.
+- `gcs_bucket_name` (String) GCS bucket name
+
+    Google Cloud Storage bucket and optional folder containing the exports. Required for GCP.
+- `gcs_service_account` (String, Sensitive) Service account key
+
+    JSON service account key with permission to list and read objects in the bucket. Required for GCP.
 - `iam_role_arn` (String) IAM role ARN
+- `s3_bucket_name` (String) S3 bucket name
+
+    Bucket name (folder optional); ex: s3://polytomic/dataset
+- `s3_bucket_region` (String) S3 bucket region
 
 #### Read-Only
 

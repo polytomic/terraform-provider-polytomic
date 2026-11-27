@@ -50,9 +50,9 @@ var CustomeriowarehouseexportsSchema = schema.Schema{
 					MarkdownDescription: `Authentication method
 
     How to authenticate with AWS. Defaults to Access Key and Secret Valid values: <code>access_key_and_secret</code> (Access Key and Secret), <code>iam_role</code> (IAM role). Default: <code>access_key_and_secret</code>.`,
-					Required:  true,
-					Optional:  false,
-					Computed:  false,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
 					Sensitive: false,
 					Validators: []validator.String{
 						stringvalidator.OneOf("access_key_and_secret", "iam_role"),
@@ -84,6 +84,18 @@ var CustomeriowarehouseexportsSchema = schema.Schema{
 					Computed:            true,
 					Sensitive:           false,
 				},
+				"cloud_provider": schema.StringAttribute{
+					MarkdownDescription: `Cloud provider
+
+    Cloud provider that stores the exports. Defaults to AWS when omitted. Valid values: <code>aws</code> (AWS), <code>gcp</code> (GCP). Default: <code>aws</code>.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
+					Validators: []validator.String{
+						stringvalidator.OneOf("aws", "gcp"),
+					},
+				},
 				"external_id": schema.StringAttribute{
 					MarkdownDescription: `External ID
 
@@ -92,6 +104,27 @@ var CustomeriowarehouseexportsSchema = schema.Schema{
 					Optional:  false,
 					Computed:  true,
 					Sensitive: false,
+				},
+				"gcs_bucket_name": schema.StringAttribute{
+					MarkdownDescription: `GCS bucket name
+
+    Google Cloud Storage bucket and optional folder containing the exports. Required for GCP.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
+				},
+				"gcs_service_account": schema.StringAttribute{
+					MarkdownDescription: `Service account key
+
+    JSON service account key with permission to list and read objects in the bucket. Required for GCP.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
+					},
 				},
 				"iam_role_arn": schema.StringAttribute{
 					MarkdownDescription: `IAM role ARN`,
@@ -104,16 +137,16 @@ var CustomeriowarehouseexportsSchema = schema.Schema{
 					MarkdownDescription: `S3 bucket name
 
     Bucket name (folder optional); ex: s3://polytomic/dataset`,
-					Required:  true,
-					Optional:  false,
-					Computed:  false,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
 					Sensitive: false,
 				},
 				"s3_bucket_region": schema.StringAttribute{
 					MarkdownDescription: `S3 bucket region`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
 					Sensitive:           false,
 				},
 			},
@@ -147,7 +180,10 @@ type CustomeriowarehouseexportsConf struct {
 	Aws_access_key_id     string `mapstructure:"aws_access_key_id" tfsdk:"aws_access_key_id"`
 	Aws_secret_access_key string `mapstructure:"aws_secret_access_key" tfsdk:"aws_secret_access_key"`
 	Aws_user              string `mapstructure:"aws_user" tfsdk:"aws_user"`
+	Cloud_provider        string `mapstructure:"cloud_provider" tfsdk:"cloud_provider"`
 	External_id           string `mapstructure:"external_id" tfsdk:"external_id"`
+	Gcs_bucket_name       string `mapstructure:"gcs_bucket_name" tfsdk:"gcs_bucket_name"`
+	Gcs_service_account   string `mapstructure:"gcs_service_account" tfsdk:"gcs_service_account"`
 	Iam_role_arn          string `mapstructure:"iam_role_arn" tfsdk:"iam_role_arn"`
 	S3_bucket_name        string `mapstructure:"s3_bucket_name" tfsdk:"s3_bucket_name"`
 	S3_bucket_region      string `mapstructure:"s3_bucket_region" tfsdk:"s3_bucket_region"`
@@ -231,7 +267,10 @@ func (r *CustomeriowarehouseexportsConnectionResource) Create(ctx context.Contex
 		"aws_access_key_id":     types.StringType,
 		"aws_secret_access_key": types.StringType,
 		"aws_user":              types.StringType,
+		"cloud_provider":        types.StringType,
 		"external_id":           types.StringType,
+		"gcs_bucket_name":       types.StringType,
+		"gcs_service_account":   types.StringType,
 		"iam_role_arn":          types.StringType,
 		"s3_bucket_name":        types.StringType,
 		"s3_bucket_region":      types.StringType,
@@ -309,7 +348,10 @@ func (r *CustomeriowarehouseexportsConnectionResource) Read(ctx context.Context,
 		"aws_access_key_id":     types.StringType,
 		"aws_secret_access_key": types.StringType,
 		"aws_user":              types.StringType,
+		"cloud_provider":        types.StringType,
 		"external_id":           types.StringType,
+		"gcs_bucket_name":       types.StringType,
+		"gcs_service_account":   types.StringType,
 		"iam_role_arn":          types.StringType,
 		"s3_bucket_name":        types.StringType,
 		"s3_bucket_region":      types.StringType,
@@ -397,7 +439,10 @@ func (r *CustomeriowarehouseexportsConnectionResource) Update(ctx context.Contex
 		"aws_access_key_id":     types.StringType,
 		"aws_secret_access_key": types.StringType,
 		"aws_user":              types.StringType,
+		"cloud_provider":        types.StringType,
 		"external_id":           types.StringType,
+		"gcs_bucket_name":       types.StringType,
+		"gcs_service_account":   types.StringType,
 		"iam_role_arn":          types.StringType,
 		"s3_bucket_name":        types.StringType,
 		"s3_bucket_region":      types.StringType,

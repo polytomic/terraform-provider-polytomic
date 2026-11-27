@@ -47,24 +47,38 @@ var DatadogSchema = schema.Schema{
 		"configuration": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"api_key": schema.StringAttribute{
-					MarkdownDescription: `API key`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
-					Sensitive:           true,
+					MarkdownDescription: `API key
+
+    Datadog API key used to send events.`,
+					Required:  true,
+					Optional:  false,
+					Computed:  false,
+					Sensitive: true,
 					PlanModifiers: []planmodifier.String{
 						stringplanmodifier.UseStateForUnknown(),
 					},
 				},
 				"region": schema.StringAttribute{
-					MarkdownDescription: `Site Valid values: <code>US1</code> (US1), <code>US3</code> (US3), <code>US5</code> (US5), <code>EU1</code> (EU1), <code>US1-FED</code> (US1-FED), <code>AP1</code> (AP1), <code>AP2</code> (AP2). Default: <code>US1</code>.`,
-					Required:            true,
-					Optional:            false,
-					Computed:            false,
-					Sensitive:           false,
+					MarkdownDescription: `Site
+
+    Datadog site the account belongs to. Valid values: <code>US1</code> (US1), <code>US3</code> (US3), <code>US5</code> (US5), <code>EU1</code> (EU1), <code>US1-FED</code> (US1-FED), <code>AP1</code> (AP1), <code>AP2</code> (AP2). Default: <code>US1</code>.`,
+					Required:  true,
+					Optional:  false,
+					Computed:  false,
+					Sensitive: false,
 					Validators: []validator.String{
 						stringvalidator.OneOf("US1", "US3", "US5", "EU1", "US1-FED", "AP1", "AP2"),
 					},
+				},
+				"tags": schema.MapAttribute{
+					MarkdownDescription: `Event tags
+
+    Tags added to every event sent to Datadog, as tag names mapped to values.`,
+					Required:    false,
+					Optional:    true,
+					Computed:    true,
+					Sensitive:   false,
+					ElementType: types.StringType,
 				},
 			},
 
@@ -93,8 +107,9 @@ func (t *DatadogConnectionResource) Schema(ctx context.Context, req resource.Sch
 }
 
 type DatadogConf struct {
-	Api_key string `mapstructure:"api_key" tfsdk:"api_key"`
-	Region  string `mapstructure:"region" tfsdk:"region"`
+	Api_key string            `mapstructure:"api_key" tfsdk:"api_key"`
+	Region  string            `mapstructure:"region" tfsdk:"region"`
+	Tags    map[string]string `mapstructure:"tags" tfsdk:"tags"`
 }
 
 type DatadogConnectionResource struct {
@@ -173,6 +188,9 @@ func (r *DatadogConnectionResource) Create(ctx context.Context, req resource.Cre
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"api_key": types.StringType,
 		"region":  types.StringType,
+		"tags": types.MapType{
+			ElemType: types.StringType,
+		},
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -245,6 +263,9 @@ func (r *DatadogConnectionResource) Read(ctx context.Context, req resource.ReadR
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"api_key": types.StringType,
 		"region":  types.StringType,
+		"tags": types.MapType{
+			ElemType: types.StringType,
+		},
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -327,6 +348,9 @@ func (r *DatadogConnectionResource) Update(ctx context.Context, req resource.Upd
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"api_key": types.StringType,
 		"region":  types.StringType,
+		"tags": types.MapType{
+			ElemType: types.StringType,
+		},
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

@@ -59,6 +59,12 @@ func (d *AzuresqlConnectionDataSource) Schema(ctx context.Context, req datasourc
 						MarkdownDescription: `Use Azure blob storage for faster bulk loading (destination only)`,
 						Computed:            true,
 					},
+					"change_detection": schema.BoolAttribute{
+						MarkdownDescription: `Use change data capture for bulk syncs
+
+    Read bulk sync changes from the change data capture instances already enabled on the source tables. Default: <code>false</code>.`,
+						Computed: true,
+					},
 					"container_name": schema.StringAttribute{
 						MarkdownDescription: `Storage container name (destination only)`,
 						Computed:            true,
@@ -73,6 +79,10 @@ func (d *AzuresqlConnectionDataSource) Schema(ctx context.Context, req datasourc
 					},
 					"port": schema.Int64Attribute{
 						MarkdownDescription: `Default: <code>1433</code>.`,
+						Computed:            true,
+					},
+					"read_only_intent": schema.BoolAttribute{
+						MarkdownDescription: `Read from a read-only replica Default: <code>false</code>.`,
 						Computed:            true,
 					},
 					"ssh": schema.BoolAttribute{
@@ -113,10 +123,12 @@ func (d *AzuresqlConnectionDataSource) Schema(ctx context.Context, req datasourc
 type AzuresqlDataSourceConf struct {
 	Account_name             string `mapstructure:"account_name" tfsdk:"account_name"`
 	BlobStore                bool   `mapstructure:"blobStore" tfsdk:"blob_store"`
+	Change_detection         bool   `mapstructure:"change_detection" tfsdk:"change_detection"`
 	Container_name           string `mapstructure:"container_name" tfsdk:"container_name"`
 	Database                 string `mapstructure:"database" tfsdk:"database"`
 	Hostname                 string `mapstructure:"hostname" tfsdk:"hostname"`
 	Port                     int64  `mapstructure:"port" tfsdk:"port"`
+	Read_only_intent         bool   `mapstructure:"read_only_intent" tfsdk:"read_only_intent"`
 	Ssh                      bool   `mapstructure:"ssh" tfsdk:"ssh"`
 	Ssh_host                 string `mapstructure:"ssh_host" tfsdk:"ssh_host"`
 	Ssh_port                 int64  `mapstructure:"ssh_port" tfsdk:"ssh_port"`
@@ -163,10 +175,12 @@ func (d *AzuresqlConnectionDataSource) Read(ctx context.Context, req datasource.
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"account_name":             types.StringType,
 		"blob_store":               types.BoolType,
+		"change_detection":         types.BoolType,
 		"container_name":           types.StringType,
 		"database":                 types.StringType,
 		"hostname":                 types.StringType,
 		"port":                     types.NumberType,
+		"read_only_intent":         types.BoolType,
 		"ssh":                      types.BoolType,
 		"ssh_host":                 types.StringType,
 		"ssh_port":                 types.NumberType,

@@ -36,10 +36,13 @@ data "polytomic_mssql_connection" "mssql" {
 
 Read-Only:
 
-- `change_detection` (Boolean) Use change data capture for bulk syncs Default: <code>false</code>.
+- `change_detection` (Boolean) Use change data capture for bulk syncs
+
+    Read bulk sync changes from the change data capture instances already enabled on the source tables. Default: <code>false</code>.
 - `database` (String)
 - `hostname` (String) Server
 - `port` (Number) Default: <code>1433</code>.
+- `read_only_intent` (Boolean) Read from a read-only replica Default: <code>false</code>.
 - `ssh` (Boolean) Connect over SSH tunnel
 - `ssh_host` (String) SSH host
 - `ssh_port` (Number) SSH port Default: <code>22</code>.

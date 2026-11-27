@@ -52,8 +52,10 @@ func (d *MssqlConnectionDataSource) Schema(ctx context.Context, req datasource.S
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"change_detection": schema.BoolAttribute{
-						MarkdownDescription: `Use change data capture for bulk syncs Default: <code>false</code>.`,
-						Computed:            true,
+						MarkdownDescription: `Use change data capture for bulk syncs
+
+    Read bulk sync changes from the change data capture instances already enabled on the source tables. Default: <code>false</code>.`,
+						Computed: true,
 					},
 					"database": schema.StringAttribute{
 						MarkdownDescription: ``,
@@ -65,6 +67,10 @@ func (d *MssqlConnectionDataSource) Schema(ctx context.Context, req datasource.S
 					},
 					"port": schema.Int64Attribute{
 						MarkdownDescription: `Default: <code>1433</code>.`,
+						Computed:            true,
+					},
+					"read_only_intent": schema.BoolAttribute{
+						MarkdownDescription: `Read from a read-only replica Default: <code>false</code>.`,
 						Computed:            true,
 					},
 					"ssh": schema.BoolAttribute{
@@ -107,6 +113,7 @@ type MssqlDataSourceConf struct {
 	Database                 string `mapstructure:"database" tfsdk:"database"`
 	Hostname                 string `mapstructure:"hostname" tfsdk:"hostname"`
 	Port                     int64  `mapstructure:"port" tfsdk:"port"`
+	Read_only_intent         bool   `mapstructure:"read_only_intent" tfsdk:"read_only_intent"`
 	Ssh                      bool   `mapstructure:"ssh" tfsdk:"ssh"`
 	Ssh_host                 string `mapstructure:"ssh_host" tfsdk:"ssh_host"`
 	Ssh_port                 int64  `mapstructure:"ssh_port" tfsdk:"ssh_port"`
@@ -155,6 +162,7 @@ func (d *MssqlConnectionDataSource) Read(ctx context.Context, req datasource.Rea
 		"database":                 types.StringType,
 		"hostname":                 types.StringType,
 		"port":                     types.NumberType,
+		"read_only_intent":         types.BoolType,
 		"ssh":                      types.BoolType,
 		"ssh_host":                 types.StringType,
 		"ssh_port":                 types.NumberType,

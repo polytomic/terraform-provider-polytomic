@@ -48,6 +48,16 @@ state before it will take effect on a destroy operation.
 #### Required
 
 - `api_key` (String, Sensitive) API key
-- `region` (String) Site Valid values: <code>US1</code> (US1), <code>US3</code> (US3), <code>US5</code> (US5), <code>EU1</code> (EU1), <code>US1-FED</code> (US1-FED), <code>AP1</code> (AP1), <code>AP2</code> (AP2). Default: <code>US1</code>.
+
+    Datadog API key used to send events.
+- `region` (String) Site
+
+    Datadog site the account belongs to. Valid values: <code>US1</code> (US1), <code>US3</code> (US3), <code>US5</code> (US5), <code>EU1</code> (EU1), <code>US1-FED</code> (US1-FED), <code>AP1</code> (AP1), <code>AP2</code> (AP2). Default: <code>US1</code>.
+
+#### Optional
+
+- `tags` (Map of String) Event tags
+
+    Tags added to every event sent to Datadog, as tag names mapped to values.
 
 

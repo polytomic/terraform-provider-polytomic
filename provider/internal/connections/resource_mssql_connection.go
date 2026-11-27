@@ -54,11 +54,13 @@ var MssqlSchema = schema.Schema{
 					},
 				},
 				"change_detection": schema.BoolAttribute{
-					MarkdownDescription: `Use change data capture for bulk syncs Default: <code>false</code>.`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
+					MarkdownDescription: `Use change data capture for bulk syncs
+
+    Read bulk sync changes from the change data capture instances already enabled on the source tables. Default: <code>false</code>.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
 				},
 				"database": schema.StringAttribute{
 					MarkdownDescription: ``,
@@ -89,6 +91,13 @@ var MssqlSchema = schema.Schema{
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
+					Sensitive:           false,
+				},
+				"read_only_intent": schema.BoolAttribute{
+					MarkdownDescription: `Read from a read-only replica Default: <code>false</code>.`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
 					Sensitive:           false,
 				},
 				"ssh": schema.BoolAttribute{
@@ -183,6 +192,7 @@ type MssqlConf struct {
 	Hostname                 string `mapstructure:"hostname" tfsdk:"hostname"`
 	Password                 string `mapstructure:"password" tfsdk:"password"`
 	Port                     int64  `mapstructure:"port" tfsdk:"port"`
+	Read_only_intent         bool   `mapstructure:"read_only_intent" tfsdk:"read_only_intent"`
 	Ssh                      bool   `mapstructure:"ssh" tfsdk:"ssh"`
 	Ssh_host                 string `mapstructure:"ssh_host" tfsdk:"ssh_host"`
 	Ssh_port                 int64  `mapstructure:"ssh_port" tfsdk:"ssh_port"`
@@ -273,6 +283,7 @@ func (r *MssqlConnectionResource) Create(ctx context.Context, req resource.Creat
 		"hostname":                 types.StringType,
 		"password":                 types.StringType,
 		"port":                     types.NumberType,
+		"read_only_intent":         types.BoolType,
 		"ssh":                      types.BoolType,
 		"ssh_host":                 types.StringType,
 		"ssh_port":                 types.NumberType,
@@ -357,6 +368,7 @@ func (r *MssqlConnectionResource) Read(ctx context.Context, req resource.ReadReq
 		"hostname":                 types.StringType,
 		"password":                 types.StringType,
 		"port":                     types.NumberType,
+		"read_only_intent":         types.BoolType,
 		"ssh":                      types.BoolType,
 		"ssh_host":                 types.StringType,
 		"ssh_port":                 types.NumberType,
@@ -451,6 +463,7 @@ func (r *MssqlConnectionResource) Update(ctx context.Context, req resource.Updat
 		"hostname":                 types.StringType,
 		"password":                 types.StringType,
 		"port":                     types.NumberType,
+		"read_only_intent":         types.BoolType,
 		"ssh":                      types.BoolType,
 		"ssh_host":                 types.StringType,
 		"ssh_port":                 types.NumberType,
