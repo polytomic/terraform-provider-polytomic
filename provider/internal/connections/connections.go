@@ -10,6 +10,7 @@ import (
 
 var (
 	Resources = []func() resource.Resource{
+		func() resource.Resource { return &AdrollConnectionResource{} },
 		func() resource.Resource { return &AffinityConnectionResource{} },
 		func() resource.Resource { return &AirtableConnectionResource{} },
 		func() resource.Resource { return &Amazon_adsConnectionResource{} },
@@ -84,6 +85,7 @@ var (
 		func() resource.Resource { return &DubConnectionResource{} },
 		func() resource.Resource { return &DynamodbConnectionResource{} },
 		func() resource.Resource { return &ExpensifyConnectionResource{} },
+		func() resource.Resource { return &Facebook_pagesConnectionResource{} },
 		func() resource.Resource { return &Factors_aiConnectionResource{} },
 		func() resource.Resource { return &FakturowniaConnectionResource{} },
 		func() resource.Resource { return &FathomConnectionResource{} },
@@ -105,6 +107,7 @@ var (
 		func() resource.Resource { return &Google_search_ads_360ConnectionResource{} },
 		func() resource.Resource { return &GoogleadsConnectionResource{} },
 		func() resource.Resource { return &GoogleanalyticsConnectionResource{} },
+		func() resource.Resource { return &GooglecloudmonitoringConnectionResource{} },
 		func() resource.Resource { return &GooglecloudmysqlConnectionResource{} },
 		func() resource.Resource { return &GooglecloudsqlConnectionResource{} },
 		func() resource.Resource { return &GooglesearchconsoleConnectionResource{} },
@@ -211,6 +214,7 @@ var (
 		func() resource.Resource { return &SalesbricksConnectionResource{} },
 		func() resource.Resource { return &SalesforceConnectionResource{} },
 		func() resource.Resource { return &SalesloftConnectionResource{} },
+		func() resource.Resource { return &Sap_business_one_for_hanaConnectionResource{} },
 		func() resource.Resource { return &ScamalyticsConnectionResource{} },
 		func() resource.Resource { return &ScylladbConnectionResource{} },
 		func() resource.Resource { return &Seal_subscriptionsConnectionResource{} },
@@ -275,6 +279,7 @@ var (
 	}
 
 	Datasources = []func() datasource.DataSource{
+		func() datasource.DataSource { return &AdrollConnectionDataSource{} },
 		func() datasource.DataSource { return &AffinityConnectionDataSource{} },
 		func() datasource.DataSource { return &AirtableConnectionDataSource{} },
 		func() datasource.DataSource { return &Amazon_adsConnectionDataSource{} },
@@ -351,6 +356,7 @@ var (
 		func() datasource.DataSource { return &DubConnectionDataSource{} },
 		func() datasource.DataSource { return &DynamodbConnectionDataSource{} },
 		func() datasource.DataSource { return &ExpensifyConnectionDataSource{} },
+		func() datasource.DataSource { return &Facebook_pagesConnectionDataSource{} },
 		func() datasource.DataSource { return &Factors_aiConnectionDataSource{} },
 		func() datasource.DataSource { return &FakturowniaConnectionDataSource{} },
 		func() datasource.DataSource { return &FathomConnectionDataSource{} },
@@ -372,6 +378,7 @@ var (
 		func() datasource.DataSource { return &Google_search_ads_360ConnectionDataSource{} },
 		func() datasource.DataSource { return &GoogleadsConnectionDataSource{} },
 		func() datasource.DataSource { return &GoogleanalyticsConnectionDataSource{} },
+		func() datasource.DataSource { return &GooglecloudmonitoringConnectionDataSource{} },
 		func() datasource.DataSource { return &GooglecloudmysqlConnectionDataSource{} },
 		func() datasource.DataSource { return &GooglecloudsqlConnectionDataSource{} },
 		func() datasource.DataSource { return &GooglesearchconsoleConnectionDataSource{} },
@@ -481,6 +488,7 @@ var (
 		func() datasource.DataSource { return &SalesbricksConnectionDataSource{} },
 		func() datasource.DataSource { return &SalesforceConnectionDataSource{} },
 		func() datasource.DataSource { return &SalesloftConnectionDataSource{} },
+		func() datasource.DataSource { return &Sap_business_one_for_hanaConnectionDataSource{} },
 		func() datasource.DataSource { return &ScamalyticsConnectionDataSource{} },
 		func() datasource.DataSource { return &ScylladbConnectionDataSource{} },
 		func() datasource.DataSource { return &Seal_subscriptionsConnectionDataSource{} },
@@ -545,6 +553,7 @@ var (
 	}
 
 	ImportableResources = map[string]resource.Resource{
+		"adroll":                     &AdrollConnectionResource{},
 		"affinity":                   &AffinityConnectionResource{},
 		"airtable":                   &AirtableConnectionResource{},
 		"amazon_ads":                 &Amazon_adsConnectionResource{},
@@ -619,6 +628,7 @@ var (
 		"dub":                        &DubConnectionResource{},
 		"dynamodb":                   &DynamodbConnectionResource{},
 		"expensify":                  &ExpensifyConnectionResource{},
+		"facebook_pages":             &Facebook_pagesConnectionResource{},
 		"factors_ai":                 &Factors_aiConnectionResource{},
 		"fakturownia":                &FakturowniaConnectionResource{},
 		"fathom":                     &FathomConnectionResource{},
@@ -640,6 +650,7 @@ var (
 		"google_search_ads_360":      &Google_search_ads_360ConnectionResource{},
 		"googleads":                  &GoogleadsConnectionResource{},
 		"googleanalytics":            &GoogleanalyticsConnectionResource{},
+		"googlecloudmonitoring":      &GooglecloudmonitoringConnectionResource{},
 		"googlecloudmysql":           &GooglecloudmysqlConnectionResource{},
 		"googlecloudsql":             &GooglecloudsqlConnectionResource{},
 		"googlesearchconsole":        &GooglesearchconsoleConnectionResource{},
@@ -746,6 +757,7 @@ var (
 		"salesbricks":                &SalesbricksConnectionResource{},
 		"salesforce":                 &SalesforceConnectionResource{},
 		"salesloft":                  &SalesloftConnectionResource{},
+		"sap_business_one_for_hana":  &Sap_business_one_for_hanaConnectionResource{},
 		"scamalytics":                &ScamalyticsConnectionResource{},
 		"scylladb":                   &ScylladbConnectionResource{},
 		"seal_subscriptions":         &Seal_subscriptionsConnectionResource{},
@@ -810,6 +822,7 @@ var (
 	}
 
 	ImportableDatasources = map[string]datasource.DataSource{
+		"adroll":                     &AdrollConnectionDataSource{},
 		"affinity":                   &AffinityConnectionDataSource{},
 		"airtable":                   &AirtableConnectionDataSource{},
 		"amazon_ads":                 &Amazon_adsConnectionDataSource{},
@@ -886,6 +899,7 @@ var (
 		"dub":                        &DubConnectionDataSource{},
 		"dynamodb":                   &DynamodbConnectionDataSource{},
 		"expensify":                  &ExpensifyConnectionDataSource{},
+		"facebook_pages":             &Facebook_pagesConnectionDataSource{},
 		"factors_ai":                 &Factors_aiConnectionDataSource{},
 		"fakturownia":                &FakturowniaConnectionDataSource{},
 		"fathom":                     &FathomConnectionDataSource{},
@@ -907,6 +921,7 @@ var (
 		"google_search_ads_360":      &Google_search_ads_360ConnectionDataSource{},
 		"googleads":                  &GoogleadsConnectionDataSource{},
 		"googleanalytics":            &GoogleanalyticsConnectionDataSource{},
+		"googlecloudmonitoring":      &GooglecloudmonitoringConnectionDataSource{},
 		"googlecloudmysql":           &GooglecloudmysqlConnectionDataSource{},
 		"googlecloudsql":             &GooglecloudsqlConnectionDataSource{},
 		"googlesearchconsole":        &GooglesearchconsoleConnectionDataSource{},
@@ -1016,6 +1031,7 @@ var (
 		"salesbricks":                &SalesbricksConnectionDataSource{},
 		"salesforce":                 &SalesforceConnectionDataSource{},
 		"salesloft":                  &SalesloftConnectionDataSource{},
+		"sap_business_one_for_hana":  &Sap_business_one_for_hanaConnectionDataSource{},
 		"scamalytics":                &ScamalyticsConnectionDataSource{},
 		"scylladb":                   &ScylladbConnectionDataSource{},
 		"seal_subscriptions":         &Seal_subscriptionsConnectionDataSource{},
@@ -1083,6 +1099,7 @@ var (
 	// produced by an interactive OAuth flow and therefore cannot be supplied
 	// out-of-band by a Terraform user.
 	OAuthConnections = map[string]bool{
+		"adroll":                 true,
 		"airtable":               true,
 		"amazon_ads":             true,
 		"anaplan":                true,

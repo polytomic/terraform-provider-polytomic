@@ -67,10 +67,22 @@ func (d *CustomeriowarehouseexportsConnectionDataSource) Schema(ctx context.Cont
 						MarkdownDescription: `User ARN`,
 						Computed:            true,
 					},
+					"cloud_provider": schema.StringAttribute{
+						MarkdownDescription: `Cloud provider
+
+    Cloud provider that stores the exports. Defaults to AWS when omitted. Valid values: <code>aws</code> (AWS), <code>gcp</code> (GCP). Default: <code>aws</code>.`,
+						Computed: true,
+					},
 					"external_id": schema.StringAttribute{
 						MarkdownDescription: `External ID
 
     External ID for the IAM role`,
+						Computed: true,
+					},
+					"gcs_bucket_name": schema.StringAttribute{
+						MarkdownDescription: `GCS bucket name
+
+    Google Cloud Storage bucket and optional folder containing the exports. Required for GCP.`,
 						Computed: true,
 					},
 					"iam_role_arn": schema.StringAttribute{
@@ -98,7 +110,9 @@ type CustomeriowarehouseexportsDataSourceConf struct {
 	Auth_mode         string `mapstructure:"auth_mode" tfsdk:"auth_mode"`
 	Aws_access_key_id string `mapstructure:"aws_access_key_id" tfsdk:"aws_access_key_id"`
 	Aws_user          string `mapstructure:"aws_user" tfsdk:"aws_user"`
+	Cloud_provider    string `mapstructure:"cloud_provider" tfsdk:"cloud_provider"`
 	External_id       string `mapstructure:"external_id" tfsdk:"external_id"`
+	Gcs_bucket_name   string `mapstructure:"gcs_bucket_name" tfsdk:"gcs_bucket_name"`
 	Iam_role_arn      string `mapstructure:"iam_role_arn" tfsdk:"iam_role_arn"`
 	S3_bucket_name    string `mapstructure:"s3_bucket_name" tfsdk:"s3_bucket_name"`
 	S3_bucket_region  string `mapstructure:"s3_bucket_region" tfsdk:"s3_bucket_region"`
@@ -142,7 +156,9 @@ func (d *CustomeriowarehouseexportsConnectionDataSource) Read(ctx context.Contex
 		"auth_mode":         types.StringType,
 		"aws_access_key_id": types.StringType,
 		"aws_user":          types.StringType,
+		"cloud_provider":    types.StringType,
 		"external_id":       types.StringType,
+		"gcs_bucket_name":   types.StringType,
 		"iam_role_arn":      types.StringType,
 		"s3_bucket_name":    types.StringType,
 		"s3_bucket_region":  types.StringType,

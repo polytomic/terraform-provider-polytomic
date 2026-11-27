@@ -38,10 +38,14 @@ Read-Only:
 
 - `account_name` (String) Storage account name (destination only)
 - `blob_store` (Boolean) Use Azure blob storage for faster bulk loading (destination only)
+- `change_detection` (Boolean) Use change data capture for bulk syncs
+
+    Read bulk sync changes from the change data capture instances already enabled on the source tables. Default: <code>false</code>.
 - `container_name` (String) Storage container name (destination only)
 - `database` (String)
 - `hostname` (String) Server
 - `port` (Number) Default: <code>1433</code>.
+- `read_only_intent` (Boolean) Read from a read-only replica Default: <code>false</code>.
 - `ssh` (Boolean) Connect over SSH tunnel
 - `ssh_host` (String) SSH host
 - `ssh_port` (Number) SSH port Default: <code>22</code>.

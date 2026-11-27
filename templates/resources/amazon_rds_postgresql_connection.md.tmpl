@@ -61,14 +61,19 @@ state before it will take effect on a destroy operation.
 - `ca_cert` (String, Sensitive) CA certificate
 
     Optional PEM root certificate trusted in addition to the system and Amazon RDS roots. Used by verify-ca and verify-full.
-- `change_detection` (Boolean) Use logical replication for bulk syncs Default: <code>false</code>.
-- `publication` (String)
+- `change_detection` (Boolean) Use logical replication for bulk syncs
+
+    Read changes for bulk syncs from PostgreSQL logical replication. Default: <code>false</code>.
+- `publication` (String) Publication that logical replication reads changes from; required when change_detection is true.
 - `rds_endpoint_hostname` (String) RDS endpoint hostname
 
     RDS hostname used to sign IAM tokens and for TLS server name. Defaults to Hostname when omitted.
 - `rds_endpoint_port` (Number) RDS endpoint port
 
     RDS port used to sign IAM tokens. Defaults to Port when omitted.
+- `slot_failover` (Boolean) Enable replication slot failover
+
+    Create Polytomic-managed replication slots with failover so they are synchronized to standbys; requires PostgreSQL 17 or later, and a failover slot cannot be used for logical decoding on a replica. Default: <code>false</code>.
 - `ssh` (Boolean) Connect over SSH tunnel
 - `ssh_host` (String) SSH host
 - `ssh_port` (Number) SSH port Default: <code>22</code>.

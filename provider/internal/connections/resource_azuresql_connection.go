@@ -67,6 +67,15 @@ var AzuresqlSchema = schema.Schema{
 					Computed:            true,
 					Sensitive:           false,
 				},
+				"change_detection": schema.BoolAttribute{
+					MarkdownDescription: `Use change data capture for bulk syncs
+
+    Read bulk sync changes from the change data capture instances already enabled on the source tables. Default: <code>false</code>.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
+				},
 				"container_name": schema.StringAttribute{
 					MarkdownDescription: `Storage container name (destination only)`,
 					Required:            false,
@@ -103,6 +112,13 @@ var AzuresqlSchema = schema.Schema{
 					Required:            true,
 					Optional:            false,
 					Computed:            false,
+					Sensitive:           false,
+				},
+				"read_only_intent": schema.BoolAttribute{
+					MarkdownDescription: `Read from a read-only replica Default: <code>false</code>.`,
+					Required:            false,
+					Optional:            true,
+					Computed:            true,
 					Sensitive:           false,
 				},
 				"ssh": schema.BoolAttribute{
@@ -194,11 +210,13 @@ type AzuresqlConf struct {
 	Access_key               string `mapstructure:"access_key" tfsdk:"access_key"`
 	Account_name             string `mapstructure:"account_name" tfsdk:"account_name"`
 	BlobStore                bool   `mapstructure:"blobStore" tfsdk:"blob_store"`
+	Change_detection         bool   `mapstructure:"change_detection" tfsdk:"change_detection"`
 	Container_name           string `mapstructure:"container_name" tfsdk:"container_name"`
 	Database                 string `mapstructure:"database" tfsdk:"database"`
 	Hostname                 string `mapstructure:"hostname" tfsdk:"hostname"`
 	Password                 string `mapstructure:"password" tfsdk:"password"`
 	Port                     int64  `mapstructure:"port" tfsdk:"port"`
+	Read_only_intent         bool   `mapstructure:"read_only_intent" tfsdk:"read_only_intent"`
 	Ssh                      bool   `mapstructure:"ssh" tfsdk:"ssh"`
 	Ssh_host                 string `mapstructure:"ssh_host" tfsdk:"ssh_host"`
 	Ssh_port                 int64  `mapstructure:"ssh_port" tfsdk:"ssh_port"`
@@ -286,11 +304,13 @@ func (r *AzuresqlConnectionResource) Create(ctx context.Context, req resource.Cr
 		"access_key":               types.StringType,
 		"account_name":             types.StringType,
 		"blob_store":               types.BoolType,
+		"change_detection":         types.BoolType,
 		"container_name":           types.StringType,
 		"database":                 types.StringType,
 		"hostname":                 types.StringType,
 		"password":                 types.StringType,
 		"port":                     types.NumberType,
+		"read_only_intent":         types.BoolType,
 		"ssh":                      types.BoolType,
 		"ssh_host":                 types.StringType,
 		"ssh_port":                 types.NumberType,
@@ -372,11 +392,13 @@ func (r *AzuresqlConnectionResource) Read(ctx context.Context, req resource.Read
 		"access_key":               types.StringType,
 		"account_name":             types.StringType,
 		"blob_store":               types.BoolType,
+		"change_detection":         types.BoolType,
 		"container_name":           types.StringType,
 		"database":                 types.StringType,
 		"hostname":                 types.StringType,
 		"password":                 types.StringType,
 		"port":                     types.NumberType,
+		"read_only_intent":         types.BoolType,
 		"ssh":                      types.BoolType,
 		"ssh_host":                 types.StringType,
 		"ssh_port":                 types.NumberType,
@@ -468,11 +490,13 @@ func (r *AzuresqlConnectionResource) Update(ctx context.Context, req resource.Up
 		"access_key":               types.StringType,
 		"account_name":             types.StringType,
 		"blob_store":               types.BoolType,
+		"change_detection":         types.BoolType,
 		"container_name":           types.StringType,
 		"database":                 types.StringType,
 		"hostname":                 types.StringType,
 		"password":                 types.StringType,
 		"port":                     types.NumberType,
+		"read_only_intent":         types.BoolType,
 		"ssh":                      types.BoolType,
 		"ssh_host":                 types.StringType,
 		"ssh_port":                 types.NumberType,

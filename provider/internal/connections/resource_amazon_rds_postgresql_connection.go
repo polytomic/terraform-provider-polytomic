@@ -59,11 +59,13 @@ var Amazon_rds_postgresqlSchema = schema.Schema{
 					},
 				},
 				"change_detection": schema.BoolAttribute{
-					MarkdownDescription: `Use logical replication for bulk syncs Default: <code>false</code>.`,
-					Required:            false,
-					Optional:            true,
-					Computed:            true,
-					Sensitive:           false,
+					MarkdownDescription: `Use logical replication for bulk syncs
+
+    Read changes for bulk syncs from PostgreSQL logical replication. Default: <code>false</code>.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
 				},
 				"database": schema.StringAttribute{
 					MarkdownDescription: ``,
@@ -105,7 +107,7 @@ var Amazon_rds_postgresqlSchema = schema.Schema{
 					Sensitive:           false,
 				},
 				"publication": schema.StringAttribute{
-					MarkdownDescription: ``,
+					MarkdownDescription: `Publication that logical replication reads changes from; required when change_detection is true.`,
 					Required:            false,
 					Optional:            true,
 					Computed:            true,
@@ -135,6 +137,15 @@ var Amazon_rds_postgresqlSchema = schema.Schema{
 					Optional:            false,
 					Computed:            false,
 					Sensitive:           false,
+				},
+				"slot_failover": schema.BoolAttribute{
+					MarkdownDescription: `Enable replication slot failover
+
+    Create Polytomic-managed replication slots with failover so they are synchronized to standbys; requires PostgreSQL 17 or later, and a failover slot cannot be used for logical decoding on a replica. Default: <code>false</code>.`,
+					Required:  false,
+					Optional:  true,
+					Computed:  true,
+					Sensitive: false,
 				},
 				"ssh": schema.BoolAttribute{
 					MarkdownDescription: `Connect over SSH tunnel`,
@@ -237,6 +248,7 @@ type Amazon_rds_postgresqlConf struct {
 	Rds_endpoint_hostname string            `mapstructure:"rds_endpoint_hostname" tfsdk:"rds_endpoint_hostname"`
 	Rds_endpoint_port     int64             `mapstructure:"rds_endpoint_port" tfsdk:"rds_endpoint_port"`
 	Region                string            `mapstructure:"region" tfsdk:"region"`
+	Slot_failover         bool              `mapstructure:"slot_failover" tfsdk:"slot_failover"`
 	Ssh                   bool              `mapstructure:"ssh" tfsdk:"ssh"`
 	Ssh_host              string            `mapstructure:"ssh_host" tfsdk:"ssh_host"`
 	Ssh_port              int64             `mapstructure:"ssh_port" tfsdk:"ssh_port"`
@@ -332,6 +344,7 @@ func (r *Amazon_rds_postgresqlConnectionResource) Create(ctx context.Context, re
 		"rds_endpoint_hostname": types.StringType,
 		"rds_endpoint_port":     types.NumberType,
 		"region":                types.StringType,
+		"slot_failover":         types.BoolType,
 		"ssh":                   types.BoolType,
 		"ssh_host":              types.StringType,
 		"ssh_port":              types.NumberType,
@@ -422,6 +435,7 @@ func (r *Amazon_rds_postgresqlConnectionResource) Read(ctx context.Context, req 
 		"rds_endpoint_hostname": types.StringType,
 		"rds_endpoint_port":     types.NumberType,
 		"region":                types.StringType,
+		"slot_failover":         types.BoolType,
 		"ssh":                   types.BoolType,
 		"ssh_host":              types.StringType,
 		"ssh_port":              types.NumberType,
@@ -522,6 +536,7 @@ func (r *Amazon_rds_postgresqlConnectionResource) Update(ctx context.Context, re
 		"rds_endpoint_hostname": types.StringType,
 		"rds_endpoint_port":     types.NumberType,
 		"region":                types.StringType,
+		"slot_failover":         types.BoolType,
 		"ssh":                   types.BoolType,
 		"ssh_host":              types.StringType,
 		"ssh_port":              types.NumberType,

@@ -43,9 +43,15 @@ Read-Only:
 
     Access Key ID with read/write access to a bucket.
 - `aws_user` (String) User ARN
+- `cloud_provider` (String) Cloud provider
+
+    Cloud provider that stores the exports. Defaults to AWS when omitted. Valid values: <code>aws</code> (AWS), <code>gcp</code> (GCP). Default: <code>aws</code>.
 - `external_id` (String) External ID
 
     External ID for the IAM role
+- `gcs_bucket_name` (String) GCS bucket name
+
+    Google Cloud Storage bucket and optional folder containing the exports. Required for GCP.
 - `iam_role_arn` (String) IAM role ARN
 - `s3_bucket_name` (String) S3 bucket name
 

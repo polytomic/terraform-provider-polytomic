@@ -52,8 +52,17 @@ func (d *DatadogConnectionDataSource) Schema(ctx context.Context, req datasource
 			"configuration": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"region": schema.StringAttribute{
-						MarkdownDescription: `Site Valid values: <code>US1</code> (US1), <code>US3</code> (US3), <code>US5</code> (US5), <code>EU1</code> (EU1), <code>US1-FED</code> (US1-FED), <code>AP1</code> (AP1), <code>AP2</code> (AP2). Default: <code>US1</code>.`,
-						Computed:            true,
+						MarkdownDescription: `Site
+
+    Datadog site the account belongs to. Valid values: <code>US1</code> (US1), <code>US3</code> (US3), <code>US5</code> (US5), <code>EU1</code> (EU1), <code>US1-FED</code> (US1-FED), <code>AP1</code> (AP1), <code>AP2</code> (AP2). Default: <code>US1</code>.`,
+						Computed: true,
+					},
+					"tags": schema.MapAttribute{
+						MarkdownDescription: `Event tags
+
+    Tags added to every event sent to Datadog, as tag names mapped to values.`,
+						Computed:    true,
+						ElementType: types.StringType,
 					},
 				},
 				Optional: true,
@@ -63,7 +72,8 @@ func (d *DatadogConnectionDataSource) Schema(ctx context.Context, req datasource
 }
 
 type DatadogDataSourceConf struct {
-	Region string `mapstructure:"region" tfsdk:"region"`
+	Region string            `mapstructure:"region" tfsdk:"region"`
+	Tags   map[string]string `mapstructure:"tags" tfsdk:"tags"`
 }
 
 func (d *DatadogConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
@@ -102,6 +112,9 @@ func (d *DatadogConnectionDataSource) Read(ctx context.Context, req datasource.R
 	var diags diag.Diagnostics
 	data.Configuration, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"region": types.StringType,
+		"tags": types.MapType{
+			ElemType: types.StringType,
+		},
 	}, conf)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
